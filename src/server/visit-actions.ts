@@ -1,0 +1,511 @@
+"use server"
+
+import { revalidatePath } from "next/cache"
+import { db } from "@/lib/db"
+import { assertAuthenticated, getRestaurantForUser, assertRestaurantAccess } from "@/lib/dal"
+import type { EnrollmentSummary } from "@/types/enrollment"
+
+// ─── Types ──────────────────────────────────────────────────
+
+export type VisitSearchResult = {
+  id: string
+  fullName: string
+  email: string | null
+  phone: string | null
+  totalVisits: number
+  lastVisitAt: Date | null
+  enrollments: EnrollmentSummary[]
+}
+
+export type RegisterVisitResult = {
+  success: boolean
+  error?: string
+  wasRewardEarned: boolean
+  rewardDescription?: string
+  newCycleVisits: number
+  newTotalVisits: number
+  visitsRequired: number
+  programName?: string
+}
+
+// ─── QR Scan Lookup ──────────────────────────────────────────
+
+export type ScanLookupResult = {
+  success: boolean
+  error?: string
+  errorType?: "NOT_FOUND" | "FROZEN" | "COMPLETED" | "MARKETING_QR" | "INVALID_FORMAT"
+  customer?: VisitSearchResult
+  enrollment?: EnrollmentSummary
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+export async function lookupEnrollmentByWalletPassId(
+  walletPassId: string
+): Promise<ScanLookupResult> {
+  await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+  if (!restaurant) {
+    return { success: false, error: "No restaurant found", errorType: "NOT_FOUND" }
+  }
+
+  // Reject URLs (marketing QR codes)
+  if (walletPassId.startsWith("http://") || walletPassId.startsWith("https://")) {
+    return {
+      success: false,
+      error: "This is a join link, not a wallet pass. Scan the QR code on the customer's wallet.",
+      errorType: "MARKETING_QR",
+    }
+  }
+
+  // Validate UUID format
+  if (!UUID_RE.test(walletPassId.trim())) {
+    return {
+      success: false,
+      error: "Unrecognized QR code. Please scan a wallet pass.",
+      errorType: "INVALID_FORMAT",
+    }
+  }
+
+  const enrollment = await db.enrollment.findUnique({
+    where: { walletPassId: walletPassId.trim() },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phone: true,
+          totalVisits: true,
+          lastVisitAt: true,
+          restaurantId: true,
+          deletedAt: true,
+        },
+      },
+      loyaltyProgram: {
+        select: {
+          id: true,
+          name: true,
+          visitsRequired: true,
+          status: true,
+        },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return {
+      success: false,
+      error: "Card not recognized. The customer may need to re-add their wallet pass.",
+      errorType: "NOT_FOUND",
+    }
+  }
+
+  // Cross-tenant check — don't leak data
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return {
+      success: false,
+      error: "Card not recognized. The customer may need to re-add their wallet pass.",
+      errorType: "NOT_FOUND",
+    }
+  }
+
+  // Soft-deleted customer
+  if (enrollment.customer.deletedAt) {
+    return {
+      success: false,
+      error: "Card not recognized. The customer may need to re-add their wallet pass.",
+      errorType: "NOT_FOUND",
+    }
+  }
+
+  // Frozen enrollment
+  if (enrollment.status === "FROZEN") {
+    return {
+      success: false,
+      error: "This loyalty card is frozen. The program may have ended.",
+      errorType: "FROZEN",
+    }
+  }
+
+  // Completed enrollment
+  if (enrollment.status === "COMPLETED") {
+    return {
+      success: false,
+      error: "This loyalty program is complete.",
+      errorType: "COMPLETED",
+    }
+  }
+
+  // Fetch all active enrollments for this customer (needed for VisitSearchResult)
+  const allEnrollments = await db.enrollment.findMany({
+    where: {
+      customerId: enrollment.customer.id,
+      status: "ACTIVE",
+      loyaltyProgram: { status: "ACTIVE" },
+    },
+    select: {
+      id: true,
+      currentCycleVisits: true,
+      totalVisits: true,
+      walletPassType: true,
+      status: true,
+      loyaltyProgram: {
+        select: {
+          id: true,
+          name: true,
+          visitsRequired: true,
+        },
+      },
+    },
+  })
+
+  const customer: VisitSearchResult = {
+    id: enrollment.customer.id,
+    fullName: enrollment.customer.fullName,
+    email: enrollment.customer.email,
+    phone: enrollment.customer.phone,
+    totalVisits: enrollment.customer.totalVisits,
+    lastVisitAt: enrollment.customer.lastVisitAt,
+    enrollments: allEnrollments.map((e) => ({
+      enrollmentId: e.id,
+      programId: e.loyaltyProgram.id,
+      programName: e.loyaltyProgram.name,
+      currentCycleVisits: e.currentCycleVisits,
+      visitsRequired: e.loyaltyProgram.visitsRequired,
+      totalVisits: e.totalVisits,
+      status: e.status,
+      walletPassType: e.walletPassType,
+    })),
+  }
+
+  const enrollmentSummary: EnrollmentSummary = {
+    enrollmentId: enrollment.id,
+    programId: enrollment.loyaltyProgram.id,
+    programName: enrollment.loyaltyProgram.name,
+    currentCycleVisits: enrollment.currentCycleVisits,
+    visitsRequired: enrollment.loyaltyProgram.visitsRequired,
+    totalVisits: enrollment.totalVisits,
+    status: enrollment.status,
+    walletPassType: enrollment.walletPassType,
+  }
+
+  return {
+    success: true,
+    customer,
+    enrollment: enrollmentSummary,
+  }
+}
+
+// ─── Search Customers for Visit Registration ────────────────
+
+export type VisitSearchResponse = {
+  customers: VisitSearchResult[]
+}
+
+export async function searchCustomersForVisit(
+  query: string
+): Promise<VisitSearchResponse> {
+  await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+  if (!restaurant) return { customers: [] }
+
+  const search = query.trim()
+  if (!search) return { customers: [] }
+
+  const customers = await db.customer.findMany({
+    where: {
+      restaurantId: restaurant.id,
+      deletedAt: null,
+      OR: [
+        { fullName: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+        { phone: { contains: search } },
+      ],
+    },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      phone: true,
+      totalVisits: true,
+      lastVisitAt: true,
+      enrollments: {
+        where: {
+          status: "ACTIVE",
+          loyaltyProgram: { status: "ACTIVE" },
+        },
+        select: {
+          id: true,
+          currentCycleVisits: true,
+          totalVisits: true,
+          walletPassType: true,
+          status: true,
+          loyaltyProgram: {
+            select: {
+              id: true,
+              name: true,
+              visitsRequired: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { fullName: "asc" },
+    take: 10,
+  })
+
+  return {
+    customers: customers.map((c) => ({
+      id: c.id,
+      fullName: c.fullName,
+      email: c.email,
+      phone: c.phone,
+      totalVisits: c.totalVisits,
+      lastVisitAt: c.lastVisitAt,
+      enrollments: c.enrollments.map((e) => ({
+        enrollmentId: e.id,
+        programId: e.loyaltyProgram.id,
+        programName: e.loyaltyProgram.name,
+        currentCycleVisits: e.currentCycleVisits,
+        visitsRequired: e.loyaltyProgram.visitsRequired,
+        totalVisits: e.totalVisits,
+        status: e.status,
+        walletPassType: e.walletPassType,
+      })),
+    })),
+  }
+}
+
+// ─── Register Visit ─────────────────────────────────────────
+
+export async function registerVisit(
+  enrollmentId: string
+): Promise<RegisterVisitResult> {
+  const session = await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+
+  if (!restaurant) {
+    return {
+      success: false,
+      error: "No restaurant found",
+      wasRewardEarned: false,
+      newCycleVisits: 0,
+      newTotalVisits: 0,
+      visitsRequired: 0,
+    }
+  }
+
+  // Verify staff has access to this restaurant
+  await assertRestaurantAccess(restaurant.id)
+
+  // Fetch enrollment with program and customer
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          restaurantId: true,
+          deletedAt: true,
+          totalVisits: true,
+          fullName: true,
+        },
+      },
+      loyaltyProgram: {
+        select: {
+          id: true,
+          name: true,
+          visitsRequired: true,
+          rewardDescription: true,
+          rewardExpiryDays: true,
+          status: true,
+          endsAt: true,
+        },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return {
+      success: false,
+      error: "Enrollment not found",
+      wasRewardEarned: false,
+      newCycleVisits: 0,
+      newTotalVisits: 0,
+      visitsRequired: 0,
+    }
+  }
+
+  // Validate enrollment belongs to this restaurant
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return {
+      success: false,
+      error: "Enrollment not found",
+      wasRewardEarned: false,
+      newCycleVisits: 0,
+      newTotalVisits: 0,
+      visitsRequired: 0,
+    }
+  }
+
+  // Check customer not soft-deleted
+  if (enrollment.customer.deletedAt) {
+    return {
+      success: false,
+      error: "Customer has been deleted",
+      wasRewardEarned: false,
+      newCycleVisits: 0,
+      newTotalVisits: 0,
+      visitsRequired: 0,
+    }
+  }
+
+  // Check enrollment is ACTIVE
+  if (enrollment.status !== "ACTIVE") {
+    return {
+      success: false,
+      error: `This enrollment is ${enrollment.status.toLowerCase()}`,
+      wasRewardEarned: false,
+      newCycleVisits: enrollment.currentCycleVisits,
+      newTotalVisits: enrollment.totalVisits,
+      visitsRequired: enrollment.loyaltyProgram.visitsRequired,
+    }
+  }
+
+  // Check program is ACTIVE
+  if (enrollment.loyaltyProgram.status !== "ACTIVE") {
+    return {
+      success: false,
+      error: "This loyalty program is no longer active",
+      wasRewardEarned: false,
+      newCycleVisits: enrollment.currentCycleVisits,
+      newTotalVisits: enrollment.totalVisits,
+      visitsRequired: enrollment.loyaltyProgram.visitsRequired,
+    }
+  }
+
+  // Check program hasn't expired
+  if (enrollment.loyaltyProgram.endsAt && enrollment.loyaltyProgram.endsAt < new Date()) {
+    return {
+      success: false,
+      error: "This loyalty program has expired",
+      wasRewardEarned: false,
+      newCycleVisits: enrollment.currentCycleVisits,
+      newTotalVisits: enrollment.totalVisits,
+      visitsRequired: enrollment.loyaltyProgram.visitsRequired,
+    }
+  }
+
+  const program = enrollment.loyaltyProgram
+
+  // Prevent double-registration within 1 minute
+  const oneMinuteAgo = new Date(Date.now() - 60_000)
+  const recentVisit = await db.visit.findFirst({
+    where: {
+      enrollmentId: enrollment.id,
+      createdAt: { gte: oneMinuteAgo },
+    },
+    select: { id: true },
+  })
+
+  if (recentVisit) {
+    return {
+      success: false,
+      error: "A visit was already registered for this enrollment less than a minute ago",
+      wasRewardEarned: false,
+      newCycleVisits: enrollment.currentCycleVisits,
+      newTotalVisits: enrollment.totalVisits,
+      visitsRequired: program.visitsRequired,
+    }
+  }
+
+  // Calculate new visit counts
+  const newCycleVisits = enrollment.currentCycleVisits + 1
+  const newEnrollmentTotalVisits = enrollment.totalVisits + 1
+  const newCustomerTotalVisits = enrollment.customer.totalVisits + 1
+  const wasRewardEarned = newCycleVisits >= program.visitsRequired
+
+  // Run everything in a transaction
+  await db.$transaction(async (tx) => {
+    // Create Visit record
+    await tx.visit.create({
+      data: {
+        customerId: enrollment.customer.id,
+        restaurantId: restaurant.id,
+        loyaltyProgramId: program.id,
+        enrollmentId: enrollment.id,
+        registeredById: session.user.id,
+        visitNumber: newCycleVisits,
+      },
+    })
+
+    if (wasRewardEarned) {
+      // Reset cycle on enrollment and create reward
+      await tx.enrollment.update({
+        where: { id: enrollment.id },
+        data: {
+          currentCycleVisits: 0,
+          totalVisits: newEnrollmentTotalVisits,
+        },
+      })
+
+      const expiresAt = new Date()
+      expiresAt.setDate(expiresAt.getDate() + program.rewardExpiryDays)
+
+      await tx.reward.create({
+        data: {
+          customerId: enrollment.customer.id,
+          restaurantId: restaurant.id,
+          loyaltyProgramId: program.id,
+          enrollmentId: enrollment.id,
+          status: "AVAILABLE",
+          expiresAt,
+        },
+      })
+    } else {
+      // Just increment enrollment visits
+      await tx.enrollment.update({
+        where: { id: enrollment.id },
+        data: {
+          currentCycleVisits: newCycleVisits,
+          totalVisits: newEnrollmentTotalVisits,
+        },
+      })
+    }
+
+    // Always update Customer denormalized counters
+    await tx.customer.update({
+      where: { id: enrollment.customer.id },
+      data: {
+        totalVisits: newCustomerTotalVisits,
+        lastVisitAt: new Date(),
+      },
+    })
+  })
+
+  // Dispatch wallet pass update via Trigger.dev (async background job)
+  if (enrollment.walletPassType !== "NONE") {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) =>
+        tasks.trigger("update-wallet-pass", {
+          enrollmentId: enrollment.id,
+          updateType: wasRewardEarned ? "REWARD_EARNED" : "VISIT",
+        })
+      )
+      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+
+  return {
+    success: true,
+    wasRewardEarned,
+    rewardDescription: wasRewardEarned ? program.rewardDescription : undefined,
+    newCycleVisits: wasRewardEarned ? 0 : newCycleVisits,
+    newTotalVisits: newEnrollmentTotalVisits,
+    visitsRequired: program.visitsRequired,
+    programName: program.name,
+  }
+}

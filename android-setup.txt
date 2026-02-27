@@ -1,0 +1,63 @@
+Step-by-step setup                                                                
+                                                                                    
+  1. Create a Google Cloud project                                                  
+                                                                                    
+  1. Go to console.cloud.google.com                                                 
+  2. Create a new project (e.g. "Fidelio Dev")                                      
+  3. Note the Project ID
+
+  2. Enable the Google Wallet API
+
+  1. In the GCP console, go to APIs & Services > Library
+  2. Search for "Google Wallet API"
+  3. Click Enable
+
+  3. Create a service account
+
+  1. Go to IAM & Admin > Service Accounts
+  2. Click Create Service Account
+  3. Name: fidelio-wallet (or anything)
+  4. Role: skip for now (not needed for Wallet)
+  5. Click Done
+  6. Click the service account you just created
+  7. Go to Keys tab > Add Key > Create new key > JSON
+  8. A .json file will download — keep it safe
+
+  4. Get a Wallet Issuer ID
+
+  1. Go to pay.google.com/business/console
+  2. Sign up for the Google Wallet API issuer account
+  3. Note your Issuer ID (a numeric string)
+  4. Under Manage > API access, add your service account email (from step 3) with
+  "Developer" role
+
+  5. Set your env vars
+
+  Open .env.local and fill in:
+
+  GOOGLE_WALLET_ISSUER_ID="1234567890"
+  GOOGLE_WALLET_SERVICE_ACCOUNT_KEY='{"type":"service_account","project_id":"fidelio
+  -dev","private_key_id":"...","private_key":"-----BEGIN RSA PRIVATE
+  KEY-----\n...\n-----END RSA PRIVATE KEY-----\n","client_email":"fidelio-wallet@fid
+  elio-dev.iam.gserviceaccount.com",...}'
+
+  For the service account key, paste the entire JSON from the downloaded file as a
+  single-line string. Your code already handles both raw JSON and base64-encoded
+  formats.
+
+  6. Test it
+
+  Once the env vars are set, you can test the flow:
+
+  1. Start the dev server (pnpm dev)
+  2. Log in, create a restaurant with a loyalty program
+  3. Add a customer
+  4. Issue a Google Wallet pass from the customer detail view
+  5. The save URL will open Google's "Save to Wallet" page
+
+  You can also test the public flow at /join/[your-restaurant-slug] — select Google
+  Wallet on the onboarding form.
+
+  Note: You need a real Android device or a Google account signed into Chrome to
+  actually save the pass. On desktop, Google shows a preview but can't add it to a
+  phone wallet without the Google Wallet app.

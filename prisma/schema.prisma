@@ -1,0 +1,527 @@
+// ─────────────────────────────────────────────────────────────
+// Fidelio — Digital Loyalty Card SaaS
+// Prisma v7 schema — PostgreSQL 18 with uuidv7()
+// ─────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────
+
+enum UserRole {
+  USER        @map("user")
+  SUPER_ADMIN @map("super_admin")
+
+  @@map("user_role")
+}
+
+enum SubscriptionStatus {
+  TRIALING @map("trialing")
+  ACTIVE   @map("active")
+  PAST_DUE @map("past_due")
+  CANCELED @map("canceled")
+  FREE     @map("free")
+
+  @@map("subscription_status")
+}
+
+enum Plan {
+  FREE       @map("free")
+  STARTER    @map("starter")
+  PRO        @map("pro")
+  ENTERPRISE @map("enterprise")
+
+  @@map("plan")
+}
+
+enum WalletPassType {
+  APPLE  @map("apple")
+  GOOGLE @map("google")
+  NONE   @map("none")
+
+  @@map("wallet_pass_type")
+}
+
+enum RewardStatus {
+  AVAILABLE @map("available")
+  REDEEMED  @map("redeemed")
+  EXPIRED   @map("expired")
+
+  @@map("reward_status")
+}
+
+enum WalletPassAction {
+  CREATED     @map("created")
+  UPDATED     @map("updated")
+  PUSH_SENT   @map("push_sent")
+  PUSH_FAILED @map("push_failed")
+
+  @@map("wallet_pass_action")
+}
+
+enum StaffRole {
+  OWNER @map("owner")
+  STAFF @map("staff")
+
+  @@map("staff_role")
+}
+
+enum CardShape {
+  CLEAN      @map("clean")
+  SHOWCASE   @map("showcase")
+  INFO_RICH  @map("info_rich")
+
+  @@map("card_shape")
+}
+
+enum PatternStyle {
+  NONE            @map("none")
+  DOTS            @map("dots")
+  WAVES           @map("waves")
+  GEOMETRIC       @map("geometric")
+  CHEVRON         @map("chevron")
+  CROSSHATCH      @map("crosshatch")
+  DIAMONDS        @map("diamonds")
+  CONFETTI        @map("confetti")
+  SOLID_PRIMARY   @map("solid_primary")
+  SOLID_SECONDARY @map("solid_secondary")
+
+  @@map("pattern_style")
+}
+
+enum ProgressStyle {
+  NUMBERS    @map("numbers")
+  CIRCLES    @map("circles")
+  SQUARES    @map("squares")
+  STARS      @map("stars")
+  STAMPS     @map("stamps")
+  PERCENTAGE @map("percentage")
+  REMAINING  @map("remaining")
+
+  @@map("progress_style")
+}
+
+enum FontFamily {
+  SANS    @map("sans")
+  SERIF   @map("serif")
+  ROUNDED @map("rounded")
+  MONO    @map("mono")
+
+  @@map("font_family")
+}
+
+enum LabelFormat {
+  UPPERCASE  @map("uppercase")
+  TITLE_CASE @map("title_case")
+  LOWERCASE  @map("lowercase")
+
+  @@map("label_format")
+}
+
+enum EnrollmentStatus {
+  ACTIVE    @map("active")
+  COMPLETED @map("completed")
+  FROZEN    @map("frozen")
+
+  @@map("enrollment_status")
+}
+
+enum ProgramStatus {
+  DRAFT    @map("draft")
+  ACTIVE   @map("active")
+  ARCHIVED @map("archived")
+
+  @@map("program_status")
+}
+
+// ─── Better Auth Core Tables ─────────────────────────────────
+// These 4 models MUST match Better Auth's expected schema.
+// Custom fields (role, restaurantId) are added via additionalFields
+// in the auth config (Phase 0.3).
+
+model User {
+  id            String   @id @default(dbgenerated("uuidv7()::text"))
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  role          UserRole  @default(USER)
+  banned        Boolean   @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  restaurantId  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  restaurant       Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+  sessions         Session[]
+  accounts         Account[]
+  members          Member[]
+  invitations      Invitation[]
+  registeredVisits Visit[]     @relation("RegisteredBy")
+  redeemedRewards  Reward[]    @relation("RedeemedBy")
+
+  @@index([restaurantId])
+  @@map("user")
+}
+
+model Session {
+  id                     String   @id @default(dbgenerated("uuidv7()::text"))
+  expiresAt              DateTime
+  token                  String   @unique
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  ipAddress              String?
+  userAgent              String?
+  userId                 String
+  activeOrganizationId   String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+// ─── Better Auth Organization Plugin Tables ──────────────────
+
+model Organization {
+  id        String   @id @default(dbgenerated("uuidv7()::text"))
+  name      String
+  slug      String   @unique
+  logo      String?
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  members     Member[]
+  invitations Invitation[]
+
+  @@map("organization")
+}
+
+model Member {
+  id             String   @id @default(dbgenerated("uuidv7()::text"))
+  userId         String
+  organizationId String
+  role           String
+  createdAt      DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String   @id @default(dbgenerated("uuidv7()::text"))
+  email          String
+  inviterId      String
+  organizationId String
+  role           String
+  status         String   @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+
+  inviter      User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("invitation")
+}
+
+model Account {
+  id                    String    @id @default(dbgenerated("uuidv7()::text"))
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(dbgenerated("uuidv7()::text"))
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// ─── Application Models ──────────────────────────────────────
+
+model Restaurant {
+  id                   String             @id @default(dbgenerated("uuidv7()::text"))
+  name                 String
+  slug                 String             @unique
+  logo                 String?
+  brandColor           String?
+  secondaryColor       String?
+  address              String?
+  phone                String?
+  website              String?
+  timezone             String             @default("UTC")
+  subscriptionStatus   SubscriptionStatus @default(FREE)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  plan                 Plan               @default(FREE)
+  settings             Json               @default("{}")
+  trialEndsAt          DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  users              User[]
+  loyaltyPrograms    LoyaltyProgram[]
+  customers          Customer[]
+  visits             Visit[]
+  rewards            Reward[]
+  staffInvitations   StaffInvitation[]
+  analyticsSnapshots AnalyticsSnapshot[]
+
+  @@map("restaurant")
+}
+
+model LoyaltyProgram {
+  id                 String        @id @default(dbgenerated("uuidv7()::text"))
+  restaurantId       String
+  name               String
+  visitsRequired     Int           @default(10)
+  rewardDescription  String
+  rewardExpiryDays   Int           @default(90)
+  status             ProgramStatus @default(ACTIVE)
+  startsAt           DateTime      @default(now())
+  endsAt             DateTime?
+  termsAndConditions String?       @db.Text
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  restaurant  Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  enrollments Enrollment[]
+  visits      Visit[]
+  rewards     Reward[]
+  cardDesign  CardDesign?
+
+  @@index([restaurantId])
+  @@index([restaurantId, status])
+  @@map("loyalty_program")
+}
+
+model Enrollment {
+  id                     String           @id @default(dbgenerated("uuidv7()::text"))
+  customerId             String
+  loyaltyProgramId       String
+  currentCycleVisits     Int              @default(0)
+  totalVisits            Int              @default(0)
+  totalRewardsRedeemed   Int              @default(0)
+  walletPassId           String?          @unique
+  walletPassSerialNumber String?          @unique
+  walletPassType         WalletPassType   @default(NONE)
+  status                 EnrollmentStatus @default(ACTIVE)
+  enrolledAt             DateTime         @default(now())
+  frozenAt               DateTime?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+
+  customer            Customer             @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  loyaltyProgram      LoyaltyProgram       @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
+  visits              Visit[]
+  rewards             Reward[]
+  walletPassLogs      WalletPassLog[]
+  deviceRegistrations DeviceRegistration[]
+
+  @@unique([customerId, loyaltyProgramId])
+  @@index([customerId])
+  @@index([loyaltyProgramId])
+  @@index([walletPassSerialNumber])
+  @@index([status])
+  @@map("enrollment")
+}
+
+model Customer {
+  id           String    @id @default(dbgenerated("uuidv7()::text"))
+  restaurantId String
+  fullName     String
+  email        String?
+  phone        String?
+  totalVisits  Int       @default(0)
+  lastVisitAt  DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  restaurant  Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  enrollments Enrollment[]
+  visits      Visit[]
+  rewards     Reward[]
+
+  @@unique([restaurantId, email])
+  @@unique([restaurantId, phone])
+  @@index([restaurantId, deletedAt])
+  @@index([restaurantId, totalVisits])
+  @@index([email])
+  @@map("customer")
+}
+
+model Visit {
+  id               String   @id @default(dbgenerated("uuidv7()::text"))
+  customerId       String
+  restaurantId     String
+  loyaltyProgramId String
+  enrollmentId     String?
+  registeredById   String?
+  visitNumber      Int
+  createdAt        DateTime @default(now())
+
+  customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  loyaltyProgram LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
+  enrollment     Enrollment?    @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
+  registeredBy   User?          @relation("RegisteredBy", fields: [registeredById], references: [id], onDelete: SetNull)
+
+  @@index([customerId])
+  @@index([restaurantId])
+  @@index([enrollmentId])
+  @@index([createdAt])
+  @@index([restaurantId, createdAt])
+  @@index([customerId, createdAt])
+  @@map("visit")
+}
+
+model Reward {
+  id               String       @id @default(dbgenerated("uuidv7()::text"))
+  customerId       String
+  restaurantId     String
+  loyaltyProgramId String
+  enrollmentId     String?
+  status           RewardStatus @default(AVAILABLE)
+  earnedAt         DateTime     @default(now())
+  redeemedAt       DateTime?
+  expiresAt        DateTime
+  redeemedById     String?
+
+  customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  loyaltyProgram LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
+  enrollment     Enrollment?    @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
+  redeemedBy     User?          @relation("RedeemedBy", fields: [redeemedById], references: [id], onDelete: SetNull)
+
+  @@index([customerId])
+  @@index([enrollmentId])
+  @@index([status])
+  @@index([restaurantId, status])
+  @@index([restaurantId, expiresAt])
+  @@map("reward")
+}
+
+model WalletPassLog {
+  id           String           @id @default(dbgenerated("uuidv7()::text"))
+  enrollmentId String?
+  customerId   String?
+  action       WalletPassAction
+  details      Json             @default("{}")
+  createdAt    DateTime         @default(now())
+
+  enrollment Enrollment? @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@index([enrollmentId])
+  @@map("wallet_pass_log")
+}
+
+model StaffInvitation {
+  id           String    @id @default(dbgenerated("uuidv7()::text"))
+  restaurantId String
+  email        String
+  role         StaffRole
+  token        String    @unique
+  expiresAt    DateTime
+  accepted     Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
+  @@map("staff_invitation")
+}
+
+model DeviceRegistration {
+  id                      String   @id @default(dbgenerated("uuidv7()::text"))
+  deviceLibraryIdentifier String
+  pushToken               String
+  serialNumber            String
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  enrollment Enrollment @relation(fields: [serialNumber], references: [walletPassSerialNumber], onDelete: Cascade)
+
+  @@unique([deviceLibraryIdentifier, serialNumber])
+  @@index([serialNumber])
+  @@map("device_registration")
+}
+
+model AnalyticsSnapshot {
+  id              String   @id @default(dbgenerated("uuidv7()::text"))
+  restaurantId    String
+  date            DateTime @db.Date
+  totalCustomers  Int      @default(0)
+  newCustomers    Int      @default(0)
+  totalVisits     Int      @default(0)
+  rewardsEarned   Int      @default(0)
+  rewardsRedeemed Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, date])
+  @@index([restaurantId, date])
+  @@map("analytics_snapshot")
+}
+
+model CardDesign {
+  id                  String       @id @default(dbgenerated("uuidv7()::text"))
+  loyaltyProgramId    String       @unique
+  shape               CardShape    @default(CLEAN)
+  primaryColor        String?
+  secondaryColor      String?
+  textColor           String?
+  stripImageUrl       String?
+  stripImageApple     String?
+  stripImageGoogle    String?
+  patternStyle        PatternStyle @default(NONE)
+  progressStyle       ProgressStyle @default(NUMBERS)
+  fontFamily          FontFamily    @default(SANS)
+  labelFormat         LabelFormat   @default(UPPERCASE)
+  customProgressLabel String?       @db.VarChar(30)
+  generatedStripApple  String?
+  generatedStripGoogle String?
+  templateId          String?       @db.VarChar(50)
+  palettePreset       String?
+  businessHours       String?      @db.Text
+  mapAddress          String?
+  socialLinks         Json         @default("{}")
+  customMessage       String?      @db.Text
+  designHash          String       @default("")
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  loyaltyProgram LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
+
+  @@map("card_design")
+}
