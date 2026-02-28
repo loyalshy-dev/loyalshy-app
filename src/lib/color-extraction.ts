@@ -1,0 +1,354 @@
+import sharp from "sharp"
+import { computeTextColor } from "@/lib/wallet/card-design"
+
+// ─── Types ──────────────────────────────────────────────────
+
+export type ExtractedColor = {
+  hex: string
+  rgb: [number, number, number]
+  percentage: number
+}
+
+export type ExtractedPalette = {
+  colors: ExtractedColor[]
+  primarySuggestion: string
+  secondarySuggestion: string
+  textColor: string
+  isMonochrome: boolean
+}
+
+// ─── Color Space Helpers ────────────────────────────────────
+
+function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
+  r /= 255
+  g /= 255
+  b /= 255
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  const l = (max + min) / 2
+  if (max === min) return [0, 0, l]
+
+  const d = max - min
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+  let h = 0
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6
+  else if (max === g) h = ((b - r) / d + 2) / 6
+  else h = ((r - g) / d + 4) / 6
+
+  return [h * 360, s, l]
+}
+
+function rgbToLab(r: number, g: number, b: number): [number, number, number] {
+  // sRGB → XYZ (D65)
+  let rr = r / 255
+  let gg = g / 255
+  let bb = b / 255
+  rr = rr > 0.04045 ? Math.pow((rr + 0.055) / 1.055, 2.4) : rr / 12.92
+  gg = gg > 0.04045 ? Math.pow((gg + 0.055) / 1.055, 2.4) : gg / 12.92
+  bb = bb > 0.04045 ? Math.pow((bb + 0.055) / 1.055, 2.4) : bb / 12.92
+  let x = (rr * 0.4124564 + gg * 0.3575761 + bb * 0.1804375) / 0.95047
+  let y = rr * 0.2126729 + gg * 0.7151522 + bb * 0.0721750
+  let z = (rr * 0.0193339 + gg * 0.1191920 + bb * 0.9503041) / 1.08883
+  const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116)
+  x = f(x)
+  y = f(y)
+  z = f(z)
+  return [116 * y - 16, 500 * (x - y), 200 * (y - z)]
+}
+
+/** CIE76 Delta-E (perceptual color distance) */
+function deltaE(
+  rgb1: [number, number, number],
+  rgb2: [number, number, number]
+): number {
+  const lab1 = rgbToLab(...rgb1)
+  const lab2 = rgbToLab(...rgb2)
+  return Math.sqrt(
+    (lab1[0] - lab2[0]) ** 2 +
+    (lab1[1] - lab2[1]) ** 2 +
+    (lab1[2] - lab2[2]) ** 2
+  )
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  return `#${[r, g, b].map((c) => Math.round(c).toString(16).padStart(2, "0")).join("")}`
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  const cleaned = hex.replace("#", "")
+  return [
+    parseInt(cleaned.substring(0, 2), 16),
+    parseInt(cleaned.substring(2, 4), 16),
+    parseInt(cleaned.substring(4, 6), 16),
+  ]
+}
+
+// ─── K-Means Clustering ─────────────────────────────────────
+
+type Pixel = [number, number, number]
+
+function kMeansClustering(
+  pixels: Pixel[],
+  k: number,
+  maxIterations: number = 20
+): { centroid: Pixel; count: number }[] {
+  if (pixels.length === 0) return []
+  if (pixels.length <= k) {
+    return pixels.map((p) => ({ centroid: [...p] as Pixel, count: 1 }))
+  }
+
+  // k-means++ initialization
+  const centroids: Pixel[] = []
+  centroids.push([...pixels[Math.floor(Math.random() * pixels.length)]])
+
+  for (let i = 1; i < k; i++) {
+    const distances = pixels.map((p) => {
+      const minDist = Math.min(
+        ...centroids.map(
+          (c) => (p[0] - c[0]) ** 2 + (p[1] - c[1]) ** 2 + (p[2] - c[2]) ** 2
+        )
+      )
+      return minDist
+    })
+    const total = distances.reduce((a, b) => a + b, 0)
+    if (total === 0) {
+      centroids.push([...pixels[Math.floor(Math.random() * pixels.length)]])
+      continue
+    }
+    // Prevent floating-point overshoot by clamping r slightly below total
+    let r = Math.random() * total * 0.9999
+    let picked = false
+    for (let j = 0; j < distances.length; j++) {
+      r -= distances[j]
+      if (r <= 0) {
+        centroids.push([...pixels[j]])
+        picked = true
+        break
+      }
+    }
+    // Deterministic fallback: pick the last pixel if draw loop exhausted
+    if (!picked) {
+      centroids.push([...pixels[pixels.length - 1]])
+    }
+  }
+
+  // Iterate
+  const assignments = new Uint16Array(pixels.length)
+
+  for (let iter = 0; iter < maxIterations; iter++) {
+    let changed = false
+
+    // Assign pixels to nearest centroid
+    for (let i = 0; i < pixels.length; i++) {
+      let minDist = Infinity
+      let minIdx = 0
+      for (let j = 0; j < centroids.length; j++) {
+        const d =
+          (pixels[i][0] - centroids[j][0]) ** 2 +
+          (pixels[i][1] - centroids[j][1]) ** 2 +
+          (pixels[i][2] - centroids[j][2]) ** 2
+        if (d < minDist) {
+          minDist = d
+          minIdx = j
+        }
+      }
+      if (assignments[i] !== minIdx) {
+        assignments[i] = minIdx
+        changed = true
+      }
+    }
+
+    if (!changed) break
+
+    // Recompute centroids (skip empty clusters — leave at previous position)
+    const sums = Array.from({ length: k }, () => [0, 0, 0, 0] as [number, number, number, number])
+    for (let i = 0; i < pixels.length; i++) {
+      const c = assignments[i]
+      sums[c][0] += pixels[i][0]
+      sums[c][1] += pixels[i][1]
+      sums[c][2] += pixels[i][2]
+      sums[c][3]++
+    }
+    for (let j = 0; j < k; j++) {
+      if (sums[j][3] > 0) {
+        centroids[j] = [
+          sums[j][0] / sums[j][3],
+          sums[j][1] / sums[j][3],
+          sums[j][2] / sums[j][3],
+        ]
+      }
+    }
+  }
+
+  // Count per cluster and filter out empty clusters
+  const counts = new Uint32Array(k)
+  for (let i = 0; i < pixels.length; i++) {
+    counts[assignments[i]]++
+  }
+
+  return centroids
+    .map((centroid, i) => ({
+      centroid: [Math.round(centroid[0]), Math.round(centroid[1]), Math.round(centroid[2])] as Pixel,
+      count: counts[i],
+    }))
+    .filter((c) => c.count > 0)
+}
+
+// ─── Fallback Palette ───────────────────────────────────────
+
+const FALLBACK_PALETTE: ExtractedPalette = {
+  colors: [
+    { hex: "#334155", rgb: [51, 65, 85], percentage: 100 },
+  ],
+  primarySuggestion: "#334155",
+  secondarySuggestion: "#94a3b8",
+  textColor: "#ffffff",
+  isMonochrome: true,
+}
+
+// ─── Main Extraction ────────────────────────────────────────
+
+export async function extractPaletteFromBuffer(
+  buffer: Buffer
+): Promise<ExtractedPalette> {
+  // Resize to 50x50 — use "inside" to preserve all logo regions (no cropping)
+  const { data, info } = await sharp(buffer)
+    .resize(50, 50, { fit: "inside" })
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+
+  const pixels: Pixel[] = []
+  const totalPixels = info.width * info.height
+
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i]
+    const g = data[i + 1]
+    const b = data[i + 2]
+    const a = data[i + 3]
+
+    // Filter out transparent pixels
+    if (a < 128) continue
+    // Filter out near-white
+    if (r > 240 && g > 240 && b > 240) continue
+    // Filter out near-black
+    if (r < 15 && g < 15 && b < 15) continue
+
+    pixels.push([r, g, b])
+  }
+
+  // Edge case: >90% transparent or filtered out
+  if (pixels.length < totalPixels * 0.1) {
+    return FALLBACK_PALETTE
+  }
+
+  // Run k-means
+  const clusters = kMeansClustering(pixels, 5, 20)
+  if (clusters.length === 0) return FALLBACK_PALETTE
+
+  // Sort by pixel count (most dominant first)
+  clusters.sort((a, b) => b.count - a.count)
+
+  const totalCounted = clusters.reduce((s, c) => s + c.count, 0)
+
+  // Check monochrome: all clusters have low saturation (threshold 0.15 for subtle tints)
+  const isMonochrome = clusters.every((c) => {
+    const [, s] = rgbToHsl(...c.centroid)
+    return s < 0.15
+  })
+
+  // Pick primary: highest saturation with moderate lightness (0.15–0.75)
+  let primaryIdx = 0
+  let bestSat = -1
+  for (let i = 0; i < clusters.length; i++) {
+    const [, s, l] = rgbToHsl(...clusters[i].centroid)
+    if (l >= 0.15 && l <= 0.75 && s > bestSat) {
+      bestSat = s
+      primaryIdx = i
+    }
+  }
+  // If nothing qualified (monochrome or extreme lightness), use most dominant
+  if (bestSat < 0) primaryIdx = 0
+
+  let primaryHex = rgbToHex(...clusters[primaryIdx].centroid)
+  const primaryRgb = clusters[primaryIdx].centroid
+
+  // If primary is too bright, darken it
+  const [, , pL] = rgbToHsl(...primaryRgb)
+  if (pL > 0.7) {
+    const factor = 0.6
+    primaryHex = rgbToHex(
+      Math.round(primaryRgb[0] * factor),
+      Math.round(primaryRgb[1] * factor),
+      Math.round(primaryRgb[2] * factor)
+    )
+  }
+
+  // Build colors array (with darkened primary reflected)
+  const colors: ExtractedColor[] = clusters.map((c, i) => ({
+    hex: i === primaryIdx ? primaryHex : rgbToHex(...c.centroid),
+    rgb: i === primaryIdx ? hexToRgb(primaryHex) : c.centroid,
+    percentage: Math.round((c.count / totalCounted) * 100),
+  }))
+
+  // Pick secondary: most contrasting cluster against primary
+  let secondaryIdx = 0
+  let maxContrast = -1
+  for (let i = 0; i < clusters.length; i++) {
+    if (i === primaryIdx) continue
+    const d = deltaE(hexToRgb(primaryHex), clusters[i].centroid)
+    if (d > maxContrast) {
+      maxContrast = d
+      secondaryIdx = i
+    }
+  }
+
+  let secondaryHex = colors[secondaryIdx].hex
+
+  // Single-color logo: derive secondary by shifting hue
+  if (clusters.length === 1 || maxContrast < 10) {
+    const [h, s, l] = rgbToHsl(...hexToRgb(primaryHex))
+    const newH = (h + 30) % 360
+    secondaryHex = hslToHex(newH, Math.min(s + 0.1, 1), Math.min(l + 0.2, 0.85))
+  }
+
+  const textColor = computeTextColor(primaryHex)
+
+  return {
+    colors,
+    primarySuggestion: primaryHex,
+    secondarySuggestion: secondaryHex,
+    textColor,
+    isMonochrome,
+  }
+}
+
+// ─── HSL → Hex ──────────────────────────────────────────────
+
+function hslToHex(h: number, s: number, l: number): string {
+  const [r, g, b] = hslToRgb(h, s, l)
+  return rgbToHex(r, g, b)
+}
+
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  h = ((h % 360) + 360) % 360
+  const c = (1 - Math.abs(2 * l - 1)) * s
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
+  const m = l - c / 2
+  let r = 0, g = 0, b = 0
+  if (h < 60) { r = c; g = x; b = 0 }
+  else if (h < 120) { r = x; g = c; b = 0 }
+  else if (h < 180) { r = 0; g = c; b = x }
+  else if (h < 240) { r = 0; g = x; b = c }
+  else if (h < 300) { r = x; g = 0; b = c }
+  else { r = c; g = 0; b = x }
+  return [
+    Math.round((r + m) * 255),
+    Math.round((g + m) * 255),
+    Math.round((b + m) * 255),
+  ]
+}
+
+// ─── Exports for testing / template-matcher ─────────────────
+
+export { rgbToHsl, rgbToLab, deltaE, hexToRgb, rgbToHex }

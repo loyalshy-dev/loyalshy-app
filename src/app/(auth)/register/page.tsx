@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
@@ -24,7 +24,18 @@ import {
   setupLoyaltyProgram,
   initializeTrialSubscription,
   completeOnboarding,
+  applyCardDesignFromBrand,
 } from "@/server/onboarding-registration-actions"
+import {
+  WalletPassRenderer,
+  type WalletPassDesign,
+} from "@/components/wallet-pass-renderer"
+import {
+  matchTemplates,
+  applyPaletteToTemplate,
+} from "@/lib/wallet/template-matcher"
+import type { ExtractedPalette } from "@/lib/color-extraction"
+import type { RestaurantCategory } from "@/lib/wallet/card-templates"
 import {
   Check,
   ChevronRight,
@@ -37,6 +48,13 @@ import {
   Rocket,
   PartyPopper,
   QrCode,
+  Coffee,
+  UtensilsCrossed,
+  Smile,
+  Wine,
+  CakeSlice,
+  Sparkles,
+  ChevronDown,
 } from "lucide-react"
 
 // ─── Step definitions ───────────────────────────────────────
@@ -364,7 +382,18 @@ function RestaurantStep({
   )
 }
 
-// ─── Step 3: Branding ───────────────────────────────────────
+// ─── Step 3: Branding (3-phase flow) ─────────────────────────
+
+const VIBE_OPTIONS: { id: RestaurantCategory; label: string; icon: typeof Coffee }[] = [
+  { id: "cafe", label: "Cafe", icon: Coffee },
+  { id: "fine-dining", label: "Fine Dining", icon: UtensilsCrossed },
+  { id: "casual", label: "Casual", icon: Smile },
+  { id: "bar", label: "Bar", icon: Wine },
+  { id: "bakery", label: "Bakery", icon: CakeSlice },
+  { id: "general", label: "General", icon: Sparkles },
+]
+
+type BrandingPhase = "input" | "processing" | "preview"
 
 function BrandingStep({
   restaurantId,
@@ -375,10 +404,25 @@ function BrandingStep({
   onNext: () => void
   onSkip: () => void
 }) {
-  const [brandColor, setBrandColor] = useState("#4f46e5")
+  const [phase, setPhase] = useState<BrandingPhase>("input")
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [palette, setPalette] = useState<ExtractedPalette | null>(null)
+  const [category, setCategory] = useState<RestaurantCategory | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isApplying, setIsApplying] = useState(false)
+
+  // Preview state
+  const [currentDesign, setCurrentDesign] = useState<WalletPassDesign | null>(null)
+  const [currentTemplateId, setCurrentTemplateId] = useState<string>("")
+  const [currentTemplateName, setCurrentTemplateName] = useState<string>("")
+  const [alternatives, setAlternatives] = useState<{ design: WalletPassDesign; templateId: string; name: string }[]>([])
+  const [showManualColors, setShowManualColors] = useState(false)
+  const [manualPrimary, setManualPrimary] = useState("")
+  const [manualSecondary, setManualSecondary] = useState("")
+
+  // Processing animation
+  const [visibleDots, setVisibleDots] = useState(0)
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -399,31 +443,153 @@ function BrandingStep({
 
     if ("url" in result && result.url) {
       setLogoUrl(result.url)
+      if ("palette" in result && result.palette) {
+        setPalette(result.palette)
+      }
       toast.success("Logo uploaded!")
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setIsLoading(true)
+  function handleGenerate() {
+    if (!logoUrl && !category) {
+      // Neither selected — continue with defaults
+      onSkip()
+      return
+    }
 
-    await updateRestaurantBranding({ restaurantId, brandColor })
+    // Clear any lingering timers from a previous run
+    timersRef.current.forEach(clearTimeout)
+    timersRef.current = []
+
+    // Move to processing phase
+    setPhase("processing")
+    setVisibleDots(0)
+
+    // If we have a palette, animate the color dots
+    const dotCount = palette?.colors.length ?? 0
+    if (dotCount > 0) {
+      for (let i = 0; i < dotCount; i++) {
+        const id = setTimeout(() => setVisibleDots((v) => v + 1), 200 * (i + 1))
+        timersRef.current.push(id)
+      }
+    }
+
+    // Run template matching (client-side, instant)
+    const matches = matchTemplates(palette, category, 4)
+
+    // Auto-transition to preview
+    const delay = palette ? 1500 : 600
+    const transitionId = setTimeout(() => {
+      if (matches.length > 0) {
+        const primary = applyPaletteToTemplate(matches[0].template, palette, category)
+        setCurrentDesign(primary)
+        setCurrentTemplateId(matches[0].template.id)
+        setCurrentTemplateName(matches[0].template.name)
+        setManualPrimary(primary.primaryColor)
+        setManualSecondary(primary.secondaryColor)
+
+        setAlternatives(
+          matches.slice(1).map((m) => ({
+            design: applyPaletteToTemplate(m.template, palette, category),
+            templateId: m.template.id,
+            name: m.template.name,
+          }))
+        )
+      }
+      setPhase("preview")
+    }, delay)
+    timersRef.current.push(transitionId)
+  }
+
+  function selectAlternative(idx: number) {
+    const alt = alternatives[idx]
+    if (!alt) return
+
+    // Swap current with the clicked alternative
+    const prevDesign = currentDesign!
+    const prevId = currentTemplateId
+    const prevName = currentTemplateName
+
+    setCurrentDesign(alt.design)
+    setCurrentTemplateId(alt.templateId)
+    setCurrentTemplateName(alt.name)
+    setManualPrimary(alt.design.primaryColor)
+    setManualSecondary(alt.design.secondaryColor)
+
+    const newAlts = [...alternatives]
+    newAlts[idx] = { design: prevDesign, templateId: prevId, name: prevName }
+    setAlternatives(newAlts)
+  }
+
+  function handleManualColorChange(type: "primary" | "secondary", value: string) {
+    if (type === "primary") {
+      setManualPrimary(value)
+    } else {
+      setManualSecondary(value)
+    }
+
+    if (currentDesign && /^#[0-9a-fA-F]{6}$/.test(value)) {
+      const newPrimary = type === "primary" ? value : manualPrimary
+      const newSecondary = type === "secondary" ? value : manualSecondary
+      setCurrentDesign({
+        ...currentDesign,
+        primaryColor: newPrimary,
+        secondaryColor: newSecondary,
+        textColor: getTextColorForBg(newPrimary),
+      })
+    }
+  }
+
+  async function handleApplyDesign() {
+    if (!currentDesign) return
+    setIsApplying(true)
+
+    const result = await applyCardDesignFromBrand({
+      restaurantId,
+      primaryColor: currentDesign.primaryColor,
+      secondaryColor: currentDesign.secondaryColor,
+      textColor: currentDesign.textColor,
+      templateId: currentTemplateId || undefined,
+      shape: currentDesign.shape,
+      patternStyle: currentDesign.patternStyle,
+      progressStyle: currentDesign.progressStyle,
+      labelFormat: currentDesign.labelFormat,
+      editorConfig: {
+        stripColor1: currentDesign.stripColor1 ?? null,
+        stripColor2: currentDesign.stripColor2 ?? null,
+        stripFill: currentDesign.stripFill ?? "gradient",
+        patternColor: currentDesign.patternColor ?? null,
+        useStampGrid: currentDesign.useStampGrid ?? false,
+        stampGridConfig: currentDesign.stampGridConfig ?? null,
+      },
+    })
+
+    if ("error" in result && result.error) {
+      toast.error(result.error)
+      setIsApplying(false)
+      return
+    }
+
     onNext()
   }
 
-  return (
-    <Card>
-      <CardHeader className="text-center">
-        <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10">
-          <Palette className="size-5 text-primary" />
-        </div>
-        <CardTitle className="text-xl font-bold">Customize your brand</CardTitle>
-        <CardDescription>
-          Make your loyalty cards match your restaurant&apos;s identity.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+  // ─── Phase A: Upload + Vibe ───────────────────────────────
+
+  if (phase === "input") {
+    return (
+      <Card>
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10">
+            <Palette className="size-5 text-primary" />
+          </div>
+          <CardTitle className="text-xl font-bold">
+            Make your card match your brand
+          </CardTitle>
+          <CardDescription>
+            Upload your logo and pick your vibe — we&apos;ll generate a loyalty card for you.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
           {/* Logo upload */}
           <div className="space-y-2">
             <Label>Restaurant logo</Label>
@@ -439,8 +605,12 @@ function BrandingStep({
                     />
                     <button
                       type="button"
-                      onClick={() => setLogoUrl(null)}
+                      onClick={() => {
+                        setLogoUrl(null)
+                        setPalette(null)
+                      }}
                       className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-destructive text-white"
+                      aria-label="Remove logo"
                     >
                       <X className="size-3" />
                     </button>
@@ -459,7 +629,7 @@ function BrandingStep({
                     disabled={isUploading}
                   />
                   <span className="text-sm font-medium text-primary hover:underline">
-                    {isUploading ? "Uploading..." : "Upload logo"}
+                    {isUploading ? "Uploading..." : logoUrl ? "Change logo" : "Upload logo"}
                   </span>
                 </label>
                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -467,74 +637,49 @@ function BrandingStep({
                 </p>
               </div>
             </div>
+            {/* Show extracted colors hint */}
+            {palette && palette.colors.length > 0 && (
+              <div className="flex items-center gap-1.5 mt-2">
+                <span className="text-xs text-muted-foreground">Colors found:</span>
+                {palette.colors.slice(0, 5).map((c, i) => (
+                  <div
+                    key={i}
+                    className="size-4 rounded-full border border-border"
+                    style={{ backgroundColor: c.hex }}
+                    title={`${c.hex} (${c.percentage}%)`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Brand color */}
+          {/* Vibe selector */}
           <div className="space-y-2">
-            <Label htmlFor="brand-color">Brand color</Label>
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                id="brand-color"
-                value={brandColor}
-                onChange={(e) => setBrandColor(e.target.value)}
-                className="size-10 cursor-pointer rounded-md border border-border bg-transparent p-0.5"
-              />
-              <Input
-                type="text"
-                value={brandColor}
-                onChange={(e) => setBrandColor(e.target.value)}
-                className="max-w-32 font-mono text-sm"
-                placeholder="#4f46e5"
-              />
-              <div
-                className="flex-1 h-10 rounded-md"
-                style={{ backgroundColor: brandColor }}
-              />
+            <Label>What&apos;s your restaurant&apos;s vibe?</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {VIBE_OPTIONS.map((vibe) => {
+                const Icon = vibe.icon
+                const isSelected = category === vibe.id
+                return (
+                  <button
+                    key={vibe.id}
+                    type="button"
+                    onClick={() => setCategory(isSelected ? null : vibe.id)}
+                    className={`flex flex-col items-center gap-1.5 rounded-lg border-2 p-3 text-center transition-all ${
+                      isSelected
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
+                    }`}
+                  >
+                    <Icon className="size-5" />
+                    <span className="text-xs font-medium">{vibe.label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
-          {/* Preview card */}
-          <div className="rounded-xl border bg-muted/30 p-4">
-            <p className="text-xs font-medium text-muted-foreground mb-3">
-              Wallet pass preview
-            </p>
-            <div
-              className="mx-auto max-w-[240px] rounded-xl p-4 text-white"
-              style={{ backgroundColor: brandColor }}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                {logoUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={logoUrl}
-                    alt=""
-                    className="size-6 rounded"
-                  />
-                )}
-                <span className="text-xs font-medium opacity-90">
-                  Your Restaurant
-                </span>
-              </div>
-              <p className="text-lg font-bold">Loyalty Card</p>
-              <div className="flex gap-1 mt-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="size-3 rounded-full bg-white/80"
-                  />
-                ))}
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="size-3 rounded-full bg-white/30"
-                  />
-                ))}
-              </div>
-              <p className="text-xs mt-2 opacity-75">5 / 10 visits</p>
-            </div>
-          </div>
-
+          {/* Actions */}
           <div className="flex gap-3">
             <Button
               type="button"
@@ -544,12 +689,183 @@ function BrandingStep({
             >
               Skip for now
             </Button>
-            <Button type="submit" className="flex-1" disabled={isLoading}>
-              {isLoading ? <LoadingSpinner /> : <ChevronRight className="size-4" />}
-              Continue
+            <Button
+              type="button"
+              className="flex-1"
+              onClick={handleGenerate}
+              disabled={isUploading}
+            >
+              {!logoUrl && !category ? (
+                <>Continue with defaults</>
+              ) : (
+                <>
+                  Generate my card
+                  <ChevronRight className="size-4" />
+                </>
+              )}
             </Button>
           </div>
-        </form>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // ─── Phase B: Processing ──────────────────────────────────
+
+  if (phase === "processing") {
+    return (
+      <Card>
+        <CardContent className="py-12">
+          <div className="flex flex-col items-center justify-center text-center space-y-4">
+            <Loader2 className="size-10 animate-spin text-primary" />
+            <div>
+              <p className="text-lg font-semibold">
+                {palette ? "Analyzing your brand..." : "Picking the perfect template..."}
+              </p>
+              {palette && palette.colors.length > 0 && (
+                <div className="flex items-center justify-center gap-2 mt-3">
+                  {palette.colors.slice(0, 5).map((c, i) => (
+                    <div
+                      key={i}
+                      className="size-6 rounded-full border border-border transition-all duration-300"
+                      style={{
+                        backgroundColor: c.hex,
+                        opacity: i < visibleDots ? 1 : 0,
+                        transform: i < visibleDots ? "scale(1)" : "scale(0.5)",
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+              {palette && visibleDots > 0 && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Found {Math.min(visibleDots, palette.colors.length)} color{visibleDots !== 1 ? "s" : ""} in your logo
+                </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // ─── Phase C: Preview + Alternatives ──────────────────────
+
+  return (
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-xl font-bold">Your loyalty card</CardTitle>
+        <CardDescription>
+          Here&apos;s a card designed for your brand. You can customize it further in the Studio later.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {/* Wallet pass preview */}
+        {currentDesign && (
+          <div className="flex justify-center">
+            <WalletPassRenderer
+              design={currentDesign}
+              format="apple"
+              restaurantName="Your Restaurant"
+              logoUrl={logoUrl}
+              width={260}
+              height={357}
+              compact
+            />
+          </div>
+        )}
+
+        {/* Alternative swatches */}
+        {alternatives.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">
+              Try another look:
+            </p>
+            <div className="flex gap-2">
+              {alternatives.map((alt, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => selectAlternative(i)}
+                  className="h-8 flex-1 rounded-md border border-border transition-all hover:scale-105 hover:shadow-sm"
+                  style={{
+                    background: `linear-gradient(135deg, ${alt.design.primaryColor} 0%, ${alt.design.secondaryColor} 100%)`,
+                  }}
+                  aria-label={`Alternative template ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Manual color adjustment (collapsible) */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowManualColors(!showManualColors)}
+            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronDown
+              className={`size-3.5 transition-transform ${showManualColors ? "rotate-180" : ""}`}
+            />
+            Adjust colors manually
+          </button>
+          {showManualColors && (
+            <div className="mt-3 space-y-3">
+              <div className="flex items-center gap-3">
+                <Label className="w-20 text-xs">Primary</Label>
+                <input
+                  type="color"
+                  value={manualPrimary}
+                  onChange={(e) => handleManualColorChange("primary", e.target.value)}
+                  className="size-8 cursor-pointer rounded border border-border bg-transparent p-0.5"
+                />
+                <Input
+                  type="text"
+                  value={manualPrimary}
+                  onChange={(e) => handleManualColorChange("primary", e.target.value)}
+                  className="max-w-28 font-mono text-xs h-8"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <Label className="w-20 text-xs">Secondary</Label>
+                <input
+                  type="color"
+                  value={manualSecondary}
+                  onChange={(e) => handleManualColorChange("secondary", e.target.value)}
+                  className="size-8 cursor-pointer rounded border border-border bg-transparent p-0.5"
+                />
+                <Input
+                  type="text"
+                  value={manualSecondary}
+                  onChange={(e) => handleManualColorChange("secondary", e.target.value)}
+                  className="max-w-28 font-mono text-xs h-8"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={onSkip}
+          >
+            Skip for now
+          </Button>
+          <Button
+            type="button"
+            className="flex-1"
+            onClick={handleApplyDesign}
+            disabled={isApplying || !currentDesign}
+          >
+            {isApplying ? <LoadingSpinner /> : <ChevronRight className="size-4" />}
+            Use this design
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
@@ -873,6 +1189,20 @@ function DoneStep({
       </CardContent>
     </Card>
   )
+}
+
+// ─── Text Color Helper (client-safe) ─────────────────────────
+
+function getTextColorForBg(hex: string): string {
+  const cleaned = hex.replace("#", "")
+  const r = parseInt(cleaned.substring(0, 2), 16) / 255
+  const g = parseInt(cleaned.substring(2, 4), 16) / 255
+  const b = parseInt(cleaned.substring(4, 6), 16) / 255
+  const sR = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4)
+  const sG = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4)
+  const sB = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4)
+  const lum = 0.2126 * sR + 0.7152 * sG + 0.0722 * sB
+  return lum > 0.179 ? "#1a1a1a" : "#ffffff"
 }
 
 // ─── Password Strength ──────────────────────────────────────

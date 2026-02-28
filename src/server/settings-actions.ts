@@ -1382,6 +1382,40 @@ export async function resetPlatformLogo(restaurantId: string, platform: "apple" 
   return { success: true, url: newUrl }
 }
 
+// ─── Extract Palette from Logo URL ───────────────────────────
+
+export async function extractPaletteFromLogoUrl(restaurantId: string) {
+  await assertRestaurantRole(restaurantId, "owner")
+
+  const restaurant = await db.restaurant.findUnique({
+    where: { id: restaurantId },
+    select: { logo: true },
+  })
+
+  if (!restaurant?.logo) {
+    return { error: "No logo uploaded" }
+  }
+
+  try {
+    const { extractPaletteFromBuffer } = await import("@/lib/color-extraction")
+
+    let sourceBuffer: Buffer
+    if (restaurant.logo.startsWith("data:")) {
+      const base64 = restaurant.logo.split(",")[1]
+      sourceBuffer = Buffer.from(base64, "base64")
+    } else {
+      const res = await fetch(restaurant.logo)
+      if (!res.ok) return { error: "Failed to fetch logo" }
+      sourceBuffer = Buffer.from(await res.arrayBuffer())
+    }
+
+    const palette = await extractPaletteFromBuffer(sourceBuffer)
+    return { success: true, palette }
+  } catch {
+    return { error: "Failed to extract colors" }
+  }
+}
+
 // ─── Update Loyalty Program ─────────────────────────────────
 
 export async function updateLoyaltyProgram(input: z.infer<typeof updateLoyaltyProgramSchema>) {

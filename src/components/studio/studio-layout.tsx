@@ -209,7 +209,7 @@ export function StudioLayout({
 
     switch (ui.activeTool) {
       case "templates":
-        return <TemplatePanel store={store} />
+        return <TemplatePanel store={store} restaurantId={restaurantId} restaurantLogo={restaurantLogo} />
       case "colors":
         return <ColorsPanel store={store} />
       case "shape":
@@ -266,17 +266,23 @@ export function StudioLayout({
           />
         )}
 
-        {/* Center: Canvas */}
-        <CanvasPanel
-          design={design}
-          format={ui.previewFormat}
-          deviceFrame={ui.deviceFrame}
-          restaurantName={restaurantName}
-          restaurantLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
-          programName={programName}
-          visitsRequired={visitsRequired}
-          rewardDescription={rewardDescription}
-        />
+        {/* Center: Canvas + floating Brand Match prompt */}
+        <div style={{ flex: 1, position: "relative", display: "flex" }}>
+          <CanvasPanel
+            design={design}
+            format={ui.previewFormat}
+            deviceFrame={ui.deviceFrame}
+            restaurantName={restaurantName}
+            restaurantLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
+            programName={programName}
+            visitsRequired={visitsRequired}
+            rewardDescription={rewardDescription}
+          />
+          <BrandMatchPrompt
+            visible={ui.activeTool !== "templates"}
+            onOpen={() => store.getState().setActiveTool("templates")}
+          />
+        </div>
 
         {/* Right: Property panel */}
         {ui.activeTool && !isMobile && (
@@ -324,6 +330,81 @@ export function StudioLayout({
           onToolSelect={(tool) => store.getState().setActiveTool(tool)}
         />
       )}
+    </div>
+  )
+}
+
+// ─── Brand Match Floating Prompt ─────────────────────────────
+
+import { Wand2, X as XIcon } from "lucide-react"
+
+function BrandMatchPrompt({
+  visible,
+  onOpen,
+}: {
+  visible: boolean
+  onOpen: () => void
+}) {
+  const [dismissed, setDismissed] = useState(false)
+
+  if (dismissed || !visible) return null
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen() } }}
+      style={{
+        position: "absolute",
+        bottom: 20,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 15,
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "8px 14px 8px 12px",
+        borderRadius: 10,
+        backgroundColor: "var(--primary)",
+        color: "var(--primary-foreground)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+        animation: "brandMatchIn 0.4s ease-out",
+      }}
+      onClick={onOpen}
+    >
+      <Wand2 size={15} />
+      <span style={{ fontSize: 13, fontWeight: 600 }}>Match card to your brand</span>
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          setDismissed(true)
+        }}
+        aria-label="Dismiss"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          border: "none",
+          backgroundColor: "rgba(255,255,255,0.2)",
+          color: "inherit",
+          cursor: "pointer",
+          marginLeft: 2,
+          padding: 0,
+        }}
+      >
+        <XIcon size={10} />
+      </button>
+      <style>{`
+        @keyframes brandMatchIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+          to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+      `}</style>
     </div>
   )
 }

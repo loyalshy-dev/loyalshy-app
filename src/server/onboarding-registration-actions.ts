@@ -20,6 +20,19 @@ const updateBrandingSchema = z.object({
   brandColor: z.string().max(50).optional().default(""),
 })
 
+const applyCardDesignSchema = z.object({
+  restaurantId: z.string().min(1),
+  primaryColor: z.string().min(4).max(9),
+  secondaryColor: z.string().min(4).max(9),
+  textColor: z.string().min(4).max(9),
+  templateId: z.string().max(50).optional(),
+  shape: z.enum(["CLEAN", "SHOWCASE", "INFO_RICH"]).optional(),
+  patternStyle: z.enum(["NONE", "DOTS", "WAVES", "GEOMETRIC", "CHEVRON", "CROSSHATCH", "DIAMONDS", "CONFETTI", "SOLID_PRIMARY", "SOLID_SECONDARY", "STAMP_GRID"]).optional(),
+  progressStyle: z.enum(["NUMBERS", "CIRCLES", "SQUARES", "STARS", "STAMPS", "PERCENTAGE", "REMAINING"]).optional(),
+  labelFormat: z.enum(["UPPERCASE", "TITLE_CASE", "LOWERCASE"]).optional(),
+  editorConfig: z.record(z.string(), z.unknown()).optional(),
+})
+
 const setupLoyaltySchema = z.object({
   restaurantId: z.string().min(1),
   visitsRequired: z.number().int().min(3).max(30),
@@ -197,7 +210,17 @@ export async function uploadOnboardingLogo(formData: FormData) {
     data: { logo: blob.url },
   })
 
-  return { success: true, url: blob.url }
+  // Extract color palette from the uploaded image (non-fatal)
+  let palette: import("@/lib/color-extraction").ExtractedPalette | null = null
+  try {
+    const { extractPaletteFromBuffer } = await import("@/lib/color-extraction")
+    const arrayBuffer = await file.arrayBuffer()
+    palette = await extractPaletteFromBuffer(Buffer.from(arrayBuffer))
+  } catch {
+    // Palette extraction is non-fatal — return url without palette
+  }
+
+  return { success: true, url: blob.url, palette }
 }
 
 // ─── Setup Loyalty Program ─────────────────────────────────
@@ -361,6 +384,65 @@ export async function initializeTrialSubscription(restaurantId: string) {
     })
     return { success: true, stripeError: true }
   }
+}
+
+// ─── Apply Card Design from Brand ─────────────────────────
+
+export async function applyCardDesignFromBrand(input: z.infer<typeof applyCardDesignSchema>) {
+  const session = await assertAuthenticated()
+  const parsed = applyCardDesignSchema.parse(input)
+
+  // Verify user owns this restaurant
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { restaurantId: true },
+  })
+
+  if (user?.restaurantId !== parsed.restaurantId) {
+    return { error: "Unauthorized" }
+  }
+
+  // Find the default loyalty program
+  const program = await db.loyaltyProgram.findFirst({
+    where: { restaurantId: parsed.restaurantId },
+    include: { cardDesign: true },
+  })
+
+  if (!program?.cardDesign) {
+    return { error: "Card design not found" }
+  }
+
+  // Build update data
+  const updateData: Record<string, unknown> = {
+    primaryColor: parsed.primaryColor,
+    secondaryColor: parsed.secondaryColor,
+    textColor: parsed.textColor,
+  }
+
+  if (parsed.templateId) updateData.templateId = parsed.templateId
+  if (parsed.shape) updateData.shape = parsed.shape
+  if (parsed.patternStyle) updateData.patternStyle = parsed.patternStyle
+  if (parsed.progressStyle) updateData.progressStyle = parsed.progressStyle
+  if (parsed.labelFormat) updateData.labelFormat = parsed.labelFormat
+  if (parsed.editorConfig) {
+    // Merge with existing editorConfig
+    const existing = (program.cardDesign.editorConfig as Record<string, unknown>) ?? {}
+    updateData.editorConfig = { ...existing, ...parsed.editorConfig }
+  }
+
+  await db.$transaction([
+    db.cardDesign.update({
+      where: { id: program.cardDesign.id },
+      data: updateData,
+    }),
+    db.restaurant.update({
+      where: { id: parsed.restaurantId },
+      data: { brandColor: parsed.primaryColor },
+    }),
+  ])
+
+  revalidatePath("/dashboard")
+  return { success: true }
 }
 
 // ─── Complete Onboarding ───────────────────────────────────
