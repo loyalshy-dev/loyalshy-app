@@ -76,6 +76,7 @@ export async function POST(request: Request) {
             rewardDescription: true,
             rewardExpiryDays: true,
             termsAndConditions: true,
+            endsAt: true,
             restaurant: {
               select: {
                 id: true,
@@ -146,6 +147,7 @@ export async function POST(request: Request) {
       programId: program.id,
       enrollmentId: enrollment.id,
       cardDesign,
+      programEndsAt: program.endsAt,
     })
 
     return NextResponse.json({ saveUrl })

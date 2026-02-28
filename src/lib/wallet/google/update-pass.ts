@@ -7,6 +7,8 @@ import {
   GOOGLE_WALLET_ISSUER_ID,
   buildEnrollmentObjectId,
 } from "./constants"
+import { formatProgressValue, formatLabel } from "../card-design"
+import type { ProgressStyle, LabelFormat } from "../card-design"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -23,12 +25,16 @@ type GooglePassUpdateData = {
   restaurantLogo: string | null
   programName: string
   memberSince: Date
+  // Card design fields for formatting
+  progressStyle: ProgressStyle
+  labelFormat: LabelFormat
+  customProgressLabel: string | null
 }
 
 // ─── Update Google Wallet Pass ──────────────────────────────
 
 /**
- * Updates a Google Wallet pass by PATCHing the generic object
+ * Updates a Google Wallet pass by PATCHing the loyalty object
  * via the Google Wallet REST API. Changes appear automatically
  * on the user's device.
  */
@@ -40,9 +46,18 @@ async function patchGoogleWalletObject(
   const objectId = buildEnrollmentObjectId(data.enrollmentId)
   const token = await getAccessToken()
 
-  const progressValue = data.hasAvailableReward
-    ? "Reward Available!"
-    : `${data.currentCycleVisits} / ${data.visitsRequired} Visits`
+  const progressStyle = data.progressStyle
+  const labelFmt = data.labelFormat
+  const progressValue = formatProgressValue(
+    data.currentCycleVisits,
+    data.visitsRequired,
+    progressStyle,
+    data.hasAvailableReward
+  )
+
+  const progressLabel = data.customProgressLabel
+    ? data.customProgressLabel
+    : data.hasAvailableReward ? "STATUS" : "PROGRESS"
 
   const memberSinceFormatted = data.memberSince.toLocaleDateString("en-US", {
     month: "short",
@@ -50,42 +65,23 @@ async function patchGoogleWalletObject(
   })
 
   const patchBody: Record<string, unknown> = {
+    loyaltyPoints: {
+      label: formatLabel(progressLabel, labelFmt),
+      balance: { string: progressValue },
+    },
+    secondaryLoyaltyPoints: {
+      label: formatLabel("TOTAL VISITS", labelFmt),
+      balance: { int: data.totalVisits },
+    },
+    accountName: data.customerName,
     textModulesData: [
-      {
-        id: "progress",
-        header: "PROGRESS",
-        body: progressValue,
-      },
-      {
-        id: "totalVisits",
-        header: "TOTAL VISITS",
-        body: `${data.totalVisits}`,
-      },
-      {
-        id: "nextReward",
-        header: "NEXT REWARD",
-        body: data.rewardDescription,
-      },
-      {
-        id: "memberSince",
-        header: "MEMBER SINCE",
-        body: memberSinceFormatted,
-      },
-      {
-        id: "customerName",
-        header: "NAME",
-        body: data.customerName,
-      },
-      {
-        id: "programName",
-        header: "PROGRAM",
-        body: data.programName,
-      },
+      { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: data.rewardDescription },
+      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ],
   }
 
   const response = await fetch(
-    `${GOOGLE_WALLET_API_BASE}/genericObject/${encodeURIComponent(objectId)}`,
+    `${GOOGLE_WALLET_API_BASE}/loyaltyObject/${encodeURIComponent(objectId)}`,
     {
       method: "PATCH",
       headers: {
@@ -139,6 +135,13 @@ export async function notifyGooglePassUpdate(
           name: true,
           visitsRequired: true,
           rewardDescription: true,
+          cardDesign: {
+            select: {
+              progressStyle: true,
+              labelFormat: true,
+              customProgressLabel: true,
+            },
+          },
         },
       },
       rewards: {
@@ -150,6 +153,8 @@ export async function notifyGooglePassUpdate(
   })
 
   if (!enrollment || enrollment.walletPassType !== "GOOGLE") return
+
+  const cardDesign = enrollment.loyaltyProgram.cardDesign
 
   try {
     await patchGoogleWalletObject({
@@ -165,6 +170,9 @@ export async function notifyGooglePassUpdate(
       restaurantLogo: enrollment.customer.restaurant.logo,
       programName: enrollment.loyaltyProgram.name,
       memberSince: enrollment.customer.createdAt,
+      progressStyle: (cardDesign?.progressStyle as ProgressStyle) ?? "NUMBERS",
+      labelFormat: (cardDesign?.labelFormat as LabelFormat) ?? "UPPERCASE",
+      customProgressLabel: cardDesign?.customProgressLabel ?? null,
     })
   } catch (error) {
     console.error("Failed to update Google Wallet pass:", error instanceof Error ? error.message : "Unknown error")

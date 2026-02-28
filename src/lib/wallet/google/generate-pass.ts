@@ -33,9 +33,11 @@ export type GooglePassGenerationInput = {
   enrollmentId?: string
   // Card design fields
   cardDesign?: CardDesignData | null
+  // Program lifecycle
+  programEndsAt?: Date | null
 }
 
-// ─── Hex Color Helpers ──────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────
 
 function ensureHexColor(color: string | null, fallback: string): string {
   if (!color) return fallback
@@ -43,9 +45,21 @@ function ensureHexColor(color: string | null, fallback: string): string {
   return fallback
 }
 
-// ─── Build Generic Class (one per program or restaurant) ───────────────
+function normalizeSocialUrl(handle: string, platform: "instagram" | "facebook" | "tiktok" | "x"): string {
+  if (handle.startsWith("http://") || handle.startsWith("https://")) return handle
+  const cleaned = handle.replace(/^@/, "")
+  const bases: Record<string, string> = {
+    instagram: "https://instagram.com/",
+    facebook: "https://facebook.com/",
+    tiktok: "https://tiktok.com/@",
+    x: "https://x.com/",
+  }
+  return `${bases[platform]}${cleaned}`
+}
 
-function buildGenericClass(input: GooglePassGenerationInput) {
+// ─── Build Loyalty Class (one per program or restaurant) ─────────────
+
+function buildLoyaltyClass(input: GooglePassGenerationInput) {
   // Use per-program class ID when programId is available, otherwise fall back to restaurant
   const classId = input.programId
     ? buildProgramClassId(input.programId)
@@ -54,28 +68,13 @@ function buildGenericClass(input: GooglePassGenerationInput) {
   const shape: CardShape = design?.shape ?? "CLEAN"
   const hexBg = ensureHexColor(design?.primaryColor ?? input.brandColor, "#1a1a2e")
   const layout = getFieldLayout(shape)
+  const labelFmt = design?.labelFormat ?? "UPPERCASE"
 
-  // Build card row template based on shape
+  // Build card row template — progress/totalVisits now handled by loyaltyPoints,
+  // so rows only contain: nextReward + memberSince, customerName
   const cardRowTemplateInfos: Record<string, unknown>[] = []
 
   if (layout.google.rows >= 1) {
-    cardRowTemplateInfos.push({
-      twoItems: {
-        startItem: {
-          firstValue: {
-            fields: [{ fieldPath: "object.textModulesData['progress']" }],
-          },
-        },
-        endItem: {
-          firstValue: {
-            fields: [{ fieldPath: "object.textModulesData['totalVisits']" }],
-          },
-        },
-      },
-    })
-  }
-
-  if (layout.google.rows >= 2) {
     cardRowTemplateInfos.push({
       twoItems: {
         startItem: {
@@ -92,27 +91,77 @@ function buildGenericClass(input: GooglePassGenerationInput) {
     })
   }
 
-  if (layout.google.rows >= 3) {
+  if (layout.google.rows >= 2) {
     cardRowTemplateInfos.push({
       oneItem: {
         item: {
           firstValue: {
-            fields: [{ fieldPath: "object.textModulesData['customerName']" }],
+            fields: [{ fieldPath: "object.textModulesData['nextReward']" }],
           },
         },
       },
     })
   }
 
-  const genericClass: Record<string, unknown> = {
-    id: classId,
-    classTemplateInfo: {
-      cardTemplateOverride: {
-        cardRowTemplateInfos,
+  if (layout.google.rows >= 3) {
+    cardRowTemplateInfos.push({
+      oneItem: {
+        item: {
+          firstValue: {
+            fields: [{ fieldPath: "object.textModulesData['memberSince']" }],
+          },
+        },
       },
-    },
+    })
+  }
+
+  const programDisplayName = input.programName
+    ? `${input.programName} Loyalty`
+    : "Loyalty Card"
+
+  // Prefer Google-specific logo, fall back to general
+  const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
+
+  const loyaltyClass: Record<string, unknown> = {
+    id: classId,
+    programName: programDisplayName,
+    issuerName: input.restaurantName,
+    reviewStatus: "UNDER_REVIEW",
     hexBackgroundColor: hexBg,
     multipleDevicesAndHoldersAllowedStatus: "ONE_USER_ALL_DEVICES",
+    securityAnimation: { animationType: "FOIL_SHIMMER" },
+  }
+
+  // Program logo (required for Loyalty)
+  if (googleLogo) {
+    loyaltyClass.programLogo = {
+      sourceUri: { uri: googleLogo },
+      contentDescription: {
+        defaultValue: { language: "en", value: `${input.restaurantName} logo` },
+      },
+    }
+    loyaltyClass.wideProgramLogo = {
+      sourceUri: { uri: googleLogo },
+      contentDescription: {
+        defaultValue: { language: "en", value: `${input.restaurantName} logo` },
+      },
+    }
+  }
+
+  // Card row template override
+  if (cardRowTemplateInfos.length > 0) {
+    loyaltyClass.classTemplateInfo = {
+      cardTemplateOverride: { cardRowTemplateInfos },
+    }
+  }
+
+  // Homepage
+  if (input.restaurantWebsite) {
+    loyaltyClass.homepageUri = {
+      uri: input.restaurantWebsite,
+      description: input.restaurantName,
+      id: "homepage",
+    }
   }
 
   // Links module for restaurant contact + socials
@@ -132,31 +181,31 @@ function buildGenericClass(input: GooglePassGenerationInput) {
     })
   }
 
-  // Social links from card design
+  // Social links from card design — normalize handles to full URLs
   if (design?.socialLinks.instagram) {
     linksUris.push({
-      uri: design.socialLinks.instagram,
+      uri: normalizeSocialUrl(design.socialLinks.instagram, "instagram"),
       description: "Instagram",
       id: "instagram",
     })
   }
   if (design?.socialLinks.facebook) {
     linksUris.push({
-      uri: design.socialLinks.facebook,
+      uri: normalizeSocialUrl(design.socialLinks.facebook, "facebook"),
       description: "Facebook",
       id: "facebook",
     })
   }
   if (design?.socialLinks.tiktok) {
     linksUris.push({
-      uri: design.socialLinks.tiktok,
+      uri: normalizeSocialUrl(design.socialLinks.tiktok, "tiktok"),
       description: "TikTok",
       id: "tiktok",
     })
   }
   if (design?.socialLinks.x) {
     linksUris.push({
-      uri: design.socialLinks.x,
+      uri: normalizeSocialUrl(design.socialLinks.x, "x"),
       description: "X",
       id: "x",
     })
@@ -171,42 +220,68 @@ function buildGenericClass(input: GooglePassGenerationInput) {
     })
   }
 
-  if (linksUris.length > 0) {
-    genericClass.linksModuleData = { uris: linksUris }
+  // Contact fallback — always include at least one link
+  if (linksUris.length === 0) {
+    linksUris.push({
+      uri: `mailto:support@fidelio.app`,
+      description: "Contact Support",
+      id: "contact",
+    })
   }
 
-  // Info module for business hours + custom message
-  const infoModules: Record<string, unknown>[] = []
+  loyaltyClass.linksModuleData = { uris: linksUris }
+
+  // Text modules replace deprecated infoModuleData
+  const classTextModules: Record<string, unknown>[] = []
   if (design?.businessHours) {
-    infoModules.push({
-      header: "Business Hours",
+    classTextModules.push({
+      id: "businessHours",
+      header: formatLabel("BUSINESS HOURS", labelFmt),
       body: design.businessHours,
     })
   }
   if (design?.customMessage) {
-    infoModules.push({
-      header: "Message",
+    classTextModules.push({
+      id: "customMessage",
+      header: formatLabel("MESSAGE", labelFmt),
       body: design.customMessage,
     })
   }
-  if (infoModules.length > 0) {
-    genericClass.infoModuleData = {
-      showLastUpdateTime: true,
-      labelValueRows: infoModules.map((m) => ({
-        columns: [{
-          label: m.header as string,
-          value: m.body as string,
-        }],
-      })),
-    }
+  if (input.termsAndConditions) {
+    classTextModules.push({
+      id: "terms",
+      header: formatLabel("TERMS & CONDITIONS", labelFmt),
+      body: input.termsAndConditions,
+    })
+  }
+  if (classTextModules.length > 0) {
+    loyaltyClass.textModulesData = classTextModules
   }
 
-  return genericClass
+  // Merchant locations from coordinates
+  if (design?.mapLatitude != null && design?.mapLongitude != null) {
+    loyaltyClass.locations = [
+      { latitude: design.mapLatitude, longitude: design.mapLongitude },
+    ]
+  }
+
+  // Discoverable program (optional — helps Google surface the card)
+  loyaltyClass.discoverableProgram = {
+    merchantSigninInfo: {
+      signinWebsite: {
+        uri: input.restaurantWebsite ?? "https://fidelio.app",
+        description: input.restaurantName,
+      },
+    },
+    state: "TRUSTED_TESTERS",
+  }
+
+  return loyaltyClass
 }
 
-// ─── Build Generic Object (one per enrollment or customer) ────────────────
+// ─── Build Loyalty Object (one per enrollment or customer) ────────────
 
-function buildGenericObject(input: GooglePassGenerationInput) {
+function buildLoyaltyObject(input: GooglePassGenerationInput) {
   // Use enrollment-scoped object ID when enrollmentId is available, otherwise fall back to customer
   const objectId = input.enrollmentId
     ? buildEnrollmentObjectId(input.enrollmentId)
@@ -237,65 +312,44 @@ function buildGenericObject(input: GooglePassGenerationInput) {
     year: "numeric",
   })
 
-  // Use program name in header/subheader when available
-  const headerValue = input.restaurantName
-  const subheaderValue = input.programName
-    ? `${input.programName} Loyalty Card`
-    : "Loyalty Card"
-
-  const genericObject: Record<string, unknown> = {
+  const loyaltyObject: Record<string, unknown> = {
     id: objectId,
     classId,
     state: "ACTIVE",
-    header: {
-      defaultValue: {
-        language: "en",
-        value: headerValue,
-      },
+    accountId: input.walletPassId,
+    accountName: input.customerName,
+    // Native loyalty points — primary progress
+    loyaltyPoints: {
+      label: formatLabel(progressLabel, labelFmt),
+      balance: { string: progressValue },
     },
-    subheader: {
-      defaultValue: {
-        language: "en",
-        value: subheaderValue,
-      },
+    // Secondary loyalty points — total visits
+    secondaryLoyaltyPoints: {
+      label: formatLabel("TOTAL VISITS", labelFmt),
+      balance: { int: input.totalVisits },
     },
-    cardTitle: {
-      defaultValue: {
-        language: "en",
-        value: input.restaurantName,
-      },
-    },
-    hexBackgroundColor: ensureHexColor(design?.primaryColor ?? input.brandColor, "#1a1a2e"),
     barcode: {
       type: "QR_CODE",
       value: input.walletPassId,
     },
+    // Remaining text fields that aren't covered by native loyalty fields
     textModulesData: [
-      { id: "progress", header: formatLabel(progressLabel, labelFmt), body: progressValue },
-      { id: "totalVisits", header: formatLabel("TOTAL VISITS", labelFmt), body: `${input.totalVisits}` },
       { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: input.rewardDescription },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
-      { id: "customerName", header: formatLabel("NAME", labelFmt), body: input.customerName },
     ],
+    // Group passes from the same restaurant together
+    groupingInfo: { groupingId: input.restaurantId },
   }
 
-  // Add logo if available — prefer Google-specific, fall back to general
-  const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
-  if (googleLogo) {
-    genericObject.logo = {
-      sourceUri: {
-        uri: googleLogo,
-      },
-      contentDescription: {
-        defaultValue: {
-          language: "en",
-          value: `${input.restaurantName} logo`,
-        },
-      },
+  // Valid time interval for time-bound programs
+  if (input.programEndsAt) {
+    loyaltyObject.validTimeInterval = {
+      end: { date: input.programEndsAt.toISOString() },
     }
   }
 
   // Hero image: use dynamic stamp grid route, static strip image, or logo
+  const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
   let heroImageUrl: string | null = null
   if (layout.google.showHeroImage) {
     const stripFiltersG = design ? parseStripFilters(design.editorConfig) : { useStampGrid: false }
@@ -311,41 +365,29 @@ function buildGenericObject(input: GooglePassGenerationInput) {
   }
 
   if (heroImageUrl) {
-    genericObject.heroImage = {
-      sourceUri: {
-        uri: heroImageUrl,
-      },
+    loyaltyObject.heroImage = {
+      sourceUri: { uri: heroImageUrl },
       contentDescription: {
-        defaultValue: {
-          language: "en",
-          value: input.restaurantName,
-        },
+        defaultValue: { language: "en", value: input.restaurantName },
       },
     }
   }
 
-  // Notifications — alert on save
-  genericObject.notifications = {
-    upcomingNotification: {
-      enableNotification: true,
-    },
-  }
-
-  return genericObject
+  return loyaltyObject
 }
 
 // ─── Generate Save-to-Wallet URL ────────────────────────────
 
 /**
- * Generates a "Save to Google Wallet" URL containing the class
+ * Generates a "Save to Google Wallet" URL containing the loyalty class
  * and object definitions in a signed JWT. When the user taps
  * the link, Google creates/updates the class and object automatically.
  */
 export function generateGoogleWalletSaveUrl(
   input: GooglePassGenerationInput
 ): string {
-  const genericClass = buildGenericClass(input)
-  const genericObject = buildGenericObject(input)
+  const loyaltyClass = buildLoyaltyClass(input)
+  const loyaltyObject = buildLoyaltyObject(input)
 
-  return buildSaveUrl([genericClass], [genericObject])
+  return buildSaveUrl([loyaltyClass], [loyaltyObject])
 }

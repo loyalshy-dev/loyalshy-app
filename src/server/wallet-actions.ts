@@ -198,6 +198,7 @@ export async function issueGoogleWalletPass(
           rewardExpiryDays: true,
           termsAndConditions: true,
           restaurantId: true,
+          endsAt: true,
           cardDesign: true,
         },
       },
@@ -253,6 +254,7 @@ export async function issueGoogleWalletPass(
       programId: enrollment.loyaltyProgram.id,
       enrollmentId: enrollment.id,
       cardDesign,
+      programEndsAt: enrollment.loyaltyProgram.endsAt,
     })
 
     // Update enrollment with wallet pass fields

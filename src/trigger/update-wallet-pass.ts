@@ -130,7 +130,7 @@ export const updateWalletPassTask = task({
           pushFailed: pushResult.failed,
         }
       } else if (enrollment.walletPassType === "GOOGLE") {
-        // ── Google Wallet: PATCH the generic object via REST API ──
+        // ── Google Wallet: PATCH the loyalty object via REST API ──
         const result = await patchGooglePass(
           enrollment,
           program,
@@ -245,13 +245,18 @@ async function patchGooglePass(
 
   const patchBody: Record<string, unknown> = {
     classId: buildProgramClassId(program.id),
+    loyaltyPoints: {
+      label: formatLabel(progressLabel, labelFmt),
+      balance: { string: progressValue },
+    },
+    secondaryLoyaltyPoints: {
+      label: formatLabel("TOTAL VISITS", labelFmt),
+      balance: { int: enrollment.totalVisits },
+    },
+    accountName: enrollment.customer.fullName,
     textModulesData: [
-      { id: "progress", header: formatLabel(progressLabel, labelFmt), body: progressValue },
-      { id: "totalVisits", header: formatLabel("TOTAL VISITS", labelFmt), body: `${enrollment.totalVisits}` },
       { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: program.rewardDescription },
-      { id: "programName", header: formatLabel("PROGRAM", labelFmt), body: program.name },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
-      { id: "customerName", header: formatLabel("NAME", labelFmt), body: enrollment.customer.fullName },
     ],
   }
 
@@ -269,11 +274,9 @@ async function patchGooglePass(
     }
   }
 
-  // For design changes, also update colors and hero image
+  // For design changes, also update hero image
+  // Note: hexBackgroundColor is a class-level field in LoyaltyClass, not on the object
   if (updateType === "DESIGN_CHANGE" || updateType === "PROGRAM_CHANGE") {
-    const hexBg = cardDesign?.primaryColor ?? enrollment.loyaltyProgram.restaurant.brandColor ?? "#1a1a2e"
-    patchBody.hexBackgroundColor = hexBg
-
     if (isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
       const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.fidelio.app"
       patchBody.heroImage = {
@@ -296,7 +299,7 @@ async function patchGooglePass(
   }
 
   const response = await fetch(
-    `${GOOGLE_WALLET_API_BASE}/genericObject/${encodeURIComponent(objectId)}`,
+    `${GOOGLE_WALLET_API_BASE}/loyaltyObject/${encodeURIComponent(objectId)}`,
     {
       method: "PATCH",
       headers: {

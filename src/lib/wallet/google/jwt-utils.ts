@@ -44,16 +44,16 @@ export function signJwt(payload: Record<string, unknown>): string {
 }
 
 /**
- * Generate a "Save to Google Wallet" URL from class/object definitions.
+ * Generate a "Save to Google Wallet" URL from loyalty class/object definitions.
  */
 export function buildSaveUrl(
-  genericClasses: Record<string, unknown>[],
-  genericObjects: Record<string, unknown>[]
+  loyaltyClasses: Record<string, unknown>[],
+  loyaltyObjects: Record<string, unknown>[]
 ): string {
   const jwt = signJwt({
     payload: {
-      genericClasses,
-      genericObjects,
+      loyaltyClasses,
+      loyaltyObjects,
     },
   })
 

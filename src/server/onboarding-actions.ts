@@ -198,10 +198,12 @@ export async function joinLoyaltyProgram(
     },
     select: {
       id: true,
+      name: true,
       visitsRequired: true,
       rewardDescription: true,
       rewardExpiryDays: true,
       termsAndConditions: true,
+      endsAt: true,
       cardDesign: true,
     },
   })
@@ -374,10 +376,12 @@ async function issuePassForEnrollment(
   },
   program: {
     id: string
+    name: string
     visitsRequired: number
     rewardDescription: string
     rewardExpiryDays: number
     termsAndConditions: string | null
+    endsAt: Date | null
   },
   platform: "apple" | "google",
   isReturning: boolean,
@@ -475,7 +479,11 @@ async function issuePassForEnrollment(
       termsAndConditions: program.termsAndConditions,
       restaurantPhone: restaurant.phone,
       restaurantWebsite: restaurant.website,
+      programName: program.name,
+      programId: program.id,
+      enrollmentId: enrollment.enrollmentId,
       cardDesign,
+      programEndsAt: program.endsAt,
     })
 
     // Store wallet fields on Enrollment (not Customer)
