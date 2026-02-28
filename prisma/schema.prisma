@@ -528,6 +528,8 @@ model CardDesign {
   palettePreset       String?
   businessHours       String?      @db.Text
   mapAddress          String?
+  mapLatitude         Float?
+  mapLongitude        Float?
   socialLinks         Json         @default("{}")
   customMessage       String?      @db.Text
   designHash          String       @default("")

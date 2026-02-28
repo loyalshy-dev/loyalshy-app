@@ -126,6 +126,7 @@ export async function generateApplePass(
   if (stampGridStripBuffer) {
     icons["strip.png"] = stampGridStripBuffer
     icons["strip@2x.png"] = stampGridStripBuffer
+    icons["strip@3x.png"] = stampGridStripBuffer
   }
   const colors = getPassColors(
     design?.primaryColor ?? input.brandColor,
@@ -156,6 +157,11 @@ export async function generateApplePass(
 
   // Use storeCard for loyalty cards (supports strip images)
   pass.type = "storeCard"
+
+  // Apple Watch notes:
+  // - Strip images are NOT displayed on Apple Watch — only back fields and text fields render.
+  // - Back fields are accessible via the (i) button on Watch.
+  // - Keep important info in text fields (primary/secondary/auxiliary), not just the strip.
 
   // ── Barcode: QR code encoding the walletPassId (auth token) ──
   pass.setBarcodes({
@@ -250,10 +256,15 @@ export async function generateApplePass(
     })
   }
 
-  if (input.restaurantPhone || input.restaurantWebsite) {
+  // Always include contact info — Apple HIG requires a way to reach the business
+  {
     const contactParts: string[] = []
     if (input.restaurantPhone) contactParts.push(input.restaurantPhone)
     if (input.restaurantWebsite) contactParts.push(input.restaurantWebsite)
+    if (contactParts.length === 0) {
+      contactParts.push(input.restaurantName)
+      contactParts.push("https://fidelio.app")
+    }
     pass.backFields.push({
       key: "contact",
       label: "Contact",
@@ -304,6 +315,15 @@ export async function generateApplePass(
     label: "Powered By",
     value: "Fidelio — Digital Loyalty Cards\nhttps://fidelio.app",
   })
+
+  // Location relevance — shows pass on lock screen when near the restaurant
+  if (design?.mapLatitude != null && design?.mapLongitude != null) {
+    pass.setLocations({
+      latitude: design.mapLatitude,
+      longitude: design.mapLongitude,
+      relevantText: `You're near ${input.restaurantName}`,
+    })
+  }
 
   return pass.getAsBuffer()
 }

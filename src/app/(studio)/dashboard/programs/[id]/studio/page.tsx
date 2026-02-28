@@ -72,6 +72,8 @@ export default async function StudioPage(props: {
         generatedStripGoogle: cardDesign.generatedStripGoogle ?? null,
         businessHours: cardDesign.businessHours ?? "",
         mapAddress: cardDesign.mapAddress ?? "",
+        mapLatitude: cardDesign.mapLatitude ?? null,
+        mapLongitude: cardDesign.mapLongitude ?? null,
         socialLinks: (cardDesign.socialLinks as Record<string, string>) ?? {},
         customMessage: cardDesign.customMessage ?? "",
         cardType: cardDesign.cardType as string,

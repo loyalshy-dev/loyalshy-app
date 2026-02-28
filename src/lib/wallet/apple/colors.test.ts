@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { hexToPasskitRgb, getPassColors } from "./colors"
+import { hexToPasskitRgb, blendColors, getPassColors } from "./colors"
 
 describe("hexToPasskitRgb", () => {
   it("converts black hex to rgb", () => {
@@ -27,12 +27,25 @@ describe("hexToPasskitRgb", () => {
   })
 })
 
+describe("blendColors", () => {
+  it("returns first color at ratio 0", () => {
+    expect(blendColors("#ff0000", "#0000ff", 0)).toBe("#ff0000")
+  })
+
+  it("returns second color at ratio 1", () => {
+    expect(blendColors("#ff0000", "#0000ff", 1)).toBe("#0000ff")
+  })
+
+  it("returns midpoint at ratio 0.5", () => {
+    expect(blendColors("#000000", "#ffffff", 0.5)).toBe("#808080")
+  })
+})
+
 describe("getPassColors", () => {
   it("uses provided brand and secondary colors", () => {
     const result = getPassColors("#ff0000", "#00ff00")
     expect(result.backgroundColor).toBe("rgb(255, 0, 0)")
     expect(result.foregroundColor).toBe("rgb(0, 255, 0)")
-    expect(result.labelColor).toBe("rgb(0, 255, 0)")
   })
 
   it("uses default dark background when brandColor is null", () => {
@@ -43,18 +56,23 @@ describe("getPassColors", () => {
   it("uses default white foreground when secondaryColor is null", () => {
     const result = getPassColors("#ff0000", null)
     expect(result.foregroundColor).toBe("rgb(255, 255, 255)")
-    expect(result.labelColor).toBe("rgb(255, 255, 255)")
   })
 
   it("uses all defaults when both colors are null", () => {
     const result = getPassColors(null, null)
     expect(result.backgroundColor).toBe("rgb(26, 26, 46)")
     expect(result.foregroundColor).toBe("rgb(255, 255, 255)")
-    expect(result.labelColor).toBe("rgb(255, 255, 255)")
   })
 
-  it("labelColor always matches foregroundColor", () => {
+  it("labelColor is dimmed 30% toward background for visual hierarchy", () => {
+    // fg=#00ff00, bg=#ff0000 → labelColor = blend(#00ff00, #ff0000, 0.3)
+    // R: 0*(0.7) + 255*(0.3) = 77, G: 255*(0.7) + 0*(0.3) = 179, B: 0
+    const result = getPassColors("#ff0000", "#00ff00")
+    expect(result.labelColor).toBe("rgb(77, 179, 0)")
+  })
+
+  it("labelColor differs from foregroundColor", () => {
     const result = getPassColors("#123456", "#abcdef")
-    expect(result.labelColor).toBe(result.foregroundColor)
+    expect(result.labelColor).not.toBe(result.foregroundColor)
   })
 })

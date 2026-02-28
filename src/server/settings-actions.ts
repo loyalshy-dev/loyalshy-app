@@ -44,6 +44,8 @@ export type ProgramWithDesign = {
     templateId: string | null
     businessHours: string | null
     mapAddress: string | null
+    mapLatitude: number | null
+    mapLongitude: number | null
     socialLinks: SocialLinks
     customMessage: string | null
     designHash: string
@@ -190,6 +192,8 @@ export async function getSettingsData() {
           templateId: p.cardDesign.templateId,
           businessHours: p.cardDesign.businessHours,
           mapAddress: p.cardDesign.mapAddress,
+          mapLatitude: p.cardDesign.mapLatitude,
+          mapLongitude: p.cardDesign.mapLongitude,
           socialLinks: p.cardDesign.socialLinks as SocialLinks,
           customMessage: p.cardDesign.customMessage,
           designHash: p.cardDesign.designHash,
@@ -538,6 +542,7 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
       stripImageGoogle: true,
       stripImageUrl: true,
       editorConfig: true,
+      mapAddress: true,
     },
   })
 
@@ -670,6 +675,33 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
       editorConfig,
     },
   })
+
+  // Geocode address if it changed
+  const newMapAddress = parsed.mapAddress || null
+  const oldMapAddress = existingDesign?.mapAddress ?? null
+  if (newMapAddress !== oldMapAddress) {
+    if (newMapAddress) {
+      try {
+        const { geocodeAddress } = await import("@/lib/geocoding")
+        const coords = await geocodeAddress(newMapAddress)
+        await db.cardDesign.update({
+          where: { loyaltyProgramId: parsed.programId },
+          data: {
+            mapLatitude: coords?.lat ?? null,
+            mapLongitude: coords?.lng ?? null,
+          },
+        })
+      } catch {
+        // Geocoding failure never blocks save — coordinates remain null
+      }
+    } else {
+      // Address cleared — remove coordinates
+      await db.cardDesign.update({
+        where: { loyaltyProgramId: parsed.programId },
+        data: { mapLatitude: null, mapLongitude: null },
+      })
+    }
+  }
 
   // Sync colors back to Restaurant for brand consistency
   if (primaryColor || secondaryColor) {

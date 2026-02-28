@@ -214,6 +214,8 @@ export async function getProgramForSettings(programId: string): Promise<ProgramW
           templateId: program.cardDesign.templateId,
           businessHours: program.cardDesign.businessHours,
           mapAddress: program.cardDesign.mapAddress,
+          mapLatitude: program.cardDesign.mapLatitude,
+          mapLongitude: program.cardDesign.mapLongitude,
           socialLinks: program.cardDesign.socialLinks as SocialLinks,
           customMessage: program.cardDesign.customMessage,
           designHash: program.cardDesign.designHash,

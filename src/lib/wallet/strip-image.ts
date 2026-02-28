@@ -7,6 +7,9 @@ import { getStampIconPaths, getRewardIconPaths } from "./stamp-icons"
 // ─── Dimensions ─────────────────────────────────────────────
 
 export const APPLE_STRIP_WIDTH = 1125
+// Apple storeCard spec: 375x123pt → 1125x369 @3x. We use 432 (coupon size).
+// Apple crops to fill — extra height gets trimmed. Changing would break
+// stamp grid aspect ratios and invalidate all cached Blob strip images.
 export const APPLE_STRIP_HEIGHT = 432
 export const GOOGLE_HERO_WIDTH = 1032
 export const GOOGLE_HERO_HEIGHT = 336

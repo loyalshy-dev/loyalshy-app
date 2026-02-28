@@ -140,6 +140,8 @@ export type CardDesignData = {
   templateId: string | null
   businessHours: string | null
   mapAddress: string | null
+  mapLatitude: number | null
+  mapLongitude: number | null
   socialLinks: SocialLinks
   customMessage: string | null
   designHash: string
@@ -166,6 +168,8 @@ export type CardDesignRow = {
   templateId: string | null
   businessHours: string | null
   mapAddress: string | null
+  mapLatitude: number | null
+  mapLongitude: number | null
   socialLinks: unknown
   customMessage: string | null
   designHash: string
@@ -295,6 +299,8 @@ export function computeDesignHash(design: {
   generatedStripGoogle: string | null
   businessHours: string | null
   mapAddress: string | null
+  mapLatitude?: number | null
+  mapLongitude?: number | null
   socialLinks: unknown
   customMessage: string | null
   editorConfig?: unknown
@@ -316,6 +322,8 @@ export function computeDesignHash(design: {
     gg: design.generatedStripGoogle,
     bh: design.businessHours,
     ma: design.mapAddress,
+    mlat: design.mapLatitude ?? null,
+    mlng: design.mapLongitude ?? null,
     sl: design.socialLinks,
     cm: design.customMessage,
     ec: design.editorConfig ?? null,
@@ -357,6 +365,8 @@ export function resolveCardDesign(
     templateId: cardDesign?.templateId ?? null,
     businessHours: cardDesign?.businessHours ?? null,
     mapAddress: cardDesign?.mapAddress ?? null,
+    mapLatitude: cardDesign?.mapLatitude ?? null,
+    mapLongitude: cardDesign?.mapLongitude ?? null,
     socialLinks: parseSocialLinks(cardDesign?.socialLinks),
     customMessage: cardDesign?.customMessage ?? null,
     designHash: cardDesign?.designHash ?? "",

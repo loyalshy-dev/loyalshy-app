@@ -48,6 +48,8 @@ export type WalletState = {
   generatedStripGoogle: string | null
   businessHours: string
   mapAddress: string
+  mapLatitude: number | null
+  mapLongitude: number | null
   socialLinks: SocialLinks
   customMessage: string
   useStampGrid: boolean
@@ -127,6 +129,8 @@ export function createCardDesignStore() {
           generatedStripGoogle: null,
           businessHours: "",
           mapAddress: "",
+          mapLatitude: null,
+          mapLongitude: null,
           socialLinks: {},
           customMessage: "",
           useStampGrid: false,
