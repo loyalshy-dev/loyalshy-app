@@ -12,11 +12,8 @@ type Restaurant = {
 }
 
 export function BillingPlaceholder({ restaurant }: { restaurant: Restaurant }) {
-  const planLabel = restaurant.plan === "FREE" ? "Free" : restaurant.plan
-  const statusLabel =
-    restaurant.subscriptionStatus === "FREE"
-      ? "No active subscription"
-      : restaurant.subscriptionStatus
+  const planLabel = restaurant.plan
+  const statusLabel = restaurant.subscriptionStatus
 
   return (
     <div className="space-y-6">
@@ -42,8 +39,8 @@ export function BillingPlaceholder({ restaurant }: { restaurant: Restaurant }) {
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {restaurant.plan === "FREE"
-                    ? "Upgrade to unlock premium features"
+                  {restaurant.subscriptionStatus === "TRIALING"
+                    ? "You're on a free trial"
                     : "Your subscription renews monthly"}
                 </p>
               </div>

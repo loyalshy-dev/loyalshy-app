@@ -21,16 +21,16 @@ import type { BillingData } from "@/server/billing-actions"
 // ─── Plan Card Colors ──────────────────────────────────────
 
 const planAccents: Record<string, string> = {
-  FREE: "bg-muted text-muted-foreground",
   STARTER: "bg-brand/10 text-brand",
   PRO: "bg-chart-1/10 text-chart-1",
+  BUSINESS: "bg-chart-2/10 text-chart-2",
   ENTERPRISE: "bg-chart-4/10 text-chart-4",
 }
 
 const planBorders: Record<string, string> = {
-  FREE: "border-border",
   STARTER: "border-brand/30 ring-1 ring-brand/20",
   PRO: "border-chart-1/30",
+  BUSINESS: "border-chart-2/30",
   ENTERPRISE: "border-chart-4/30",
 }
 
@@ -46,8 +46,6 @@ function getStatusBadge(status: string) {
       return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 text-[10px]">Past Due</Badge>
     case "CANCELED":
       return <Badge className="bg-muted text-muted-foreground text-[10px]">Canceled</Badge>
-    case "FREE":
-      return <Badge variant="secondary" className="text-[10px]">Free</Badge>
     default:
       return <Badge variant="secondary" className="text-[10px]">{status}</Badge>
   }
@@ -188,7 +186,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${planAccents[currentPlan] ?? planAccents.FREE}`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${planAccents[currentPlan] ?? planAccents.STARTER}`}>
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
@@ -199,10 +197,10 @@ export function BillingSettings({ data }: { data: BillingData }) {
                   {getStatusBadge(restaurant.subscriptionStatus)}
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {currentPlan === "FREE"
-                    ? "Upgrade to unlock premium features"
-                    : restaurant.subscriptionStatus === "TRIALING"
-                      ? `Trial ends in ${trialDaysRemaining} day${trialDaysRemaining !== 1 ? "s" : ""}`
+                  {restaurant.subscriptionStatus === "TRIALING"
+                    ? `Trial ends in ${trialDaysRemaining} day${trialDaysRemaining !== 1 ? "s" : ""}`
+                    : restaurant.subscriptionStatus === "CANCELED"
+                      ? "Subscribe to continue using Fidelio"
                       : "Your subscription renews monthly"}
                 </p>
               </div>
@@ -319,11 +317,11 @@ export function BillingSettings({ data }: { data: BillingData }) {
         </div>
         <div className="p-6">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {(["FREE", "STARTER", "PRO", "ENTERPRISE"] as const).map((planId) => {
+            {(["STARTER", "PRO", "BUSINESS", "ENTERPRISE"] as const).map((planId) => {
               const plan = plans[planId]
               const isCurrent = currentPlan === planId
               const isEnterprise = planId === "ENTERPRISE"
-              const lookupKey = planId === "STARTER" ? "starter_monthly" : planId === "PRO" ? "pro_monthly" : null
+              const lookupKey = planId === "STARTER" ? "starter_monthly" : planId === "PRO" ? "pro_monthly" : planId === "BUSINESS" ? "business_monthly" : null
 
               return (
                 <div
@@ -335,7 +333,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className={`inline-flex items-center justify-center h-8 w-8 rounded-lg ${planAccents[planId] ?? planAccents.FREE}`}>
+                    <span className={`inline-flex items-center justify-center h-8 w-8 rounded-lg ${planAccents[planId] ?? planAccents.STARTER}`}>
                       <Sparkles className="h-4 w-4" />
                     </span>
                     {isCurrent && (
@@ -349,8 +347,6 @@ export function BillingSettings({ data }: { data: BillingData }) {
                   <div className="mt-3 mb-4">
                     {plan.price === null ? (
                       <p className="text-2xl font-bold tracking-tight">Custom</p>
-                    ) : plan.price === 0 ? (
-                      <p className="text-2xl font-bold tracking-tight">$0<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                     ) : (
                       <p className="text-2xl font-bold tracking-tight">${plan.price}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                     )}
@@ -376,23 +372,6 @@ export function BillingSettings({ data }: { data: BillingData }) {
                         <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
                       </a>
                     </Button>
-                  ) : planId === "FREE" ? (
-                    // Can't downgrade to free from UI — must cancel subscription in portal
-                    restaurant.stripeCustomerId ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={handleManageBilling}
-                        disabled={portalLoading}
-                      >
-                        Manage Plan
-                      </Button>
-                    ) : (
-                      <Button variant="outline" size="sm" disabled className="w-full">
-                        Current Plan
-                      </Button>
-                    )
                   ) : lookupKey ? (
                     <Button
                       size="sm"
@@ -404,7 +383,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
                         <>
-                          {currentPlan !== "FREE" ? "Switch" : "Upgrade"}
+                          Upgrade
                           <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
                         </>
                       )}

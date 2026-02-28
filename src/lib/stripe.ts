@@ -24,62 +24,68 @@ export const stripe: Stripe = new Proxy({} as Stripe, {
 
 // ─── Plan Definitions ──────────────────────────────────────
 
-export type PlanId = "FREE" | "STARTER" | "PRO" | "ENTERPRISE"
+export type PlanId = "STARTER" | "PRO" | "BUSINESS" | "ENTERPRISE"
 
 export type PlanDefinition = {
   id: PlanId
   name: string
   description: string
   price: number | null // null = custom pricing
+  annualPrice: number | null // null = custom pricing
   customerLimit: number
   staffLimit: number
   features: string[]
 }
 
 export const PLANS: Record<PlanId, PlanDefinition> = {
-  FREE: {
-    id: "FREE",
-    name: "Free",
-    description: "Get started with the basics",
-    price: 0,
-    customerLimit: 50,
-    staffLimit: 1,
-    features: [
-      "Up to 50 customers",
-      "1 staff member",
-      "Basic analytics",
-      "Wallet pass with watermark",
-    ],
-  },
   STARTER: {
     id: "STARTER",
     name: "Starter",
-    description: "For growing restaurants",
-    price: 29,
-    customerLimit: 500,
-    staffLimit: 3,
+    description: "For small restaurants getting started",
+    price: 15,
+    annualPrice: 12,
+    customerLimit: 200,
+    staffLimit: 2,
     features: [
-      "Up to 500 customers",
-      "3 staff members",
-      "Full analytics",
-      "Custom branding (no watermark)",
-      "Email support",
+      "Up to 200 customers",
+      "2 staff members",
+      "Apple & Google Wallet passes",
+      "Card design studio",
+      "Dashboard analytics",
     ],
   },
   PRO: {
     id: "PRO",
     name: "Pro",
+    description: "For growing restaurants",
+    price: 39,
+    annualPrice: 31,
+    customerLimit: 1_000,
+    staffLimit: 5,
+    features: [
+      "Up to 1,000 customers",
+      "5 staff members",
+      "Apple & Google Wallet passes",
+      "Card design studio",
+      "Dashboard analytics",
+      "Email support",
+    ],
+  },
+  BUSINESS: {
+    id: "BUSINESS",
+    name: "Business",
     description: "For serious loyalty programs",
     price: 79,
+    annualPrice: 63,
     customerLimit: Infinity,
-    staffLimit: 10,
+    staffLimit: 15,
     features: [
       "Unlimited customers",
-      "10 staff members",
+      "15 staff members",
+      "Apple & Google Wallet passes",
+      "Card design studio",
+      "Dashboard analytics",
       "Priority support",
-      "API access",
-      "Advanced analytics",
-      "Multi-location (coming soon)",
     ],
   },
   ENTERPRISE: {
@@ -87,11 +93,12 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     name: "Enterprise",
     description: "Custom solutions for large chains",
     price: null,
+    annualPrice: null,
     customerLimit: Infinity,
     staffLimit: Infinity,
     features: [
-      "Everything in Pro",
-      "Custom integrations",
+      "Everything in Business",
+      "Unlimited staff members",
       "Dedicated support",
       "SLA guarantees",
     ],
@@ -104,10 +111,11 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
 export const STRIPE_PRICE_LOOKUP_KEYS: Record<string, PlanId> = {
   starter_monthly: "STARTER",
   pro_monthly: "PRO",
+  business_monthly: "BUSINESS",
 }
 
 export function getPlanForPriceLookupKey(lookupKey: string): PlanId {
-  return STRIPE_PRICE_LOOKUP_KEYS[lookupKey] ?? "FREE"
+  return STRIPE_PRICE_LOOKUP_KEYS[lookupKey] ?? "STARTER"
 }
 
 // ─── Helpers ───────────────────────────────────────────────
@@ -120,6 +128,6 @@ export function getPlanLimits(plan: PlanId) {
 }
 
 export function isUpgrade(currentPlan: PlanId, newPlan: PlanId): boolean {
-  const order: PlanId[] = ["FREE", "STARTER", "PRO", "ENTERPRISE"]
+  const order: PlanId[] = ["STARTER", "PRO", "BUSINESS", "ENTERPRISE"]
   return order.indexOf(newPlan) > order.indexOf(currentPlan)
 }

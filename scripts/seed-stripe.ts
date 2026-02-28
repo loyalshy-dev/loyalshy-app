@@ -4,9 +4,10 @@
  * Usage:
  *   STRIPE_SECRET_KEY=sk_test_... npx tsx scripts/seed-stripe.ts
  *
- * This creates (or updates) two Stripe Products with monthly prices:
- *   - Fidelio Starter ($29/month, lookup_key: starter_monthly)
- *   - Fidelio Pro ($79/month, lookup_key: pro_monthly)
+ * This creates (or updates) three Stripe Products with monthly prices:
+ *   - Fidelio Starter ($15/month, lookup_key: starter_monthly)
+ *   - Fidelio Pro ($39/month, lookup_key: pro_monthly)
+ *   - Fidelio Business ($79/month, lookup_key: business_monthly)
  *
  * Idempotent: uses metadata.fidelio_plan to skip existing products.
  */
@@ -21,16 +22,23 @@ const plans = [
   {
     fidelioPlan: "STARTER",
     name: "Fidelio Starter",
-    description: "Up to 500 customers, 3 staff, full analytics, custom branding.",
-    priceAmount: 2900, // cents
+    description: "Up to 200 customers, 2 staff, full analytics, custom branding.",
+    priceAmount: 1500, // cents ($15/month)
     lookupKey: "starter_monthly",
   },
   {
     fidelioPlan: "PRO",
     name: "Fidelio Pro",
-    description: "Unlimited customers, 10 staff, priority support, API access.",
-    priceAmount: 7900,
+    description: "Up to 1,000 customers, 5 staff, email support.",
+    priceAmount: 3900, // cents ($39/month)
     lookupKey: "pro_monthly",
+  },
+  {
+    fidelioPlan: "BUSINESS",
+    name: "Fidelio Business",
+    description: "Unlimited customers, 15 staff, priority support.",
+    priceAmount: 7900, // cents ($79/month)
+    lookupKey: "business_monthly",
   },
 ]
 

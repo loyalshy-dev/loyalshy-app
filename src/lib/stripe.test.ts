@@ -9,18 +9,25 @@ import {
 
 describe("PLANS", () => {
   it("defines all four plans", () => {
-    expect(Object.keys(PLANS)).toEqual(["FREE", "STARTER", "PRO", "ENTERPRISE"])
+    expect(Object.keys(PLANS)).toEqual(["STARTER", "PRO", "BUSINESS", "ENTERPRISE"])
   })
 
-  it("FREE plan has lowest limits", () => {
-    expect(PLANS.FREE.customerLimit).toBe(50)
-    expect(PLANS.FREE.staffLimit).toBe(1)
-    expect(PLANS.FREE.price).toBe(0)
+  it("STARTER plan has correct limits", () => {
+    expect(PLANS.STARTER.customerLimit).toBe(200)
+    expect(PLANS.STARTER.staffLimit).toBe(2)
+    expect(PLANS.STARTER.price).toBe(15)
   })
 
-  it("PRO plan has unlimited customers", () => {
-    expect(PLANS.PRO.customerLimit).toBe(Infinity)
-    expect(PLANS.PRO.staffLimit).toBe(10)
+  it("PRO plan has correct limits", () => {
+    expect(PLANS.PRO.customerLimit).toBe(1_000)
+    expect(PLANS.PRO.staffLimit).toBe(5)
+    expect(PLANS.PRO.price).toBe(39)
+  })
+
+  it("BUSINESS plan has unlimited customers", () => {
+    expect(PLANS.BUSINESS.customerLimit).toBe(Infinity)
+    expect(PLANS.BUSINESS.staffLimit).toBe(15)
+    expect(PLANS.BUSINESS.price).toBe(79)
   })
 
   it("ENTERPRISE plan has unlimited everything", () => {
@@ -31,19 +38,19 @@ describe("PLANS", () => {
 })
 
 describe("getPlanLimits", () => {
-  it("returns correct limits for FREE plan", () => {
-    const limits = getPlanLimits("FREE")
-    expect(limits).toEqual({ customerLimit: 50, staffLimit: 1 })
-  })
-
   it("returns correct limits for STARTER plan", () => {
     const limits = getPlanLimits("STARTER")
-    expect(limits).toEqual({ customerLimit: 500, staffLimit: 3 })
+    expect(limits).toEqual({ customerLimit: 200, staffLimit: 2 })
   })
 
   it("returns correct limits for PRO plan", () => {
     const limits = getPlanLimits("PRO")
-    expect(limits).toEqual({ customerLimit: Infinity, staffLimit: 10 })
+    expect(limits).toEqual({ customerLimit: 1_000, staffLimit: 5 })
+  })
+
+  it("returns correct limits for BUSINESS plan", () => {
+    const limits = getPlanLimits("BUSINESS")
+    expect(limits).toEqual({ customerLimit: Infinity, staffLimit: 15 })
   })
 
   it("returns correct limits for ENTERPRISE plan", () => {
@@ -53,35 +60,35 @@ describe("getPlanLimits", () => {
 })
 
 describe("isUpgrade", () => {
-  it("FREE → STARTER is an upgrade", () => {
-    expect(isUpgrade("FREE", "STARTER")).toBe(true)
-  })
-
-  it("FREE → PRO is an upgrade", () => {
-    expect(isUpgrade("FREE", "PRO")).toBe(true)
-  })
-
-  it("FREE → ENTERPRISE is an upgrade", () => {
-    expect(isUpgrade("FREE", "ENTERPRISE")).toBe(true)
-  })
-
   it("STARTER → PRO is an upgrade", () => {
     expect(isUpgrade("STARTER", "PRO")).toBe(true)
   })
 
-  it("PRO → ENTERPRISE is an upgrade", () => {
-    expect(isUpgrade("PRO", "ENTERPRISE")).toBe(true)
+  it("STARTER → BUSINESS is an upgrade", () => {
+    expect(isUpgrade("STARTER", "BUSINESS")).toBe(true)
+  })
+
+  it("STARTER → ENTERPRISE is an upgrade", () => {
+    expect(isUpgrade("STARTER", "ENTERPRISE")).toBe(true)
+  })
+
+  it("PRO → BUSINESS is an upgrade", () => {
+    expect(isUpgrade("PRO", "BUSINESS")).toBe(true)
+  })
+
+  it("BUSINESS → ENTERPRISE is an upgrade", () => {
+    expect(isUpgrade("BUSINESS", "ENTERPRISE")).toBe(true)
   })
 
   it("same plan is NOT an upgrade", () => {
-    expect(isUpgrade("FREE", "FREE")).toBe(false)
+    expect(isUpgrade("STARTER", "STARTER")).toBe(false)
     expect(isUpgrade("PRO", "PRO")).toBe(false)
   })
 
   it("downgrade is NOT an upgrade", () => {
     expect(isUpgrade("PRO", "STARTER")).toBe(false)
-    expect(isUpgrade("ENTERPRISE", "FREE")).toBe(false)
-    expect(isUpgrade("STARTER", "FREE")).toBe(false)
+    expect(isUpgrade("ENTERPRISE", "STARTER")).toBe(false)
+    expect(isUpgrade("BUSINESS", "PRO")).toBe(false)
   })
 })
 
@@ -94,8 +101,12 @@ describe("getPlanForPriceLookupKey", () => {
     expect(getPlanForPriceLookupKey("pro_monthly")).toBe("PRO")
   })
 
-  it("returns FREE for unknown lookup keys", () => {
-    expect(getPlanForPriceLookupKey("unknown")).toBe("FREE")
-    expect(getPlanForPriceLookupKey("")).toBe("FREE")
+  it("maps business_monthly to BUSINESS", () => {
+    expect(getPlanForPriceLookupKey("business_monthly")).toBe("BUSINESS")
+  })
+
+  it("returns STARTER for unknown lookup keys", () => {
+    expect(getPlanForPriceLookupKey("unknown")).toBe("STARTER")
+    expect(getPlanForPriceLookupKey("")).toBe("STARTER")
   })
 })

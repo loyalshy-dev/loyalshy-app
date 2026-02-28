@@ -11,6 +11,7 @@ import { stripe } from "@/lib/stripe"
 const LOOKUP_KEY_TO_PLAN: Record<string, string> = {
   starter_monthly: "STARTER",
   pro_monthly: "PRO",
+  business_monthly: "BUSINESS",
 }
 
 // In-memory set of recently processed event IDs (per serverless instance)
@@ -103,14 +104,14 @@ function getSubscriptionIdFromInvoice(invoice: Stripe.Invoice): string | null {
 
 function getPlanFromSubscription(subscription: Stripe.Subscription): string {
   const item = subscription.items.data[0]
-  if (!item) return "FREE"
+  if (!item) return "STARTER"
 
   const lookupKey = item.price.lookup_key
   if (lookupKey && LOOKUP_KEY_TO_PLAN[lookupKey]) {
     return LOOKUP_KEY_TO_PLAN[lookupKey]
   }
 
-  return "FREE"
+  return "STARTER"
 }
 
 function mapSubscriptionStatus(status: Stripe.Subscription.Status): string {
@@ -195,7 +196,6 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   await db.restaurant.update({
     where: { id: restaurant.id },
     data: {
-      plan: "FREE" as never,
       subscriptionStatus: "CANCELED" as never,
       stripeSubscriptionId: null,
       trialEndsAt: null,

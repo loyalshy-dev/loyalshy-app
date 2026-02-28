@@ -18,50 +18,52 @@ type PlanDef = {
   features: string[]
 }
 
-const PLANS: Record<"FREE" | "STARTER" | "PRO", PlanDef> = {
-  FREE: {
-    name: "Free",
-    description: "Get started with the basics",
-    monthlyPrice: 0,
-    annualPrice: 0,
-    customerLimit: 50,
-    staffLimit: 1,
-    features: [
-      "Up to 50 customers",
-      "1 staff member",
-      "Basic analytics",
-      "Wallet pass with watermark",
-    ],
-  },
+const PLANS: Record<"STARTER" | "PRO" | "BUSINESS", PlanDef> = {
   STARTER: {
     name: "Starter",
-    description: "For growing restaurants",
-    monthlyPrice: 29,
-    annualPrice: 23,
-    customerLimit: 500,
-    staffLimit: 3,
+    description: "For small restaurants getting started",
+    monthlyPrice: 15,
+    annualPrice: 12,
+    customerLimit: 200,
+    staffLimit: 2,
     features: [
-      "Up to 500 customers",
-      "3 staff members",
-      "Full analytics",
-      "Custom branding (no watermark)",
-      "Email support",
+      "Up to 200 customers",
+      "2 staff members",
+      "Apple & Google Wallet passes",
+      "Card design studio",
+      "Dashboard analytics",
     ],
   },
   PRO: {
     name: "Pro",
+    description: "For growing restaurants",
+    monthlyPrice: 39,
+    annualPrice: 31,
+    customerLimit: 1_000,
+    staffLimit: 5,
+    features: [
+      "Up to 1,000 customers",
+      "5 staff members",
+      "Apple & Google Wallet passes",
+      "Card design studio",
+      "Dashboard analytics",
+      "Email support",
+    ],
+  },
+  BUSINESS: {
+    name: "Business",
     description: "For serious loyalty programs",
     monthlyPrice: 79,
     annualPrice: 63,
     customerLimit: Infinity,
-    staffLimit: 10,
+    staffLimit: 15,
     features: [
       "Unlimited customers",
-      "10 staff members",
+      "15 staff members",
+      "Apple & Google Wallet passes",
+      "Card design studio",
+      "Dashboard analytics",
       "Priority support",
-      "API access",
-      "Advanced analytics",
-      "Multi-location (coming soon)",
     ],
   },
 }
@@ -75,7 +77,6 @@ const ENTERPRISE = {
 
 function formatPrice(price: number | null): string {
   if (price === null) return "Custom"
-  if (price === 0) return "$0"
   return `$${price}`
 }
 
@@ -136,7 +137,7 @@ function BillingToggle({
 // ─── Plan Card ────────────────────────────────────────────────────────────────
 
 type PlanCardProps = {
-  planKey: "FREE" | "STARTER" | "PRO"
+  planKey: "STARTER" | "PRO" | "BUSINESS"
   highlighted?: boolean
   period: BillingPeriod
 }
@@ -144,11 +145,6 @@ type PlanCardProps = {
 function PlanCard({ planKey, highlighted = false, period }: PlanCardProps) {
   const plan = PLANS[planKey]
   const price = period === "annual" ? plan.annualPrice : plan.monthlyPrice
-
-  const cta =
-    planKey === "FREE"
-      ? { label: "Get Started", variant: "outline" as const }
-      : { label: "Start Free Trial", variant: planKey === "STARTER" ? ("default" as const) : ("outline" as const) }
 
   return (
     <div
@@ -188,16 +184,11 @@ function PlanCard({ planKey, highlighted = false, period }: PlanCardProps) {
         <span className="text-4xl font-bold tracking-tight text-foreground">
           {formatPrice(price)}
         </span>
-        {price !== null && price > 0 && (
-          <span className="text-[13px] text-muted-foreground">/ month</span>
-        )}
-        {price === 0 && (
-          <span className="text-[13px] text-muted-foreground">forever</span>
-        )}
+        <span className="text-[13px] text-muted-foreground">/ month</span>
       </div>
 
       {/* Annual savings badge */}
-      {period === "annual" && plan.monthlyPrice !== null && plan.monthlyPrice > 0 && (
+      {period === "annual" && plan.monthlyPrice !== null && (
         <p className="text-[12px] text-success font-medium -mt-4 mb-4">
           ${(plan.monthlyPrice - (plan.annualPrice ?? 0)) * 12} saved per year
         </p>
@@ -206,7 +197,7 @@ function PlanCard({ planKey, highlighted = false, period }: PlanCardProps) {
       {/* CTA */}
       <Button
         asChild
-        variant={cta.variant}
+        variant={highlighted ? "default" : "outline"}
         size="lg"
         className={[
           "w-full mb-6 text-[13px] font-medium",
@@ -215,7 +206,7 @@ function PlanCard({ planKey, highlighted = false, period }: PlanCardProps) {
             : "",
         ].join(" ")}
       >
-        <Link href="/register">{cta.label}</Link>
+        <Link href="/register">Start Free Trial</Link>
       </Button>
 
       {/* Divider */}
@@ -241,7 +232,7 @@ function PlanCard({ planKey, highlighted = false, period }: PlanCardProps) {
       {/* Limits sub-line */}
       <p className="mt-5 text-[12px] text-muted-foreground">
         Up to {formatLimit(plan.customerLimit)} customers · {formatLimit(plan.staffLimit)} staff
-        {plan.staffLimit !== Infinity ? (plan.staffLimit === 1 ? " member" : " members") : " members"}
+        {plan.staffLimit === 1 ? " member" : " members"}
       </p>
     </div>
   )
@@ -278,7 +269,7 @@ export function Pricing() {
             Simple, transparent pricing
           </h2>
           <p className="text-[15px] text-muted-foreground max-w-md mx-auto">
-            Start free, upgrade when you&apos;re ready. All plans include a 14-day trial.
+            Start with a 14-day free trial. No credit card required.
           </p>
         </div>
 
@@ -289,9 +280,9 @@ export function Pricing() {
 
         {/* 3-column grid */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6 items-start">
-          <PlanCard planKey="FREE" period={period} />
-          <PlanCard planKey="STARTER" highlighted period={period} />
-          <PlanCard planKey="PRO" period={period} />
+          <PlanCard planKey="STARTER" period={period} />
+          <PlanCard planKey="PRO" highlighted period={period} />
+          <PlanCard planKey="BUSINESS" period={period} />
         </div>
 
         {/* Enterprise footer */}
@@ -301,7 +292,7 @@ export function Pricing() {
               {ENTERPRISE.name} — {ENTERPRISE.description}
             </p>
             <p className="text-[13px] text-muted-foreground">
-              Need more? Contact us for custom Enterprise pricing with dedicated support and SLA guarantees.
+              Need more? Contact us for Enterprise pricing with unlimited staff, dedicated support, and SLA guarantees.
             </p>
           </div>
           <Button asChild variant="outline" size="sm" className="shrink-0 text-[13px]">

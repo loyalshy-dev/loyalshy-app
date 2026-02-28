@@ -79,7 +79,6 @@ export const processStripeWebhookTask = task({
           await db.restaurant.update({
             where: { id: restaurant.id },
             data: {
-              plan: "FREE" as never,
               subscriptionStatus: "CANCELED" as never,
               stripeSubscriptionId: null,
               trialEndsAt: null,
@@ -154,8 +153,9 @@ function lookupKeyToPlan(lookupKey?: string): string {
   const map: Record<string, string> = {
     starter_monthly: "STARTER",
     pro_monthly: "PRO",
+    business_monthly: "BUSINESS",
   }
-  return lookupKey ? (map[lookupKey] ?? "FREE") : "FREE"
+  return lookupKey ? (map[lookupKey] ?? "STARTER") : "STARTER"
 }
 
 function mapStatus(status: string): string {

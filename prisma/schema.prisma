@@ -25,15 +25,14 @@ enum SubscriptionStatus {
   ACTIVE   @map("active")
   PAST_DUE @map("past_due")
   CANCELED @map("canceled")
-  FREE     @map("free")
 
   @@map("subscription_status")
 }
 
 enum Plan {
-  FREE       @map("free")
   STARTER    @map("starter")
   PRO        @map("pro")
+  BUSINESS   @map("business")
   ENTERPRISE @map("enterprise")
 
   @@map("plan")
@@ -291,10 +290,10 @@ model Restaurant {
   phone                String?
   website              String?
   timezone             String             @default("UTC")
-  subscriptionStatus   SubscriptionStatus @default(FREE)
+  subscriptionStatus   SubscriptionStatus @default(TRIALING)
   stripeCustomerId     String?            @unique
   stripeSubscriptionId String?            @unique
-  plan                 Plan               @default(FREE)
+  plan                 Plan               @default(STARTER)
   settings             Json               @default("{}")
   trialEndsAt          DateTime?
   createdAt            DateTime           @default(now())
