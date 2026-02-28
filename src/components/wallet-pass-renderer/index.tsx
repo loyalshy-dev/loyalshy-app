@@ -115,23 +115,28 @@ export function WalletPassRenderer({
 
   const lbl = (text: string) => formatLabel(text, design.labelFormat)
 
-  // Map field names to label+value pairs
+  // Map field names to label+value pairs — must match actual pass field data
+  // (Apple: generate-pass.ts fieldData; Google: loyaltyObject textModulesData)
+  const progressLabel = design.customProgressLabel
+    ? design.customProgressLabel
+    : hasReward ? "STATUS" : "PROGRESS"
+
   function resolveField(name: string) {
     switch (name) {
       case "restaurant":
-        return { label: lbl("Restaurant"), value: restaurantName }
+        return { label: lbl("RESTAURANT"), value: restaurantName }
       case "progress":
-        return { label: lbl(design.customProgressLabel || "Progress"), value: progressText }
+        return { label: lbl(progressLabel), value: progressText }
       case "nextReward":
-        return { label: lbl("Next Reward"), value: hasReward ? "Earned!" : rewardDescription }
+        return { label: lbl("NEXT REWARD"), value: rewardDescription }
       case "totalVisits":
-        return { label: lbl("Visits"), value: `${currentVisits}/${totalVisits}` }
+        return { label: lbl("TOTAL VISITS"), value: `${totalVisits}` }
       case "customerName":
-        return { label: lbl("Member"), value: customerName }
+        return { label: lbl("NAME"), value: customerName }
       case "memberSince":
-        return { label: lbl("Since"), value: memberSince }
+        return { label: lbl("MEMBER SINCE"), value: memberSince }
       case "memberNumber":
-        return { label: lbl("Member #"), value: "0001" }
+        return { label: lbl("MEMBER"), value: `#${totalVisits}` }
       default:
         return { label: name, value: "—" }
     }
