@@ -3,7 +3,6 @@
 import { useState, useEffect, useTransition } from "react"
 import Image from "next/image"
 import {
-  Smartphone,
   CreditCard,
   Check,
   Loader2,
@@ -14,7 +13,8 @@ import {
 import { joinLoyaltyProgram } from "@/server/onboarding-actions"
 import type { RestaurantPublicInfo, OnboardingResult } from "@/server/onboarding-actions"
 import type { PublicProgramInfo } from "@/types/enrollment"
-import { computeTextColor } from "@/lib/wallet/card-design"
+import { computeTextColor, parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
+import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 
 type Platform = "apple" | "google"
 type Step = "program-select" | "form" | "success"
@@ -240,8 +240,30 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
           {/* Program cards */}
           <div className="space-y-3">
             {programs.map((program) => {
-              const pDesign = program.cardDesign
-              const pColor = pDesign?.primaryColor ?? restaurant.brandColor ?? "oklch(0.55 0.2 265)"
+              const cardDesign = program.cardDesign
+              const sf1 = cardDesign ? parseStripFilters(cardDesign.editorConfig) : { useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
+              const sg1 = sf1.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
+              const programDesign: WalletPassDesign = {
+                shape: (cardDesign?.shape ?? "CLEAN") as WalletPassDesign["shape"],
+                primaryColor: cardDesign?.primaryColor ?? "#1a1a2e",
+                secondaryColor: cardDesign?.secondaryColor ?? "#ffffff",
+                textColor: cardDesign?.textColor ?? "#ffffff",
+                progressStyle: (cardDesign?.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
+                labelFormat: (cardDesign?.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
+                customProgressLabel: cardDesign?.customProgressLabel ?? null,
+                stripImageUrl: cardDesign?.stripImageUrl ?? null,
+                patternStyle: (cardDesign?.patternStyle === "STAMP_GRID" ? "NONE" : cardDesign?.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
+                useStampGrid: sg1,
+                stripColor1: sf1.stripColor1 ?? null,
+                stripColor2: sf1.stripColor2 ?? null,
+                stripFill: sf1.stripFill ?? "gradient",
+                patternColor: sf1.patternColor ?? null,
+                stripImagePosition: sf1.stripImagePosition,
+                stripImageZoom: sf1.stripImageZoom,
+                stampGridConfig: sg1
+                  ? parseStampGridConfig(cardDesign!.editorConfig)
+                  : undefined,
+              }
 
               return (
                 <button
@@ -250,12 +272,21 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
                   className="w-full text-left rounded-xl border border-border bg-card p-4 hover:border-foreground/30 hover:bg-accent/50 transition-colors group"
                 >
                   <div className="flex items-center gap-4">
-                    {/* Color swatch */}
-                    <div
-                      className="w-12 h-12 rounded-lg shrink-0 flex items-center justify-center"
-                      style={{ backgroundColor: pColor }}
-                    >
-                      <Gift className="w-6 h-6 text-white" />
+                    {/* Card preview thumbnail */}
+                    <div className="shrink-0 rounded-lg overflow-hidden" style={{ width: 56, height: 72 }}>
+                      <WalletPassRenderer
+                        design={programDesign}
+                        format="apple"
+                        compact
+                        width={56}
+                        height={72}
+                        restaurantName={restaurant.name}
+                        logoUrl={restaurant.logo}
+                        programName={program.name}
+                        currentVisits={0}
+                        totalVisits={program.visitsRequired}
+                        rewardDescription=""
+                      />
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -407,6 +438,51 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
             <p className="text-sm text-muted-foreground leading-relaxed">
               {design.customMessage}
             </p>
+          </div>
+        )}
+
+        {/* Card preview */}
+        {activeProgram && (
+          <div className="flex justify-center">
+            {(() => {
+              const cd = activeProgram.cardDesign
+              const sf2 = cd ? parseStripFilters(cd.editorConfig) : { useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
+              const sg2 = sf2.useStampGrid || cd?.patternStyle === "STAMP_GRID"
+              const formDesign: WalletPassDesign = {
+                shape: (cd?.shape ?? "CLEAN") as WalletPassDesign["shape"],
+                primaryColor: cd?.primaryColor ?? "#1a1a2e",
+                secondaryColor: cd?.secondaryColor ?? "#ffffff",
+                textColor: cd?.textColor ?? "#ffffff",
+                progressStyle: (cd?.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
+                labelFormat: (cd?.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
+                customProgressLabel: cd?.customProgressLabel ?? null,
+                stripImageUrl: cd?.stripImageUrl ?? null,
+                patternStyle: (cd?.patternStyle === "STAMP_GRID" ? "NONE" : cd?.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
+                useStampGrid: sg2,
+                stripColor1: sf2.stripColor1 ?? null,
+                stripColor2: sf2.stripColor2 ?? null,
+                stripFill: sf2.stripFill ?? "gradient",
+                patternColor: sf2.patternColor ?? null,
+                stripImagePosition: sf2.stripImagePosition,
+                stripImageZoom: sf2.stripImageZoom,
+                stampGridConfig: sg2
+                  ? parseStampGridConfig(cd!.editorConfig)
+                  : undefined,
+              }
+              return (
+                <WalletPassRenderer
+                  design={formDesign}
+                  format="apple"
+                  compact
+                  restaurantName={restaurant.name}
+                  logoUrl={restaurant.logo}
+                  programName={activeProgram.name}
+                  currentVisits={0}
+                  totalVisits={activeProgram.visitsRequired}
+                  rewardDescription={activeProgram.rewardDescription}
+                />
+              )
+            })()}
           </div>
         )}
 

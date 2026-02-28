@@ -1,0 +1,215 @@
+"use client"
+
+import { create } from "zustand"
+import { immer } from "zustand/middleware/immer"
+import { temporal } from "zundo"
+import type {
+  StudioTool,
+  PreviewFormat,
+  DeviceFrame,
+} from "@/types/editor"
+import type {
+  CardShape,
+  PatternStyle,
+  ProgressStyle,
+  FontFamily,
+  LabelFormat,
+  SocialLinks,
+  StampGridConfig,
+} from "@/lib/wallet/card-design"
+import { DEFAULT_STAMP_GRID_CONFIG } from "@/lib/wallet/card-design"
+
+// ─── Wallet Slice (typed DB columns) ──────────────────────
+
+export type WalletState = {
+  cardType: string
+  shape: CardShape
+  primaryColor: string
+  secondaryColor: string
+  textColor: string
+  autoTextColor: boolean
+  patternStyle: PatternStyle
+  progressStyle: ProgressStyle
+  fontFamily: FontFamily
+  labelFormat: LabelFormat
+  customProgressLabel: string
+  palettePreset: string | null
+  templateId: string | null
+  stripImageUrl: string | null
+  stripImageApple: string | null
+  stripImageGoogle: string | null
+  stripOpacity: number       // 0–1, default 1 (fully opaque)
+  stripGrayscale: boolean    // convert strip image to black & white
+  stripColor1: string | null // strip gradient start (null = use primaryColor)
+  stripColor2: string | null // strip gradient end (null = use secondaryColor)
+  stripFill: "flat" | "gradient" // flat = solid color, gradient = two-color gradient
+  patternColor: string | null   // pattern accent color (null = use stripColor2)
+  generatedStripApple: string | null
+  generatedStripGoogle: string | null
+  businessHours: string
+  mapAddress: string
+  socialLinks: SocialLinks
+  customMessage: string
+  useStampGrid: boolean
+  stampGridConfig: StampGridConfig
+  stripImagePosition: { x: number; y: number }
+  stripImageZoom: number
+  logoAppleUrl: string | null
+  logoGoogleUrl: string | null
+}
+
+// ─── UI Slice ─────────────────────────────────────────────
+
+type UIState = {
+  activeTool: StudioTool | null
+  previewFormat: PreviewFormat
+  deviceFrame: DeviceFrame
+  isDirty: boolean
+  isSaving: boolean
+  saveError: string | null
+}
+
+// ─── Combined Store ───────────────────────────────────────
+
+type CardDesignStore = {
+  wallet: WalletState
+  ui: UIState
+
+  // Wallet actions
+  setWalletField: <K extends keyof WalletState>(key: K, value: WalletState[K]) => void
+
+  // Template actions
+  applyTemplate: (template: { wallet: Partial<WalletState> }) => void
+
+  // UI actions
+  setActiveTool: (tool: StudioTool | null) => void
+  setPreviewFormat: (format: PreviewFormat) => void
+  setDeviceFrame: (frame: DeviceFrame) => void
+  setSaving: (saving: boolean) => void
+  setSaveError: (error: string | null) => void
+  markClean: () => void
+
+  // Hydration
+  hydrate: (wallet: Partial<WalletState>) => void
+}
+
+// ─── Store Factory ────────────────────────────────────────
+
+export function createCardDesignStore() {
+  return create<CardDesignStore>()(
+    temporal(
+      immer((set) => ({
+        // ─── Initial State ──────────────────────────
+        wallet: {
+          cardType: "STAMP",
+          shape: "CLEAN",
+          primaryColor: "#1a1a2e",
+          secondaryColor: "#ffffff",
+          textColor: "#ffffff",
+          autoTextColor: true,
+          patternStyle: "NONE",
+          progressStyle: "NUMBERS",
+          fontFamily: "SANS",
+          labelFormat: "UPPERCASE",
+          customProgressLabel: "",
+          palettePreset: null,
+          templateId: null,
+          stripImageUrl: null,
+          stripImageApple: null,
+          stripImageGoogle: null,
+          stripOpacity: 1,
+          stripGrayscale: false,
+          stripColor1: null,
+          stripColor2: null,
+          stripFill: "gradient",
+          patternColor: null,
+          generatedStripApple: null,
+          generatedStripGoogle: null,
+          businessHours: "",
+          mapAddress: "",
+          socialLinks: {},
+          customMessage: "",
+          useStampGrid: false,
+          stampGridConfig: { ...DEFAULT_STAMP_GRID_CONFIG },
+          stripImagePosition: { x: 0.5, y: 0.5 },
+          stripImageZoom: 1,
+          logoAppleUrl: null,
+          logoGoogleUrl: null,
+        },
+        ui: {
+          activeTool: null,
+          previewFormat: "apple",
+          deviceFrame: "minimal",
+          isDirty: false,
+          isSaving: false,
+          saveError: null,
+        },
+
+        // ─── Wallet Actions ─────────────────────────
+
+        setWalletField: (key, value) =>
+          set((state) => {
+            ;(state.wallet as Record<string, unknown>)[key] = value
+            state.ui.isDirty = true
+          }),
+
+        // ─── Template Actions ───────────────────────
+
+        applyTemplate: (template) =>
+          set((state) => {
+            if (template.wallet) {
+              Object.assign(state.wallet, template.wallet)
+            }
+            state.ui.isDirty = true
+          }),
+
+        // ─── UI Actions ────────────────────────────
+
+        setActiveTool: (tool) =>
+          set((state) => {
+            state.ui.activeTool = tool
+          }),
+
+        setPreviewFormat: (format) =>
+          set((state) => {
+            state.ui.previewFormat = format
+          }),
+
+        setDeviceFrame: (frame) =>
+          set((state) => {
+            state.ui.deviceFrame = frame
+          }),
+
+        setSaving: (saving) =>
+          set((state) => {
+            state.ui.isSaving = saving
+          }),
+
+        setSaveError: (error) =>
+          set((state) => {
+            state.ui.saveError = error
+          }),
+
+        markClean: () =>
+          set((state) => {
+            state.ui.isDirty = false
+          }),
+
+        // ─── Hydration ─────────────────────────────
+
+        hydrate: (wallet) =>
+          set((state) => {
+            Object.assign(state.wallet, wallet)
+            state.ui.isDirty = false
+          }),
+      })),
+      {
+        limit: 50,
+        equality: (pastState, currentState) =>
+          pastState.wallet === currentState.wallet,
+      }
+    )
+  )
+}
+
+export type CardDesignStoreApi = ReturnType<typeof createCardDesignStore>

@@ -1,9 +1,8 @@
 import { connection } from "next/server"
 import { notFound, redirect } from "next/navigation"
 import { assertAuthenticated, getRestaurantForUser, assertRestaurantRole } from "@/lib/dal"
-import { getProgramForSettings } from "@/server/program-actions"
 import { db } from "@/lib/db"
-import { CardDesignEditor } from "@/components/dashboard/settings/card-design-editor"
+import { CardDesignPreview } from "@/components/dashboard/settings/card-design-preview"
 
 export default async function ProgramDesignPage(props: {
   params: Promise<{ id: string }>
@@ -19,32 +18,42 @@ export default async function ProgramDesignPage(props: {
 
   await assertRestaurantRole(restaurant.id, "owner")
 
-  const program = await getProgramForSettings(programId)
+  const program = await db.loyaltyProgram.findFirst({
+    where: { id: programId, restaurantId: restaurant.id },
+    include: { cardDesign: true },
+  })
+
   if (!program) {
     notFound()
   }
 
-  // Count enrollments with wallet passes for this program
-  const walletPassCount = await db.enrollment.count({
-    where: {
-      loyaltyProgramId: programId,
-      walletPassType: { not: "NONE" },
-    },
-  })
-
   return (
-    <CardDesignEditor
-      restaurant={{
-        id: restaurant.id,
-        name: restaurant.name,
-        slug: restaurant.slug,
-        logo: restaurant.logo,
-        brandColor: restaurant.brandColor,
-        secondaryColor: restaurant.secondaryColor,
-      }}
+    <CardDesignPreview
       programId={programId}
-      cardDesign={program.cardDesign}
-      walletPassCount={walletPassCount}
+      programName={program.name}
+      restaurantName={restaurant.name}
+      restaurantLogo={restaurant.logo}
+      restaurantLogoApple={restaurant.logoApple}
+      restaurantLogoGoogle={restaurant.logoGoogle}
+      visitsRequired={program.visitsRequired}
+      rewardDescription={program.rewardDescription}
+      cardDesign={
+        program.cardDesign
+          ? {
+              cardType: program.cardDesign.cardType as string,
+              shape: program.cardDesign.shape as string,
+              primaryColor: program.cardDesign.primaryColor,
+              secondaryColor: program.cardDesign.secondaryColor,
+              textColor: program.cardDesign.textColor,
+              patternStyle: program.cardDesign.patternStyle as string,
+              progressStyle: program.cardDesign.progressStyle as string,
+              labelFormat: program.cardDesign.labelFormat as string,
+              customProgressLabel: program.cardDesign.customProgressLabel ?? null,
+              stripImageUrl: program.cardDesign.stripImageUrl ?? null,
+              editorConfig: program.cardDesign.editorConfig,
+            }
+          : null
+      }
     />
   )
 }

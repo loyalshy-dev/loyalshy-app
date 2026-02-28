@@ -38,6 +38,7 @@ export default async function ProgramsPage() {
     <ProgramsListView
       programs={programs}
       restaurantId={restaurant.id}
+      restaurantName={restaurant.name}
       isOwner={isOwner}
     />
   )

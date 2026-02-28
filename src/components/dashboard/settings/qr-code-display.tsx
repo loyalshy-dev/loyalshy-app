@@ -12,6 +12,8 @@ import {
   Smartphone,
   LayoutGrid,
 } from "lucide-react"
+import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
+import { parseStripFilters } from "@/lib/wallet/card-design"
 
 type SizePreset = {
   id: string
@@ -49,11 +51,26 @@ const SIZE_PRESETS: SizePreset[] = [
   },
 ]
 
+type PartialCardDesign = {
+  cardType?: string | null
+  primaryColor?: string | null
+  secondaryColor?: string | null
+  textColor?: string | null
+  shape?: string | null
+  patternStyle?: string | null
+  progressStyle?: string | null
+  labelFormat?: string | null
+  customProgressLabel?: string | null
+  stripImageUrl?: string | null
+  editorConfig?: unknown
+}
+
 type ProgramInfo = {
   id: string
   name: string
   rewardDescription: string
   visitsRequired: number
+  cardDesign?: PartialCardDesign | null
 }
 
 type QrCodeDisplayProps = {
@@ -85,6 +102,32 @@ export function QrCodeDisplay({
   const activeProgram = programs.find((p) => p.id === activeTab) ?? null
   const rewardDescription = activeProgram?.rewardDescription ?? programs[0]?.rewardDescription ?? "Free reward"
   const visitsRequired = activeProgram?.visitsRequired ?? programs[0]?.visitsRequired ?? 10
+
+  // Derive card design data for the active program (or first program as fallback)
+  const activeProgramDesign = activeProgram?.cardDesign ?? programs[0]?.cardDesign ?? null
+  const qrSf = activeProgramDesign ? parseStripFilters(activeProgramDesign.editorConfig) : null
+  const walletDesign: WalletPassDesign | null = activeProgramDesign
+    ? {
+        shape: (activeProgramDesign.shape ?? "CLEAN") as WalletPassDesign["shape"],
+        primaryColor: activeProgramDesign.primaryColor ?? "#1a1a2e",
+        secondaryColor: activeProgramDesign.secondaryColor ?? "#ffffff",
+        textColor: activeProgramDesign.textColor ?? "#ffffff",
+        progressStyle: (activeProgramDesign.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
+        labelFormat: (activeProgramDesign.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
+        customProgressLabel: activeProgramDesign.customProgressLabel ?? null,
+        stripImageUrl: activeProgramDesign.stripImageUrl ?? null,
+        stripOpacity: qrSf?.stripOpacity ?? 1,
+        stripGrayscale: qrSf?.stripGrayscale ?? false,
+        patternStyle: (activeProgramDesign.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
+        stripImagePosition: qrSf?.stripImagePosition,
+        stripImageZoom: qrSf?.stripImageZoom,
+      }
+    : null
+  // Pull resolved primary color for the poster accent bar
+  const accentColor =
+    activeProgramDesign?.primaryColor ??
+    restaurant.brandColor ??
+    "#1a1a2e"
 
   const [origin, setOrigin] = useState("")
   useEffect(() => {
@@ -134,15 +177,16 @@ export function QrCodeDisplay({
       const ctx = canvas.getContext("2d")
       if (!ctx) return
 
-      const brandColor = restaurant.brandColor ?? "#1a1a2e"
+      const posterAccentColor =
+        activeProgramDesign?.primaryColor ?? restaurant.brandColor ?? "#1a1a2e"
 
       // Background
       ctx.fillStyle = "#ffffff"
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Brand color bar at top
+      // Brand color bar at top (uses card design primary or restaurant brand color)
       const barHeight = Math.round(canvas.height * 0.06)
-      ctx.fillStyle = brandColor
+      ctx.fillStyle = posterAccentColor
       ctx.fillRect(0, 0, canvas.width, barHeight)
 
       // Restaurant name
@@ -269,43 +313,74 @@ export function QrCodeDisplay({
         {/* QR Code preview */}
         <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
           <div className="flex flex-col items-center space-y-6">
-            {/* QR code */}
-            <div className="relative">
+            {/* Poster mockup: accent bar + QR code + info */}
+            <div
+              className="w-full max-w-xs rounded-2xl overflow-hidden shadow-md border border-border bg-white"
+              style={{ borderTopColor: accentColor, borderTopWidth: 4 }}
+            >
+              {/* Colored accent strip */}
               <div
-                className="w-56 h-56 sm:w-64 sm:h-64 rounded-xl bg-white p-4 shadow-sm border border-border"
-                dangerouslySetInnerHTML={{ __html: qrSvg }}
+                className="h-2 w-full"
+                style={{ backgroundColor: accentColor }}
               />
-              {/* Restaurant logo overlay in center */}
-              {restaurant.logo && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-white border-2 border-white shadow-sm">
-                    <Image
-                      src={restaurant.logo}
-                      alt=""
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
+
+              <div className="flex flex-col items-center gap-4 px-5 py-5">
+                {/* QR code */}
+                <div className="relative">
+                  <div
+                    className="w-44 h-44 rounded-xl bg-white p-3 shadow-sm border border-border"
+                    dangerouslySetInnerHTML={{ __html: qrSvg }}
+                  />
+                  {/* Restaurant logo overlay in center */}
+                  {restaurant.logo && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-white border-2 border-white shadow-sm">
+                        <Image
+                          src={restaurant.logo}
+                          alt=""
+                          width={40}
+                          height={40}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Restaurant / program info */}
+                <div className="text-center space-y-0.5">
+                  <h3 className="font-semibold text-[14px] text-gray-900">{restaurant.name}</h3>
+                  {activeProgram ? (
+                    <>
+                      <p className="text-[12px] font-medium text-gray-700">{activeProgram.name}</p>
+                      <p className="text-[11px] text-gray-400">
+                        {activeProgram.rewardDescription} after {activeProgram.visitsRequired} visits
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-[11px] text-gray-400">
+                      Choose from {programs.length} programs
+                    </p>
+                  )}
+                </div>
+
+                {/* Card preview */}
+                {walletDesign && (
+                  <div className="w-full flex justify-center">
+                    <WalletPassRenderer
+                      design={walletDesign}
+                      format="apple"
+                      restaurantName={restaurant.name}
+                      logoUrl={restaurant.logo}
+                      programName={activeProgram?.name ?? programs[0]?.name ?? "Loyalty Program"}
+                      rewardDescription={rewardDescription}
+                      totalVisits={visitsRequired}
+                      currentVisits={0}
+                      compact
                     />
                   </div>
-                </div>
-              )}
-            </div>
-
-            {/* Restaurant / program info */}
-            <div className="text-center space-y-1">
-              <h3 className="font-semibold text-[15px]">{restaurant.name}</h3>
-              {activeProgram ? (
-                <>
-                  <p className="text-xs font-medium text-foreground/80">{activeProgram.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Earn a free {activeProgram.rewardDescription} after {activeProgram.visitsRequired} visits
-                  </p>
-                </>
-              ) : (
-                <p className="text-xs text-muted-foreground">
-                  Customers will choose from {programs.length} programs
-                </p>
-              )}
+                )}
+              </div>
             </div>
 
             {/* URL */}
@@ -318,7 +393,7 @@ export function QrCodeDisplay({
                 <button
                   onClick={copyUrl}
                   className="shrink-0 p-1 rounded hover:bg-accent transition-colors"
-                  title="Copy URL"
+                  aria-label="Copy join URL"
                 >
                   {copied ? (
                     <Check className="w-3.5 h-3.5 text-success" />

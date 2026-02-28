@@ -26,6 +26,21 @@ export default async function ProgramQrCodePage(props: {
       name: true,
       rewardDescription: true,
       visitsRequired: true,
+      cardDesign: {
+        select: {
+          cardType: true,
+          primaryColor: true,
+          secondaryColor: true,
+          textColor: true,
+          shape: true,
+          patternStyle: true,
+          progressStyle: true,
+          labelFormat: true,
+          customProgressLabel: true,
+          stripImageUrl: true,
+          editorConfig: true,
+        },
+      },
     },
   })
 
@@ -47,6 +62,7 @@ export default async function ProgramQrCodePage(props: {
           name: program.name,
           rewardDescription: program.rewardDescription,
           visitsRequired: program.visitsRequired,
+          cardDesign: program.cardDesign ?? null,
         },
       ]}
     />

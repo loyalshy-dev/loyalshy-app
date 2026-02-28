@@ -8,7 +8,7 @@ import { db } from "@/lib/db"
 import { assertRestaurantRole, getRestaurantForUser } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
 import { computeDesignHash, computeTextColor } from "@/lib/wallet/card-design"
-import type { CardShape, PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
+import type { CardType, CardShape, PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
 
 // ─── Types ─────────────────────────────────────────────────
 
@@ -25,6 +25,7 @@ export type ProgramWithDesign = {
   createdAt: Date
   enrollmentCount: number
   cardDesign: {
+    cardType: CardType
     shape: CardShape
     primaryColor: string | null
     secondaryColor: string | null
@@ -82,12 +83,13 @@ const inviteTeamMemberSchema = z.object({
 
 const saveCardDesignSchema = z.object({
   programId: z.string().min(1),
+  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON"]).optional().default("STAMP"),
   shape: z.enum(["CLEAN", "SHOWCASE", "INFO_RICH"]),
   primaryColor: z.string().max(20).optional().default(""),
   secondaryColor: z.string().max(20).optional().default(""),
   textColor: z.string().max(20).optional().default(""),
-  autoTextColor: z.boolean().optional().default(true),
-  patternStyle: z.enum(["NONE", "DOTS", "WAVES", "GEOMETRIC", "CHEVRON", "CROSSHATCH", "DIAMONDS", "CONFETTI", "SOLID_PRIMARY", "SOLID_SECONDARY"]),
+  autoTextColor: z.boolean().optional().default(false),
+  patternStyle: z.enum(["NONE", "DOTS", "WAVES", "GEOMETRIC", "CHEVRON", "CROSSHATCH", "DIAMONDS", "CONFETTI", "SOLID_PRIMARY", "SOLID_SECONDARY", "STAMP_GRID"]),
   progressStyle: z.enum(["NUMBERS", "CIRCLES", "SQUARES", "STARS", "STAMPS", "PERCENTAGE", "REMAINING"]).optional().default("NUMBERS"),
   fontFamily: z.enum(["SANS", "SERIF", "ROUNDED", "MONO"]).optional().default("SANS"),
   labelFormat: z.enum(["UPPERCASE", "TITLE_CASE", "LOWERCASE"]).optional().default("UPPERCASE"),
@@ -103,6 +105,26 @@ const saveCardDesignSchema = z.object({
     x: z.string().max(200).optional().default(""),
   }).optional(),
   customMessage: z.string().max(2000).optional().default(""),
+  stripOpacity: z.number().min(0).max(1).optional().default(1),
+  stripGrayscale: z.boolean().optional().default(false),
+  stripColor1: z.string().max(20).nullable().optional(),
+  stripColor2: z.string().max(20).nullable().optional(),
+  stripFill: z.enum(["flat", "gradient"]).optional().default("gradient"),
+  patternColor: z.string().max(20).nullable().optional(),
+  stripImagePosition: z.object({
+    x: z.number().min(0).max(1),
+    y: z.number().min(0).max(1),
+  }).optional(),
+  stripImageZoom: z.number().min(1).max(3).optional(),
+  useStampGrid: z.boolean().optional().default(false),
+  stampGridConfig: z.object({
+    stampIcon: z.string().max(50),
+    customStampIconUrl: z.string().nullable().optional(),
+    rewardIcon: z.string().max(10),
+    stampShape: z.enum(["circle", "rounded-square", "square"]),
+    filledStyle: z.enum(["icon", "icon-with-border", "solid"]),
+    useStripBackground: z.boolean().optional(),
+  }).optional(),
 })
 
 const createLoyaltyProgramSchema = z.object({
@@ -149,6 +171,7 @@ export async function getSettingsData() {
     enrollmentCount: p._count.enrollments,
     cardDesign: p.cardDesign
       ? {
+          cardType: p.cardDesign.cardType as CardType,
           shape: p.cardDesign.shape as CardShape,
           primaryColor: p.cardDesign.primaryColor,
           secondaryColor: p.cardDesign.secondaryColor,
@@ -378,7 +401,15 @@ export async function archiveLoyaltyProgram(restaurantId: string, programId: str
 // ─── Save Card Design ──────────────────────────────────────
 
 export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>) {
-  const parsed = saveCardDesignSchema.parse(input)
+  let parsed: z.infer<typeof saveCardDesignSchema>
+  try {
+    parsed = saveCardDesignSchema.parse(input)
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return { error: `Validation failed: ${err.issues.map((e: { message: string }) => e.message).join(", ")}` }
+    }
+    return { error: "Invalid design data" }
+  }
 
   // Look up the program to get the restaurantId for auth check
   const program = await db.loyaltyProgram.findUnique({
@@ -404,72 +435,89 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
 
   const templateId = parsed.templateId ?? null
 
-  // Check if a template with strip design is being applied
-  if (templateId) {
-    const { getTemplateById } = await import("@/lib/wallet/card-templates")
-    const template = getTemplateById(templateId)
-    if (template && template.stripDesign.type !== "none") {
-      const { generateTemplateStripImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } =
+  // Build editorConfig — store stampGridConfig, image filters, stamp grid toggle
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const editorConfig: Record<string, any> = {}
+  if (parsed.useStampGrid) {
+    editorConfig.useStampGrid = true
+  }
+  if (parsed.stampGridConfig) {
+    editorConfig.stampGridConfig = parsed.stampGridConfig
+  }
+  if (parsed.stripOpacity !== undefined && parsed.stripOpacity !== 1) {
+    editorConfig.stripOpacity = parsed.stripOpacity
+  }
+  if (parsed.stripGrayscale) {
+    editorConfig.stripGrayscale = true
+  }
+  if (parsed.stripColor1) {
+    editorConfig.stripColor1 = parsed.stripColor1
+  }
+  if (parsed.stripColor2) {
+    editorConfig.stripColor2 = parsed.stripColor2
+  }
+  if (parsed.stripFill && parsed.stripFill !== "gradient") {
+    editorConfig.stripFill = parsed.stripFill
+  }
+  if (parsed.patternColor) {
+    editorConfig.patternColor = parsed.patternColor
+  }
+  if (parsed.stripImagePosition && (parsed.stripImagePosition.x !== 0.5 || parsed.stripImagePosition.y !== 0.5)) {
+    editorConfig.stripImagePosition = parsed.stripImagePosition
+  }
+  if (parsed.stripImageZoom && parsed.stripImageZoom !== 1) {
+    editorConfig.stripImageZoom = parsed.stripImageZoom
+  }
+
+  // Generate pattern-based strip images when pattern is not NONE.
+  // When stamp grid is active, strips are generated dynamically per-enrollment.
+  // Strip image generation + Blob upload is optional — skip gracefully
+  // when BLOB_READ_WRITE_TOKEN is not configured (e.g. local development).
+  // Use strip-specific colors for pattern generation (fall back to card colors)
+  const stripPrimary = parsed.stripColor1 || primaryColor
+  const stripSecondary = parsed.patternColor || parsed.stripColor2 || secondaryColor
+
+  if (parsed.patternStyle !== "NONE" && stripPrimary) {
+    try {
+      const { generateStripImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } =
         await import("@/lib/wallet/strip-image")
       const { put } = await import("@vercel/blob")
 
+      const secondary = stripSecondary ?? "#ffffff"
+
       const [appleBuffer, googleBuffer] = await Promise.all([
-        generateTemplateStripImage(template.stripDesign, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, primaryColor ?? undefined, secondaryColor ?? undefined),
-        generateTemplateStripImage(template.stripDesign, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT, primaryColor ?? undefined, secondaryColor ?? undefined),
+        generateStripImage({
+          primaryColor: stripPrimary,
+          secondaryColor: secondary,
+          patternStyle: parsed.patternStyle as PatternStyle,
+          width: APPLE_STRIP_WIDTH,
+          height: APPLE_STRIP_HEIGHT,
+        }),
+        generateStripImage({
+          primaryColor: stripPrimary,
+          secondaryColor: secondary,
+          patternStyle: parsed.patternStyle as PatternStyle,
+          width: GOOGLE_HERO_WIDTH,
+          height: GOOGLE_HERO_HEIGHT,
+        }),
       ])
 
-      if (appleBuffer && googleBuffer) {
-        const [appleBlob, googleBlob] = await Promise.all([
-          put(`strip-images/${parsed.programId}/template-apple-${Date.now()}.png`, appleBuffer, {
-            access: "public",
-            addRandomSuffix: true,
-          }),
-          put(`strip-images/${parsed.programId}/template-google-${Date.now()}.png`, googleBuffer, {
-            access: "public",
-            addRandomSuffix: true,
-          }),
-        ])
-        generatedStripApple = appleBlob.url
-        generatedStripGoogle = googleBlob.url
-      }
+      const [appleBlob, googleBlob] = await Promise.all([
+        put(`strip-images/${parsed.programId}/generated-apple-${Date.now()}.png`, appleBuffer, {
+          access: "public",
+          addRandomSuffix: true,
+        }),
+        put(`strip-images/${parsed.programId}/generated-google-${Date.now()}.png`, googleBuffer, {
+          access: "public",
+          addRandomSuffix: true,
+        }),
+      ])
+
+      generatedStripApple = appleBlob.url
+      generatedStripGoogle = googleBlob.url
+    } catch {
+      // Blob token not configured — skip strip image upload
     }
-  } else if (parsed.patternStyle !== "NONE" && primaryColor) {
-    const { generateStripImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } =
-      await import("@/lib/wallet/strip-image")
-    const { put } = await import("@vercel/blob")
-
-    const secondary = secondaryColor ?? "#ffffff"
-
-    const [appleBuffer, googleBuffer] = await Promise.all([
-      generateStripImage({
-        primaryColor,
-        secondaryColor: secondary,
-        patternStyle: parsed.patternStyle as PatternStyle,
-        width: APPLE_STRIP_WIDTH,
-        height: APPLE_STRIP_HEIGHT,
-      }),
-      generateStripImage({
-        primaryColor,
-        secondaryColor: secondary,
-        patternStyle: parsed.patternStyle as PatternStyle,
-        width: GOOGLE_HERO_WIDTH,
-        height: GOOGLE_HERO_HEIGHT,
-      }),
-    ])
-
-    const [appleBlob, googleBlob] = await Promise.all([
-      put(`strip-images/${parsed.programId}/generated-apple-${Date.now()}.png`, appleBuffer, {
-        access: "public",
-        addRandomSuffix: true,
-      }),
-      put(`strip-images/${parsed.programId}/generated-google-${Date.now()}.png`, googleBuffer, {
-        access: "public",
-        addRandomSuffix: true,
-      }),
-    ])
-
-    generatedStripApple = appleBlob.url
-    generatedStripGoogle = googleBlob.url
   }
 
   const socialLinks = {
@@ -488,16 +536,62 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
       generatedStripGoogle: true,
       stripImageApple: true,
       stripImageGoogle: true,
+      stripImageUrl: true,
+      editorConfig: true,
     },
   })
+
+  // Re-crop strip image when position/zoom changed and a strip image exists
+  let reCroppedApple: string | null = null
+  let reCroppedGoogle: string | null = null
+  const newPos = parsed.stripImagePosition ?? { x: 0.5, y: 0.5 }
+  const newZoom = parsed.stripImageZoom ?? 1
+  if (existingDesign?.stripImageUrl && !existingDesign.stripImageUrl.startsWith("data:")) {
+    const oldFilters = existingDesign.editorConfig ? (existingDesign.editorConfig as Record<string, unknown>) : {}
+    const oldPos = (oldFilters.stripImagePosition as { x: number; y: number } | undefined) ?? { x: 0.5, y: 0.5 }
+    const oldZoom = (oldFilters.stripImageZoom as number | undefined) ?? 1
+    const posChanged = Math.abs(newPos.x - oldPos.x) > 0.001 || Math.abs(newPos.y - oldPos.y) > 0.001
+    const zoomChanged = Math.abs(newZoom - oldZoom) > 0.001
+
+    if (posChanged || zoomChanged) {
+      try {
+        const { cropStripImageWithPosition, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } =
+          await import("@/lib/wallet/strip-image")
+        const { put, del } = await import("@vercel/blob")
+
+        const imgRes = await fetch(existingDesign.stripImageUrl)
+        if (imgRes.ok) {
+          const originalBuffer = Buffer.from(await imgRes.arrayBuffer())
+          const [appleBuffer, googleBuffer] = await Promise.all([
+            cropStripImageWithPosition(originalBuffer, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, newPos, newZoom),
+            cropStripImageWithPosition(originalBuffer, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT, newPos, newZoom),
+          ])
+          const [appleBlob, googleBlob] = await Promise.all([
+            put(`strip-images/${parsed.programId}/apple-${Date.now()}.png`, appleBuffer, { access: "public", addRandomSuffix: true }),
+            put(`strip-images/${parsed.programId}/google-${Date.now()}.png`, googleBuffer, { access: "public", addRandomSuffix: true }),
+          ])
+          reCroppedApple = appleBlob.url
+          reCroppedGoogle = googleBlob.url
+
+          // Delete old crops
+          const oldCrops = [existingDesign.stripImageApple, existingDesign.stripImageGoogle].filter(Boolean) as string[]
+          if (oldCrops.length > 0) {
+            try { await del(oldCrops) } catch { /* old blobs may not exist */ }
+          }
+        }
+      } catch {
+        // Blob token not configured or fetch failed — skip re-crop
+      }
+    }
+  }
 
   const newHash = computeDesignHash({
     shape: parsed.shape,
     primaryColor,
     secondaryColor,
     textColor,
-    stripImageApple: existingDesign?.stripImageApple ?? null,
-    stripImageGoogle: existingDesign?.stripImageGoogle ?? null,
+    stripImageApple: reCroppedApple ?? existingDesign?.stripImageApple ?? null,
+    stripImageGoogle: reCroppedGoogle ?? existingDesign?.stripImageGoogle ?? null,
     patternStyle: parsed.patternStyle,
     progressStyle: parsed.progressStyle,
     fontFamily: parsed.fontFamily,
@@ -509,6 +603,7 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
     mapAddress: parsed.mapAddress || null,
     socialLinks,
     customMessage: parsed.customMessage || null,
+    editorConfig,
   })
 
   // Delete old generated strip images if we're replacing them
@@ -521,11 +616,15 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
     }
   }
 
+  // For stamp grid, clear static generated strips (they're generated dynamically)
+  const isStampGrid = parsed.useStampGrid
+
   // Upsert card design by loyaltyProgramId
   await db.cardDesign.upsert({
     where: { loyaltyProgramId: parsed.programId },
     create: {
       loyaltyProgramId: parsed.programId,
+      cardType: parsed.cardType,
       shape: parsed.shape,
       primaryColor,
       secondaryColor,
@@ -535,8 +634,8 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
       fontFamily: parsed.fontFamily,
       labelFormat: parsed.labelFormat,
       customProgressLabel: parsed.customProgressLabel || null,
-      generatedStripApple,
-      generatedStripGoogle,
+      generatedStripApple: isStampGrid ? null : generatedStripApple,
+      generatedStripGoogle: isStampGrid ? null : generatedStripGoogle,
       palettePreset: parsed.palettePreset ?? null,
       templateId,
       businessHours: parsed.businessHours || null,
@@ -544,8 +643,10 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
       socialLinks,
       customMessage: parsed.customMessage || null,
       designHash: newHash,
+      editorConfig,
     },
     update: {
+      cardType: parsed.cardType,
       shape: parsed.shape,
       primaryColor,
       secondaryColor,
@@ -555,7 +656,10 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
       fontFamily: parsed.fontFamily,
       labelFormat: parsed.labelFormat,
       customProgressLabel: parsed.customProgressLabel || null,
-      ...(generatedStripApple ? { generatedStripApple, generatedStripGoogle } : {}),
+      ...(isStampGrid
+        ? { generatedStripApple: null, generatedStripGoogle: null }
+        : generatedStripApple ? { generatedStripApple, generatedStripGoogle } : {}),
+      ...(reCroppedApple ? { stripImageApple: reCroppedApple, stripImageGoogle: reCroppedGoogle } : {}),
       palettePreset: parsed.palettePreset ?? null,
       templateId,
       businessHours: parsed.businessHours || null,
@@ -563,6 +667,7 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
       socialLinks,
       customMessage: parsed.customMessage || null,
       designHash: newHash,
+      editorConfig,
     },
   })
 
@@ -636,41 +741,67 @@ export async function uploadStripImage(formData: FormData) {
     return { error: "File must be PNG, JPEG, or WebP" }
   }
 
-  const { put, del } = await import("@vercel/blob")
-  const { processUploadedStripImage } = await import("@/lib/wallet/strip-image")
-
-  // Upload original
-  const originalBlob = await put(
-    `strip-images/${programId}/original-${Date.now()}.${file.name.split(".").pop()}`,
-    file,
-    { access: "public", addRandomSuffix: true }
-  )
-
-  // Crop to Apple and Google dimensions
   const originalBuffer = Buffer.from(await file.arrayBuffer())
-  const { appleBuffer, googleBuffer } = await processUploadedStripImage(originalBuffer)
 
-  const [appleBlob, googleBlob] = await Promise.all([
-    put(`strip-images/${programId}/apple-${Date.now()}.png`, appleBuffer, {
-      access: "public",
-      addRandomSuffix: true,
-    }),
-    put(`strip-images/${programId}/google-${Date.now()}.png`, googleBuffer, {
-      access: "public",
-      addRandomSuffix: true,
-    }),
-  ])
-
-  // Delete old strip images
-  const existing = await db.cardDesign.findUnique({
+  // Read current position/zoom from editorConfig for crop
+  const currentDesign = await db.cardDesign.findUnique({
     where: { loyaltyProgramId: programId },
-    select: { stripImageUrl: true, stripImageApple: true, stripImageGoogle: true },
+    select: { editorConfig: true },
   })
-  if (existing) {
-    const toDelete = [existing.stripImageUrl, existing.stripImageApple, existing.stripImageGoogle].filter(Boolean) as string[]
-    if (toDelete.length > 0) {
-      try { await del(toDelete) } catch { /* old blobs may not exist */ }
+  const cfg = currentDesign?.editorConfig as Record<string, unknown> | null
+  const position = cfg?.stripImagePosition as { x: number; y: number } | undefined
+  const zoom = cfg?.stripImageZoom as number | undefined
+
+  let originalUrl: string
+  let appleUrl: string
+  let googleUrl: string
+
+  try {
+    const { put, del } = await import("@vercel/blob")
+    const { processUploadedStripImage } = await import("@/lib/wallet/strip-image")
+
+    // Upload original
+    const originalBlob = await put(
+      `strip-images/${programId}/original-${Date.now()}.${file.name.split(".").pop()}`,
+      file,
+      { access: "public", addRandomSuffix: true }
+    )
+
+    // Crop to Apple and Google dimensions (with position/zoom if set)
+    const { appleBuffer, googleBuffer } = await processUploadedStripImage(originalBuffer, position, zoom)
+
+    const [appleBlob, googleBlob] = await Promise.all([
+      put(`strip-images/${programId}/apple-${Date.now()}.png`, appleBuffer, {
+        access: "public",
+        addRandomSuffix: true,
+      }),
+      put(`strip-images/${programId}/google-${Date.now()}.png`, googleBuffer, {
+        access: "public",
+        addRandomSuffix: true,
+      }),
+    ])
+
+    // Delete old strip images
+    const existing = await db.cardDesign.findUnique({
+      where: { loyaltyProgramId: programId },
+      select: { stripImageUrl: true, stripImageApple: true, stripImageGoogle: true },
+    })
+    if (existing) {
+      const toDelete = [existing.stripImageUrl, existing.stripImageApple, existing.stripImageGoogle].filter(Boolean) as string[]
+      if (toDelete.length > 0) {
+        try { await del(toDelete) } catch { /* old blobs may not exist */ }
+      }
     }
+
+    originalUrl = originalBlob.url
+    appleUrl = appleBlob.url
+    googleUrl = googleBlob.url
+  } catch {
+    // BLOB_READ_WRITE_TOKEN not configured — use data URI fallback for local dev
+    const dataUri = `data:${file.type};base64,${originalBuffer.toString("base64")}`
+    originalUrl = dataUri
+    appleUrl = dataUri
+    googleUrl = dataUri
   }
 
   // Update card design with new strip image URLs
@@ -678,23 +809,23 @@ export async function uploadStripImage(formData: FormData) {
     where: { loyaltyProgramId: programId },
     create: {
       loyaltyProgramId: programId,
-      stripImageUrl: originalBlob.url,
-      stripImageApple: appleBlob.url,
-      stripImageGoogle: googleBlob.url,
+      stripImageUrl: originalUrl,
+      stripImageApple: appleUrl,
+      stripImageGoogle: googleUrl,
     },
     update: {
-      stripImageUrl: originalBlob.url,
-      stripImageApple: appleBlob.url,
-      stripImageGoogle: googleBlob.url,
+      stripImageUrl: originalUrl,
+      stripImageApple: appleUrl,
+      stripImageGoogle: googleUrl,
     },
   })
 
   revalidatePath("/dashboard/settings")
   return {
     success: true,
-    originalUrl: originalBlob.url,
-    appleUrl: appleBlob.url,
-    googleUrl: googleBlob.url,
+    originalUrl,
+    appleUrl,
+    googleUrl,
   }
 }
 
@@ -741,17 +872,26 @@ export async function deleteStripImage(programId: string) {
   return { success: true }
 }
 
-// ─── Upload Restaurant Logo ─────────────────────────────────
+// ─── Upload Custom Stamp Icon ────────────────────────────────
 
-export async function uploadRestaurantLogo(formData: FormData) {
-  const restaurantId = formData.get("restaurantId") as string
+export async function uploadStampIcon(formData: FormData) {
+  const programId = formData.get("programId") as string
   const file = formData.get("file") as File
 
-  if (!restaurantId || !file) {
-    return { error: "Missing restaurant ID or file" }
+  if (!programId || !file) {
+    return { error: "Missing program ID or file" }
   }
 
-  await assertRestaurantRole(restaurantId, "owner")
+  const program = await db.loyaltyProgram.findUnique({
+    where: { id: programId },
+    select: { restaurantId: true },
+  })
+
+  if (!program) {
+    return { error: "Loyalty program not found" }
+  }
+
+  await assertRestaurantRole(program.restaurantId, "owner")
 
   // Validate file
   const maxSize = 2 * 1024 * 1024 // 2MB
@@ -764,36 +904,294 @@ export async function uploadRestaurantLogo(formData: FormData) {
     return { error: "File must be PNG, JPEG, WebP, or SVG" }
   }
 
-  // Upload to Vercel Blob
-  const { put } = await import("@vercel/blob")
-  const blob = await put(`logos/${restaurantId}/${file.name}`, file, {
-    access: "public",
-    addRandomSuffix: true,
+  // Look up existing editorConfig for cleanup + merge
+  const existing = await db.cardDesign.findUnique({
+    where: { loyaltyProgramId: programId },
+    select: { editorConfig: true },
   })
 
-  // Delete old logo if exists
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: restaurantId },
-    select: { logo: true },
-  })
-  if (restaurant?.logo) {
+  // Auto-trim transparent whitespace for raster images
+  const rawBuffer = Buffer.from(await file.arrayBuffer())
+  let processedBuffer: Buffer = rawBuffer
+  let processedType = file.type
+  if (file.type !== "image/svg+xml") {
     try {
-      const { del } = await import("@vercel/blob")
-      await del(restaurant.logo)
+      const { default: sharp } = await import("sharp")
+      processedBuffer = await sharp(rawBuffer).trim().png().toBuffer()
+      processedType = "image/png"
     } catch {
-      // Old logo may not exist in blob storage
+      // trim failed (e.g. fully opaque image) — use original
     }
   }
 
-  // Update restaurant with new logo URL
+  let blobUrl: string
+  try {
+    const { put, del } = await import("@vercel/blob")
+
+    // Delete old stamp icon blob if one exists
+    if (existing?.editorConfig && typeof existing.editorConfig === "object") {
+      const cfg = existing.editorConfig as Record<string, unknown>
+      const stampCfg = cfg.stampGridConfig as Record<string, unknown> | undefined
+      const oldUrl = stampCfg?.customStampIconUrl
+      if (typeof oldUrl === "string") {
+        try { await del(oldUrl) } catch { /* old blob may not exist */ }
+      }
+    }
+
+    const ext = processedType === "image/png" ? "png" : (file.name.split(".").pop() ?? "png")
+    const blob = await put(
+      `stamp-icons/${programId}/stamp-${Date.now()}.${ext}`,
+      processedBuffer,
+      { access: "public", addRandomSuffix: true }
+    )
+    blobUrl = blob.url
+  } catch {
+    // BLOB_READ_WRITE_TOKEN not configured — use local object URL fallback
+    // In local dev, store a data URI so the preview still works
+    blobUrl = `data:${processedType};base64,${processedBuffer.toString("base64")}`
+  }
+
+  // Update editorConfig with the new custom stamp icon URL
+  const editorConfig = (existing?.editorConfig && typeof existing.editorConfig === "object"
+    ? existing.editorConfig
+    : {}) as Record<string, unknown>
+
+  const stampGridConfig = (editorConfig.stampGridConfig && typeof editorConfig.stampGridConfig === "object"
+    ? editorConfig.stampGridConfig
+    : {}) as Record<string, unknown>
+
+  await db.cardDesign.update({
+    where: { loyaltyProgramId: programId },
+    data: {
+      editorConfig: {
+        ...editorConfig,
+        stampGridConfig: { ...stampGridConfig, customStampIconUrl: blobUrl },
+      },
+    },
+  })
+
+  revalidatePath("/dashboard/programs")
+  return { success: true, url: blobUrl }
+}
+
+// ─── Delete Custom Stamp Icon ────────────────────────────────
+
+export async function deleteStampIcon(programId: string) {
+  const program = await db.loyaltyProgram.findUnique({
+    where: { id: programId },
+    select: { restaurantId: true },
+  })
+
+  if (!program) {
+    return { error: "Loyalty program not found" }
+  }
+
+  await assertRestaurantRole(program.restaurantId, "owner")
+
+  const existing = await db.cardDesign.findUnique({
+    where: { loyaltyProgramId: programId },
+    select: { editorConfig: true },
+  })
+
+  if (existing?.editorConfig && typeof existing.editorConfig === "object") {
+    const editorConfig = existing.editorConfig as Record<string, unknown>
+    const stampGridConfig = (editorConfig.stampGridConfig && typeof editorConfig.stampGridConfig === "object"
+      ? editorConfig.stampGridConfig
+      : {}) as Record<string, unknown>
+
+    const oldUrl = stampGridConfig.customStampIconUrl
+    if (typeof oldUrl === "string") {
+      try {
+        const { del } = await import("@vercel/blob")
+        await del(oldUrl)
+      } catch { /* ok */ }
+    }
+
+    await db.cardDesign.update({
+      where: { loyaltyProgramId: programId },
+      data: {
+        editorConfig: {
+          ...editorConfig,
+          stampGridConfig: { ...stampGridConfig, customStampIconUrl: null },
+        },
+      },
+    })
+  }
+
+  revalidatePath("/dashboard/programs")
+  return { success: true }
+}
+
+// ─── Logo Processing Constants ──────────────────────────────
+
+// Apple Wallet: wide rectangle, 160×50pt → 320×100px @2x
+const APPLE_LOGO_WIDTH = 320
+const APPLE_LOGO_HEIGHT = 100
+
+// Google Wallet: circular mask, 660–840px square with ~15% safe margin
+const GOOGLE_LOGO_SIZE = 660
+
+// ─── Logo Processing Helpers ────────────────────────────────
+
+async function processLogoForApple(sourceBuffer: Buffer): Promise<Buffer> {
+  const { default: sharp } = await import("sharp")
+
+  // Get source dimensions
+  const meta = await sharp(sourceBuffer).metadata()
+  const srcW = meta.width ?? 1
+  const srcH = meta.height ?? 1
+
+  // Fit the logo inside the Apple rectangle, centered, transparent background
+  // Use "contain" so we never crop — just center-fit with padding
+  return sharp(sourceBuffer)
+    .resize(APPLE_LOGO_WIDTH, APPLE_LOGO_HEIGHT, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toBuffer()
+}
+
+async function processLogoForGoogle(sourceBuffer: Buffer): Promise<Buffer> {
+  const { default: sharp } = await import("sharp")
+
+  // Get source dimensions
+  const meta = await sharp(sourceBuffer).metadata()
+  const srcW = meta.width ?? 1
+  const srcH = meta.height ?? 1
+
+  // For Google, we need a square with ~15% margin so the artwork
+  // doesn't clip when the circle mask is applied.
+  // Content area = 70% of the square, centered
+  const contentSize = Math.round(GOOGLE_LOGO_SIZE * 0.70)
+
+  // First resize source to fit inside the content area
+  const resized = await sharp(sourceBuffer)
+    .resize(contentSize, contentSize, {
+      fit: "contain",
+      background: { r: 255, g: 255, b: 255, alpha: 0 },
+    })
+    .png()
+    .toBuffer()
+
+  // Then composite onto a full-size transparent square
+  const margin = Math.round((GOOGLE_LOGO_SIZE - contentSize) / 2)
+  return sharp({
+    create: {
+      width: GOOGLE_LOGO_SIZE,
+      height: GOOGLE_LOGO_SIZE,
+      channels: 4,
+      background: { r: 255, g: 255, b: 255, alpha: 0 },
+    },
+  })
+    .composite([{ input: resized, left: margin, top: margin }])
+    .png()
+    .toBuffer()
+}
+
+async function uploadBuffer(
+  buffer: Buffer,
+  path: string,
+  contentType: string
+): Promise<string> {
+  try {
+    const { put } = await import("@vercel/blob")
+    const blob = await put(path, buffer, {
+      access: "public",
+      addRandomSuffix: true,
+      contentType,
+    })
+    return blob.url
+  } catch {
+    // BLOB_READ_WRITE_TOKEN not configured — data URI fallback for local dev
+    return `data:${contentType};base64,${buffer.toString("base64")}`
+  }
+}
+
+async function deleteBlob(url: string | null | undefined) {
+  if (!url || url.startsWith("data:")) return
+  try {
+    const { del } = await import("@vercel/blob")
+    await del(url)
+  } catch {
+    // Blob may not exist
+  }
+}
+
+// ─── Upload Restaurant Logo ─────────────────────────────────
+// Single upload → stores source + auto-generates Apple and Google versions
+
+export async function uploadRestaurantLogo(formData: FormData) {
+  const restaurantId = formData.get("restaurantId") as string
+  const file = formData.get("file") as File
+
+  if (!restaurantId || !file) {
+    return { error: "Missing restaurant ID or file" }
+  }
+
+  await assertRestaurantRole(restaurantId, "owner")
+
+  const maxSize = 2 * 1024 * 1024
+  if (file.size > maxSize) {
+    return { error: "File must be under 2MB" }
+  }
+
+  const validTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"]
+  if (!validTypes.includes(file.type)) {
+    return { error: "File must be PNG, JPEG, WebP, or SVG" }
+  }
+
+  // Delete old logos
+  const old = await db.restaurant.findUnique({
+    where: { id: restaurantId },
+    select: { logo: true, logoApple: true, logoGoogle: true },
+  })
+  await Promise.all([
+    deleteBlob(old?.logo),
+    deleteBlob(old?.logoApple),
+    deleteBlob(old?.logoGoogle),
+  ])
+
+  const sourceBuffer = Buffer.from(await file.arrayBuffer())
+
+  // Upload source logo
+  const logoUrl = await uploadBuffer(
+    sourceBuffer,
+    `logos/${restaurantId}/source/${file.name}`,
+    file.type
+  )
+
+  // Auto-generate platform-optimized versions (skip for SVG — pass through)
+  let appleUrl: string
+  let googleUrl: string
+
+  if (file.type === "image/svg+xml") {
+    // SVG: use source as-is for both (wallets handle SVG rendering)
+    appleUrl = logoUrl
+    googleUrl = logoUrl
+  } else {
+    const [appleBuf, googleBuf] = await Promise.all([
+      processLogoForApple(sourceBuffer),
+      processLogoForGoogle(sourceBuffer),
+    ])
+
+    const [aUrl, gUrl] = await Promise.all([
+      uploadBuffer(appleBuf, `logos/${restaurantId}/apple/logo.png`, "image/png"),
+      uploadBuffer(googleBuf, `logos/${restaurantId}/google/logo.png`, "image/png"),
+    ])
+    appleUrl = aUrl
+    googleUrl = gUrl
+  }
+
   await db.restaurant.update({
     where: { id: restaurantId },
-    data: { logo: blob.url },
+    data: { logo: logoUrl, logoApple: appleUrl, logoGoogle: googleUrl },
   })
 
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
-  return { success: true, url: blob.url }
+  revalidatePath("/dashboard/programs")
+  return { success: true, url: logoUrl, appleUrl, googleUrl }
 }
 
 // ─── Delete Restaurant Logo ─────────────────────────────────
@@ -801,28 +1199,155 @@ export async function uploadRestaurantLogo(formData: FormData) {
 export async function deleteRestaurantLogo(restaurantId: string) {
   await assertRestaurantRole(restaurantId, "owner")
 
-  const restaurant = await db.restaurant.findUnique({
+  const old = await db.restaurant.findUnique({
     where: { id: restaurantId },
-    select: { logo: true },
+    select: { logo: true, logoApple: true, logoGoogle: true },
   })
 
-  if (restaurant?.logo) {
-    try {
-      const { del } = await import("@vercel/blob")
-      await del(restaurant.logo)
-    } catch {
-      // Blob may not exist
-    }
-  }
+  await Promise.all([
+    deleteBlob(old?.logo),
+    deleteBlob(old?.logoApple),
+    deleteBlob(old?.logoGoogle),
+  ])
 
   await db.restaurant.update({
     where: { id: restaurantId },
-    data: { logo: null },
+    data: { logo: null, logoApple: null, logoGoogle: null },
   })
 
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
+  revalidatePath("/dashboard/programs")
   return { success: true }
+}
+
+// ─── Upload Platform Logo Override (Apple / Google) ─────────
+// Manual override for one platform — replaces the auto-generated version
+
+export async function uploadPlatformLogo(formData: FormData) {
+  const restaurantId = formData.get("restaurantId") as string
+  const platform = formData.get("platform") as string
+  const file = formData.get("file") as File
+
+  if (!restaurantId || !file || !platform) {
+    return { error: "Missing restaurant ID, platform, or file" }
+  }
+
+  if (platform !== "apple" && platform !== "google") {
+    return { error: "Platform must be 'apple' or 'google'" }
+  }
+
+  await assertRestaurantRole(restaurantId, "owner")
+
+  const maxSize = 2 * 1024 * 1024
+  if (file.size > maxSize) {
+    return { error: "File must be under 2MB" }
+  }
+
+  const validTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"]
+  if (!validTypes.includes(file.type)) {
+    return { error: "File must be PNG, JPEG, WebP, or SVG" }
+  }
+
+  const column = platform === "apple" ? "logoApple" : "logoGoogle"
+
+  // Delete old platform logo
+  const old = await db.restaurant.findUnique({
+    where: { id: restaurantId },
+    select: { [column]: true },
+  })
+  const oldUrl = (old as Record<string, unknown>)?.[column] as string | null
+  await deleteBlob(oldUrl)
+
+  const sourceBuffer = Buffer.from(await file.arrayBuffer())
+
+  // Process for the target platform (optimize even manual overrides)
+  let processedUrl: string
+  if (file.type === "image/svg+xml") {
+    processedUrl = await uploadBuffer(
+      sourceBuffer,
+      `logos/${restaurantId}/${platform}/override.svg`,
+      file.type
+    )
+  } else {
+    const processedBuf = platform === "apple"
+      ? await processLogoForApple(sourceBuffer)
+      : await processLogoForGoogle(sourceBuffer)
+    processedUrl = await uploadBuffer(
+      processedBuf,
+      `logos/${restaurantId}/${platform}/override.png`,
+      "image/png"
+    )
+  }
+
+  await db.restaurant.update({
+    where: { id: restaurantId },
+    data: { [column]: processedUrl },
+  })
+
+  revalidatePath("/dashboard/settings")
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/programs")
+  return { success: true, url: processedUrl }
+}
+
+// ─── Reset Platform Logo to Auto-Generated ──────────────────
+// Removes the manual override and re-generates from the source logo
+
+export async function resetPlatformLogo(restaurantId: string, platform: "apple" | "google") {
+  await assertRestaurantRole(restaurantId, "owner")
+
+  const column = platform === "apple" ? "logoApple" : "logoGoogle"
+
+  const restaurant = await db.restaurant.findUnique({
+    where: { id: restaurantId },
+    select: { logo: true, logoApple: true, logoGoogle: true },
+  })
+
+  if (!restaurant?.logo) {
+    return { error: "No source logo to regenerate from" }
+  }
+
+  // Delete old platform logo
+  const oldUrl = platform === "apple" ? restaurant.logoApple : restaurant.logoGoogle
+  await deleteBlob(oldUrl)
+
+  // Re-generate from source
+  const sourceLogo = restaurant.logo
+  let newUrl: string
+  if (sourceLogo.startsWith("data:image/svg")) {
+    newUrl = sourceLogo
+  } else {
+    // Fetch source buffer
+    let sourceBuffer: Buffer
+    if (sourceLogo.startsWith("data:")) {
+      const base64 = sourceLogo.split(",")[1]
+      sourceBuffer = Buffer.from(base64, "base64")
+    } else {
+      const res = await fetch(sourceLogo)
+      if (!res.ok) return { error: "Failed to fetch source logo" }
+      sourceBuffer = Buffer.from(await res.arrayBuffer())
+    }
+
+    const processedBuf = platform === "apple"
+      ? await processLogoForApple(sourceBuffer)
+      : await processLogoForGoogle(sourceBuffer)
+    newUrl = await uploadBuffer(
+      processedBuf,
+      `logos/${restaurantId}/${platform}/auto.png`,
+      "image/png"
+    )
+  }
+
+  await db.restaurant.update({
+    where: { id: restaurantId },
+    data: { [column]: newUrl },
+  })
+
+  revalidatePath("/dashboard/settings")
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/programs")
+  return { success: true, url: newUrl }
 }
 
 // ─── Update Loyalty Program ─────────────────────────────────

@@ -246,6 +246,21 @@ export async function getCustomerDetail(
               visitsRequired: true,
               rewardDescription: true,
               status: true,
+              cardDesign: {
+                select: {
+                  cardType: true,
+                  primaryColor: true,
+                  secondaryColor: true,
+                  textColor: true,
+                  shape: true,
+                  patternStyle: true,
+                  progressStyle: true,
+                  labelFormat: true,
+                  customProgressLabel: true,
+                  stripImageUrl: true,
+                  editorConfig: true,
+                },
+              },
             },
           },
         },
@@ -292,6 +307,20 @@ export async function getCustomerDetail(
     walletPassType: e.walletPassType,
     enrolledAt: e.enrolledAt,
     frozenAt: e.frozenAt,
+    cardDesign: e.loyaltyProgram.cardDesign
+      ? {
+          cardType: e.loyaltyProgram.cardDesign.cardType,
+          primaryColor: e.loyaltyProgram.cardDesign.primaryColor,
+          secondaryColor: e.loyaltyProgram.cardDesign.secondaryColor,
+          textColor: e.loyaltyProgram.cardDesign.textColor,
+          shape: e.loyaltyProgram.cardDesign.shape,
+          patternStyle: e.loyaltyProgram.cardDesign.patternStyle,
+          progressStyle: e.loyaltyProgram.cardDesign.progressStyle,
+          labelFormat: e.loyaltyProgram.cardDesign.labelFormat,
+          customProgressLabel: e.loyaltyProgram.cardDesign.customProgressLabel,
+          stripImageUrl: e.loyaltyProgram.cardDesign.stripImageUrl,
+        }
+      : null,
   }))
 
   return {

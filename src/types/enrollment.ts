@@ -1,5 +1,21 @@
 import type { WalletPassType, EnrollmentStatus, ProgramStatus } from "@prisma/client"
 
+// ─── Card design snapshot (shared across enrollment types) ───
+
+export type EnrollmentCardDesign = {
+  cardType: string
+  primaryColor: string | null
+  secondaryColor: string | null
+  textColor: string | null
+  shape: string
+  patternStyle: string
+  progressStyle: string
+  labelFormat: string
+  customProgressLabel: string | null
+  stripImageUrl: string | null
+  editorConfig?: unknown
+} | null
+
 // ─── Summary (used in lists and search results) ─────────────
 
 export type EnrollmentSummary = {
@@ -11,6 +27,7 @@ export type EnrollmentSummary = {
   totalVisits: number
   status: EnrollmentStatus
   walletPassType: WalletPassType
+  cardDesign: EnrollmentCardDesign
 }
 
 // ─── Detail (used in customer detail sheet) ──────────────────
@@ -29,6 +46,7 @@ export type EnrollmentDetail = {
   walletPassType: WalletPassType
   enrolledAt: Date
   frozenAt: Date | null
+  cardDesign: EnrollmentCardDesign
 }
 
 // ─── Program with CardDesign (for settings) ──────────────────
@@ -45,6 +63,7 @@ export type ProgramWithDesign = {
   termsAndConditions: string | null
   enrollmentCount: number
   cardDesign: {
+    cardType: string
     shape: string
     primaryColor: string | null
     secondaryColor: string | null
@@ -68,6 +87,7 @@ export type PublicProgramInfo = {
   visitsRequired: number
   rewardDescription: string
   cardDesign: {
+    cardType: string
     shape: string
     primaryColor: string | null
     secondaryColor: string | null
@@ -79,5 +99,6 @@ export type PublicProgramInfo = {
     labelFormat: string
     customProgressLabel: string | null
     customMessage: string | null
+    editorConfig?: unknown
   } | null
 }

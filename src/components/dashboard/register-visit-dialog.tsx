@@ -36,6 +36,8 @@ import {
 } from "@/server/visit-actions"
 import type { EnrollmentSummary } from "@/types/enrollment"
 import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
+import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
+import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -398,6 +400,7 @@ export function RegisterVisitDialog({
             isRegistering={isRegistering}
             onConfirm={handleConfirm}
             onBack={handleBack}
+            cardDesign={selectedEnrollment?.cardDesign ?? null}
           />
         )}
         {step === "success" && selectedCustomer && (
@@ -643,18 +646,36 @@ function ProgramPickerStep({
 
 // ─── Confirm Step ───────────────────────────────────────────
 
+type ConfirmStepCardDesign = {
+  cardType: string
+  primaryColor: string | null
+  secondaryColor: string | null
+  textColor: string | null
+  shape?: string | null
+  patternStyle?: string | null
+  progressStyle?: string | null
+  labelFormat?: string | null
+  customProgressLabel?: string | null
+  stripImageUrl?: string | null
+  editorConfig?: unknown
+} | null
+
 function ConfirmStep({
   customer,
   enrollment,
   isRegistering,
   onConfirm,
   onBack,
+  cardDesign = null,
 }: {
   customer: VisitSearchResult
   enrollment: EnrollmentSummary | null
   isRegistering: boolean
   onConfirm: () => void
   onBack: () => void
+  /** Card design for the selected enrollment's program. Pass once
+   *  EnrollmentSummary includes cardDesign data. */
+  cardDesign?: ConfirmStepCardDesign
 }) {
   if (!enrollment) {
     return (
@@ -684,6 +705,33 @@ function ConfirmStep({
   const filled = enrollment.currentCycleVisits
   const nextVisit = filled + 1
   const visitsRequired = enrollment.visitsRequired
+
+  // Build WalletPassDesign from card design data when available
+  const visitSf = cardDesign ? parseStripFilters(cardDesign.editorConfig) : { useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
+  const visitSg = visitSf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
+  const design: WalletPassDesign | null = cardDesign
+    ? {
+        shape: (cardDesign.shape ?? "CLEAN") as WalletPassDesign["shape"],
+        primaryColor: cardDesign.primaryColor ?? "#1a1a2e",
+        secondaryColor: cardDesign.secondaryColor ?? "#ffffff",
+        textColor: cardDesign.textColor ?? "#ffffff",
+        progressStyle: (cardDesign.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
+        labelFormat: (cardDesign.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
+        customProgressLabel: cardDesign.customProgressLabel ?? null,
+        stripImageUrl: cardDesign.stripImageUrl ?? null,
+        patternStyle: (cardDesign.patternStyle === "STAMP_GRID" ? "NONE" : cardDesign.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
+        useStampGrid: visitSg,
+        stripColor1: visitSf.stripColor1 ?? null,
+        stripColor2: visitSf.stripColor2 ?? null,
+        stripFill: visitSf.stripFill ?? "gradient",
+        patternColor: visitSf.patternColor ?? null,
+        stripImagePosition: visitSf.stripImagePosition,
+        stripImageZoom: visitSf.stripImageZoom,
+        stampGridConfig: visitSg
+          ? parseStampGridConfig(cardDesign.editorConfig)
+          : undefined,
+      }
+    : null
 
   return (
     <div className="flex flex-col">
@@ -717,8 +765,25 @@ function ConfirmStep({
         </div>
       </div>
 
-      {/* Stamp card */}
-      <StampCard filled={filled} total={visitsRequired} highlightNext />
+      {/* Card preview */}
+      {design ? (
+        <div className="flex justify-center px-6">
+          <WalletPassRenderer
+            design={design}
+            format="apple"
+            programName={enrollment.programName}
+            restaurantName=""
+            customerName={customer.fullName}
+            currentVisits={nextVisit}
+            totalVisits={visitsRequired}
+            rewardDescription=""
+            compact
+            width={280}
+          />
+        </div>
+      ) : (
+        <StampCard filled={filled} total={visitsRequired} highlightNext />
+      )}
 
       {/* Confirm button */}
       <div className="p-4 pt-6">

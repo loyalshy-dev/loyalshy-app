@@ -11,7 +11,7 @@ import {
   WEB_SERVICE_BASE_URL,
 } from "./constants"
 import type { CardDesignData, CardShape } from "../card-design"
-import { getFieldLayout, formatProgressValue, formatLabel } from "../card-design"
+import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters } from "../card-design"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -27,6 +27,7 @@ export type PassGenerationInput = {
   hasAvailableReward: boolean
   restaurantName: string
   restaurantLogo: string | null
+  restaurantLogoApple: string | null
   brandColor: string | null
   secondaryColor: string | null
   rewardDescription: string
@@ -52,12 +53,80 @@ export async function generateApplePass(
   const textColor = design?.textColor ?? null
   const layout = getFieldLayout(shape)
 
-  // Determine strip image URL for this shape
-  const stripImageUrl = layout.apple.useStrip
-    ? (design?.stripImageApple ?? design?.generatedStripApple ?? null)
-    : null
+  // Determine strip image: dynamic stamp grid or static URL
+  let stripImageUrl: string | null = null
+  let stampGridStripBuffer: Buffer | null = null
 
-  const icons = await getIconBuffers(input.restaurantLogo, stripImageUrl)
+  const stripFilters = design ? parseStripFilters(design.editorConfig) : { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null }
+  // Stamp grid: check editorConfig flag or legacy patternStyle column
+  const isStampGrid = stripFilters.useStampGrid || design?.patternStyle === "STAMP_GRID"
+
+  // Effective strip colors (independent from card background)
+  const stripPrimary = stripFilters.stripColor1 ?? design?.primaryColor ?? input.brandColor ?? "#1a1a2e"
+  const stripSecondary = stripFilters.stripColor2 ?? design?.secondaryColor ?? input.secondaryColor ?? "#ffffff"
+
+  if (layout.apple.useStrip && isStampGrid && design) {
+    // Generate stamp grid strip image dynamically for this enrollment
+    const { generateStampGridImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
+    const stampGridConfig = parseStampGridConfig(design.editorConfig)
+    stampGridStripBuffer = await generateStampGridImage({
+      currentVisits: input.currentCycleVisits,
+      totalVisits: input.visitsRequired,
+      hasReward: input.hasAvailableReward,
+      config: stampGridConfig,
+      primaryColor: stripPrimary,
+      secondaryColor: stripSecondary,
+      textColor: design.textColor,
+      width: APPLE_STRIP_WIDTH,
+      height: APPLE_STRIP_HEIGHT,
+      stripImageUrl: design.stripImageApple,
+      stripOpacity: stripFilters.stripOpacity,
+      stripGrayscale: stripFilters.stripGrayscale,
+    })
+  } else if (layout.apple.useStrip) {
+    const rawUrl = design?.stripImageApple ?? design?.generatedStripApple ?? null
+    // Apply filters to static strip images if needed
+    if (rawUrl && (stripFilters.stripOpacity < 1 || stripFilters.stripGrayscale)) {
+      const { default: sharp } = await import("sharp")
+      const { APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
+      const res = await fetch(rawUrl)
+      if (res.ok) {
+        let pipeline = sharp(Buffer.from(await res.arrayBuffer()))
+          .resize(APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, { fit: "cover", position: "centre" })
+        if (stripFilters.stripGrayscale) pipeline = pipeline.greyscale()
+        if (stripFilters.stripOpacity < 1) {
+          // Reduce alpha then flatten onto primary color background
+          const { data, info } = await pipeline.ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+          for (let i = 3; i < data.length; i += 4) {
+            data[i] = Math.round(data[i] * stripFilters.stripOpacity)
+          }
+          const transparentStrip = await sharp(data, {
+            raw: { width: info.width, height: info.height, channels: 4 },
+          }).png().toBuffer()
+          const bgColor = stripPrimary
+          const bg = await sharp({ create: { width: APPLE_STRIP_WIDTH, height: APPLE_STRIP_HEIGHT, channels: 4, background: bgColor } }).png().toBuffer()
+          stampGridStripBuffer = await sharp(bg)
+            .composite([{ input: transparentStrip }])
+            .png()
+            .toBuffer()
+        } else {
+          stampGridStripBuffer = await pipeline.png().toBuffer()
+        }
+      } else {
+        stripImageUrl = rawUrl
+      }
+    } else {
+      stripImageUrl = rawUrl
+    }
+  }
+
+  const icons = await getIconBuffers(input.restaurantLogoApple ?? input.restaurantLogo, stripImageUrl)
+
+  // If we have a dynamically generated stamp grid buffer, inject it directly
+  if (stampGridStripBuffer) {
+    icons["strip.png"] = stampGridStripBuffer
+    icons["strip@2x.png"] = stampGridStripBuffer
+  }
   const colors = getPassColors(
     design?.primaryColor ?? input.brandColor,
     design?.secondaryColor ?? input.secondaryColor,

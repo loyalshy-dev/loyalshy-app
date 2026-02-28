@@ -38,6 +38,7 @@ export async function GET(
             select: {
               name: true,
               logo: true,
+              logoApple: true,
               brandColor: true,
               secondaryColor: true,
               phone: true,
@@ -80,6 +81,7 @@ export async function GET(
       hasAvailableReward: enrollment.rewards.length > 0,
       restaurantName: restaurant.name,
       restaurantLogo: restaurant.logo,
+      restaurantLogoApple: restaurant.logoApple,
       brandColor: restaurant.brandColor,
       secondaryColor: restaurant.secondaryColor,
       rewardDescription: program.rewardDescription,

@@ -76,6 +76,7 @@ export async function getRestaurantBySlug(
           rewardDescription: true,
           cardDesign: {
             select: {
+              cardType: true,
               shape: true,
               primaryColor: true,
               secondaryColor: true,
@@ -87,6 +88,7 @@ export async function getRestaurantBySlug(
               labelFormat: true,
               customProgressLabel: true,
               customMessage: true,
+              editorConfig: true,
             },
           },
         },
@@ -114,6 +116,7 @@ export async function getRestaurantBySlug(
       rewardDescription: p.rewardDescription,
       cardDesign: p.cardDesign
         ? {
+            cardType: p.cardDesign.cardType,
             shape: p.cardDesign.shape,
             primaryColor: p.cardDesign.primaryColor,
             secondaryColor: p.cardDesign.secondaryColor,
@@ -173,6 +176,8 @@ export async function joinLoyaltyProgram(
       id: true,
       name: true,
       logo: true,
+      logoApple: true,
+      logoGoogle: true,
       brandColor: true,
       secondaryColor: true,
       phone: true,
@@ -360,6 +365,8 @@ async function issuePassForEnrollment(
     id: string
     name: string
     logo: string | null
+    logoApple: string | null
+    logoGoogle: string | null
     brandColor: string | null
     secondaryColor: string | null
     phone: string | null
@@ -393,6 +400,7 @@ async function issuePassForEnrollment(
         hasAvailableReward: enrollment.hasAvailableReward,
         restaurantName: restaurant.name,
         restaurantLogo: restaurant.logo,
+        restaurantLogoApple: restaurant.logoApple,
         brandColor: restaurant.brandColor,
         secondaryColor: restaurant.secondaryColor,
         rewardDescription: program.rewardDescription,
@@ -460,6 +468,7 @@ async function issuePassForEnrollment(
       hasAvailableReward: enrollment.hasAvailableReward,
       restaurantName: restaurant.name,
       restaurantLogo: restaurant.logo,
+      restaurantLogoGoogle: restaurant.logoGoogle,
       brandColor: restaurant.brandColor,
       rewardDescription: program.rewardDescription,
       rewardExpiryDays: program.rewardExpiryDays,

@@ -90,6 +90,7 @@ enum PatternStyle {
   CONFETTI        @map("confetti")
   SOLID_PRIMARY   @map("solid_primary")
   SOLID_SECONDARY @map("solid_secondary")
+  STAMP_GRID      @map("stamp_grid")
 
   @@map("pattern_style")
 }
@@ -121,6 +122,15 @@ enum LabelFormat {
   LOWERCASE  @map("lowercase")
 
   @@map("label_format")
+}
+
+enum CardType {
+  STAMP  @map("stamp")
+  POINTS @map("points")
+  TIER   @map("tier")
+  COUPON @map("coupon")
+
+  @@map("card_type")
 }
 
 enum EnrollmentStatus {
@@ -273,6 +283,8 @@ model Restaurant {
   name                 String
   slug                 String             @unique
   logo                 String?
+  logoApple            String?
+  logoGoogle           String?
   brandColor           String?
   secondaryColor       String?
   address              String?
@@ -497,6 +509,7 @@ model AnalyticsSnapshot {
 model CardDesign {
   id                  String       @id @default(dbgenerated("uuidv7()::text"))
   loyaltyProgramId    String       @unique
+  cardType            CardType     @default(STAMP)
   shape               CardShape    @default(CLEAN)
   primaryColor        String?
   secondaryColor      String?
@@ -518,6 +531,7 @@ model CardDesign {
   socialLinks         Json         @default("{}")
   customMessage       String?      @db.Text
   designHash          String       @default("")
+  editorConfig        Json         @default("{}")
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
 

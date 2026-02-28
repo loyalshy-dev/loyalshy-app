@@ -88,6 +88,21 @@ export async function lookupEnrollmentByWalletPassId(
           name: true,
           visitsRequired: true,
           status: true,
+          cardDesign: {
+            select: {
+              cardType: true,
+              primaryColor: true,
+              secondaryColor: true,
+              textColor: true,
+              shape: true,
+              patternStyle: true,
+              progressStyle: true,
+              labelFormat: true,
+              customProgressLabel: true,
+              stripImageUrl: true,
+              editorConfig: true,
+            },
+          },
         },
       },
     },
@@ -155,6 +170,21 @@ export async function lookupEnrollmentByWalletPassId(
           id: true,
           name: true,
           visitsRequired: true,
+          cardDesign: {
+            select: {
+              cardType: true,
+              primaryColor: true,
+              secondaryColor: true,
+              textColor: true,
+              shape: true,
+              patternStyle: true,
+              progressStyle: true,
+              labelFormat: true,
+              customProgressLabel: true,
+              stripImageUrl: true,
+              editorConfig: true,
+            },
+          },
         },
       },
     },
@@ -176,6 +206,20 @@ export async function lookupEnrollmentByWalletPassId(
       totalVisits: e.totalVisits,
       status: e.status,
       walletPassType: e.walletPassType,
+      cardDesign: e.loyaltyProgram.cardDesign
+        ? {
+            cardType: e.loyaltyProgram.cardDesign.cardType,
+            primaryColor: e.loyaltyProgram.cardDesign.primaryColor,
+            secondaryColor: e.loyaltyProgram.cardDesign.secondaryColor,
+            textColor: e.loyaltyProgram.cardDesign.textColor,
+            shape: e.loyaltyProgram.cardDesign.shape,
+            patternStyle: e.loyaltyProgram.cardDesign.patternStyle,
+            progressStyle: e.loyaltyProgram.cardDesign.progressStyle,
+            labelFormat: e.loyaltyProgram.cardDesign.labelFormat,
+            customProgressLabel: e.loyaltyProgram.cardDesign.customProgressLabel,
+            stripImageUrl: e.loyaltyProgram.cardDesign.stripImageUrl,
+          }
+        : null,
     })),
   }
 
@@ -188,6 +232,20 @@ export async function lookupEnrollmentByWalletPassId(
     totalVisits: enrollment.totalVisits,
     status: enrollment.status,
     walletPassType: enrollment.walletPassType,
+    cardDesign: enrollment.loyaltyProgram.cardDesign
+      ? {
+          cardType: enrollment.loyaltyProgram.cardDesign.cardType,
+          primaryColor: enrollment.loyaltyProgram.cardDesign.primaryColor,
+          secondaryColor: enrollment.loyaltyProgram.cardDesign.secondaryColor,
+          textColor: enrollment.loyaltyProgram.cardDesign.textColor,
+          shape: enrollment.loyaltyProgram.cardDesign.shape,
+          patternStyle: enrollment.loyaltyProgram.cardDesign.patternStyle,
+          progressStyle: enrollment.loyaltyProgram.cardDesign.progressStyle,
+          labelFormat: enrollment.loyaltyProgram.cardDesign.labelFormat,
+          customProgressLabel: enrollment.loyaltyProgram.cardDesign.customProgressLabel,
+          stripImageUrl: enrollment.loyaltyProgram.cardDesign.stripImageUrl,
+        }
+      : null,
   }
 
   return {
@@ -246,6 +304,21 @@ export async function searchCustomersForVisit(
               id: true,
               name: true,
               visitsRequired: true,
+              cardDesign: {
+                select: {
+                  cardType: true,
+                  primaryColor: true,
+                  secondaryColor: true,
+                  textColor: true,
+                  shape: true,
+                  patternStyle: true,
+                  progressStyle: true,
+                  labelFormat: true,
+                  customProgressLabel: true,
+                  stripImageUrl: true,
+                  editorConfig: true,
+                },
+              },
             },
           },
         },
@@ -272,6 +345,20 @@ export async function searchCustomersForVisit(
         totalVisits: e.totalVisits,
         status: e.status,
         walletPassType: e.walletPassType,
+        cardDesign: e.loyaltyProgram.cardDesign
+          ? {
+              cardType: e.loyaltyProgram.cardDesign.cardType,
+              primaryColor: e.loyaltyProgram.cardDesign.primaryColor,
+              secondaryColor: e.loyaltyProgram.cardDesign.secondaryColor,
+              textColor: e.loyaltyProgram.cardDesign.textColor,
+              shape: e.loyaltyProgram.cardDesign.shape,
+              patternStyle: e.loyaltyProgram.cardDesign.patternStyle,
+              progressStyle: e.loyaltyProgram.cardDesign.progressStyle,
+              labelFormat: e.loyaltyProgram.cardDesign.labelFormat,
+              customProgressLabel: e.loyaltyProgram.cardDesign.customProgressLabel,
+              stripImageUrl: e.loyaltyProgram.cardDesign.stripImageUrl,
+            }
+          : null,
       })),
     })),
   }

@@ -48,6 +48,8 @@ import {
 } from "@/server/customer-actions"
 import { redeemReward } from "@/server/reward-actions"
 import type { EnrollmentDetail } from "@/types/enrollment"
+import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
+import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -509,9 +511,59 @@ function EnrollmentProgressSection({
     )
   }
 
-  // Single enrollment — show full-size progress ring
+  // Single enrollment — show WalletPassRenderer preview if design data available,
+  // otherwise fall back to full-size ProgressRing
   if (activeEnrollments.length === 1 && otherEnrollments.length === 0) {
     const enrollment = activeEnrollments[0]
+
+    if (enrollment.cardDesign) {
+      const cds1Ps = (enrollment.cardDesign as any)?.patternStyle
+      const cds1Sf = parseStripFilters(enrollment.cardDesign?.editorConfig)
+      const cds1Sg = cds1Sf.useStampGrid || cds1Ps === "STAMP_GRID"
+      const design: WalletPassDesign = {
+        shape: (enrollment.cardDesign as any)?.shape ?? "CLEAN",
+        primaryColor: enrollment.cardDesign?.primaryColor ?? "#1a1a2e",
+        secondaryColor: enrollment.cardDesign?.secondaryColor ?? "#ffffff",
+        textColor: enrollment.cardDesign?.textColor ?? "#ffffff",
+        progressStyle: (enrollment.cardDesign as any)?.progressStyle ?? "NUMBERS",
+        labelFormat: (enrollment.cardDesign as any)?.labelFormat ?? "UPPERCASE",
+        customProgressLabel: null,
+        stripImageUrl: null,
+        patternStyle: (cds1Ps === "STAMP_GRID" ? "NONE" : cds1Ps ?? "NONE"),
+        useStampGrid: cds1Sg,
+        stripColor1: cds1Sf.stripColor1 ?? null,
+        stripColor2: cds1Sf.stripColor2 ?? null,
+        stripFill: cds1Sf.stripFill ?? "gradient",
+        patternColor: cds1Sf.patternColor ?? null,
+        stripImagePosition: cds1Sf.stripImagePosition,
+        stripImageZoom: cds1Sf.stripImageZoom,
+        stampGridConfig: cds1Sg
+          ? parseStampGridConfig(enrollment.cardDesign?.editorConfig)
+          : undefined,
+      }
+      return (
+        <div className="flex items-center justify-center py-6">
+          <div className="flex flex-col items-center gap-2">
+            <WalletPassRenderer
+              design={design}
+              format="apple"
+              restaurantName=""
+              programName={enrollment.programName}
+              currentVisits={enrollment.currentCycleVisits}
+              totalVisits={enrollment.visitsRequired}
+              rewardDescription={enrollment.rewardDescription}
+              compact
+              width={220}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              {enrollment.visitsRequired - enrollment.currentCycleVisits} visits until {enrollment.rewardDescription}
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    // Fallback: no card design data
     return (
       <div className="flex items-center justify-center py-6">
         <div className="text-center">
@@ -528,26 +580,76 @@ function EnrollmentProgressSection({
     )
   }
 
-  // Multiple enrollments — show compact progress rings side by side
+  // Multiple enrollments — show mini WalletPassRenderer per enrollment when design
+  // data is available, otherwise fall back to compact ProgressRings
   return (
     <div className="py-4 px-6">
-      <div className="flex flex-wrap items-start justify-center gap-6">
-        {activeEnrollments.map((enrollment) => (
-          <div key={enrollment.enrollmentId} className="text-center">
-            <ProgressRing
-              current={enrollment.currentCycleVisits}
-              total={enrollment.visitsRequired}
-              size={80}
-              strokeWidth={6}
-            />
-            <p className="text-[11px] font-medium mt-1.5 max-w-[100px] truncate">
-              {enrollment.programName}
-            </p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">
-              {enrollment.visitsRequired - enrollment.currentCycleVisits} to go
-            </p>
-          </div>
-        ))}
+      <div className="flex flex-wrap items-start justify-center gap-4">
+        {activeEnrollments.map((enrollment) => {
+          if (enrollment.cardDesign) {
+            const cds2Ps = (enrollment.cardDesign as any)?.patternStyle
+            const cds2Sf = parseStripFilters(enrollment.cardDesign?.editorConfig)
+            const cds2Sg = cds2Sf.useStampGrid || cds2Ps === "STAMP_GRID"
+            const design: WalletPassDesign = {
+              shape: (enrollment.cardDesign as any)?.shape ?? "CLEAN",
+              primaryColor: enrollment.cardDesign?.primaryColor ?? "#1a1a2e",
+              secondaryColor: enrollment.cardDesign?.secondaryColor ?? "#ffffff",
+              textColor: enrollment.cardDesign?.textColor ?? "#ffffff",
+              progressStyle: (enrollment.cardDesign as any)?.progressStyle ?? "NUMBERS",
+              labelFormat: (enrollment.cardDesign as any)?.labelFormat ?? "UPPERCASE",
+              customProgressLabel: null,
+              stripImageUrl: null,
+              patternStyle: (cds2Ps === "STAMP_GRID" ? "NONE" : cds2Ps ?? "NONE"),
+              useStampGrid: cds2Sg,
+              stripColor1: cds2Sf.stripColor1 ?? null,
+              stripColor2: cds2Sf.stripColor2 ?? null,
+              stripFill: cds2Sf.stripFill ?? "gradient",
+              patternColor: cds2Sf.patternColor ?? null,
+              stripImagePosition: cds2Sf.stripImagePosition,
+              stripImageZoom: cds2Sf.stripImageZoom,
+              stampGridConfig: cds2Sg
+                ? parseStampGridConfig(enrollment.cardDesign?.editorConfig)
+                : undefined,
+            }
+            return (
+              <div key={enrollment.enrollmentId} className="flex flex-col items-center gap-1.5">
+                <WalletPassRenderer
+                  design={design}
+                  format="apple"
+                  restaurantName=""
+                  programName={enrollment.programName}
+                  currentVisits={enrollment.currentCycleVisits}
+                  totalVisits={enrollment.visitsRequired}
+                  rewardDescription={enrollment.rewardDescription}
+                  compact
+                  width={120}
+                  height={160}
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  {enrollment.currentCycleVisits}/{enrollment.visitsRequired}
+                </p>
+              </div>
+            )
+          }
+
+          // Fallback: no card design data
+          return (
+            <div key={enrollment.enrollmentId} className="text-center">
+              <ProgressRing
+                current={enrollment.currentCycleVisits}
+                total={enrollment.visitsRequired}
+                size={80}
+                strokeWidth={6}
+              />
+              <p className="text-[11px] font-medium mt-1.5 max-w-[100px] truncate">
+                {enrollment.programName}
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                {enrollment.visitsRequired - enrollment.currentCycleVisits} to go
+              </p>
+            </div>
+          )
+        })}
       </div>
 
       {/* Inactive enrollments summary */}

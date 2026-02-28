@@ -26,6 +26,9 @@ Multi-tenant SaaS for restaurants to create digital loyalty cards with Apple/Goo
 | Playwright | 1.58 | E2E browser tests (chromium + mobile) |
 | Sentry | 10.x (@sentry/nextjs) | Error tracking, source map upload, request instrumentation |
 | Plausible | Script-based | Privacy-first analytics (env-gated via NEXT_PUBLIC_PLAUSIBLE_DOMAIN) |
+| zustand | ~5.x | State management for card design studio |
+| immer | ~10.x | Immutable state updates (zustand middleware) |
+| zundo | ~2.x | Undo/redo temporal middleware for zustand |
 
 ## Critical Architecture Rules
 
@@ -90,15 +93,20 @@ Multi-tenant SaaS for restaurants to create digital loyalty cards with Apple/Goo
         /customers            → Customer management
         /rewards              → Cross-program rewards (not in sidebar)
         /settings             → General, Team, Billing, Jobs (owner)
+    /(studio)       → Full-page card design studio (own layout, no dashboard shell)
+      /dashboard/programs/[id]/studio → Canva-like editor
     /(public)       → Landing, pricing, QR scan pages
     /api            → API routes
   /components       → Reusable UI components
     /ui             → Shadcn components
+    /card-renderer  → Shared CardRenderer used across all surfaces
+    /studio         → Studio editor components (layout, toolbar, canvas, panels)
     /dashboard      → Dashboard-specific components
       /programs     → Program list view, tab nav, editor, create form
     /marketing      → Landing page components
     /wallet         → Wallet pass components
   /lib              → Utilities, db client, auth config, DAL
+    /stores         → Zustand stores (card-design-store.ts)
   /server           → Server actions (incl. program-actions.ts)
   /trigger          → Trigger.dev job definitions
   /types            → TypeScript type definitions
@@ -119,6 +127,7 @@ The full plan is in `loyalty-card-plan-v4.md`. Phases:
 - **Phase 3** — Wallet Pass Integration (3.1 Apple, 3.2 Google, 3.3 QR/Onboarding, 3.4 Trigger.dev)
 - **Phase 4** — Stripe Billing & Onboarding (4.1 Stripe, 4.2 Onboarding Flow)
 - **Phase 5** — Polish & Production (5.1 Errors, 5.2 Mobile, 5.3 Security, 5.4 Testing, 5.5 Perf)
+- **Phase 9** — Card Design Studio (9A Schema+Store, 9B CardRenderer, 9C Studio Layout, 9D Templates, 9E Panels, 9F Propagation+Polish)
 - **Phase 6** — Deployment (6.1 Production)
 
 ## Current Progress
@@ -145,6 +154,12 @@ The full plan is in `loyalty-card-plan-v4.md`. Phases:
 - [x] Phase 5.5 — Performance & SEO (DB indexes, image optimization, Sentry, Plausible analytics, sitemap, robots.txt, OG image, JSON-LD, debounce fixes, router.prefetch)
 - [x] Phase 7 — Multi-program restructure (Enrollment pivot entity, per-program CardDesign, ProgramStatus lifecycle, multi-enrollment wallet passes, 94 tests passing)
 - [x] Phase 8 — Dashboard navigation restructure (Programs as top-level sidebar item with per-program sub-pages, Settings simplified to General/Team/Billing/Jobs)
+- [x] Phase 9A — Schema + Store + Server Action (CardType enum, editorConfig JSON column, zustand+immer+zundo store, updated saveCardDesign)
+- [x] Phase 9B — Shared CardRenderer (stamp-grid, points-display, tier-display, coupon-display, code-renderer, cutout-overlay, pattern-overlay, buildEditorConfig)
+- [x] Phase 9C — Full-page Studio Layout (3-panel Canva-like editor, toolbar, canvas, tool selector, panel shell, mobile responsive, keyboard shortcuts)
+- [x] Phase 9D — Template Gallery (30+ templates across 4 card types, template-panel with filters)
+- [x] Phase 9E — Property Panels (14 panels: colors, background, stamp, points, tier, coupon, typography, layout, cutout, code, fields, logo, strip, templates)
+- [x] Phase 9F — Design Propagation + Polish (CardRenderer in visit registration, customer detail, onboarding, QR poster; /design as preview page with "Open Studio" button; mobile studio layout; error/loading boundaries)
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -183,7 +198,7 @@ Update the "Current Progress" section above to track what's done.
 11. Customer (end user — identity + denormalized totalVisits)
 12. Visit (stamp/check-in, linked to Enrollment)
 13. Reward (linked to Enrollment)
-14. CardDesign (per LoyaltyProgram, not per Restaurant)
+14. CardDesign (per LoyaltyProgram; typed columns for wallet passes + `editorConfig` JSON for rich studio editor; `cardType`: STAMP/POINTS/TIER/COUPON)
 15. WalletPassLog (linked to Enrollment)
 16. StaffInvitation (custom invite flow with tokens — NOT Better Auth's Invitation)
 17. DeviceRegistration (Apple Wallet push, linked to Enrollment)
@@ -222,7 +237,8 @@ Update the "Current Progress" section above to track what's done.
 - `/dashboard/programs` — list of all programs (grid cards, status badges, enrollment counts)
 - `/dashboard/programs/[id]` — program overview with stat cards (layout provides tab nav)
 - `/dashboard/programs/[id]/rewards` — per-program rewards (reuses RewardsView with `hideProgramFilter`)
-- `/dashboard/programs/[id]/design` — card design editor (owner only)
+- `/dashboard/programs/[id]/design` — card design preview with "Open Studio" button (owner only)
+- `/dashboard/programs/[id]/studio` — full-page Canva-like card design editor (own layout, no dashboard shell)
 - `/dashboard/programs/[id]/qr-code` — QR code for this program (owner only)
 - `/dashboard/programs/[id]/settings` — program edit form (owner only)
 

@@ -1,14 +1,8 @@
-import type { CardShape, PatternStyle, ProgressStyle, FontFamily, LabelFormat } from "./card-design"
+import type { CardShape, PatternStyle, ProgressStyle, LabelFormat, StampGridConfig } from "./card-design"
 
-// ─── Types ──────────────────────────────────────────────────
+// ─── Types ──────────────────────────────────────────────
 
 export type RestaurantCategory = "cafe" | "fine-dining" | "casual" | "bar" | "bakery" | "general"
-
-export type TemplateStripDesign =
-  | { type: "gradient"; stops: Array<{ color: string; position: number }>; angle: number }
-  | { type: "pattern"; patternStyle: PatternStyle; color: string; opacity: number }
-  | { type: "image"; assetPath: string }
-  | { type: "none" }
 
 export type CardTemplate = {
   id: string
@@ -23,14 +17,18 @@ export type CardTemplate = {
     textColor: string
     patternStyle: PatternStyle
     progressStyle: ProgressStyle
-    fontFamily: FontFamily
     labelFormat: LabelFormat
     palettePreset: string | null
+    useStampGrid?: boolean
+    stampGridConfig?: StampGridConfig
+    stripColor1?: string | null
+    stripColor2?: string | null
+    stripFill?: "flat" | "gradient"
+    patternColor?: string | null
   }
-  stripDesign: TemplateStripDesign
 }
 
-// ─── Categories ─────────────────────────────────────────────
+// ─── Categories ─────────────────────────────────────────
 
 export const TEMPLATE_CATEGORIES: { id: RestaurantCategory | "all"; name: string }[] = [
   { id: "all", name: "All" },
@@ -42,9 +40,11 @@ export const TEMPLATE_CATEGORIES: { id: RestaurantCategory | "all"; name: string
   { id: "general", name: "General" },
 ]
 
-// ─── Templates ──────────────────────────────────────────────
+// ─── Templates ──────────────────────────────────────────
 
 export const CARD_TEMPLATES: CardTemplate[] = [
+  // ── STAMP: Existing 10 ──────────────────────────────────
+
   {
     id: "cafe-warm-brew",
     name: "Warm Brew",
@@ -58,20 +58,11 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       textColor: "#ffffff",
       patternStyle: "NONE",
       progressStyle: "STAMPS",
-      fontFamily: "ROUNDED",
       labelFormat: "TITLE_CASE",
       palettePreset: "espresso",
     },
-    stripDesign: {
-      type: "gradient",
-      stops: [
-        { color: "#3e2723", position: 0 },
-        { color: "#5d4037", position: 40 },
-        { color: "#a1887f", position: 100 },
-      ],
-      angle: 135,
-    },
   },
+
   {
     id: "cafe-minimal",
     name: "Clean Roast",
@@ -85,12 +76,11 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       textColor: "#ffffff",
       patternStyle: "NONE",
       progressStyle: "NUMBERS",
-      fontFamily: "SANS",
       labelFormat: "UPPERCASE",
       palettePreset: "charcoal",
     },
-    stripDesign: { type: "none" },
   },
+
   {
     id: "fine-noir",
     name: "Noir",
@@ -104,15 +94,11 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       textColor: "#f5f5f5",
       patternStyle: "NONE",
       progressStyle: "NUMBERS",
-      fontFamily: "SERIF",
       labelFormat: "UPPERCASE",
       palettePreset: null,
     },
-    stripDesign: {
-      type: "image",
-      assetPath: "/templates/fine-noir",
-    },
   },
+
   {
     id: "fine-gold",
     name: "Gold Reserve",
@@ -126,20 +112,11 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       textColor: "#f5f0e8",
       patternStyle: "GEOMETRIC",
       progressStyle: "NUMBERS",
-      fontFamily: "SERIF",
       labelFormat: "UPPERCASE",
       palettePreset: null,
     },
-    stripDesign: {
-      type: "gradient",
-      stops: [
-        { color: "#0d0d1a", position: 0 },
-        { color: "#1a1a2e", position: 50 },
-        { color: "#c9a96e", position: 100 },
-      ],
-      angle: 135,
-    },
   },
+
   {
     id: "casual-bright",
     name: "Sunny Side",
@@ -153,20 +130,11 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       textColor: "#ffffff",
       patternStyle: "DOTS",
       progressStyle: "STAMPS",
-      fontFamily: "ROUNDED",
       labelFormat: "TITLE_CASE",
       palettePreset: null,
     },
-    stripDesign: {
-      type: "gradient",
-      stops: [
-        { color: "#f9a825", position: 0 },
-        { color: "#f57c00", position: 50 },
-        { color: "#e65100", position: 100 },
-      ],
-      angle: 120,
-    },
   },
+
   {
     id: "casual-fresh",
     name: "Fresh & Easy",
@@ -180,12 +148,11 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       textColor: "#1a1a1a",
       patternStyle: "NONE",
       progressStyle: "CIRCLES",
-      fontFamily: "SANS",
       labelFormat: "TITLE_CASE",
       palettePreset: null,
     },
-    stripDesign: { type: "none" },
   },
+
   {
     id: "bar-neon",
     name: "Neon Nights",
@@ -199,15 +166,11 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       textColor: "#ffffff",
       patternStyle: "NONE",
       progressStyle: "CIRCLES",
-      fontFamily: "SANS",
       labelFormat: "UPPERCASE",
       palettePreset: null,
     },
-    stripDesign: {
-      type: "image",
-      assetPath: "/templates/bar-neon",
-    },
   },
+
   {
     id: "bar-craft",
     name: "Craft House",
@@ -221,17 +184,11 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       textColor: "#ffffff",
       patternStyle: "GEOMETRIC",
       progressStyle: "SQUARES",
-      fontFamily: "MONO",
       labelFormat: "UPPERCASE",
       palettePreset: null,
     },
-    stripDesign: {
-      type: "pattern",
-      patternStyle: "GEOMETRIC",
-      color: "#ffb300",
-      opacity: 0.12,
-    },
   },
+
   {
     id: "bakery-sweet",
     name: "Sweet Pastels",
@@ -245,20 +202,11 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       textColor: "#4e342e",
       patternStyle: "DOTS",
       progressStyle: "STARS",
-      fontFamily: "ROUNDED",
       labelFormat: "TITLE_CASE",
       palettePreset: null,
     },
-    stripDesign: {
-      type: "gradient",
-      stops: [
-        { color: "#f8bbd0", position: 0 },
-        { color: "#f48fb1", position: 40 },
-        { color: "#fff8e1", position: 100 },
-      ],
-      angle: 135,
-    },
   },
+
   {
     id: "general-slate",
     name: "Slate Modern",
@@ -272,35 +220,588 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       textColor: "#ffffff",
       patternStyle: "NONE",
       progressStyle: "NUMBERS",
-      fontFamily: "SANS",
       labelFormat: "UPPERCASE",
       palettePreset: "slate",
     },
-    stripDesign: { type: "none" },
+  },
+
+  // ── STAMP: 5 New ─────────────────────────────────────────
+
+  {
+    id: "cafe-matcha",
+    name: "Matcha Garden",
+    description: "Soft greens and cream — serene vibes for specialty cafes",
+    category: "cafe",
+    tags: ["matcha", "green", "zen", "specialty"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#2d6a4f",
+      secondaryColor: "#b7e4c7",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "STAMPS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "casual-retro",
+    name: "Retro Diner",
+    description: "Vintage checkerboard energy — nostalgic and bold",
+    category: "casual",
+    tags: ["retro", "vintage", "bold", "diner"],
+    design: {
+      shape: "INFO_RICH",
+      primaryColor: "#b71c1c",
+      secondaryColor: "#ffeb3b",
+      textColor: "#ffffff",
+      patternStyle: "CROSSHATCH",
+      progressStyle: "SQUARES",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "bar-whiskey",
+    name: "Old Fashioned",
+    description: "Deep amber and wood tones — for whiskey bars and speakeasies",
+    category: "bar",
+    tags: ["whiskey", "amber", "dark", "premium"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#3e1a00",
+      secondaryColor: "#bf8c5a",
+      textColor: "#f5e6d3",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "bakery-artisan",
+    name: "Artisan Loaf",
+    description: "Warm kraft-paper tones — rustic and handcrafted feel",
+    category: "bakery",
+    tags: ["artisan", "rustic", "bread", "craft"],
+    design: {
+      shape: "CLEAN",
+      primaryColor: "#5d4037",
+      secondaryColor: "#d7ccc8",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "STAMPS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "fine-blush",
+    name: "Rose & Ivory",
+    description: "Soft blush and ivory — modern fine dining with feminine elegance",
+    category: "fine-dining",
+    tags: ["blush", "elegant", "feminine", "modern"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#880e4f",
+      secondaryColor: "#f8bbd0",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "CIRCLES",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  // ── POINTS: 7 Templates ──────────────────────────────────
+
+  {
+    id: "points-progress-pro",
+    name: "Progress Pro",
+    description: "Energetic green gradient with a thick bar — built for casual dining loyalty",
+    category: "casual",
+    tags: ["progress", "green", "energy", "gradient"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#1b5e20",
+      secondaryColor: "#69f0ae",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "points-sleek-track",
+    name: "Sleek Track",
+    description: "Dark and refined with a thin progress bar — versatile for any venue",
+    category: "general",
+    tags: ["dark", "minimal", "thin", "sleek"],
+    design: {
+      shape: "CLEAN",
+      primaryColor: "#121212",
+      secondaryColor: "#e0e0e0",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "points-neon-progress",
+    name: "Neon Progress",
+    description: "Neon pink and purple bar — electric nightlife energy",
+    category: "bar",
+    tags: ["neon", "bar", "nightlife", "electric"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#0d0d0d",
+      secondaryColor: "#e040fb",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "points-nature-path",
+    name: "Nature Path",
+    description: "Earthy greens and warm browns — grounded and organic cafe feel",
+    category: "cafe",
+    tags: ["earthy", "organic", "green", "natural"],
+    design: {
+      shape: "CLEAN",
+      primaryColor: "#33691e",
+      secondaryColor: "#dcedc8",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "points-ice-cream-dash",
+    name: "Ice Cream Dash",
+    description: "Pastel gradient bar — playful and sweet for dessert counters",
+    category: "bakery",
+    tags: ["pastel", "sweet", "ice cream", "playful"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#fce4ec",
+      secondaryColor: "#e1bee7",
+      textColor: "#4a148c",
+      patternStyle: "DOTS",
+      progressStyle: "NUMBERS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "points-power-meter",
+    name: "Power Meter",
+    description: "Bold red and orange bar — high-energy for fast-casual brands",
+    category: "casual",
+    tags: ["bold", "red", "orange", "energy", "fast-casual"],
+    design: {
+      shape: "INFO_RICH",
+      primaryColor: "#b71c1c",
+      secondaryColor: "#ff8f00",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "points-zen-flow",
+    name: "Zen Flow",
+    description: "Minimal thin bar with muted tones — refined for fine dining",
+    category: "fine-dining",
+    tags: ["minimal", "zen", "muted", "refined"],
+    design: {
+      shape: "CLEAN",
+      primaryColor: "#1c1c1e",
+      secondaryColor: "#8e8e93",
+      textColor: "#f2f2f7",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  // ── TIER: 5 Templates ────────────────────────────────────
+
+  {
+    id: "tier-gold-club",
+    name: "Gold Club",
+    description: "Classic black and gold shield — the mark of a premium member",
+    category: "fine-dining",
+    tags: ["gold", "shield", "premium", "classic"],
+    design: {
+      shape: "INFO_RICH",
+      primaryColor: "#1a1a2e",
+      secondaryColor: "#c9a96e",
+      textColor: "#f5f0e8",
+      patternStyle: "GEOMETRIC",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "tier-vip-lounge",
+    name: "VIP Lounge",
+    description: "Dark purple with a star badge — for bars with elite regulars",
+    category: "bar",
+    tags: ["vip", "dark", "purple", "star", "nightlife"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#1a0030",
+      secondaryColor: "#9c27b0",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "tier-elite-status",
+    name: "Elite Status",
+    description: "Silver and navy with a circle badge — professional and versatile",
+    category: "general",
+    tags: ["silver", "navy", "circle", "professional"],
+    design: {
+      shape: "CLEAN",
+      primaryColor: "#1a237e",
+      secondaryColor: "#90caf9",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "tier-crown-tier",
+    name: "Crown Tier",
+    description: "Burgundy and gold shield — regal and aspirational",
+    category: "fine-dining",
+    tags: ["burgundy", "gold", "regal", "shield", "exclusive"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#4a0010",
+      secondaryColor: "#c9a96e",
+      textColor: "#f5f0e8",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "tier-level-up",
+    name: "Level Up",
+    description: "Bold gradient with a star badge — gamified loyalty for casual spots",
+    category: "casual",
+    tags: ["gamified", "gradient", "star", "bold", "progress"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#1565c0",
+      secondaryColor: "#00bfa5",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  // ── COUPON: 5 Templates ──────────────────────────────────
+
+  {
+    id: "coupon-flash-deal",
+    name: "Flash Deal",
+    description: "Bold red ticket style — urgent and attention-grabbing",
+    category: "general",
+    tags: ["bold", "red", "urgent", "deal", "ticket"],
+    design: {
+      shape: "INFO_RICH",
+      primaryColor: "#c62828",
+      secondaryColor: "#ffffff",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "coupon-happy-hour",
+    name: "Happy Hour",
+    description: "Neon ticket style — glowing deals for bar promotions",
+    category: "bar",
+    tags: ["neon", "bar", "happy hour", "ticket", "nightlife"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#0d0d0d",
+      secondaryColor: "#00e676",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "coupon-sweet-treat",
+    name: "Sweet Treat",
+    description: "Pastel bold style — irresistible offers for bakeries",
+    category: "bakery",
+    tags: ["pastel", "sweet", "bakery", "bold"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#f06292",
+      secondaryColor: "#fff8e1",
+      textColor: "#4e342e",
+      patternStyle: "DOTS",
+      progressStyle: "NUMBERS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "coupon-first-timer",
+    name: "First Timer",
+    description: "Warm minimal style — a welcoming offer for new cafe visitors",
+    category: "cafe",
+    tags: ["warm", "minimal", "welcome", "cafe", "first visit"],
+    design: {
+      shape: "CLEAN",
+      primaryColor: "#fff8f0",
+      secondaryColor: "#795548",
+      textColor: "#3e2723",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "coupon-vip-offer",
+    name: "VIP Offer",
+    description: "Dark and bold — an exclusive offer for fine dining guests",
+    category: "fine-dining",
+    tags: ["vip", "dark", "exclusive", "bold", "fine-dining"],
+    design: {
+      shape: "INFO_RICH",
+      primaryColor: "#0a0a0a",
+      secondaryColor: "#c9a96e",
+      textColor: "#f5f0e8",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  // ── GENERAL / MULTI-TYPE: 3 Templates ───────────────────
+
+  {
+    id: "general-universal-clean",
+    name: "Universal Clean",
+    description: "Ultra minimal white card — works for any brand, any context",
+    category: "general",
+    tags: ["minimal", "white", "universal", "clean", "blank"],
+    design: {
+      shape: "CLEAN",
+      primaryColor: "#ffffff",
+      secondaryColor: "#f5f5f5",
+      textColor: "#111111",
+      patternStyle: "NONE",
+      progressStyle: "STAMPS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "general-restaurant-classic",
+    name: "Restaurant Classic",
+    description: "Serif type and deep red — a timeless traditional loyalty card",
+    category: "general",
+    tags: ["traditional", "classic", "serif", "red", "timeless"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#8b0000",
+      secondaryColor: "#f5f0e8",
+      textColor: "#f5f0e8",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "general-modern-flex",
+    name: "Modern Flex",
+    description: "Contemporary gradient with a points bar — adapts to any modern restaurant",
+    category: "general",
+    tags: ["modern", "gradient", "points", "flexible", "contemporary"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#1e3a5f",
+      secondaryColor: "#00b4d8",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: null,
+    },
+  },
+  // ── STAMP GRID: 4 Templates ────────────────────────────────
+
+  {
+    id: "stamp-grid-coffee",
+    name: "Coffee Stamps",
+    description: "Classic coffee cup stamps on a dark background — the digital stamp card",
+    category: "cafe",
+    tags: ["coffee", "stamps", "grid", "visual", "cafe"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#3e2723",
+      secondaryColor: "#a1887f",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "TITLE_CASE",
+      palettePreset: "espresso",
+      useStampGrid: true,
+      stampGridConfig: {
+        stampIcon: "coffee",
+        customStampIconUrl: null,
+        rewardIcon: "reward-star",
+        stampShape: "circle",
+        filledStyle: "icon",
+        stampIconScale: 0.6,
+        useStripBackground: false,
+      },
+    },
+  },
+
+  {
+    id: "stamp-grid-pizza",
+    name: "Pizza Tracker",
+    description: "Rounded pizza stamps — track your way to a free slice",
+    category: "casual",
+    tags: ["pizza", "stamps", "grid", "fun", "casual"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#b71c1c",
+      secondaryColor: "#ffeb3b",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+      useStampGrid: true,
+      stampGridConfig: {
+        stampIcon: "pizza",
+        customStampIconUrl: null,
+        rewardIcon: "sparkles",
+        stampShape: "rounded-square",
+        filledStyle: "icon-with-border",
+        stampIconScale: 0.6,
+        useStripBackground: false,
+      },
+    },
+  },
+
+  {
+    id: "stamp-grid-burger",
+    name: "Burger Badges",
+    description: "Bold square burger badges — earn your way to a free meal",
+    category: "casual",
+    tags: ["burger", "stamps", "grid", "bold", "badges"],
+    design: {
+      shape: "INFO_RICH",
+      primaryColor: "#1a1a1a",
+      secondaryColor: "#ff8f00",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+      useStampGrid: true,
+      stampGridConfig: {
+        stampIcon: "beef",
+        customStampIconUrl: null,
+        rewardIcon: "trophy",
+        stampShape: "square",
+        filledStyle: "icon",
+        stampIconScale: 0.6,
+        useStripBackground: false,
+      },
+    },
+  },
+
+  {
+    id: "stamp-grid-drinks",
+    name: "Drink Collector",
+    description: "Collect drink stamps with a clean minimal look",
+    category: "bar",
+    tags: ["drinks", "stamps", "grid", "minimal", "bar"],
+    design: {
+      shape: "SHOWCASE",
+      primaryColor: "#0d0d0d",
+      secondaryColor: "#e040fb",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+      useStampGrid: true,
+      stampGridConfig: {
+        stampIcon: "cup-soda",
+        customStampIconUrl: null,
+        rewardIcon: "gift",
+        stampShape: "circle",
+        filledStyle: "solid",
+        stampIconScale: 0.6,
+        useStripBackground: false,
+      },
+    },
   },
 ]
+
+// ─── Helpers ─────────────────────────────────────────────
 
 /** Find a template by ID */
 export function getTemplateById(id: string): CardTemplate | undefined {
   return CARD_TEMPLATES.find((t) => t.id === id)
-}
-
-/**
- * Convert a template's stripDesign to a CSS background value
- * for use in the client-side preview (no server-side image generation needed).
- */
-export function templateStripToCss(stripDesign: TemplateStripDesign): string | null {
-  switch (stripDesign.type) {
-    case "gradient": {
-      const stops = stripDesign.stops
-        .map((s) => `${s.color} ${s.position}%`)
-        .join(", ")
-      return `linear-gradient(${stripDesign.angle}deg, ${stops})`
-    }
-    case "image":
-      return `url(${stripDesign.assetPath}-apple.jpg) center/cover`
-    case "pattern":
-    case "none":
-      return null
-  }
 }

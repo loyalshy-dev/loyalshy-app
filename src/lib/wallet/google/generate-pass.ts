@@ -3,7 +3,7 @@ import "server-only"
 import { buildClassId, buildObjectId, buildProgramClassId, buildEnrollmentObjectId } from "./constants"
 import { buildSaveUrl } from "./jwt-utils"
 import type { CardDesignData, CardShape } from "../card-design"
-import { getFieldLayout, formatProgressValue, formatLabel } from "../card-design"
+import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters } from "../card-design"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -20,6 +20,7 @@ export type GooglePassGenerationInput = {
   hasAvailableReward: boolean
   restaurantName: string
   restaurantLogo: string | null
+  restaurantLogoGoogle: string | null
   brandColor: string | null
   rewardDescription: string
   rewardExpiryDays: number
@@ -278,11 +279,12 @@ function buildGenericObject(input: GooglePassGenerationInput) {
     ],
   }
 
-  // Add logo if available
-  if (input.restaurantLogo) {
+  // Add logo if available — prefer Google-specific, fall back to general
+  const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
+  if (googleLogo) {
     genericObject.logo = {
       sourceUri: {
-        uri: input.restaurantLogo,
+        uri: googleLogo,
       },
       contentDescription: {
         defaultValue: {
@@ -293,10 +295,20 @@ function buildGenericObject(input: GooglePassGenerationInput) {
     }
   }
 
-  // Hero image: use strip image for SHOWCASE and INFO_RICH, or fall back to logo
-  const heroImageUrl = layout.google.showHeroImage
-    ? (design?.stripImageGoogle ?? design?.generatedStripGoogle ?? input.restaurantLogo)
-    : input.restaurantLogo
+  // Hero image: use dynamic stamp grid route, static strip image, or logo
+  let heroImageUrl: string | null = null
+  if (layout.google.showHeroImage) {
+    const stripFiltersG = design ? parseStripFilters(design.editorConfig) : { useStampGrid: false }
+    if ((stripFiltersG.useStampGrid || design?.patternStyle === "STAMP_GRID") && input.enrollmentId) {
+      // Dynamic stamp grid: Google fetches from our API route each time
+      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.fidelio.app"
+      heroImageUrl = `${baseUrl}/api/wallet/strip/${input.enrollmentId}`
+    } else {
+      heroImageUrl = design?.stripImageGoogle ?? design?.generatedStripGoogle ?? googleLogo
+    }
+  } else {
+    heroImageUrl = googleLogo
+  }
 
   if (heroImageUrl) {
     genericObject.heroImage = {

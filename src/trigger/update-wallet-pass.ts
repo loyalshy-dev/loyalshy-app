@@ -59,6 +59,8 @@ export const updateWalletPassTask = task({
                   brandColor: true,
                   secondaryColor: true,
                   logo: true,
+                  logoApple: true,
+                  logoGoogle: true,
                   phone: true,
                   website: true,
                 },
@@ -189,10 +191,12 @@ type CardDesignRow = {
   primaryColor: string | null
   stripImageGoogle: string | null
   generatedStripGoogle: string | null
+  patternStyle: string
   shape: string
   progressStyle: string
   labelFormat: string
   customProgressLabel: string | null
+  editorConfig: unknown
 } | null
 
 async function patchGooglePass(
@@ -251,18 +255,42 @@ async function patchGooglePass(
     ],
   }
 
+  // For stamp grid, always update hero image on VISIT (cache-bust)
+  const { parseStripFilters } = await import("@/lib/wallet/card-design")
+  const triggerStripFilters = parseStripFilters(cardDesign?.editorConfig)
+  const isTriggerStampGrid = triggerStripFilters.useStampGrid || cardDesign?.patternStyle === "stamp_grid" || cardDesign?.patternStyle === "STAMP_GRID"
+  if (isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
+    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.fidelio.app"
+    patchBody.heroImage = {
+      sourceUri: { uri: `${baseUrl}/api/wallet/strip/${enrollment.id}?v=${Date.now()}` },
+      contentDescription: {
+        defaultValue: { language: "en", value: "Stamp progress" },
+      },
+    }
+  }
+
   // For design changes, also update colors and hero image
   if (updateType === "DESIGN_CHANGE" || updateType === "PROGRAM_CHANGE") {
     const hexBg = cardDesign?.primaryColor ?? enrollment.loyaltyProgram.restaurant.brandColor ?? "#1a1a2e"
     patchBody.hexBackgroundColor = hexBg
 
-    const heroUrl = cardDesign?.stripImageGoogle ?? cardDesign?.generatedStripGoogle
-    if (heroUrl && cardDesign?.shape !== "CLEAN") {
+    if (isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
+      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.fidelio.app"
       patchBody.heroImage = {
-        sourceUri: { uri: heroUrl },
+        sourceUri: { uri: `${baseUrl}/api/wallet/strip/${enrollment.id}?v=${Date.now()}` },
         contentDescription: {
-          defaultValue: { language: "en", value: "Card design" },
+          defaultValue: { language: "en", value: "Stamp progress" },
         },
+      }
+    } else {
+      const heroUrl = cardDesign?.stripImageGoogle ?? cardDesign?.generatedStripGoogle
+      if (heroUrl && cardDesign?.shape !== "CLEAN") {
+        patchBody.heroImage = {
+          sourceUri: { uri: heroUrl },
+          contentDescription: {
+            defaultValue: { language: "en", value: "Card design" },
+          },
+        }
       }
     }
   }

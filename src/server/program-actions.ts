@@ -3,7 +3,7 @@
 import { db } from "@/lib/db"
 import { assertRestaurantAccess, assertRestaurantRole, getRestaurantForUser } from "@/lib/dal"
 import type { ProgramWithDesign } from "@/server/settings-actions"
-import type { CardShape, PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
+import type { CardType, CardShape, PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
 
 // ─── Types ─────────────────────────────────────────────────
 
@@ -18,6 +18,18 @@ export type ProgramListItem = {
   endsAt: Date | null
   createdAt: Date
   enrollmentCount: number
+  cardDesign: {
+    shape: string
+    primaryColor: string | null
+    secondaryColor: string | null
+    textColor: string | null
+    patternStyle: string
+    progressStyle: string
+    labelFormat: string
+    customProgressLabel: string | null
+    stripImageUrl: string | null
+    editorConfig: unknown
+  } | null
 }
 
 export type ProgramDetail = {
@@ -52,6 +64,20 @@ export async function getProgramsList(): Promise<ProgramListItem[]> {
       _count: {
         select: { enrollments: true },
       },
+      cardDesign: {
+        select: {
+          shape: true,
+          primaryColor: true,
+          secondaryColor: true,
+          textColor: true,
+          patternStyle: true,
+          progressStyle: true,
+          labelFormat: true,
+          customProgressLabel: true,
+          stripImageUrl: true,
+          editorConfig: true,
+        },
+      },
     },
     orderBy: { createdAt: "asc" },
   })
@@ -71,6 +97,7 @@ export async function getProgramsList(): Promise<ProgramListItem[]> {
       endsAt: p.endsAt,
       createdAt: p.createdAt,
       enrollmentCount: p._count.enrollments,
+      cardDesign: p.cardDesign,
     }))
     .sort((a, b) => {
       const sa = statusOrder[a.status] ?? 3
@@ -168,6 +195,7 @@ export async function getProgramForSettings(programId: string): Promise<ProgramW
     enrollmentCount: program._count.enrollments,
     cardDesign: program.cardDesign
       ? {
+          cardType: program.cardDesign.cardType as CardType,
           shape: program.cardDesign.shape as CardShape,
           primaryColor: program.cardDesign.primaryColor,
           secondaryColor: program.cardDesign.secondaryColor,

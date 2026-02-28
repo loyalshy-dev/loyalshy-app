@@ -2,8 +2,9 @@ import crypto from "crypto"
 
 // ─── Types ──────────────────────────────────────────────────
 
+export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON"
 export type CardShape = "CLEAN" | "SHOWCASE" | "INFO_RICH"
-export type PatternStyle = "NONE" | "DOTS" | "WAVES" | "GEOMETRIC" | "CHEVRON" | "CROSSHATCH" | "DIAMONDS" | "CONFETTI" | "SOLID_PRIMARY" | "SOLID_SECONDARY"
+export type PatternStyle = "NONE" | "DOTS" | "WAVES" | "GEOMETRIC" | "CHEVRON" | "CROSSHATCH" | "DIAMONDS" | "CONFETTI" | "SOLID_PRIMARY" | "SOLID_SECONDARY" | "STAMP_GRID"
 export type ProgressStyle = "NUMBERS" | "CIRCLES" | "SQUARES" | "STARS" | "STAMPS" | "PERCENTAGE" | "REMAINING"
 export type FontFamily = "SANS" | "SERIF" | "ROUNDED" | "MONO"
 export type LabelFormat = "UPPERCASE" | "TITLE_CASE" | "LOWERCASE"
@@ -15,7 +16,112 @@ export type SocialLinks = {
   x?: string
 }
 
+// ─── Stamp Grid Config ─────────────────────────────────────
+
+export type StampGridConfig = {
+  stampIcon: string      // Lucide icon ID (e.g. "coffee", "pizza")
+  customStampIconUrl: string | null  // Vercel Blob URL for uploaded custom icon
+  rewardIcon: string     // Lucide icon ID for the reward slot
+  stampShape: "circle" | "rounded-square" | "square"
+  filledStyle: "icon" | "icon-with-border" | "solid"
+  stampIconScale: number // 0.4–0.9, controls icon size within stamp slot (default 0.6)
+  useStripBackground: boolean  // overlay grid on strip image instead of gradient
+}
+
+export const DEFAULT_STAMP_GRID_CONFIG: StampGridConfig = {
+  stampIcon: "coffee",
+  customStampIconUrl: null,
+  rewardIcon: "gift",
+  stampShape: "circle",
+  filledStyle: "icon",
+  stampIconScale: 0.6,
+  useStripBackground: false,
+}
+
+/** Maps legacy raster filenames to Lucide icon IDs for backward compatibility */
+const LEGACY_ICON_MAP: Record<string, string> = {
+  "cafe.jpg": "coffee",
+  "beer.jpg": "beer",
+  "burger.jpg": "beef",
+  "pizza.jpg": "pizza",
+  "pizza.png": "pizza",
+  "drink.jpg": "cup-soda",
+  "chili.avif": "flame",
+}
+
+/** Parse strip image filter settings from editorConfig JSON */
+export type StripFilters = {
+  stripOpacity: number
+  stripGrayscale: boolean
+  useStampGrid: boolean
+  stripColor1: string | null
+  stripColor2: string | null
+  stripFill: "flat" | "gradient"
+  patternColor: string | null
+  stripImagePosition: { x: number; y: number }
+  stripImageZoom: number
+}
+
+export function parseStripFilters(editorConfig: unknown): StripFilters {
+  if (!editorConfig || typeof editorConfig !== "object") return { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient", patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
+  const obj = editorConfig as Record<string, unknown>
+  const rawPos = obj.stripImagePosition
+  let posX = 0.5
+  let posY = 0.5
+  if (rawPos && typeof rawPos === "object") {
+    const p = rawPos as Record<string, unknown>
+    if (typeof p.x === "number") posX = Math.max(0, Math.min(1, p.x))
+    if (typeof p.y === "number") posY = Math.max(0, Math.min(1, p.y))
+  }
+  const rawZoom = obj.stripImageZoom
+  const zoom = typeof rawZoom === "number" ? Math.max(1, Math.min(3, rawZoom)) : 1
+  return {
+    stripOpacity: typeof obj.stripOpacity === "number" ? Math.max(0, Math.min(1, obj.stripOpacity)) : 1,
+    stripGrayscale: typeof obj.stripGrayscale === "boolean" ? obj.stripGrayscale : false,
+    useStampGrid: typeof obj.useStampGrid === "boolean" ? obj.useStampGrid : false,
+    stripColor1: typeof obj.stripColor1 === "string" ? obj.stripColor1 : null,
+    stripColor2: typeof obj.stripColor2 === "string" ? obj.stripColor2 : null,
+    stripFill: obj.stripFill === "flat" ? "flat" : "gradient",
+    patternColor: typeof obj.patternColor === "string" ? obj.patternColor : null,
+    stripImagePosition: { x: posX, y: posY },
+    stripImageZoom: zoom,
+  }
+}
+
+/** Parse StampGridConfig from editorConfig JSON, returning defaults for missing fields */
+export function parseStampGridConfig(editorConfig: unknown): StampGridConfig {
+  if (!editorConfig || typeof editorConfig !== "object") return { ...DEFAULT_STAMP_GRID_CONFIG }
+  const obj = editorConfig as Record<string, unknown>
+  const cfg = (obj.stampGridConfig ?? obj) as Record<string, unknown>
+
+  const rawIcon = typeof cfg.stampIcon === "string" ? cfg.stampIcon : DEFAULT_STAMP_GRID_CONFIG.stampIcon
+  const stampIcon = LEGACY_ICON_MAP[rawIcon] ?? rawIcon
+
+  // Legacy emoji rewardIcon values (single/double char) → fall back to default icon ID
+  const rawReward = typeof cfg.rewardIcon === "string" ? cfg.rewardIcon : DEFAULT_STAMP_GRID_CONFIG.rewardIcon
+  const rewardIcon = rawReward.length <= 2 ? DEFAULT_STAMP_GRID_CONFIG.rewardIcon : rawReward
+
+  return {
+    stampIcon,
+    customStampIconUrl: typeof cfg.customStampIconUrl === "string" ? cfg.customStampIconUrl : null,
+    rewardIcon,
+    stampShape: (cfg.stampShape === "circle" || cfg.stampShape === "rounded-square" || cfg.stampShape === "square")
+      ? cfg.stampShape
+      : DEFAULT_STAMP_GRID_CONFIG.stampShape,
+    filledStyle: (cfg.filledStyle === "icon" || cfg.filledStyle === "icon-with-border" || cfg.filledStyle === "solid")
+      ? cfg.filledStyle
+      : DEFAULT_STAMP_GRID_CONFIG.filledStyle,
+    stampIconScale: typeof cfg.stampIconScale === "number"
+      ? Math.max(0.4, Math.min(0.9, cfg.stampIconScale))
+      : DEFAULT_STAMP_GRID_CONFIG.stampIconScale,
+    useStripBackground: typeof cfg.useStripBackground === "boolean" ? cfg.useStripBackground : false,
+  }
+}
+
+// ─── Card Design Data ──────────────────────────────────────
+
 export type CardDesignData = {
+  cardType: CardType
   shape: CardShape
   primaryColor: string
   secondaryColor: string
@@ -37,9 +143,11 @@ export type CardDesignData = {
   socialLinks: SocialLinks
   customMessage: string | null
   designHash: string
+  editorConfig: unknown
 }
 
 export type CardDesignRow = {
+  cardType: string
   shape: string
   primaryColor: string | null
   secondaryColor: string | null
@@ -61,6 +169,7 @@ export type CardDesignRow = {
   socialLinks: unknown
   customMessage: string | null
   designHash: string
+  editorConfig: unknown
 }
 
 // ─── Palette Presets ────────────────────────────────────────
@@ -123,22 +232,25 @@ export function formatProgressValue(
 ): string {
   if (hasReward) return rewardLabel ?? "Reward Available!"
 
+  // Symbol styles use a fixed 10-segment bar for consistent wallet pass rendering
+  const SEGMENTS = 10
+  const filled = total > 0 ? Math.round((current / total) * SEGMENTS) : 0
+  const empty = SEGMENTS - filled
+
   switch (style) {
     case "CIRCLES":
-      return "●".repeat(current) + "○".repeat(Math.max(0, total - current))
+      return "●".repeat(filled) + "○".repeat(empty)
     case "SQUARES":
-      return "■".repeat(current) + "□".repeat(Math.max(0, total - current))
+      return "■".repeat(filled) + "□".repeat(empty)
     case "STARS":
-      return "★".repeat(current) + "☆".repeat(Math.max(0, total - current))
+      return "★".repeat(filled) + "☆".repeat(empty)
     case "STAMPS":
-      return "◉".repeat(current) + "◎".repeat(Math.max(0, total - current))
+      return "◉".repeat(filled) + "◎".repeat(empty)
     case "PERCENTAGE":
       return `${total > 0 ? Math.round((current / total) * 100) : 0}%`
     case "REMAINING": {
       const remaining = Math.max(0, total - current)
-      return remaining === 1
-        ? "1 more visit to go!"
-        : `${remaining} more visits to go!`
+      return remaining === 1 ? "1 visit left" : `${remaining} visits left`
     }
     case "NUMBERS":
     default:
@@ -167,6 +279,7 @@ export function formatLabel(label: string, format: LabelFormat): string {
 
 /** Compute a SHA-256 hash of design-relevant fields, truncated to 16 chars */
 export function computeDesignHash(design: {
+  cardType?: string
   shape: string
   primaryColor: string | null
   secondaryColor: string | null
@@ -184,8 +297,10 @@ export function computeDesignHash(design: {
   mapAddress: string | null
   socialLinks: unknown
   customMessage: string | null
+  editorConfig?: unknown
 }): string {
   const payload = JSON.stringify({
+    ct: design.cardType ?? "STAMP",
     s: design.shape,
     p: design.primaryColor,
     sc: design.secondaryColor,
@@ -203,6 +318,7 @@ export function computeDesignHash(design: {
     ma: design.mapAddress,
     sl: design.socialLinks,
     cm: design.customMessage,
+    ec: design.editorConfig ?? null,
   })
   return crypto.createHash("sha256").update(payload).digest("hex").substring(0, 16)
 }
@@ -222,6 +338,7 @@ export function resolveCardDesign(
   const text = cardDesign?.textColor ?? computeTextColor(primary)
 
   return {
+    cardType: (cardDesign?.cardType as CardType) ?? "STAMP",
     shape: (cardDesign?.shape as CardShape) ?? "CLEAN",
     primaryColor: primary,
     secondaryColor: secondary,
@@ -243,6 +360,7 @@ export function resolveCardDesign(
     socialLinks: parseSocialLinks(cardDesign?.socialLinks),
     customMessage: cardDesign?.customMessage ?? null,
     designHash: cardDesign?.designHash ?? "",
+    editorConfig: cardDesign?.editorConfig ?? {},
   }
 }
 
