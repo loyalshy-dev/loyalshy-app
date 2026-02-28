@@ -1,7 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { CARDS, QR_GRIDS, type CardData } from "./wallet-card-data"
+import { MARKETING_CARDS, MARKETING_CARD_DESIGNS } from "./wallet-card-data"
+import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 
 /* ─── Constants ────────────────────────────────────────────────────── */
 
@@ -14,172 +15,10 @@ const CARD_PEEK = 64
 const VISIBLE_CARDS = 4 // show 4 of 5 cards in stacked view
 const EXPAND_TOP = STATUS_BAR_H + 4
 
-/* ─── Wallet card (phone-sized) ────────────────────────────────────── */
+/* ─── Card dimensions inside phone ─────────────────────────────────── */
 
-function PhoneWalletCard({
-  card,
-  qrGrid,
-  expanded,
-}: {
-  card: CardData
-  qrGrid: boolean[][]
-  expanded: boolean
-}) {
-  const dotCols = 5
-  const dotSize = expanded ? "h-7" : "h-5"
-  const qrSize = expanded ? "64px" : "45px"
-
-  return (
-    <div
-      className="w-full overflow-hidden rounded-2xl"
-      style={{
-        background: `linear-gradient(145deg, ${card.primary} 0%, ${card.secondary} 100%)`,
-        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.12)`,
-      }}
-    >
-      {/* Texture overlay */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: `
-            radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-            radial-gradient(circle at 80% 85%, ${card.primary}88 0%, transparent 45%)
-          `,
-        }}
-      />
-
-      {/* Header */}
-      <div className="relative flex items-center justify-between px-3 pt-4">
-        <div>
-          <p
-            className="text-[7px] font-semibold uppercase tracking-[0.12em]"
-            style={{ color: `${card.secondary}cc` }}
-          >
-            Fidelio Loyalty
-          </p>
-          <p className="mt-0.5 text-[11px] font-semibold leading-tight text-white">
-            {card.restaurant}
-          </p>
-        </div>
-        <div
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-          style={{
-            background: "rgba(255,255,255,0.12)",
-            border: "1px solid rgba(255,255,255,0.18)",
-          }}
-          aria-hidden="true"
-        >
-          <span className="text-[9px] font-bold text-white">
-            {card.monogram}
-          </span>
-        </div>
-      </div>
-
-      {/* Divider */}
-      <div
-        className="mx-3 mt-2.5"
-        style={{ height: "1px", background: "rgba(255,255,255,0.10)" }}
-        aria-hidden="true"
-      />
-
-      {/* Visit count */}
-      <div className="px-3 pt-2.5">
-        <p
-          className="text-[8px] font-medium uppercase tracking-[0.1em]"
-          style={{ color: `${card.secondary}aa` }}
-        >
-          Visits
-        </p>
-        <p className="mt-0.5 text-xl font-bold tabular-nums leading-none text-white">
-          {card.visits}
-          <span
-            className="text-xs font-normal"
-            style={{ color: "rgba(255,255,255,0.5)" }}
-          >
-            {" "}/ {card.total}
-          </span>
-        </p>
-      </div>
-
-      {/* Progress dots */}
-      <div className="px-3 pt-2.5" aria-hidden="true">
-        <div
-          className="grid gap-1"
-          style={{ gridTemplateColumns: `repeat(${dotCols}, 1fr)` }}
-        >
-          {Array.from({ length: card.total }, (_, i) => {
-            const filled = i < card.visits
-            return (
-              <div
-                key={i}
-                className={`${dotSize} w-full rounded-md`}
-                style={
-                  filled
-                    ? {
-                        background: "rgba(255,255,255,0.9)",
-                        boxShadow: `0 1px 4px ${card.primary}66`,
-                      }
-                    : {
-                        background: "rgba(255,255,255,0.12)",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                      }
-                }
-              />
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Divider */}
-      <div
-        className="mx-3 mt-2.5"
-        style={{ height: "1px", background: "rgba(255,255,255,0.10)" }}
-        aria-hidden="true"
-      />
-
-      {/* Reward text */}
-      <div className="px-3 pt-2.5">
-        <p
-          className="text-[7px] font-semibold uppercase tracking-[0.12em]"
-          style={{ color: `${card.secondary}aa` }}
-        >
-          Your next reward
-        </p>
-        <p className="mt-0.5 text-[11px] font-medium leading-snug text-white">
-          {card.reward}
-        </p>
-      </div>
-
-      {/* QR code */}
-      <div className="flex justify-center px-3 pt-2.5 pb-3" aria-hidden="true">
-        <div
-          className="rounded-lg p-1.5"
-          style={{ background: "rgba(255,255,255,0.92)" }}
-        >
-          <div
-            className="grid gap-px"
-            style={{
-              gridTemplateColumns: "repeat(9, 1fr)",
-              width: qrSize,
-              height: qrSize,
-            }}
-          >
-            {qrGrid.flat().map((filled, i) => (
-              <div
-                key={i}
-                style={{
-                  background: filled ? "#1a1a1a" : "transparent",
-                  borderRadius: "0.5px",
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+const PHONE_CARD_W = SCREEN_W - 16 // 236 (px-2 = 8px each side)
+const PHONE_CARD_H = Math.round(PHONE_CARD_W * (11 / 8)) // ~325
 
 /* ─── Status bar icons ─────────────────────────────────────────────── */
 
@@ -327,7 +166,7 @@ export function PhoneMockupInteractive() {
     : "transform 350ms cubic-bezier(0.32, 0, 0.15, 1), opacity 250ms ease, border-radius 350ms ease"
 
   // Only show first VISIBLE_CARDS in the stacked view
-  const visibleCards = CARDS.slice(0, VISIBLE_CARDS)
+  const visibleCards = MARKETING_CARDS.slice(0, VISIBLE_CARDS)
 
   return (
     <div className="flex items-center justify-center">
@@ -390,6 +229,7 @@ export function PhoneMockupInteractive() {
                 }}
               >
                 {visibleCards.map((card, i) => {
+                  const design = MARKETING_CARD_DESIGNS[i]
                   const isThisExpanded = expandedIndex === i
                   const someOtherExpanded = isExpanded && !isThisExpanded
 
@@ -407,7 +247,7 @@ export function PhoneMockupInteractive() {
                       role="button"
                       tabIndex={isExpanded && !isThisExpanded ? -1 : 0}
                       aria-expanded={isThisExpanded}
-                      aria-label={`${card.restaurant} — ${card.visits} of ${card.total} visits. ${isThisExpanded ? "Press Escape or Back to collapse." : "Tap to expand."}`}
+                      aria-label={`${card.restaurantName} — ${card.currentVisits} of ${card.totalVisits} visits. ${isThisExpanded ? "Press Escape or Back to collapse." : "Tap to expand."}`}
                       className="absolute left-0 right-0 px-2 outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-inset"
                       style={{
                         transform: `translateY(${y}px)`,
@@ -428,10 +268,18 @@ export function PhoneMockupInteractive() {
                         }
                       }}
                     >
-                      <PhoneWalletCard
-                        card={card}
-                        qrGrid={QR_GRIDS[i]}
-                        expanded={isThisExpanded}
+                      <WalletPassRenderer
+                        design={design}
+                        compact
+                        width={PHONE_CARD_W}
+                        height={PHONE_CARD_H}
+                        format="apple"
+                        restaurantName={card.restaurantName}
+                        currentVisits={card.currentVisits}
+                        totalVisits={card.totalVisits}
+                        rewardDescription={card.rewardDescription}
+                        customerName={card.customerName}
+                        memberSince={card.memberSince}
                       />
                     </div>
                   )

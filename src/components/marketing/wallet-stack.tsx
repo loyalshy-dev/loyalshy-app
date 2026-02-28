@@ -1,7 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { CARDS, QR_GRIDS, type CardData } from "./wallet-card-data"
+import { MARKETING_CARDS, MARKETING_CARD_DESIGNS } from "./wallet-card-data"
+import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
 
@@ -42,7 +43,6 @@ function getCardTransform(
 /* ─── Single loyalty card ──────────────────────────────────────────── */
 
 function LoyaltyCard({
-  card,
   index,
   style,
   isActive,
@@ -50,8 +50,9 @@ function LoyaltyCard({
   onClick,
   onHover,
   onLeave,
+  cardW,
+  cardH,
 }: {
-  card: CardData
   index: number
   style: React.CSSProperties
   isActive: boolean
@@ -59,22 +60,25 @@ function LoyaltyCard({
   onClick: () => void
   onHover: () => void
   onLeave: () => void
+  cardW: number
+  cardH: number
 }) {
-  const dotCols = 5
+  const card = MARKETING_CARDS[index]
+  const design = MARKETING_CARD_DESIGNS[index]
 
   return (
     <div
       role="img"
-      aria-label={`${card.restaurant} loyalty card showing ${card.visits} of ${card.total} visits`}
+      aria-label={`${card.restaurantName} loyalty card showing ${card.currentVisits} of ${card.totalVisits} visits`}
       className="absolute left-0 top-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       style={{
         ...style,
         transition: "transform 250ms ease-out, box-shadow 250ms ease-out, filter 250ms ease-out",
         filter: isHovered && !isActive
-          ? `drop-shadow(0 8px 24px ${card.primary}88)`
+          ? `drop-shadow(0 8px 24px ${design.primaryColor}88)`
           : isActive
-            ? `drop-shadow(0 16px 48px ${card.primary}66)`
-            : `drop-shadow(0 4px 12px ${card.primary}44)`,
+            ? `drop-shadow(0 16px 48px ${design.primaryColor}66)`
+            : `drop-shadow(0 4px 12px ${design.primaryColor}44)`,
       }}
       tabIndex={isActive ? -1 : 0}
       onClick={onClick}
@@ -87,151 +91,19 @@ function LoyaltyCard({
         }
       }}
     >
-      {/* Card body */}
-      <div
-        className="relative w-[220px] overflow-hidden rounded-2xl sm:w-[240px] lg:w-[260px]"
-        style={{
-          background: `linear-gradient(145deg, ${card.primary} 0%, ${card.secondary}44 100%)`,
-          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.12)`,
-          aspectRatio: "260 / 340",
-        }}
-      >
-        {/* Inner texture overlay */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: `
-              radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 85%, ${card.primary}88 0%, transparent 45%)
-            `,
-          }}
-        />
-
-        {/* Header */}
-        <div className="relative flex items-center justify-between px-4 pt-5">
-          <div>
-            <p
-              className="text-[8px] font-semibold uppercase tracking-[0.12em]"
-              style={{ color: `${card.secondary}cc` }}
-            >
-              Fidelio Loyalty
-            </p>
-            <p
-              className="mt-0.5 text-[13px] font-semibold leading-tight text-white"
-            >
-              {card.restaurant}
-            </p>
-          </div>
-          <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-            style={{
-              background: "rgba(255,255,255,0.12)",
-              border: "1px solid rgba(255,255,255,0.18)",
-            }}
-            aria-hidden="true"
-          >
-            <span className="text-[10px] font-bold text-white">
-              {card.monogram}
-            </span>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div
-          className="mx-4 mt-3"
-          style={{ height: "1px", background: "rgba(255,255,255,0.10)" }}
-          aria-hidden="true"
-        />
-
-        {/* Visit count */}
-        <div className="px-4 pt-3">
-          <p
-            className="text-[9px] font-medium uppercase tracking-[0.1em]"
-            style={{ color: `${card.secondary}aa` }}
-          >
-            Visits
-          </p>
-          <p className="mt-0.5 text-2xl font-bold tabular-nums leading-none text-white">
-            {card.visits}
-            <span
-              className="text-sm font-normal"
-              style={{ color: "rgba(255,255,255,0.5)" }}
-            >
-              {" "}/ {card.total}
-            </span>
-          </p>
-        </div>
-
-        {/* Progress dots */}
-        <div className="px-4 pt-3" aria-hidden="true">
-          <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${dotCols}, 1fr)` }}>
-            {Array.from({ length: card.total }, (_, i) => {
-              const filled = i < card.visits
-              return (
-                <div
-                  key={i}
-                  className="h-5 w-full rounded-md"
-                  style={
-                    filled
-                      ? {
-                          background: "rgba(255,255,255,0.9)",
-                          boxShadow: `0 1px 4px ${card.primary}66`,
-                        }
-                      : {
-                          background: "rgba(255,255,255,0.12)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                        }
-                  }
-                />
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div
-          className="mx-4 mt-3"
-          style={{ height: "1px", background: "rgba(255,255,255,0.10)" }}
-          aria-hidden="true"
-        />
-
-        {/* Reward text */}
-        <div className="px-4 pt-3">
-          <p
-            className="text-[8px] font-semibold uppercase tracking-[0.12em]"
-            style={{ color: `${card.secondary}aa` }}
-          >
-            Your next reward
-          </p>
-          <p className="mt-1 text-[12px] font-medium leading-snug text-white">
-            {card.reward}
-          </p>
-        </div>
-
-        {/* QR code */}
-        <div className="flex justify-center px-4 pt-3 pb-4" aria-hidden="true">
-          <div
-            className="rounded-lg p-1.5"
-            style={{ background: "rgba(255,255,255,0.92)" }}
-          >
-            <div
-              className="grid gap-px"
-              style={{ gridTemplateColumns: "repeat(9, 1fr)", width: "45px", height: "45px" }}
-            >
-              {QR_GRIDS[index].flat().map((filled, i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: filled ? "#1a1a1a" : "transparent",
-                    borderRadius: "0.5px",
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      <WalletPassRenderer
+        design={design}
+        compact
+        width={cardW}
+        height={cardH}
+        format="apple"
+        restaurantName={card.restaurantName}
+        currentVisits={card.currentVisits}
+        totalVisits={card.totalVisits}
+        rewardDescription={card.rewardDescription}
+        customerName={card.customerName}
+        memberSince={card.memberSince}
+      />
     </div>
   )
 }
@@ -270,7 +142,7 @@ export function WalletStack() {
 
     timerRef.current = setInterval(() => {
       if (!interactedRef.current) {
-        setActiveIndex((prev) => (prev + 1) % CARDS.length)
+        setActiveIndex((prev) => (prev + 1) % MARKETING_CARDS.length)
       }
     }, 3500)
 
@@ -290,13 +162,17 @@ export function WalletStack() {
     return () => clearTimeout(resumeTimer)
   }, [])
 
+  // Responsive card dimensions (8:11 ratio)
+  const cardW = compact ? 220 : 260
+  const cardH = Math.round(cardW * (11 / 8))
+
   return (
     <div
       className="relative"
       style={{
         // Enough space for the fanned cards
-        width: compact ? "280px" : "340px",
-        height: compact ? "320px" : "380px",
+        width: compact ? 280 : 340,
+        height: compact ? cardH + 30 : cardH + 40,
       }}
     >
       {/* Float animation wrapper */}
@@ -314,10 +190,10 @@ export function WalletStack() {
           className="relative h-full w-full"
         >
           {/* Render back-to-front: cards further back first so front card paints last */}
-          {[...CARDS.keys()]
+          {[...MARKETING_CARDS.keys()]
             .sort((a, b) => {
-              const depthA = ((a - activeIndex + CARDS.length) % CARDS.length) || 0
-              const depthB = ((b - activeIndex + CARDS.length) % CARDS.length) || 0
+              const depthA = ((a - activeIndex + MARKETING_CARDS.length) % MARKETING_CARDS.length) || 0
+              const depthB = ((b - activeIndex + MARKETING_CARDS.length) % MARKETING_CARDS.length) || 0
               // Higher depth = further back = render first
               return depthB - depthA
             })
@@ -326,14 +202,13 @@ export function WalletStack() {
                 i,
                 activeIndex,
                 hoveredIndex,
-                CARDS.length,
+                MARKETING_CARDS.length,
                 compact,
               )
 
               return (
                 <LoyaltyCard
                   key={i}
-                  card={CARDS[i]}
                   index={i}
                   isActive={i === activeIndex}
                   isHovered={hoveredIndex === i}
@@ -341,6 +216,8 @@ export function WalletStack() {
                   onClick={() => handleCardClick(i)}
                   onHover={() => setHoveredIndex(i)}
                   onLeave={() => setHoveredIndex(-1)}
+                  cardW={cardW}
+                  cardH={cardH}
                 />
               )
             })}

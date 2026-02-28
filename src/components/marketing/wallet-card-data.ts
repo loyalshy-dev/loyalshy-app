@@ -1,94 +1,86 @@
 /* ─── Shared card data for marketing wallet visuals ───────────────── */
 
-export interface CardData {
-  restaurant: string
-  monogram: string
-  primary: string
-  secondary: string
-  visits: number
-  total: number
-  reward: string
+import { getTemplateById, type CardTemplate } from "@/lib/wallet/card-templates"
+import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
+
+// ─── Types ──────────────────────────────────────────────
+
+export type MarketingCard = {
+  templateId: string
+  restaurantName: string
+  currentVisits: number
+  totalVisits: number
+  rewardDescription: string
+  customerName: string
+  memberSince: string
 }
 
-export const CARDS: CardData[] = [
-  {
-    restaurant: "Blue Horizon Bistro",
-    monogram: "BH",
-    primary: "#023e8a",
-    secondary: "#48cae4",
-    visits: 7,
-    total: 10,
-    reward: "Free dessert",
-  },
-  {
-    restaurant: "Rosetta Kitchen",
-    monogram: "RK",
-    primary: "#e63946",
-    secondary: "#f1a7a0",
-    visits: 3,
-    total: 8,
-    reward: "Free appetizer",
-  },
-  {
-    restaurant: "Fern & Root",
-    monogram: "FR",
-    primary: "#1b4332",
-    secondary: "#52b788",
-    visits: 5,
-    total: 12,
-    reward: "BOGO entrée",
-  },
-  {
-    restaurant: "Violet Table",
-    monogram: "VT",
-    primary: "#4a148c",
-    secondary: "#ce93d8",
-    visits: 9,
-    total: 10,
-    reward: "Free meal",
-  },
-  {
-    restaurant: "Ember & Oak",
-    monogram: "EO",
-    primary: "#3e2723",
-    secondary: "#a1887f",
-    visits: 2,
-    total: 6,
-    reward: "Free espresso",
-  },
-]
+// ─── Template → WalletPassDesign converter ──────────────
 
-/* ─── Decorative QR pattern ────────────────────────────────────────── */
-
-/** Seeded PRNG so each card gets a stable, unique QR pattern. */
-function seededRandom(seed: number) {
-  let s = seed
-  return () => {
-    s = (s * 16807 + 0) % 2147483647
-    return s / 2147483647
+function templateToDesign(template: CardTemplate): WalletPassDesign {
+  return {
+    ...template.design,
+    customProgressLabel: null,
+    stripImageUrl: null,
   }
 }
 
-/** 9×9 grid with corner finder patterns baked in — looks like a real QR code. */
-function generateQrGrid(seed: number): boolean[][] {
-  const size = 9
-  const rand = seededRandom(seed)
-  const grid: boolean[][] = Array.from({ length: size }, () =>
-    Array.from({ length: size }, () => rand() > 0.45),
-  )
+// ─── Marketing card data (5 visually diverse picks) ─────
 
-  // Top-left finder pattern (3×3 solid block)
-  for (let r = 0; r < 3; r++)
-    for (let c = 0; c < 3; c++) grid[r][c] = true
-  // Top-right finder
-  for (let r = 0; r < 3; r++)
-    for (let c = size - 3; c < size; c++) grid[r][c] = true
-  // Bottom-left finder
-  for (let r = size - 3; r < size; r++)
-    for (let c = 0; c < 3; c++) grid[r][c] = true
+export const MARKETING_CARDS: MarketingCard[] = [
+  {
+    templateId: "fine-gold",
+    restaurantName: "Aurum Kitchen",
+    currentVisits: 7,
+    totalVisits: 10,
+    rewardDescription: "Free tasting menu",
+    customerName: "Sophie L.",
+    memberSince: "Jan 2026",
+  },
+  {
+    templateId: "stamp-grid-coffee",
+    restaurantName: "Morning Grounds",
+    currentVisits: 5,
+    totalVisits: 8,
+    rewardDescription: "Free latte",
+    customerName: "Marcus W.",
+    memberSince: "Nov 2025",
+  },
+  {
+    templateId: "casual-bright",
+    restaurantName: "Sunny Taco",
+    currentVisits: 3,
+    totalVisits: 10,
+    rewardDescription: "BOGO burrito",
+    customerName: "Elena R.",
+    memberSince: "Feb 2026",
+  },
+  {
+    templateId: "bar-neon",
+    restaurantName: "Neon Lounge",
+    currentVisits: 9,
+    totalVisits: 12,
+    rewardDescription: "Free cocktail",
+    customerName: "James K.",
+    memberSince: "Dec 2025",
+  },
+  {
+    templateId: "bakery-sweet",
+    restaurantName: "Miel Bakery",
+    currentVisits: 4,
+    totalVisits: 6,
+    rewardDescription: "Free croissant",
+    customerName: "Ava M.",
+    memberSince: "Jan 2026",
+  },
+]
 
-  return grid
-}
+// ─── Pre-computed designs ───────────────────────────────
 
-// Pre-generate grids (one per card) so they're stable across renders.
-export const QR_GRIDS = CARDS.map((_, i) => generateQrGrid((i + 1) * 7919))
+export const MARKETING_CARD_DESIGNS: WalletPassDesign[] = MARKETING_CARDS.map(
+  (card) => {
+    const template = getTemplateById(card.templateId)
+    if (!template) throw new Error(`Template not found: ${card.templateId}`)
+    return templateToDesign(template)
+  },
+)
