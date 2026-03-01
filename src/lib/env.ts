@@ -30,8 +30,12 @@ const envSchema = z.object({
   // Email
   RESEND_API_KEY: z.string().optional(),
 
-  // Vercel Blob
-  BLOB_READ_WRITE_TOKEN: z.string().optional(),
+  // Cloudflare R2 (File Uploads)
+  R2_ACCOUNT_ID: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  R2_BUCKET_NAME: z.string().optional(),
+  R2_PUBLIC_URL: z.string().optional(),
 
   // Apple Wallet
   APPLE_PASS_TYPE_IDENTIFIER: z.string().optional(),

@@ -1,4 +1,4 @@
-# Fidelio — Digital Loyalty Card SaaS
+# Loyalshy — Digital Loyalty Card SaaS
 
 ## Project Overview
 
@@ -18,7 +18,7 @@ Multi-tenant SaaS for restaurants to create digital loyalty cards with Apple/Goo
 | Tailwind CSS | 4.2 | CSS-native `@theme`, no tailwind.config.js |
 | shadcn/ui | 3.8.5 | New York style, unified Radix UI |
 | Resend | latest | Transactional email |
-| Vercel Blob | latest | File uploads (logos) — Vercel is ephemeral |
+| Cloudflare R2 | @aws-sdk/client-s3 | File uploads (logos, strip images, stamp icons) via S3-compatible API |
 | passkit-generator | 3.5 | Apple Wallet .pkpass generation from buffers (no FS template) |
 | google-auth-library | 10.6 | Google Wallet JWT signing + OAuth2 for API calls |
 | qrcode | 1.5 | QR code SVG/PNG generation for customer onboarding |
@@ -261,7 +261,7 @@ Update the "Current Progress" section above to track what's done.
 
 ## Environment Variables
 
-See `.env.example` for full list. Key vars: DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TRIGGER_SECRET_KEY, RESEND_API_KEY, BLOB_READ_WRITE_TOKEN, APPLE_PASS_* (5 vars), GOOGLE_WALLET_* (2 vars), NEXT_PUBLIC_SENTRY_DSN, NEXT_PUBLIC_PLAUSIBLE_DOMAIN.
+See `.env.example` for full list. Key vars: DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TRIGGER_SECRET_KEY, RESEND_API_KEY, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL, APPLE_PASS_* (5 vars), GOOGLE_WALLET_* (2 vars), NEXT_PUBLIC_SENTRY_DSN, NEXT_PUBLIC_PLAUSIBLE_DOMAIN.
 
 ## Detailed File References
 

@@ -199,15 +199,13 @@ export async function uploadOnboardingLogo(formData: FormData) {
     return { error: "File must be PNG, JPEG, WebP, or SVG" }
   }
 
-  const { put } = await import("@vercel/blob")
-  const blob = await put(`logos/${restaurantId}/${file.name}`, file, {
-    access: "public",
-    addRandomSuffix: true,
-  })
+  const { uploadFile } = await import("@/lib/storage")
+  const fileBuffer = Buffer.from(await file.arrayBuffer())
+  const logoUrl = await uploadFile(fileBuffer, `logos/${restaurantId}/${file.name}`, file.type)
 
   await db.restaurant.update({
     where: { id: restaurantId },
-    data: { logo: blob.url },
+    data: { logo: logoUrl },
   })
 
   // Extract color palette from the uploaded image (non-fatal)
@@ -220,7 +218,7 @@ export async function uploadOnboardingLogo(formData: FormData) {
     // Palette extraction is non-fatal — return url without palette
   }
 
-  return { success: true, url: blob.url, palette }
+  return { success: true, url: logoUrl, palette }
 }
 
 // ─── Setup Loyalty Program ─────────────────────────────────

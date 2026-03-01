@@ -483,7 +483,7 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
   // Generate pattern-based strip images when pattern is not NONE.
   // When stamp grid is active, strips are generated dynamically per-enrollment.
   // Strip image generation + Blob upload is optional — skip gracefully
-  // when BLOB_READ_WRITE_TOKEN is not configured (e.g. local development).
+  // when R2 credentials are not configured (e.g. local development).
   // Use strip-specific colors for pattern generation (fall back to card colors)
   const stripPrimary = parsed.stripColor1 || primaryColor
   const stripSecondary = parsed.patternColor || parsed.stripColor2 || secondaryColor
@@ -492,7 +492,7 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
     try {
       const { generateStripImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } =
         await import("@/lib/wallet/strip-image")
-      const { put } = await import("@vercel/blob")
+      const { uploadFile } = await import("@/lib/storage")
 
       const secondary = stripSecondary ?? "#ffffff"
 
@@ -513,19 +513,13 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
         }),
       ])
 
-      const [appleBlob, googleBlob] = await Promise.all([
-        put(`strip-images/${parsed.programId}/generated-apple-${Date.now()}.png`, appleBuffer, {
-          access: "public",
-          addRandomSuffix: true,
-        }),
-        put(`strip-images/${parsed.programId}/generated-google-${Date.now()}.png`, googleBuffer, {
-          access: "public",
-          addRandomSuffix: true,
-        }),
+      const [appleUrl, googleUrl] = await Promise.all([
+        uploadFile(appleBuffer, `strip-images/${parsed.programId}/generated-apple-${Date.now()}.png`, "image/png"),
+        uploadFile(googleBuffer, `strip-images/${parsed.programId}/generated-google-${Date.now()}.png`, "image/png"),
       ])
 
-      generatedStripApple = appleBlob.url
-      generatedStripGoogle = googleBlob.url
+      generatedStripApple = appleUrl
+      generatedStripGoogle = googleUrl
     } catch {
       // Blob token not configured — skip strip image upload
     }
@@ -569,7 +563,7 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
       try {
         const { cropStripImageWithPosition, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } =
           await import("@/lib/wallet/strip-image")
-        const { put, del } = await import("@vercel/blob")
+        const { uploadFile, deleteFiles } = await import("@/lib/storage")
 
         const imgRes = await fetch(existingDesign.stripImageUrl)
         if (imgRes.ok) {
@@ -578,18 +572,15 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
             cropStripImageWithPosition(originalBuffer, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, newPos, newZoom),
             cropStripImageWithPosition(originalBuffer, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT, newPos, newZoom),
           ])
-          const [appleBlob, googleBlob] = await Promise.all([
-            put(`strip-images/${parsed.programId}/apple-${Date.now()}.png`, appleBuffer, { access: "public", addRandomSuffix: true }),
-            put(`strip-images/${parsed.programId}/google-${Date.now()}.png`, googleBuffer, { access: "public", addRandomSuffix: true }),
+          const [appleUrl, googleUrl] = await Promise.all([
+            uploadFile(appleBuffer, `strip-images/${parsed.programId}/apple-${Date.now()}.png`, "image/png"),
+            uploadFile(googleBuffer, `strip-images/${parsed.programId}/google-${Date.now()}.png`, "image/png"),
           ])
-          reCroppedApple = appleBlob.url
-          reCroppedGoogle = googleBlob.url
+          reCroppedApple = appleUrl
+          reCroppedGoogle = googleUrl
 
           // Delete old crops
-          const oldCrops = [existingDesign.stripImageApple, existingDesign.stripImageGoogle].filter(Boolean) as string[]
-          if (oldCrops.length > 0) {
-            try { await del(oldCrops) } catch { /* old blobs may not exist */ }
-          }
+          await deleteFiles([existingDesign.stripImageApple, existingDesign.stripImageGoogle])
         }
       } catch {
         // Blob token not configured or fetch failed — skip re-crop
@@ -620,12 +611,8 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
 
   // Delete old generated strip images if we're replacing them
   if (generatedStripApple && existingDesign?.generatedStripApple) {
-    try {
-      const { del } = await import("@vercel/blob")
-      await del([existingDesign.generatedStripApple, existingDesign.generatedStripGoogle!].filter(Boolean))
-    } catch {
-      // Old blobs may not exist
-    }
+    const { deleteFiles } = await import("@/lib/storage")
+    await deleteFiles([existingDesign.generatedStripApple, existingDesign.generatedStripGoogle])
   }
 
   // For stamp grid, clear static generated strips (they're generated dynamically)
@@ -796,28 +783,23 @@ export async function uploadStripImage(formData: FormData) {
   let googleUrl: string
 
   try {
-    const { put, del } = await import("@vercel/blob")
+    const { uploadFile, deleteFiles } = await import("@/lib/storage")
     const { processUploadedStripImage } = await import("@/lib/wallet/strip-image")
 
     // Upload original
-    const originalBlob = await put(
-      `strip-images/${programId}/original-${Date.now()}.${file.name.split(".").pop()}`,
-      file,
-      { access: "public", addRandomSuffix: true }
+    const ext = file.name.split(".").pop() ?? "png"
+    const uploadedOriginalUrl = await uploadFile(
+      originalBuffer,
+      `strip-images/${programId}/original-${Date.now()}.${ext}`,
+      file.type,
     )
 
     // Crop to Apple and Google dimensions (with position/zoom if set)
     const { appleBuffer, googleBuffer } = await processUploadedStripImage(originalBuffer, position, zoom)
 
-    const [appleBlob, googleBlob] = await Promise.all([
-      put(`strip-images/${programId}/apple-${Date.now()}.png`, appleBuffer, {
-        access: "public",
-        addRandomSuffix: true,
-      }),
-      put(`strip-images/${programId}/google-${Date.now()}.png`, googleBuffer, {
-        access: "public",
-        addRandomSuffix: true,
-      }),
+    const [uploadedAppleUrl, uploadedGoogleUrl] = await Promise.all([
+      uploadFile(appleBuffer, `strip-images/${programId}/apple-${Date.now()}.png`, "image/png"),
+      uploadFile(googleBuffer, `strip-images/${programId}/google-${Date.now()}.png`, "image/png"),
     ])
 
     // Delete old strip images
@@ -826,17 +808,14 @@ export async function uploadStripImage(formData: FormData) {
       select: { stripImageUrl: true, stripImageApple: true, stripImageGoogle: true },
     })
     if (existing) {
-      const toDelete = [existing.stripImageUrl, existing.stripImageApple, existing.stripImageGoogle].filter(Boolean) as string[]
-      if (toDelete.length > 0) {
-        try { await del(toDelete) } catch { /* old blobs may not exist */ }
-      }
+      await deleteFiles([existing.stripImageUrl, existing.stripImageApple, existing.stripImageGoogle])
     }
 
-    originalUrl = originalBlob.url
-    appleUrl = appleBlob.url
-    googleUrl = googleBlob.url
+    originalUrl = uploadedOriginalUrl
+    appleUrl = uploadedAppleUrl
+    googleUrl = uploadedGoogleUrl
   } catch {
-    // BLOB_READ_WRITE_TOKEN not configured — use data URI fallback for local dev
+    // R2 credentials not configured — use data URI fallback for local dev
     const dataUri = `data:${file.type};base64,${originalBuffer.toString("base64")}`
     originalUrl = dataUri
     appleUrl = dataUri
@@ -891,10 +870,8 @@ export async function deleteStripImage(programId: string) {
   if (existing) {
     const toDelete = [existing.stripImageUrl, existing.stripImageApple, existing.stripImageGoogle].filter(Boolean) as string[]
     if (toDelete.length > 0) {
-      try {
-        const { del } = await import("@vercel/blob")
-        await del(toDelete)
-      } catch { /* ok */ }
+      const { deleteFiles } = await import("@/lib/storage")
+      await deleteFiles(toDelete)
     }
 
     await db.cardDesign.update({
@@ -963,31 +940,29 @@ export async function uploadStampIcon(formData: FormData) {
     }
   }
 
-  let blobUrl: string
+  let stampUrl: string
   try {
-    const { put, del } = await import("@vercel/blob")
+    const { uploadFile, deleteFile } = await import("@/lib/storage")
 
-    // Delete old stamp icon blob if one exists
+    // Delete old stamp icon if one exists
     if (existing?.editorConfig && typeof existing.editorConfig === "object") {
       const cfg = existing.editorConfig as Record<string, unknown>
       const stampCfg = cfg.stampGridConfig as Record<string, unknown> | undefined
       const oldUrl = stampCfg?.customStampIconUrl
       if (typeof oldUrl === "string") {
-        try { await del(oldUrl) } catch { /* old blob may not exist */ }
+        await deleteFile(oldUrl)
       }
     }
 
     const ext = processedType === "image/png" ? "png" : (file.name.split(".").pop() ?? "png")
-    const blob = await put(
-      `stamp-icons/${programId}/stamp-${Date.now()}.${ext}`,
+    stampUrl = await uploadFile(
       processedBuffer,
-      { access: "public", addRandomSuffix: true }
+      `stamp-icons/${programId}/stamp-${Date.now()}.${ext}`,
+      processedType,
     )
-    blobUrl = blob.url
   } catch {
-    // BLOB_READ_WRITE_TOKEN not configured — use local object URL fallback
-    // In local dev, store a data URI so the preview still works
-    blobUrl = `data:${processedType};base64,${processedBuffer.toString("base64")}`
+    // R2 credentials not configured — data URI fallback for local dev
+    stampUrl = `data:${processedType};base64,${processedBuffer.toString("base64")}`
   }
 
   // Update editorConfig with the new custom stamp icon URL
@@ -1004,13 +979,13 @@ export async function uploadStampIcon(formData: FormData) {
     data: {
       editorConfig: {
         ...editorConfig,
-        stampGridConfig: { ...stampGridConfig, customStampIconUrl: blobUrl },
+        stampGridConfig: { ...stampGridConfig, customStampIconUrl: stampUrl },
       },
     },
   })
 
   revalidatePath("/dashboard/programs")
-  return { success: true, url: blobUrl }
+  return { success: true, url: stampUrl }
 }
 
 // ─── Delete Custom Stamp Icon ────────────────────────────────
@@ -1040,10 +1015,8 @@ export async function deleteStampIcon(programId: string) {
 
     const oldUrl = stampGridConfig.customStampIconUrl
     if (typeof oldUrl === "string") {
-      try {
-        const { del } = await import("@vercel/blob")
-        await del(oldUrl)
-      } catch { /* ok */ }
+      const { deleteFile } = await import("@/lib/storage")
+      await deleteFile(oldUrl)
     }
 
     await db.cardDesign.update({
@@ -1131,30 +1104,15 @@ async function processLogoForGoogle(sourceBuffer: Buffer): Promise<Buffer> {
 async function uploadBuffer(
   buffer: Buffer,
   path: string,
-  contentType: string
+  contentType: string,
 ): Promise<string> {
-  try {
-    const { put } = await import("@vercel/blob")
-    const blob = await put(path, buffer, {
-      access: "public",
-      addRandomSuffix: true,
-      contentType,
-    })
-    return blob.url
-  } catch {
-    // BLOB_READ_WRITE_TOKEN not configured — data URI fallback for local dev
-    return `data:${contentType};base64,${buffer.toString("base64")}`
-  }
+  const { uploadFile } = await import("@/lib/storage")
+  return uploadFile(buffer, path, contentType)
 }
 
 async function deleteBlob(url: string | null | undefined) {
-  if (!url || url.startsWith("data:")) return
-  try {
-    const { del } = await import("@vercel/blob")
-    await del(url)
-  } catch {
-    // Blob may not exist
-  }
+  const { deleteFile } = await import("@/lib/storage")
+  return deleteFile(url)
 }
 
 // ─── Upload Restaurant Logo ─────────────────────────────────
