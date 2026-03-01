@@ -156,6 +156,32 @@ export async function checkCustomerLimit(restaurantId: string): Promise<{
   }
 }
 
+export async function checkProgramLimit(restaurantId: string): Promise<{
+  allowed: boolean
+  current: number
+  limit: number
+  approaching: boolean
+}> {
+  const restaurant = await db.restaurant.findUnique({
+    where: { id: restaurantId },
+    select: { plan: true },
+  })
+  if (!restaurant) return { allowed: false, current: 0, limit: 0, approaching: false }
+
+  const plan = restaurant.plan as PlanId
+  const { programLimit } = getPlanLimits(plan)
+  const current = await db.loyaltyProgram.count({
+    where: { restaurantId, status: { not: "ARCHIVED" } },
+  })
+
+  return {
+    allowed: current < programLimit,
+    current,
+    limit: programLimit,
+    approaching: programLimit !== Infinity && current >= programLimit * 0.8,
+  }
+}
+
 export async function checkStaffLimit(restaurantId: string): Promise<{
   allowed: boolean
   current: number

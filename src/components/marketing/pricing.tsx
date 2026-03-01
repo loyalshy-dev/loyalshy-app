@@ -15,6 +15,7 @@ type PlanDef = {
   annualPrice: number | null
   customerLimit: number
   staffLimit: number
+  programLimit: number
   features: string[]
 }
 
@@ -26,9 +27,11 @@ const PLANS: Record<"STARTER" | "PRO" | "BUSINESS", PlanDef> = {
     annualPrice: 12,
     customerLimit: 200,
     staffLimit: 2,
+    programLimit: 1,
     features: [
       "Up to 200 customers",
       "2 staff members",
+      "1 loyalty program",
       "Apple & Google Wallet passes",
       "Card design studio",
       "Dashboard analytics",
@@ -41,9 +44,11 @@ const PLANS: Record<"STARTER" | "PRO" | "BUSINESS", PlanDef> = {
     annualPrice: 31,
     customerLimit: 1_000,
     staffLimit: 5,
+    programLimit: 3,
     features: [
       "Up to 1,000 customers",
       "5 staff members",
+      "Up to 3 programs",
       "Apple & Google Wallet passes",
       "Card design studio",
       "Dashboard analytics",
@@ -57,9 +62,11 @@ const PLANS: Record<"STARTER" | "PRO" | "BUSINESS", PlanDef> = {
     annualPrice: 63,
     customerLimit: Infinity,
     staffLimit: 15,
+    programLimit: 10,
     features: [
       "Unlimited customers",
       "15 staff members",
+      "Up to 10 programs",
       "Apple & Google Wallet passes",
       "Card design studio",
       "Dashboard analytics",

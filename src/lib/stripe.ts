@@ -34,6 +34,7 @@ export type PlanDefinition = {
   annualPrice: number | null // null = custom pricing
   customerLimit: number
   staffLimit: number
+  programLimit: number
   features: string[]
 }
 
@@ -46,9 +47,11 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     annualPrice: 12,
     customerLimit: 200,
     staffLimit: 2,
+    programLimit: 1,
     features: [
       "Up to 200 customers",
       "2 staff members",
+      "1 loyalty program",
       "Apple & Google Wallet passes",
       "Card design studio",
       "Dashboard analytics",
@@ -62,9 +65,11 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     annualPrice: 31,
     customerLimit: 1_000,
     staffLimit: 5,
+    programLimit: 3,
     features: [
       "Up to 1,000 customers",
       "5 staff members",
+      "Up to 3 programs",
       "Apple & Google Wallet passes",
       "Card design studio",
       "Dashboard analytics",
@@ -79,9 +84,11 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     annualPrice: 63,
     customerLimit: Infinity,
     staffLimit: 15,
+    programLimit: 10,
     features: [
       "Unlimited customers",
       "15 staff members",
+      "Up to 10 programs",
       "Apple & Google Wallet passes",
       "Card design studio",
       "Dashboard analytics",
@@ -96,9 +103,11 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     annualPrice: null,
     customerLimit: Infinity,
     staffLimit: Infinity,
+    programLimit: Infinity,
     features: [
       "Everything in Business",
       "Unlimited staff members",
+      "Unlimited programs",
       "Dedicated support",
       "SLA guarantees",
     ],
@@ -124,6 +133,7 @@ export function getPlanLimits(plan: PlanId) {
   return {
     customerLimit: PLANS[plan].customerLimit,
     staffLimit: PLANS[plan].staffLimit,
+    programLimit: PLANS[plan].programLimit,
   }
 }
 

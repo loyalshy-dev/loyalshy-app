@@ -99,6 +99,47 @@ describe("checkCustomerLimit", () => {
   })
 })
 
+describe("checkProgramLimit", () => {
+  it("allows creating program when under limit", async () => {
+    const { checkProgramLimit } = await import("./billing-actions")
+
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER" })
+    mockDb.loyaltyProgram.count.mockResolvedValue(0) // Starter limit is 1
+
+    const result = await checkProgramLimit("restaurant-1")
+
+    expect(result.allowed).toBe(true)
+    expect(result.current).toBe(0)
+    expect(result.limit).toBe(1)
+  })
+
+  it("blocks creating program at limit", async () => {
+    const { checkProgramLimit } = await import("./billing-actions")
+
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER" })
+    mockDb.loyaltyProgram.count.mockResolvedValue(1) // STARTER limit is 1
+
+    const result = await checkProgramLimit("restaurant-1")
+
+    expect(result.allowed).toBe(false)
+    expect(result.current).toBe(1)
+    expect(result.limit).toBe(1)
+  })
+
+  it("allows multiple programs on PRO plan", async () => {
+    const { checkProgramLimit } = await import("./billing-actions")
+
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "PRO" })
+    mockDb.loyaltyProgram.count.mockResolvedValue(2) // PRO limit is 3
+
+    const result = await checkProgramLimit("restaurant-1")
+
+    expect(result.allowed).toBe(true)
+    expect(result.current).toBe(2)
+    expect(result.limit).toBe(3)
+  })
+})
+
 describe("checkStaffLimit", () => {
   it("allows inviting staff when under limit", async () => {
     const { checkStaffLimit } = await import("./billing-actions")

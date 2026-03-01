@@ -142,20 +142,7 @@ export function matchTemplates(
   // Sort by score descending
   scored.sort((a, b) => b.score - a.score)
 
-  const top = scored.slice(0, limit)
-
-  // Guarantee at least one stamp grid template in results.
-  // If none made the cut naturally, replace the last slot with the
-  // highest-scoring stamp grid template.
-  const hasStampGrid = top.some((m) => m.template.design.useStampGrid)
-  if (!hasStampGrid) {
-    const bestStamp = scored.find((m) => m.template.design.useStampGrid)
-    if (bestStamp && top.length > 0) {
-      top[top.length - 1] = bestStamp
-    }
-  }
-
-  return top
+  return scored.slice(0, limit)
 }
 
 // ─── Apply Palette to Template ──────────────────────────────

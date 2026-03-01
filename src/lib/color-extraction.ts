@@ -83,6 +83,31 @@ function hexToRgb(hex: string): [number, number, number] {
   ]
 }
 
+// ─── Seeded PRNG (mulberry32) ───────────────────────────────
+
+/** Fast 32-bit seeded PRNG. Returns values in [0, 1). */
+function mulberry32(seed: number): () => number {
+  let s = seed | 0
+  return () => {
+    s = (s + 0x6d2b79f5) | 0
+    let t = Math.imul(s ^ (s >>> 15), 1 | s)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+/** Derive a seed from pixel data so identical images produce identical palettes. */
+function pixelSeed(pixels: Pixel[]): number {
+  let h = 0
+  const step = Math.max(1, Math.floor(pixels.length / 64))
+  for (let i = 0; i < pixels.length; i += step) {
+    h = ((h << 5) - h + pixels[i][0]) | 0
+    h = ((h << 5) - h + pixels[i][1]) | 0
+    h = ((h << 5) - h + pixels[i][2]) | 0
+  }
+  return h
+}
+
 // ─── K-Means Clustering ─────────────────────────────────────
 
 type Pixel = [number, number, number]
@@ -97,9 +122,12 @@ function kMeansClustering(
     return pixels.map((p) => ({ centroid: [...p] as Pixel, count: 1 }))
   }
 
+  // Seeded PRNG for reproducible results
+  const rand = mulberry32(pixelSeed(pixels))
+
   // k-means++ initialization
   const centroids: Pixel[] = []
-  centroids.push([...pixels[Math.floor(Math.random() * pixels.length)]])
+  centroids.push([...pixels[Math.floor(rand() * pixels.length)]])
 
   for (let i = 1; i < k; i++) {
     const distances = pixels.map((p) => {
@@ -112,11 +140,11 @@ function kMeansClustering(
     })
     const total = distances.reduce((a, b) => a + b, 0)
     if (total === 0) {
-      centroids.push([...pixels[Math.floor(Math.random() * pixels.length)]])
+      centroids.push([...pixels[Math.floor(rand() * pixels.length)]])
       continue
     }
     // Prevent floating-point overshoot by clamping r slightly below total
-    let r = Math.random() * total * 0.9999
+    let r = rand() * total * 0.9999
     let picked = false
     for (let j = 0; j < distances.length; j++) {
       r -= distances[j]

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useRef } from "react"
 import { useStore } from "zustand"
 import { toast } from "sonner"
 import {
@@ -165,8 +165,11 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo }: Props) {
   // Brand Match state
   const [brandCategory, setBrandCategory] = useState<RestaurantCategory | null>(null)
   const [isMatching, setIsMatching] = useState(false)
-  const [matchResults, setMatchResults] = useState<{ template: CardTemplate; palette: ExtractedPalette | null }[] | null>(null)
+  const [matchResults, setMatchResults] = useState<{ template: CardTemplate; palette: ExtractedPalette | null; matchedCategory: RestaurantCategory | null }[] | null>(null)
   const [matchPalette, setMatchPalette] = useState<ExtractedPalette | null>(null)
+
+  // Cache palette per logo URL to avoid redundant server calls
+  const paletteCacheRef = useRef<{ url: string; palette: ExtractedPalette } | null>(null)
 
   // Filter templates
   const filtered = CARD_TEMPLATES.filter((t) => {
@@ -195,8 +198,8 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo }: Props) {
     })
   }
 
-  function applyMatchedTemplate(template: CardTemplate, palette: ExtractedPalette | null) {
-    const design = applyPaletteToTemplate(template, palette, brandCategory)
+  function applyMatchedTemplate(template: CardTemplate, palette: ExtractedPalette | null, category: RestaurantCategory | null = brandCategory) {
+    const design = applyPaletteToTemplate(template, palette, category)
     const s = store.getState()
     s.applyTemplate({
       wallet: {
@@ -240,20 +243,25 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo }: Props) {
     try {
       let palette: ExtractedPalette | null = null
 
-      // Extract palette from restaurant logo if available
+      // Extract palette from restaurant logo if available (cached per URL)
       if (restaurantLogo) {
-        const result = await extractPaletteFromLogoUrl(restaurantId)
-        if ("palette" in result && result.palette) {
-          palette = result.palette
-          setMatchPalette(palette)
+        if (paletteCacheRef.current?.url === restaurantLogo) {
+          palette = paletteCacheRef.current.palette
+        } else {
+          const result = await extractPaletteFromLogoUrl(restaurantId)
+          if ("palette" in result && result.palette) {
+            palette = result.palette
+            paletteCacheRef.current = { url: restaurantLogo, palette }
+          }
         }
+        if (palette) setMatchPalette(palette)
       }
 
       // Run template matching
       const matches = matchTemplates(palette, brandCategory, 4)
 
       setMatchResults(
-        matches.map((m) => ({ template: m.template, palette }))
+        matches.map((m) => ({ template: m.template, palette, matchedCategory: brandCategory }))
       )
 
       // Auto-apply the top match
@@ -429,13 +437,13 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo }: Props) {
             Matched for you
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-            {matchResults.map(({ template, palette }) => {
-              const design = applyPaletteToTemplate(template, palette, brandCategory)
+            {matchResults.map(({ template, palette, matchedCategory }) => {
+              const design = applyPaletteToTemplate(template, palette, matchedCategory)
               const isActive = currentTemplateId === template.id
               return (
                 <button
                   key={template.id}
-                  onClick={() => applyMatchedTemplate(template, palette)}
+                  onClick={() => applyMatchedTemplate(template, palette, matchedCategory)}
                   style={{
                     borderRadius: 8,
                     border: `2px solid ${isActive ? "var(--primary)" : "var(--border)"}`,

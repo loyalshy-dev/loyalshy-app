@@ -7,6 +7,7 @@ import { addDays } from "date-fns"
 import { db } from "@/lib/db"
 import { assertRestaurantRole, getRestaurantForUser } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
+import { checkProgramLimit } from "@/server/billing-actions"
 import { computeDesignHash, computeTextColor } from "@/lib/wallet/card-design"
 import type { CardType, CardShape, PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
 
@@ -315,6 +316,12 @@ export async function updateRestaurantProfile(input: z.infer<typeof updateProfil
 export async function createLoyaltyProgram(input: z.infer<typeof createLoyaltyProgramSchema>) {
   const parsed = createLoyaltyProgramSchema.parse(input)
   await assertRestaurantRole(parsed.restaurantId, "owner")
+
+  // Enforce plan program limit
+  const programCheck = await checkProgramLimit(parsed.restaurantId)
+  if (!programCheck.allowed) {
+    return { error: `Program limit reached (${programCheck.limit}). Upgrade your plan to create more programs.` }
+  }
 
   // Create the program with a default card design
   const program = await db.loyaltyProgram.create({

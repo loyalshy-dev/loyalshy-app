@@ -15,24 +15,28 @@ describe("PLANS", () => {
   it("STARTER plan has correct limits", () => {
     expect(PLANS.STARTER.customerLimit).toBe(200)
     expect(PLANS.STARTER.staffLimit).toBe(2)
+    expect(PLANS.STARTER.programLimit).toBe(1)
     expect(PLANS.STARTER.price).toBe(15)
   })
 
   it("PRO plan has correct limits", () => {
     expect(PLANS.PRO.customerLimit).toBe(1_000)
     expect(PLANS.PRO.staffLimit).toBe(5)
+    expect(PLANS.PRO.programLimit).toBe(3)
     expect(PLANS.PRO.price).toBe(39)
   })
 
   it("BUSINESS plan has unlimited customers", () => {
     expect(PLANS.BUSINESS.customerLimit).toBe(Infinity)
     expect(PLANS.BUSINESS.staffLimit).toBe(15)
+    expect(PLANS.BUSINESS.programLimit).toBe(10)
     expect(PLANS.BUSINESS.price).toBe(79)
   })
 
   it("ENTERPRISE plan has unlimited everything", () => {
     expect(PLANS.ENTERPRISE.customerLimit).toBe(Infinity)
     expect(PLANS.ENTERPRISE.staffLimit).toBe(Infinity)
+    expect(PLANS.ENTERPRISE.programLimit).toBe(Infinity)
     expect(PLANS.ENTERPRISE.price).toBeNull()
   })
 })
@@ -40,22 +44,22 @@ describe("PLANS", () => {
 describe("getPlanLimits", () => {
   it("returns correct limits for STARTER plan", () => {
     const limits = getPlanLimits("STARTER")
-    expect(limits).toEqual({ customerLimit: 200, staffLimit: 2 })
+    expect(limits).toEqual({ customerLimit: 200, staffLimit: 2, programLimit: 1 })
   })
 
   it("returns correct limits for PRO plan", () => {
     const limits = getPlanLimits("PRO")
-    expect(limits).toEqual({ customerLimit: 1_000, staffLimit: 5 })
+    expect(limits).toEqual({ customerLimit: 1_000, staffLimit: 5, programLimit: 3 })
   })
 
   it("returns correct limits for BUSINESS plan", () => {
     const limits = getPlanLimits("BUSINESS")
-    expect(limits).toEqual({ customerLimit: Infinity, staffLimit: 15 })
+    expect(limits).toEqual({ customerLimit: Infinity, staffLimit: 15, programLimit: 10 })
   })
 
   it("returns correct limits for ENTERPRISE plan", () => {
     const limits = getPlanLimits("ENTERPRISE")
-    expect(limits).toEqual({ customerLimit: Infinity, staffLimit: Infinity })
+    expect(limits).toEqual({ customerLimit: Infinity, staffLimit: Infinity, programLimit: Infinity })
   })
 })
 
