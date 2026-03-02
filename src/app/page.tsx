@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { MarketingNavbar } from "@/components/marketing/navbar"
 import { Hero } from "@/components/marketing/hero"
 import { SocialProof } from "@/components/marketing/social-proof"
@@ -11,6 +12,7 @@ import { Pricing } from "@/components/marketing/pricing"
 import { FAQ } from "@/components/marketing/faq"
 import { ClosingCTA } from "@/components/marketing/closing-cta"
 import { MarketingFooter } from "@/components/marketing/footer"
+import { connection } from "next/server"
 import { getPublicShowcaseCards } from "@/server/showcase-actions"
 import type { MarketingCard } from "@/components/marketing/wallet-card-data"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
@@ -107,7 +109,9 @@ function showcaseToMarketing(dbCards: { designData: unknown; metadata: unknown }
   return { cards, designs }
 }
 
-export default async function LandingPage() {
+async function ShowcaseContent() {
+  await connection()
+
   let showcaseCards: MarketingCard[] | undefined
   let showcaseDesigns: WalletPassDesign[] | undefined
 
@@ -123,20 +127,43 @@ export default async function LandingPage() {
   }
 
   return (
+    <>
+      <Hero showcaseCards={showcaseCards} showcaseDesigns={showcaseDesigns} />
+      <SocialProof />
+      <DashboardPreview />
+      <HowItWorks />
+      <WalletPreview showcaseCards={showcaseCards} showcaseDesigns={showcaseDesigns} />
+      <Features />
+      <Testimonials />
+      <Pricing />
+      <FAQ />
+      <ClosingCTA />
+    </>
+  )
+}
+
+export default function LandingPage() {
+  return (
     <div className="min-h-screen">
       <JsonLd />
       <MarketingNavbar />
       <main>
-        <Hero showcaseCards={showcaseCards} showcaseDesigns={showcaseDesigns} />
-        <SocialProof />
-        <DashboardPreview />
-        <HowItWorks />
-        <WalletPreview showcaseCards={showcaseCards} showcaseDesigns={showcaseDesigns} />
-        <Features />
-        <Testimonials />
-        <Pricing />
-        <FAQ />
-        <ClosingCTA />
+        <Suspense fallback={
+          <>
+            <Hero />
+            <SocialProof />
+            <DashboardPreview />
+            <HowItWorks />
+            <WalletPreview />
+            <Features />
+            <Testimonials />
+            <Pricing />
+            <FAQ />
+            <ClosingCTA />
+          </>
+        }>
+          <ShowcaseContent />
+        </Suspense>
       </main>
       <MarketingFooter />
     </div>
