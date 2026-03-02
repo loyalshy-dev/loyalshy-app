@@ -9,6 +9,7 @@ import { publicFormLimiter } from "@/lib/rate-limit"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
+import { buildCardUrl } from "@/lib/card-access"
 import type { PublicProgramInfo } from "@/types/enrollment"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -33,9 +34,21 @@ export type OnboardingResult = {
   error?: string
 }
 
+export type JoinResult = {
+  success: boolean
+  enrollmentId?: string
+  customerName?: string
+  isReturning?: boolean
+  currentCycleVisits?: number
+  totalVisits?: number
+  hasAvailableReward?: boolean
+  cardUrl?: string
+  error?: string
+}
+
 // ─── Validation ─────────────────────────────────────────────
 
-const onboardingSchema = z.object({
+const joinSchema = z.object({
   fullName: z.string().min(1, "Name is required").max(100),
   email: z
     .string()
@@ -50,6 +63,11 @@ const onboardingSchema = z.object({
     .or(z.literal("")),
   restaurantSlug: z.string().min(1),
   programId: z.string().min(1),
+})
+
+const passRequestSchema = z.object({
+  enrollmentId: z.string().min(1),
+  restaurantSlug: z.string().min(1),
   platform: z.enum(["apple", "google"]),
 })
 
@@ -134,11 +152,128 @@ export async function getRestaurantBySlug(
   }
 }
 
-// ─── Join / Onboard Customer ────────────────────────────────
+// ─── Get Enrollment Card Data (for persistent card page) ────
 
-export async function joinLoyaltyProgram(
+export type EnrollmentCardData = {
+  enrollmentId: string
+  customerName: string
+  currentCycleVisits: number
+  totalVisits: number
+  hasAvailableReward: boolean
+  restaurant: {
+    name: string
+    slug: string
+    logo: string | null
+    brandColor: string | null
+  }
+  program: {
+    name: string
+    visitsRequired: number
+    rewardDescription: string
+    cardDesign: PublicProgramInfo["cardDesign"]
+  }
+}
+
+export async function getEnrollmentCardData(
+  enrollmentId: string,
+  restaurantSlug: string
+): Promise<EnrollmentCardData | null> {
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    select: {
+      id: true,
+      currentCycleVisits: true,
+      totalVisits: true,
+      rewards: {
+        where: { status: "AVAILABLE" },
+        select: { id: true },
+        take: 1,
+      },
+      customer: {
+        select: { fullName: true },
+      },
+      loyaltyProgram: {
+        select: {
+          name: true,
+          visitsRequired: true,
+          rewardDescription: true,
+          status: true,
+          cardDesign: {
+            select: {
+              cardType: true,
+              shape: true,
+              primaryColor: true,
+              secondaryColor: true,
+              textColor: true,
+              stripImageUrl: true,
+              patternStyle: true,
+              progressStyle: true,
+              fontFamily: true,
+              labelFormat: true,
+              customProgressLabel: true,
+              customMessage: true,
+              editorConfig: true,
+            },
+          },
+          restaurant: {
+            select: {
+              name: true,
+              slug: true,
+              logo: true,
+              brandColor: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!enrollment) return null
+
+  // Verify the enrollment belongs to the restaurant with the given slug
+  if (enrollment.loyaltyProgram.restaurant.slug !== restaurantSlug) return null
+
+  // Only show cards for active programs
+  if (enrollment.loyaltyProgram.status !== "ACTIVE") return null
+
+  const cd = enrollment.loyaltyProgram.cardDesign
+  return {
+    enrollmentId: enrollment.id,
+    customerName: enrollment.customer.fullName,
+    currentCycleVisits: enrollment.currentCycleVisits,
+    totalVisits: enrollment.totalVisits,
+    hasAvailableReward: enrollment.rewards.length > 0,
+    restaurant: enrollment.loyaltyProgram.restaurant,
+    program: {
+      name: enrollment.loyaltyProgram.name,
+      visitsRequired: enrollment.loyaltyProgram.visitsRequired,
+      rewardDescription: enrollment.loyaltyProgram.rewardDescription,
+      cardDesign: cd
+        ? {
+            cardType: cd.cardType,
+            shape: cd.shape,
+            primaryColor: cd.primaryColor,
+            secondaryColor: cd.secondaryColor,
+            textColor: cd.textColor,
+            stripImageUrl: cd.stripImageUrl,
+            patternStyle: cd.patternStyle,
+            progressStyle: cd.progressStyle,
+            fontFamily: cd.fontFamily,
+            labelFormat: cd.labelFormat,
+            customProgressLabel: cd.customProgressLabel,
+            customMessage: cd.customMessage,
+            editorConfig: cd.editorConfig,
+          }
+        : null,
+    },
+  }
+}
+
+// ─── Join Program (enrollment only, no wallet pass) ─────────
+
+export async function joinProgram(
   formData: FormData
-): Promise<OnboardingResult> {
+): Promise<JoinResult> {
   // Rate limit by IP
   const headersList = await headers()
   const ip = headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
@@ -153,10 +288,9 @@ export async function joinLoyaltyProgram(
     phone: formData.get("phone") as string,
     restaurantSlug: formData.get("restaurantSlug") as string,
     programId: formData.get("programId") as string,
-    platform: formData.get("platform") as string,
   }
 
-  const parsed = onboardingSchema.safeParse(raw)
+  const parsed = joinSchema.safeParse(raw)
   if (!parsed.success) {
     return {
       success: false,
@@ -164,48 +298,29 @@ export async function joinLoyaltyProgram(
     }
   }
 
-  const { restaurantSlug, programId, platform } = parsed.data
+  const { restaurantSlug, programId } = parsed.data
   const fullName = sanitizeText(parsed.data.fullName, 100)
   const cleanEmail = parsed.data.email ? sanitizeText(parsed.data.email, 255) || null : null
   const cleanPhone = parsed.data.phone ? sanitizeText(parsed.data.phone, 30) || null : null
 
-  // Fetch restaurant + specific program + card design
+  // Fetch restaurant
   const restaurant = await db.restaurant.findUnique({
     where: { slug: restaurantSlug },
-    select: {
-      id: true,
-      name: true,
-      logo: true,
-      logoApple: true,
-      logoGoogle: true,
-      brandColor: true,
-      secondaryColor: true,
-      phone: true,
-      website: true,
-    },
+    select: { id: true },
   })
 
   if (!restaurant) {
     return { success: false, error: "Restaurant not found" }
   }
 
-  // Fetch the specific program with its card design
+  // Fetch the specific program
   const program = await db.loyaltyProgram.findFirst({
     where: {
       id: programId,
       restaurantId: restaurant.id,
       status: "ACTIVE",
     },
-    select: {
-      id: true,
-      name: true,
-      visitsRequired: true,
-      rewardDescription: true,
-      rewardExpiryDays: true,
-      termsAndConditions: true,
-      endsAt: true,
-      cardDesign: true,
-    },
+    select: { id: true },
   })
 
   if (!program) {
@@ -283,9 +398,6 @@ export async function joinLoyaltyProgram(
       id: true,
       currentCycleVisits: true,
       totalVisits: true,
-      walletPassId: true,
-      walletPassSerialNumber: true,
-      walletPassType: true,
       status: true,
       rewards: {
         where: { status: "AVAILABLE" },
@@ -307,9 +419,6 @@ export async function joinLoyaltyProgram(
         id: true,
         currentCycleVisits: true,
         totalVisits: true,
-        walletPassId: true,
-        walletPassSerialNumber: true,
-        walletPassType: true,
         status: true,
         rewards: {
           where: { status: "AVAILABLE" },
@@ -320,7 +429,105 @@ export async function joinLoyaltyProgram(
     })
   }
 
-  // Resolve card design for pass generation (per-program)
+  return {
+    success: true,
+    enrollmentId: enrollment.id,
+    customerName: customer.fullName,
+    isReturning: isReturningCustomer || isReturningEnrollment,
+    currentCycleVisits: enrollment.currentCycleVisits,
+    totalVisits: enrollment.totalVisits,
+    hasAvailableReward: enrollment.rewards.length > 0,
+    cardUrl: buildCardUrl(restaurantSlug, enrollment.id),
+  }
+}
+
+// ─── Request Wallet Pass (separate from enrollment) ─────────
+
+export async function requestWalletPass(
+  enrollmentId: string,
+  restaurantSlug: string,
+  platform: "apple" | "google"
+): Promise<OnboardingResult> {
+  // Rate limit by IP
+  const headersList = await headers()
+  const ip = headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
+  const { success: rateLimitOk } = publicFormLimiter.check(`pass:${ip}`)
+  if (!rateLimitOk) {
+    return { success: false, error: "Too many requests. Please try again later." }
+  }
+
+  const parsed = passRequestSchema.safeParse({ enrollmentId, restaurantSlug, platform })
+  if (!parsed.success) {
+    return { success: false, error: "Invalid request" }
+  }
+
+  // Fetch enrollment with linked data
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: parsed.data.enrollmentId },
+    select: {
+      id: true,
+      currentCycleVisits: true,
+      totalVisits: true,
+      walletPassId: true,
+      walletPassSerialNumber: true,
+      walletPassType: true,
+      status: true,
+      rewards: {
+        where: { status: "AVAILABLE" },
+        select: { id: true },
+        take: 1,
+      },
+      customer: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          createdAt: true,
+        },
+      },
+      loyaltyProgram: {
+        select: {
+          id: true,
+          name: true,
+          visitsRequired: true,
+          rewardDescription: true,
+          rewardExpiryDays: true,
+          termsAndConditions: true,
+          endsAt: true,
+          cardDesign: true,
+          restaurant: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              logo: true,
+              logoApple: true,
+              logoGoogle: true,
+              brandColor: true,
+              secondaryColor: true,
+              phone: true,
+              website: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  // Verify the enrollment belongs to the restaurant with the given slug
+  if (enrollment.loyaltyProgram.restaurant.slug !== parsed.data.restaurantSlug) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  const restaurant = enrollment.loyaltyProgram.restaurant
+  const program = enrollment.loyaltyProgram
+  const customer = enrollment.customer
+
+  // Resolve card design for pass generation
   const cardDesign = resolveCardDesign(program.cardDesign, restaurant)
 
   return issuePassForEnrollment(
@@ -339,8 +546,8 @@ export async function joinLoyaltyProgram(
     },
     restaurant,
     program,
-    platform as "apple" | "google",
-    isReturningCustomer || isReturningEnrollment,
+    parsed.data.platform,
+    true, // requesting a pass after enrollment is always a "returning" action
     cardDesign,
   )
 }

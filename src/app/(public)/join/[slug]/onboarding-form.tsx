@@ -9,15 +9,18 @@ import {
   ArrowLeft,
   Gift,
   ChevronRight,
+  Smartphone,
+  Bookmark,
 } from "lucide-react"
-import { joinLoyaltyProgram } from "@/server/onboarding-actions"
-import type { RestaurantPublicInfo, OnboardingResult } from "@/server/onboarding-actions"
+import { joinProgram, requestWalletPass } from "@/server/onboarding-actions"
+import type { RestaurantPublicInfo, OnboardingResult, JoinResult } from "@/server/onboarding-actions"
 import type { PublicProgramInfo } from "@/types/enrollment"
-import { computeTextColor, parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
-import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
+import { computeTextColor } from "@/lib/wallet/card-design"
+import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
+import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 
 type Platform = "apple" | "google"
-type Step = "program-select" | "form" | "success"
+type Step = "program-select" | "form" | "card-view" | "success"
 
 function detectPlatform(): Platform {
   if (typeof navigator === "undefined") return "apple"
@@ -67,8 +70,12 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
   const [platform, setPlatform] = useState<Platform>("apple")
   const [showBothPlatforms, setShowBothPlatforms] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [isRequestingPass, startPassTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const [result, setResult] = useState<OnboardingResult | null>(null)
+  const [joinResult, setJoinResult] = useState<JoinResult | null>(null)
+  const [walletResult, setWalletResult] = useState<OnboardingResult | null>(null)
+  const [name, setName] = useState("")
+  const [addedToWallet, setAddedToWallet] = useState(false)
 
   useEffect(() => {
     const detected = detectPlatform()
@@ -87,20 +94,41 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
   function handleSubmit(formData: FormData) {
     setError(null)
     formData.set("restaurantSlug", restaurant.slug)
-    formData.set("platform", platform)
     if (selectedProgram) {
       formData.set("programId", selectedProgram.id)
     }
 
     startTransition(async () => {
-      const res = await joinLoyaltyProgram(formData)
+      const res = await joinProgram(formData)
 
       if (!res.success) {
         setError(res.error ?? "Something went wrong")
         return
       }
 
-      setResult(res)
+      setJoinResult(res)
+      setStep("card-view")
+    })
+  }
+
+  function handleAddToWallet(chosenPlatform: Platform) {
+    if (!joinResult?.enrollmentId) return
+    setError(null)
+
+    startPassTransition(async () => {
+      const res = await requestWalletPass(
+        joinResult.enrollmentId!,
+        restaurant.slug,
+        chosenPlatform
+      )
+
+      if (!res.success) {
+        setError(res.error ?? "Failed to generate wallet pass")
+        return
+      }
+
+      setWalletResult(res)
+      setAddedToWallet(true)
 
       if (res.platform === "apple" && res.passBuffer) {
         // Trigger .pkpass download
@@ -121,10 +149,15 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
       } else if (res.platform === "google" && res.saveUrl) {
         // Redirect to Google Wallet save URL
         window.location.href = res.saveUrl
+        return // Don't transition — page is navigating away
       }
 
       setStep("success")
     })
+  }
+
+  function handleContinueWithoutWallet() {
+    setStep("success")
   }
 
   // Use selected program's card design, falling back to first program or restaurant defaults
@@ -136,6 +169,16 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
     /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : "#4F46E5"
   )
 
+  // Detect dark brand colors so badge stays visible
+  const isColorDark = (() => {
+    const m = brandColor.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/)
+    if (!m) return false
+    const [r, g, b] = [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)]
+    // Perceived brightness (ITU-R BT.601)
+    return (r * 299 + g * 587 + b * 114) / 1000 < 60
+  })()
+  const badgeMix = isColorDark ? 20 : 12
+
   const fontFamilyCss: Record<string, string> = {
     SANS: "inherit",
     SERIF: "Georgia, Cambria, 'Times New Roman', serif",
@@ -145,7 +188,7 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
   const webFont = fontFamilyCss[design?.fontFamily ?? "SANS"] ?? "inherit"
 
   // --- Success screen ---
-  if (step === "success" && result) {
+  if (step === "success") {
     return (
       <div className="min-h-dvh flex items-center justify-center p-4 bg-background">
         <div className="w-full max-w-md text-center space-y-6">
@@ -162,26 +205,28 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
 
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight">
-              {result.isReturning ? "Welcome back!" : "You're all set!"}
+              {joinResult?.isReturning ? "Welcome back!" : "You're all set!"}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {result.isReturning
-                ? `Welcome back, ${result.customerName}! Your loyalty card has been re-issued.`
-                : `Your loyalty card for ${restaurant.name} is ready.`}
+              {addedToWallet
+                ? joinResult?.isReturning
+                  ? `Welcome back, ${joinResult.customerName}! Your loyalty card has been re-issued.`
+                  : `Your loyalty card for ${restaurant.name} is ready.`
+                : `Your loyalty card for ${restaurant.name} has been created.`}
             </p>
           </div>
 
-          {result.platform === "apple" && (
+          {addedToWallet && walletResult?.platform === "apple" && (
             <p className="text-sm text-muted-foreground">
               Your pass should open automatically. Check your Wallet app if it
               doesn't appear.
             </p>
           )}
-          {result.platform === "google" && (
+          {addedToWallet && walletResult?.platform === "google" && (
             <p className="text-sm text-muted-foreground">
               You're being redirected to Google Wallet. If nothing happens,{" "}
               <a
-                href={result.saveUrl}
+                href={walletResult.saveUrl}
                 className="underline underline-offset-4 hover:text-foreground"
               >
                 tap here
@@ -189,11 +234,29 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
               .
             </p>
           )}
+          {!addedToWallet && (
+            <p className="text-sm text-muted-foreground">
+              Show your name at the counter to earn stamps on each visit.
+            </p>
+          )}
+
+          {joinResult?.cardUrl && (
+            <a
+              href={joinResult.cardUrl}
+              className="inline-flex items-center justify-center gap-2 w-full h-10 rounded-lg border border-input text-sm font-medium hover:bg-accent/50 transition-colors"
+            >
+              <Bookmark className="w-4 h-4" aria-hidden="true" />
+              View your card
+            </a>
+          )}
 
           <button
             onClick={() => {
               setStep(hasMultiplePrograms ? "program-select" : "form")
-              setResult(null)
+              setJoinResult(null)
+              setWalletResult(null)
+              setAddedToWallet(false)
+              setError(null)
               if (hasMultiplePrograms) {
                 setSelectedProgram(null)
               }
@@ -203,6 +266,158 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
             <ArrowLeft className="w-4 h-4" />
             Start over
           </button>
+        </div>
+      </div>
+    )
+  }
+
+  // --- Card view screen (post-enrollment, pre-wallet) ---
+  if (step === "card-view" && joinResult) {
+    const passDesign = activeProgram?.cardDesign
+      ? buildWalletPassDesign(activeProgram.cardDesign)
+      : null
+
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center p-4 bg-background" style={{ fontFamily: webFont }}>
+        <div className="w-full max-w-md space-y-6">
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {joinResult.isReturning ? "Welcome back!" : "Your card is ready!"}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {joinResult.isReturning
+                ? `Welcome back, ${joinResult.customerName}!`
+                : `${joinResult.customerName}, here's your loyalty card for ${restaurant.name}.`}
+            </p>
+          </div>
+
+          {/* Full-size card preview */}
+          {passDesign && activeProgram && (
+            <div className="flex justify-center">
+              <WalletPassRenderer
+                design={passDesign}
+                format="apple"
+                restaurantName={restaurant.name}
+                logoUrl={restaurant.logo}
+                programName={activeProgram.name}
+                customerName={joinResult.customerName}
+                currentVisits={joinResult.currentCycleVisits ?? 0}
+                totalVisits={activeProgram.visitsRequired}
+                rewardDescription={activeProgram.rewardDescription}
+                hasReward={joinResult.hasAvailableReward}
+              />
+            </div>
+          )}
+
+          {/* Wallet buttons */}
+          <div className="space-y-3">
+            {/* Error */}
+            {error && (
+              <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
+
+            {/* Show platform-specific or both wallet buttons */}
+            {showBothPlatforms ? (
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => handleAddToWallet("apple")}
+                  disabled={isRequestingPass}
+                  className="flex items-center justify-center gap-2 h-12 rounded-lg text-[15px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: brandColor,
+                    color: textOnBrand,
+                  }}
+                >
+                  {isRequestingPass ? (
+                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <>
+                      <AppleIcon className="w-5 h-5" aria-hidden="true" />
+                      Apple Wallet
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => handleAddToWallet("google")}
+                  disabled={isRequestingPass}
+                  className="flex items-center justify-center gap-2 h-12 rounded-lg text-[15px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: brandColor,
+                    color: textOnBrand,
+                  }}
+                >
+                  {isRequestingPass ? (
+                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <>
+                      <GoogleWalletIcon className="w-5 h-5" aria-hidden="true" />
+                      Google Wallet
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleAddToWallet(platform)}
+                disabled={isRequestingPass}
+                className="flex w-full items-center justify-center gap-2 h-12 rounded-lg text-[15px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: brandColor,
+                  color: textOnBrand,
+                }}
+              >
+                {isRequestingPass ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                    Adding to wallet...
+                  </>
+                ) : (
+                  <>
+                    {platform === "apple" ? (
+                      <AppleIcon className="w-5 h-5" aria-hidden="true" />
+                    ) : (
+                      <GoogleWalletIcon className="w-5 h-5" aria-hidden="true" />
+                    )}
+                    Add to {platform === "apple" ? "Apple" : "Google"} Wallet
+                  </>
+                )}
+              </button>
+            )}
+
+            {/* Continue without wallet */}
+            <button
+              onClick={handleContinueWithoutWallet}
+              disabled={isRequestingPass}
+              className="flex w-full items-center justify-center gap-2 h-10 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+            >
+              Continue without wallet
+            </button>
+          </div>
+
+          {/* Bookmark hint */}
+          {joinResult.cardUrl && (
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <Bookmark className="w-3.5 h-3.5" aria-hidden="true" />
+              <a
+                href={joinResult.cardUrl}
+                className="underline underline-offset-4 hover:text-foreground transition-colors"
+              >
+                Bookmark your card
+              </a>
+              {" "}to access it anytime
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="text-center">
+            <p className="text-[11px] text-muted-foreground/70">
+              Powered by{" "}
+              <span className="font-medium text-muted-foreground">Loyalshy</span>
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -240,30 +455,7 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
           {/* Program cards */}
           <div className="space-y-3">
             {programs.map((program) => {
-              const cardDesign = program.cardDesign
-              const sf1 = cardDesign ? parseStripFilters(cardDesign.editorConfig) : { useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
-              const sg1 = sf1.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
-              const programDesign: WalletPassDesign = {
-                shape: (cardDesign?.shape ?? "CLEAN") as WalletPassDesign["shape"],
-                primaryColor: cardDesign?.primaryColor ?? "#1a1a2e",
-                secondaryColor: cardDesign?.secondaryColor ?? "#ffffff",
-                textColor: cardDesign?.textColor ?? "#ffffff",
-                progressStyle: (cardDesign?.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
-                labelFormat: (cardDesign?.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
-                customProgressLabel: cardDesign?.customProgressLabel ?? null,
-                stripImageUrl: cardDesign?.stripImageUrl ?? null,
-                patternStyle: (cardDesign?.patternStyle === "STAMP_GRID" ? "NONE" : cardDesign?.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
-                useStampGrid: sg1,
-                stripColor1: sf1.stripColor1 ?? null,
-                stripColor2: sf1.stripColor2 ?? null,
-                stripFill: sf1.stripFill ?? "gradient",
-                patternColor: sf1.patternColor ?? null,
-                stripImagePosition: sf1.stripImagePosition,
-                stripImageZoom: sf1.stripImageZoom,
-                stampGridConfig: sg1
-                  ? parseStampGridConfig(cardDesign!.editorConfig)
-                  : undefined,
-              }
+              const programDesign = buildWalletPassDesign(program.cardDesign)
 
               return (
                 <button
@@ -308,12 +500,12 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
           {/* Footer */}
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <CreditCard className="w-3.5 h-3.5" />
+              <CreditCard className="w-3.5 h-3.5" aria-hidden="true" />
               Free digital loyalty card
             </div>
             <p className="text-[11px] text-muted-foreground/70">
               Powered by{" "}
-              <span className="font-medium text-muted-foreground">Fidelio</span>
+              <span className="font-medium text-muted-foreground">Loyalshy</span>
             </p>
           </div>
         </div>
@@ -403,12 +595,12 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
               <div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
                 style={{
-                  backgroundColor: `color-mix(in oklch, ${brandColor} 12%, transparent)`,
+                  backgroundColor: `color-mix(in oklch, ${brandColor} ${badgeMix}%, transparent)`,
                   color: brandColor,
                 }}
               >
-                <Gift className="w-4 h-4" />
-                Earn a free {activeProgram.rewardDescription} after{" "}
+                <Gift className="w-4 h-4" aria-hidden="true" />
+                {activeProgram.rewardDescription} after{" "}
                 {activeProgram.visitsRequired} visits
               </div>
             )}
@@ -421,12 +613,12 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
             <div
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
               style={{
-                backgroundColor: `color-mix(in oklch, ${brandColor} 12%, transparent)`,
+                backgroundColor: `color-mix(in oklch, ${brandColor} ${badgeMix}%, transparent)`,
                 color: brandColor,
               }}
             >
-              <Gift className="w-4 h-4" />
-              Earn a free {activeProgram.rewardDescription} after{" "}
+              <Gift className="w-4 h-4" aria-hidden="true" />
+              {activeProgram.rewardDescription} after{" "}
               {activeProgram.visitsRequired} visits
             </div>
           </div>
@@ -445,30 +637,7 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
         {activeProgram && (
           <div className="flex justify-center">
             {(() => {
-              const cd = activeProgram.cardDesign
-              const sf2 = cd ? parseStripFilters(cd.editorConfig) : { useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
-              const sg2 = sf2.useStampGrid || cd?.patternStyle === "STAMP_GRID"
-              const formDesign: WalletPassDesign = {
-                shape: (cd?.shape ?? "CLEAN") as WalletPassDesign["shape"],
-                primaryColor: cd?.primaryColor ?? "#1a1a2e",
-                secondaryColor: cd?.secondaryColor ?? "#ffffff",
-                textColor: cd?.textColor ?? "#ffffff",
-                progressStyle: (cd?.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
-                labelFormat: (cd?.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
-                customProgressLabel: cd?.customProgressLabel ?? null,
-                stripImageUrl: cd?.stripImageUrl ?? null,
-                patternStyle: (cd?.patternStyle === "STAMP_GRID" ? "NONE" : cd?.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
-                useStampGrid: sg2,
-                stripColor1: sf2.stripColor1 ?? null,
-                stripColor2: sf2.stripColor2 ?? null,
-                stripFill: sf2.stripFill ?? "gradient",
-                patternColor: sf2.patternColor ?? null,
-                stripImagePosition: sf2.stripImagePosition,
-                stripImageZoom: sf2.stripImageZoom,
-                stampGridConfig: sg2
-                  ? parseStampGridConfig(cd!.editorConfig)
-                  : undefined,
-              }
+              const formDesign = buildWalletPassDesign(activeProgram.cardDesign)
               return (
                 <WalletPassRenderer
                   design={formDesign}
@@ -477,6 +646,7 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
                   restaurantName={restaurant.name}
                   logoUrl={restaurant.logo}
                   programName={activeProgram.name}
+                  customerName={name.trim() || undefined}
                   currentVisits={0}
                   totalVisits={activeProgram.visitsRequired}
                   rewardDescription={activeProgram.rewardDescription}
@@ -503,6 +673,8 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
               required
               autoComplete="name"
               placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
             />
           </div>
@@ -549,41 +721,6 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
             />
           </div>
 
-          {/* Platform selector (visible on desktop) */}
-          {showBothPlatforms && (
-            <div className="space-y-1.5">
-              <label className="text-[13px] font-medium text-foreground">
-                Choose your wallet
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPlatform("apple")}
-                  className={`flex items-center justify-center gap-2 h-11 rounded-lg border text-sm font-medium transition-colors ${
-                    platform === "apple"
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-input hover:border-foreground/30"
-                  }`}
-                >
-                  <AppleIcon className="w-4 h-4" />
-                  Apple Wallet
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPlatform("google")}
-                  className={`flex items-center justify-center gap-2 h-11 rounded-lg border text-sm font-medium transition-colors ${
-                    platform === "google"
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-input hover:border-foreground/30"
-                  }`}
-                >
-                  <GoogleWalletIcon className="w-4 h-4" />
-                  Google Wallet
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Error */}
           {error && (
             <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
@@ -603,17 +740,13 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
           >
             {isPending ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
                 Creating your card...
               </>
             ) : (
               <>
-                {platform === "apple" ? (
-                  <AppleIcon className="w-5 h-5" />
-                ) : (
-                  <GoogleWalletIcon className="w-5 h-5" />
-                )}
-                Add to {platform === "apple" ? "Apple" : "Google"} Wallet
+                <Smartphone className="w-5 h-5" aria-hidden="true" />
+                Get your card
               </>
             )}
           </button>
@@ -622,12 +755,12 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
         {/* Footer */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <CreditCard className="w-3.5 h-3.5" />
+            <CreditCard className="w-3.5 h-3.5" aria-hidden="true" />
             Free digital loyalty card
           </div>
           <p className="text-[11px] text-muted-foreground/70">
             Powered by{" "}
-            <span className="font-medium text-muted-foreground">Fidelio</span>
+            <span className="font-medium text-muted-foreground">Loyalshy</span>
           </p>
         </div>
       </div>
