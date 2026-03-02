@@ -28,6 +28,7 @@ export default async function CustomersPage({
   const order = params.order === "asc" ? "asc" as const : "desc" as const
   const page = typeof params.page === "string" ? Math.max(1, parseInt(params.page, 10) || 1) : 1
   const hasReward = typeof params.reward === "string" ? params.reward : "all"
+  const programType = typeof params.type === "string" ? params.type : "all"
 
   const result = await getCustomers({
     page,
@@ -36,6 +37,7 @@ export default async function CustomersPage({
     sort,
     order,
     hasReward,
+    programType,
   })
 
   // Check if this restaurant has ANY customers (for empty state)
@@ -51,6 +53,7 @@ export default async function CustomersPage({
       order={order}
       page={page}
       hasReward={hasReward}
+      programType={programType}
       isEmpty={totalCustomerCount === 0}
     />
   )

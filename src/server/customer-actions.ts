@@ -24,6 +24,7 @@ export type CustomerRow = {
   enrollmentCount: number
   primaryEnrollment: {
     programName: string
+    programType: string
     currentCycleVisits: number
     visitsRequired: number
   } | null
@@ -50,6 +51,7 @@ export type CustomerDetail = {
     createdAt: Date
     registeredBy: string | null
     programName: string
+    programType: string
   }[]
   rewards: {
     id: string
@@ -113,6 +115,7 @@ export type GetCustomersParams = {
   sort?: string
   order?: "asc" | "desc"
   hasReward?: string
+  programType?: string
 }
 
 export async function getCustomers(
@@ -127,6 +130,7 @@ export async function getCustomers(
   const sortField = params.sort ?? "createdAt"
   const sortOrder = params.order ?? "desc"
   const hasReward = params.hasReward ?? "all"
+  const programType = params.programType ?? "all"
 
   // Build where clause (exclude soft-deleted)
   const where: Record<string, unknown> = { restaurantId, deletedAt: null }
@@ -137,6 +141,17 @@ export async function getCustomers(
       { email: { contains: search, mode: "insensitive" } },
       { phone: { contains: search } },
     ]
+  }
+
+  // Filter by program type
+  const validTypes = ["STAMP_CARD", "COUPON", "MEMBERSHIP"]
+  if (programType !== "all" && validTypes.includes(programType)) {
+    where.enrollments = {
+      some: {
+        status: "ACTIVE",
+        loyaltyProgram: { programType },
+      },
+    }
   }
 
   // Map sortable fields
@@ -172,6 +187,7 @@ export async function getCustomers(
             loyaltyProgram: {
               select: {
                 name: true,
+                programType: true,
                 visitsRequired: true,
               },
             },
@@ -206,6 +222,7 @@ export async function getCustomers(
       primaryEnrollment: primary
         ? {
             programName: primary.loyaltyProgram.name,
+            programType: primary.loyaltyProgram.programType,
             currentCycleVisits: primary.currentCycleVisits,
             visitsRequired: primary.loyaltyProgram.visitsRequired,
           }
@@ -276,7 +293,7 @@ export async function getCustomerDetail(
           visitNumber: true,
           createdAt: true,
           registeredBy: { select: { name: true } },
-          loyaltyProgram: { select: { name: true } },
+          loyaltyProgram: { select: { name: true, programType: true } },
         },
       },
       rewards: {
@@ -322,6 +339,7 @@ export async function getCustomerDetail(
           labelFormat: e.loyaltyProgram.cardDesign.labelFormat,
           customProgressLabel: e.loyaltyProgram.cardDesign.customProgressLabel,
           stripImageUrl: e.loyaltyProgram.cardDesign.stripImageUrl,
+          editorConfig: e.loyaltyProgram.cardDesign.editorConfig,
         }
       : null,
   }))
@@ -341,6 +359,7 @@ export async function getCustomerDetail(
       createdAt: v.createdAt,
       registeredBy: v.registeredBy?.name ?? null,
       programName: v.loyaltyProgram.name,
+      programType: v.loyaltyProgram.programType,
     })),
     rewards: customer.rewards.map((r) => ({
       id: r.id,

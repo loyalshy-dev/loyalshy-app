@@ -4,6 +4,8 @@ import { useState, useEffect, useTransition } from "react"
 import { formatDistanceToNow, format } from "date-fns"
 import {
   Stamp,
+  Ticket,
+  Crown,
   Gift,
   Pencil,
   Trash2,
@@ -114,6 +116,64 @@ const rewardStatusConfig: Record<
     label: "Expired",
     className: "bg-muted text-muted-foreground border-border",
   },
+}
+
+const visitTypeIcons: Record<string, typeof Stamp> = {
+  STAMP_CARD: Stamp,
+  COUPON: Ticket,
+  MEMBERSHIP: Crown,
+}
+
+function buildWalletDesign(enrollment: EnrollmentDetail): WalletPassDesign | null {
+  if (!enrollment.cardDesign) return null
+  const cd = enrollment.cardDesign
+  const ps = cd.patternStyle
+  const sf = parseStripFilters(cd.editorConfig)
+  const sg = sf.useStampGrid || ps === "STAMP_GRID"
+  return {
+    cardType: (cd.cardType ?? "STAMP") as WalletPassDesign["cardType"],
+    shape: (cd.shape ?? "CLEAN") as WalletPassDesign["shape"],
+    primaryColor: cd.primaryColor ?? "#1a1a2e",
+    secondaryColor: cd.secondaryColor ?? "#ffffff",
+    textColor: cd.textColor ?? "#ffffff",
+    progressStyle: (cd.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
+    labelFormat: (cd.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
+    customProgressLabel: cd.customProgressLabel ?? null,
+    stripImageUrl: cd.stripImageUrl ?? null,
+    patternStyle: (ps === "STAMP_GRID" ? "NONE" : ps ?? "NONE") as WalletPassDesign["patternStyle"],
+    useStampGrid: sg,
+    stripColor1: sf.stripColor1 ?? null,
+    stripColor2: sf.stripColor2 ?? null,
+    stripFill: sf.stripFill ?? "gradient",
+    patternColor: sf.patternColor ?? null,
+    stripImagePosition: sf.stripImagePosition,
+    stripImageZoom: sf.stripImageZoom,
+    stampGridConfig: sg ? parseStampGridConfig(cd.editorConfig) : undefined,
+  }
+}
+
+function getProgressText(enrollment: EnrollmentDetail): string {
+  switch (enrollment.programType) {
+    case "COUPON":
+      return enrollment.status === "COMPLETED" ? "Coupon redeemed" : "Ready to redeem"
+    case "MEMBERSHIP":
+      return "Active member"
+    default: {
+      const remaining = enrollment.visitsRequired - enrollment.currentCycleVisits
+      return `${remaining} visit${remaining !== 1 ? "s" : ""} until ${enrollment.rewardDescription}`
+    }
+  }
+}
+
+function getCompactProgressText(enrollment: EnrollmentDetail): string {
+  switch (enrollment.programType) {
+    case "COUPON":
+      return enrollment.status === "COMPLETED" ? "Redeemed" : "Coupon"
+    case "MEMBERSHIP":
+      return "Member"
+    default:
+      return `${enrollment.currentCycleVisits}/${enrollment.visitsRequired}`
+  }
 }
 
 type CustomerDetailSheetProps = {
@@ -304,17 +364,19 @@ export function CustomerDetailSheet({
                         </p>
                       ) : (
                         <div className="space-y-0">
-                          {detail.visits.map((visit) => (
+                          {detail.visits.map((visit) => {
+                            const VisitIcon = visitTypeIcons[visit.programType] ?? Stamp
+                            return (
                             <div
                               key={visit.id}
                               className="flex items-center gap-3 py-2 border-b border-border last:border-0"
                             >
                               <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand/10">
-                                <Stamp className="size-3.5 text-brand" />
+                                <VisitIcon className="size-3.5 text-brand" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-[13px] font-medium">
-                                  Visit #{visit.visitNumber}
+                                  {visit.programType === "MEMBERSHIP" ? "Check-in" : `Visit #${visit.visitNumber}`}
                                   <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
                                     {visit.programName}
                                   </span>
@@ -331,7 +393,8 @@ export function CustomerDetailSheet({
                                 })}
                               </span>
                             </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       )}
                     </div>
@@ -527,33 +590,9 @@ function EnrollmentProgressSection({
   // otherwise fall back to full-size ProgressRing
   if (activeEnrollments.length === 1 && otherEnrollments.length === 0) {
     const enrollment = activeEnrollments[0]
+    const design = buildWalletDesign(enrollment)
 
-    if (enrollment.cardDesign) {
-      const cds1Ps = (enrollment.cardDesign as any)?.patternStyle
-      const cds1Sf = parseStripFilters(enrollment.cardDesign?.editorConfig)
-      const cds1Sg = cds1Sf.useStampGrid || cds1Ps === "STAMP_GRID"
-      const design: WalletPassDesign = {
-        cardType: ((enrollment.cardDesign as any)?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-        shape: (enrollment.cardDesign as any)?.shape ?? "CLEAN",
-        primaryColor: enrollment.cardDesign?.primaryColor ?? "#1a1a2e",
-        secondaryColor: enrollment.cardDesign?.secondaryColor ?? "#ffffff",
-        textColor: enrollment.cardDesign?.textColor ?? "#ffffff",
-        progressStyle: (enrollment.cardDesign as any)?.progressStyle ?? "NUMBERS",
-        labelFormat: (enrollment.cardDesign as any)?.labelFormat ?? "UPPERCASE",
-        customProgressLabel: null,
-        stripImageUrl: null,
-        patternStyle: (cds1Ps === "STAMP_GRID" ? "NONE" : cds1Ps ?? "NONE"),
-        useStampGrid: cds1Sg,
-        stripColor1: cds1Sf.stripColor1 ?? null,
-        stripColor2: cds1Sf.stripColor2 ?? null,
-        stripFill: cds1Sf.stripFill ?? "gradient",
-        patternColor: cds1Sf.patternColor ?? null,
-        stripImagePosition: cds1Sf.stripImagePosition,
-        stripImageZoom: cds1Sf.stripImageZoom,
-        stampGridConfig: cds1Sg
-          ? parseStampGridConfig(enrollment.cardDesign?.editorConfig)
-          : undefined,
-      }
+    if (design) {
       return (
         <div className="flex items-center justify-center py-6">
           <div className="flex flex-col items-center gap-2">
@@ -569,7 +608,7 @@ function EnrollmentProgressSection({
               width={220}
             />
             <p className="text-[11px] text-muted-foreground">
-              {enrollment.visitsRequired - enrollment.currentCycleVisits} visits until {enrollment.rewardDescription}
+              {getProgressText(enrollment)}
             </p>
           </div>
         </div>
@@ -580,13 +619,22 @@ function EnrollmentProgressSection({
     return (
       <div className="flex items-center justify-center py-6">
         <div className="text-center">
-          <ProgressRing
-            current={enrollment.currentCycleVisits}
-            total={enrollment.visitsRequired}
-          />
+          {enrollment.programType === "STAMP_CARD" ? (
+            <ProgressRing
+              current={enrollment.currentCycleVisits}
+              total={enrollment.visitsRequired}
+            />
+          ) : (
+            <div className="flex size-[120px] items-center justify-center rounded-full bg-brand/10 mx-auto">
+              {(() => {
+                const Icon = visitTypeIcons[enrollment.programType] ?? Stamp
+                return <Icon className="size-10 text-brand" />
+              })()}
+            </div>
+          )}
           <p className="text-[12px] font-medium mt-2">{enrollment.programName}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            {enrollment.visitsRequired - enrollment.currentCycleVisits} visits until {enrollment.rewardDescription}
+            {getProgressText(enrollment)}
           </p>
         </div>
       </div>
@@ -599,32 +647,9 @@ function EnrollmentProgressSection({
     <div className="py-4 px-6">
       <div className="flex flex-wrap items-start justify-center gap-4">
         {activeEnrollments.map((enrollment) => {
-          if (enrollment.cardDesign) {
-            const cds2Ps = (enrollment.cardDesign as any)?.patternStyle
-            const cds2Sf = parseStripFilters(enrollment.cardDesign?.editorConfig)
-            const cds2Sg = cds2Sf.useStampGrid || cds2Ps === "STAMP_GRID"
-            const design: WalletPassDesign = {
-              cardType: ((enrollment.cardDesign as any)?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-              shape: (enrollment.cardDesign as any)?.shape ?? "CLEAN",
-              primaryColor: enrollment.cardDesign?.primaryColor ?? "#1a1a2e",
-              secondaryColor: enrollment.cardDesign?.secondaryColor ?? "#ffffff",
-              textColor: enrollment.cardDesign?.textColor ?? "#ffffff",
-              progressStyle: (enrollment.cardDesign as any)?.progressStyle ?? "NUMBERS",
-              labelFormat: (enrollment.cardDesign as any)?.labelFormat ?? "UPPERCASE",
-              customProgressLabel: null,
-              stripImageUrl: null,
-              patternStyle: (cds2Ps === "STAMP_GRID" ? "NONE" : cds2Ps ?? "NONE"),
-              useStampGrid: cds2Sg,
-              stripColor1: cds2Sf.stripColor1 ?? null,
-              stripColor2: cds2Sf.stripColor2 ?? null,
-              stripFill: cds2Sf.stripFill ?? "gradient",
-              patternColor: cds2Sf.patternColor ?? null,
-              stripImagePosition: cds2Sf.stripImagePosition,
-              stripImageZoom: cds2Sf.stripImageZoom,
-              stampGridConfig: cds2Sg
-                ? parseStampGridConfig(enrollment.cardDesign?.editorConfig)
-                : undefined,
-            }
+          const design = buildWalletDesign(enrollment)
+
+          if (design) {
             return (
               <div key={enrollment.enrollmentId} className="flex flex-col items-center gap-1.5">
                 <WalletPassRenderer
@@ -640,26 +665,44 @@ function EnrollmentProgressSection({
                   height={160}
                 />
                 <p className="text-[10px] text-muted-foreground">
-                  {enrollment.currentCycleVisits}/{enrollment.visitsRequired}
+                  {getCompactProgressText(enrollment)}
                 </p>
               </div>
             )
           }
 
           // Fallback: no card design data
+          if (enrollment.programType === "STAMP_CARD") {
+            return (
+              <div key={enrollment.enrollmentId} className="text-center">
+                <ProgressRing
+                  current={enrollment.currentCycleVisits}
+                  total={enrollment.visitsRequired}
+                  size={80}
+                  strokeWidth={6}
+                />
+                <p className="text-[11px] font-medium mt-1.5 max-w-[100px] truncate">
+                  {enrollment.programName}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  {enrollment.visitsRequired - enrollment.currentCycleVisits} to go
+                </p>
+              </div>
+            )
+          }
+
+          // Fallback for non-stamp types: type icon
+          const FallbackIcon = visitTypeIcons[enrollment.programType] ?? Stamp
           return (
             <div key={enrollment.enrollmentId} className="text-center">
-              <ProgressRing
-                current={enrollment.currentCycleVisits}
-                total={enrollment.visitsRequired}
-                size={80}
-                strokeWidth={6}
-              />
+              <div className="flex size-[80px] items-center justify-center rounded-full bg-brand/10 mx-auto">
+                <FallbackIcon className="size-7 text-brand" />
+              </div>
               <p className="text-[11px] font-medium mt-1.5 max-w-[100px] truncate">
                 {enrollment.programName}
               </p>
               <p className="text-[10px] text-muted-foreground mt-0.5">
-                {enrollment.visitsRequired - enrollment.currentCycleVisits} to go
+                {getCompactProgressText(enrollment)}
               </p>
             </div>
           )
@@ -671,12 +714,14 @@ function EnrollmentProgressSection({
         <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
           {otherEnrollments.map((enrollment) => {
             const config = enrollmentStatusConfig[enrollment.status] ?? enrollmentStatusConfig.CANCELLED
+            const TypeIcon = visitTypeIcons[enrollment.programType] ?? Stamp
             return (
               <Badge
                 key={enrollment.enrollmentId}
                 variant="outline"
                 className={`text-[10px] px-1.5 py-0 gap-1 ${config.className}`}
               >
+                <TypeIcon className="size-3" />
                 {enrollment.programName} — {config.label}
               </Badge>
             )

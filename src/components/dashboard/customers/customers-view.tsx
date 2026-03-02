@@ -18,6 +18,7 @@ type CustomersViewProps = {
   order: "asc" | "desc"
   page: number
   hasReward: string
+  programType: string
   isEmpty: boolean
 }
 
@@ -28,6 +29,7 @@ export function CustomersView({
   order,
   page,
   hasReward,
+  programType,
   isEmpty,
 }: CustomersViewProps) {
   const [addSheetOpen, setAddSheetOpen] = useState(false)
@@ -82,6 +84,7 @@ export function CustomersView({
           <CustomerFilters
             search={search}
             hasReward={hasReward}
+            programType={programType}
             totalResults={result.total}
           />
 

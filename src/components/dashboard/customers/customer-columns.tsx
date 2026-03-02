@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns"
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Eye, Pencil, Trash2, Stamp, Ticket, Crown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,7 +11,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
 import type { CustomerRow } from "@/server/customer-actions"
+
+const typeIcons: Record<string, typeof Stamp> = {
+  STAMP_CARD: Stamp,
+  COUPON: Ticket,
+  MEMBERSHIP: Crown,
+}
+
+const typeLabels: Record<string, string> = {
+  STAMP_CARD: "Stamp",
+  COUPON: "Coupon",
+  MEMBERSHIP: "Member",
+}
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -95,7 +108,7 @@ export function getCustomerColumns(
         </Button>
       ),
       cell: ({ row }) => {
-        const { primaryEnrollment, enrollmentCount } = row.original
+        const { primaryEnrollment, enrollmentCount, hasAvailableReward } = row.original
 
         if (!primaryEnrollment) {
           return (
@@ -105,12 +118,49 @@ export function getCustomerColumns(
           )
         }
 
-        const { currentCycleVisits, visitsRequired, programName } = primaryEnrollment
+        const { currentCycleVisits, visitsRequired, programName, programType } = primaryEnrollment
+        const TypeIcon = typeIcons[programType] ?? Stamp
+        const typeLabel = typeLabels[programType] ?? "Program"
+        const moreSuffix = enrollmentCount > 1
+          ? `+${enrollmentCount - 1} more`
+          : programName
+
+        if (programType === "COUPON") {
+          return (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1 shrink-0">
+                <TypeIcon className="size-3" />
+                {typeLabel}
+              </Badge>
+              <span className="text-[12px] text-muted-foreground">
+                {hasAvailableReward ? "Ready" : "Redeemed"}
+              </span>
+              <span className="text-[11px] text-muted-foreground truncate max-w-[100px] hidden lg:inline">
+                {moreSuffix}
+              </span>
+            </div>
+          )
+        }
+
+        if (programType === "MEMBERSHIP") {
+          return (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1 shrink-0">
+                <TypeIcon className="size-3" />
+                {typeLabel}
+              </Badge>
+              <span className="text-[11px] text-muted-foreground truncate max-w-[100px] hidden lg:inline">
+                {moreSuffix}
+              </span>
+            </div>
+          )
+        }
+
+        // STAMP_CARD (default)
         const pct = Math.min((currentCycleVisits / visitsRequired) * 100, 100)
 
         return (
           <div className="flex items-center gap-2">
-            {/* Mini progress bar */}
             <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
               <div
                 className="h-full rounded-full bg-brand transition-all"
@@ -121,9 +171,7 @@ export function getCustomerColumns(
               {currentCycleVisits}/{visitsRequired}
             </span>
             <span className="text-[11px] text-muted-foreground truncate max-w-[100px] hidden lg:inline">
-              {enrollmentCount > 1
-                ? `+${enrollmentCount - 1} more`
-                : programName}
+              {moreSuffix}
             </span>
           </div>
         )

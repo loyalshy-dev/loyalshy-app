@@ -2,22 +2,30 @@
 
 import { useTransition, useRef, useCallback } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import { Search, X, Download } from "lucide-react"
+import { Search, X, Download, Stamp, Ticket, Crown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { exportCustomersCSV } from "@/server/customer-actions"
 import { toast } from "sonner"
 
+const programTypeFilters = [
+  { value: "STAMP_CARD", label: "Stamp", icon: Stamp },
+  { value: "COUPON", label: "Coupon", icon: Ticket },
+  { value: "MEMBERSHIP", label: "Member", icon: Crown },
+] as const
+
 type CustomerFiltersProps = {
   search: string
   hasReward: string
+  programType: string
   totalResults: number
 }
 
 export function CustomerFilters({
   search,
   hasReward,
+  programType,
   totalResults,
 }: CustomerFiltersProps) {
   const router = useRouter()
@@ -60,6 +68,10 @@ export function CustomerFilters({
     updateParams({ reward: value === hasReward ? null : value })
   }
 
+  function handleTypeFilter(value: string) {
+    updateParams({ type: value === programType ? null : value })
+  }
+
   function clearFilters() {
     startTransition(() => {
       router.push(pathname, { scroll: false })
@@ -84,7 +96,7 @@ export function CustomerFilters({
     })
   }
 
-  const hasActiveFilters = search || hasReward !== "all"
+  const hasActiveFilters = search || hasReward !== "all" || programType !== "all"
 
   return (
     <div className="space-y-3">
@@ -135,6 +147,28 @@ export function CustomerFilters({
             Has Reward
           </Badge>
         </button>
+
+        {/* Program type chips */}
+        {programTypeFilters.map((pt) => {
+          const isActive = programType === pt.value
+          return (
+            <button
+              key={pt.value}
+              onClick={() => handleTypeFilter(pt.value)}
+              className="focus:outline-none"
+            >
+              <Badge
+                variant={isActive ? "default" : "outline"}
+                className={`cursor-pointer text-[11px] px-2 py-0.5 gap-1 ${
+                  isActive ? "" : "hover:bg-accent"
+                }`}
+              >
+                <pt.icon className="size-3" />
+                {pt.label}
+              </Badge>
+            </button>
+          )
+        })}
 
         {/* Active filters count + clear */}
         {hasActiveFilters && (
