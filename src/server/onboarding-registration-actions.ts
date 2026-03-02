@@ -26,7 +26,7 @@ const applyCardDesignSchema = z.object({
   secondaryColor: z.string().min(4).max(9),
   textColor: z.string().min(4).max(9),
   templateId: z.string().max(50).optional(),
-  shape: z.enum(["CLEAN", "SHOWCASE", "INFO_RICH"]).optional(),
+  showStrip: z.boolean().optional(),
   patternStyle: z.enum(["NONE", "DOTS", "WAVES", "GEOMETRIC", "CHEVRON", "CROSSHATCH", "DIAMONDS", "CONFETTI", "SOLID_PRIMARY", "SOLID_SECONDARY", "STAMP_GRID"]).optional(),
   progressStyle: z.enum(["NUMBERS", "CIRCLES", "SQUARES", "STARS", "STAMPS", "PERCENTAGE", "REMAINING"]).optional(),
   labelFormat: z.enum(["UPPERCASE", "TITLE_CASE", "LOWERCASE"]).optional(),
@@ -402,7 +402,7 @@ export async function applyCardDesignFromBrand(input: z.infer<typeof applyCardDe
   }
 
   if (parsed.templateId) updateData.templateId = parsed.templateId
-  if (parsed.shape) updateData.shape = parsed.shape
+  if (parsed.showStrip !== undefined) updateData.showStrip = parsed.showStrip
   if (parsed.patternStyle) updateData.patternStyle = parsed.patternStyle
   if (parsed.progressStyle) updateData.progressStyle = parsed.progressStyle
   if (parsed.labelFormat) updateData.labelFormat = parsed.labelFormat

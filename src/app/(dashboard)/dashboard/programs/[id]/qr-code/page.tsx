@@ -34,7 +34,7 @@ export default async function ProgramQrCodePage(props: {
           primaryColor: true,
           secondaryColor: true,
           textColor: true,
-          shape: true,
+          showStrip: true,
           patternStyle: true,
           progressStyle: true,
           labelFormat: true,

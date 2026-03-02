@@ -3,7 +3,6 @@ import crypto from "crypto"
 // ─── Types ──────────────────────────────────────────────────
 
 export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON"
-export type CardShape = "CLEAN" | "SHOWCASE" | "INFO_RICH"
 export type PatternStyle = "NONE" | "DOTS" | "WAVES" | "GEOMETRIC" | "CHEVRON" | "CROSSHATCH" | "DIAMONDS" | "CONFETTI" | "SOLID_PRIMARY" | "SOLID_SECONDARY" | "STAMP_GRID"
 export type ProgressStyle = "NUMBERS" | "CIRCLES" | "SQUARES" | "STARS" | "STAMPS" | "PERCENTAGE" | "REMAINING"
 export type FontFamily = "SANS" | "SERIF" | "ROUNDED" | "MONO"
@@ -122,7 +121,7 @@ export function parseStampGridConfig(editorConfig: unknown): StampGridConfig {
 
 export type CardDesignData = {
   cardType: CardType
-  shape: CardShape
+  showStrip: boolean
   primaryColor: string
   secondaryColor: string
   textColor: string
@@ -150,7 +149,7 @@ export type CardDesignData = {
 
 export type CardDesignRow = {
   cardType: string
-  shape: string
+  showStrip: boolean
   primaryColor: string | null
   secondaryColor: string | null
   textColor: string | null
@@ -284,7 +283,7 @@ export function formatLabel(label: string, format: LabelFormat): string {
 /** Compute a SHA-256 hash of design-relevant fields, truncated to 16 chars */
 export function computeDesignHash(design: {
   cardType?: string
-  shape: string
+  showStrip: boolean
   primaryColor: string | null
   secondaryColor: string | null
   textColor: string | null
@@ -307,7 +306,7 @@ export function computeDesignHash(design: {
 }): string {
   const payload = JSON.stringify({
     ct: design.cardType ?? "STAMP",
-    s: design.shape,
+    ss: design.showStrip,
     p: design.primaryColor,
     sc: design.secondaryColor,
     t: design.textColor,
@@ -347,7 +346,7 @@ export function resolveCardDesign(
 
   return {
     cardType: (cardDesign?.cardType as CardType) ?? "STAMP",
-    shape: (cardDesign?.shape as CardShape) ?? "CLEAN",
+    showStrip: cardDesign?.showStrip ?? true,
     primaryColor: primary,
     secondaryColor: secondary,
     textColor: text,
@@ -393,178 +392,64 @@ export type PassFieldLayout = {
     primary: string[]
     secondary: string[]
     auxiliary: string[]
-    useStrip: boolean
   }
   google: {
     rows: number
-    showHeroImage: boolean
     fields: string[]
   }
 }
 
 /**
- * Returns the field layout for a given card shape.
- * Determines which fields appear where on Apple/Google passes.
+ * Returns the field layout for a given card type.
+ * One fixed layout per card type (INFO_RICH base — shows all data).
+ * Strip visibility is controlled separately via `showStrip` on CardDesign.
  *
- * CLEAN: No strip. Primary = progress. Secondary = reward + visits. Auxiliary = member since + name.
- * SHOWCASE: Strip dominates. Primary = progress (overlaid). Secondary = reward only. Fewer fields visible.
- * INFO_RICH: Optional strip. More fields. Header = restaurant + member #. Primary = progress. Secondary = reward + visits + member since. Auxiliary = name.
- *
- * COUPON fields: discount (primary), validUntil, couponCode, customerName
- * TIER fields: tierName (primary), benefits, memberSince, customerName
+ * STAMP/POINTS: header=restaurant+memberNumber, primary=progress, secondary=nextReward+totalVisits+memberSince, auxiliary=customerName
+ * COUPON: header=restaurant, primary=discount, secondary=validUntil+couponCode+customerName
+ * TIER: header=restaurant, primary=tierName, secondary=benefits+memberSince+customerName
  */
-export function getFieldLayout(shape: CardShape, cardType?: CardType): PassFieldLayout {
-  // ─── COUPON layouts ──────────────────────────────────────
+export function getFieldLayout(cardType?: CardType): PassFieldLayout {
   if (cardType === "COUPON") {
-    switch (shape) {
-      case "SHOWCASE":
-        return {
-          apple: {
-            header: ["restaurant"],
-            primary: ["discount"],
-            secondary: ["validUntil"],
-            auxiliary: ["customerName"],
-            useStrip: true,
-          },
-          google: {
-            rows: 1,
-            showHeroImage: true,
-            fields: ["discount", "validUntil", "customerName"],
-          },
-        }
-      case "INFO_RICH":
-        return {
-          apple: {
-            header: ["restaurant"],
-            primary: ["discount"],
-            secondary: ["validUntil", "couponCode", "customerName"],
-            auxiliary: [],
-            useStrip: true,
-          },
-          google: {
-            rows: 3,
-            showHeroImage: true,
-            fields: ["discount", "validUntil", "couponCode", "customerName"],
-          },
-        }
-      case "CLEAN":
-      default:
-        return {
-          apple: {
-            header: ["restaurant"],
-            primary: ["discount"],
-            secondary: ["validUntil", "couponCode"],
-            auxiliary: ["customerName"],
-            useStrip: false,
-          },
-          google: {
-            rows: 2,
-            showHeroImage: false,
-            fields: ["discount", "validUntil", "couponCode", "customerName"],
-          },
-        }
+    return {
+      apple: {
+        header: ["restaurant"],
+        primary: ["discount"],
+        secondary: ["validUntil", "couponCode", "customerName"],
+        auxiliary: [],
+      },
+      google: {
+        rows: 3,
+        fields: ["discount", "validUntil", "couponCode", "customerName"],
+      },
     }
   }
 
-  // ─── TIER (Membership) layouts ───────────────────────────
   if (cardType === "TIER") {
-    switch (shape) {
-      case "SHOWCASE":
-        return {
-          apple: {
-            header: ["restaurant"],
-            primary: ["tierName"],
-            secondary: ["memberSince"],
-            auxiliary: ["customerName"],
-            useStrip: true,
-          },
-          google: {
-            rows: 1,
-            showHeroImage: true,
-            fields: ["tierName", "memberSince", "customerName"],
-          },
-        }
-      case "INFO_RICH":
-        return {
-          apple: {
-            header: ["restaurant"],
-            primary: ["tierName"],
-            secondary: ["benefits", "memberSince", "customerName"],
-            auxiliary: [],
-            useStrip: true,
-          },
-          google: {
-            rows: 3,
-            showHeroImage: true,
-            fields: ["tierName", "benefits", "memberSince", "customerName"],
-          },
-        }
-      case "CLEAN":
-      default:
-        return {
-          apple: {
-            header: ["restaurant"],
-            primary: ["tierName"],
-            secondary: ["benefits", "memberSince"],
-            auxiliary: ["customerName"],
-            useStrip: false,
-          },
-          google: {
-            rows: 2,
-            showHeroImage: false,
-            fields: ["tierName", "benefits", "memberSince", "customerName"],
-          },
-        }
+    return {
+      apple: {
+        header: ["restaurant"],
+        primary: ["tierName"],
+        secondary: ["benefits", "memberSince", "customerName"],
+        auxiliary: [],
+      },
+      google: {
+        rows: 3,
+        fields: ["tierName", "benefits", "memberSince", "customerName"],
+      },
     }
   }
 
-  // ─── STAMP / POINTS (default) layouts ────────────────────
-  switch (shape) {
-    case "SHOWCASE":
-      return {
-        apple: {
-          header: ["restaurant"],
-          primary: ["progress"],
-          secondary: ["nextReward"],
-          auxiliary: ["customerName"],
-          useStrip: true,
-        },
-        google: {
-          rows: 1,
-          showHeroImage: true,
-          fields: ["progress", "nextReward", "customerName"],
-        },
-      }
-    case "INFO_RICH":
-      return {
-        apple: {
-          header: ["restaurant", "memberNumber"],
-          primary: ["progress"],
-          secondary: ["nextReward", "totalVisits", "memberSince"],
-          auxiliary: ["customerName"],
-          useStrip: true,
-        },
-        google: {
-          rows: 3,
-          showHeroImage: true,
-          fields: ["progress", "totalVisits", "nextReward", "memberSince", "customerName"],
-        },
-      }
-    case "CLEAN":
-    default:
-      return {
-        apple: {
-          header: ["restaurant"],
-          primary: ["progress"],
-          secondary: ["nextReward", "totalVisits"],
-          auxiliary: ["memberSince", "customerName"],
-          useStrip: false,
-        },
-        google: {
-          rows: 2,
-          showHeroImage: false,
-          fields: ["progress", "totalVisits", "nextReward", "memberSince", "customerName"],
-        },
-      }
+  // STAMP / POINTS (default)
+  return {
+    apple: {
+      header: ["restaurant", "memberNumber"],
+      primary: ["progress"],
+      secondary: ["nextReward", "totalVisits", "memberSince"],
+      auxiliary: ["customerName"],
+    },
+    google: {
+      rows: 3,
+      fields: ["progress", "totalVisits", "nextReward", "memberSince", "customerName"],
+    },
   }
 }

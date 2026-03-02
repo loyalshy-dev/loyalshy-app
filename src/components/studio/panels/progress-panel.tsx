@@ -172,7 +172,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
   const customProgressLabel = wallet.customProgressLabel
   const useStampGrid = wallet.useStampGrid
   const stampGridConfig = wallet.stampGridConfig
-  const shape = wallet.shape
+  const showStrip = wallet.showStrip
 
   const stripColor1 = wallet.stripColor1
   const stripColor2 = wallet.stripColor2
@@ -189,12 +189,6 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
   // Derived: which option is active
   const activeId: "STAMP_GRID" | ProgressStyle = useStampGrid ? "STAMP_GRID" : progressStyle
 
-  // CLEAN shape has no strip, so stamp grid is unavailable
-  const isClean = shape === "CLEAN"
-
-  // Warning: if stamp grid was active and shape was changed to CLEAN
-  const showCleanWarning = isClean && useStampGrid
-
   // Live preview for text styles
   const livePreview = formatProgressValue(4, visitsRequired, progressStyle, false)
 
@@ -204,8 +198,9 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
 
   function handleStyleSelect(id: "STAMP_GRID" | ProgressStyle) {
     if (id === "STAMP_GRID") {
-      if (isClean) return // no-op for CLEAN shape
       store.getState().setWalletField("useStampGrid", true)
+      // Stamp grid needs the strip area to render
+      if (!showStrip) store.getState().setWalletField("showStrip", true)
     } else {
       store.getState().setWalletField("useStampGrid", false)
       store.getState().setWalletField("progressStyle", id)
@@ -214,23 +209,6 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
 
   return (
     <div>
-      {/* ─── CLEAN shape warning ─── */}
-      {showCleanWarning && (
-        <div
-          style={{
-            padding: "8px 10px",
-            borderRadius: 6,
-            backgroundColor: "oklch(0.85 0.08 70)",
-            color: "oklch(0.3 0.05 70)",
-            fontSize: 11,
-            marginBottom: 12,
-            lineHeight: 1.4,
-          }}
-        >
-          Stamp Grid was active but the card shape is now <strong>Clean</strong> (no strip area). Switch to Showcase or Info Rich in the Shape panel to re-enable, or pick a text style below.
-        </div>
-      )}
-
       {/* ─── B. Unified Style Picker ─── */}
       <SectionHeader>Progress Style</SectionHeader>
       <div
@@ -244,13 +222,11 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
         {STYLE_OPTIONS.map((opt) => {
           const isActive = activeId === opt.id
           const isStampGridOption = opt.id === "STAMP_GRID"
-          const isDisabled = isStampGridOption && isClean
 
           return (
             <button
               key={opt.id}
               onClick={() => handleStyleSelect(opt.id)}
-              disabled={isDisabled}
               aria-pressed={isActive}
               style={{
                 display: "flex",
@@ -262,8 +238,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                 borderRadius: 8,
                 border: `2px solid ${isActive ? "var(--primary)" : "var(--border)"}`,
                 backgroundColor: isActive ? "var(--accent)" : "transparent",
-                cursor: isDisabled ? "not-allowed" : "pointer",
-                opacity: isDisabled ? 0.4 : 1,
+                cursor: "pointer",
                 textAlign: "center",
                 minHeight: 58,
                 position: "relative",
@@ -320,19 +295,13 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                 {opt.name}
               </div>
 
-              {/* Disabled note for stamp grid on CLEAN */}
-              {isDisabled && (
-                <div style={{ fontSize: 8, color: "var(--muted-foreground)", lineHeight: 1.2 }}>
-                  requires strip
-                </div>
-              )}
             </button>
           )
         })}
       </div>
 
       {/* ─── C. Stamp Grid Config (when stamp grid selected) ─── */}
-      {useStampGrid && !isClean && (
+      {useStampGrid && (
         <>
           <div style={{ height: 1, backgroundColor: "var(--border)", marginBottom: 16 }} />
 

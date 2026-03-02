@@ -3,7 +3,6 @@
 import {
   LayoutGrid,
   Palette,
-  Columns3,
   BarChart3,
   ImagePlus,
   CircleUserRound,
@@ -28,7 +27,6 @@ type ToolItem = {
 const TOOLS: ToolItem[] = [
   { id: "templates", label: "Templates", icon: <LayoutGrid size={18} /> },
   { id: "colors", label: "Colors", icon: <Palette size={18} /> },
-  { id: "shape", label: "Shape", icon: <Columns3 size={18} /> },
   { id: "progress", label: "Progress", icon: <BarChart3 size={18} /> },
   { id: "strip", label: "Strip", icon: <ImagePlus size={18} /> },
   { id: "logo", label: "Logo", icon: <CircleUserRound size={18} /> },

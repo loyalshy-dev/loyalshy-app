@@ -132,7 +132,7 @@ function buildWalletDesign(enrollment: EnrollmentDetail): WalletPassDesign | nul
   const sg = sf.useStampGrid || ps === "STAMP_GRID"
   return {
     cardType: (cd.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-    shape: (cd.shape ?? "CLEAN") as WalletPassDesign["shape"],
+    showStrip: cd.showStrip ?? true,
     primaryColor: cd.primaryColor ?? "#1a1a2e",
     secondaryColor: cd.secondaryColor ?? "#ffffff",
     textColor: cd.textColor ?? "#ffffff",

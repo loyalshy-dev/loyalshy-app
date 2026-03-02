@@ -11,7 +11,6 @@ import { ToolSelector } from "@/components/studio/tools/tool-selector"
 import { CanvasPanel } from "@/components/studio/canvas/canvas-panel"
 import { PanelShell } from "@/components/studio/panels/panel-shell"
 import { ColorsPanel } from "@/components/studio/panels/colors-panel"
-import { ShapePanel } from "@/components/studio/panels/shape-panel"
 import { ProgressPanel } from "@/components/studio/panels/progress-panel"
 import { StripPanel } from "@/components/studio/panels/strip-panel"
 import { LabelsPanel } from "@/components/studio/panels/labels-panel"
@@ -70,7 +69,7 @@ export function ShowcaseStudioLayout({
 
   const design: WalletPassDesign = {
     cardType,
-    shape: wallet.shape,
+    showStrip: wallet.showStrip,
     primaryColor: wallet.primaryColor,
     secondaryColor: wallet.secondaryColor,
     textColor: wallet.textColor,
@@ -111,7 +110,7 @@ export function ShowcaseStudioLayout({
       const result = await saveShowcaseCardDesign({
         id: showcaseCardId,
         cardType: state.wallet.cardType as "STAMP" | "POINTS" | "TIER" | "COUPON",
-        shape: state.wallet.shape,
+        showStrip: state.wallet.showStrip,
         primaryColor: state.wallet.primaryColor,
         secondaryColor: state.wallet.secondaryColor,
         textColor: state.wallet.textColor,
@@ -209,7 +208,7 @@ export function ShowcaseStudioLayout({
   // ─── Filtered tools (no logo, no details for showcase) ─
 
   const SHOWCASE_TOOLS: StudioTool[] = [
-    "templates", "colors", "shape", "progress", "strip", "labels",
+    "templates", "colors", "progress", "strip", "labels",
   ]
 
   // ─── Panel routing ────────────────────────────────────
@@ -222,8 +221,6 @@ export function ShowcaseStudioLayout({
         return <TemplatePanel store={store} restaurantId="" restaurantLogo={null} cardType={cardType} />
       case "colors":
         return <ColorsPanel store={store} />
-      case "shape":
-        return <ShapePanel store={store} />
       case "progress":
         return (
           <ProgressPanel

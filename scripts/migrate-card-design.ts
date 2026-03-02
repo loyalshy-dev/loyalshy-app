@@ -81,7 +81,7 @@ async function main() {
     await db.cardDesign.create({
       data: {
         restaurantId: r.id,
-        shape: "CLEAN",
+        showStrip: false,
         primaryColor,
         secondaryColor,
         textColor,

@@ -77,7 +77,7 @@ type Props = {
 }
 
 export function StripPanel({ store, programId, onUploadStrip, onDeleteStrip }: Props) {
-  const shape = useStore(store, (s) => s.wallet.shape)
+  const showStrip = useStore(store, (s) => s.wallet.showStrip)
   const stripImageUrl = useStore(store, (s) => s.wallet.stripImageUrl)
   const stripOpacity = useStore(store, (s) => s.wallet.stripOpacity)
   const stripGrayscale = useStore(store, (s) => s.wallet.stripGrayscale)
@@ -100,35 +100,52 @@ export function StripPanel({ store, programId, onUploadStrip, onDeleteStrip }: P
   const [isUploadingStrip, setIsUploadingStrip] = useState(false)
   const stripFileInputRef = useRef<HTMLInputElement>(null)
 
-  const isClean = shape === "CLEAN"
   const isStampGrid = useStampGrid
-
-  if (isClean) {
-    return (
-      <div>
-        <div
-          style={{
-            padding: "16px",
-            borderRadius: 8,
-            backgroundColor: "var(--muted)",
-            textAlign: "center",
-          }}
-        >
-          <div style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)", marginBottom: 4 }}>
-            No strip image
-          </div>
-          <div style={{ fontSize: 11, color: "var(--muted-foreground)" }}>
-            The &ldquo;Clean&rdquo; shape doesn&apos;t use a strip image. Switch to &ldquo;Showcase&rdquo; or &ldquo;Info Rich&rdquo; to enable strip images.
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   const hasCustomCrop = stripImagePosition.x !== 0.5 || stripImagePosition.y !== 0.5 || stripImageZoom !== 1
 
   return (
     <div>
+      {/* Show Strip toggle */}
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "10px 12px",
+          borderRadius: 8,
+          border: `1.5px solid ${showStrip ? "var(--primary)" : "var(--border)"}`,
+          backgroundColor: showStrip ? "var(--accent)" : "transparent",
+          cursor: "pointer",
+          marginBottom: 12,
+        }}
+      >
+        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>Show Strip</span>
+        <input
+          type="checkbox"
+          checked={showStrip}
+          onChange={(e) => store.getState().setWalletField("showStrip", e.target.checked)}
+          style={{ accentColor: "var(--primary)", width: 16, height: 16 }}
+        />
+      </label>
+
+      {!showStrip && (
+        <div
+          style={{
+            padding: "12px",
+            borderRadius: 8,
+            backgroundColor: "var(--muted)",
+            textAlign: "center",
+            fontSize: 11,
+            color: "var(--muted-foreground)",
+          }}
+        >
+          Enable &ldquo;Show Strip&rdquo; to configure strip image, colors, and patterns.
+        </div>
+      )}
+
+      {showStrip && (
+        <>
       {/* Interactive crop preview */}
       {stripImageUrl ? (
         <StripCropWidget
@@ -461,6 +478,8 @@ export function StripPanel({ store, programId, onUploadStrip, onDeleteStrip }: P
             Stamp Grid is active — stamps overlay on {stripImageUrl ? "your uploaded image" : isFlat ? "a solid background" : "a gradient background"}. Stamp colors can be edited in the Progress panel.
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   )

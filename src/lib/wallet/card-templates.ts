@@ -1,4 +1,4 @@
-import type { CardType, CardShape, PatternStyle, ProgressStyle, LabelFormat, StampGridConfig } from "./card-design"
+import type { CardType, PatternStyle, ProgressStyle, LabelFormat, StampGridConfig } from "./card-design"
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -12,7 +12,7 @@ export type CardTemplate = {
   tags: string[]
   design: {
     cardType?: CardType // defaults to "STAMP" if undefined (backward compat)
-    shape: CardShape
+    showStrip: boolean
     primaryColor: string
     secondaryColor: string
     textColor: string
@@ -53,7 +53,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "cafe",
     tags: ["coffee", "warm", "cozy"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#3e2723",
       secondaryColor: "#a1887f",
       textColor: "#ffffff",
@@ -71,7 +71,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "cafe",
     tags: ["minimal", "modern", "clean"],
     design: {
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#1a1a1a",
       secondaryColor: "#e0e0e0",
       textColor: "#ffffff",
@@ -89,7 +89,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "fine-dining",
     tags: ["dark", "luxury", "premium"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#0a0a0a",
       secondaryColor: "#4a4a4a",
       textColor: "#f5f5f5",
@@ -107,7 +107,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "fine-dining",
     tags: ["gold", "sophisticated", "exclusive"],
     design: {
-      shape: "INFO_RICH",
+      showStrip: true,
       primaryColor: "#1a1a2e",
       secondaryColor: "#c9a96e",
       textColor: "#f5f0e8",
@@ -125,7 +125,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "casual",
     tags: ["bright", "fun", "energetic"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#f57c00",
       secondaryColor: "#fff176",
       textColor: "#ffffff",
@@ -143,7 +143,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "casual",
     tags: ["light", "airy", "fresh"],
     design: {
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#ffffff",
       secondaryColor: "#4caf50",
       textColor: "#1a1a1a",
@@ -161,7 +161,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bar",
     tags: ["moody", "neon", "nightlife"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#0d0d0d",
       secondaryColor: "#e040fb",
       textColor: "#ffffff",
@@ -179,7 +179,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bar",
     tags: ["industrial", "craft", "amber"],
     design: {
-      shape: "INFO_RICH",
+      showStrip: true,
       primaryColor: "#263238",
       secondaryColor: "#ffb300",
       textColor: "#ffffff",
@@ -197,7 +197,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bakery",
     tags: ["soft", "pastel", "welcoming"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#f8bbd0",
       secondaryColor: "#fff8e1",
       textColor: "#4e342e",
@@ -215,7 +215,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "general",
     tags: ["neutral", "professional", "universal"],
     design: {
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#334155",
       secondaryColor: "#94a3b8",
       textColor: "#ffffff",
@@ -235,7 +235,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "cafe",
     tags: ["matcha", "green", "zen", "specialty"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#2d6a4f",
       secondaryColor: "#b7e4c7",
       textColor: "#ffffff",
@@ -253,7 +253,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "casual",
     tags: ["retro", "vintage", "bold", "diner"],
     design: {
-      shape: "INFO_RICH",
+      showStrip: true,
       primaryColor: "#b71c1c",
       secondaryColor: "#ffeb3b",
       textColor: "#ffffff",
@@ -271,7 +271,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bar",
     tags: ["whiskey", "amber", "dark", "premium"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#3e1a00",
       secondaryColor: "#bf8c5a",
       textColor: "#f5e6d3",
@@ -289,7 +289,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bakery",
     tags: ["artisan", "rustic", "bread", "craft"],
     design: {
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#5d4037",
       secondaryColor: "#d7ccc8",
       textColor: "#ffffff",
@@ -307,7 +307,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "fine-dining",
     tags: ["blush", "elegant", "feminine", "modern"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#880e4f",
       secondaryColor: "#f8bbd0",
       textColor: "#ffffff",
@@ -327,7 +327,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "casual",
     tags: ["progress", "green", "energy", "gradient"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#1b5e20",
       secondaryColor: "#69f0ae",
       textColor: "#ffffff",
@@ -345,7 +345,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "general",
     tags: ["dark", "minimal", "thin", "sleek"],
     design: {
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#121212",
       secondaryColor: "#e0e0e0",
       textColor: "#ffffff",
@@ -363,7 +363,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bar",
     tags: ["neon", "bar", "nightlife", "electric"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#0d0d0d",
       secondaryColor: "#e040fb",
       textColor: "#ffffff",
@@ -381,7 +381,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "cafe",
     tags: ["earthy", "organic", "green", "natural"],
     design: {
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#33691e",
       secondaryColor: "#dcedc8",
       textColor: "#ffffff",
@@ -399,7 +399,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bakery",
     tags: ["pastel", "sweet", "ice cream", "playful"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#fce4ec",
       secondaryColor: "#e1bee7",
       textColor: "#4a148c",
@@ -417,7 +417,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "casual",
     tags: ["bold", "red", "orange", "energy", "fast-casual"],
     design: {
-      shape: "INFO_RICH",
+      showStrip: true,
       primaryColor: "#b71c1c",
       secondaryColor: "#ff8f00",
       textColor: "#ffffff",
@@ -435,7 +435,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "fine-dining",
     tags: ["minimal", "zen", "muted", "refined"],
     design: {
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#1c1c1e",
       secondaryColor: "#8e8e93",
       textColor: "#f2f2f7",
@@ -456,7 +456,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["gold", "shield", "premium", "classic"],
     design: {
       cardType: "TIER",
-      shape: "INFO_RICH",
+      showStrip: true,
       primaryColor: "#1a1a2e",
       secondaryColor: "#c9a96e",
       textColor: "#f5f0e8",
@@ -475,7 +475,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["vip", "dark", "purple", "star", "nightlife"],
     design: {
       cardType: "TIER",
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#1a0030",
       secondaryColor: "#9c27b0",
       textColor: "#ffffff",
@@ -494,7 +494,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["silver", "navy", "circle", "professional"],
     design: {
       cardType: "TIER",
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#1a237e",
       secondaryColor: "#90caf9",
       textColor: "#ffffff",
@@ -513,7 +513,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["burgundy", "gold", "regal", "shield", "exclusive"],
     design: {
       cardType: "TIER",
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#4a0010",
       secondaryColor: "#c9a96e",
       textColor: "#f5f0e8",
@@ -532,7 +532,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["gamified", "gradient", "star", "bold", "progress"],
     design: {
       cardType: "TIER",
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#1565c0",
       secondaryColor: "#00bfa5",
       textColor: "#ffffff",
@@ -553,7 +553,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["bold", "red", "urgent", "deal", "ticket"],
     design: {
       cardType: "COUPON",
-      shape: "INFO_RICH",
+      showStrip: true,
       primaryColor: "#c62828",
       secondaryColor: "#ffffff",
       textColor: "#ffffff",
@@ -572,7 +572,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["neon", "bar", "happy hour", "ticket", "nightlife"],
     design: {
       cardType: "COUPON",
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#0d0d0d",
       secondaryColor: "#00e676",
       textColor: "#ffffff",
@@ -591,7 +591,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["pastel", "sweet", "bakery", "bold"],
     design: {
       cardType: "COUPON",
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#f06292",
       secondaryColor: "#fff8e1",
       textColor: "#4e342e",
@@ -610,7 +610,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["warm", "minimal", "welcome", "cafe", "first visit"],
     design: {
       cardType: "COUPON",
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#fff8f0",
       secondaryColor: "#795548",
       textColor: "#3e2723",
@@ -629,7 +629,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["vip", "dark", "exclusive", "bold", "fine-dining"],
     design: {
       cardType: "COUPON",
-      shape: "INFO_RICH",
+      showStrip: true,
       primaryColor: "#0a0a0a",
       secondaryColor: "#c9a96e",
       textColor: "#f5f0e8",
@@ -648,7 +648,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["simple", "clean", "minimal", "offer"],
     design: {
       cardType: "COUPON",
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#212121",
       secondaryColor: "#757575",
       textColor: "#ffffff",
@@ -667,7 +667,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     tags: ["modern", "teal", "dark", "fresh", "member"],
     design: {
       cardType: "TIER",
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#0d3b3b",
       secondaryColor: "#4db6ac",
       textColor: "#ffffff",
@@ -687,7 +687,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "general",
     tags: ["minimal", "white", "universal", "clean", "blank"],
     design: {
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#ffffff",
       secondaryColor: "#f5f5f5",
       textColor: "#111111",
@@ -705,7 +705,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "general",
     tags: ["traditional", "classic", "serif", "red", "timeless"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#8b0000",
       secondaryColor: "#f5f0e8",
       textColor: "#f5f0e8",
@@ -723,7 +723,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "general",
     tags: ["modern", "gradient", "points", "flexible", "contemporary"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#1e3a5f",
       secondaryColor: "#00b4d8",
       textColor: "#ffffff",
@@ -742,7 +742,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "cafe",
     tags: ["coffee", "stamps", "grid", "visual", "cafe"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#3e2723",
       secondaryColor: "#a1887f",
       textColor: "#ffffff",
@@ -770,7 +770,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "casual",
     tags: ["pizza", "stamps", "grid", "fun", "casual"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#b71c1c",
       secondaryColor: "#ffeb3b",
       textColor: "#ffffff",
@@ -798,7 +798,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "casual",
     tags: ["burger", "stamps", "grid", "bold", "badges"],
     design: {
-      shape: "INFO_RICH",
+      showStrip: true,
       primaryColor: "#1a1a1a",
       secondaryColor: "#ff8f00",
       textColor: "#ffffff",
@@ -826,7 +826,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bar",
     tags: ["drinks", "stamps", "grid", "minimal", "bar"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#0d0d0d",
       secondaryColor: "#e040fb",
       textColor: "#ffffff",
@@ -854,7 +854,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "fine-dining",
     tags: ["fine-dining", "stamps", "grid", "elegant", "premium"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#1a1a2e",
       secondaryColor: "#c9b037",
       textColor: "#ffffff",
@@ -882,7 +882,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bakery",
     tags: ["bakery", "stamps", "grid", "sweet", "pastry"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#f5e6d3",
       secondaryColor: "#8d6e63",
       textColor: "#3e2723",
@@ -910,7 +910,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "general",
     tags: ["general", "stamps", "grid", "versatile", "universal"],
     design: {
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#334155",
       secondaryColor: "#94a3b8",
       textColor: "#ffffff",

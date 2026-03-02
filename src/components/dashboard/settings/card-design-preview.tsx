@@ -20,7 +20,7 @@ type CardDesignPreviewProps = {
   rewardDescription: string
   cardDesign: {
     cardType: string
-    shape: string
+    showStrip: boolean
     primaryColor: string | null
     secondaryColor: string | null
     textColor: string | null
@@ -60,7 +60,7 @@ export function CardDesignPreview({
 
   const design: WalletPassDesign = {
     cardType: (cardDesign?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-    shape: (cardDesign?.shape ?? "CLEAN") as WalletPassDesign["shape"],
+    showStrip: cardDesign?.showStrip ?? true,
     primaryColor: cardDesign?.primaryColor ?? "#1a1a2e",
     secondaryColor: cardDesign?.secondaryColor ?? "#ffffff",
     textColor: cardDesign?.textColor ?? "#ffffff",

@@ -550,7 +550,7 @@ function BrandingStep({
       secondaryColor: currentDesign.secondaryColor,
       textColor: currentDesign.textColor,
       templateId: currentTemplateId || undefined,
-      shape: currentDesign.shape,
+      showStrip: currentDesign.showStrip,
       patternStyle: currentDesign.patternStyle,
       progressStyle: currentDesign.progressStyle,
       labelFormat: currentDesign.labelFormat,

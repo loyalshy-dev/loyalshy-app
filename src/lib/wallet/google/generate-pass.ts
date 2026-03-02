@@ -2,7 +2,7 @@ import "server-only"
 
 import { buildClassId, buildObjectId, buildProgramClassId, buildEnrollmentObjectId } from "./constants"
 import { buildSaveUrl } from "./jwt-utils"
-import type { CardDesignData, CardShape, CardType } from "../card-design"
+import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters } from "../card-design"
 import { parseCouponConfig, formatCouponValue, parseMembershipConfig } from "../../program-config"
 
@@ -69,10 +69,9 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
     ? buildProgramClassId(input.programId)
     : buildClassId(input.restaurantId)
   const design = input.cardDesign
-  const shape: CardShape = design?.shape ?? "CLEAN"
   const hexBg = ensureHexColor(design?.primaryColor ?? input.brandColor, "#1a1a2e")
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
-  const layout = getFieldLayout(shape, cardType)
+  const layout = getFieldLayout(cardType)
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
 
   // Type-specific row field paths
@@ -310,9 +309,9 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
     ? buildProgramClassId(input.programId)
     : buildClassId(input.restaurantId)
   const design = input.cardDesign
-  const shape: CardShape = design?.shape ?? "CLEAN"
+  const showStrip = design?.showStrip ?? false
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
-  const layout = getFieldLayout(shape, cardType)
+  const layout = getFieldLayout(cardType)
 
   const progressStyle = design?.progressStyle ?? "NUMBERS"
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
@@ -411,7 +410,7 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
   const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
   const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
   let heroImageUrl: string | null = null
-  if (layout.google.showHeroImage) {
+  if (showStrip) {
     const stripFiltersG = design ? parseStripFilters(design.editorConfig) : { useStampGrid: false }
     if (isStampType && (stripFiltersG.useStampGrid || design?.patternStyle === "STAMP_GRID") && input.enrollmentId) {
       // Dynamic stamp grid: Google fetches from our API route each time

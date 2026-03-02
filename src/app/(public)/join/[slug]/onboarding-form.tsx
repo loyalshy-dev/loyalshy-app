@@ -183,7 +183,6 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
   // Use selected program's card design, falling back to first program or restaurant defaults
   const activeProgram = selectedProgram ?? programs[0]
   const design = activeProgram?.cardDesign
-  const shape = design?.shape ?? "CLEAN"
   const brandColor = design?.primaryColor ?? restaurant.brandColor ?? "oklch(0.55 0.2 265)"
   const textOnBrand = design?.textColor ?? computeTextColor(
     /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : "#4F46E5"
@@ -558,84 +557,31 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
           </button>
         )}
 
-        {/* SHOWCASE: hero image header */}
-        {shape === "SHOWCASE" && design?.stripImageUrl && (
-          <div className="relative -mx-4 -mt-4 mb-4 h-40 overflow-hidden rounded-b-2xl">
-            <Image
-              src={design.stripImageUrl}
-              alt={restaurant.name}
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
-            <div className="absolute bottom-4 left-4 flex items-center gap-3">
-              {restaurant.logo && (
-                <div className="w-14 h-14 rounded-xl overflow-hidden bg-white/10 border border-white/20">
-                  <Image
-                    src={restaurant.logo}
-                    alt={restaurant.name}
-                    width={56}
-                    height={56}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              <div>
-                <h1 className="text-xl font-semibold text-white tracking-tight">
-                  {restaurant.name}
-                </h1>
-                <p className="text-white/70 text-sm">
-                  {activeProgram?.name ?? "Get your digital loyalty card"}
-                </p>
-              </div>
+        {/* Header */}
+        <div className="text-center space-y-4">
+          {restaurant.logo && (
+            <div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden bg-muted">
+              <Image
+                src={restaurant.logo}
+                alt={restaurant.name}
+                width={80}
+                height={80}
+                className="w-full h-full object-cover"
+              />
             </div>
+          )}
+
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {restaurant.name}
+            </h1>
+            <p className="text-muted-foreground text-[15px]">
+              {activeProgram?.name ?? "Get your digital loyalty card"}
+            </p>
           </div>
-        )}
 
-        {/* Standard header (CLEAN and INFO_RICH without hero) */}
-        {shape !== "SHOWCASE" && (
-          <div className="text-center space-y-4">
-            {restaurant.logo && (
-              <div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden bg-muted">
-                <Image
-                  src={restaurant.logo}
-                  alt={restaurant.name}
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                {restaurant.name}
-              </h1>
-              <p className="text-muted-foreground text-[15px]">
-                {activeProgram?.name ?? "Get your digital loyalty card"}
-              </p>
-            </div>
-
-            {/* Reward info */}
-            {activeProgram && (
-              <div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
-                style={{
-                  backgroundColor: `color-mix(in oklch, ${brandColor} ${badgeMix}%, transparent)`,
-                  color: brandColor,
-                }}
-              >
-                <Gift className="w-4 h-4" aria-hidden="true" />
-                {activeProgram.rewardDescription} after{" "}
-                {activeProgram.visitsRequired} visits
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* SHOWCASE reward badge (below hero) */}
-        {shape === "SHOWCASE" && activeProgram && (
-          <div className="text-center">
+          {/* Reward info */}
+          {activeProgram && (
             <div
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
               style={{
@@ -647,11 +593,11 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
               {activeProgram.rewardDescription} after{" "}
               {activeProgram.visitsRequired} visits
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* INFO_RICH: custom message + extra details */}
-        {shape === "INFO_RICH" && design?.customMessage && (
+        {/* Custom message */}
+        {design?.customMessage && (
           <div className="rounded-lg bg-muted/50 px-4 py-3">
             <p className="text-sm text-muted-foreground leading-relaxed">
               {design.customMessage}

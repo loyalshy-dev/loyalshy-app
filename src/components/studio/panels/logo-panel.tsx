@@ -53,7 +53,6 @@ function Placeholder({ initial, fontSize }: { initial: string; fontSize: number 
 export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
   const logoAppleUrl = useStore(store, (s) => s.wallet.logoAppleUrl)
   const logoGoogleUrl = useStore(store, (s) => s.wallet.logoGoogleUrl)
-  const shape = useStore(store, (s) => s.wallet.shape)
 
   const [uploading, setUploading] = useState(false)
   const [overrideOpen, setOverrideOpen] = useState<"apple" | "google" | null>(null)
@@ -372,23 +371,6 @@ export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
             )
           })}
         </>
-      )}
-
-      {/* ─── Shape context note ──────────────────────────── */}
-      {shape === "SHOWCASE" && (
-        <div
-          style={{
-            padding: "8px 10px",
-            borderRadius: 6,
-            backgroundColor: "var(--accent)",
-            marginTop: 8,
-            fontSize: 11,
-            color: "var(--muted-foreground)",
-          }}
-        >
-          The &ldquo;Showcase&rdquo; shape has a large strip image below the header.
-          Keep your logo simple so it doesn&apos;t compete with the strip.
-        </div>
       )}
 
       {/* ─── Shared info ─────────────────────────────────── */}

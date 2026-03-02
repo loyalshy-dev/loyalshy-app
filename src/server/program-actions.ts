@@ -3,7 +3,7 @@
 import { db } from "@/lib/db"
 import { assertRestaurantAccess, assertRestaurantRole, getRestaurantForUser } from "@/lib/dal"
 import type { ProgramWithDesign } from "@/server/settings-actions"
-import type { CardType, CardShape, PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
+import type { CardType, PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
 
 // ─── Types ─────────────────────────────────────────────────
 
@@ -22,7 +22,7 @@ export type ProgramListItem = {
   enrollmentCount: number
   cardDesign: {
     cardType: string
-    shape: string
+    showStrip: boolean
     primaryColor: string | null
     secondaryColor: string | null
     textColor: string | null
@@ -72,7 +72,7 @@ export async function getProgramsList(): Promise<ProgramListItem[]> {
       cardDesign: {
         select: {
           cardType: true,
-          shape: true,
+          showStrip: true,
           primaryColor: true,
           secondaryColor: true,
           textColor: true,
@@ -208,7 +208,7 @@ export async function getProgramForSettings(programId: string): Promise<ProgramW
     cardDesign: program.cardDesign
       ? {
           cardType: program.cardDesign.cardType as CardType,
-          shape: program.cardDesign.shape as CardShape,
+          showStrip: program.cardDesign.showStrip,
           primaryColor: program.cardDesign.primaryColor,
           secondaryColor: program.cardDesign.secondaryColor,
           textColor: program.cardDesign.textColor,

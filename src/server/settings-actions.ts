@@ -9,7 +9,7 @@ import { assertRestaurantRole, getRestaurantForUser } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
 import { checkProgramLimit } from "@/server/billing-actions"
 import { computeDesignHash, computeTextColor } from "@/lib/wallet/card-design"
-import type { CardType, CardShape, PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
+import type { CardType, PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
 
 // ─── Types ─────────────────────────────────────────────────
 
@@ -29,7 +29,7 @@ export type ProgramWithDesign = {
   enrollmentCount: number
   cardDesign: {
     cardType: CardType
-    shape: CardShape
+    showStrip: boolean
     primaryColor: string | null
     secondaryColor: string | null
     textColor: string | null
@@ -90,7 +90,7 @@ const inviteTeamMemberSchema = z.object({
 const saveCardDesignSchema = z.object({
   programId: z.string().min(1),
   cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON"]).optional().default("STAMP"),
-  shape: z.enum(["CLEAN", "SHOWCASE", "INFO_RICH"]),
+  showStrip: z.boolean(),
   primaryColor: z.string().max(20).optional().default(""),
   secondaryColor: z.string().max(20).optional().default(""),
   textColor: z.string().max(20).optional().default(""),
@@ -182,7 +182,7 @@ export async function getSettingsData() {
     cardDesign: p.cardDesign
       ? {
           cardType: p.cardDesign.cardType as CardType,
-          shape: p.cardDesign.shape as CardShape,
+          showStrip: p.cardDesign.showStrip,
           primaryColor: p.cardDesign.primaryColor,
           secondaryColor: p.cardDesign.secondaryColor,
           textColor: p.cardDesign.textColor,
@@ -356,7 +356,7 @@ export async function createLoyaltyProgram(input: z.infer<typeof createLoyaltyPr
       cardDesign: {
         create: {
           cardType: defaultCardType,
-          shape: "CLEAN",
+          showStrip: true,
           patternStyle: "NONE",
           progressStyle: "NUMBERS",
           fontFamily: "SANS",
@@ -756,7 +756,7 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
   }
 
   const newHash = computeDesignHash({
-    shape: parsed.shape,
+    showStrip: parsed.showStrip,
     primaryColor,
     secondaryColor,
     textColor,
@@ -791,7 +791,7 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
     create: {
       loyaltyProgramId: parsed.programId,
       cardType: parsed.cardType,
-      shape: parsed.shape,
+      showStrip: parsed.showStrip,
       primaryColor,
       secondaryColor,
       textColor,
@@ -813,7 +813,7 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
     },
     update: {
       cardType: parsed.cardType,
-      shape: parsed.shape,
+      showStrip: parsed.showStrip,
       primaryColor,
       secondaryColor,
       textColor,

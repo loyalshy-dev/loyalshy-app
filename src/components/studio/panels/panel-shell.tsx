@@ -13,7 +13,6 @@ type PanelShellProps = {
 const PANEL_TITLES: Record<StudioTool, string> = {
   templates: "Templates",
   colors: "Colors & Themes",
-  shape: "Shape & Layout",
   progress: "Progress Style",
   strip: "Strip Image",
   logo: "Logo",

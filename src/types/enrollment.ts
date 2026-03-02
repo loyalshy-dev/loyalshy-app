@@ -7,7 +7,7 @@ export type EnrollmentCardDesign = {
   primaryColor: string | null
   secondaryColor: string | null
   textColor: string | null
-  shape: string
+  showStrip: boolean
   patternStyle: string
   progressStyle: string
   labelFormat: string
@@ -68,7 +68,7 @@ export type ProgramWithDesign = {
   enrollmentCount: number
   cardDesign: {
     cardType: string
-    shape: string
+    showStrip: boolean
     primaryColor: string | null
     secondaryColor: string | null
     textColor: string | null
@@ -93,7 +93,7 @@ export type PublicProgramInfo = {
   rewardDescription: string
   cardDesign: {
     cardType: string
-    shape: string
+    showStrip: boolean
     primaryColor: string | null
     secondaryColor: string | null
     textColor: string | null

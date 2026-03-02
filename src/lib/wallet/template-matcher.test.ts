@@ -122,7 +122,7 @@ describe("applyPaletteToTemplate", () => {
     expect(result.secondaryColor).toBe(CAFE_PALETTE.secondarySuggestion)
     expect(result.textColor).toBe(CAFE_PALETTE.textColor)
     // Structural properties come from template
-    expect(result.shape).toBe(template.design.shape)
+    expect(result.showStrip).toBe(template.design.showStrip)
     expect(result.patternStyle).toBe(template.design.patternStyle)
     expect(result.progressStyle).toBe(template.design.progressStyle)
     expect(result.labelFormat).toBe(template.design.labelFormat)
@@ -142,7 +142,7 @@ describe("applyPaletteToTemplate", () => {
     const result = applyPaletteToTemplate(template, NEON_PALETTE)
 
     // Should have all required WalletPassDesign fields
-    expect(result.shape).toBeDefined()
+    expect(result.showStrip).toBeDefined()
     expect(result.primaryColor).toMatch(/^#/)
     expect(result.secondaryColor).toMatch(/^#/)
     expect(result.textColor).toMatch(/^#/)

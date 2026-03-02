@@ -57,7 +57,7 @@ type PartialCardDesign = {
   primaryColor?: string | null
   secondaryColor?: string | null
   textColor?: string | null
-  shape?: string | null
+  showStrip?: boolean
   patternStyle?: string | null
   progressStyle?: string | null
   labelFormat?: string | null
@@ -112,7 +112,7 @@ export function QrCodeDisplay({
   const walletDesign: WalletPassDesign | null = activeProgramDesign
     ? {
         cardType: (activeProgramDesign.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-        shape: (activeProgramDesign.shape ?? "CLEAN") as WalletPassDesign["shape"],
+        showStrip: activeProgramDesign.showStrip ?? true,
         primaryColor: activeProgramDesign.primaryColor ?? "#1a1a2e",
         secondaryColor: activeProgramDesign.secondaryColor ?? "#ffffff",
         textColor: activeProgramDesign.textColor ?? "#ffffff",

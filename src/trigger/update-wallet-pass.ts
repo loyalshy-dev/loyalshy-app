@@ -196,7 +196,7 @@ type CardDesignRow = {
   stripImageGoogle: string | null
   generatedStripGoogle: string | null
   patternStyle: string
-  shape: string
+  showStrip: boolean
   progressStyle: string
   labelFormat: string
   customProgressLabel: string | null
@@ -311,7 +311,7 @@ async function patchGooglePass(
   const { parseStripFilters } = await import("@/lib/wallet/card-design")
   const triggerStripFilters = parseStripFilters(cardDesign?.editorConfig)
   const isTriggerStampGrid = triggerStripFilters.useStampGrid || cardDesign?.patternStyle === "stamp_grid" || cardDesign?.patternStyle === "STAMP_GRID"
-  if (isStampCard && isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
+  if (isStampCard && isTriggerStampGrid && cardDesign?.showStrip !== false) {
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
     patchBody.heroImage = {
       sourceUri: { uri: `${baseUrl}/api/wallet/strip/${enrollment.id}?v=${Date.now()}` },
@@ -323,7 +323,7 @@ async function patchGooglePass(
 
   // For design changes, also update hero image (stamp card only for stamp grid)
   if (updateType === "DESIGN_CHANGE" || updateType === "PROGRAM_CHANGE") {
-    if (isStampCard && isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
+    if (isStampCard && isTriggerStampGrid && cardDesign?.showStrip !== false) {
       const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
       patchBody.heroImage = {
         sourceUri: { uri: `${baseUrl}/api/wallet/strip/${enrollment.id}?v=${Date.now()}` },
@@ -333,7 +333,7 @@ async function patchGooglePass(
       }
     } else {
       const heroUrl = cardDesign?.stripImageGoogle ?? cardDesign?.generatedStripGoogle
-      if (heroUrl && cardDesign?.shape !== "CLEAN") {
+      if (heroUrl && cardDesign?.showStrip !== false) {
         patchBody.heroImage = {
           sourceUri: { uri: heroUrl },
           contentDescription: {

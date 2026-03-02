@@ -70,14 +70,6 @@ enum StaffRole {
   @@map("staff_role")
 }
 
-enum CardShape {
-  CLEAN      @map("clean")
-  SHOWCASE   @map("showcase")
-  INFO_RICH  @map("info_rich")
-
-  @@map("card_shape")
-}
-
 enum PatternStyle {
   NONE            @map("none")
   DOTS            @map("dots")
@@ -541,7 +533,7 @@ model CardDesign {
   id                  String       @id @default(dbgenerated("uuidv7()::text"))
   loyaltyProgramId    String       @unique
   cardType            CardType     @default(STAMP)
-  shape               CardShape    @default(CLEAN)
+  showStrip           Boolean      @default(true)  @map("show_strip")
   primaryColor        String?
   secondaryColor      String?
   textColor           String?

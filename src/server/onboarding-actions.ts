@@ -97,7 +97,7 @@ export async function getRestaurantBySlug(
           cardDesign: {
             select: {
               cardType: true,
-              shape: true,
+              showStrip: true,
               primaryColor: true,
               secondaryColor: true,
               textColor: true,
@@ -138,7 +138,7 @@ export async function getRestaurantBySlug(
       cardDesign: p.cardDesign
         ? {
             cardType: p.cardDesign.cardType,
-            shape: p.cardDesign.shape,
+            showStrip: p.cardDesign.showStrip,
             primaryColor: p.cardDesign.primaryColor,
             secondaryColor: p.cardDesign.secondaryColor,
             textColor: p.cardDesign.textColor,
@@ -212,7 +212,7 @@ export async function getEnrollmentCardData(
           cardDesign: {
             select: {
               cardType: true,
-              shape: true,
+              showStrip: true,
               primaryColor: true,
               secondaryColor: true,
               textColor: true,
@@ -266,7 +266,7 @@ export async function getEnrollmentCardData(
       cardDesign: cd
         ? {
             cardType: cd.cardType,
-            shape: cd.shape,
+            showStrip: cd.showStrip,
             primaryColor: cd.primaryColor,
             secondaryColor: cd.secondaryColor,
             textColor: cd.textColor,

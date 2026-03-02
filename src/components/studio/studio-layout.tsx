@@ -11,7 +11,6 @@ import { ToolSelector } from "./tools/tool-selector"
 import { CanvasPanel } from "./canvas/canvas-panel"
 import { PanelShell } from "./panels/panel-shell"
 import { ColorsPanel } from "./panels/colors-panel"
-import { ShapePanel } from "./panels/shape-panel"
 import { ProgressPanel } from "./panels/progress-panel"
 import { StripPanel } from "./panels/strip-panel"
 import { LabelsPanel } from "./panels/labels-panel"
@@ -95,7 +94,7 @@ export function StudioLayout({
   // Build WalletPassDesign from store state
   const design: WalletPassDesign = {
     cardType,
-    shape: wallet.shape,
+    showStrip: wallet.showStrip,
     primaryColor: wallet.primaryColor,
     secondaryColor: wallet.secondaryColor,
     textColor: wallet.textColor,
@@ -142,7 +141,7 @@ export function StudioLayout({
       const result = await saveCardDesign({
         programId,
         cardType: state.wallet.cardType as "STAMP" | "POINTS" | "TIER" | "COUPON",
-        shape: state.wallet.shape,
+        showStrip: state.wallet.showStrip,
         primaryColor: state.wallet.primaryColor,
         secondaryColor: state.wallet.secondaryColor,
         textColor: state.wallet.textColor,
@@ -233,8 +232,6 @@ export function StudioLayout({
         return <TemplatePanel store={store} restaurantId={restaurantId} restaurantLogo={restaurantLogo} cardType={cardType} />
       case "colors":
         return <ColorsPanel store={store} />
-      case "shape":
-        return <ShapePanel store={store} />
       case "progress":
         return (
           <ProgressPanel

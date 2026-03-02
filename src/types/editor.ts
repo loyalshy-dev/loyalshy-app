@@ -7,7 +7,6 @@ export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON"
 export type StudioTool =
   | "templates"
   | "colors"
-  | "shape"
   | "progress"
   | "strip"
   | "logo"

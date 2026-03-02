@@ -10,7 +10,7 @@ import {
   ORGANIZATION_NAME,
   WEB_SERVICE_BASE_URL,
 } from "./constants"
-import type { CardDesignData, CardShape, CardType } from "../card-design"
+import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters } from "../card-design"
 import { parseCouponConfig, formatCouponValue, parseMembershipConfig } from "../../program-config"
 
@@ -53,10 +53,10 @@ export async function generateApplePass(
   const certs = getAppleCertificates()
 
   const design = input.cardDesign
-  const shape: CardShape = design?.shape ?? "CLEAN"
+  const showStrip = design?.showStrip ?? false
   const textColor = design?.textColor ?? null
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
-  const layout = getFieldLayout(shape, cardType)
+  const layout = getFieldLayout(cardType)
 
   // Determine strip image: dynamic stamp grid or static URL
   let stripImageUrl: string | null = null
@@ -71,7 +71,7 @@ export async function generateApplePass(
   const stripSecondary = stripFilters.stripColor2 ?? design?.secondaryColor ?? input.secondaryColor ?? "#ffffff"
 
   const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
-  if (layout.apple.useStrip && isStampGrid && design && isStampType) {
+  if (showStrip && isStampGrid && design && isStampType) {
     // Generate stamp grid strip image dynamically for this enrollment
     const { generateStampGridImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
     const stampGridConfig = parseStampGridConfig(design.editorConfig)
@@ -89,7 +89,7 @@ export async function generateApplePass(
       stripOpacity: stripFilters.stripOpacity,
       stripGrayscale: stripFilters.stripGrayscale,
     })
-  } else if (layout.apple.useStrip) {
+  } else if (showStrip) {
     const rawUrl = design?.stripImageApple ?? design?.generatedStripApple ?? null
     // Apply filters to static strip images if needed
     if (rawUrl && (stripFilters.stripOpacity < 1 || stripFilters.stripGrayscale)) {

@@ -76,7 +76,7 @@ async function main() {
   await prisma.cardDesign.create({
     data: {
       loyaltyProgramId: burgerProgram.id,
-      shape: "CLEAN",
+      showStrip: false,
       primaryColor: "#FF6B35",
       secondaryColor: "#004E89",
       textColor: "#ffffff",
@@ -91,7 +91,7 @@ async function main() {
   await prisma.cardDesign.create({
     data: {
       loyaltyProgramId: drinksProgram.id,
-      shape: "SHOWCASE",
+      showStrip: true,
       primaryColor: "#004E89",
       secondaryColor: "#48cae4",
       textColor: "#ffffff",

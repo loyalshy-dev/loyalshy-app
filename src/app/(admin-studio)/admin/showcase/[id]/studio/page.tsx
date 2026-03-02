@@ -20,7 +20,7 @@ export default async function ShowcaseStudioPage(props: {
 
   // Build walletData shape matching what StudioLayout expects
   const walletData = {
-    shape: (designData.shape as string) ?? "CLEAN",
+    showStrip: (designData.showStrip as boolean) ?? true,
     primaryColor: (designData.primaryColor as string) ?? "#1a1a2e",
     secondaryColor: (designData.secondaryColor as string) ?? "#ffffff",
     textColor: (designData.textColor as string) ?? "#ffffff",

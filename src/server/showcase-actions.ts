@@ -33,7 +33,7 @@ export type ShowcaseMetadata = z.infer<typeof metadataSchema>
 const saveDesignSchema = z.object({
   id: z.string().min(1),
   cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON"]).optional().default("STAMP"),
-  shape: z.enum(["CLEAN", "SHOWCASE", "INFO_RICH"]),
+  showStrip: z.boolean(),
   primaryColor: z.string().max(20).optional().default(""),
   secondaryColor: z.string().max(20).optional().default(""),
   textColor: z.string().max(20).optional().default(""),
@@ -111,7 +111,7 @@ export async function createShowcaseCard(
 
   const defaultDesign = {
     cardType,
-    shape: "CLEAN",
+    showStrip: true,
     primaryColor: cardType === "COUPON" ? "#7c3aed" : cardType === "TIER" ? "#b45309" : "#1a1a2e",
     secondaryColor: "#ffffff",
     textColor: "#ffffff",
@@ -347,7 +347,7 @@ export async function saveShowcaseCardDesign(input: z.infer<typeof saveDesignSch
 
   const designData: Record<string, unknown> = {
     cardType: parsed.cardType,
-    shape: parsed.shape,
+    showStrip: parsed.showStrip,
     primaryColor,
     secondaryColor,
     textColor,

@@ -177,7 +177,7 @@ export function applyPaletteToTemplate(
 
   return {
     cardType: d.cardType,
-    shape: d.shape,
+    showStrip: d.showStrip,
     primaryColor,
     secondaryColor,
     textColor,

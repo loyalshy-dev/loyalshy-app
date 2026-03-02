@@ -54,7 +54,7 @@ function designDataToWalletDesign(data: unknown): WalletPassDesign {
   const d = (data ?? {}) as Record<string, unknown>
   return {
     cardType: (d.cardType as WalletPassDesign["cardType"]) ?? "STAMP",
-    shape: (d.shape as WalletPassDesign["shape"]) ?? "CLEAN",
+    showStrip: (d.showStrip as boolean) ?? true,
     primaryColor: (d.primaryColor as string) ?? "#1a1a2e",
     secondaryColor: (d.secondaryColor as string) ?? "#ffffff",
     textColor: (d.textColor as string) ?? "#ffffff",

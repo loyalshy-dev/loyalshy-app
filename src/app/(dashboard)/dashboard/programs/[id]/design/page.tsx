@@ -43,7 +43,7 @@ export default async function ProgramDesignPage(props: {
         program.cardDesign
           ? {
               cardType: program.cardDesign.cardType as string,
-              shape: program.cardDesign.shape as string,
+              showStrip: program.cardDesign.showStrip as boolean,
               primaryColor: program.cardDesign.primaryColor,
               secondaryColor: program.cardDesign.secondaryColor,
               textColor: program.cardDesign.textColor,

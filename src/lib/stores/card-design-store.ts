@@ -9,7 +9,6 @@ import type {
   DeviceFrame,
 } from "@/types/editor"
 import type {
-  CardShape,
   PatternStyle,
   ProgressStyle,
   FontFamily,
@@ -23,7 +22,7 @@ import { DEFAULT_STAMP_GRID_CONFIG } from "@/lib/wallet/card-design"
 
 export type WalletState = {
   cardType: string
-  shape: CardShape
+  showStrip: boolean
   primaryColor: string
   secondaryColor: string
   textColor: string
@@ -104,7 +103,7 @@ export function createCardDesignStore() {
         // ─── Initial State ──────────────────────────
         wallet: {
           cardType: "STAMP",
-          shape: "CLEAN",
+          showStrip: true,
           primaryColor: "#1a1a2e",
           secondaryColor: "#ffffff",
           textColor: "#ffffff",

@@ -25,7 +25,7 @@ export function buildWalletPassDesign(
 
   return {
     cardType: (cardDesign?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-    shape: (cardDesign?.shape ?? "CLEAN") as WalletPassDesign["shape"],
+    showStrip: cardDesign?.showStrip ?? true,
     primaryColor: cardDesign?.primaryColor ?? "#1a1a2e",
     secondaryColor: cardDesign?.secondaryColor ?? "#ffffff",
     textColor: cardDesign?.textColor ?? "#ffffff",

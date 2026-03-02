@@ -39,7 +39,6 @@ function TemplateSwatchPreview({
   primaryColor,
   secondaryColor,
   textColor,
-  shape,
   useStampGrid,
   stampGridConfig,
   templateCardType,
@@ -48,7 +47,6 @@ function TemplateSwatchPreview({
   primaryColor: string
   secondaryColor: string
   textColor: string
-  shape: string
   useStampGrid?: boolean
   stampGridConfig?: StampGridConfig
   templateCardType?: CardType
@@ -145,7 +143,7 @@ function TemplateSwatchPreview({
       }}
     >
       <span style={{ fontSize: height < 44 ? 8 : 9, color: textColor, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.9 }}>
-        {shape}
+        Preview
       </span>
     </div>
   )
@@ -188,7 +186,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
     const s = store.getState()
     s.applyTemplate({
       wallet: {
-        shape: template.design.shape,
+        showStrip: template.design.showStrip,
         primaryColor: template.design.primaryColor,
         secondaryColor: template.design.secondaryColor,
         textColor: template.design.textColor,
@@ -210,7 +208,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
     const s = store.getState()
     s.applyTemplate({
       wallet: {
-        shape: design.shape,
+        showStrip: design.showStrip,
         primaryColor: design.primaryColor,
         secondaryColor: design.secondaryColor,
         textColor: design.textColor,
@@ -231,7 +229,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
     const s = store.getState()
     s.applyTemplate({
       wallet: {
-        shape: "CLEAN",
+        showStrip: false,
         primaryColor: "#1a1a2e",
         secondaryColor: "#ffffff",
         textColor: "#ffffff",
@@ -468,7 +466,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
                     primaryColor={design.primaryColor}
                     secondaryColor={design.secondaryColor}
                     textColor={design.textColor}
-                    shape={design.shape}
+
                     useStampGrid={design.useStampGrid}
                     stampGridConfig={design.stampGridConfig}
                     templateCardType={template.design.cardType}
@@ -566,7 +564,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
                 primaryColor={t.design.primaryColor}
                 secondaryColor={t.design.secondaryColor}
                 textColor={t.design.textColor}
-                shape={t.design.shape}
+
                 useStampGrid={t.design.useStampGrid}
                 stampGridConfig={t.design.stampGridConfig}
                 templateCardType={t.design.cardType}

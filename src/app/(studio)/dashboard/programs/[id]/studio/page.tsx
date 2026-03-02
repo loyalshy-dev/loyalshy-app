@@ -45,7 +45,7 @@ export default async function StudioPage(props: {
   const realPatternStyle = isLegacyStampGrid ? "NONE" : (cardDesign?.patternStyle ?? "NONE")
   const walletData = cardDesign
     ? {
-        shape: cardDesign.shape as string,
+        showStrip: cardDesign.showStrip as boolean,
         primaryColor: cardDesign.primaryColor ?? "#1a1a2e",
         secondaryColor: cardDesign.secondaryColor ?? "#ffffff",
         textColor: cardDesign.textColor ?? "#ffffff",
