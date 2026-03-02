@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { WalletStack } from "@/components/marketing/wallet-stack"
 
 /**
- * Hero section for Fidelio marketing landing page.
+ * Hero section for Loyalshy marketing landing page.
  *
  * Usage:
  *   import { Hero } from "@/components/marketing/hero"

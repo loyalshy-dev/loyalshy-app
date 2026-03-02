@@ -223,7 +223,7 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   // Contact fallback — always include at least one link
   if (linksUris.length === 0) {
     linksUris.push({
-      uri: `mailto:support@fidelio.app`,
+      uri: `mailto:support@loyalshy.com`,
       description: "Contact Support",
       id: "contact",
     })
@@ -269,7 +269,7 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   loyaltyClass.discoverableProgram = {
     merchantSigninInfo: {
       signinWebsite: {
-        uri: input.restaurantWebsite ?? "https://fidelio.app",
+        uri: input.restaurantWebsite ?? "https://loyalshy.com",
         description: input.restaurantName,
       },
     },
@@ -355,7 +355,7 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
     const stripFiltersG = design ? parseStripFilters(design.editorConfig) : { useStampGrid: false }
     if ((stripFiltersG.useStampGrid || design?.patternStyle === "STAMP_GRID") && input.enrollmentId) {
       // Dynamic stamp grid: Google fetches from our API route each time
-      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.fidelio.app"
+      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
       heroImageUrl = `${baseUrl}/api/wallet/strip/${input.enrollmentId}`
     } else {
       heroImageUrl = design?.stripImageGoogle ?? design?.generatedStripGoogle ?? googleLogo

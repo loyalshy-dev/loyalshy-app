@@ -263,7 +263,7 @@ export async function generateApplePass(
     if (input.restaurantWebsite) contactParts.push(input.restaurantWebsite)
     if (contactParts.length === 0) {
       contactParts.push(input.restaurantName)
-      contactParts.push("https://fidelio.app")
+      contactParts.push("https://loyalshy.com")
     }
     pass.backFields.push({
       key: "contact",
@@ -313,7 +313,7 @@ export async function generateApplePass(
   pass.backFields.push({
     key: "poweredBy",
     label: "Powered By",
-    value: "Fidelio — Digital Loyalty Cards\nhttps://fidelio.app",
+    value: "Loyalshy — Digital Loyalty Cards\nhttps://loyalshy.com",
   })
 
   // Location relevance — shows pass on lock screen when near the restaurant

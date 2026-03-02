@@ -128,7 +128,7 @@ export function DashboardShell({
                 </h2>
                 <p className="text-sm text-muted-foreground mt-2 max-w-md">
                   Your subscription was canceled. Upgrade to a plan to continue
-                  using Fidelio and access your dashboard.
+                  using Loyalshy and access your dashboard.
                 </p>
                 <Button asChild className="mt-6">
                   <Link href="/dashboard/settings?tab=billing">

@@ -215,7 +215,7 @@ function AccountStep({ onNext }: { onNext: () => void }) {
     <Card className="max-w-md mx-auto">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-        <CardDescription>Get started with Fidelio for free</CardDescription>
+        <CardDescription>Get started with Loyalshy for free</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button

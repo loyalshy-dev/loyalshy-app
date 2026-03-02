@@ -86,12 +86,12 @@ export function MobileSidebar({
           ) : (
             <div className="size-7 rounded-md bg-sidebar-accent flex items-center justify-center">
               <span className="text-[11px] font-semibold text-sidebar-accent-foreground">
-                {restaurant ? getInitials(restaurant.name) : "F"}
+                {restaurant ? getInitials(restaurant.name) : "L"}
               </span>
             </div>
           )}
           <SheetTitle className="text-sm font-semibold text-sidebar-primary">
-            {restaurant?.name ?? "Fidelio"}
+            {restaurant?.name ?? "Loyalshy"}
           </SheetTitle>
         </SheetHeader>
 

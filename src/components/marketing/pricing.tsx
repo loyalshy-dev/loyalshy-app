@@ -303,7 +303,7 @@ export function Pricing() {
             </p>
           </div>
           <Button asChild variant="outline" size="sm" className="shrink-0 text-[13px]">
-            <Link href="mailto:sales@fidelio.app">Contact Sales</Link>
+            <Link href="mailto:sales@loyalshy.com">Contact Sales</Link>
           </Button>
         </div>
       </div>

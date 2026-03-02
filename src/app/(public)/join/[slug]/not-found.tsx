@@ -16,7 +16,7 @@ export default function JoinNotFound() {
           href="/"
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
         >
-          Go to Fidelio
+          Go to Loyalshy
         </Link>
       </div>
     </div>

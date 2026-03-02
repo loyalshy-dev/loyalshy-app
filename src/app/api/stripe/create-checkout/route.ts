@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
         email: session.user.email,
         name: restaurant.name,
         metadata: {
-          fidelio_restaurant_id: restaurant.id,
-          fidelio_user_id: session.user.id,
+          loyalshy_restaurant_id: restaurant.id,
+          loyalshy_user_id: session.user.id,
         },
       })
       stripeCustomerId = customer.id
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       cancel_url: `${baseUrl}/dashboard/settings?tab=billing&checkout=canceled`,
       subscription_data: {
         metadata: {
-          fidelio_restaurant_id: restaurant.id,
+          loyalshy_restaurant_id: restaurant.id,
         },
       },
       allow_promotion_codes: true,

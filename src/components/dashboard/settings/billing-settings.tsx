@@ -200,7 +200,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                   {restaurant.subscriptionStatus === "TRIALING"
                     ? `Trial ends in ${trialDaysRemaining} day${trialDaysRemaining !== 1 ? "s" : ""}`
                     : restaurant.subscriptionStatus === "CANCELED"
-                      ? "Subscribe to continue using Fidelio"
+                      ? "Subscribe to continue using Loyalshy"
                       : "Your subscription renews monthly"}
                 </p>
               </div>
@@ -367,7 +367,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                     </Button>
                   ) : isEnterprise ? (
                     <Button variant="outline" size="sm" className="w-full" asChild>
-                      <a href="mailto:hello@fidelio.app">
+                      <a href="mailto:hello@loyalshy.com">
                         Contact Us
                         <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
                       </a>

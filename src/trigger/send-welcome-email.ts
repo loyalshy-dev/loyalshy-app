@@ -25,18 +25,18 @@ export const sendWelcomeEmailTask = task({
     const { Resend } = await import("resend")
     const resend = new Resend(process.env.RESEND_API_KEY)
 
-    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://fidelio.app"
+    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
     const dashboardUrl = `${baseUrl}/dashboard`
     const qrUrl = `${baseUrl}/dashboard/settings/qr-code`
     const joinUrl = `${baseUrl}/join/${payload.restaurantSlug}`
 
     const result = await resend.emails.send({
-      from: "Fidelio <noreply@fidelio.app>",
+      from: "Loyalshy <noreply@loyalshy.com>",
       to: payload.email,
-      subject: `Welcome to Fidelio, ${payload.ownerName}!`,
+      subject: `Welcome to Loyalshy, ${payload.ownerName}!`,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:520px;margin:0 auto;padding:40px 20px;">
-          <h1 style="color:#171717;font-size:28px;margin-bottom:8px;">Welcome to Fidelio!</h1>
+          <h1 style="color:#171717;font-size:28px;margin-bottom:8px;">Welcome to Loyalshy!</h1>
           <p style="color:#525252;font-size:15px;line-height:1.6;">
             Hi ${payload.ownerName}, your restaurant <strong>${payload.restaurantName}</strong> is all set up. Here's how to get started:
           </p>
@@ -60,7 +60,7 @@ export const sendWelcomeEmailTask = task({
           </p>
 
           <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
-          <p style="color:#a3a3a3;font-size:12px;">Fidelio — Digital Loyalty Cards</p>
+          <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital Loyalty Cards</p>
         </div>
       `,
     })

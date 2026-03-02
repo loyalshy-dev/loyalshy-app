@@ -3,7 +3,7 @@ Step-by-step setup
   1. Create a Google Cloud project                                                  
                                                                                     
   1. Go to console.cloud.google.com                                                 
-  2. Create a new project (e.g. "Fidelio Dev")                                      
+  2. Create a new project (e.g. "Loyalshy Dev")                                      
   3. Note the Project ID
 
   2. Enable the Google Wallet API
@@ -16,7 +16,7 @@ Step-by-step setup
 
   1. Go to IAM & Admin > Service Accounts
   2. Click Create Service Account
-  3. Name: fidelio-wallet (or anything)
+  3. Name: loyalshy-wallet (or anything)
   4. Role: skip for now (not needed for Wallet)
   5. Click Done
   6. Click the service account you just created
@@ -36,9 +36,9 @@ Step-by-step setup
   Open .env.local and fill in:
 
   GOOGLE_WALLET_ISSUER_ID="1234567890"
-  GOOGLE_WALLET_SERVICE_ACCOUNT_KEY='{"type":"service_account","project_id":"fidelio
+  GOOGLE_WALLET_SERVICE_ACCOUNT_KEY='{"type":"service_account","project_id":"loyalshy
   -dev","private_key_id":"...","private_key":"-----BEGIN RSA PRIVATE
-  KEY-----\n...\n-----END RSA PRIVATE KEY-----\n","client_email":"fidelio-wallet@fid
+  KEY-----\n...\n-----END RSA PRIVATE KEY-----\n","client_email":"loyalshy-wallet@fid
   elio-dev.iam.gserviceaccount.com",...}'
 
   For the service account key, paste the entire JSON from the downloaded file as a

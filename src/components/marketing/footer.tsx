@@ -34,7 +34,7 @@ const FOOTER_COLUMNS: FooterColumn[] = [
     links: [
       { label: "About", href: "/about" },
       { label: "Blog", href: "/blog" },
-      { label: "Contact", href: "mailto:hello@fidelio.app" },
+      { label: "Contact", href: "mailto:hello@loyalshy.com" },
     ],
   },
   {
@@ -63,7 +63,7 @@ export function MarketingFooter() {
               href="/"
               className="inline-flex items-center gap-1.5 font-bold tracking-tight transition-opacity hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2"
               style={{ color: "oklch(0.97 0 0)" }}
-              aria-label="Fidelio home"
+              aria-label="Loyalshy home"
             >
               {/* Brand accent dot mirrors the navbar */}
               <span
@@ -71,7 +71,7 @@ export function MarketingFooter() {
                 style={{ background: "var(--brand)" }}
                 aria-hidden="true"
               />
-              <span className="text-[15px]">Fidelio</span>
+              <span className="text-[15px]">Loyalshy</span>
             </Link>
             <p
               className="mt-3 text-sm leading-relaxed"
@@ -127,7 +127,7 @@ export function MarketingFooter() {
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm" style={{ color: "oklch(0.45 0.008 285)" }}>
-            &copy; 2026 Fidelio. All rights reserved.
+            &copy; 2026 Loyalshy. All rights reserved.
           </p>
           <p className="text-sm" style={{ color: "oklch(0.45 0.008 285)" }}>
             Built with care for restaurant owners.

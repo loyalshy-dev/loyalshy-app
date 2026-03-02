@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import QRCode from "qrcode"
 import {
   formatProgressValue,
   formatLabel,
@@ -57,6 +59,7 @@ type WalletPassRendererProps = {
   compact?: boolean
   className?: string
   style?: React.CSSProperties
+  qrValue?: string // When provided, renders a real QR code instead of placeholder
 }
 
 // ─── Constants ──────────────────────────────────────────────
@@ -87,6 +90,7 @@ export function WalletPassRenderer({
   compact = false,
   className,
   style: styleProp,
+  qrValue,
 }: WalletPassRendererProps) {
   const layout = getFieldLayout(design.shape)
   const isApple = format === "apple"
@@ -410,7 +414,7 @@ export function WalletPassRenderer({
           }}
         />
 
-        {/* ─── QR Code placeholder ─── */}
+        {/* ─── QR Code ─── */}
         <div
           style={{
             display: "flex",
@@ -429,7 +433,11 @@ export function WalletPassRenderer({
               justifyContent: "center",
             }}
           >
-            <QrPlaceholder size={64} />
+            {qrValue ? (
+              <QrImage value={qrValue} size={64} />
+            ) : (
+              <QrPlaceholder size={64} />
+            )}
           </div>
         </div>
       </div>
@@ -621,6 +629,28 @@ function StampGridOverlay({
         })}
       </div>
     </div>
+  )
+}
+
+// ─── QR Code (real) ─────────────────────────────────────────
+
+function QrImage({ value, size }: { value: string; size: number }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    QRCode.toDataURL(value, {
+      width: size * 2, // 2x for retina
+      margin: 0,
+      errorCorrectionLevel: "M",
+      color: { dark: "#000000", light: "#ffffff" },
+    }).then(setDataUrl).catch(() => {})
+  }, [value, size])
+
+  if (!dataUrl) return <QrPlaceholder size={size} />
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={dataUrl} alt="QR code" width={size} height={size} style={{ display: "block" }} />
   )
 }
 

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og"
 
 export const runtime = undefined
-export const alt = "Fidelio — Digital Loyalty Cards for Restaurants"
+export const alt = "Loyalshy — Digital Loyalty Cards for Restaurants"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
@@ -33,7 +33,7 @@ export default function OGImage() {
             marginBottom: 32,
           }}
         >
-          <span style={{ fontSize: 40, color: "white", fontWeight: 700 }}>F</span>
+          <span style={{ fontSize: 40, color: "white", fontWeight: 700 }}>L</span>
         </div>
 
         {/* Title */}
@@ -46,7 +46,7 @@ export default function OGImage() {
             lineHeight: 1.2,
           }}
         >
-          Fidelio
+          Loyalshy
         </h1>
 
         {/* Subtitle */}

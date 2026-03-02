@@ -16,15 +16,15 @@ import {
 const FAQ_ITEMS = [
   {
     id: "how-it-works",
-    question: "How does Fidelio work?",
+    question: "How does Loyalshy work?",
     answer:
-      "Fidelio replaces paper punch cards with digital loyalty cards that live in your customers' Apple or Google Wallet. You set up your restaurant, print a QR code, and customers scan it to get their digital pass. Staff register visits from the dashboard, and customers automatically earn rewards.",
+      "Loyalshy replaces paper punch cards with digital loyalty cards that live in your customers' Apple or Google Wallet. You set up your restaurant, print a QR code, and customers scan it to get their digital pass. Staff register visits from the dashboard, and customers automatically earn rewards.",
   },
   {
     id: "devices-supported",
     question: "What devices are supported?",
     answer:
-      "Fidelio works with Apple Wallet (iPhone, Apple Watch) and Google Wallet (Android). The passes automatically update whenever a visit is registered — no app download required for customers.",
+      "Loyalshy works with Apple Wallet (iPhone, Apple Watch) and Google Wallet (Android). The passes automatically update whenever a visit is registered — no app download required for customers.",
   },
   {
     id: "setup-time",
@@ -83,7 +83,7 @@ export function FAQ() {
             Frequently asked questions
           </h2>
           <p className="text-[15px] text-[var(--muted-foreground)]">
-            Everything you need to know about Fidelio.
+            Everything you need to know about Loyalshy.
           </p>
         </div>
 
@@ -112,7 +112,7 @@ export function FAQ() {
         <p className="mt-8 text-center text-[13px] text-[var(--muted-foreground)]">
           Still have questions?{" "}
           <a
-            href="mailto:hello@fidelio.app"
+            href="mailto:hello@loyalshy.com"
             className="font-medium text-[var(--foreground)] underline underline-offset-4 hover:opacity-70 transition-opacity"
           >
             Email us

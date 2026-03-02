@@ -72,7 +72,7 @@ export function MarketingNavbar() {
         <Link
           href="/"
           className="flex items-center gap-1.5 font-bold tracking-tight text-foreground transition-opacity hover:opacity-80"
-          aria-label="Fidelio home"
+          aria-label="Loyalshy home"
         >
           {/* Brand accent dot */}
           <span
@@ -80,7 +80,7 @@ export function MarketingNavbar() {
             style={{ background: "var(--brand)" }}
             aria-hidden="true"
           />
-          <span className="text-[15px]">Fidelio</span>
+          <span className="text-[15px]">Loyalshy</span>
         </Link>
 
         {/* Center nav links — desktop only */}
@@ -149,7 +149,7 @@ export function MarketingNavbar() {
                       style={{ background: "var(--brand)" }}
                       aria-hidden="true"
                     />
-                    <span className="text-[15px]">Fidelio</span>
+                    <span className="text-[15px]">Loyalshy</span>
                   </Link>
                 </SheetTitle>
                 <SheetClose asChild>

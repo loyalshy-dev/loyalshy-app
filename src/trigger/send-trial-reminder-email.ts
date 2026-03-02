@@ -15,7 +15,7 @@ export const sendTrialReminderEmailTask = schedules.task({
 
     try {
       const now = new Date()
-      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://fidelio.app"
+      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
 
       // Find restaurants where trialEndsAt is 7, 3, or 1 days away
       const reminderDays = [7, 3, 1]
@@ -62,9 +62,9 @@ export const sendTrialReminderEmailTask = schedules.task({
 
           try {
             await resend.emails.send({
-              from: "Fidelio <noreply@fidelio.app>",
+              from: "Loyalshy <noreply@loyalshy.com>",
               to: owner.email,
-              subject: `Your Fidelio trial ends ${daysLabel}`,
+              subject: `Your Loyalshy trial ends ${daysLabel}`,
               html: `
                 <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">
                   <h2 style="color:#171717;font-size:24px;margin-bottom:8px;">Trial Ending ${daysAway === 1 ? "Tomorrow" : `in ${daysAway} Days`}</h2>
@@ -81,7 +81,7 @@ export const sendTrialReminderEmailTask = schedules.task({
                     Upgrade Now
                   </a>
                   <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
-                  <p style="color:#a3a3a3;font-size:12px;">Fidelio — Digital Loyalty Cards</p>
+                  <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital Loyalty Cards</p>
                 </div>
               `,
             })

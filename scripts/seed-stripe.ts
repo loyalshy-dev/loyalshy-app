@@ -1,15 +1,15 @@
 /**
- * Seed Stripe with Fidelio products and prices.
+ * Seed Stripe with Loyalshy products and prices.
  *
  * Usage:
  *   STRIPE_SECRET_KEY=sk_test_... npx tsx scripts/seed-stripe.ts
  *
  * This creates (or updates) three Stripe Products with monthly prices:
- *   - Fidelio Starter ($15/month, lookup_key: starter_monthly)
- *   - Fidelio Pro ($39/month, lookup_key: pro_monthly)
- *   - Fidelio Business ($79/month, lookup_key: business_monthly)
+ *   - Loyalshy Starter ($15/month, lookup_key: starter_monthly)
+ *   - Loyalshy Pro ($39/month, lookup_key: pro_monthly)
+ *   - Loyalshy Business ($79/month, lookup_key: business_monthly)
  *
- * Idempotent: uses metadata.fidelio_plan to skip existing products.
+ * Idempotent: uses metadata.loyalshy_plan to skip existing products.
  */
 
 import Stripe from "stripe"
@@ -20,22 +20,22 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const plans = [
   {
-    fidelioPlan: "STARTER",
-    name: "Fidelio Starter",
+    loyalshyPlan: "STARTER",
+    name: "Loyalshy Starter",
     description: "Up to 200 customers, 2 staff, full analytics, custom branding.",
     priceAmount: 1500, // cents ($15/month)
     lookupKey: "starter_monthly",
   },
   {
-    fidelioPlan: "PRO",
-    name: "Fidelio Pro",
+    loyalshyPlan: "PRO",
+    name: "Loyalshy Pro",
     description: "Up to 1,000 customers, 5 staff, email support.",
     priceAmount: 3900, // cents ($39/month)
     lookupKey: "pro_monthly",
   },
   {
-    fidelioPlan: "BUSINESS",
-    name: "Fidelio Business",
+    loyalshyPlan: "BUSINESS",
+    name: "Loyalshy Business",
     description: "Unlimited customers, 15 staff, priority support.",
     priceAmount: 7900, // cents ($79/month)
     lookupKey: "business_monthly",
@@ -48,7 +48,7 @@ async function main() {
   for (const plan of plans) {
     // Check if product already exists
     const existing = await stripe.products.search({
-      query: `metadata["fidelio_plan"]:"${plan.fidelioPlan}"`,
+      query: `metadata["loyalshy_plan"]:"${plan.loyalshyPlan}"`,
     })
 
     let product: Stripe.Product
@@ -66,7 +66,7 @@ async function main() {
       product = await stripe.products.create({
         name: plan.name,
         description: plan.description,
-        metadata: { fidelio_plan: plan.fidelioPlan },
+        metadata: { loyalshy_plan: plan.loyalshyPlan },
       })
       console.log(`Created product "${plan.name}": ${product.id}`)
     }
@@ -104,7 +104,7 @@ async function main() {
     } else {
       const config = await stripe.billingPortal.configurations.create({
         business_profile: {
-          headline: "Manage your Fidelio subscription",
+          headline: "Manage your Loyalshy subscription",
         },
         features: {
           subscription_update: {

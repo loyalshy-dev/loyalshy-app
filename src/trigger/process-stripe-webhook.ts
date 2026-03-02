@@ -33,7 +33,7 @@ export const processStripeWebhookTask = task({
         case "customer.subscription.created":
         case "customer.subscription.updated": {
           const subscription = payload.data as Record<string, unknown>
-          const restaurantId = (subscription.metadata as Record<string, string>)?.fidelio_restaurant_id
+          const restaurantId = (subscription.metadata as Record<string, string>)?.loyalshy_restaurant_id
 
           if (!restaurantId) {
             return { processed: false, reason: "no_restaurant_id" }

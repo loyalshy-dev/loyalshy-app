@@ -27,7 +27,7 @@ export const auth = betterAuth({
     maxPasswordLength: 128,
     sendResetPassword: async ({ user, url }) => {
       await getResend().emails.send({
-        from: "Fidelio <noreply@fidelio.app>",
+        from: "Loyalshy <noreply@loyalshy.com>",
         to: user.email,
         subject: "Reset your password",
         html: `

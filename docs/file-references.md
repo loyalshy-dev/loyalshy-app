@@ -1,4 +1,4 @@
-# Fidelio — File References
+# Loyalshy — File References
 
 Detailed file-by-file reference for each feature area. Extracted from CLAUDE.md to keep it under the context size limit.
 

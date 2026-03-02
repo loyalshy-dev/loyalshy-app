@@ -265,7 +265,7 @@ async function patchGooglePass(
   const triggerStripFilters = parseStripFilters(cardDesign?.editorConfig)
   const isTriggerStampGrid = triggerStripFilters.useStampGrid || cardDesign?.patternStyle === "stamp_grid" || cardDesign?.patternStyle === "STAMP_GRID"
   if (isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
-    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.fidelio.app"
+    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
     patchBody.heroImage = {
       sourceUri: { uri: `${baseUrl}/api/wallet/strip/${enrollment.id}?v=${Date.now()}` },
       contentDescription: {
@@ -278,7 +278,7 @@ async function patchGooglePass(
   // Note: hexBackgroundColor is a class-level field in LoyaltyClass, not on the object
   if (updateType === "DESIGN_CHANGE" || updateType === "PROGRAM_CHANGE") {
     if (isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
-      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.fidelio.app"
+      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
       patchBody.heroImage = {
         sourceUri: { uri: `${baseUrl}/api/wallet/strip/${enrollment.id}?v=${Date.now()}` },
         contentDescription: {

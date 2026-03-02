@@ -99,7 +99,7 @@ export function OnboardingChecklist({
             <Check className="size-4 text-primary" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold">Get started with Fidelio</h2>
+            <h2 className="text-sm font-semibold">Get started with Loyalshy</h2>
             <p className="text-xs text-muted-foreground">
               {completedCount} of {items.length} completed
             </p>

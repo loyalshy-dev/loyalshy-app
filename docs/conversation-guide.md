@@ -1,4 +1,4 @@
-# Conversation Guide — Fidelio Development
+# Conversation Guide — Loyalshy Development
 
 ## Why Separate Conversations?
 

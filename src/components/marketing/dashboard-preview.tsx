@@ -1,5 +1,5 @@
 /**
- * DashboardPreview — A CSS-only mockup of the Fidelio dashboard
+ * DashboardPreview — A CSS-only mockup of the Loyalshy dashboard
  * shown below the hero to give prospects a preview of the product.
  *
  * Server Component — no client-side interactivity required.
@@ -20,7 +20,7 @@ export function DashboardPreview() {
             </div>
             <div className="flex-1 flex justify-center">
               <div className="rounded-md bg-background border border-border px-10 py-1 text-[11px] text-muted-foreground">
-                app.fidelio.app/dashboard
+                app.loyalshy.com/dashboard
               </div>
             </div>
             <div className="w-[52px]" />
@@ -43,7 +43,7 @@ export function DashboardPreview() {
                   style={{ background: "oklch(0.55 0.2 265)" }}
                 />
                 <span className="text-[12px] font-bold" style={{ color: "oklch(0.97 0 0)" }}>
-                  Fidelio
+                  Loyalshy
                 </span>
               </div>
               {/* Nav items */}

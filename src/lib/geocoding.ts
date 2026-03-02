@@ -23,7 +23,7 @@ export async function geocodeAddress(
     const response = await fetch(url.toString(), {
       headers: {
         // Required by Nominatim usage policy
-        "User-Agent": "Fidelio-LoyaltyCard/1.0 (https://fidelio.app)",
+        "User-Agent": "Loyalshy-LoyaltyCard/1.0 (https://loyalshy.com)",
       },
       signal: AbortSignal.timeout(8000),
     })

@@ -252,12 +252,12 @@ export function QrCodeDisplay({
           Math.round(canvas.height * 0.015)
       )
 
-      // Fidelio branding at bottom
+      // Loyalshy branding at bottom
       const brandFontSize = Math.round(canvas.width * 0.022)
       ctx.fillStyle = "#bbbbbb"
       ctx.font = `400 ${brandFontSize}px -apple-system, 'Segoe UI', sans-serif`
       ctx.fillText(
-        "Powered by Fidelio",
+        "Powered by Loyalshy",
         canvas.width / 2,
         canvas.height - Math.round(canvas.height * 0.03)
       )

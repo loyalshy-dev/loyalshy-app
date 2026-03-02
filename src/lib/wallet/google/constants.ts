@@ -14,7 +14,7 @@ export const GOOGLE_WALLET_SAVE_BASE =
  * Uses restaurantId as the default scope.
  */
 export function buildClassId(restaurantId: string): string {
-  return `${GOOGLE_WALLET_ISSUER_ID}.fidelio-restaurant-${restaurantId}`
+  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-restaurant-${restaurantId}`
 }
 
 /**
@@ -22,7 +22,7 @@ export function buildClassId(restaurantId: string): string {
  * Each loyalty program gets its own Google Wallet class.
  */
 export function buildProgramClassId(programId: string): string {
-  return `${GOOGLE_WALLET_ISSUER_ID}.fidelio-program-${programId}`
+  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-program-${programId}`
 }
 
 /**
@@ -30,7 +30,7 @@ export function buildProgramClassId(programId: string): string {
  * Legacy: scoped to customerId.
  */
 export function buildObjectId(customerId: string): string {
-  return `${GOOGLE_WALLET_ISSUER_ID}.fidelio-customer-${customerId}`
+  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-customer-${customerId}`
 }
 
 /**
@@ -38,5 +38,5 @@ export function buildObjectId(customerId: string): string {
  * Each enrollment gets its own Google Wallet object.
  */
 export function buildEnrollmentObjectId(enrollmentId: string): string {
-  return `${GOOGLE_WALLET_ISSUER_ID}.fidelio-enrollment-${enrollmentId}`
+  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-enrollment-${enrollmentId}`
 }

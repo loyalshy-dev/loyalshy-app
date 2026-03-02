@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const firstProgram = restaurant.programs[0]
   const title = `Join ${restaurant.name}`
   const description = firstProgram
-    ? `Get your digital loyalty card for ${restaurant.name}. Earn a free ${firstProgram.rewardDescription} after ${firstProgram.visitsRequired} visits!`
+    ? `Get your digital loyalty card for ${restaurant.name}. ${firstProgram.rewardDescription} after ${firstProgram.visitsRequired} visits!`
     : `Get your digital loyalty card for ${restaurant.name}.`
 
   return {

@@ -1,4 +1,4 @@
-# Fidelio — Digital Loyalty Card SaaS
+# Loyalshy — Digital Loyalty Card SaaS
 
 Multi-tenant SaaS for restaurants to create digital loyalty cards with Apple and Google Wallet passes. Restaurant staff register customer visits; after N visits, customers earn rewards.
 
@@ -24,10 +24,10 @@ pnpm install
 
 ```bash
 # Start PostgreSQL (Docker example)
-docker run -d --name fidelio-db \
-  -e POSTGRES_USER=fidelio \
-  -e POSTGRES_PASSWORD=fidelio \
-  -e POSTGRES_DB=fidelio \
+docker run -d --name loyalshy-db \
+  -e POSTGRES_USER=loyalshy \
+  -e POSTGRES_PASSWORD=loyalshy \
+  -e POSTGRES_DB=loyalshy \
   -p 5433:5432 \
   postgres:18
 
@@ -59,7 +59,7 @@ Google Wallet passes require a Google Cloud service account and an Issuer ID. No
 ### Step 1 — Create a Google Cloud project
 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Click **New Project** (e.g. "Fidelio Dev")
+2. Click **New Project** (e.g. "Loyalshy Dev")
 3. Note the **Project ID**
 
 ### Step 2 — Enable the Google Wallet API
@@ -72,7 +72,7 @@ Google Wallet passes require a Google Cloud service account and an Issuer ID. No
 
 1. Go to **IAM & Admin > Service Accounts**
 2. Click **Create Service Account**
-3. Name: `fidelio-wallet` (or anything you prefer)
+3. Name: `loyalshy-wallet` (or anything you prefer)
 4. Skip the optional role assignment
 5. Click **Done**
 6. Click the service account you just created
@@ -124,7 +124,7 @@ Apple Wallet passes require an Apple Developer Program membership and signing ce
 1. Go to [developer.apple.com/account](https://developer.apple.com/account)
 2. Navigate to **Certificates, Identifiers & Profiles > Identifiers**
 3. Click **+** and select **Pass Type IDs**
-4. Enter a description (e.g. "Fidelio Loyalty") and identifier (e.g. `pass.com.yourcompany.fidelio`)
+4. Enter a description (e.g. "Loyalshy Loyalty") and identifier (e.g. `pass.com.yourcompany.loyalshy`)
 5. Click **Register**
 
 ### Step 3 — Create a Pass signing certificate
@@ -176,7 +176,7 @@ base64 -i wwdr.pem | tr -d '\n'
 Add to `.env.local`:
 
 ```env
-APPLE_PASS_TYPE_IDENTIFIER="pass.com.yourcompany.fidelio"
+APPLE_PASS_TYPE_IDENTIFIER="pass.com.yourcompany.loyalshy"
 APPLE_TEAM_IDENTIFIER="YOUR_TEAM_ID"
 APPLE_PASS_CERTIFICATE="base64-encoded-pass-cert.pem"
 APPLE_PASS_KEY="base64-encoded-pass-key.pem"

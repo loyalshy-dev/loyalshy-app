@@ -100,13 +100,13 @@ export function Sidebar({ user, restaurant, orgRole }: SidebarProps) {
         ) : (
           <div className="size-7 rounded-md bg-sidebar-accent flex items-center justify-center shrink-0">
             <span className="text-[11px] font-semibold text-sidebar-accent-foreground">
-              {restaurant ? getInitials(restaurant.name) : "F"}
+              {restaurant ? getInitials(restaurant.name) : "L"}
             </span>
           </div>
         )}
         {!collapsed && (
           <span className="text-sm font-semibold text-sidebar-primary truncate">
-            {restaurant?.name ?? "Fidelio"}
+            {restaurant?.name ?? "Loyalshy"}
           </span>
         )}
       </div>

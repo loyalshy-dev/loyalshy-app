@@ -39,7 +39,7 @@ export function ClosingCTA() {
           Ready to grow your repeat business?
         </h2>
         <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-          Join 200+ restaurants using Fidelio to turn first-time visitors into loyal regulars.
+          Join 200+ restaurants using Loyalshy to turn first-time visitors into loyal regulars.
           Set up in 5 minutes, no credit card required.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">

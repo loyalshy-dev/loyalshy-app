@@ -21,13 +21,13 @@ export const viewport: Viewport = {
   themeColor: "#0a0a0a",
 };
 
-const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://fidelio.app";
+const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://loyalshy.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Fidelio — Digital Loyalty Cards for Restaurants",
-    template: "%s — Fidelio",
+    default: "Loyalshy — Digital Loyalty Cards for Restaurants",
+    template: "%s — Loyalshy",
   },
   description:
     "Create digital loyalty cards with Apple and Google Wallet passes for your restaurant. Boost repeat visits and reward your best customers.",
@@ -42,15 +42,15 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     type: "website",
-    siteName: "Fidelio",
-    title: "Fidelio — Digital Loyalty Cards for Restaurants",
+    siteName: "Loyalshy",
+    title: "Loyalshy — Digital Loyalty Cards for Restaurants",
     description:
       "Create digital loyalty cards with Apple and Google Wallet passes. Boost repeat visits and reward your best customers.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fidelio — Digital Loyalty Cards for Restaurants",
+    title: "Loyalshy — Digital Loyalty Cards for Restaurants",
     description:
       "Create digital loyalty cards with Apple and Google Wallet passes. Boost repeat visits and reward your best customers.",
   },
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Fidelio",
+    title: "Loyalshy",
   },
 };
 

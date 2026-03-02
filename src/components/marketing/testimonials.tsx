@@ -79,7 +79,7 @@ const testimonials = [
     stat: "92%",
     statLabel: "redemption rate",
     quote:
-      "Our redemption rate went from 15% with paper cards to 92% with Fidelio. Digital passes actually get used because they're always in the customer's phone.",
+      "Our redemption rate went from 15% with paper cards to 92% with Loyalshy. Digital passes actually get used because they're always in the customer's phone.",
   },
   {
     name: "Thomas Bergström",
@@ -87,7 +87,7 @@ const testimonials = [
     stat: "2 hrs",
     statLabel: "saved per week",
     quote:
-      "We used to spend hours managing punch cards and tracking rewards manually. Fidelio automated everything. My staff can focus on what matters — great food.",
+      "We used to spend hours managing punch cards and tracking rewards manually. Loyalshy automated everything. My staff can focus on what matters — great food.",
   },
 ] as const
 
@@ -189,7 +189,7 @@ export function Testimonials() {
             Loved by restaurant owners
           </h2>
           <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-            See how restaurants are growing repeat business with Fidelio
+            See how restaurants are growing repeat business with Loyalshy
           </p>
         </div>
 

@@ -120,6 +120,7 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug }: CardPageC
             totalVisits={data.program.visitsRequired}
             rewardDescription={data.program.rewardDescription}
             hasReward={data.hasAvailableReward}
+            qrValue={data.walletPassId ?? undefined}
           />
         </div>
 

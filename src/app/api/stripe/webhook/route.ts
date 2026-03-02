@@ -7,7 +7,7 @@ import { stripe } from "@/lib/stripe"
 // Verifies signature, then processes billing events inline.
 // Idempotency: tracks processed event IDs to prevent duplicate processing.
 
-// Map Stripe price lookup keys to Fidelio plan enum values
+// Map Stripe price lookup keys to Loyalshy plan enum values
 const LOOKUP_KEY_TO_PLAN: Record<string, string> = {
   starter_monthly: "STARTER",
   pro_monthly: "PRO",
@@ -136,9 +136,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     { expand: ["items.data.price"] }
   )
 
-  const restaurantId = subscription.metadata?.fidelio_restaurant_id
+  const restaurantId = subscription.metadata?.loyalshy_restaurant_id
   if (!restaurantId) {
-    console.error("No fidelio_restaurant_id in subscription metadata")
+    console.error("No loyalshy_restaurant_id in subscription metadata")
     return
   }
 

@@ -156,6 +156,7 @@ export async function getRestaurantBySlug(
 
 export type EnrollmentCardData = {
   enrollmentId: string
+  walletPassId: string | null
   customerName: string
   currentCycleVisits: number
   totalVisits: number
@@ -182,6 +183,7 @@ export async function getEnrollmentCardData(
     where: { id: enrollmentId },
     select: {
       id: true,
+      walletPassId: true,
       currentCycleVisits: true,
       totalVisits: true,
       rewards: {
@@ -239,6 +241,7 @@ export async function getEnrollmentCardData(
   const cd = enrollment.loyaltyProgram.cardDesign
   return {
     enrollmentId: enrollment.id,
+    walletPassId: enrollment.walletPassId,
     customerName: enrollment.customer.fullName,
     currentCycleVisits: enrollment.currentCycleVisits,
     totalVisits: enrollment.totalVisits,
@@ -399,6 +402,7 @@ export async function joinProgram(
       currentCycleVisits: true,
       totalVisits: true,
       status: true,
+      walletPassId: true,
       rewards: {
         where: { status: "AVAILABLE" },
         select: { id: true },
@@ -409,17 +413,31 @@ export async function joinProgram(
 
   const isReturningEnrollment = !!enrollment
 
+  // Ensure returning enrollments have a walletPassId for the browser card QR
+  if (enrollment && !enrollment.walletPassId) {
+    const walletPassId = randomUUID()
+    await db.enrollment.update({
+      where: { id: enrollment.id },
+      data: { walletPassId },
+    })
+    enrollment = { ...enrollment, walletPassId }
+  }
+
   if (!enrollment) {
+    // Generate walletPassId upfront so the browser card page has a scannable QR
+    const walletPassId = randomUUID()
     enrollment = await db.enrollment.create({
       data: {
         customerId: customer.id,
         loyaltyProgramId: program.id,
+        walletPassId,
       },
       select: {
         id: true,
         currentCycleVisits: true,
         totalVisits: true,
         status: true,
+        walletPassId: true,
         rewards: {
           where: { status: "AVAILABLE" },
           select: { id: true },

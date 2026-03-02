@@ -12,7 +12,7 @@ import { FAQ } from "@/components/marketing/faq"
 import { ClosingCTA } from "@/components/marketing/closing-cta"
 import { MarketingFooter } from "@/components/marketing/footer"
 
-const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://fidelio.app"
+const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://loyalshy.com"
 
 export const metadata: Metadata = {
   alternates: { canonical: siteUrl },
@@ -22,7 +22,7 @@ function JsonLd() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "Fidelio",
+    name: "Loyalshy",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
