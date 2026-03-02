@@ -14,14 +14,14 @@ import { getSessionCookie } from "better-auth/cookies"
 // ─────────────────────────────────────────────────────────────
 
 const AUTH_PAGES_REDIRECT = ["/login", "/forgot-password"]
-const PROTECTED_PREFIX = "/dashboard"
+const PROTECTED_PREFIXES = ["/dashboard", "/admin"]
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const sessionCookie = getSessionCookie(request)
 
   // Unauthenticated user trying to access protected routes
-  if (!sessionCookie && pathname.startsWith(PROTECTED_PREFIX)) {
+  if (!sessionCookie && PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))) {
     const loginUrl = new URL("/login", request.url)
     loginUrl.searchParams.set("callbackUrl", pathname)
     return NextResponse.redirect(loginUrl)
@@ -44,6 +44,7 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/admin/:path*",
     "/login",
     "/register",
     "/forgot-password",

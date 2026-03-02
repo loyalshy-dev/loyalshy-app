@@ -1,0 +1,39 @@
+import { connection } from "next/server"
+import { assertSuperAdmin } from "@/lib/dal"
+import { getAdminPlatformStats } from "@/server/admin-actions"
+import { AdminStatCards } from "@/components/admin/overview/admin-stat-cards"
+import { SubscriptionBreakdown } from "@/components/admin/overview/subscription-breakdown"
+import { PlanBreakdown } from "@/components/admin/overview/plan-breakdown"
+
+export default async function AdminOverviewPage() {
+  await connection()
+  await assertSuperAdmin()
+
+  const stats = await getAdminPlatformStats()
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-lg font-semibold tracking-tight">Platform Overview</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Global metrics across all restaurants and users.
+        </p>
+      </div>
+
+      <AdminStatCards
+        totalUsers={stats.totalUsers}
+        totalRestaurants={stats.totalRestaurants}
+        totalCustomers={stats.totalCustomers}
+        estimatedMrr={stats.estimatedMrr}
+        newUsersThisMonth={stats.newUsersThisMonth}
+        newRestaurantsThisMonth={stats.newRestaurantsThisMonth}
+        activeSubscriptions={stats.activeSubscriptions}
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <SubscriptionBreakdown data={stats.subscriptionBreakdown} />
+        <PlanBreakdown data={stats.planBreakdown} />
+      </div>
+    </div>
+  )
+}
