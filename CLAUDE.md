@@ -160,6 +160,8 @@ The full plan is in `loyalty-card-plan-v4.md`. Phases:
 - [x] Phase 9D — Template Gallery (30+ templates across 4 card types, template-panel with filters)
 - [x] Phase 9E — Property Panels (14 panels: colors, background, stamp, points, tier, coupon, typography, layout, cutout, code, fields, logo, strip, templates)
 - [x] Phase 9F — Design Propagation + Polish (CardRenderer in visit registration, customer detail, onboarding, QR poster; /design as preview page with "Open Studio" button; mobile studio layout; error/loading boundaries)
+- [x] Phase 10A — Program Types Foundation (ProgramType enum on LoyaltyProgram, config JSON column, 2-step create form, type-aware list/detail/settings/tabs, stamp-only visit guard, 131 tests passing)
+- [x] Phase 10B — Coupon Redemption Flow (redeemCoupon server action, auto-create Reward on coupon enrollment, coupon redemption in register-visit dialog, single/unlimited coupon support, 137 tests passing)
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -193,7 +195,7 @@ Update the "Current Progress" section above to track what's done.
 
 **Application (11):**
 8. Restaurant (tenant)
-9. LoyaltyProgram (status: DRAFT/ACTIVE/ARCHIVED, startsAt, endsAt)
+9. LoyaltyProgram (programType: STAMP_CARD/COUPON/MEMBERSHIP, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
 10. Enrollment (pivot: Customer × LoyaltyProgram — cycle visits, wallet pass, status)
 11. Customer (end user — identity + denormalized totalVisits)
 12. Visit (stamp/check-in, linked to Enrollment)
@@ -259,9 +261,26 @@ Update the "Current Progress" section above to track what's done.
 - OKLCH color space throughout — all tokens in `globals.css` `:root` / `.dark`
 - `TooltipProvider` wraps dashboard shell (NOT root layout)
 
+## Deployment Infrastructure
+
+| Layer | Service | Notes |
+|-------|---------|-------|
+| Compute | Vercel (Pro) | Next.js 16 native, preview deploys |
+| Database | Neon PostgreSQL | Serverless, connection pooling, DB branching |
+| Cache / Rate Limiting | Upstash Redis | HTTP-based, serverless-safe, @upstash/ratelimit |
+| File Storage | Cloudflare R2 | Already configured (S3-compatible) |
+| Background Jobs | Trigger.dev | Already configured (8 tasks, 5 queues) |
+| Email | Resend | Already configured (via Trigger.dev) |
+| Payments | Stripe | Already configured (subscriptions, webhooks) |
+| Error Tracking | Sentry | Already configured (source maps) |
+| Analytics | Plausible | Already configured (privacy-first) |
+| DNS / CDN | Cloudflare | Free tier, pairs with R2 |
+
+For full deployment guide, checklist, and cost estimate, see **`docs/deployment-stack.md`**.
+
 ## Environment Variables
 
-See `.env.example` for full list. Key vars: DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TRIGGER_SECRET_KEY, RESEND_API_KEY, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL, APPLE_PASS_* (5 vars), GOOGLE_WALLET_* (2 vars), NEXT_PUBLIC_SENTRY_DSN, NEXT_PUBLIC_PLAUSIBLE_DOMAIN.
+See `.env.example` for full list. Key vars: DATABASE_URL, DATABASE_URL_UNPOOLED, BETTER_AUTH_SECRET, BETTER_AUTH_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TRIGGER_SECRET_KEY, RESEND_API_KEY, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL, APPLE_PASS_* (5 vars), GOOGLE_WALLET_* (2 vars), UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN, NEXT_PUBLIC_SENTRY_DSN, NEXT_PUBLIC_PLAUSIBLE_DOMAIN.
 
 ## Detailed File References
 
