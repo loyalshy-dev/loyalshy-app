@@ -95,7 +95,7 @@ Multi-tenant SaaS for restaurants to create digital loyalty cards with Apple/Goo
         /settings             → General, Team, Billing, Jobs (owner)
     /(studio)       → Full-page card design studio (own layout, no dashboard shell)
       /dashboard/programs/[id]/studio → Canva-like editor
-    /(public)       → Landing, pricing, QR scan pages
+    /(public)       → Landing, pricing, QR scan, card view pages
     /api            → API routes
   /components       → Reusable UI components
     /ui             → Shadcn components
@@ -209,7 +209,7 @@ Update the "Current Progress" section above to track what's done.
 - [ ] No `any` types, strict TypeScript
 - [ ] Every form validates client AND server (Zod)
 - [ ] Every server action calls DAL auth first (exceptions: `onboarding-actions.ts` is public-facing, `onboarding-registration-actions.ts` uses assertAuthenticated() not restaurant-level DAL since user has no restaurant yet)
-- [ ] Every Server Component calls `getCurrentUser()` from DAL (exception: `/join/[slug]` is public)
+- [ ] Every Server Component calls `getCurrentUser()` from DAL (exception: `/join/[slug]` and `/join/[slug]/card/[enrollmentId]` are public, card page uses HMAC signature verification instead)
 - [ ] proxy.ts only reads cookies — no DB calls
 - [x] Mobile responsive (test at 375px)
 - [x] Loading and error states for all async operations
