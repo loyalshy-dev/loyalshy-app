@@ -2,6 +2,10 @@ import "server-only"
 
 import Stripe from "stripe"
 
+// Re-export plan definitions from shared (client-safe) module
+export { PLANS, getPlanLimits, isUpgrade, isActiveSubscription } from "./plans"
+export type { PlanId, PlanDefinition } from "./plans"
+
 // ─── Stripe Client ─────────────────────────────────────────
 
 function getStripeClient(): Stripe {
@@ -22,100 +26,10 @@ export const stripe: Stripe = new Proxy({} as Stripe, {
   },
 })
 
-// ─── Plan Definitions ──────────────────────────────────────
-
-export type PlanId = "STARTER" | "PRO" | "BUSINESS" | "ENTERPRISE"
-
-export type PlanDefinition = {
-  id: PlanId
-  name: string
-  description: string
-  price: number | null // null = custom pricing
-  annualPrice: number | null // null = custom pricing
-  customerLimit: number
-  staffLimit: number
-  programLimit: number
-  features: string[]
-}
-
-export const PLANS: Record<PlanId, PlanDefinition> = {
-  STARTER: {
-    id: "STARTER",
-    name: "Starter",
-    description: "For small restaurants getting started",
-    price: 15,
-    annualPrice: 12,
-    customerLimit: 200,
-    staffLimit: 2,
-    programLimit: 1,
-    features: [
-      "Up to 200 customers",
-      "2 staff members",
-      "1 loyalty program",
-      "Apple & Google Wallet passes",
-      "Card design studio",
-      "Dashboard analytics",
-    ],
-  },
-  PRO: {
-    id: "PRO",
-    name: "Pro",
-    description: "For growing restaurants",
-    price: 39,
-    annualPrice: 31,
-    customerLimit: 1_000,
-    staffLimit: 5,
-    programLimit: 3,
-    features: [
-      "Up to 1,000 customers",
-      "5 staff members",
-      "Up to 3 programs",
-      "Apple & Google Wallet passes",
-      "Card design studio",
-      "Dashboard analytics",
-      "Email support",
-    ],
-  },
-  BUSINESS: {
-    id: "BUSINESS",
-    name: "Business",
-    description: "For serious loyalty programs",
-    price: 79,
-    annualPrice: 63,
-    customerLimit: Infinity,
-    staffLimit: 15,
-    programLimit: 10,
-    features: [
-      "Unlimited customers",
-      "15 staff members",
-      "Up to 10 programs",
-      "Apple & Google Wallet passes",
-      "Card design studio",
-      "Dashboard analytics",
-      "Priority support",
-    ],
-  },
-  ENTERPRISE: {
-    id: "ENTERPRISE",
-    name: "Enterprise",
-    description: "Custom solutions for large chains",
-    price: null,
-    annualPrice: null,
-    customerLimit: Infinity,
-    staffLimit: Infinity,
-    programLimit: Infinity,
-    features: [
-      "Everything in Business",
-      "Unlimited staff members",
-      "Unlimited programs",
-      "Dedicated support",
-      "SLA guarantees",
-    ],
-  },
-}
-
 // ─── Stripe Price Lookup Keys ──────────────────────────────
 // These match the lookup_key set during Stripe product/price seeding.
+
+import type { PlanId } from "./plans"
 
 export const STRIPE_PRICE_LOOKUP_KEYS: Record<string, PlanId> = {
   starter_monthly: "STARTER",
@@ -127,17 +41,32 @@ export function getPlanForPriceLookupKey(lookupKey: string): PlanId {
   return STRIPE_PRICE_LOOKUP_KEYS[lookupKey] ?? "STARTER"
 }
 
-// ─── Helpers ───────────────────────────────────────────────
+// ─── Subscription Status Mapping ──────────────────────────
+// Shared between webhook handler and Trigger.dev task.
 
-export function getPlanLimits(plan: PlanId) {
-  return {
-    customerLimit: PLANS[plan].customerLimit,
-    staffLimit: PLANS[plan].staffLimit,
-    programLimit: PLANS[plan].programLimit,
+export type SubscriptionStatusValue = "TRIALING" | "ACTIVE" | "PAST_DUE" | "CANCELED"
+
+export function mapSubscriptionStatus(status: string): SubscriptionStatusValue {
+  switch (status) {
+    case "trialing": return "TRIALING"
+    case "active": return "ACTIVE"
+    case "past_due": return "PAST_DUE"
+    case "canceled":
+    case "unpaid":
+    case "incomplete_expired": return "CANCELED"
+    case "incomplete": return "PAST_DUE"
+    case "paused": return "CANCELED"
+    default: return "ACTIVE"
   }
 }
 
-export function isUpgrade(currentPlan: PlanId, newPlan: PlanId): boolean {
-  const order: PlanId[] = ["STARTER", "PRO", "BUSINESS", "ENTERPRISE"]
-  return order.indexOf(newPlan) > order.indexOf(currentPlan)
+// ─── Invoice Helpers ──────────────────────────────────────
+// Stripe API v20 moved subscription ID to invoice.parent.subscription_details.
+
+export function getSubscriptionIdFromInvoice(invoice: Record<string, unknown>): string | null {
+  const parent = invoice.parent as Record<string, unknown> | undefined
+  const subDetails = parent?.subscription_details as Record<string, unknown> | undefined
+  const sub = subDetails?.subscription
+  if (!sub) return null
+  return typeof sub === "string" ? sub : (sub as { id: string }).id
 }

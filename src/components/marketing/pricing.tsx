@@ -5,80 +5,11 @@ import Link from "next/link"
 import { Check } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { PLANS, type PlanId } from "@/lib/plans"
 
-// ─── Plan Data (client-safe, no server import) ────────────────────────────────
+// ─── Plan Data ────────────────────────────────────────────────────────
 
-type PlanDef = {
-  name: string
-  description: string
-  monthlyPrice: number | null
-  annualPrice: number | null
-  customerLimit: number
-  staffLimit: number
-  programLimit: number
-  features: string[]
-}
-
-const PLANS: Record<"STARTER" | "PRO" | "BUSINESS", PlanDef> = {
-  STARTER: {
-    name: "Starter",
-    description: "For small restaurants getting started",
-    monthlyPrice: 15,
-    annualPrice: 12,
-    customerLimit: 200,
-    staffLimit: 2,
-    programLimit: 1,
-    features: [
-      "Up to 200 customers",
-      "2 staff members",
-      "1 loyalty program",
-      "Apple & Google Wallet passes",
-      "Card design studio",
-      "Dashboard analytics",
-    ],
-  },
-  PRO: {
-    name: "Pro",
-    description: "For growing restaurants",
-    monthlyPrice: 39,
-    annualPrice: 31,
-    customerLimit: 1_000,
-    staffLimit: 5,
-    programLimit: 3,
-    features: [
-      "Up to 1,000 customers",
-      "5 staff members",
-      "Up to 3 programs",
-      "Apple & Google Wallet passes",
-      "Card design studio",
-      "Dashboard analytics",
-      "Email support",
-    ],
-  },
-  BUSINESS: {
-    name: "Business",
-    description: "For serious loyalty programs",
-    monthlyPrice: 79,
-    annualPrice: 63,
-    customerLimit: Infinity,
-    staffLimit: 15,
-    programLimit: 10,
-    features: [
-      "Unlimited customers",
-      "15 staff members",
-      "Up to 10 programs",
-      "Apple & Google Wallet passes",
-      "Card design studio",
-      "Dashboard analytics",
-      "Priority support",
-    ],
-  },
-}
-
-const ENTERPRISE = {
-  name: "Enterprise",
-  description: "Custom solutions for large chains",
-}
+const ENTERPRISE = PLANS.ENTERPRISE
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -144,14 +75,14 @@ function BillingToggle({
 // ─── Plan Card ────────────────────────────────────────────────────────────────
 
 type PlanCardProps = {
-  planKey: "STARTER" | "PRO" | "BUSINESS"
+  planKey: Exclude<PlanId, "ENTERPRISE">
   highlighted?: boolean
   period: BillingPeriod
 }
 
 function PlanCard({ planKey, highlighted = false, period }: PlanCardProps) {
   const plan = PLANS[planKey]
-  const price = period === "annual" ? plan.annualPrice : plan.monthlyPrice
+  const price = period === "annual" ? plan.annualPrice : plan.price
 
   return (
     <div
@@ -195,9 +126,9 @@ function PlanCard({ planKey, highlighted = false, period }: PlanCardProps) {
       </div>
 
       {/* Annual savings badge */}
-      {period === "annual" && plan.monthlyPrice !== null && (
+      {period === "annual" && plan.price !== null && (
         <p className="text-[12px] text-success font-medium -mt-4 mb-4">
-          ${(plan.monthlyPrice - (plan.annualPrice ?? 0)) * 12} saved per year
+          ${(plan.price - (plan.annualPrice ?? 0)) * 12} saved per year
         </p>
       )}
 

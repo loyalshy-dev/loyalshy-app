@@ -84,9 +84,9 @@ export function BillingPlaceholder({ restaurant }: { restaurant: Restaurant }) {
       {/* Coming Soon Notice */}
       <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
         <CreditCard className="mx-auto h-8 w-8 text-muted-foreground" />
-        <h3 className="mt-3 text-sm font-medium">Stripe billing coming soon</h3>
+        <h3 className="mt-3 text-sm font-medium">Billing setup in progress</h3>
         <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
-          Subscription management, invoicing, and the customer portal will be configured in Phase 4.
+          Subscription management, invoicing, and the customer portal will be available shortly.
         </p>
       </div>
     </div>

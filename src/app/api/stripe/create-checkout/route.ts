@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
         name: restaurant.name,
         metadata: {
           loyalshy_restaurant_id: restaurant.id,
-          loyalshy_user_id: session.user.id,
         },
       })
       stripeCustomerId = customer.id

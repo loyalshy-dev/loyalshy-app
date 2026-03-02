@@ -39,16 +39,26 @@ export const sendTrialReminderEmailTask = schedules.task({
           select: {
             id: true,
             name: true,
-            users: {
-              where: { role: "USER" },
-              select: { name: true, email: true },
-              take: 1,
-            },
+            slug: true,
           },
         })
 
         for (const restaurant of restaurants) {
-          const owner = restaurant.users[0]
+          // Find the org owner via organization membership (not User.role)
+          const org = await db.organization.findUnique({
+            where: { slug: restaurant.slug },
+            select: {
+              members: {
+                where: { role: "owner" },
+                select: {
+                  user: { select: { name: true, email: true } },
+                },
+                take: 1,
+              },
+            },
+          })
+
+          const owner = org?.members[0]?.user
           if (!owner?.email) continue
 
           const daysLabel = daysAway === 1 ? "tomorrow" : `in ${daysAway} days`

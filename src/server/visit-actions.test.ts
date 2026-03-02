@@ -369,6 +369,141 @@ describe("redeemCoupon", () => {
   })
 })
 
+describe("checkInMember", () => {
+  function createMembershipEnrollment(overrides?: Record<string, unknown>) {
+    return createMockEnrollment({
+      loyaltyProgram: {
+        id: "program-1",
+        name: "VIP Membership",
+        programType: "MEMBERSHIP",
+        config: {
+          membershipTier: "Gold",
+          benefits: "Priority seating, 10% off",
+          validDuration: "yearly",
+        },
+        status: "ACTIVE",
+        endsAt: null,
+      },
+      ...overrides,
+    })
+  }
+
+  it("records check-in and increments totalVisits", async () => {
+    const { checkInMember } = await import("./visit-actions")
+
+    const enrollment = createMembershipEnrollment({ totalVisits: 5 })
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+    mockDb.visit.findFirst.mockResolvedValue(null)
+
+    const result = await checkInMember("enrollment-1")
+
+    expect(result.success).toBe(true)
+    expect(result.totalCheckIns).toBe(6)
+    expect(result.programName).toBe("VIP Membership")
+  })
+
+  it("creates Visit record but does NOT create Reward", async () => {
+    const { checkInMember } = await import("./visit-actions")
+
+    const enrollment = createMembershipEnrollment({ totalVisits: 3 })
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+    mockDb.visit.findFirst.mockResolvedValue(null)
+
+    await checkInMember("enrollment-1")
+
+    expect(mockDb.$transaction).toHaveBeenCalledOnce()
+
+    const txFn = mockDb.$transaction.mock.calls[0]![0] as Function
+    const tx = mockDb._tx
+    await txFn(tx)
+
+    expect(tx.visit.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          customerId: "customer-1",
+          enrollmentId: "enrollment-1",
+          visitNumber: 4,
+        }),
+      })
+    )
+
+    // No reward should be created for membership check-ins
+    expect(tx.reward.create).not.toHaveBeenCalled()
+  })
+
+  it("does NOT modify currentCycleVisits", async () => {
+    const { checkInMember } = await import("./visit-actions")
+
+    const enrollment = createMembershipEnrollment({
+      currentCycleVisits: 3,
+      totalVisits: 10,
+    })
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+    mockDb.visit.findFirst.mockResolvedValue(null)
+
+    await checkInMember("enrollment-1")
+
+    const txFn = mockDb.$transaction.mock.calls[0]![0] as Function
+    const tx = mockDb._tx
+    await txFn(tx)
+
+    // Enrollment update should only set totalVisits, not currentCycleVisits
+    expect(tx.enrollment.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { totalVisits: 11 },
+      })
+    )
+  })
+
+  it("blocks double check-in within 1 minute", async () => {
+    const { checkInMember } = await import("./visit-actions")
+
+    const enrollment = createMembershipEnrollment()
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+    mockDb.visit.findFirst.mockResolvedValue({ id: "visit-recent" })
+
+    const result = await checkInMember("enrollment-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toContain("less than a minute ago")
+  })
+
+  it("returns error when not MEMBERSHIP type", async () => {
+    const { checkInMember } = await import("./visit-actions")
+
+    const enrollment = createMockEnrollment() // default is STAMP_CARD
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+
+    const result = await checkInMember("enrollment-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBe("Check-in is only available for membership programs")
+  })
+
+  it("returns error when enrollment not found", async () => {
+    const { checkInMember } = await import("./visit-actions")
+
+    mockDb.enrollment.findUnique.mockResolvedValue(null)
+
+    const result = await checkInMember("nonexistent")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBe("Enrollment not found")
+  })
+
+  it("returns error when enrollment not ACTIVE", async () => {
+    const { checkInMember } = await import("./visit-actions")
+
+    const enrollment = createMembershipEnrollment({ status: "FROZEN" })
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+
+    const result = await checkInMember("enrollment-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toContain("frozen")
+  })
+})
+
 describe("searchCustomersForVisit", () => {
   it("returns matching customers with enrollments", async () => {
     const { searchCustomersForVisit } = await import("./visit-actions")

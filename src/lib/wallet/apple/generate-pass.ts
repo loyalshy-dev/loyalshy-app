@@ -10,8 +10,9 @@ import {
   ORGANIZATION_NAME,
   WEB_SERVICE_BASE_URL,
 } from "./constants"
-import type { CardDesignData, CardShape } from "../card-design"
+import type { CardDesignData, CardShape, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters } from "../card-design"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig } from "../../program-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -39,6 +40,9 @@ export type PassGenerationInput = {
   programName?: string
   // Card design fields
   cardDesign?: CardDesignData | null
+  // Program type + config for type-specific pass content
+  programType?: string
+  programConfig?: unknown
 }
 
 // ─── Generate Pass ──────────────────────────────────────────
@@ -51,7 +55,8 @@ export async function generateApplePass(
   const design = input.cardDesign
   const shape: CardShape = design?.shape ?? "CLEAN"
   const textColor = design?.textColor ?? null
-  const layout = getFieldLayout(shape)
+  const cardType: CardType | undefined = design?.cardType as CardType | undefined
+  const layout = getFieldLayout(shape, cardType)
 
   // Determine strip image: dynamic stamp grid or static URL
   let stripImageUrl: string | null = null
@@ -65,7 +70,8 @@ export async function generateApplePass(
   const stripPrimary = stripFilters.stripColor1 ?? design?.primaryColor ?? input.brandColor ?? "#1a1a2e"
   const stripSecondary = stripFilters.stripColor2 ?? design?.secondaryColor ?? input.secondaryColor ?? "#ffffff"
 
-  if (layout.apple.useStrip && isStampGrid && design) {
+  const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
+  if (layout.apple.useStrip && isStampGrid && design && isStampType) {
     // Generate stamp grid strip image dynamically for this enrollment
     const { generateStampGridImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
     const stampGridConfig = parseStampGridConfig(design.editorConfig)
@@ -134,10 +140,13 @@ export async function generateApplePass(
     textColor
   )
 
-  // Use program name in description if provided
-  const passDescription = input.programName
-    ? `${input.programName} Loyalty Card`
-    : `${input.restaurantName} Loyalty Card`
+  // Type-aware pass description
+  const passDescription = (() => {
+    const name = input.programName ?? input.restaurantName
+    if (input.programType === "COUPON") return `${name} Coupon`
+    if (input.programType === "MEMBERSHIP") return `${name} Membership`
+    return `${name} Loyalty Card`
+  })()
 
   const pass = new PKPass(icons, certs, {
     formatVersion: 1,
@@ -189,6 +198,10 @@ export async function generateApplePass(
     year: "numeric",
   })
 
+  // Parse type-specific config for field data
+  const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
+  const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
+
   // Field data map — all labels go through formatLabel
   const fieldData: Record<string, { key: string; label: string; value: string }> = {
     restaurant: { key: "restaurant", label: formatLabel("RESTAURANT", labelFmt), value: input.restaurantName },
@@ -198,6 +211,13 @@ export async function generateApplePass(
     totalVisits: { key: "totalVisits", label: formatLabel("TOTAL VISITS", labelFmt), value: `${input.totalVisits}` },
     memberSince: { key: "memberSince", label: formatLabel("MEMBER SINCE", labelFmt), value: memberSinceFormatted },
     customerName: { key: "customerName", label: formatLabel("NAME", labelFmt), value: input.customerName },
+    // COUPON fields
+    discount: { key: "discount", label: formatLabel("DISCOUNT", labelFmt), value: couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription },
+    validUntil: { key: "validUntil", label: formatLabel("VALID UNTIL", labelFmt), value: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+    couponCode: { key: "couponCode", label: formatLabel("CODE", labelFmt), value: couponConfig?.couponCode ?? "" },
+    // TIER/MEMBERSHIP fields
+    tierName: { key: "tierName", label: formatLabel("TIER", labelFmt), value: membershipConfig?.membershipTier ?? "" },
+    benefits: { key: "benefits", label: formatLabel("BENEFITS", labelFmt), value: membershipConfig?.benefits ?? "" },
   }
 
   // Populate header fields
@@ -235,24 +255,66 @@ export async function generateApplePass(
     })
   }
 
-  pass.backFields.push(
-    {
-      key: "programInfo",
-      label: "Loyalty Program",
-      value: `Earn a reward after every ${input.visitsRequired} visits! Your reward: ${input.rewardDescription}. Rewards expire ${input.rewardExpiryDays} days after being earned.`,
-    },
-    {
-      key: "currentProgress",
-      label: "Current Progress",
-      value: `${input.currentCycleVisits} of ${input.visitsRequired} visits completed this cycle. ${input.totalVisits} total visits.`,
+  // Type-specific back fields
+  if (input.programType === "COUPON" && couponConfig) {
+    pass.backFields.push({
+      key: "couponDetails",
+      label: "Coupon Details",
+      value: `${formatCouponValue(couponConfig)}${couponConfig.couponDescription ? ` — ${couponConfig.couponDescription}` : ""}`,
+    })
+    if (couponConfig.couponCode) {
+      pass.backFields.push({
+        key: "redemptionCode",
+        label: "Redemption Code",
+        value: couponConfig.couponCode,
+      })
     }
-  )
+    pass.backFields.push({
+      key: "redemptionInstructions",
+      label: "How to Redeem",
+      value: "Show this pass to staff when placing your order. The coupon will be applied at checkout.",
+    })
+  } else if (input.programType === "MEMBERSHIP" && membershipConfig) {
+    pass.backFields.push({
+      key: "membershipTier",
+      label: "Membership Tier",
+      value: membershipConfig.membershipTier,
+    })
+    if (membershipConfig.benefits) {
+      pass.backFields.push({
+        key: "membershipBenefits",
+        label: "Benefits",
+        value: membershipConfig.benefits,
+      })
+    }
+    pass.backFields.push({
+      key: "membershipTerms",
+      label: "Membership",
+      value: `Show this pass when visiting to check in. Your membership entitles you to the benefits listed above.`,
+    })
+  } else {
+    // STAMP_CARD (default)
+    pass.backFields.push(
+      {
+        key: "programInfo",
+        label: "Loyalty Program",
+        value: `Earn a reward after every ${input.visitsRequired} visits! Your reward: ${input.rewardDescription}. Rewards expire ${input.rewardExpiryDays} days after being earned.`,
+      },
+      {
+        key: "currentProgress",
+        label: "Current Progress",
+        value: `${input.currentCycleVisits} of ${input.visitsRequired} visits completed this cycle. ${input.totalVisits} total visits.`,
+      }
+    )
+  }
 
-  if (input.termsAndConditions) {
+  // T&C from program or type-specific config
+  const termsText = (input.programType === "COUPON" ? couponConfig?.terms : input.programType === "MEMBERSHIP" ? membershipConfig?.terms : null) ?? input.termsAndConditions
+  if (termsText) {
     pass.backFields.push({
       key: "terms",
       label: "Terms & Conditions",
-      value: input.termsAndConditions,
+      value: termsText,
     })
   }
 

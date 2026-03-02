@@ -39,7 +39,7 @@ describe("checkCustomerLimit", () => {
   it("allows adding customer when under limit", async () => {
     const { checkCustomerLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", subscriptionStatus: "ACTIVE" })
     mockDb.customer.count.mockResolvedValue(100) // Starter limit is 200
 
     const result = await checkCustomerLimit("restaurant-1")
@@ -53,7 +53,7 @@ describe("checkCustomerLimit", () => {
   it("blocks adding customer at limit", async () => {
     const { checkCustomerLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", subscriptionStatus: "ACTIVE" })
     mockDb.customer.count.mockResolvedValue(200) // STARTER limit is 200
 
     const result = await checkCustomerLimit("restaurant-1")
@@ -66,7 +66,7 @@ describe("checkCustomerLimit", () => {
   it("signals approaching limit at 80%", async () => {
     const { checkCustomerLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", subscriptionStatus: "ACTIVE" })
     mockDb.customer.count.mockResolvedValue(160) // 80% of 200
 
     const result = await checkCustomerLimit("restaurant-1")
@@ -78,7 +78,7 @@ describe("checkCustomerLimit", () => {
   it("never approaching for unlimited plans", async () => {
     const { checkCustomerLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "BUSINESS" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "BUSINESS", subscriptionStatus: "ACTIVE" })
     mockDb.customer.count.mockResolvedValue(10_000)
 
     const result = await checkCustomerLimit("restaurant-1")
@@ -103,7 +103,7 @@ describe("checkProgramLimit", () => {
   it("allows creating program when under limit", async () => {
     const { checkProgramLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", subscriptionStatus: "ACTIVE" })
     mockDb.loyaltyProgram.count.mockResolvedValue(0) // Starter limit is 1
 
     const result = await checkProgramLimit("restaurant-1")
@@ -116,7 +116,7 @@ describe("checkProgramLimit", () => {
   it("blocks creating program at limit", async () => {
     const { checkProgramLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", subscriptionStatus: "ACTIVE" })
     mockDb.loyaltyProgram.count.mockResolvedValue(1) // STARTER limit is 1
 
     const result = await checkProgramLimit("restaurant-1")
@@ -129,7 +129,7 @@ describe("checkProgramLimit", () => {
   it("allows multiple programs on PRO plan", async () => {
     const { checkProgramLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "PRO" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "PRO", subscriptionStatus: "ACTIVE" })
     mockDb.loyaltyProgram.count.mockResolvedValue(2) // PRO limit is 3
 
     const result = await checkProgramLimit("restaurant-1")
@@ -144,7 +144,7 @@ describe("checkStaffLimit", () => {
   it("allows inviting staff when under limit", async () => {
     const { checkStaffLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", slug: "test" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", slug: "test", subscriptionStatus: "ACTIVE" })
     mockDb.organization.findUnique.mockResolvedValue({
       _count: { members: 1 },
     })
@@ -160,7 +160,7 @@ describe("checkStaffLimit", () => {
   it("counts pending invitations toward the limit", async () => {
     const { checkStaffLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", slug: "test" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", slug: "test", subscriptionStatus: "ACTIVE" })
     mockDb.organization.findUnique.mockResolvedValue({
       _count: { members: 1 },
     })
@@ -176,7 +176,7 @@ describe("checkStaffLimit", () => {
   it("blocks at STARTER plan limit (2 staff)", async () => {
     const { checkStaffLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", slug: "test" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "STARTER", slug: "test", subscriptionStatus: "ACTIVE" })
     mockDb.organization.findUnique.mockResolvedValue({
       _count: { members: 2 },
     })

@@ -162,6 +162,8 @@ The full plan is in `loyalty-card-plan-v4.md`. Phases:
 - [x] Phase 9F — Design Propagation + Polish (CardRenderer in visit registration, customer detail, onboarding, QR poster; /design as preview page with "Open Studio" button; mobile studio layout; error/loading boundaries)
 - [x] Phase 10A — Program Types Foundation (ProgramType enum on LoyaltyProgram, config JSON column, 2-step create form, type-aware list/detail/settings/tabs, stamp-only visit guard, 131 tests passing)
 - [x] Phase 10B — Coupon Redemption Flow (redeemCoupon server action, auto-create Reward on coupon enrollment, coupon redemption in register-visit dialog, single/unlimited coupon support, 137 tests passing)
+- [x] Phase 10C — Membership Check-in Flow (checkInMember server action, CHECK_IN wallet pass update, register-visit dialog includes MEMBERSHIP, Crown icon, 144 tests passing)
+- [x] Phase 10D — Type-specific Wallet Passes (Apple/Google pass generators type-aware via cardType→getFieldLayout, COUPON fields: discount/validUntil/couponCode, MEMBERSHIP fields: tier/benefits/memberSince, stamp grid guarded to STAMP/POINTS only, programType+config wired through all callers, Google PATCH type-dispatch)
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy

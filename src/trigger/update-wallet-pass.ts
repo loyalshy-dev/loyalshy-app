@@ -7,7 +7,7 @@ import { createDb } from "./db"
 
 type UpdateWalletPassPayload = {
   enrollmentId: string
-  updateType: "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "PROGRAM_CHANGE" | "ENROLLMENT_FROZEN"
+  updateType: "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "PROGRAM_CHANGE" | "ENROLLMENT_FROZEN" | "CHECK_IN"
 }
 
 // ─── Task ───────────────────────────────────────────────────
@@ -48,6 +48,8 @@ export const updateWalletPassTask = task({
             select: {
               id: true,
               name: true,
+              programType: true,
+              config: true,
               visitsRequired: true,
               rewardDescription: true,
               rewardExpiryDays: true,
@@ -183,6 +185,8 @@ type EnrollmentForGoogle = {
 type ProgramForGoogle = {
   id: string
   name: string
+  programType?: string
+  config?: unknown
   visitsRequired: number
   rewardDescription: string
 }
@@ -222,49 +226,92 @@ async function patchGooglePass(
   const token = await getAccessToken()
 
   const { formatProgressValue, formatLabel } = await import("@/lib/wallet/card-design")
+  const { parseCouponConfig, formatCouponValue, parseMembershipConfig } = await import("@/lib/program-config")
   type ProgressStyle = import("@/lib/wallet/card-design").ProgressStyle
   type LabelFormat = import("@/lib/wallet/card-design").LabelFormat
 
   const progressStyle = (cardDesign?.progressStyle ?? "NUMBERS") as ProgressStyle
   const labelFmt = (cardDesign?.labelFormat ?? "UPPERCASE") as LabelFormat
-  const progressValue = formatProgressValue(
-    enrollment.currentCycleVisits,
-    program.visitsRequired,
-    progressStyle,
-    hasAvailableReward
-  )
-
-  const progressLabel = cardDesign?.customProgressLabel
-    ? cardDesign.customProgressLabel
-    : hasAvailableReward ? "STATUS" : "PROGRESS"
 
   const memberSinceFormatted = enrollment.enrolledAt.toLocaleDateString(
     "en-US",
     { month: "short", year: "numeric" }
   )
 
-  const patchBody: Record<string, unknown> = {
-    classId: buildProgramClassId(program.id),
-    loyaltyPoints: {
+  // Type-dispatch: build type-specific loyalty points and text modules
+  let loyaltyPoints: Record<string, unknown>
+  let secondaryLoyaltyPoints: Record<string, unknown>
+  let textModulesData: Record<string, unknown>[]
+
+  const couponConfig = program.programType === "COUPON" ? parseCouponConfig(program.config) : null
+  const membershipConfig = program.programType === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
+
+  if (program.programType === "COUPON" && couponConfig) {
+    loyaltyPoints = {
+      label: formatLabel("DISCOUNT", labelFmt),
+      balance: { string: formatCouponValue(couponConfig) },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("VALID UNTIL", labelFmt),
+      balance: { string: couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+    }
+    textModulesData = [
+      ...(couponConfig.couponCode ? [{ id: "couponCode", header: formatLabel("CODE", labelFmt), body: couponConfig.couponCode }] : []),
+      { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
+    ]
+  } else if (program.programType === "MEMBERSHIP" && membershipConfig) {
+    loyaltyPoints = {
+      label: formatLabel("TIER", labelFmt),
+      balance: { string: membershipConfig.membershipTier },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("CHECK-INS", labelFmt),
+      balance: { int: enrollment.totalVisits },
+    }
+    textModulesData = [
+      { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
+      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
+    ]
+  } else {
+    // STAMP_CARD (default)
+    const progressValue = formatProgressValue(
+      enrollment.currentCycleVisits,
+      program.visitsRequired,
+      progressStyle,
+      hasAvailableReward
+    )
+    const progressLabel = cardDesign?.customProgressLabel
+      ? cardDesign.customProgressLabel
+      : hasAvailableReward ? "STATUS" : "PROGRESS"
+
+    loyaltyPoints = {
       label: formatLabel(progressLabel, labelFmt),
       balance: { string: progressValue },
-    },
-    secondaryLoyaltyPoints: {
+    }
+    secondaryLoyaltyPoints = {
       label: formatLabel("TOTAL VISITS", labelFmt),
       balance: { int: enrollment.totalVisits },
-    },
-    accountName: enrollment.customer.fullName,
-    textModulesData: [
+    }
+    textModulesData = [
       { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: program.rewardDescription },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
-    ],
+    ]
   }
 
-  // For stamp grid, always update hero image on VISIT (cache-bust)
+  const patchBody: Record<string, unknown> = {
+    classId: buildProgramClassId(program.id),
+    loyaltyPoints,
+    secondaryLoyaltyPoints,
+    accountName: enrollment.customer.fullName,
+    textModulesData,
+  }
+
+  // Stamp grid hero image: only for STAMP_CARD programs
+  const isStampCard = !program.programType || program.programType === "STAMP_CARD"
   const { parseStripFilters } = await import("@/lib/wallet/card-design")
   const triggerStripFilters = parseStripFilters(cardDesign?.editorConfig)
   const isTriggerStampGrid = triggerStripFilters.useStampGrid || cardDesign?.patternStyle === "stamp_grid" || cardDesign?.patternStyle === "STAMP_GRID"
-  if (isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
+  if (isStampCard && isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
     patchBody.heroImage = {
       sourceUri: { uri: `${baseUrl}/api/wallet/strip/${enrollment.id}?v=${Date.now()}` },
@@ -274,10 +321,9 @@ async function patchGooglePass(
     }
   }
 
-  // For design changes, also update hero image
-  // Note: hexBackgroundColor is a class-level field in LoyaltyClass, not on the object
+  // For design changes, also update hero image (stamp card only for stamp grid)
   if (updateType === "DESIGN_CHANGE" || updateType === "PROGRAM_CHANGE") {
-    if (isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
+    if (isStampCard && isTriggerStampGrid && cardDesign?.shape !== "CLEAN") {
       const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
       patchBody.heroImage = {
         sourceUri: { uri: `${baseUrl}/api/wallet/strip/${enrollment.id}?v=${Date.now()}` },

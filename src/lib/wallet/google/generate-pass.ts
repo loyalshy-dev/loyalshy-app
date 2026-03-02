@@ -2,8 +2,9 @@ import "server-only"
 
 import { buildClassId, buildObjectId, buildProgramClassId, buildEnrollmentObjectId } from "./constants"
 import { buildSaveUrl } from "./jwt-utils"
-import type { CardDesignData, CardShape } from "../card-design"
+import type { CardDesignData, CardShape, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters } from "../card-design"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig } from "../../program-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -35,6 +36,9 @@ export type GooglePassGenerationInput = {
   cardDesign?: CardDesignData | null
   // Program lifecycle
   programEndsAt?: Date | null
+  // Program type + config for type-specific pass content
+  programType?: string
+  programConfig?: unknown
 }
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -67,11 +71,21 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   const design = input.cardDesign
   const shape: CardShape = design?.shape ?? "CLEAN"
   const hexBg = ensureHexColor(design?.primaryColor ?? input.brandColor, "#1a1a2e")
-  const layout = getFieldLayout(shape)
+  const cardType: CardType | undefined = design?.cardType as CardType | undefined
+  const layout = getFieldLayout(shape, cardType)
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
 
-  // Build card row template — progress/totalVisits now handled by loyaltyPoints,
-  // so rows only contain: nextReward + memberSince, customerName
+  // Type-specific row field paths
+  const isCoupon = input.programType === "COUPON"
+  const isMembership = input.programType === "MEMBERSHIP"
+
+  // Determine which text module fields to reference in rows
+  const row1Start = isCoupon ? "couponCode" : isMembership ? "benefits" : "nextReward"
+  const row1End = "memberSince"
+  const row2Field = isCoupon ? "couponCode" : isMembership ? "benefits" : "nextReward"
+  const row3Field = "memberSince"
+
+  // Build card row template
   const cardRowTemplateInfos: Record<string, unknown>[] = []
 
   if (layout.google.rows >= 1) {
@@ -79,12 +93,12 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
       twoItems: {
         startItem: {
           firstValue: {
-            fields: [{ fieldPath: "object.textModulesData['nextReward']" }],
+            fields: [{ fieldPath: `object.textModulesData['${row1Start}']` }],
           },
         },
         endItem: {
           firstValue: {
-            fields: [{ fieldPath: "object.textModulesData['memberSince']" }],
+            fields: [{ fieldPath: `object.textModulesData['${row1End}']` }],
           },
         },
       },
@@ -96,7 +110,7 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
       oneItem: {
         item: {
           firstValue: {
-            fields: [{ fieldPath: "object.textModulesData['nextReward']" }],
+            fields: [{ fieldPath: `object.textModulesData['${row2Field}']` }],
           },
         },
       },
@@ -108,16 +122,21 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
       oneItem: {
         item: {
           firstValue: {
-            fields: [{ fieldPath: "object.textModulesData['memberSince']" }],
+            fields: [{ fieldPath: `object.textModulesData['${row3Field}']` }],
           },
         },
       },
     })
   }
 
-  const programDisplayName = input.programName
-    ? `${input.programName} Loyalty`
-    : "Loyalty Card"
+  // Type-aware program display name
+  const programDisplayName = (() => {
+    const name = input.programName
+    if (!name) return "Loyalty Card"
+    if (isCoupon) return name
+    if (isMembership) return `${name} Membership`
+    return `${name} Loyalty`
+  })()
 
   // Prefer Google-specific logo, fall back to general
   const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
@@ -292,7 +311,8 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
     : buildClassId(input.restaurantId)
   const design = input.cardDesign
   const shape: CardShape = design?.shape ?? "CLEAN"
-  const layout = getFieldLayout(shape)
+  const cardType: CardType | undefined = design?.cardType as CardType | undefined
+  const layout = getFieldLayout(shape, cardType)
 
   const progressStyle = design?.progressStyle ?? "NUMBERS"
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
@@ -312,31 +332,70 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
     year: "numeric",
   })
 
+  // Parse type-specific config
+  const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
+  const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
+
+  // Type-specific loyalty points and text modules
+  let loyaltyPoints: Record<string, unknown>
+  let secondaryLoyaltyPoints: Record<string, unknown>
+  let textModulesData: Record<string, unknown>[]
+
+  if (input.programType === "COUPON" && couponConfig) {
+    loyaltyPoints = {
+      label: formatLabel("DISCOUNT", labelFmt),
+      balance: { string: formatCouponValue(couponConfig) },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("VALID UNTIL", labelFmt),
+      balance: { string: couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+    }
+    textModulesData = [
+      ...(couponConfig.couponCode ? [{ id: "couponCode", header: formatLabel("CODE", labelFmt), body: couponConfig.couponCode }] : []),
+      { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
+    ]
+  } else if (input.programType === "MEMBERSHIP" && membershipConfig) {
+    loyaltyPoints = {
+      label: formatLabel("TIER", labelFmt),
+      balance: { string: membershipConfig.membershipTier },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("CHECK-INS", labelFmt),
+      balance: { int: input.totalVisits },
+    }
+    textModulesData = [
+      { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
+      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
+    ]
+  } else {
+    // STAMP_CARD (default)
+    loyaltyPoints = {
+      label: formatLabel(progressLabel, labelFmt),
+      balance: { string: progressValue },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("TOTAL VISITS", labelFmt),
+      balance: { int: input.totalVisits },
+    }
+    textModulesData = [
+      { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: input.rewardDescription },
+      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
+    ]
+  }
+
   const loyaltyObject: Record<string, unknown> = {
     id: objectId,
     classId,
     state: "ACTIVE",
     accountId: input.walletPassId,
     accountName: input.customerName,
-    // Native loyalty points — primary progress
-    loyaltyPoints: {
-      label: formatLabel(progressLabel, labelFmt),
-      balance: { string: progressValue },
-    },
-    // Secondary loyalty points — total visits
-    secondaryLoyaltyPoints: {
-      label: formatLabel("TOTAL VISITS", labelFmt),
-      balance: { int: input.totalVisits },
-    },
+    loyaltyPoints,
+    secondaryLoyaltyPoints,
     barcode: {
       type: "QR_CODE",
       value: input.walletPassId,
     },
-    // Remaining text fields that aren't covered by native loyalty fields
-    textModulesData: [
-      { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: input.rewardDescription },
-      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
-    ],
+    textModulesData,
     // Group passes from the same restaurant together
     groupingInfo: { groupingId: input.restaurantId },
   }
@@ -350,10 +409,11 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
 
   // Hero image: use dynamic stamp grid route, static strip image, or logo
   const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
+  const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
   let heroImageUrl: string | null = null
   if (layout.google.showHeroImage) {
     const stripFiltersG = design ? parseStripFilters(design.editorConfig) : { useStampGrid: false }
-    if ((stripFiltersG.useStampGrid || design?.patternStyle === "STAMP_GRID") && input.enrollmentId) {
+    if (isStampType && (stripFiltersG.useStampGrid || design?.patternStyle === "STAMP_GRID") && input.enrollmentId) {
       // Dynamic stamp grid: Google fetches from our API route each time
       const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
       heroImageUrl = `${baseUrl}/api/wallet/strip/${input.enrollmentId}`

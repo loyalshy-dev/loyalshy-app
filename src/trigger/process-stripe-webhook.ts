@@ -1,6 +1,7 @@
 import { task, AbortTaskRunError } from "@trigger.dev/sdk"
 import { billingQueue } from "./queues"
 import { createDb } from "./db"
+import { mapSubscriptionStatus, getSubscriptionIdFromInvoice } from "@/lib/stripe"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -42,7 +43,7 @@ export const processStripeWebhookTask = task({
           const items = subscription.items as { data: Array<{ price: { lookup_key?: string } }> }
           const lookupKey = items?.data?.[0]?.price?.lookup_key
           const plan = lookupKeyToPlan(lookupKey)
-          const status = mapStatus(subscription.status as string)
+          const status = mapSubscriptionStatus(subscription.status as string)
 
           await db.restaurant.update({
             where: { id: restaurantId },
@@ -80,6 +81,7 @@ export const processStripeWebhookTask = task({
             where: { id: restaurant.id },
             data: {
               subscriptionStatus: "CANCELED" as never,
+              plan: "STARTER" as never,
               stripeSubscriptionId: null,
               trialEndsAt: null,
             },
@@ -90,14 +92,15 @@ export const processStripeWebhookTask = task({
 
         case "invoice.payment_failed": {
           const invoice = payload.data as Record<string, unknown>
-          if (!invoice.subscription) {
+          const subscriptionId = getSubscriptionIdFromInvoice(invoice)
+          if (!subscriptionId) {
             return { processed: false, reason: "no_subscription" }
           }
 
           const restaurant = await db.restaurant.findFirst({
             where: {
               OR: [
-                { stripeSubscriptionId: invoice.subscription as string },
+                { stripeSubscriptionId: subscriptionId },
                 { stripeCustomerId: invoice.customer as string },
               ],
             },
@@ -115,14 +118,15 @@ export const processStripeWebhookTask = task({
 
         case "invoice.paid": {
           const invoice = payload.data as Record<string, unknown>
-          if (!invoice.subscription) {
+          const subscriptionId = getSubscriptionIdFromInvoice(invoice)
+          if (!subscriptionId) {
             return { processed: false, reason: "no_subscription" }
           }
 
           const restaurant = await db.restaurant.findFirst({
             where: {
               OR: [
-                { stripeSubscriptionId: invoice.subscription as string },
+                { stripeSubscriptionId: subscriptionId },
                 { stripeCustomerId: invoice.customer as string },
               ],
             },
@@ -156,16 +160,4 @@ function lookupKeyToPlan(lookupKey?: string): string {
     business_monthly: "BUSINESS",
   }
   return lookupKey ? (map[lookupKey] ?? "STARTER") : "STARTER"
-}
-
-function mapStatus(status: string): string {
-  switch (status) {
-    case "trialing": return "TRIALING"
-    case "active": return "ACTIVE"
-    case "past_due": return "PAST_DUE"
-    case "canceled":
-    case "unpaid":
-    case "incomplete_expired": return "CANCELED"
-    default: return "ACTIVE"
-  }
 }

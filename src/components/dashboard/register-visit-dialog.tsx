@@ -18,6 +18,7 @@ import {
   CreditCard,
   ScanLine,
   Ticket,
+  Crown,
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -33,9 +34,11 @@ import {
   searchCustomersForVisit,
   registerVisit,
   redeemCoupon,
+  checkInMember,
   lookupEnrollmentByWalletPassId,
   type VisitSearchResult,
   type RedeemCouponResult,
+  type CheckInResult,
 } from "@/server/visit-actions"
 import type { EnrollmentSummary } from "@/types/enrollment"
 import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
@@ -101,6 +104,7 @@ export function RegisterVisitDialog({
     programName: "",
   })
   const [couponResult, setCouponResult] = useState<RedeemCouponResult | null>(null)
+  const [checkInResult, setCheckInResult] = useState<CheckInResult | null>(null)
   const [scanMode, setScanMode] = useState(false)
   const [scanError, setScanError] = useState<string | null>(null)
   const [isScanLooking, setIsScanLooking] = useState(false)
@@ -143,7 +147,7 @@ export function RegisterVisitDialog({
           if (match) {
             setSelectedCustomer(match)
             const activeEnrollments = match.enrollments.filter(
-              (e) => e.status === "ACTIVE" && (e.programType === "STAMP_CARD" || e.programType === "COUPON")
+              (e) => e.status === "ACTIVE"
             )
             if (activeEnrollments.length === 1) {
               // Auto-select the only enrollment
@@ -166,6 +170,7 @@ export function RegisterVisitDialog({
         setSelectedCustomer(null)
         setSelectedEnrollment(null)
         setCouponResult(null)
+        setCheckInResult(null)
         setScanMode(false)
         setScanError(null)
         setIsScanLooking(false)
@@ -207,7 +212,7 @@ export function RegisterVisitDialog({
   function handleSelectCustomer(customer: VisitSearchResult) {
     setSelectedCustomer(customer)
     const activeEnrollments = customer.enrollments.filter(
-      (e) => e.status === "ACTIVE" && (e.programType === "STAMP_CARD" || e.programType === "COUPON")
+      (e) => e.status === "ACTIVE"
     )
     if (activeEnrollments.length === 1) {
       // Auto-select the only enrollment
@@ -304,6 +309,33 @@ export function RegisterVisitDialog({
     })
   }
 
+  // Confirm membership check-in
+  function handleConfirmCheckIn() {
+    if (!selectedEnrollment) return
+
+    startRegister(async () => {
+      const result = await checkInMember(selectedEnrollment.enrollmentId)
+
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to record check-in")
+        return
+      }
+
+      setCheckInResult(result)
+      setStep("success")
+
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(10)
+      }
+
+      toast.success(`Check-in recorded for ${selectedCustomer?.fullName}`)
+
+      autoDismissRef.current = setTimeout(() => {
+        onOpenChange(false)
+      }, 2500)
+    })
+  }
+
   // QR scan result handler
   async function handleScanResult(data: string) {
     setScanError(null)
@@ -359,7 +391,7 @@ export function RegisterVisitDialog({
         setSelectedEnrollment(null)
       } else {
         const activeEnrollments = selectedCustomer?.enrollments.filter(
-          (e) => e.status === "ACTIVE" && (e.programType === "STAMP_CARD" || e.programType === "COUPON")
+          (e) => e.status === "ACTIVE"
         ) ?? []
         if (activeEnrollments.length > 1) {
           // Go back to program picker
@@ -435,6 +467,7 @@ export function RegisterVisitDialog({
             isRegistering={isRegistering}
             onConfirm={handleConfirm}
             onConfirmCoupon={handleConfirmCoupon}
+            onConfirmCheckIn={handleConfirmCheckIn}
             onBack={handleBack}
             cardDesign={selectedEnrollment?.cardDesign ?? null}
           />
@@ -448,6 +481,7 @@ export function RegisterVisitDialog({
             visitsRequired={resultVisits.visitsRequired}
             programName={resultVisits.programName}
             couponResult={couponResult}
+            checkInResult={checkInResult}
             onClose={() => onOpenChange(false)}
           />
         )}
@@ -602,7 +636,7 @@ function ProgramPickerStep({
   onBack: () => void
 }) {
   const activeEnrollments = customer.enrollments.filter(
-    (e) => e.status === "ACTIVE" && (e.programType === "STAMP_CARD" || e.programType === "COUPON")
+    (e) => e.status === "ACTIVE"
   )
 
   return (
@@ -646,7 +680,8 @@ function ProgramPickerStep({
           )}
           {activeEnrollments.map((enrollment) => {
             const isCoupon = enrollment.programType === "COUPON"
-            const pct = isCoupon
+            const isMembership = enrollment.programType === "MEMBERSHIP"
+            const pct = isCoupon || isMembership
               ? 100
               : Math.min(
                   (enrollment.currentCycleVisits / enrollment.visitsRequired) * 100,
@@ -661,7 +696,9 @@ function ProgramPickerStep({
                 onClick={() => onSelect(enrollment)}
               >
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand/10">
-                  {isCoupon ? (
+                  {isMembership ? (
+                    <Crown className="size-5 text-brand" />
+                  ) : isCoupon ? (
                     <Ticket className="size-5 text-brand" />
                   ) : (
                     <CreditCard className="size-5 text-brand" />
@@ -677,8 +714,17 @@ function ProgramPickerStep({
                         Coupon
                       </span>
                     )}
+                    {isMembership && (
+                      <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
+                        Membership
+                      </span>
+                    )}
                   </div>
-                  {isCoupon ? (
+                  {isMembership ? (
+                    <p className="text-[12px] text-muted-foreground mt-1">
+                      Member
+                    </p>
+                  ) : isCoupon ? (
                     <p className="text-[12px] font-medium text-success mt-1">
                       Ready to redeem
                     </p>
@@ -728,6 +774,7 @@ function ConfirmStep({
   isRegistering,
   onConfirm,
   onConfirmCoupon,
+  onConfirmCheckIn,
   onBack,
   cardDesign = null,
 }: {
@@ -736,6 +783,7 @@ function ConfirmStep({
   isRegistering: boolean
   onConfirm: () => void
   onConfirmCoupon: () => void
+  onConfirmCheckIn: () => void
   onBack: () => void
   /** Card design for the selected enrollment's program. Pass once
    *  EnrollmentSummary includes cardDesign data. */
@@ -767,6 +815,7 @@ function ConfirmStep({
   }
 
   const isCoupon = enrollment.programType === "COUPON"
+  const isMembership = enrollment.programType === "MEMBERSHIP"
   const filled = enrollment.currentCycleVisits
   const nextVisit = filled + 1
   const visitsRequired = enrollment.visitsRequired
@@ -774,9 +823,10 @@ function ConfirmStep({
   // Build WalletPassDesign from card design data when available
   const visitSf = cardDesign ? parseStripFilters(cardDesign.editorConfig) : { useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
   const visitSg = visitSf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
+  const resolvedCardType = isMembership ? "TIER" : isCoupon ? "COUPON" : "STAMP"
   const design: WalletPassDesign | null = cardDesign
     ? {
-        cardType: (isCoupon ? "COUPON" : "STAMP") as WalletPassDesign["cardType"],
+        cardType: resolvedCardType as WalletPassDesign["cardType"],
         shape: (cardDesign.shape ?? "CLEAN") as WalletPassDesign["shape"],
         primaryColor: cardDesign.primaryColor ?? "#1a1a2e",
         secondaryColor: cardDesign.secondaryColor ?? "#ffffff",
@@ -813,7 +863,7 @@ function ConfirmStep({
           <ArrowLeft className="size-4" />
         </Button>
         <DialogTitle className="text-base">
-          {isCoupon ? "Redeem Coupon" : "Confirm Visit"}
+          {isMembership ? "Member Check-in" : isCoupon ? "Redeem Coupon" : "Confirm Visit"}
         </DialogTitle>
       </div>
 
@@ -828,9 +878,11 @@ function ConfirmStep({
         <div className="text-center">
           <p className="text-[15px] font-semibold">{customer.fullName}</p>
           <p className="text-[12px] text-muted-foreground mt-0.5">
-            {isCoupon
-              ? `${enrollment.programName} — Coupon Redemption`
-              : `${enrollment.programName} — Visit #${enrollment.totalVisits + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
+            {isMembership
+              ? `${enrollment.programName} — Member Check-in`
+              : isCoupon
+                ? `${enrollment.programName} — Coupon Redemption`
+                : `${enrollment.programName} — Visit #${enrollment.totalVisits + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
           </p>
         </div>
       </div>
@@ -844,12 +896,19 @@ function ConfirmStep({
             programName={enrollment.programName}
             restaurantName=""
             customerName={customer.fullName}
-            currentVisits={isCoupon ? 1 : nextVisit}
-            totalVisits={isCoupon ? 1 : visitsRequired}
+            currentVisits={isCoupon || isMembership ? 1 : nextVisit}
+            totalVisits={isCoupon || isMembership ? 1 : visitsRequired}
             rewardDescription=""
             compact
             width={280}
           />
+        </div>
+      ) : isMembership ? (
+        <div className="px-6">
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-6">
+            <Crown className="size-10 text-brand" />
+            <p className="text-[13px] font-medium text-center">Member Check-in</p>
+          </div>
         </div>
       ) : isCoupon ? (
         <div className="px-6">
@@ -866,17 +925,19 @@ function ConfirmStep({
       <div className="p-4 pt-6">
         <Button
           className="w-full h-11 text-[14px] font-medium gap-2"
-          onClick={isCoupon ? onConfirmCoupon : onConfirm}
+          onClick={isMembership ? onConfirmCheckIn : isCoupon ? onConfirmCoupon : onConfirm}
           disabled={isRegistering}
         >
           {isRegistering ? (
             <Loader2 className="size-4 animate-spin" />
+          ) : isMembership ? (
+            <Crown className="size-4" />
           ) : isCoupon ? (
             <Ticket className="size-4" />
           ) : (
             <Stamp className="size-4" />
           )}
-          {isCoupon ? "Redeem Coupon" : "Register Visit"}
+          {isMembership ? "Check In" : isCoupon ? "Redeem Coupon" : "Register Visit"}
         </Button>
       </div>
     </div>
@@ -947,6 +1008,7 @@ function SuccessStep({
   visitsRequired,
   programName,
   couponResult,
+  checkInResult,
   onClose,
 }: {
   customer: VisitSearchResult
@@ -956,6 +1018,7 @@ function SuccessStep({
   visitsRequired: number
   programName: string
   couponResult: RedeemCouponResult | null
+  checkInResult: CheckInResult | null
   onClose: () => void
 }) {
   return (
@@ -963,7 +1026,20 @@ function SuccessStep({
       className="flex flex-col items-center py-10 px-6 cursor-pointer"
       onClick={onClose}
     >
-      {couponResult ? (
+      {checkInResult ? (
+        <>
+          <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
+            <AnimatedCheckmark />
+          </div>
+          <p className="text-lg font-semibold mt-6">Check-in Recorded!</p>
+          <p className="text-[13px] text-muted-foreground mt-1">
+            {customer.fullName} — {checkInResult.programName}
+          </p>
+          <p className="text-[12px] text-muted-foreground mt-0.5 tabular-nums">
+            {checkInResult.totalCheckIns} total check-in{checkInResult.totalCheckIns !== 1 ? "s" : ""}
+          </p>
+        </>
+      ) : couponResult ? (
         <>
           <div className="relative">
             <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">

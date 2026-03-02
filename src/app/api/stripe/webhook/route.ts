@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { db } from "@/lib/db"
-import { stripe } from "@/lib/stripe"
+import { stripe, mapSubscriptionStatus, getSubscriptionIdFromInvoice } from "@/lib/stripe"
 
 // ─── Stripe Webhook Handler ────────────────────────────────
 // Verifies signature, then processes billing events inline.
-// Idempotency: tracks processed event IDs to prevent duplicate processing.
+// Idempotency: uses DB-backed WebhookEvent table for cross-instance deduplication.
 
 // Map Stripe price lookup keys to Loyalshy plan enum values
 const LOOKUP_KEY_TO_PLAN: Record<string, string> = {
@@ -13,10 +13,6 @@ const LOOKUP_KEY_TO_PLAN: Record<string, string> = {
   pro_monthly: "PRO",
   business_monthly: "BUSINESS",
 }
-
-// In-memory set of recently processed event IDs (per serverless instance)
-const processedEvents = new Set<string>()
-const MAX_PROCESSED_EVENTS = 1000
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
@@ -26,22 +22,36 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing signature" }, { status: 400 })
   }
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    console.error("STRIPE_WEBHOOK_SECRET is not configured")
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 })
+  }
+
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    )
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
   } catch (err) {
     console.error("Webhook signature verification failed:", err instanceof Error ? err.message : "Unknown error")
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
-  // Idempotency check — skip already-processed events
-  if (processedEvents.has(event.id)) {
-    return NextResponse.json({ received: true, deduplicated: true })
+  // DB-backed idempotency check
+  try {
+    await db.webhookEvent.create({
+      data: {
+        stripeEventId: event.id,
+        eventType: event.type,
+      },
+    })
+  } catch (err) {
+    // Unique constraint violation = already processed
+    if (err instanceof Error && err.message.includes("Unique constraint")) {
+      return NextResponse.json({ received: true, deduplicated: true })
+    }
+    // Other DB errors — log but continue processing (better to double-process than miss)
+    console.error("Idempotency check error:", err instanceof Error ? err.message : "Unknown error")
   }
 
   try {
@@ -79,28 +89,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 })
   }
 
-  // Mark event as processed
-  processedEvents.add(event.id)
-  if (processedEvents.size > MAX_PROCESSED_EVENTS) {
-    // Evict oldest entries (Set preserves insertion order)
-    const iterator = processedEvents.values()
-    for (let i = 0; i < 200; i++) {
-      const first = iterator.next()
-      if (first.value) processedEvents.delete(first.value)
-    }
-  }
-
   return NextResponse.json({ received: true })
 }
 
 // ─── Helpers ───────────────────────────────────────────────
-
-/** Extract subscription ID from an invoice (Stripe v20: parent.subscription_details) */
-function getSubscriptionIdFromInvoice(invoice: Stripe.Invoice): string | null {
-  const sub = invoice.parent?.subscription_details?.subscription
-  if (!sub) return null
-  return typeof sub === "string" ? sub : sub.id
-}
 
 function getPlanFromSubscription(subscription: Stripe.Subscription): string {
   const item = subscription.items.data[0]
@@ -112,18 +104,6 @@ function getPlanFromSubscription(subscription: Stripe.Subscription): string {
   }
 
   return "STARTER"
-}
-
-function mapSubscriptionStatus(status: Stripe.Subscription.Status): string {
-  switch (status) {
-    case "trialing": return "TRIALING"
-    case "active": return "ACTIVE"
-    case "past_due": return "PAST_DUE"
-    case "canceled":
-    case "unpaid":
-    case "incomplete_expired": return "CANCELED"
-    default: return "ACTIVE"
-  }
 }
 
 // ─── Event Handlers ────────────────────────────────────────
@@ -197,6 +177,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     where: { id: restaurant.id },
     data: {
       subscriptionStatus: "CANCELED" as never,
+      plan: "STARTER" as never,
       stripeSubscriptionId: null,
       trialEndsAt: null,
     },
@@ -204,7 +185,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const subscriptionId = getSubscriptionIdFromInvoice(invoice)
+  const subscriptionId = getSubscriptionIdFromInvoice(invoice as unknown as Record<string, unknown>)
   if (!subscriptionId) return
 
   const restaurant = await db.restaurant.findFirst({
@@ -225,7 +206,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  const subscriptionId = getSubscriptionIdFromInvoice(invoice)
+  const subscriptionId = getSubscriptionIdFromInvoice(invoice as unknown as Record<string, unknown>)
   if (!subscriptionId) return
 
   const restaurant = await db.restaurant.findFirst({

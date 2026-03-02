@@ -316,46 +316,38 @@ export async function initializeTrialSubscription(restaurantId: string) {
 
     const starterPrice = prices.data[0]
 
-    if (starterPrice) {
-      // Create subscription with 14-day trial
-      const subscription = await stripe.subscriptions.create({
-        customer: stripeCustomerId,
-        items: [{ price: starterPrice.id }],
-        trial_period_days: 14,
-        payment_settings: {
-          save_default_payment_method: "on_subscription",
-        },
-        trial_settings: {
-          end_behavior: { missing_payment_method: "cancel" },
-        },
-      })
-
-      const trialEndsAt = subscription.trial_end
-        ? new Date(subscription.trial_end * 1000)
-        : addDays(new Date(), 14)
-
-      await db.restaurant.update({
-        where: { id: restaurantId },
-        data: {
-          stripeCustomerId,
-          stripeSubscriptionId: subscription.id,
-          subscriptionStatus: "TRIALING",
-          plan: "STARTER",
-          trialEndsAt,
-        },
-      })
-    } else {
-      // No Stripe price found — fallback to free plan with trial marker
-      await db.restaurant.update({
-        where: { id: restaurantId },
-        data: {
-          stripeCustomerId,
-          subscriptionStatus: "TRIALING",
-          plan: "STARTER",
-          trialEndsAt: addDays(new Date(), 14),
-        },
-      })
+    if (!starterPrice) {
+      console.error("Starter price lookup key not found in Stripe")
+      return { error: "Billing setup failed — starter price not configured. Please contact support." }
     }
+
+    // Create subscription with 14-day trial
+    const subscription = await stripe.subscriptions.create({
+      customer: stripeCustomerId,
+      items: [{ price: starterPrice.id }],
+      trial_period_days: 14,
+      payment_settings: {
+        save_default_payment_method: "on_subscription",
+      },
+      trial_settings: {
+        end_behavior: { missing_payment_method: "cancel" },
+      },
+    })
+
+    const trialEndsAt = subscription.trial_end
+      ? new Date(subscription.trial_end * 1000)
+      : addDays(new Date(), 14)
+
+    await db.restaurant.update({
+      where: { id: restaurantId },
+      data: {
+        stripeCustomerId,
+        stripeSubscriptionId: subscription.id,
+        subscriptionStatus: "TRIALING",
+        plan: "STARTER",
+        trialEndsAt,
+      },
+    })
 
     // Dispatch welcome email via Trigger.dev
     import("@trigger.dev/sdk")
@@ -372,16 +364,7 @@ export async function initializeTrialSubscription(restaurantId: string) {
     return { success: true }
   } catch (error) {
     console.error("Failed to initialize trial:", error instanceof Error ? error.message : "Unknown error")
-    // Fallback — set up as starter trial without Stripe
-    await db.restaurant.update({
-      where: { id: restaurantId },
-      data: {
-        subscriptionStatus: "TRIALING",
-        plan: "STARTER",
-        trialEndsAt: addDays(new Date(), 14),
-      },
-    })
-    return { success: true, stripeError: true }
+    return { error: "Failed to set up billing. Please try again or contact support." }
   }
 }
 

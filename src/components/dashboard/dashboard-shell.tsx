@@ -37,7 +37,12 @@ export function DashboardShell({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [commandOpen, setCommandOpen] = useState(false)
   const [registerVisitOpen, setRegisterVisitOpen] = useState(false)
-  const [bannerDismissed, setBannerDismissed] = useState(false)
+  const [trialBannerDismissed, setTrialBannerDismissed] = useState(() => {
+    if (typeof window === "undefined") return false
+    return sessionStorage.getItem("loyalshy_trial_banner_dismissed") === "1"
+  })
+  // Past due banner should never be persistently dismissed — it's urgent
+  const [pastDueBannerDismissed, setPastDueBannerDismissed] = useState(false)
 
   function handleRegisterVisit() {
     setCommandOpen(false)
@@ -49,13 +54,18 @@ export function DashboardShell({
     ? Math.max(0, Math.ceil((new Date(restaurant.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : null
 
-  const showTrialBanner = !bannerDismissed &&
+  const showTrialBanner = !trialBannerDismissed &&
     restaurant?.subscriptionStatus === "TRIALING" &&
     trialDaysRemaining !== null &&
     trialDaysRemaining <= 7
 
-  const showPastDueBanner = !bannerDismissed &&
+  const showPastDueBanner = !pastDueBannerDismissed &&
     restaurant?.subscriptionStatus === "PAST_DUE"
+
+  function dismissTrialBanner() {
+    setTrialBannerDismissed(true)
+    try { sessionStorage.setItem("loyalshy_trial_banner_dismissed", "1") } catch {}
+  }
 
   const showSubscriptionGate = restaurant?.subscriptionStatus === "CANCELED"
 
@@ -94,7 +104,7 @@ export function DashboardShell({
                   </Link>
                 </span>
               </div>
-              <button onClick={() => setBannerDismissed(true)} className="text-amber-600/60 hover:text-amber-700" aria-label="Dismiss trial banner">
+              <button onClick={dismissTrialBanner} className="text-amber-600/60 hover:text-amber-700" aria-label="Dismiss trial banner">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -111,7 +121,7 @@ export function DashboardShell({
                   </Link>
                 </span>
               </div>
-              <button onClick={() => setBannerDismissed(true)} className="text-red-600/60 hover:text-red-700" aria-label="Dismiss payment banner">
+              <button onClick={() => setPastDueBannerDismissed(true)} className="text-red-600/60 hover:text-red-700" aria-label="Dismiss payment banner">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>

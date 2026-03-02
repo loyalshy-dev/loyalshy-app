@@ -59,6 +59,8 @@ export async function issueAppleWalletPass(
         select: {
           id: true,
           name: true,
+          programType: true,
+          config: true,
           visitsRequired: true,
           rewardDescription: true,
           rewardExpiryDays: true,
@@ -118,6 +120,8 @@ export async function issueAppleWalletPass(
       restaurantWebsite: restaurant.website,
       programName: enrollment.loyaltyProgram.name,
       cardDesign,
+      programType: enrollment.loyaltyProgram.programType,
+      programConfig: enrollment.loyaltyProgram.config,
     })
 
     // Update enrollment with wallet pass fields
@@ -193,6 +197,8 @@ export async function issueGoogleWalletPass(
         select: {
           id: true,
           name: true,
+          programType: true,
+          config: true,
           visitsRequired: true,
           rewardDescription: true,
           rewardExpiryDays: true,
@@ -255,6 +261,8 @@ export async function issueGoogleWalletPass(
       enrollmentId: enrollment.id,
       cardDesign,
       programEndsAt: enrollment.loyaltyProgram.endsAt,
+      programType: enrollment.loyaltyProgram.programType,
+      programConfig: enrollment.loyaltyProgram.config,
     })
 
     // Update enrollment with wallet pass fields

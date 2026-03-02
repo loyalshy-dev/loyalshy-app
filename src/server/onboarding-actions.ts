@@ -534,6 +534,8 @@ export async function requestWalletPass(
         select: {
           id: true,
           name: true,
+          programType: true,
+          config: true,
           visitsRequired: true,
           rewardDescription: true,
           rewardExpiryDays: true,
@@ -629,6 +631,8 @@ async function issuePassForEnrollment(
   program: {
     id: string
     name: string
+    programType: string
+    config: unknown
     visitsRequired: number
     rewardDescription: string
     rewardExpiryDays: number
@@ -665,6 +669,8 @@ async function issuePassForEnrollment(
         restaurantPhone: restaurant.phone,
         restaurantWebsite: restaurant.website,
         cardDesign,
+        programType: program.programType,
+        programConfig: program.config,
       })
 
       // Store wallet fields on Enrollment (not Customer)
@@ -736,6 +742,8 @@ async function issuePassForEnrollment(
       enrollmentId: enrollment.enrollmentId,
       cardDesign,
       programEndsAt: program.endsAt,
+      programType: program.programType,
+      programConfig: program.config,
     })
 
     // Store wallet fields on Enrollment (not Customer)

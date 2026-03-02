@@ -133,8 +133,18 @@ export function SettingsView({
           pendingInvitations={pendingInvitations}
         />
       )}
-      {currentTab === "billing" && billingData && (
-        <BillingSettings data={billingData} />
+      {currentTab === "billing" && (
+        billingData ? (
+          <BillingSettings data={billingData} />
+        ) : (
+          <div className="rounded-lg border border-border bg-card p-8 text-center">
+            <CreditCard className="mx-auto h-8 w-8 text-muted-foreground" />
+            <h3 className="mt-3 text-sm font-medium">Unable to load billing data</h3>
+            <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
+              There was a problem loading your billing information. Please try refreshing the page.
+            </p>
+          </div>
+        )
       )}
     </div>
   )

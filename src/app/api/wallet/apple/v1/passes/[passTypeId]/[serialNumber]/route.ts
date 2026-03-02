@@ -43,6 +43,8 @@ export async function GET(request: Request, { params }: { params: Params }) {
         select: {
           id: true,
           name: true,
+          programType: true,
+          config: true,
           visitsRequired: true,
           rewardDescription: true,
           rewardExpiryDays: true,
@@ -113,6 +115,8 @@ export async function GET(request: Request, { params }: { params: Params }) {
       restaurantWebsite: restaurant.website,
       programName: program.name,
       cardDesign,
+      programType: program.programType,
+      programConfig: program.config,
     })
 
     // Log update

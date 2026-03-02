@@ -38,6 +38,14 @@ export type RedeemCouponResult = {
   programName?: string
 }
 
+export type CheckInResult = {
+  success: boolean
+  error?: string
+  totalCheckIns?: number
+  memberSince?: Date
+  programName?: string
+}
+
 // ─── QR Scan Lookup ──────────────────────────────────────────
 
 export type ScanLookupResult = {
@@ -771,6 +779,148 @@ export async function redeemCoupon(
     couponDescription: couponConfig?.couponDescription ?? program.rewardDescription,
     discountText,
     redemptionLimit,
+    programName: program.name,
+  }
+}
+
+// ─── Check In Member ────────────────────────────────────────
+
+export async function checkInMember(
+  enrollmentId: string
+): Promise<CheckInResult> {
+  const session = await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+
+  if (!restaurant) {
+    return { success: false, error: "No restaurant found" }
+  }
+
+  await assertRestaurantAccess(restaurant.id)
+
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          restaurantId: true,
+          deletedAt: true,
+          totalVisits: true,
+          fullName: true,
+        },
+      },
+      loyaltyProgram: {
+        select: {
+          id: true,
+          name: true,
+          programType: true,
+          config: true,
+          status: true,
+          endsAt: true,
+        },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.deletedAt) {
+    return { success: false, error: "Customer has been deleted" }
+  }
+
+  if (enrollment.status !== "ACTIVE") {
+    return {
+      success: false,
+      error: `This enrollment is ${enrollment.status.toLowerCase()}`,
+    }
+  }
+
+  if (enrollment.loyaltyProgram.status !== "ACTIVE") {
+    return { success: false, error: "This loyalty program is no longer active" }
+  }
+
+  if (enrollment.loyaltyProgram.programType !== "MEMBERSHIP") {
+    return { success: false, error: "Check-in is only available for membership programs" }
+  }
+
+  // Prevent double check-in within 1 minute
+  const oneMinuteAgo = new Date(Date.now() - 60_000)
+  const recentVisit = await db.visit.findFirst({
+    where: {
+      enrollmentId: enrollment.id,
+      createdAt: { gte: oneMinuteAgo },
+    },
+    select: { id: true },
+  })
+
+  if (recentVisit) {
+    return {
+      success: false,
+      error: "A check-in was already recorded for this membership less than a minute ago",
+    }
+  }
+
+  const program = enrollment.loyaltyProgram
+  const newEnrollmentTotalVisits = enrollment.totalVisits + 1
+  const newCustomerTotalVisits = enrollment.customer.totalVisits + 1
+
+  await db.$transaction(async (tx) => {
+    // Create Visit record
+    await tx.visit.create({
+      data: {
+        customerId: enrollment.customer.id,
+        restaurantId: restaurant.id,
+        loyaltyProgramId: program.id,
+        enrollmentId: enrollment.id,
+        registeredById: session.user.id,
+        visitNumber: newEnrollmentTotalVisits,
+      },
+    })
+
+    // Increment enrollment totalVisits only (no currentCycleVisits, no rewards)
+    await tx.enrollment.update({
+      where: { id: enrollment.id },
+      data: {
+        totalVisits: newEnrollmentTotalVisits,
+      },
+    })
+
+    // Update customer denormalized counters
+    await tx.customer.update({
+      where: { id: enrollment.customer.id },
+      data: {
+        totalVisits: newCustomerTotalVisits,
+        lastVisitAt: new Date(),
+      },
+    })
+  })
+
+  // Dispatch wallet pass update via Trigger.dev
+  if (enrollment.walletPassType !== "NONE") {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) =>
+        tasks.trigger("update-wallet-pass", {
+          enrollmentId: enrollment.id,
+          updateType: "CHECK_IN",
+        })
+      )
+      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/programs")
+
+  return {
+    success: true,
+    totalCheckIns: newEnrollmentTotalVisits,
+    memberSince: enrollment.enrolledAt,
     programName: program.name,
   }
 }

@@ -498,6 +498,16 @@ model DeviceRegistration {
   @@map("device_registration")
 }
 
+model WebhookEvent {
+  id               String   @id @default(dbgenerated("uuidv7()::text"))
+  stripeEventId    String   @unique
+  eventType        String
+  processedAt      DateTime @default(now())
+
+  @@index([processedAt])
+  @@map("webhook_event")
+}
+
 model AnalyticsSnapshot {
   id              String   @id @default(dbgenerated("uuidv7()::text"))
   restaurantId    String

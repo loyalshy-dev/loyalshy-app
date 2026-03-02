@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import type { BillingData } from "@/server/billing-actions"
+import { isUpgrade, type PlanId } from "@/lib/plans"
 
 // ─── Plan Card Colors ──────────────────────────────────────
 
@@ -61,7 +62,9 @@ export function BillingSettings({ data }: { data: BillingData }) {
   const [isPending, startTransition] = useTransition()
 
   const { restaurant, usage, plans } = data
-  const currentPlan = restaurant.plan
+  const currentPlan = restaurant.plan as PlanId
+  const hasActiveSubscription = !!restaurant.stripeSubscriptionId &&
+    (restaurant.subscriptionStatus === "ACTIVE" || restaurant.subscriptionStatus === "TRIALING")
 
   const checkoutStatus = searchParams.get("checkout")
 
@@ -367,10 +370,29 @@ export function BillingSettings({ data }: { data: BillingData }) {
                     </Button>
                   ) : isEnterprise ? (
                     <Button variant="outline" size="sm" className="w-full" asChild>
-                      <a href="mailto:hello@loyalshy.com">
+                      <a href="mailto:sales@loyalshy.com">
                         Contact Us
                         <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
                       </a>
+                    </Button>
+                  ) : hasActiveSubscription ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={handleManageBilling}
+                      disabled={portalLoading}
+                    >
+                      {portalLoading ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : isUpgrade(currentPlan, planId) ? (
+                        <>
+                          Upgrade
+                          <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
+                        </>
+                      ) : (
+                        "Downgrade"
+                      )}
                     </Button>
                   ) : lookupKey ? (
                     <Button
@@ -383,7 +405,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
                         <>
-                          Upgrade
+                          Subscribe
                           <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
                         </>
                       )}
