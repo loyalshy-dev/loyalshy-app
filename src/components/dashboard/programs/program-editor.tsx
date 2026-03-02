@@ -8,18 +8,43 @@ import { toast } from "sonner"
 import {
   AlertTriangle,
   Archive,
-  Paintbrush,
+  ArchiveRestore,
   Loader2,
+  Paintbrush,
+  Play,
+  Trash2,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   updateLoyaltyProgram,
   archiveLoyaltyProgram,
+  activateProgram,
+  reactivateProgram,
+  deleteProgram,
 } from "@/server/settings-actions"
-import type { ProgramWithDesign } from "@/server/settings-actions"
+import type { ProgramWithDesign, ProgramDeleteCounts } from "@/server/settings-actions"
 import { parseCouponConfig, parseMembershipConfig } from "@/lib/program-config"
 import { PROGRAM_TYPE_META, type ProgramType } from "@/types/program-types"
 
@@ -63,9 +88,16 @@ export function ProgramEditor({
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [isArchiving, startArchiveTransition] = useTransition()
+  const [isDangerPending, startDangerTransition] = useTransition()
   const [showWarning, setShowWarning] = useState(false)
   const [resetProgress, setResetProgress] = useState(false)
+
+  // Danger zone dialog state
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showReactivateDialog, setShowReactivateDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteConfirmName, setDeleteConfirmName] = useState("")
+  const [deleteCounts, setDeleteCounts] = useState<ProgramDeleteCounts | null>(null)
 
   const programType = (program.programType ?? "STAMP_CARD") as ProgramType
   const isStampCard = programType === "STAMP_CARD"
@@ -169,26 +201,61 @@ export function ProgramEditor({
   }
 
   function handleArchive() {
-    if (
-      !confirm(
-        "Archive this program? Active enrollments will be frozen and customers will not be able to earn new visits."
-      )
-    ) {
-      return
-    }
-
-    startArchiveTransition(async () => {
+    startDangerTransition(async () => {
       const result = await archiveLoyaltyProgram(restaurant.id, program.id)
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
         toast.success("Program archived")
+        setShowArchiveDialog(false)
         router.refresh()
       }
     })
   }
 
+  function handleActivate() {
+    startDangerTransition(async () => {
+      const result = await activateProgram(restaurant.id, program.id)
+      if ("error" in result) {
+        toast.error(String(result.error))
+      } else {
+        toast.success("Program activated")
+        router.refresh()
+      }
+    })
+  }
+
+  function handleReactivate() {
+    startDangerTransition(async () => {
+      const result = await reactivateProgram(restaurant.id, program.id)
+      if ("error" in result) {
+        toast.error(String(result.error))
+      } else {
+        toast.success("Program reactivated")
+        setShowReactivateDialog(false)
+        router.refresh()
+      }
+    })
+  }
+
+  function handleDelete() {
+    startDangerTransition(async () => {
+      const result = await deleteProgram(restaurant.id, program.id, deleteConfirmName)
+      if ("error" in result) {
+        if (result.counts) {
+          setDeleteCounts(result.counts)
+        }
+        toast.error(String(result.error))
+      } else {
+        toast.success("Program deleted")
+        setShowDeleteDialog(false)
+        router.push("/dashboard/programs")
+      }
+    })
+  }
+
   const isArchived = program.status === "ARCHIVED"
+  const isDraft = program.status === "DRAFT"
   const typeMeta = PROGRAM_TYPE_META[programType]
 
   return (
@@ -514,7 +581,6 @@ export function ProgramEditor({
       {/* Actions Row */}
       <div className="flex items-center justify-between border-t border-border pt-4">
         <div className="flex items-center gap-2">
-          {/* Card Design link */}
           <Button
             type="button"
             variant="outline"
@@ -527,25 +593,6 @@ export function ProgramEditor({
               Card Design
             </Link>
           </Button>
-
-          {/* Archive button (only for non-archived programs) */}
-          {!isArchived && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-1.5 text-warning hover:text-warning"
-              onClick={handleArchive}
-              disabled={isArchiving}
-            >
-              {isArchiving ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Archive className="h-3.5 w-3.5" />
-              )}
-              Archive
-            </Button>
-          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -577,6 +624,205 @@ export function ProgramEditor({
           </Button>
         </div>
       </div>
+
+      {/* ─── Danger Zone ─────────────────────────────────────── */}
+      <div className="rounded-lg border border-destructive/30 p-4 space-y-4 mt-2">
+        <h3 className="text-sm font-semibold text-destructive">Danger Zone</h3>
+
+        {/* Activate (DRAFT only) */}
+        {isDraft && (
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">Activate program</p>
+              <p className="text-xs text-muted-foreground">
+                Make this program live so customers can start earning visits.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 gap-1.5"
+              onClick={handleActivate}
+              disabled={isDangerPending}
+            >
+              {isDangerPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Play className="h-3.5 w-3.5" />
+              )}
+              Activate
+            </Button>
+          </div>
+        )}
+
+        {/* Archive (ACTIVE only) */}
+        {program.status === "ACTIVE" && (
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">Archive program</p>
+              <p className="text-xs text-muted-foreground">
+                Active enrollments will be frozen and customers won&apos;t earn new visits.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 gap-1.5 text-warning hover:text-warning"
+              onClick={() => setShowArchiveDialog(true)}
+              disabled={isDangerPending}
+            >
+              <Archive className="h-3.5 w-3.5" />
+              Archive
+            </Button>
+          </div>
+        )}
+
+        {/* Reactivate (ARCHIVED only) */}
+        {isArchived && (
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">Reactivate program</p>
+              <p className="text-xs text-muted-foreground">
+                Set the program back to active and unfreeze all frozen enrollments.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 gap-1.5"
+              onClick={() => setShowReactivateDialog(true)}
+              disabled={isDangerPending}
+            >
+              <ArchiveRestore className="h-3.5 w-3.5" />
+              Reactivate
+            </Button>
+          </div>
+        )}
+
+        {/* Delete (all statuses) */}
+        <div className="flex items-center justify-between gap-4 border-t border-destructive/20 pt-4">
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium">Delete program</p>
+            <p className="text-xs text-muted-foreground">
+              Permanently delete this program, including all enrollments, visits, and rewards. This cannot be undone.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            className="shrink-0 gap-1.5"
+            onClick={() => {
+              setDeleteConfirmName("")
+              setDeleteCounts(null)
+              setShowDeleteDialog(true)
+            }}
+            disabled={isDangerPending}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete
+          </Button>
+        </div>
+      </div>
+
+      {/* Archive AlertDialog */}
+      <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive program</AlertDialogTitle>
+            <AlertDialogDescription>
+              Active enrollments will be frozen and customers won&apos;t earn new visits.
+              Earned rewards will remain valid. You can reactivate the program later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDangerPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="default"
+              onClick={handleArchive}
+              disabled={isDangerPending}
+            >
+              {isDangerPending ? "Archiving..." : "Archive program"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reactivate AlertDialog */}
+      <AlertDialog open={showReactivateDialog} onOpenChange={setShowReactivateDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reactivate program</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will set the program back to active and unfreeze all frozen enrollments.
+              Customers will be able to earn visits again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDangerPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="default"
+              onClick={handleReactivate}
+              disabled={isDangerPending}
+            >
+              {isDangerPending ? "Reactivating..." : "Reactivate program"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Dialog (with name confirmation) */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete program</DialogTitle>
+            <DialogDescription>
+              This action is permanent and cannot be undone. All data associated with
+              this program will be deleted.
+            </DialogDescription>
+          </DialogHeader>
+
+          {deleteCounts && (
+            <div className="rounded-md bg-destructive/10 p-3 text-sm space-y-1">
+              <p className="font-medium text-destructive">The following data will be deleted:</p>
+              <ul className="list-disc list-inside text-muted-foreground text-xs space-y-0.5">
+                <li>{deleteCounts.enrollments} enrollment{deleteCounts.enrollments !== 1 ? "s" : ""}</li>
+                <li>{deleteCounts.visits} visit{deleteCounts.visits !== 1 ? "s" : ""}</li>
+                <li>{deleteCounts.rewards} reward{deleteCounts.rewards !== 1 ? "s" : ""}</li>
+              </ul>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="delete-confirm">
+              Type <span className="font-semibold">{program.name}</span> to confirm
+            </Label>
+            <Input
+              id="delete-confirm"
+              value={deleteConfirmName}
+              onChange={(e) => setDeleteConfirmName(e.target.value)}
+              placeholder={program.name}
+              autoComplete="off"
+            />
+          </div>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" disabled={isDangerPending}>Cancel</Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteConfirmName !== program.name || isDangerPending}
+            >
+              {isDangerPending ? "Deleting..." : "Delete program"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </form>
   )
 }

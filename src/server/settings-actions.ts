@@ -461,6 +461,121 @@ export async function activateProgram(restaurantId: string, programId: string) {
   return { success: true }
 }
 
+// ─── Reactivate Program ────────────────────────────────────
+
+export async function reactivateProgram(restaurantId: string, programId: string) {
+  await assertRestaurantRole(restaurantId, "owner")
+
+  const program = await db.loyaltyProgram.findUnique({
+    where: { id: programId },
+    select: { restaurantId: true, status: true },
+  })
+
+  if (!program || program.restaurantId !== restaurantId) {
+    return { error: "Loyalty program not found" }
+  }
+
+  if (program.status !== "ARCHIVED") {
+    return { error: "Only archived programs can be reactivated" }
+  }
+
+  // Reactivating brings the program back into the active count — check plan limit
+  const programCheck = await checkProgramLimit(restaurantId)
+  if (!programCheck.allowed) {
+    return { error: `Program limit reached (${programCheck.limit}). Upgrade your plan to reactivate this program.` }
+  }
+
+  await db.$transaction(async (tx) => {
+    await tx.loyaltyProgram.update({
+      where: { id: programId },
+      data: { status: "ACTIVE" },
+    })
+
+    // Unfreeze all FROZEN enrollments
+    await tx.enrollment.updateMany({
+      where: {
+        loyaltyProgramId: programId,
+        status: "FROZEN",
+      },
+      data: {
+        status: "ACTIVE",
+        frozenAt: null,
+      },
+    })
+  })
+
+  // Trigger wallet updates for affected enrollments
+  import("@trigger.dev/sdk")
+    .then(({ tasks }) =>
+      tasks.trigger("update-all-passes", {
+        restaurantId,
+        programId,
+        reason: "PROGRAM_REACTIVATED",
+      })
+    )
+    .catch((err: unknown) =>
+      console.error("Failed to trigger bulk pass update:", err instanceof Error ? err.message : "Unknown error")
+    )
+
+  revalidatePath("/dashboard/programs")
+  revalidatePath(`/dashboard/programs/${programId}`)
+  revalidatePath("/dashboard")
+  return { success: true }
+}
+
+// ─── Delete Program ────────────────────────────────────────
+
+export type ProgramDeleteCounts = {
+  enrollments: number
+  visits: number
+  rewards: number
+}
+
+export async function deleteProgram(
+  restaurantId: string,
+  programId: string,
+  confirmName: string
+): Promise<{ error: string; counts?: ProgramDeleteCounts } | { success: true }> {
+  await assertRestaurantRole(restaurantId, "owner")
+
+  const program = await db.loyaltyProgram.findUnique({
+    where: { id: programId },
+    select: {
+      restaurantId: true,
+      name: true,
+      _count: {
+        select: {
+          enrollments: true,
+          visits: true,
+          rewards: true,
+        },
+      },
+    },
+  })
+
+  if (!program || program.restaurantId !== restaurantId) {
+    return { error: "Loyalty program not found" }
+  }
+
+  if (confirmName !== program.name) {
+    return {
+      error: "Program name does not match",
+      counts: {
+        enrollments: program._count.enrollments,
+        visits: program._count.visits,
+        rewards: program._count.rewards,
+      },
+    }
+  }
+
+  // Hard delete — Prisma cascade handles enrollments, visits, rewards, cardDesign
+  await db.loyaltyProgram.delete({ where: { id: programId } })
+
+  revalidatePath("/dashboard/programs")
+  revalidatePath("/dashboard")
+  return { success: true }
+}
+
 // ─── Save Card Design ──────────────────────────────────────
 
 export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>) {
