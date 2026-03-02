@@ -28,7 +28,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {
   Dialog,
@@ -204,200 +203,208 @@ export function CustomerDetailSheet({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent className="w-full sm:max-w-lg p-0 overflow-hidden flex flex-col">
           {isLoading ? (
-            <DetailSkeleton />
+            <>
+              <SheetHeader className="sr-only">
+                <SheetTitle>Customer details</SheetTitle>
+              </SheetHeader>
+              <DetailSkeleton />
+            </>
           ) : detail ? (
             <>
-              <SheetHeader className="p-6 pb-0">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="flex size-12 shrink-0 items-center justify-center rounded-full text-sm font-medium text-white"
-                      style={{ backgroundColor: getAvatarColor(detail.fullName) }}
-                    >
-                      {getInitials(detail.fullName)}
-                    </div>
-                    <div>
-                      <SheetTitle className="text-lg">{detail.fullName}</SheetTitle>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
-                        {detail.email && (
-                          <span className="flex items-center gap-1 text-[12px] text-muted-foreground">
-                            <Mail className="size-3 shrink-0" />
-                            <span className="truncate">{detail.email}</span>
-                          </span>
-                        )}
-                        {detail.phone && (
-                          <span className="flex items-center gap-1 text-[12px] text-muted-foreground">
-                            <Phone className="size-3 shrink-0" />
-                            {detail.phone}
-                          </span>
-                        )}
+              {/* Scrollable body */}
+              <div className="flex-1 overflow-y-auto min-h-0">
+                <SheetHeader className="p-6 pb-0 pr-12">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="flex size-12 shrink-0 items-center justify-center rounded-full text-sm font-medium text-white"
+                        style={{ backgroundColor: getAvatarColor(detail.fullName) }}
+                      >
+                        {getInitials(detail.fullName)}
+                      </div>
+                      <div>
+                        <SheetTitle className="text-lg">{detail.fullName}</SheetTitle>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
+                          {detail.email && (
+                            <span className="flex items-center gap-1 text-[12px] text-muted-foreground">
+                              <Mail className="size-3 shrink-0" />
+                              <span className="truncate">{detail.email}</span>
+                            </span>
+                          )}
+                          {detail.phone && (
+                            <span className="flex items-center gap-1 text-[12px] text-muted-foreground">
+                              <Phone className="size-3 shrink-0" />
+                              {detail.phone}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Meta badges */}
-                <div className="flex flex-wrap items-center gap-2 mt-3">
-                  <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1">
-                    <CreditCard className="size-3" />
-                    {detail.enrollments.length} program{detail.enrollments.length !== 1 ? "s" : ""}
-                  </Badge>
-                  <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1">
-                    <CalendarDays className="size-3" />
-                    Joined {format(new Date(detail.createdAt), "MMM d, yyyy")}
-                  </Badge>
-                  {detail.lastVisitAt && (
+                  {/* Meta badges */}
+                  <div className="flex flex-wrap items-center gap-2 mt-3">
                     <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1">
-                      <Clock className="size-3" />
-                      Last visit{" "}
-                      {formatDistanceToNow(new Date(detail.lastVisitAt), {
-                        addSuffix: true,
-                      })}
+                      <CreditCard className="size-3" />
+                      {detail.enrollments.length} program{detail.enrollments.length !== 1 ? "s" : ""}
                     </Badge>
-                  )}
-                </div>
-              </SheetHeader>
-
-              {/* Enrollment Progress Rings */}
-              <EnrollmentProgressSection enrollments={detail.enrollments} />
-
-              {/* Stats row */}
-              <div className="grid grid-cols-3 gap-4 px-6 pb-4">
-                <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
-                  <p className="text-lg font-semibold tabular-nums">{detail.totalVisits}</p>
-                  <p className="text-[11px] text-muted-foreground">Total Visits</p>
-                </div>
-                <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
-                  <p className="text-lg font-semibold tabular-nums">{totalRewardsRedeemed}</p>
-                  <p className="text-[11px] text-muted-foreground">Rewards Used</p>
-                </div>
-                <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
-                  <p className="text-lg font-semibold tabular-nums">{activeRewards}</p>
-                  <p className="text-[11px] text-muted-foreground">Active Rewards</p>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Tabs: Visits / Rewards */}
-              <Tabs defaultValue="visits" className="flex-1 flex flex-col min-h-0">
-                <TabsList className="mx-6 mt-4 mb-0 h-8 bg-muted/50">
-                  <TabsTrigger value="visits" className="text-[12px] h-6 px-3">
-                    Visits ({detail.visits.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="rewards" className="text-[12px] h-6 px-3">
-                    Rewards ({detail.rewards.length})
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="visits" className="flex-1 min-h-0 mt-0">
-                  <ScrollArea className="h-[40vh] min-h-[180px] px-6 pt-3">
-                    {detail.visits.length === 0 ? (
-                      <p className="text-[13px] text-muted-foreground text-center py-8">
-                        No visits recorded yet.
-                      </p>
-                    ) : (
-                      <div className="space-y-0">
-                        {detail.visits.map((visit) => (
-                          <div
-                            key={visit.id}
-                            className="flex items-center gap-3 py-2 border-b border-border last:border-0"
-                          >
-                            <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand/10">
-                              <Stamp className="size-3.5 text-brand" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[13px] font-medium">
-                                Visit #{visit.visitNumber}
-                                <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
-                                  {visit.programName}
-                                </span>
-                              </p>
-                              <p className="text-[11px] text-muted-foreground">
-                                {visit.registeredBy
-                                  ? `by ${visit.registeredBy}`
-                                  : "Self-registered"}
-                              </p>
-                            </div>
-                            <span className="text-[11px] text-muted-foreground shrink-0">
-                              {formatDistanceToNow(new Date(visit.createdAt), {
-                                addSuffix: true,
-                              })}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                    <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1">
+                      <CalendarDays className="size-3" />
+                      Joined {format(new Date(detail.createdAt), "MMM d, yyyy")}
+                    </Badge>
+                    {detail.lastVisitAt && (
+                      <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1">
+                        <Clock className="size-3" />
+                        Last visit{" "}
+                        {formatDistanceToNow(new Date(detail.lastVisitAt), {
+                          addSuffix: true,
+                        })}
+                      </Badge>
                     )}
-                  </ScrollArea>
-                </TabsContent>
+                  </div>
+                </SheetHeader>
 
-                <TabsContent value="rewards" className="flex-1 min-h-0 mt-0">
-                  <ScrollArea className="h-[40vh] min-h-[180px] px-6 pt-3">
-                    {detail.rewards.length === 0 ? (
-                      <p className="text-[13px] text-muted-foreground text-center py-8">
-                        No rewards earned yet.
-                      </p>
-                    ) : (
-                      <div className="space-y-0">
-                        {detail.rewards.map((reward) => {
-                          const config =
-                            rewardStatusConfig[reward.status] ??
-                            rewardStatusConfig.EXPIRED
-                          return (
+                {/* Enrollment Progress Rings */}
+                <EnrollmentProgressSection enrollments={detail.enrollments} />
+
+                {/* Stats row */}
+                <div className="grid grid-cols-3 gap-4 px-6 pb-4">
+                  <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
+                    <p className="text-lg font-semibold tabular-nums">{detail.totalVisits}</p>
+                    <p className="text-[11px] text-muted-foreground">Total Visits</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
+                    <p className="text-lg font-semibold tabular-nums">{totalRewardsRedeemed}</p>
+                    <p className="text-[11px] text-muted-foreground">Rewards Used</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
+                    <p className="text-lg font-semibold tabular-nums">{activeRewards}</p>
+                    <p className="text-[11px] text-muted-foreground">Active Rewards</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Tabs: Visits / Rewards */}
+                <Tabs defaultValue="visits">
+                  <TabsList className="mx-6 mt-4 mb-0 h-8 bg-muted/50">
+                    <TabsTrigger value="visits" className="text-[12px] h-6 px-3">
+                      Visits ({detail.visits.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="rewards" className="text-[12px] h-6 px-3">
+                      Rewards ({detail.rewards.length})
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="visits" className="mt-0">
+                    <div className="px-6 pt-3 pb-4">
+                      {detail.visits.length === 0 ? (
+                        <p className="text-[13px] text-muted-foreground text-center py-8">
+                          No visits recorded yet.
+                        </p>
+                      ) : (
+                        <div className="space-y-0">
+                          {detail.visits.map((visit) => (
                             <div
-                              key={reward.id}
+                              key={visit.id}
                               className="flex items-center gap-3 py-2 border-b border-border last:border-0"
                             >
-                              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-success/10">
-                                <Gift className="size-3.5 text-success" />
+                              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand/10">
+                                <Stamp className="size-3.5 text-brand" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-[13px] font-medium">
-                                  {reward.description}
+                                  Visit #{visit.visitNumber}
                                   <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
-                                    {reward.programName}
+                                    {visit.programName}
                                   </span>
                                 </p>
                                 <p className="text-[11px] text-muted-foreground">
-                                  Earned {format(new Date(reward.earnedAt), "MMM d, yyyy")}
-                                  {reward.redeemedAt &&
-                                    ` — Redeemed ${format(new Date(reward.redeemedAt), "MMM d")}`}
+                                  {visit.registeredBy
+                                    ? `by ${visit.registeredBy}`
+                                    : "Self-registered"}
                                 </p>
                               </div>
-                              {reward.status === "AVAILABLE" ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-6 text-[11px] gap-1 px-2 shrink-0"
-                                  disabled={redeemingRewardId === reward.id}
-                                  onClick={() => handleRedeemReward(reward.id)}
-                                >
-                                  {redeemingRewardId === reward.id ? (
-                                    <Loader2 className="size-3 animate-spin" />
-                                  ) : (
-                                    <CheckCircle2 className="size-3" />
-                                  )}
-                                  Redeem
-                                </Button>
-                              ) : (
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[11px] px-1.5 py-0 ${config.className}`}
-                                >
-                                  {config.label}
-                                </Badge>
-                              )}
+                              <span className="text-[11px] text-muted-foreground shrink-0">
+                                {formatDistanceToNow(new Date(visit.createdAt), {
+                                  addSuffix: true,
+                                })}
+                              </span>
                             </div>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
 
-              {/* Actions */}
-              <div className="p-4 border-t border-border flex flex-wrap items-center gap-2">
+                  <TabsContent value="rewards" className="mt-0">
+                    <div className="px-6 pt-3 pb-4">
+                      {detail.rewards.length === 0 ? (
+                        <p className="text-[13px] text-muted-foreground text-center py-8">
+                          No rewards earned yet.
+                        </p>
+                      ) : (
+                        <div className="space-y-0">
+                          {detail.rewards.map((reward) => {
+                            const config =
+                              rewardStatusConfig[reward.status] ??
+                              rewardStatusConfig.EXPIRED
+                            return (
+                              <div
+                                key={reward.id}
+                                className="flex items-center gap-3 py-2 border-b border-border last:border-0"
+                              >
+                                <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-success/10">
+                                  <Gift className="size-3.5 text-success" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[13px] font-medium">
+                                    {reward.description}
+                                    <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
+                                      {reward.programName}
+                                    </span>
+                                  </p>
+                                  <p className="text-[11px] text-muted-foreground">
+                                    Earned {format(new Date(reward.earnedAt), "MMM d, yyyy")}
+                                    {reward.redeemedAt &&
+                                      ` — Redeemed ${format(new Date(reward.redeemedAt), "MMM d")}`}
+                                  </p>
+                                </div>
+                                {reward.status === "AVAILABLE" ? (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-6 text-[11px] gap-1 px-2 shrink-0"
+                                    disabled={redeemingRewardId === reward.id}
+                                    onClick={() => handleRedeemReward(reward.id)}
+                                  >
+                                    {redeemingRewardId === reward.id ? (
+                                      <Loader2 className="size-3 animate-spin" />
+                                    ) : (
+                                      <CheckCircle2 className="size-3" />
+                                    )}
+                                    Redeem
+                                  </Button>
+                                ) : (
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-[11px] px-1.5 py-0 ${config.className}`}
+                                  >
+                                    {config.label}
+                                  </Badge>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+
+              {/* Actions — pinned at bottom */}
+              <div className="shrink-0 p-4 border-t border-border flex flex-wrap items-center gap-2">
                 {onRegisterVisit && (
                   <Button
                     size="sm"
@@ -432,9 +439,14 @@ export function CustomerDetailSheet({
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center flex-1 text-[13px] text-muted-foreground">
-              Customer not found
-            </div>
+            <>
+              <SheetHeader className="sr-only">
+                <SheetTitle>Customer details</SheetTitle>
+              </SheetHeader>
+              <div className="flex items-center justify-center flex-1 text-[13px] text-muted-foreground">
+                Customer not found
+              </div>
+            </>
           )}
         </SheetContent>
       </Sheet>
