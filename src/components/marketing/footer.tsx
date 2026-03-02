@@ -66,7 +66,7 @@ export function MarketingFooter() {
               aria-label="Loyalshy home"
             >
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt="Loyalshy"
                 width={120}
                 height={32}
