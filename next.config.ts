@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   reactCompiler: true,
   serverExternalPackages: ["passkit-generator", "sharp"],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "4mb",
+    },
+  },
   images: {
     remotePatterns: [
       {
