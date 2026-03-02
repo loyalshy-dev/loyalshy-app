@@ -64,6 +64,22 @@ export const auth = betterAuth({
     },
   },
 
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          const adminEmail = process.env.SUPER_ADMIN_EMAIL
+          if (adminEmail && user.email.toLowerCase() === adminEmail.toLowerCase()) {
+            await db.user.update({
+              where: { id: user.id },
+              data: { role: "SUPER_ADMIN" },
+            })
+          }
+        },
+      },
+    },
+  },
+
   plugins: [
     organization({
       allowUserToCreateOrganization: async (user) => {

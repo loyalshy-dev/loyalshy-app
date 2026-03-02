@@ -208,10 +208,16 @@ Your Team Identifier can be found at [developer.apple.com/account](https://devel
 
 ## Admin Panel
 
-Super admins can access the admin panel at `/admin`. To promote a user to super admin, update their role directly in the database:
+Super admins can access the admin panel at `/admin`. Set the `SUPER_ADMIN_EMAIL` environment variable before the user registers — they will be auto-promoted on signup:
 
-```sql
-UPDATE "user" SET role = 'super_admin' WHERE email = 'you@example.com';
+```env
+SUPER_ADMIN_EMAIL="you@example.com"
+```
+
+To promote an existing user, run the seed script:
+
+```bash
+ADMIN_EMAIL=you@example.com npx tsx prisma/seed-admin.ts
 ```
 
 ### Features
