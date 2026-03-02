@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { Menu } from "lucide-react"
 
@@ -71,16 +72,17 @@ export function MarketingNavbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-1.5 font-bold tracking-tight text-foreground transition-opacity hover:opacity-80"
+          className="flex items-center transition-opacity hover:opacity-80"
           aria-label="Loyalshy home"
         >
-          {/* Brand accent dot */}
-          <span
-            className="size-2 rounded-full"
-            style={{ background: "var(--brand)" }}
-            aria-hidden="true"
+          <Image
+            src="/logo.png"
+            alt="Loyalshy"
+            width={120}
+            height={32}
+            className="h-10 w-auto dark:invert"
+            priority
           />
-          <span className="text-[15px]">Loyalshy</span>
         </Link>
 
         {/* Center nav links — desktop only */}
@@ -142,14 +144,15 @@ export function MarketingNavbar() {
                   <Link
                     href="/"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-1.5 font-bold tracking-tight text-foreground"
+                    className="flex items-center"
                   >
-                    <span
-                      className="size-2 rounded-full"
-                      style={{ background: "var(--brand)" }}
-                      aria-hidden="true"
+                    <Image
+                      src="/logo.png"
+                      alt="Loyalshy"
+                      width={120}
+                      height={32}
+                      className="h-6 w-auto dark:invert"
                     />
-                    <span className="text-[15px]">Loyalshy</span>
                   </Link>
                 </SheetTitle>
                 <SheetClose asChild>

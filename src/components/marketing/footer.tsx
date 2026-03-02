@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 
 /*
@@ -61,17 +62,16 @@ export function MarketingFooter() {
           <div className="col-span-2 sm:col-span-2 lg:col-span-1">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 font-bold tracking-tight transition-opacity hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2"
-              style={{ color: "oklch(0.97 0 0)" }}
+              className="inline-flex items-center transition-opacity hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2"
               aria-label="Loyalshy home"
             >
-              {/* Brand accent dot mirrors the navbar */}
-              <span
-                className="size-2 rounded-full shrink-0"
-                style={{ background: "var(--brand)" }}
-                aria-hidden="true"
+              <Image
+                src="/logo.png"
+                alt="Loyalshy"
+                width={120}
+                height={32}
+                className="h-10 w-auto invert"
               />
-              <span className="text-[15px]">Loyalshy</span>
             </Link>
             <p
               className="mt-3 text-sm leading-relaxed"
