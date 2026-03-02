@@ -13,11 +13,19 @@ const MAX_SHOWCASE_CARDS = 5
 
 const metadataSchema = z.object({
   restaurantName: z.string().min(1).max(100),
-  currentVisits: z.number().int().min(0).max(100),
-  totalVisits: z.number().int().min(1).max(100),
-  rewardDescription: z.string().min(1).max(200),
   customerName: z.string().min(1).max(100),
   memberSince: z.string().min(1).max(50),
+  // Stamp/Points fields
+  currentVisits: z.number().int().min(0).max(100).optional().default(5),
+  totalVisits: z.number().int().min(1).max(100).optional().default(10),
+  rewardDescription: z.string().max(200).optional().default(""),
+  // Coupon fields
+  discountText: z.string().max(100).optional().default(""),
+  couponCode: z.string().max(50).optional().default(""),
+  validUntil: z.string().max(50).optional().default(""),
+  // Membership fields
+  tierName: z.string().max(100).optional().default(""),
+  benefits: z.string().max(200).optional().default(""),
 })
 
 export type ShowcaseMetadata = z.infer<typeof metadataSchema>
@@ -80,7 +88,16 @@ export async function getShowcaseCards() {
 
 // ─── Admin: Create showcase card ─────────────────────────────
 
-export async function createShowcaseCard(rawMetadata: ShowcaseMetadata) {
+const CARD_TYPE_MAP: Record<string, string> = {
+  STAMP_CARD: "STAMP",
+  COUPON: "COUPON",
+  MEMBERSHIP: "TIER",
+}
+
+export async function createShowcaseCard(
+  rawMetadata: ShowcaseMetadata,
+  programType: string = "STAMP_CARD",
+) {
   await assertSuperAdmin()
 
   const metadata = metadataSchema.parse(rawMetadata)
@@ -90,11 +107,12 @@ export async function createShowcaseCard(rawMetadata: ShowcaseMetadata) {
     return { error: `Maximum of ${MAX_SHOWCASE_CARDS} showcase cards allowed` }
   }
 
-  // Default design: a clean stamp card
+  const cardType = CARD_TYPE_MAP[programType] ?? "STAMP"
+
   const defaultDesign = {
-    cardType: "STAMP",
+    cardType,
     shape: "CLEAN",
-    primaryColor: "#1a1a2e",
+    primaryColor: cardType === "COUPON" ? "#7c3aed" : cardType === "TIER" ? "#b45309" : "#1a1a2e",
     secondaryColor: "#ffffff",
     textColor: "#ffffff",
     patternStyle: "NONE",
@@ -413,7 +431,7 @@ export async function uploadShowcaseStripImage(formData: FormData) {
     })
 
     revalidatePath("/admin/showcase")
-    return { success: true, originalUrl }
+    return { success: true, originalUrl, appleUrl, googleUrl }
   } catch {
     return { error: "Failed to upload strip image" }
   }

@@ -61,7 +61,7 @@ async function DashboardLayoutInner({
   }
 
   // Super admins always get owner-level access
-  if (user.role === "super_admin") {
+  if (user.role === "SUPER_ADMIN") {
     orgRole = "owner"
   }
 

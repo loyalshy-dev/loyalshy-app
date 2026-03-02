@@ -255,7 +255,7 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
                       role="button"
                       tabIndex={isExpanded && !isThisExpanded ? -1 : 0}
                       aria-expanded={isThisExpanded}
-                      aria-label={`${card.restaurantName} — ${card.currentVisits} of ${card.totalVisits} visits. ${isThisExpanded ? "Press Escape or Back to collapse." : "Tap to expand."}`}
+                      aria-label={`${card.restaurantName} loyalty card. ${isThisExpanded ? "Press Escape or Back to collapse." : "Tap to expand."}`}
                       className="absolute left-0 right-0 px-2 outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-inset"
                       style={{
                         transform: `translateY(${y}px)`,
@@ -288,6 +288,11 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
                         rewardDescription={card.rewardDescription}
                         customerName={card.customerName}
                         memberSince={card.memberSince}
+                        discountText={card.discountText}
+                        couponCode={card.couponCode}
+                        validUntil={card.validUntil}
+                        tierName={card.tierName}
+                        benefits={card.benefits}
                       />
                     </div>
                   )

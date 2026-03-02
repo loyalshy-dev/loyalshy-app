@@ -560,14 +560,14 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
 
         {/* SHOWCASE: hero image header */}
         {shape === "SHOWCASE" && design?.stripImageUrl && (
-          <div className="relative -mx-4 -mt-4 mb-4 h-[160px] overflow-hidden rounded-b-2xl">
+          <div className="relative -mx-4 -mt-4 mb-4 h-40 overflow-hidden rounded-b-2xl">
             <Image
               src={design.stripImageUrl}
               alt={restaurant.name}
               fill
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
             <div className="absolute bottom-4 left-4 flex items-center gap-3">
               {restaurant.logo && (
                 <div className="w-14 h-14 rounded-xl overflow-hidden bg-white/10 border border-white/20">

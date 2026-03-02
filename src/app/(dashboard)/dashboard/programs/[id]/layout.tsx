@@ -34,7 +34,7 @@ async function ProgramLayoutInner({
 
   // Compute isOwner
   let isOwner = false
-  if (session.user.role === "super_admin") {
+  if (session.user.role === "SUPER_ADMIN") {
     isOwner = true
   } else {
     const org = await db.organization.findUnique({

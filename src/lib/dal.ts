@@ -67,12 +67,12 @@ export async function assertAuthenticated(): Promise<AuthSession> {
 }
 
 /**
- * Checks User.role === "super_admin" (global role).
+ * Checks User.role === "SUPER_ADMIN" (global role).
  * Throws redirect if not authenticated or not a super admin.
  */
 export async function assertSuperAdmin(): Promise<AuthSession> {
   const session = await assertAuthenticated()
-  if (session.user.role !== "super_admin") {
+  if (session.user.role !== "SUPER_ADMIN") {
     redirect("/dashboard")
   }
   return session
@@ -88,7 +88,7 @@ export async function assertRestaurantAccess(
   const session = await assertAuthenticated()
 
   // Super admins can access any restaurant
-  if (session.user.role === "super_admin") {
+  if (session.user.role === "SUPER_ADMIN") {
     return {
       session,
       member: {

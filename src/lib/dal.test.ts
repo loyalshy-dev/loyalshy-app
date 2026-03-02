@@ -52,13 +52,13 @@ describe("assertAuthenticated", () => {
 
 describe("assertSuperAdmin", () => {
   it("returns session for super admin", async () => {
-    const session = createMockSession({ role: "super_admin" })
+    const session = createMockSession({ role: "SUPER_ADMIN" })
     mockGetSession.mockResolvedValue(session)
 
     const { assertSuperAdmin } = await import("./dal")
     const result = await assertSuperAdmin()
 
-    expect(result.user.role).toBe("super_admin")
+    expect(result.user.role).toBe("SUPER_ADMIN")
   })
 
   it("redirects regular users to /dashboard", async () => {
@@ -74,7 +74,7 @@ describe("assertSuperAdmin", () => {
 
 describe("assertRestaurantAccess", () => {
   it("allows super admin to access any restaurant", async () => {
-    const session = createMockSession({ role: "super_admin" })
+    const session = createMockSession({ role: "SUPER_ADMIN" })
     mockGetSession.mockResolvedValue(session)
 
     const { assertRestaurantAccess } = await import("./dal")

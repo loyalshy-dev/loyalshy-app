@@ -80,11 +80,16 @@ function getMetadata(card: ShowcaseCard): ShowcaseMetadata {
   const m = (card.metadata ?? {}) as Record<string, unknown>
   return {
     restaurantName: (m.restaurantName as string) ?? "Restaurant",
+    customerName: (m.customerName as string) ?? "Customer",
+    memberSince: (m.memberSince as string) ?? "Jan 2026",
     currentVisits: (m.currentVisits as number) ?? 5,
     totalVisits: (m.totalVisits as number) ?? 10,
     rewardDescription: (m.rewardDescription as string) ?? "Free reward",
-    customerName: (m.customerName as string) ?? "Customer",
-    memberSince: (m.memberSince as string) ?? "Jan 2026",
+    discountText: (m.discountText as string) ?? "",
+    couponCode: (m.couponCode as string) ?? "",
+    validUntil: (m.validUntil as string) ?? "",
+    tierName: (m.tierName as string) ?? "",
+    benefits: (m.benefits as string) ?? "",
   }
 }
 
@@ -160,6 +165,11 @@ export function ShowcaseCardsView({ initialCards }: Props) {
                   rewardDescription={meta.rewardDescription}
                   customerName={meta.customerName}
                   memberSince={meta.memberSince}
+                  discountText={meta.discountText || undefined}
+                  couponCode={meta.couponCode || undefined}
+                  validUntil={meta.validUntil || undefined}
+                  tierName={meta.tierName || undefined}
+                  benefits={meta.benefits || undefined}
                 />
               </div>
 
@@ -167,7 +177,11 @@ export function ShowcaseCardsView({ initialCards }: Props) {
               <div className="mb-3 space-y-0.5">
                 <p className="text-sm font-medium">{meta.restaurantName}</p>
                 <p className="text-xs text-muted-foreground">
-                  {meta.currentVisits}/{meta.totalVisits} visits &middot; {meta.rewardDescription}
+                  {design.cardType === "COUPON"
+                    ? `${meta.discountText || "Coupon"} ${meta.couponCode ? `· ${meta.couponCode}` : ""}`
+                    : design.cardType === "TIER"
+                      ? `${meta.tierName || "Member"} ${meta.benefits ? `· ${meta.benefits}` : ""}`
+                      : `${meta.currentVisits}/${meta.totalVisits} visits · ${meta.rewardDescription}`}
                 </p>
               </div>
 

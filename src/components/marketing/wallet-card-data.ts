@@ -13,6 +13,13 @@ export type MarketingCard = {
   rewardDescription: string
   customerName: string
   memberSince: string
+  // Coupon fields
+  discountText?: string
+  couponCode?: string
+  validUntil?: string
+  // Membership fields
+  tierName?: string
+  benefits?: string
 }
 
 // ─── Template → WalletPassDesign converter ──────────────

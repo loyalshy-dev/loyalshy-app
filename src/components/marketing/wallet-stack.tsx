@@ -74,7 +74,7 @@ function LoyaltyCard({
   return (
     <div
       role="img"
-      aria-label={`${card.restaurantName} loyalty card showing ${card.currentVisits} of ${card.totalVisits} visits`}
+      aria-label={`${card.restaurantName} loyalty card`}
       className="absolute left-0 top-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       style={{
         ...style,
@@ -108,6 +108,11 @@ function LoyaltyCard({
         rewardDescription={card.rewardDescription}
         customerName={card.customerName}
         memberSince={card.memberSince}
+        discountText={card.discountText}
+        couponCode={card.couponCode}
+        validUntil={card.validUntil}
+        tierName={card.tierName}
+        benefits={card.benefits}
       />
     </div>
   )

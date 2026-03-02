@@ -80,6 +80,11 @@ function showcaseToMarketing(dbCards: { designData: unknown; metadata: unknown }
       rewardDescription: (m.rewardDescription as string) ?? "Free reward",
       customerName: (m.customerName as string) ?? "Customer",
       memberSince: (m.memberSince as string) ?? "Jan 2026",
+      discountText: (m.discountText as string) || undefined,
+      couponCode: (m.couponCode as string) || undefined,
+      validUntil: (m.validUntil as string) || undefined,
+      tierName: (m.tierName as string) || undefined,
+      benefits: (m.benefits as string) || undefined,
     })
 
     designs.push({

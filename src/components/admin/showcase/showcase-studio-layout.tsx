@@ -51,8 +51,12 @@ export function ShowcaseStudioLayout({
   }
   const store = storeRef.current
 
-  // Hydrate from server data
+  // Hydrate from server data on mount only — never re-hydrate after
+  // revalidatePath (e.g. from strip upload) to avoid overwriting unsaved changes
+  const hydratedRef = useRef(false)
   useEffect(() => {
+    if (hydratedRef.current) return
+    hydratedRef.current = true
     if (walletData) {
       store.getState().hydrate(walletData as Partial<WalletState>)
     }
