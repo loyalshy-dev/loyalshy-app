@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { WalletStack } from "@/components/marketing/wallet-stack"
+import type { MarketingCard } from "@/components/marketing/wallet-card-data"
+import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 
 /**
  * Hero section for Loyalshy marketing landing page.
@@ -13,7 +15,12 @@ import { WalletStack } from "@/components/marketing/wallet-stack"
  * Background: CSS-only radial mesh dots pattern — no images, no JS.
  */
 
-export function Hero() {
+type HeroProps = {
+  showcaseCards?: MarketingCard[]
+  showcaseDesigns?: WalletPassDesign[]
+}
+
+export function Hero({ showcaseCards, showcaseDesigns }: HeroProps = {}) {
   return (
     <section
       className="relative isolate overflow-hidden"
@@ -141,7 +148,7 @@ export function Hero() {
 
         {/* ── Right: Wallet card stack ─────────────────────────────────── */}
         <div className="mx-auto mt-16 flex justify-center lg:mx-0 lg:mt-0 lg:flex-1 lg:justify-end">
-          <WalletStack />
+          <WalletStack cards={showcaseCards} designs={showcaseDesigns} />
         </div>
       </div>
     </section>

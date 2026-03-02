@@ -1,6 +1,8 @@
 import { QrCode, RefreshCw, Wallet } from "lucide-react"
 import Link from "next/link"
 import { PhoneMockupInteractive } from "./phone-mockup"
+import type { MarketingCard } from "./wallet-card-data"
+import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 
 const bullets = [
   {
@@ -17,14 +19,19 @@ const bullets = [
   },
 ] as const
 
-export function WalletPreview() {
+type WalletPreviewProps = {
+  showcaseCards?: MarketingCard[]
+  showcaseDesigns?: WalletPassDesign[]
+}
+
+export function WalletPreview({ showcaseCards, showcaseDesigns }: WalletPreviewProps = {}) {
   return (
     <section id="customer-view" className="bg-background py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-2 lg:items-center lg:gap-x-20">
           {/* Phone mockup — shows first on mobile */}
           <div className="flex justify-center lg:order-last">
-            <PhoneMockupInteractive />
+            <PhoneMockupInteractive cards={showcaseCards} designs={showcaseDesigns} />
           </div>
 
           {/* Text column */}

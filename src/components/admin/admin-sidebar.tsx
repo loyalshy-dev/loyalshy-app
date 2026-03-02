@@ -7,6 +7,7 @@ import {
   BarChart3,
   Building2,
   ChevronLeft,
+  Image,
   LogOut,
   LayoutDashboard,
   Shield,
@@ -41,6 +42,7 @@ const navItems = [
   { label: "Overview", href: "/admin", icon: BarChart3 },
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Restaurants", href: "/admin/restaurants", icon: Building2 },
+  { label: "Showcase", href: "/admin/showcase", icon: Image },
 ]
 
 function getInitials(name: string) {

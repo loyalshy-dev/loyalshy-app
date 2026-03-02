@@ -95,6 +95,8 @@ Multi-tenant SaaS for restaurants to create digital loyalty cards with Apple/Goo
         /settings             → General, Team, Billing, Jobs (owner)
     /(studio)       → Full-page card design studio (own layout, no dashboard shell)
       /dashboard/programs/[id]/studio → Canva-like editor
+    /(admin-studio) → Full-page showcase card studio (own layout, super_admin only)
+      /admin/showcase/[id]/studio → Showcase card editor
     /(public)       → Landing, pricing, QR scan, card view pages
     /api            → API routes
   /components       → Reusable UI components
@@ -103,6 +105,7 @@ Multi-tenant SaaS for restaurants to create digital loyalty cards with Apple/Goo
     /studio         → Studio editor components (layout, toolbar, canvas, panels)
     /dashboard      → Dashboard-specific components
       /programs     → Program list view, tab nav, editor, create form
+    /admin/showcase → Showcase card management + studio adapter
     /marketing      → Landing page components
     /wallet         → Wallet pass components
   /lib              → Utilities, db client, auth config, DAL
@@ -164,6 +167,7 @@ The full plan is in `loyalty-card-plan-v4.md`. Phases:
 - [x] Phase 10B — Coupon Redemption Flow (redeemCoupon server action, auto-create Reward on coupon enrollment, coupon redemption in register-visit dialog, single/unlimited coupon support, 137 tests passing)
 - [x] Phase 10C — Membership Check-in Flow (checkInMember server action, CHECK_IN wallet pass update, register-visit dialog includes MEMBERSHIP, Crown icon, 144 tests passing)
 - [x] Phase 10D — Type-specific Wallet Passes (Apple/Google pass generators type-aware via cardType→getFieldLayout, COUPON fields: discount/validUntil/couponCode, MEMBERSHIP fields: tier/benefits/memberSince, stamp grid guarded to STAMP/POINTS only, programType+config wired through all callers, Google PATCH type-dispatch)
+- [x] Phase 11 — Admin Showcase Cards (ShowcaseCard model, admin CRUD at /admin/showcase, full-page studio editor reusing existing panels, marketing landing page fetches from DB with hardcoded fallback, max 5 cards, 144 tests passing)
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -195,7 +199,7 @@ Update the "Current Progress" section above to track what's done.
 6. Member (userId + organizationId + role)
 7. Invitation (Better Auth's org invite — separate from StaffInvitation)
 
-**Application (11):**
+**Application (12):**
 8. Restaurant (tenant)
 9. LoyaltyProgram (programType: STAMP_CARD/COUPON/MEMBERSHIP, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
 10. Enrollment (pivot: Customer × LoyaltyProgram — cycle visits, wallet pass, status)
@@ -207,6 +211,7 @@ Update the "Current Progress" section above to track what's done.
 16. StaffInvitation (custom invite flow with tokens — NOT Better Auth's Invitation)
 17. DeviceRegistration (Apple Wallet push, linked to Enrollment)
 18. AnalyticsSnapshot (pre-computed daily metrics)
+19. ShowcaseCard (marketing landing page card examples; `designData` JSON + `metadata` JSON + `sortOrder`)
 
 ## Quality Checklist (Verify After Each Phase)
 
@@ -253,6 +258,13 @@ Update the "Current Progress" section above to track what's done.
 - Jobs (background jobs — separate page)
 
 **Note:** `/dashboard/rewards` still works (command palette, direct URL) but is not in sidebar. `/dashboard/settings/qr-code` redirects to `/dashboard/programs`.
+
+### Admin Panel (super_admin only)
+- `/admin` — overview stats
+- `/admin/users` — user management
+- `/admin/restaurants` — restaurant management
+- `/admin/showcase` — marketing showcase card management (up to 5 cards)
+- `/admin/showcase/[id]/studio` — full-page card design editor for showcase cards (own layout, `(admin-studio)` route group)
 
 ## Design Direction
 

@@ -69,9 +69,14 @@ function ColorRow({
   )
 }
 
-type Props = { store: CardDesignStoreApi; programId: string }
+type Props = {
+  store: CardDesignStoreApi
+  programId: string
+  onUploadStrip?: (formData: FormData) => Promise<{ success?: boolean; originalUrl?: string; appleUrl?: string; googleUrl?: string; error?: string }>
+  onDeleteStrip?: (id: string) => Promise<{ success?: boolean; error?: string }>
+}
 
-export function StripPanel({ store, programId }: Props) {
+export function StripPanel({ store, programId, onUploadStrip, onDeleteStrip }: Props) {
   const shape = useStore(store, (s) => s.wallet.shape)
   const stripImageUrl = useStore(store, (s) => s.wallet.stripImageUrl)
   const stripOpacity = useStore(store, (s) => s.wallet.stripOpacity)
@@ -215,7 +220,7 @@ export function StripPanel({ store, programId }: Props) {
             const formData = new FormData()
             formData.set("programId", programId)
             formData.set("file", file)
-            const result = await uploadStripImage(formData)
+            const result = await (onUploadStrip ?? uploadStripImage)(formData)
             if (result.success && result.originalUrl) {
               store.getState().setWalletField("stripImageUrl", result.originalUrl)
               if (result.appleUrl) store.getState().setWalletField("stripImageApple", result.appleUrl)
@@ -247,7 +252,7 @@ export function StripPanel({ store, programId }: Props) {
         {stripImageUrl && (
           <button
             onClick={async () => {
-              await deleteStripImage(programId)
+              await (onDeleteStrip ?? deleteStripImage)(programId)
               store.getState().setWalletField("stripImageUrl", null)
               store.getState().setWalletField("stripImageApple", null)
               store.getState().setWalletField("stripImageGoogle", null)

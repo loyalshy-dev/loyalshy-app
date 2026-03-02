@@ -206,6 +206,32 @@ Your Team Identifier can be found at [developer.apple.com/account](https://devel
 | **Sentry** | For error tracking | [sentry.io](https://sentry.io) — free tier available |
 | **Plausible** | For analytics | [plausible.io](https://plausible.io) — optional, privacy-first |
 
+## Admin Panel
+
+Super admins can access the admin panel at `/admin`. To promote a user to super admin, update their role directly in the database:
+
+```sql
+UPDATE "user" SET role = 'super_admin' WHERE email = 'you@example.com';
+```
+
+### Features
+
+- **Overview** — platform-wide stats (users, restaurants, revenue)
+- **Users** — list, search, ban/unban users
+- **Restaurants** — list, search, view restaurant details
+- **Showcase Cards** — manage the 5 card examples shown on the marketing landing page
+
+### Showcase Cards
+
+The marketing landing page displays up to 5 loyalty card examples in the hero and customer experience sections. By default, these are hardcoded templates. Super admins can customize them from `/admin/showcase`:
+
+1. **Add a card** — set restaurant name, visit counts, reward description, and customer info
+2. **Edit design** — opens the full card design studio (same panels as the program studio: templates, colors, shape, progress, strip, labels)
+3. **Reorder** — move cards up/down to control display order
+4. **Delete** — remove cards from the landing page
+
+When showcase cards exist in the database, they replace the hardcoded defaults on the landing page. If none exist, the hardcoded fallback displays automatically.
+
 ## Project Structure
 
 ```
@@ -213,6 +239,9 @@ Your Team Identifier can be found at [developer.apple.com/account](https://devel
   /app              — App Router pages
     /(auth)         — Login / Register / Forgot password
     /(dashboard)    — Protected dashboard routes
+    /(admin)        — Super admin panel (assertSuperAdmin)
+    /(admin-studio) — Showcase card studio (own layout, no shell)
+    /(studio)       — Program card design studio (own layout)
     /(public)       — Landing, pricing, QR scan pages
     /api            — API routes
   /components       — Reusable UI components

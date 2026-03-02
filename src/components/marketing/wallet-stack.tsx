@@ -1,8 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { MARKETING_CARDS, MARKETING_CARD_DESIGNS } from "./wallet-card-data"
+import { MARKETING_CARDS, MARKETING_CARD_DESIGNS, type MarketingCard } from "./wallet-card-data"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
+import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
 
@@ -52,6 +53,8 @@ function LoyaltyCard({
   onLeave,
   cardW,
   cardH,
+  cards,
+  designs,
 }: {
   index: number
   style: React.CSSProperties
@@ -62,9 +65,11 @@ function LoyaltyCard({
   onLeave: () => void
   cardW: number
   cardH: number
+  cards: MarketingCard[]
+  designs: WalletPassDesign[]
 }) {
-  const card = MARKETING_CARDS[index]
-  const design = MARKETING_CARD_DESIGNS[index]
+  const card = cards[index]
+  const design = designs[index]
 
   return (
     <div
@@ -110,7 +115,14 @@ function LoyaltyCard({
 
 /* ─── Stack component ──────────────────────────────────────────────── */
 
-export function WalletStack() {
+type WalletStackProps = {
+  cards?: MarketingCard[]
+  designs?: WalletPassDesign[]
+}
+
+export function WalletStack({ cards: propCards, designs: propDesigns }: WalletStackProps = {}) {
+  const cards = propCards ?? MARKETING_CARDS
+  const designs = propDesigns ?? MARKETING_CARD_DESIGNS
   const [activeIndex, setActiveIndex] = useState(0)
   const [hoveredIndex, setHoveredIndex] = useState(-1)
   const [reducedMotion, setReducedMotion] = useState(false)
@@ -142,14 +154,14 @@ export function WalletStack() {
 
     timerRef.current = setInterval(() => {
       if (!interactedRef.current) {
-        setActiveIndex((prev) => (prev + 1) % MARKETING_CARDS.length)
+        setActiveIndex((prev) => (prev + 1) % cards.length)
       }
     }, 3500)
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [reducedMotion])
+  }, [reducedMotion, cards.length])
 
   const handleCardClick = useCallback((index: number) => {
     interactedRef.current = true
@@ -186,14 +198,14 @@ export function WalletStack() {
       >
         <div
           role="group"
-          aria-label="Interactive stack of 5 example loyalty cards from different restaurants. Click a card to bring it to front."
+          aria-label={`Interactive stack of ${cards.length} example loyalty cards from different restaurants. Click a card to bring it to front.`}
           className="relative h-full w-full"
         >
           {/* Render back-to-front: cards further back first so front card paints last */}
-          {[...MARKETING_CARDS.keys()]
+          {[...cards.keys()]
             .sort((a, b) => {
-              const depthA = ((a - activeIndex + MARKETING_CARDS.length) % MARKETING_CARDS.length) || 0
-              const depthB = ((b - activeIndex + MARKETING_CARDS.length) % MARKETING_CARDS.length) || 0
+              const depthA = ((a - activeIndex + cards.length) % cards.length) || 0
+              const depthB = ((b - activeIndex + cards.length) % cards.length) || 0
               // Higher depth = further back = render first
               return depthB - depthA
             })
@@ -202,7 +214,7 @@ export function WalletStack() {
                 i,
                 activeIndex,
                 hoveredIndex,
-                MARKETING_CARDS.length,
+                cards.length,
                 compact,
               )
 
@@ -218,6 +230,8 @@ export function WalletStack() {
                   onLeave={() => setHoveredIndex(-1)}
                   cardW={cardW}
                   cardH={cardH}
+                  cards={cards}
+                  designs={designs}
                 />
               )
             })}

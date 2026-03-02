@@ -1,8 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { MARKETING_CARDS, MARKETING_CARD_DESIGNS } from "./wallet-card-data"
+import { MARKETING_CARDS, MARKETING_CARD_DESIGNS, type MarketingCard } from "./wallet-card-data"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
+import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 
 /* ─── Constants ────────────────────────────────────────────────────── */
 
@@ -114,7 +115,14 @@ function SideButtons() {
 
 /* ─── Main phone mockup ───────────────────────────────────────────── */
 
-export function PhoneMockupInteractive() {
+type PhoneMockupProps = {
+  cards?: MarketingCard[]
+  designs?: WalletPassDesign[]
+}
+
+export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns }: PhoneMockupProps = {}) {
+  const allCards = propCards ?? MARKETING_CARDS
+  const allDesigns = propDesigns ?? MARKETING_CARD_DESIGNS
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
   const [reducedMotion, setReducedMotion] = useState(false)
   const backRef = useRef<HTMLButtonElement>(null)
@@ -166,7 +174,7 @@ export function PhoneMockupInteractive() {
     : "transform 350ms cubic-bezier(0.32, 0, 0.15, 1), opacity 250ms ease, border-radius 350ms ease"
 
   // Only show first VISIBLE_CARDS in the stacked view
-  const visibleCards = MARKETING_CARDS.slice(0, VISIBLE_CARDS)
+  const visibleCards = allCards.slice(0, VISIBLE_CARDS)
 
   return (
     <div className="flex items-center justify-center">
@@ -229,7 +237,7 @@ export function PhoneMockupInteractive() {
                 }}
               >
                 {visibleCards.map((card, i) => {
-                  const design = MARKETING_CARD_DESIGNS[i]
+                  const design = allDesigns[i]
                   const isThisExpanded = expandedIndex === i
                   const someOtherExpanded = isExpanded && !isThisExpanded
 

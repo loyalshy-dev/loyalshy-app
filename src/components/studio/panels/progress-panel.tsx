@@ -162,9 +162,11 @@ type Props = {
   store: CardDesignStoreApi
   programId: string
   visitsRequired: number
+  onUploadStampIcon?: (formData: FormData) => Promise<{ success?: boolean; url?: string; error?: string }>
+  onDeleteStampIcon?: (id: string) => Promise<{ success?: boolean; error?: string }>
 }
 
-export function ProgressPanel({ store, programId, visitsRequired }: Props) {
+export function ProgressPanel({ store, programId, visitsRequired, onUploadStampIcon, onDeleteStampIcon }: Props) {
   const wallet = useStore(store, (s) => s.wallet)
   const progressStyle = wallet.progressStyle
   const customProgressLabel = wallet.customProgressLabel
@@ -353,7 +355,7 @@ export function ProgressPanel({ store, programId, visitsRequired }: Props) {
               />
               <button
                 onClick={async () => {
-                  const result = await deleteStampIcon(programId)
+                  const result = await (onDeleteStampIcon ?? deleteStampIcon)(programId)
                   if (result.success) {
                     updateStampGridConfig({ customStampIconUrl: null })
                   }
@@ -386,7 +388,7 @@ export function ProgressPanel({ store, programId, visitsRequired }: Props) {
                     const formData = new FormData()
                     formData.set("programId", programId)
                     formData.set("file", file)
-                    const result = await uploadStampIcon(formData)
+                    const result = await (onUploadStampIcon ?? uploadStampIcon)(formData)
                     if (result.success && result.url) {
                       updateStampGridConfig({ customStampIconUrl: result.url })
                     }
@@ -426,7 +428,7 @@ export function ProgressPanel({ store, programId, visitsRequired }: Props) {
                 key={icon.id}
                 onClick={() => {
                   if (stampGridConfig.customStampIconUrl) {
-                    deleteStampIcon(programId).catch(() => {})
+                    (onDeleteStampIcon ?? deleteStampIcon)(programId).catch(() => {})
                   }
                   updateStampGridConfig({ stampIcon: icon.id, customStampIconUrl: null })
                 }}
