@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect, useTransition } from "react"
-import { Loader2, Bookmark } from "lucide-react"
+import { Loader2, Bookmark, CheckCircle2 } from "lucide-react"
 import { requestWalletPass } from "@/server/onboarding-actions"
 import type { EnrollmentCardData } from "@/server/onboarding-actions"
 import { computeTextColor } from "@/lib/wallet/card-design"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig } from "@/lib/program-config"
 
 type Platform = "apple" | "google"
 
@@ -60,6 +61,22 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug }: CardPageC
   )
   const passDesign = buildWalletPassDesign(data.program.cardDesign)
 
+  // Coupon-specific props
+  const couponConfig = data.program.programType === "COUPON" ? parseCouponConfig(data.program.config) : null
+  const isRedeemed = data.program.programType === "COUPON" && data.enrollmentStatus === "COMPLETED"
+  const discountText = couponConfig
+    ? (isRedeemed ? `${formatCouponValue(couponConfig)} (Redeemed)` : formatCouponValue(couponConfig))
+    : undefined
+  const couponCode = couponConfig?.couponCode ?? undefined
+  const validUntil = couponConfig?.validUntil
+    ? new Date(couponConfig.validUntil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+    : undefined
+
+  // Membership-specific props
+  const membershipConfig = data.program.programType === "MEMBERSHIP" ? parseMembershipConfig(data.program.config) : null
+  const tierName = membershipConfig?.membershipTier ?? undefined
+  const benefits = membershipConfig?.benefits ?? undefined
+
   function handleAddToWallet(chosenPlatform: Platform) {
     setError(null)
 
@@ -107,6 +124,14 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug }: CardPageC
           </p>
         </div>
 
+        {/* Redeemed banner */}
+        {isRedeemed && (
+          <div className="flex items-center justify-center gap-2 rounded-lg bg-success/10 border border-success/20 px-4 py-3 text-sm font-medium text-success">
+            <CheckCircle2 className="size-4" />
+            This coupon has been redeemed
+          </div>
+        )}
+
         {/* Card */}
         <div className="flex justify-center">
           <WalletPassRenderer
@@ -121,6 +146,11 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug }: CardPageC
             rewardDescription={data.program.rewardDescription}
             hasReward={data.hasAvailableReward}
             qrValue={data.walletPassId ?? undefined}
+            discountText={discountText}
+            couponCode={couponCode}
+            validUntil={validUntil}
+            tierName={tierName}
+            benefits={benefits}
           />
         </div>
 

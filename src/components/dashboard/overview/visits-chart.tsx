@@ -39,7 +39,7 @@ function CustomTooltip({
         {format(parseISO(data.payload.date), "MMM d, yyyy")}
       </p>
       <p className="text-sm font-medium">
-        {data.value} visit{data.value !== 1 ? "s" : ""}
+        {data.value} interaction{data.value !== 1 ? "s" : ""}
       </p>
     </div>
   )
@@ -79,7 +79,7 @@ export function VisitsChart({ initialData, initialRange }: VisitsChartProps) {
     <div className="rounded-lg border border-border bg-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <h3 className="text-[13px] font-medium text-muted-foreground">
-          Visits Over Time
+          Activity Over Time
         </h3>
         <div className="flex items-center gap-0.5 rounded-md border border-border bg-muted/50 p-0.5">
           {RANGE_LABELS.map((r) => (

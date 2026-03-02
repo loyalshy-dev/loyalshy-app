@@ -5,7 +5,7 @@ import {
   getOverviewStats,
   getVisitsOverTime,
   getBusiestDays,
-  getRewardDistribution,
+  getProgramsSummary,
   getRecentActivity,
   getTopCustomers,
 } from "@/server/analytics"
@@ -13,7 +13,7 @@ import { getOnboardingChecklist } from "@/server/onboarding-registration-actions
 import { StatCards } from "@/components/dashboard/overview/stat-cards"
 import { VisitsChart } from "@/components/dashboard/overview/visits-chart"
 import { BusiestDaysChart } from "@/components/dashboard/overview/busiest-days-chart"
-import { RewardDistributionChart } from "@/components/dashboard/overview/reward-distribution-chart"
+import { ProgramsSummary } from "@/components/dashboard/overview/programs-summary"
 import { RecentActivity } from "@/components/dashboard/overview/recent-activity"
 import { TopCustomers } from "@/components/dashboard/overview/top-customers"
 import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist"
@@ -55,7 +55,7 @@ export default async function OverviewPage() {
           <BusiestDaysSection />
         </Suspense>
         <Suspense fallback={<SecondaryChartSkeleton />}>
-          <RewardDistributionSection />
+          <ProgramsSummarySection />
         </Suspense>
       </div>
 
@@ -92,23 +92,9 @@ async function BusiestDaysSection() {
   return <BusiestDaysChart data={data} />
 }
 
-async function RewardDistributionSection() {
-  const restaurant = await getRestaurantForUser()
-
-  // Multi-program: use the first active program for the distribution chart.
-  // In future, this could aggregate across programs or allow switching.
-  const firstProgram = restaurant?.loyaltyPrograms?.[0]
-  const visitsRequired = firstProgram?.visitsRequired ?? 10
-  const programName = firstProgram?.name ?? "Loyalty Program"
-
-  const data = await getRewardDistribution(visitsRequired)
-  return (
-    <RewardDistributionChart
-      data={data}
-      visitsRequired={visitsRequired}
-      programName={programName}
-    />
-  )
+async function ProgramsSummarySection() {
+  const programs = await getProgramsSummary()
+  return <ProgramsSummary programs={programs} />
 }
 
 async function RecentActivitySection() {

@@ -1,6 +1,6 @@
 "use client"
 
-import { Users, Eye, Gift, Trophy, TrendingUp, TrendingDown } from "lucide-react"
+import { Users, Activity, Gift, Trophy, TrendingUp, TrendingDown } from "lucide-react"
 import { useAnimatedCounter } from "@/hooks/use-animated-counter"
 
 type StatCardProps = {
@@ -52,8 +52,8 @@ function StatCard({ label, value, change, icon, suffix }: StatCardProps) {
 type StatCardsProps = {
   totalCustomers: number
   totalCustomersChange: number
-  visitsThisMonth: number
-  visitsChange: number
+  activityThisMonth: number
+  activityChange: number
   activeRewards: number
   rewardsRedeemedThisMonth: number
   rewardsRedeemedChange: number
@@ -62,8 +62,8 @@ type StatCardsProps = {
 export function StatCards({
   totalCustomers,
   totalCustomersChange,
-  visitsThisMonth,
-  visitsChange,
+  activityThisMonth,
+  activityChange,
   activeRewards,
   rewardsRedeemedThisMonth,
   rewardsRedeemedChange,
@@ -77,10 +77,10 @@ export function StatCards({
         icon={<Users className="size-4" />}
       />
       <StatCard
-        label="Visits This Month"
-        value={visitsThisMonth}
-        change={visitsChange}
-        icon={<Eye className="size-4" />}
+        label="Activity This Month"
+        value={activityThisMonth}
+        change={activityChange}
+        icon={<Activity className="size-4" />}
       />
       <StatCard
         label="Active Rewards"

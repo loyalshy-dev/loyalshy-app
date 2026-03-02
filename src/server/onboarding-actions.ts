@@ -164,6 +164,7 @@ export type EnrollmentCardData = {
   currentCycleVisits: number
   totalVisits: number
   hasAvailableReward: boolean
+  enrollmentStatus: "ACTIVE" | "COMPLETED" | "FROZEN"
   restaurant: {
     name: string
     slug: string
@@ -174,6 +175,8 @@ export type EnrollmentCardData = {
     name: string
     visitsRequired: number
     rewardDescription: string
+    programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP"
+    config: unknown
     cardDesign: PublicProgramInfo["cardDesign"]
   }
 }
@@ -189,6 +192,7 @@ export async function getEnrollmentCardData(
       walletPassId: true,
       currentCycleVisits: true,
       totalVisits: true,
+      status: true,
       rewards: {
         where: { status: "AVAILABLE" },
         select: { id: true },
@@ -203,6 +207,8 @@ export async function getEnrollmentCardData(
           visitsRequired: true,
           rewardDescription: true,
           status: true,
+          programType: true,
+          config: true,
           cardDesign: {
             select: {
               cardType: true,
@@ -249,11 +255,14 @@ export async function getEnrollmentCardData(
     currentCycleVisits: enrollment.currentCycleVisits,
     totalVisits: enrollment.totalVisits,
     hasAvailableReward: enrollment.rewards.length > 0,
+    enrollmentStatus: enrollment.status,
     restaurant: enrollment.loyaltyProgram.restaurant,
     program: {
       name: enrollment.loyaltyProgram.name,
       visitsRequired: enrollment.loyaltyProgram.visitsRequired,
       rewardDescription: enrollment.loyaltyProgram.rewardDescription,
+      programType: enrollment.loyaltyProgram.programType,
+      config: enrollment.loyaltyProgram.config,
       cardDesign: cd
         ? {
             cardType: cd.cardType,

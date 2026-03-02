@@ -18,8 +18,8 @@ import {
 export type OverviewStats = {
   totalCustomers: number
   totalCustomersChange: number
-  visitsThisMonth: number
-  visitsChange: number
+  activityThisMonth: number
+  activityChange: number
   activeRewards: number
   rewardsRedeemedThisMonth: number
   rewardsRedeemedChange: number
@@ -42,7 +42,7 @@ export type RewardDistributionItem = {
 
 export type ActivityItem = {
   id: string
-  type: "visit" | "reward_earned" | "reward_redeemed"
+  type: "visit" | "reward_earned" | "reward_redeemed" | "check_in" | "coupon_redeemed"
   customerName: string
   staffName: string | null
   programName: string | null
@@ -55,6 +55,16 @@ export type TopCustomerItem = {
   fullName: string
   totalVisits: number
   lastVisitAt: Date | null
+}
+
+export type ProgramSummaryItem = {
+  id: string
+  name: string
+  programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP"
+  activeEnrollments: number
+  totalVisits: number
+  redeemedRewards: number
+  availableRewards: number
 }
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -82,6 +92,8 @@ export async function getOverviewStats(): Promise<OverviewStats> {
     customersLastMonth,
     visitsThisMonth,
     visitsLastMonth,
+    couponRedemptionsThisMonth,
+    couponRedemptionsLastMonth,
     activeRewards,
     rewardsRedeemedThisMonth,
     rewardsRedeemedLastMonth,
@@ -104,6 +116,24 @@ export async function getOverviewStats(): Promise<OverviewStats> {
       where: {
         restaurantId,
         createdAt: { gte: lastMonthStart, lt: lastMonthEnd },
+      },
+    }),
+    // Coupon redemptions this month
+    db.reward.count({
+      where: {
+        restaurantId,
+        status: "REDEEMED",
+        redeemedAt: { gte: thisMonthStart },
+        loyaltyProgram: { programType: "COUPON" },
+      },
+    }),
+    // Coupon redemptions last month
+    db.reward.count({
+      where: {
+        restaurantId,
+        status: "REDEEMED",
+        redeemedAt: { gte: lastMonthStart, lt: lastMonthEnd },
+        loyaltyProgram: { programType: "COUPON" },
       },
     }),
     db.reward.count({
@@ -129,6 +159,10 @@ export async function getOverviewStats(): Promise<OverviewStats> {
     }),
   ])
 
+  // Activity = visits + coupon redemptions
+  const activityThisMonth = visitsThisMonth + couponRedemptionsThisMonth
+  const activityLastMonth = visitsLastMonth + couponRedemptionsLastMonth
+
   // Calculate percentage changes
   const totalCustomersChange =
     customersLastMonth > 0
@@ -139,12 +173,12 @@ export async function getOverviewStats(): Promise<OverviewStats> {
         ? 100
         : 0
 
-  const visitsChange =
-    visitsLastMonth > 0
+  const activityChange =
+    activityLastMonth > 0
       ? Math.round(
-          ((visitsThisMonth - visitsLastMonth) / visitsLastMonth) * 100
+          ((activityThisMonth - activityLastMonth) / activityLastMonth) * 100
         )
-      : visitsThisMonth > 0
+      : activityThisMonth > 0
         ? 100
         : 0
 
@@ -162,8 +196,8 @@ export async function getOverviewStats(): Promise<OverviewStats> {
   return {
     totalCustomers,
     totalCustomersChange,
-    visitsThisMonth,
-    visitsChange,
+    activityThisMonth,
+    activityChange,
     activeRewards,
     rewardsRedeemedThisMonth,
     rewardsRedeemedChange,
@@ -212,21 +246,38 @@ export async function getVisitsOverTime(
     snapshotMap.set(format(s.date, "yyyy-MM-dd"), s.totalVisits)
   }
 
-  // Live query for any days not in snapshots (including today)
-  const visits = await db.visit.groupBy({
-    by: ["createdAt"],
-    where: {
-      restaurantId,
-      createdAt: { gte: startDate },
-    },
-    _count: { id: true },
-  })
+  // Live query for visits and coupon redemptions in parallel
+  const [visits, couponRedemptions] = await Promise.all([
+    db.visit.groupBy({
+      by: ["createdAt"],
+      where: {
+        restaurantId,
+        createdAt: { gte: startDate },
+      },
+      _count: { id: true },
+    }),
+    db.reward.groupBy({
+      by: ["redeemedAt"],
+      where: {
+        restaurantId,
+        status: "REDEEMED",
+        redeemedAt: { gte: startDate },
+        loyaltyProgram: { programType: "COUPON" },
+      },
+      _count: { id: true },
+    }),
+  ])
 
-  // Build daily count from raw visits
+  // Build daily count from raw visits + coupon redemptions
   const liveMap = new Map<string, number>()
   for (const v of visits) {
     const day = format(v.createdAt, "yyyy-MM-dd")
     liveMap.set(day, (liveMap.get(day) ?? 0) + v._count.id)
+  }
+  for (const r of couponRedemptions) {
+    if (!r.redeemedAt) continue
+    const day = format(r.redeemedAt, "yyyy-MM-dd")
+    liveMap.set(day, (liveMap.get(day) ?? 0) + r._count.id)
   }
 
   // Generate complete date range
@@ -251,19 +302,37 @@ export async function getBusiestDays(): Promise<BusiestDayData[]> {
   const ninetyDaysAgo = subDays(new Date(), 90)
 
   // Raw SQL for day-of-week aggregation (Prisma doesn't support EXTRACT natively)
-  const result = await db.$queryRaw<
-    { dow: number; count: bigint }[]
-  >`SELECT EXTRACT(DOW FROM "createdAt") AS dow, COUNT(*) AS count
-    FROM visit
-    WHERE "restaurantId" = ${restaurantId}
-      AND "createdAt" >= ${ninetyDaysAgo}
-    GROUP BY dow
-    ORDER BY dow`
+  const [visitResult, couponResult] = await Promise.all([
+    db.$queryRaw<
+      { dow: number; count: bigint }[]
+    >`SELECT EXTRACT(DOW FROM "createdAt") AS dow, COUNT(*) AS count
+      FROM visit
+      WHERE "restaurantId" = ${restaurantId}
+        AND "createdAt" >= ${ninetyDaysAgo}
+      GROUP BY dow
+      ORDER BY dow`,
+    db.$queryRaw<
+      { dow: number; count: bigint }[]
+    >`SELECT EXTRACT(DOW FROM r."redeemedAt") AS dow, COUNT(*) AS count
+      FROM reward r
+      JOIN loyalty_program lp ON lp.id = r."loyaltyProgramId"
+      WHERE r."restaurantId" = ${restaurantId}
+        AND r.status = 'redeemed'
+        AND r."redeemedAt" >= ${ninetyDaysAgo}
+        AND lp."programType" = 'coupon'
+      GROUP BY dow
+      ORDER BY dow`,
+  ])
 
-  // Fill all 7 days
+  // Fill all 7 days, merging visits + coupon redemptions
   const countMap = new Map<number, number>()
-  for (const r of result) {
-    countMap.set(Number(r.dow), Number(r.count))
+  for (const r of visitResult) {
+    const dow = Number(r.dow)
+    countMap.set(dow, (countMap.get(dow) ?? 0) + Number(r.count))
+  }
+  for (const r of couponResult) {
+    const dow = Number(r.dow)
+    countMap.set(dow, (countMap.get(dow) ?? 0) + Number(r.count))
   }
 
   // Reorder to Mon-Sun
@@ -336,7 +405,7 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
         createdAt: true,
         customer: { select: { fullName: true } },
         registeredBy: { select: { name: true } },
-        loyaltyProgram: { select: { name: true } },
+        loyaltyProgram: { select: { name: true, programType: true } },
       },
     }),
     db.reward.findMany({
@@ -350,7 +419,7 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
         redeemedAt: true,
         customer: { select: { fullName: true } },
         redeemedBy: { select: { name: true } },
-        loyaltyProgram: { select: { name: true, rewardDescription: true } },
+        loyaltyProgram: { select: { name: true, rewardDescription: true, programType: true } },
       },
     }),
   ])
@@ -358,22 +427,26 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
   const items: ActivityItem[] = []
 
   for (const v of recentVisits) {
+    // Classify visit type based on program type
+    const type = v.loyaltyProgram.programType === "MEMBERSHIP" ? "check_in" as const : "visit" as const
     items.push({
       id: v.id,
-      type: "visit",
+      type,
       customerName: v.customer.fullName,
       staffName: v.registeredBy?.name ?? null,
       programName: v.loyaltyProgram.name,
       createdAt: v.createdAt,
-      detail: `Visit #${v.visitNumber}`,
+      detail: type === "check_in" ? v.loyaltyProgram.name : `Visit #${v.visitNumber}`,
     })
   }
 
   for (const r of recentRewards) {
     if (r.status === "REDEEMED" && r.redeemedAt) {
+      // Classify coupon redemptions separately
+      const isCoupon = r.loyaltyProgram.programType === "COUPON"
       items.push({
         id: `${r.id}-redeemed`,
-        type: "reward_redeemed",
+        type: isCoupon ? "coupon_redeemed" : "reward_redeemed",
         customerName: r.customer.fullName,
         staffName: r.redeemedBy?.name ?? null,
         programName: r.loyaltyProgram.name,
@@ -381,15 +454,19 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
         detail: r.loyaltyProgram.rewardDescription,
       })
     }
-    items.push({
-      id: r.id,
-      type: "reward_earned",
-      customerName: r.customer.fullName,
-      staffName: null,
-      programName: r.loyaltyProgram.name,
-      createdAt: r.earnedAt,
-      detail: r.loyaltyProgram.rewardDescription,
-    })
+    // Only show "earned a reward" for non-coupon programs
+    // (coupon rewards are auto-created on enrollment, not meaningful as activity)
+    if (r.loyaltyProgram.programType !== "COUPON") {
+      items.push({
+        id: r.id,
+        type: "reward_earned",
+        customerName: r.customer.fullName,
+        staffName: null,
+        programName: r.loyaltyProgram.name,
+        createdAt: r.earnedAt,
+        detail: r.loyaltyProgram.rewardDescription,
+      })
+    }
   }
 
   // Sort by date descending, take 10
@@ -397,7 +474,65 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
   return items.slice(0, 10)
 }
 
-// ─── 6. Top Customers ───────────────────────────────────────
+// ─── 6. Programs Summary ────────────────────────────────────
+
+export async function getProgramsSummary(): Promise<ProgramSummaryItem[]> {
+  const restaurantId = await requireRestaurantId()
+
+  const programs = await db.loyaltyProgram.findMany({
+    where: { restaurantId, status: "ACTIVE" },
+    select: {
+      id: true,
+      name: true,
+      programType: true,
+      _count: {
+        select: {
+          enrollments: { where: { status: "ACTIVE" } },
+          visits: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  })
+
+  if (programs.length === 0) return []
+
+  // Batch query reward counts per program
+  const programIds = programs.map((p) => p.id)
+  const [redeemedCounts, availableCounts] = await Promise.all([
+    db.reward.groupBy({
+      by: ["loyaltyProgramId"],
+      where: {
+        loyaltyProgramId: { in: programIds },
+        status: "REDEEMED",
+      },
+      _count: { id: true },
+    }),
+    db.reward.groupBy({
+      by: ["loyaltyProgramId"],
+      where: {
+        loyaltyProgramId: { in: programIds },
+        status: "AVAILABLE",
+      },
+      _count: { id: true },
+    }),
+  ])
+
+  const redeemedMap = new Map(redeemedCounts.map((r) => [r.loyaltyProgramId, r._count.id]))
+  const availableMap = new Map(availableCounts.map((r) => [r.loyaltyProgramId, r._count.id]))
+
+  return programs.map((p) => ({
+    id: p.id,
+    name: p.name,
+    programType: p.programType,
+    activeEnrollments: p._count.enrollments,
+    totalVisits: p._count.visits,
+    redeemedRewards: redeemedMap.get(p.id) ?? 0,
+    availableRewards: availableMap.get(p.id) ?? 0,
+  }))
+}
+
+// ─── 7. Top Customers ───────────────────────────────────────
 
 export async function getTopCustomers(): Promise<TopCustomerItem[]> {
   const restaurantId = await requireRestaurantId()

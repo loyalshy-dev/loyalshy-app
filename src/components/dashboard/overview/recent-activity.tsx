@@ -1,6 +1,6 @@
 "use client"
 
-import { Eye, Gift, Trophy } from "lucide-react"
+import { Eye, Gift, Trophy, Crown, Ticket } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import type { ActivityItem } from "@/server/analytics"
 
@@ -8,6 +8,12 @@ const ACTIVITY_CONFIG = {
   visit: {
     icon: Eye,
     verb: "registered a visit",
+    color: "text-brand",
+    bg: "bg-brand/10",
+  },
+  check_in: {
+    icon: Crown,
+    verb: "checked in",
     color: "text-brand",
     bg: "bg-brand/10",
   },
@@ -20,6 +26,12 @@ const ACTIVITY_CONFIG = {
   reward_redeemed: {
     icon: Trophy,
     verb: "redeemed a reward",
+    color: "text-warning",
+    bg: "bg-warning/10",
+  },
+  coupon_redeemed: {
+    icon: Ticket,
+    verb: "redeemed a coupon",
     color: "text-warning",
     bg: "bg-warning/10",
   },

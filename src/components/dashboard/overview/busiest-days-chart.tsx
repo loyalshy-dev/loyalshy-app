@@ -25,7 +25,7 @@ function CustomTooltip({
     <div className="rounded-md border border-border bg-popover px-3 py-2 shadow-md">
       <p className="text-xs text-muted-foreground">{data.payload.day}</p>
       <p className="text-sm font-medium">
-        {data.value} visit{data.value !== 1 ? "s" : ""}
+        {data.value} interaction{data.value !== 1 ? "s" : ""}
       </p>
     </div>
   )
