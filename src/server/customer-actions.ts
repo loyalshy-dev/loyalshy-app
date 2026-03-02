@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { assertAuthenticated, getRestaurantForUser, assertRestaurantRole } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
+import { parseCouponConfig } from "@/lib/program-config"
 import type { Prisma } from "@prisma/client"
 import type { EnrollmentDetail } from "@/types/enrollment"
 
@@ -243,6 +244,7 @@ export async function getCustomerDetail(
             select: {
               id: true,
               name: true,
+              programType: true,
               visitsRequired: true,
               rewardDescription: true,
               status: true,
@@ -297,6 +299,7 @@ export async function getCustomerDetail(
     enrollmentId: e.id,
     programId: e.loyaltyProgram.id,
     programName: e.loyaltyProgram.name,
+    programType: e.loyaltyProgram.programType,
     programStatus: e.loyaltyProgram.status,
     currentCycleVisits: e.currentCycleVisits,
     visitsRequired: e.loyaltyProgram.visitsRequired,
@@ -436,7 +439,7 @@ export async function addCustomer(
   // Fetch all active loyalty programs for this restaurant
   const activePrograms = await db.loyaltyProgram.findMany({
     where: { restaurantId, status: "ACTIVE" },
-    select: { id: true },
+    select: { id: true, programType: true, config: true, rewardExpiryDays: true },
   })
 
   // Auto-enroll customer in all active programs
@@ -447,6 +450,42 @@ export async function addCustomer(
         loyaltyProgramId: program.id,
       })),
     })
+
+    // Auto-create rewards for COUPON programs
+    const couponPrograms = activePrograms.filter((p) => p.programType === "COUPON")
+    if (couponPrograms.length > 0) {
+      // Fetch the newly created enrollments for coupon programs
+      const couponEnrollments = await db.enrollment.findMany({
+        where: {
+          customerId: customer.id,
+          loyaltyProgramId: { in: couponPrograms.map((p) => p.id) },
+        },
+        select: { id: true, loyaltyProgramId: true },
+      })
+
+      for (const enrollment of couponEnrollments) {
+        const program = couponPrograms.find((p) => p.id === enrollment.loyaltyProgramId)
+        if (!program) continue
+
+        const couponConfig = parseCouponConfig(program.config)
+        const expiresAt = couponConfig?.validUntil
+          ? new Date(couponConfig.validUntil)
+          : program.rewardExpiryDays > 0
+            ? new Date(Date.now() + program.rewardExpiryDays * 86_400_000)
+            : new Date(Date.now() + 365 * 86_400_000) // default 1 year
+
+        await db.reward.create({
+          data: {
+            customerId: customer.id,
+            restaurantId,
+            loyaltyProgramId: program.id,
+            enrollmentId: enrollment.id,
+            status: "AVAILABLE",
+            expiresAt,
+          },
+        })
+      }
+    }
   }
 
   revalidatePath("/dashboard/customers")

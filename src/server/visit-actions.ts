@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { assertAuthenticated, getRestaurantForUser, assertRestaurantAccess } from "@/lib/dal"
+import { parseCouponConfig, formatCouponValue } from "@/lib/program-config"
 import type { EnrollmentSummary } from "@/types/enrollment"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -25,6 +26,15 @@ export type RegisterVisitResult = {
   newCycleVisits: number
   newTotalVisits: number
   visitsRequired: number
+  programName?: string
+}
+
+export type RedeemCouponResult = {
+  success: boolean
+  error?: string
+  couponDescription?: string
+  discountText?: string
+  redemptionLimit?: "single" | "unlimited"
   programName?: string
 }
 
@@ -86,6 +96,7 @@ export async function lookupEnrollmentByWalletPassId(
         select: {
           id: true,
           name: true,
+          programType: true,
           visitsRequired: true,
           status: true,
           cardDesign: {
@@ -169,6 +180,7 @@ export async function lookupEnrollmentByWalletPassId(
         select: {
           id: true,
           name: true,
+          programType: true,
           visitsRequired: true,
           cardDesign: {
             select: {
@@ -201,6 +213,7 @@ export async function lookupEnrollmentByWalletPassId(
       enrollmentId: e.id,
       programId: e.loyaltyProgram.id,
       programName: e.loyaltyProgram.name,
+      programType: e.loyaltyProgram.programType,
       currentCycleVisits: e.currentCycleVisits,
       visitsRequired: e.loyaltyProgram.visitsRequired,
       totalVisits: e.totalVisits,
@@ -227,6 +240,7 @@ export async function lookupEnrollmentByWalletPassId(
     enrollmentId: enrollment.id,
     programId: enrollment.loyaltyProgram.id,
     programName: enrollment.loyaltyProgram.name,
+    programType: enrollment.loyaltyProgram.programType,
     currentCycleVisits: enrollment.currentCycleVisits,
     visitsRequired: enrollment.loyaltyProgram.visitsRequired,
     totalVisits: enrollment.totalVisits,
@@ -303,6 +317,7 @@ export async function searchCustomersForVisit(
             select: {
               id: true,
               name: true,
+              programType: true,
               visitsRequired: true,
               cardDesign: {
                 select: {
@@ -340,6 +355,7 @@ export async function searchCustomersForVisit(
         enrollmentId: e.id,
         programId: e.loyaltyProgram.id,
         programName: e.loyaltyProgram.name,
+        programType: e.loyaltyProgram.programType,
         currentCycleVisits: e.currentCycleVisits,
         visitsRequired: e.loyaltyProgram.visitsRequired,
         totalVisits: e.totalVisits,
@@ -403,6 +419,7 @@ export async function registerVisit(
         select: {
           id: true,
           name: true,
+          programType: true,
           visitsRequired: true,
           rewardDescription: true,
           rewardExpiryDays: true,
@@ -465,6 +482,18 @@ export async function registerVisit(
     return {
       success: false,
       error: "This loyalty program is no longer active",
+      wasRewardEarned: false,
+      newCycleVisits: enrollment.currentCycleVisits,
+      newTotalVisits: enrollment.totalVisits,
+      visitsRequired: enrollment.loyaltyProgram.visitsRequired,
+    }
+  }
+
+  // Only stamp card programs support visit registration
+  if (enrollment.loyaltyProgram.programType !== "STAMP_CARD") {
+    return {
+      success: false,
+      error: "Visit registration is only available for stamp card programs",
       wasRewardEarned: false,
       newCycleVisits: enrollment.currentCycleVisits,
       newTotalVisits: enrollment.totalVisits,
@@ -593,6 +622,155 @@ export async function registerVisit(
     newCycleVisits: wasRewardEarned ? 0 : newCycleVisits,
     newTotalVisits: newEnrollmentTotalVisits,
     visitsRequired: program.visitsRequired,
+    programName: program.name,
+  }
+}
+
+// ─── Redeem Coupon ──────────────────────────────────────────
+
+export async function redeemCoupon(
+  enrollmentId: string
+): Promise<RedeemCouponResult> {
+  const session = await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+
+  if (!restaurant) {
+    return { success: false, error: "No restaurant found" }
+  }
+
+  await assertRestaurantAccess(restaurant.id)
+
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          restaurantId: true,
+          deletedAt: true,
+          fullName: true,
+        },
+      },
+      loyaltyProgram: {
+        select: {
+          id: true,
+          name: true,
+          programType: true,
+          config: true,
+          rewardDescription: true,
+          rewardExpiryDays: true,
+          status: true,
+        },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.deletedAt) {
+    return { success: false, error: "Customer has been deleted" }
+  }
+
+  if (enrollment.status !== "ACTIVE") {
+    return {
+      success: false,
+      error: `This enrollment is ${enrollment.status.toLowerCase()}`,
+    }
+  }
+
+  if (enrollment.loyaltyProgram.status !== "ACTIVE") {
+    return { success: false, error: "This loyalty program is no longer active" }
+  }
+
+  if (enrollment.loyaltyProgram.programType !== "COUPON") {
+    return { success: false, error: "This is not a coupon program" }
+  }
+
+  const program = enrollment.loyaltyProgram
+  const couponConfig = parseCouponConfig(program.config)
+
+  // Find an available reward to redeem
+  const reward = await db.reward.findFirst({
+    where: { enrollmentId: enrollment.id, status: "AVAILABLE" },
+    select: { id: true },
+  })
+
+  if (!reward) {
+    return { success: false, error: "No available coupon to redeem" }
+  }
+
+  const redemptionLimit = couponConfig?.redemptionLimit ?? "single"
+
+  await db.$transaction(async (tx) => {
+    // Mark reward as redeemed
+    await tx.reward.update({
+      where: { id: reward.id },
+      data: {
+        status: "REDEEMED",
+        redeemedAt: new Date(),
+        redeemedById: session.user.id,
+      },
+    })
+
+    // Increment total rewards redeemed on enrollment
+    await tx.enrollment.update({
+      where: { id: enrollment.id },
+      data: {
+        totalRewardsRedeemed: { increment: 1 },
+        ...(redemptionLimit === "single" ? { status: "COMPLETED" } : {}),
+      },
+    })
+
+    // For unlimited coupons, auto-create a new available reward
+    if (redemptionLimit === "unlimited") {
+      const expiresAt = couponConfig?.validUntil
+        ? new Date(couponConfig.validUntil)
+        : program.rewardExpiryDays > 0
+          ? new Date(Date.now() + program.rewardExpiryDays * 86_400_000)
+          : new Date(Date.now() + 365 * 86_400_000) // default 1 year
+
+      await tx.reward.create({
+        data: {
+          customerId: enrollment.customer.id,
+          restaurantId: restaurant.id,
+          loyaltyProgramId: program.id,
+          enrollmentId: enrollment.id,
+          status: "AVAILABLE",
+          expiresAt,
+        },
+      })
+    }
+  })
+
+  // Dispatch wallet pass update
+  if (enrollment.walletPassType !== "NONE") {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) =>
+        tasks.trigger("update-wallet-pass", {
+          enrollmentId: enrollment.id,
+          updateType: "REWARD_REDEEMED",
+        })
+      )
+      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/programs")
+
+  const discountText = couponConfig ? formatCouponValue(couponConfig) : program.rewardDescription
+
+  return {
+    success: true,
+    couponDescription: couponConfig?.couponDescription ?? program.rewardDescription,
+    discountText,
+    redemptionLimit,
     programName: program.name,
   }
 }

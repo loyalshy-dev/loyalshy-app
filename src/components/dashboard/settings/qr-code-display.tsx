@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { parseStripFilters } from "@/lib/wallet/card-design"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/program-config"
 
 type SizePreset = {
   id: string
@@ -68,6 +69,8 @@ type PartialCardDesign = {
 type ProgramInfo = {
   id: string
   name: string
+  programType?: string
+  programConfig?: unknown
   rewardDescription: string
   visitsRequired: number
   cardDesign?: PartialCardDesign | null
@@ -108,6 +111,7 @@ export function QrCodeDisplay({
   const qrSf = activeProgramDesign ? parseStripFilters(activeProgramDesign.editorConfig) : null
   const walletDesign: WalletPassDesign | null = activeProgramDesign
     ? {
+        cardType: (activeProgramDesign.cardType ?? "STAMP") as WalletPassDesign["cardType"],
         shape: (activeProgramDesign.shape ?? "CLEAN") as WalletPassDesign["shape"],
         primaryColor: activeProgramDesign.primaryColor ?? "#1a1a2e",
         secondaryColor: activeProgramDesign.secondaryColor ?? "#ffffff",
@@ -123,6 +127,12 @@ export function QrCodeDisplay({
         stripImageZoom: qrSf?.stripImageZoom,
       }
     : null
+
+  // Type-specific preview data
+  const activeProgramType = activeProgram?.programType ?? programs[0]?.programType
+  const activeProgramConfig = activeProgram?.programConfig ?? programs[0]?.programConfig
+  const couponConfig = activeProgramType === "COUPON" ? parseCouponConfig(activeProgramConfig) : null
+  const membershipConfig = activeProgramType === "MEMBERSHIP" ? parseMembershipConfig(activeProgramConfig) : null
   // Pull resolved primary color for the poster accent bar
   const accentColor =
     activeProgramDesign?.primaryColor ??
@@ -242,8 +252,13 @@ export function QrCodeDisplay({
       const rewardFontSize = Math.round(canvas.width * 0.028)
       ctx.fillStyle = "#999999"
       ctx.font = `400 ${rewardFontSize}px -apple-system, 'Segoe UI', sans-serif`
+      const rewardText = activeProgramType === "COUPON" && couponConfig
+        ? formatCouponValue(couponConfig)
+        : activeProgramType === "MEMBERSHIP" && membershipConfig
+          ? `${membershipConfig.membershipTier} membership`
+          : `Earn a free ${rewardDescription} after ${visitsRequired} visits`
       ctx.fillText(
-        `Earn a free ${rewardDescription} after ${visitsRequired} visits`,
+        rewardText,
         canvas.width / 2,
         qrY +
           qrDrawSize +
@@ -354,7 +369,11 @@ export function QrCodeDisplay({
                     <>
                       <p className="text-[12px] font-medium text-gray-700">{activeProgram.name}</p>
                       <p className="text-[11px] text-gray-400">
-                        {activeProgram.rewardDescription} after {activeProgram.visitsRequired} visits
+                        {activeProgram.programType === "COUPON" && couponConfig
+                          ? formatCouponValue(couponConfig)
+                          : activeProgram.programType === "MEMBERSHIP" && membershipConfig
+                            ? `${membershipConfig.membershipTier} membership`
+                            : `${activeProgram.rewardDescription} after ${activeProgram.visitsRequired} visits`}
                       </p>
                     </>
                   ) : (
@@ -375,8 +394,17 @@ export function QrCodeDisplay({
                       programName={activeProgram?.name ?? programs[0]?.name ?? "Loyalty Program"}
                       rewardDescription={rewardDescription}
                       totalVisits={visitsRequired}
-                      currentVisits={0}
+                      currentVisits={activeProgramType === "STAMP_CARD" || !activeProgramType ? 0 : 0}
                       compact
+                      // Coupon props
+                      discountText={couponConfig ? formatCouponValue(couponConfig) : undefined}
+                      couponCode={couponConfig?.couponCode}
+                      validUntil={couponConfig?.validUntil
+                        ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                        : activeProgramType === "COUPON" ? "No expiry" : undefined}
+                      // Membership props
+                      tierName={membershipConfig?.membershipTier}
+                      benefits={membershipConfig?.benefits}
                     />
                   </div>
                 )}

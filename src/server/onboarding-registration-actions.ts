@@ -115,6 +115,7 @@ export async function createRestaurant(input: z.infer<typeof createRestaurantSch
       data: {
         restaurantId: restaurant.id,
         name: "Loyalty Program",
+        programType: "STAMP_CARD",
         visitsRequired: 10,
         rewardDescription: "Free reward",
         rewardExpiryDays: 90,

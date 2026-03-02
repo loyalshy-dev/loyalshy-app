@@ -1,4 +1,4 @@
-import type { CardShape, PatternStyle, ProgressStyle, LabelFormat, StampGridConfig } from "./card-design"
+import type { CardType, CardShape, PatternStyle, ProgressStyle, LabelFormat, StampGridConfig } from "./card-design"
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -11,6 +11,7 @@ export type CardTemplate = {
   category: RestaurantCategory
   tags: string[]
   design: {
+    cardType?: CardType // defaults to "STAMP" if undefined (backward compat)
     shape: CardShape
     primaryColor: string
     secondaryColor: string
@@ -454,6 +455,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "fine-dining",
     tags: ["gold", "shield", "premium", "classic"],
     design: {
+      cardType: "TIER",
       shape: "INFO_RICH",
       primaryColor: "#1a1a2e",
       secondaryColor: "#c9a96e",
@@ -472,6 +474,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bar",
     tags: ["vip", "dark", "purple", "star", "nightlife"],
     design: {
+      cardType: "TIER",
       shape: "SHOWCASE",
       primaryColor: "#1a0030",
       secondaryColor: "#9c27b0",
@@ -490,6 +493,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "general",
     tags: ["silver", "navy", "circle", "professional"],
     design: {
+      cardType: "TIER",
       shape: "CLEAN",
       primaryColor: "#1a237e",
       secondaryColor: "#90caf9",
@@ -508,6 +512,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "fine-dining",
     tags: ["burgundy", "gold", "regal", "shield", "exclusive"],
     design: {
+      cardType: "TIER",
       shape: "SHOWCASE",
       primaryColor: "#4a0010",
       secondaryColor: "#c9a96e",
@@ -526,6 +531,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "casual",
     tags: ["gamified", "gradient", "star", "bold", "progress"],
     design: {
+      cardType: "TIER",
       shape: "SHOWCASE",
       primaryColor: "#1565c0",
       secondaryColor: "#00bfa5",
@@ -546,6 +552,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "general",
     tags: ["bold", "red", "urgent", "deal", "ticket"],
     design: {
+      cardType: "COUPON",
       shape: "INFO_RICH",
       primaryColor: "#c62828",
       secondaryColor: "#ffffff",
@@ -564,6 +571,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bar",
     tags: ["neon", "bar", "happy hour", "ticket", "nightlife"],
     design: {
+      cardType: "COUPON",
       shape: "SHOWCASE",
       primaryColor: "#0d0d0d",
       secondaryColor: "#00e676",
@@ -582,6 +590,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "bakery",
     tags: ["pastel", "sweet", "bakery", "bold"],
     design: {
+      cardType: "COUPON",
       shape: "SHOWCASE",
       primaryColor: "#f06292",
       secondaryColor: "#fff8e1",
@@ -600,6 +609,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "cafe",
     tags: ["warm", "minimal", "welcome", "cafe", "first visit"],
     design: {
+      cardType: "COUPON",
       shape: "CLEAN",
       primaryColor: "#fff8f0",
       secondaryColor: "#795548",
@@ -618,10 +628,49 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     category: "fine-dining",
     tags: ["vip", "dark", "exclusive", "bold", "fine-dining"],
     design: {
+      cardType: "COUPON",
       shape: "INFO_RICH",
       primaryColor: "#0a0a0a",
       secondaryColor: "#c9a96e",
       textColor: "#f5f0e8",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: null,
+    },
+  },
+
+  {
+    id: "coupon-simple-offer",
+    name: "Simple Offer",
+    description: "Clean and minimal — a straightforward discount for any venue",
+    category: "general",
+    tags: ["simple", "clean", "minimal", "offer"],
+    design: {
+      cardType: "COUPON",
+      shape: "CLEAN",
+      primaryColor: "#212121",
+      secondaryColor: "#757575",
+      textColor: "#ffffff",
+      patternStyle: "NONE",
+      progressStyle: "NUMBERS",
+      labelFormat: "UPPERCASE",
+      palettePreset: "charcoal",
+    },
+  },
+
+  {
+    id: "tier-modern-member",
+    name: "Modern Member",
+    description: "Dark teal and contemporary — a fresh take on membership cards",
+    category: "general",
+    tags: ["modern", "teal", "dark", "fresh", "member"],
+    design: {
+      cardType: "TIER",
+      shape: "CLEAN",
+      primaryColor: "#0d3b3b",
+      secondaryColor: "#4db6ac",
+      textColor: "#ffffff",
       patternStyle: "NONE",
       progressStyle: "NUMBERS",
       labelFormat: "UPPERCASE",

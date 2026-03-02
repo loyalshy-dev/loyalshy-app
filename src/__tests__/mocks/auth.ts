@@ -113,6 +113,7 @@ export function createMockEnrollment(overrides?: Record<string, unknown>) {
     loyaltyProgram: {
       id: "program-1",
       name: "Test Program",
+      programType: "STAMP_CARD",
       visitsRequired: 10,
       rewardDescription: "Free coffee",
       rewardExpiryDays: 30,

@@ -176,6 +176,7 @@ export function applyPaletteToTemplate(
   }
 
   return {
+    cardType: d.cardType,
     shape: d.shape,
     primaryColor,
     secondaryColor,

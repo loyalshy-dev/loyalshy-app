@@ -10,6 +10,7 @@ import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { buildCardUrl } from "@/lib/card-access"
+import { parseCouponConfig } from "@/lib/program-config"
 import type { PublicProgramInfo } from "@/types/enrollment"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -90,6 +91,7 @@ export async function getRestaurantBySlug(
         select: {
           id: true,
           name: true,
+          programType: true,
           visitsRequired: true,
           rewardDescription: true,
           cardDesign: {
@@ -130,6 +132,7 @@ export async function getRestaurantBySlug(
     programs: restaurant.loyaltyPrograms.map((p) => ({
       id: p.id,
       name: p.name,
+      programType: p.programType,
       visitsRequired: p.visitsRequired,
       rewardDescription: p.rewardDescription,
       cardDesign: p.cardDesign
@@ -323,7 +326,7 @@ export async function joinProgram(
       restaurantId: restaurant.id,
       status: "ACTIVE",
     },
-    select: { id: true },
+    select: { id: true, programType: true, config: true, rewardExpiryDays: true },
   })
 
   if (!program) {
@@ -445,6 +448,30 @@ export async function joinProgram(
         },
       },
     })
+
+    // Auto-create coupon reward for new COUPON enrollments
+    if (program.programType === "COUPON") {
+      const couponConfig = parseCouponConfig(program.config)
+      const expiresAt = couponConfig?.validUntil
+        ? new Date(couponConfig.validUntil)
+        : program.rewardExpiryDays > 0
+          ? new Date(Date.now() + program.rewardExpiryDays * 86_400_000)
+          : new Date(Date.now() + 365 * 86_400_000) // default 1 year
+
+      await db.reward.create({
+        data: {
+          customerId: customer.id,
+          restaurantId: restaurant.id,
+          loyaltyProgramId: program.id,
+          enrollmentId: enrollment.id,
+          status: "AVAILABLE",
+          expiresAt,
+        },
+      })
+
+      // Update enrollment's rewards cache for return value
+      enrollment = { ...enrollment, rewards: [{ id: "auto-created" }] }
+    }
   }
 
   return {

@@ -20,6 +20,8 @@ import {
   archiveLoyaltyProgram,
 } from "@/server/settings-actions"
 import type { ProgramWithDesign } from "@/server/settings-actions"
+import { parseCouponConfig, parseMembershipConfig } from "@/lib/program-config"
+import { PROGRAM_TYPE_META, type ProgramType } from "@/types/program-types"
 
 type LoyaltyForm = {
   name: string
@@ -30,6 +32,17 @@ type LoyaltyForm = {
   status: "DRAFT" | "ACTIVE" | "ARCHIVED"
   startsAt: string
   endsAt: string
+  // Coupon config fields
+  discountType: string
+  discountValue: number
+  couponDescription: string
+  validUntil: string
+  redemptionLimit: string
+  // Membership config fields
+  membershipTier: string
+  benefits: string
+  validDuration: string
+  customDurationDays: number
 }
 
 type Restaurant = {
@@ -54,6 +67,14 @@ export function ProgramEditor({
   const [showWarning, setShowWarning] = useState(false)
   const [resetProgress, setResetProgress] = useState(false)
 
+  const programType = (program.programType ?? "STAMP_CARD") as ProgramType
+  const isStampCard = programType === "STAMP_CARD"
+  const isCoupon = programType === "COUPON"
+  const isMembership = programType === "MEMBERSHIP"
+
+  const couponConfig = isCoupon ? parseCouponConfig(program.config) : null
+  const membershipConfig = isMembership ? parseMembershipConfig(program.config) : null
+
   const {
     register,
     handleSubmit,
@@ -71,25 +92,63 @@ export function ProgramEditor({
       endsAt: program.endsAt
         ? new Date(program.endsAt).toISOString().slice(0, 10)
         : "",
+      // Coupon defaults
+      discountType: couponConfig?.discountType ?? "percentage",
+      discountValue: couponConfig?.discountValue ?? 10,
+      couponDescription: couponConfig?.couponDescription ?? "",
+      validUntil: couponConfig?.validUntil ?? "",
+      redemptionLimit: couponConfig?.redemptionLimit ?? "single",
+      // Membership defaults
+      membershipTier: membershipConfig?.membershipTier ?? "",
+      benefits: membershipConfig?.benefits ?? "",
+      validDuration: membershipConfig?.validDuration ?? "monthly",
+      customDurationDays: membershipConfig?.customDurationDays ?? 30,
     },
   })
 
   const visitsRequired = watch("visitsRequired")
   const visitsChanged =
     Number(visitsRequired) !== program.visitsRequired
+  const validDuration = watch("validDuration")
+
+  function buildConfig(data: LoyaltyForm): Record<string, unknown> | undefined {
+    if (isCoupon) {
+      return {
+        discountType: data.discountType,
+        discountValue: data.discountValue,
+        couponDescription: data.couponDescription || undefined,
+        validUntil: data.validUntil || undefined,
+        redemptionLimit: data.redemptionLimit,
+        terms: data.termsAndConditions || undefined,
+      }
+    }
+    if (isMembership) {
+      return {
+        membershipTier: data.membershipTier,
+        benefits: data.benefits,
+        validDuration: data.validDuration,
+        ...(data.validDuration === "custom"
+          ? { customDurationDays: data.customDurationDays }
+          : {}),
+        terms: data.termsAndConditions || undefined,
+      }
+    }
+    return undefined
+  }
 
   function onSubmit(data: LoyaltyForm) {
-    if (visitsChanged && !showWarning) {
+    if (isStampCard && visitsChanged && !showWarning) {
       setShowWarning(true)
       return
     }
 
     startTransition(async () => {
+      const config = buildConfig(data)
       const result = await updateLoyaltyProgram({
         restaurantId: restaurant.id,
         programId: program.id,
         name: data.name,
-        visitsRequired: data.visitsRequired,
+        visitsRequired: isStampCard ? data.visitsRequired : 1,
         rewardDescription: data.rewardDescription,
         rewardExpiryDays: data.rewardExpiryDays,
         termsAndConditions: data.termsAndConditions,
@@ -97,6 +156,7 @@ export function ProgramEditor({
         startsAt: new Date(data.startsAt),
         endsAt: data.endsAt ? new Date(data.endsAt) : null,
         resetProgress,
+        ...(config ? { config } : {}),
       })
       if ("error" in result) {
         toast.error(String(result.error))
@@ -129,9 +189,18 @@ export function ProgramEditor({
   }
 
   const isArchived = program.status === "ARCHIVED"
+  const typeMeta = PROGRAM_TYPE_META[programType]
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {/* Program Type badge */}
+      {typeMeta && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <typeMeta.icon className="h-3.5 w-3.5" />
+          <span className="font-medium">{typeMeta.label}</span>
+        </div>
+      )}
+
       {/* Program Details */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
@@ -146,55 +215,201 @@ export function ProgramEditor({
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor={`visits-${program.id}`}>Visits Required</Label>
-          <Input
-            id={`visits-${program.id}`}
-            type="number"
-            min={3}
-            max={30}
-            {...register("visitsRequired", { valueAsNumber: true })}
-            disabled={isArchived}
-          />
-          <p className="text-xs text-muted-foreground">
-            Number of visits before a customer earns a reward (3-30).
-          </p>
-        </div>
+        {/* Stamp-only fields */}
+        {isStampCard && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor={`visits-${program.id}`}>Visits Required</Label>
+              <Input
+                id={`visits-${program.id}`}
+                type="number"
+                min={3}
+                max={30}
+                {...register("visitsRequired", { valueAsNumber: true })}
+                disabled={isArchived}
+              />
+              <p className="text-xs text-muted-foreground">
+                Number of visits before a customer earns a reward (3-30).
+              </p>
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor={`expiry-${program.id}`}>
-            Reward Expiry (Days)
-          </Label>
-          <Input
-            id={`expiry-${program.id}`}
-            type="number"
-            min={0}
-            max={365}
-            {...register("rewardExpiryDays", { valueAsNumber: true })}
-            disabled={isArchived}
-          />
-          <p className="text-xs text-muted-foreground">
-            Set to 0 for rewards that never expire.
-          </p>
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor={`expiry-${program.id}`}>
+                Reward Expiry (Days)
+              </Label>
+              <Input
+                id={`expiry-${program.id}`}
+                type="number"
+                min={0}
+                max={365}
+                {...register("rewardExpiryDays", { valueAsNumber: true })}
+                disabled={isArchived}
+              />
+              <p className="text-xs text-muted-foreground">
+                Set to 0 for rewards that never expire.
+              </p>
+            </div>
 
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
-          <Input
-            id={`reward-${program.id}`}
-            {...register("rewardDescription", {
-              required: "Reward description is required",
-            })}
-            placeholder="e.g., Free coffee or dessert"
-            disabled={isArchived}
-          />
-          {errors.rewardDescription && (
-            <p className="text-xs text-destructive">
-              {errors.rewardDescription.message}
-            </p>
-          )}
-        </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
+              <Input
+                id={`reward-${program.id}`}
+                {...register("rewardDescription", {
+                  required: "Reward description is required",
+                })}
+                placeholder="e.g., Free coffee or dessert"
+                disabled={isArchived}
+              />
+              {errors.rewardDescription && (
+                <p className="text-xs text-destructive">
+                  {errors.rewardDescription.message}
+                </p>
+              )}
+            </div>
+          </>
+        )}
 
+        {/* Coupon-specific fields */}
+        {isCoupon && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor={`discount-type-${program.id}`}>Discount Type</Label>
+              <select
+                id={`discount-type-${program.id}`}
+                {...register("discountType")}
+                disabled={isArchived}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="percentage">Percentage Off</option>
+                <option value="fixed">Fixed Amount Off</option>
+                <option value="freebie">Free Item</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`discount-value-${program.id}`}>Discount Value</Label>
+              <Input
+                id={`discount-value-${program.id}`}
+                type="number"
+                min={0}
+                max={10000}
+                {...register("discountValue", { valueAsNumber: true })}
+                disabled={isArchived}
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor={`coupon-desc-${program.id}`}>Coupon Description</Label>
+              <Input
+                id={`coupon-desc-${program.id}`}
+                {...register("couponDescription")}
+                placeholder="e.g., Get 20% off your next order"
+                disabled={isArchived}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`valid-until-${program.id}`}>Valid Until</Label>
+              <Input
+                id={`valid-until-${program.id}`}
+                type="date"
+                {...register("validUntil")}
+                disabled={isArchived}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`redemption-limit-${program.id}`}>Redemption Limit</Label>
+              <select
+                id={`redemption-limit-${program.id}`}
+                {...register("redemptionLimit")}
+                disabled={isArchived}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="single">Single Use</option>
+                <option value="unlimited">Unlimited</option>
+              </select>
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
+              <Input
+                id={`reward-${program.id}`}
+                {...register("rewardDescription", {
+                  required: "Reward description is required",
+                })}
+                placeholder="e.g., 20% off"
+                disabled={isArchived}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Membership-specific fields */}
+        {isMembership && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor={`tier-${program.id}`}>Membership Tier</Label>
+              <Input
+                id={`tier-${program.id}`}
+                {...register("membershipTier", { required: "Tier name is required" })}
+                placeholder="e.g., VIP, Gold, Premium"
+                disabled={isArchived}
+              />
+              {errors.membershipTier && (
+                <p className="text-xs text-destructive">{errors.membershipTier.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`duration-${program.id}`}>Duration</Label>
+              <select
+                id={`duration-${program.id}`}
+                {...register("validDuration")}
+                disabled={isArchived}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+                <option value="lifetime">Lifetime</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            {validDuration === "custom" && (
+              <div className="space-y-2">
+                <Label htmlFor={`custom-days-${program.id}`}>Custom Duration (Days)</Label>
+                <Input
+                  id={`custom-days-${program.id}`}
+                  type="number"
+                  min={1}
+                  max={3650}
+                  {...register("customDurationDays", { valueAsNumber: true })}
+                  disabled={isArchived}
+                />
+              </div>
+            )}
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor={`benefits-${program.id}`}>Benefits</Label>
+              <Textarea
+                id={`benefits-${program.id}`}
+                {...register("benefits", { required: "Benefits are required" })}
+                placeholder="List the perks members receive..."
+                rows={3}
+                disabled={isArchived}
+              />
+              {errors.benefits && (
+                <p className="text-xs text-destructive">{errors.benefits.message}</p>
+              )}
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
+              <Input
+                id={`reward-${program.id}`}
+                {...register("rewardDescription", {
+                  required: "Reward description is required",
+                })}
+                placeholder="e.g., VIP Member"
+                disabled={isArchived}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Shared fields */}
         <div className="space-y-2">
           <Label htmlFor={`status-${program.id}`}>Status</Label>
           <select
@@ -248,8 +463,8 @@ export function ProgramEditor({
         />
       </div>
 
-      {/* Visits Changed Warning */}
-      {showWarning && visitsChanged && (
+      {/* Visits Changed Warning (stamp only) */}
+      {isStampCard && showWarning && visitsChanged && (
         <div className="rounded-lg border border-warning/50 bg-warning/5 p-4">
           <div className="flex gap-3">
             <AlertTriangle className="h-5 w-5 shrink-0 text-warning" />

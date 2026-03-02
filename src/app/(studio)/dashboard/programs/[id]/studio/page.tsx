@@ -85,6 +85,8 @@ export default async function StudioPage(props: {
     <StudioLayout
       programId={programId}
       programName={program.name}
+      programType={program.programType}
+      programConfig={program.config}
       restaurantName={restaurant.name}
       restaurantLogo={restaurant.logo}
       restaurantLogoApple={restaurant.logoApple}

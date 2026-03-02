@@ -20,7 +20,7 @@ import { matchTemplates, applyPaletteToTemplate } from "@/lib/wallet/template-ma
 import type { ExtractedPalette } from "@/lib/color-extraction"
 import { extractPaletteFromLogoUrl } from "@/server/settings-actions"
 import { getStampIconPaths, getRewardIconPaths } from "@/lib/wallet/stamp-icons"
-import type { StampGridConfig } from "@/lib/wallet/card-design"
+import type { CardType, StampGridConfig } from "@/lib/wallet/card-design"
 
 // ─── Vibe Options ───────────────────────────────────────────
 
@@ -42,6 +42,7 @@ function TemplateSwatchPreview({
   shape,
   useStampGrid,
   stampGridConfig,
+  templateCardType,
   height = 48,
 }: {
   primaryColor: string
@@ -50,9 +51,11 @@ function TemplateSwatchPreview({
   shape: string
   useStampGrid?: boolean
   stampGridConfig?: StampGridConfig
+  templateCardType?: CardType
   height?: number
 }) {
-  if (useStampGrid && stampGridConfig) {
+  // Only show stamp grid swatch for STAMP templates
+  if (useStampGrid && stampGridConfig && (!templateCardType || templateCardType === "STAMP")) {
     const stampPaths = getStampIconPaths(stampGridConfig.stampIcon)
     const rewardPaths = getRewardIconPaths(stampGridConfig.rewardIcon)
     const borderRadius = stampGridConfig.stampShape === "circle" ? "50%"
@@ -154,11 +157,12 @@ type Props = {
   store: CardDesignStoreApi
   restaurantId: string
   restaurantLogo: string | null
+  cardType?: CardType
 }
 
 // ─── Component ──────────────────────────────────────────────
 
-export function TemplatePanel({ store, restaurantId, restaurantLogo }: Props) {
+export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }: Props) {
   const currentTemplateId = useStore(store, (s) => s.wallet.templateId)
   const [categoryFilter, setCategoryFilter] = useState<RestaurantCategory | "all">("all")
 
@@ -171,8 +175,11 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo }: Props) {
   // Cache palette per logo URL to avoid redundant server calls
   const paletteCacheRef = useRef<{ url: string; palette: ExtractedPalette } | null>(null)
 
-  // Filter templates
+  // Filter templates by cardType and category
   const filtered = CARD_TEMPLATES.filter((t) => {
+    // Filter by card type: match template's cardType (default "STAMP" for untagged)
+    const templateCardType = t.design.cardType ?? "STAMP"
+    if (cardType && templateCardType !== cardType) return false
     if (categoryFilter !== "all" && t.category !== categoryFilter) return false
     return true
   })
@@ -257,8 +264,11 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo }: Props) {
         if (palette) setMatchPalette(palette)
       }
 
-      // Run template matching
-      const matches = matchTemplates(palette, brandCategory, 4)
+      // Run template matching (filter by cardType)
+      const allMatches = matchTemplates(palette, brandCategory, 20)
+      const matches = cardType
+        ? allMatches.filter((m) => (m.template.design.cardType ?? "STAMP") === cardType).slice(0, 4)
+        : allMatches.slice(0, 4)
 
       setMatchResults(
         matches.map((m) => ({ template: m.template, palette, matchedCategory: brandCategory }))
@@ -461,6 +471,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo }: Props) {
                     shape={design.shape}
                     useStampGrid={design.useStampGrid}
                     stampGridConfig={design.stampGridConfig}
+                    templateCardType={template.design.cardType}
                     height={40}
                   />
                   <div style={{ padding: "4px 6px" }}>
@@ -558,6 +569,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo }: Props) {
                 shape={t.design.shape}
                 useStampGrid={t.design.useStampGrid}
                 stampGridConfig={t.design.stampGridConfig}
+                templateCardType={t.design.cardType}
               />
               <div style={{ padding: "6px 8px" }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: "var(--foreground)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

@@ -17,6 +17,7 @@ import {
   PartyPopper,
   CreditCard,
   ScanLine,
+  Ticket,
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -31,8 +32,10 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   searchCustomersForVisit,
   registerVisit,
+  redeemCoupon,
   lookupEnrollmentByWalletPassId,
   type VisitSearchResult,
+  type RedeemCouponResult,
 } from "@/server/visit-actions"
 import type { EnrollmentSummary } from "@/types/enrollment"
 import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
@@ -97,6 +100,7 @@ export function RegisterVisitDialog({
     visitsRequired: 10,
     programName: "",
   })
+  const [couponResult, setCouponResult] = useState<RedeemCouponResult | null>(null)
   const [scanMode, setScanMode] = useState(false)
   const [scanError, setScanError] = useState<string | null>(null)
   const [isScanLooking, setIsScanLooking] = useState(false)
@@ -139,7 +143,7 @@ export function RegisterVisitDialog({
           if (match) {
             setSelectedCustomer(match)
             const activeEnrollments = match.enrollments.filter(
-              (e) => e.status === "ACTIVE"
+              (e) => e.status === "ACTIVE" && (e.programType === "STAMP_CARD" || e.programType === "COUPON")
             )
             if (activeEnrollments.length === 1) {
               // Auto-select the only enrollment
@@ -161,6 +165,7 @@ export function RegisterVisitDialog({
         setResults([])
         setSelectedCustomer(null)
         setSelectedEnrollment(null)
+        setCouponResult(null)
         setScanMode(false)
         setScanError(null)
         setIsScanLooking(false)
@@ -202,7 +207,7 @@ export function RegisterVisitDialog({
   function handleSelectCustomer(customer: VisitSearchResult) {
     setSelectedCustomer(customer)
     const activeEnrollments = customer.enrollments.filter(
-      (e) => e.status === "ACTIVE"
+      (e) => e.status === "ACTIVE" && (e.programType === "STAMP_CARD" || e.programType === "COUPON")
     )
     if (activeEnrollments.length === 1) {
       // Auto-select the only enrollment
@@ -269,6 +274,36 @@ export function RegisterVisitDialog({
     })
   }
 
+  // Confirm coupon redemption
+  function handleConfirmCoupon() {
+    if (!selectedEnrollment) return
+
+    startRegister(async () => {
+      const result = await redeemCoupon(selectedEnrollment.enrollmentId)
+
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to redeem coupon")
+        return
+      }
+
+      setCouponResult(result)
+      setStep("success")
+
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(10)
+      }
+
+      toast.success(
+        `Coupon redeemed for ${selectedCustomer?.fullName}`,
+        { description: result.discountText }
+      )
+
+      autoDismissRef.current = setTimeout(() => {
+        onOpenChange(false)
+      }, 2500)
+    })
+  }
+
   // QR scan result handler
   async function handleScanResult(data: string) {
     setScanError(null)
@@ -324,7 +359,7 @@ export function RegisterVisitDialog({
         setSelectedEnrollment(null)
       } else {
         const activeEnrollments = selectedCustomer?.enrollments.filter(
-          (e) => e.status === "ACTIVE"
+          (e) => e.status === "ACTIVE" && (e.programType === "STAMP_CARD" || e.programType === "COUPON")
         ) ?? []
         if (activeEnrollments.length > 1) {
           // Go back to program picker
@@ -399,6 +434,7 @@ export function RegisterVisitDialog({
             enrollment={selectedEnrollment}
             isRegistering={isRegistering}
             onConfirm={handleConfirm}
+            onConfirmCoupon={handleConfirmCoupon}
             onBack={handleBack}
             cardDesign={selectedEnrollment?.cardDesign ?? null}
           />
@@ -411,6 +447,7 @@ export function RegisterVisitDialog({
             newCycleVisits={resultVisits.newCycleVisits}
             visitsRequired={resultVisits.visitsRequired}
             programName={resultVisits.programName}
+            couponResult={couponResult}
             onClose={() => onOpenChange(false)}
           />
         )}
@@ -565,7 +602,7 @@ function ProgramPickerStep({
   onBack: () => void
 }) {
   const activeEnrollments = customer.enrollments.filter(
-    (e) => e.status === "ACTIVE"
+    (e) => e.status === "ACTIVE" && (e.programType === "STAMP_CARD" || e.programType === "COUPON")
   )
 
   return (
@@ -602,11 +639,19 @@ function ProgramPickerStep({
       {/* Program cards */}
       <ScrollArea className="max-h-[50vh] min-h-[120px]">
         <div className="px-4 py-3 space-y-2">
+          {activeEnrollments.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground">No active programs</p>
+            </div>
+          )}
           {activeEnrollments.map((enrollment) => {
-            const pct = Math.min(
-              (enrollment.currentCycleVisits / enrollment.visitsRequired) * 100,
-              100
-            )
+            const isCoupon = enrollment.programType === "COUPON"
+            const pct = isCoupon
+              ? 100
+              : Math.min(
+                  (enrollment.currentCycleVisits / enrollment.visitsRequired) * 100,
+                  100
+                )
 
             return (
               <button
@@ -616,23 +661,40 @@ function ProgramPickerStep({
                 onClick={() => onSelect(enrollment)}
               >
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand/10">
-                  <CreditCard className="size-5 text-brand" />
+                  {isCoupon ? (
+                    <Ticket className="size-5 text-brand" />
+                  ) : (
+                    <CreditCard className="size-5 text-brand" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold truncate">
-                    {enrollment.programName}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-[120px]">
-                      <div
-                        className="h-full rounded-full bg-brand transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="text-[12px] font-medium tabular-nums text-brand">
-                      {enrollment.currentCycleVisits}/{enrollment.visitsRequired}
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[13px] font-semibold truncate">
+                      {enrollment.programName}
+                    </p>
+                    {isCoupon && (
+                      <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
+                        Coupon
+                      </span>
+                    )}
                   </div>
+                  {isCoupon ? (
+                    <p className="text-[12px] font-medium text-success mt-1">
+                      Ready to redeem
+                    </p>
+                  ) : (
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-[120px]">
+                        <div
+                          className="h-full rounded-full bg-brand transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-[12px] font-medium tabular-nums text-brand">
+                        {enrollment.currentCycleVisits}/{enrollment.visitsRequired}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <ArrowLeft className="size-4 text-muted-foreground rotate-180 shrink-0" />
               </button>
@@ -665,6 +727,7 @@ function ConfirmStep({
   enrollment,
   isRegistering,
   onConfirm,
+  onConfirmCoupon,
   onBack,
   cardDesign = null,
 }: {
@@ -672,6 +735,7 @@ function ConfirmStep({
   enrollment: EnrollmentSummary | null
   isRegistering: boolean
   onConfirm: () => void
+  onConfirmCoupon: () => void
   onBack: () => void
   /** Card design for the selected enrollment's program. Pass once
    *  EnrollmentSummary includes cardDesign data. */
@@ -702,6 +766,7 @@ function ConfirmStep({
     )
   }
 
+  const isCoupon = enrollment.programType === "COUPON"
   const filled = enrollment.currentCycleVisits
   const nextVisit = filled + 1
   const visitsRequired = enrollment.visitsRequired
@@ -711,6 +776,7 @@ function ConfirmStep({
   const visitSg = visitSf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
   const design: WalletPassDesign | null = cardDesign
     ? {
+        cardType: (isCoupon ? "COUPON" : "STAMP") as WalletPassDesign["cardType"],
         shape: (cardDesign.shape ?? "CLEAN") as WalletPassDesign["shape"],
         primaryColor: cardDesign.primaryColor ?? "#1a1a2e",
         secondaryColor: cardDesign.secondaryColor ?? "#ffffff",
@@ -746,7 +812,9 @@ function ConfirmStep({
         >
           <ArrowLeft className="size-4" />
         </Button>
-        <DialogTitle className="text-base">Confirm Visit</DialogTitle>
+        <DialogTitle className="text-base">
+          {isCoupon ? "Redeem Coupon" : "Confirm Visit"}
+        </DialogTitle>
       </div>
 
       {/* Customer info */}
@@ -760,7 +828,9 @@ function ConfirmStep({
         <div className="text-center">
           <p className="text-[15px] font-semibold">{customer.fullName}</p>
           <p className="text-[12px] text-muted-foreground mt-0.5">
-            {enrollment.programName} — Visit #{enrollment.totalVisits + 1} — {nextVisit}/{visitsRequired} in current cycle
+            {isCoupon
+              ? `${enrollment.programName} — Coupon Redemption`
+              : `${enrollment.programName} — Visit #${enrollment.totalVisits + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
           </p>
         </div>
       </div>
@@ -774,12 +844,19 @@ function ConfirmStep({
             programName={enrollment.programName}
             restaurantName=""
             customerName={customer.fullName}
-            currentVisits={nextVisit}
-            totalVisits={visitsRequired}
+            currentVisits={isCoupon ? 1 : nextVisit}
+            totalVisits={isCoupon ? 1 : visitsRequired}
             rewardDescription=""
             compact
             width={280}
           />
+        </div>
+      ) : isCoupon ? (
+        <div className="px-6">
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-6">
+            <Ticket className="size-10 text-brand" />
+            <p className="text-[13px] font-medium text-center">Ready to redeem</p>
+          </div>
         </div>
       ) : (
         <StampCard filled={filled} total={visitsRequired} highlightNext />
@@ -789,15 +866,17 @@ function ConfirmStep({
       <div className="p-4 pt-6">
         <Button
           className="w-full h-11 text-[14px] font-medium gap-2"
-          onClick={onConfirm}
+          onClick={isCoupon ? onConfirmCoupon : onConfirm}
           disabled={isRegistering}
         >
           {isRegistering ? (
             <Loader2 className="size-4 animate-spin" />
+          ) : isCoupon ? (
+            <Ticket className="size-4" />
           ) : (
             <Stamp className="size-4" />
           )}
-          Register Visit
+          {isCoupon ? "Redeem Coupon" : "Register Visit"}
         </Button>
       </div>
     </div>
@@ -867,6 +946,7 @@ function SuccessStep({
   newCycleVisits,
   visitsRequired,
   programName,
+  couponResult,
   onClose,
 }: {
   customer: VisitSearchResult
@@ -875,6 +955,7 @@ function SuccessStep({
   newCycleVisits: number
   visitsRequired: number
   programName: string
+  couponResult: RedeemCouponResult | null
   onClose: () => void
 }) {
   return (
@@ -882,7 +963,30 @@ function SuccessStep({
       className="flex flex-col items-center py-10 px-6 cursor-pointer"
       onClick={onClose}
     >
-      {wasRewardEarned ? (
+      {couponResult ? (
+        <>
+          <div className="relative">
+            <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
+              <AnimatedCheckmark />
+            </div>
+            <ConfettiDots />
+          </div>
+          <p className="text-xl font-bold mt-6">Coupon Redeemed!</p>
+          <p className="text-[13px] text-muted-foreground mt-1 text-center">
+            {customer.fullName} — {couponResult.programName}
+          </p>
+          {couponResult.discountText && (
+            <p className="text-[14px] font-semibold text-brand mt-2">
+              {couponResult.discountText}
+            </p>
+          )}
+          {couponResult.redemptionLimit === "unlimited" && (
+            <p className="text-[11px] text-muted-foreground mt-2">
+              A new coupon has been issued automatically
+            </p>
+          )}
+        </>
+      ) : wasRewardEarned ? (
         <>
           {/* Celebration animation */}
           <div className="relative">

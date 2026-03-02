@@ -18,6 +18,7 @@ import type { PublicProgramInfo } from "@/types/enrollment"
 import { computeTextColor } from "@/lib/wallet/card-design"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/program-config"
 
 type Platform = "apple" | "google"
 type Step = "program-select" | "form" | "card-view" | "success"
@@ -158,6 +159,25 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
 
   function handleContinueWithoutWallet() {
     setStep("success")
+  }
+
+  // Compute type-specific props for a program
+  function getTypeProps(program: PublicProgramInfo) {
+    if (program.programType === "COUPON") {
+      const config = parseCouponConfig(program.cardDesign ? undefined : undefined) // config not on PublicProgramInfo yet
+      return {
+        discountText: program.rewardDescription,
+        validUntil: "No expiry",
+        couponCode: undefined as string | undefined,
+      }
+    }
+    if (program.programType === "MEMBERSHIP") {
+      return {
+        tierName: program.rewardDescription,
+        benefits: "Exclusive perks",
+      }
+    }
+    return {}
   }
 
   // Use selected program's card design, falling back to first program or restaurant defaults
@@ -306,6 +326,7 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
                 totalVisits={activeProgram.visitsRequired}
                 rewardDescription={activeProgram.rewardDescription}
                 hasReward={joinResult.hasAvailableReward}
+                {...getTypeProps(activeProgram)}
               />
             </div>
           )}
@@ -478,6 +499,7 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
                         currentVisits={0}
                         totalVisits={program.visitsRequired}
                         rewardDescription=""
+                        {...getTypeProps(program)}
                       />
                     </div>
 
@@ -486,7 +508,11 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
                         {program.name}
                       </h3>
                       <p className="text-[13px] text-muted-foreground mt-0.5">
-                        {program.rewardDescription} after {program.visitsRequired} visits
+                        {program.programType === "COUPON"
+                          ? program.rewardDescription
+                          : program.programType === "MEMBERSHIP"
+                            ? `${program.rewardDescription}`
+                            : `${program.rewardDescription} after ${program.visitsRequired} visits`}
                       </p>
                     </div>
 
@@ -650,6 +676,7 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
                   currentVisits={0}
                   totalVisits={activeProgram.visitsRequired}
                   rewardDescription={activeProgram.rewardDescription}
+                  {...getTypeProps(activeProgram)}
                 />
               )
             })()}

@@ -20,11 +20,24 @@ import { TemplatePanel } from "./panels/template-panel"
 import { LogoPanel } from "./panels/logo-panel"
 import { saveCardDesign } from "@/server/settings-actions"
 import type { StudioTool } from "@/types/editor"
+import type { CardType } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
+import type { ProgramType } from "@/types/program-types"
+
+/** Map ProgramType → CardType for visual rendering */
+function programTypeToCardType(programType: string): CardType {
+  switch (programType) {
+    case "COUPON": return "COUPON"
+    case "MEMBERSHIP": return "TIER"
+    default: return "STAMP"
+  }
+}
 
 type StudioLayoutProps = {
   programId: string
   programName: string
+  programType: string
+  programConfig: unknown
   restaurantName: string
   restaurantLogo: string | null
   restaurantLogoApple: string | null
@@ -39,6 +52,8 @@ type StudioLayoutProps = {
 export function StudioLayout({
   programId,
   programName,
+  programType,
+  programConfig,
   restaurantName,
   restaurantLogo,
   restaurantLogoApple,
@@ -49,6 +64,7 @@ export function StudioLayout({
   walletData,
   walletPassCount,
 }: StudioLayoutProps) {
+  const cardType = programTypeToCardType(programType)
   // Create store once per mount
   const storeRef = useRef<CardDesignStoreApi | null>(null)
   if (!storeRef.current) {
@@ -74,6 +90,7 @@ export function StudioLayout({
 
   // Build WalletPassDesign from store state
   const design: WalletPassDesign = {
+    cardType,
     shape: wallet.shape,
     primaryColor: wallet.primaryColor,
     secondaryColor: wallet.secondaryColor,
@@ -209,7 +226,7 @@ export function StudioLayout({
 
     switch (ui.activeTool) {
       case "templates":
-        return <TemplatePanel store={store} restaurantId={restaurantId} restaurantLogo={restaurantLogo} />
+        return <TemplatePanel store={store} restaurantId={restaurantId} restaurantLogo={restaurantLogo} cardType={cardType} />
       case "colors":
         return <ColorsPanel store={store} />
       case "shape":
@@ -263,6 +280,7 @@ export function StudioLayout({
           <ToolSelector
             activeTool={ui.activeTool}
             onToolSelect={(tool) => store.getState().setActiveTool(tool)}
+            cardType={cardType}
           />
         )}
 
@@ -275,6 +293,8 @@ export function StudioLayout({
             restaurantName={restaurantName}
             restaurantLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
             programName={programName}
+            programType={programType}
+            programConfig={programConfig}
             visitsRequired={visitsRequired}
             rewardDescription={rewardDescription}
           />
@@ -328,6 +348,7 @@ export function StudioLayout({
         <MobileToolBar
           activeTool={ui.activeTool}
           onToolSelect={(tool) => store.getState().setActiveTool(tool)}
+          cardType={cardType}
         />
       )}
     </div>
@@ -443,11 +464,16 @@ const MOBILE_QUICK_TOOLS: { id: StudioTool; label: string; icon: React.ReactNode
 function MobileToolBar({
   activeTool,
   onToolSelect,
+  cardType,
 }: {
   activeTool: StudioTool | null
   onToolSelect: (tool: StudioTool | null) => void
+  cardType?: CardType
 }) {
   const [showMore, setShowMore] = useState(false)
+  const filteredQuickTools = cardType && cardType !== "STAMP"
+    ? MOBILE_QUICK_TOOLS.filter((t) => t.id !== "progress")
+    : MOBILE_QUICK_TOOLS
 
   return (
     <div
@@ -459,7 +485,7 @@ function MobileToolBar({
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
-      {MOBILE_QUICK_TOOLS.map((tool) => {
+      {filteredQuickTools.map((tool) => {
         const isActive = activeTool === tool.id
         return (
           <button
@@ -538,6 +564,7 @@ function MobileToolBar({
                 onToolSelect(tool)
                 setShowMore(false)
               }}
+              cardType={cardType}
             />
           </div>
         </>

@@ -533,6 +533,7 @@ function EnrollmentProgressSection({
       const cds1Sf = parseStripFilters(enrollment.cardDesign?.editorConfig)
       const cds1Sg = cds1Sf.useStampGrid || cds1Ps === "STAMP_GRID"
       const design: WalletPassDesign = {
+        cardType: ((enrollment.cardDesign as any)?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
         shape: (enrollment.cardDesign as any)?.shape ?? "CLEAN",
         primaryColor: enrollment.cardDesign?.primaryColor ?? "#1a1a2e",
         secondaryColor: enrollment.cardDesign?.secondaryColor ?? "#ffffff",
@@ -603,6 +604,7 @@ function EnrollmentProgressSection({
             const cds2Sf = parseStripFilters(enrollment.cardDesign?.editorConfig)
             const cds2Sg = cds2Sf.useStampGrid || cds2Ps === "STAMP_GRID"
             const design: WalletPassDesign = {
+              cardType: ((enrollment.cardDesign as any)?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
               shape: (enrollment.cardDesign as any)?.shape ?? "CLEAN",
               primaryColor: enrollment.cardDesign?.primaryColor ?? "#1a1a2e",
               secondaryColor: enrollment.cardDesign?.secondaryColor ?? "#ffffff",

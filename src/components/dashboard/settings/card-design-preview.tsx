@@ -1,14 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Pencil, Smartphone, CreditCard } from "lucide-react"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/program-config"
 
 type CardDesignPreviewProps = {
   programId: string
   programName: string
+  programType: string
+  programConfig: unknown
   restaurantName: string
   restaurantLogo: string | null
   restaurantLogoApple: string | null
@@ -40,6 +43,8 @@ const FORMAT_TABS: { id: PreviewFormat; label: string; icon: React.ReactNode }[]
 export function CardDesignPreview({
   programId,
   programName,
+  programType,
+  programConfig,
   restaurantName,
   restaurantLogo,
   restaurantLogoApple,
@@ -54,6 +59,7 @@ export function CardDesignPreview({
   const useStampGrid = sf ? (sf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID") : false
 
   const design: WalletPassDesign = {
+    cardType: (cardDesign?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
     shape: (cardDesign?.shape ?? "CLEAN") as WalletPassDesign["shape"],
     primaryColor: cardDesign?.primaryColor ?? "#1a1a2e",
     secondaryColor: cardDesign?.secondaryColor ?? "#ffffff",
@@ -76,6 +82,16 @@ export function CardDesignPreview({
       ? parseStampGridConfig(cardDesign.editorConfig)
       : undefined,
   }
+
+  // Type-specific preview props
+  const couponConfig = useMemo(
+    () => programType === "COUPON" ? parseCouponConfig(programConfig) : null,
+    [programType, programConfig]
+  )
+  const membershipConfig = useMemo(
+    () => programType === "MEMBERSHIP" ? parseMembershipConfig(programConfig) : null,
+    [programType, programConfig]
+  )
 
   return (
     <div className="space-y-6">
@@ -125,10 +141,19 @@ export function CardDesignPreview({
             logoAppleUrl={restaurantLogoApple}
             logoGoogleUrl={restaurantLogoGoogle}
             programName={programName}
-            currentVisits={4}
+            currentVisits={programType === "STAMP_CARD" ? 4 : 0}
             totalVisits={visitsRequired}
             rewardDescription={rewardDescription}
             customerName="Jane D."
+            // Coupon props
+            discountText={couponConfig ? formatCouponValue(couponConfig) : undefined}
+            couponCode={couponConfig?.couponCode}
+            validUntil={couponConfig?.validUntil
+              ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+              : programType === "COUPON" ? "No expiry" : undefined}
+            // Membership props
+            tierName={membershipConfig?.membershipTier}
+            benefits={membershipConfig?.benefits}
           />
           <p className="text-[11px] text-muted-foreground">
             {format === "apple" && "Apple Wallet pass preview"}

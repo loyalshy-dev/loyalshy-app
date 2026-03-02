@@ -409,8 +409,116 @@ export type PassFieldLayout = {
  * CLEAN: No strip. Primary = progress. Secondary = reward + visits. Auxiliary = member since + name.
  * SHOWCASE: Strip dominates. Primary = progress (overlaid). Secondary = reward only. Fewer fields visible.
  * INFO_RICH: Optional strip. More fields. Header = restaurant + member #. Primary = progress. Secondary = reward + visits + member since. Auxiliary = name.
+ *
+ * COUPON fields: discount (primary), validUntil, couponCode, customerName
+ * TIER fields: tierName (primary), benefits, memberSince, customerName
  */
-export function getFieldLayout(shape: CardShape): PassFieldLayout {
+export function getFieldLayout(shape: CardShape, cardType?: CardType): PassFieldLayout {
+  // ─── COUPON layouts ──────────────────────────────────────
+  if (cardType === "COUPON") {
+    switch (shape) {
+      case "SHOWCASE":
+        return {
+          apple: {
+            header: ["restaurant"],
+            primary: ["discount"],
+            secondary: ["validUntil"],
+            auxiliary: ["customerName"],
+            useStrip: true,
+          },
+          google: {
+            rows: 1,
+            showHeroImage: true,
+            fields: ["discount", "validUntil", "customerName"],
+          },
+        }
+      case "INFO_RICH":
+        return {
+          apple: {
+            header: ["restaurant"],
+            primary: ["discount"],
+            secondary: ["validUntil", "couponCode", "customerName"],
+            auxiliary: [],
+            useStrip: true,
+          },
+          google: {
+            rows: 3,
+            showHeroImage: true,
+            fields: ["discount", "validUntil", "couponCode", "customerName"],
+          },
+        }
+      case "CLEAN":
+      default:
+        return {
+          apple: {
+            header: ["restaurant"],
+            primary: ["discount"],
+            secondary: ["validUntil", "couponCode"],
+            auxiliary: ["customerName"],
+            useStrip: false,
+          },
+          google: {
+            rows: 2,
+            showHeroImage: false,
+            fields: ["discount", "validUntil", "couponCode", "customerName"],
+          },
+        }
+    }
+  }
+
+  // ─── TIER (Membership) layouts ───────────────────────────
+  if (cardType === "TIER") {
+    switch (shape) {
+      case "SHOWCASE":
+        return {
+          apple: {
+            header: ["restaurant"],
+            primary: ["tierName"],
+            secondary: ["memberSince"],
+            auxiliary: ["customerName"],
+            useStrip: true,
+          },
+          google: {
+            rows: 1,
+            showHeroImage: true,
+            fields: ["tierName", "memberSince", "customerName"],
+          },
+        }
+      case "INFO_RICH":
+        return {
+          apple: {
+            header: ["restaurant"],
+            primary: ["tierName"],
+            secondary: ["benefits", "memberSince", "customerName"],
+            auxiliary: [],
+            useStrip: true,
+          },
+          google: {
+            rows: 3,
+            showHeroImage: true,
+            fields: ["tierName", "benefits", "memberSince", "customerName"],
+          },
+        }
+      case "CLEAN":
+      default:
+        return {
+          apple: {
+            header: ["restaurant"],
+            primary: ["tierName"],
+            secondary: ["benefits", "memberSince"],
+            auxiliary: ["customerName"],
+            useStrip: false,
+          },
+          google: {
+            rows: 2,
+            showHeroImage: false,
+            fields: ["tierName", "benefits", "memberSince", "customerName"],
+          },
+        }
+    }
+  }
+
+  // ─── STAMP / POINTS (default) layouts ────────────────────
   switch (shape) {
     case "SHOWCASE":
       return {

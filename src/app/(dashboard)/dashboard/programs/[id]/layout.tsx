@@ -25,7 +25,7 @@ async function ProgramLayoutInner({
   // Validate program belongs to this restaurant
   const program = await db.loyaltyProgram.findFirst({
     where: { id: programId, restaurantId: restaurant.id },
-    select: { id: true, name: true, status: true },
+    select: { id: true, name: true, status: true, programType: true },
   })
 
   if (!program) {
@@ -56,6 +56,8 @@ async function ProgramLayoutInner({
         programId={program.id}
         programName={program.name}
         programStatus={program.status}
+        programType={program.programType}
+        restaurantId={restaurant.id}
         isOwner={isOwner}
       />
       <Suspense

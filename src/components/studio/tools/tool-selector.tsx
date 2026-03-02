@@ -11,10 +11,12 @@ import {
   FileText,
 } from "lucide-react"
 import type { StudioTool } from "@/types/editor"
+import type { CardType } from "@/lib/wallet/card-design"
 
 type ToolSelectorProps = {
   activeTool: StudioTool | null
   onToolSelect: (tool: StudioTool | null) => void
+  cardType?: CardType
 }
 
 type ToolItem = {
@@ -34,7 +36,12 @@ const TOOLS: ToolItem[] = [
   { id: "details", label: "Details", icon: <FileText size={18} /> },
 ]
 
-export function ToolSelector({ activeTool, onToolSelect }: ToolSelectorProps) {
+export function ToolSelector({ activeTool, onToolSelect, cardType }: ToolSelectorProps) {
+  // Hide stamp-specific "Progress" panel for non-STAMP card types
+  const filteredTools = cardType && cardType !== "STAMP"
+    ? TOOLS.filter((t) => t.id !== "progress")
+    : TOOLS
+
   return (
     <div
       style={{
@@ -50,7 +57,7 @@ export function ToolSelector({ activeTool, onToolSelect }: ToolSelectorProps) {
         flexShrink: 0,
       }}
     >
-      {TOOLS.map((tool) => {
+      {filteredTools.map((tool) => {
         const isActive = activeTool === tool.id
         return (
           <button

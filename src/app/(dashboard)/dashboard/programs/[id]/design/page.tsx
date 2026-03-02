@@ -31,6 +31,8 @@ export default async function ProgramDesignPage(props: {
     <CardDesignPreview
       programId={programId}
       programName={program.name}
+      programType={program.programType}
+      programConfig={program.config}
       restaurantName={restaurant.name}
       restaurantLogo={restaurant.logo}
       restaurantLogoApple={restaurant.logoApple}

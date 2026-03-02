@@ -148,6 +148,14 @@ enum ProgramStatus {
   @@map("program_status")
 }
 
+enum ProgramType {
+  STAMP_CARD @map("stamp_card")
+  COUPON     @map("coupon")
+  MEMBERSHIP @map("membership")
+
+  @@map("program_type")
+}
+
 // ─── Better Auth Core Tables ─────────────────────────────────
 // These 4 models MUST match Better Auth's expected schema.
 // Custom fields (role, restaurantId) are added via additionalFields
@@ -314,6 +322,7 @@ model LoyaltyProgram {
   id                 String        @id @default(dbgenerated("uuidv7()::text"))
   restaurantId       String
   name               String
+  programType        ProgramType   @default(STAMP_CARD)
   visitsRequired     Int           @default(10)
   rewardDescription  String
   rewardExpiryDays   Int           @default(90)
@@ -321,6 +330,7 @@ model LoyaltyProgram {
   startsAt           DateTime      @default(now())
   endsAt             DateTime?
   termsAndConditions String?       @db.Text
+  config             Json          @default("{}")
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
@@ -332,6 +342,7 @@ model LoyaltyProgram {
 
   @@index([restaurantId])
   @@index([restaurantId, status])
+  @@index([restaurantId, programType])
   @@map("loyalty_program")
 }
 

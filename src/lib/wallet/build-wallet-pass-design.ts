@@ -24,6 +24,7 @@ export function buildWalletPassDesign(
     sf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
 
   return {
+    cardType: (cardDesign?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
     shape: (cardDesign?.shape ?? "CLEAN") as WalletPassDesign["shape"],
     primaryColor: cardDesign?.primaryColor ?? "#1a1a2e",
     secondaryColor: cardDesign?.secondaryColor ?? "#ffffff",

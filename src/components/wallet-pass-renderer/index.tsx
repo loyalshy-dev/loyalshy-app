@@ -6,6 +6,7 @@ import {
   formatProgressValue,
   formatLabel,
   getFieldLayout,
+  type CardType,
   type CardShape,
   type PatternStyle,
   type ProgressStyle,
@@ -19,6 +20,7 @@ import { FieldSection } from "./field-section"
 // ─── Types ──────────────────────────────────────────────────
 
 export type WalletPassDesign = {
+  cardType?: CardType // defaults to "STAMP"
   shape: CardShape
   primaryColor: string
   secondaryColor: string
@@ -60,6 +62,13 @@ type WalletPassRendererProps = {
   className?: string
   style?: React.CSSProperties
   qrValue?: string // When provided, renders a real QR code instead of placeholder
+  // Coupon-specific
+  discountText?: string      // e.g. "20% OFF", "$5 off", "Free item"
+  couponCode?: string        // coupon code to display
+  validUntil?: string        // expiry date string
+  // Membership-specific
+  tierName?: string          // e.g. "VIP", "Gold"
+  benefits?: string          // membership benefits summary
 }
 
 // ─── Constants ──────────────────────────────────────────────
@@ -91,8 +100,14 @@ export function WalletPassRenderer({
   className,
   style: styleProp,
   qrValue,
+  discountText,
+  couponCode,
+  validUntil,
+  tierName,
+  benefits,
 }: WalletPassRendererProps) {
-  const layout = getFieldLayout(design.shape)
+  const cardType = design.cardType ?? "STAMP"
+  const layout = getFieldLayout(design.shape, cardType)
   const isApple = format === "apple"
   const resolvedLogo = isApple
     ? (logoAppleUrl ?? logoUrl ?? null)
@@ -108,14 +123,16 @@ export function WalletPassRenderer({
   const outerW = compact ? baseW : CARD_WIDTH
   const outerH = compact ? baseH : CARD_HEIGHT
 
-  // Build field values
-  const progressText = formatProgressValue(
-    currentVisits,
-    totalVisits,
-    design.progressStyle,
-    hasReward,
-    design.customProgressLabel ?? rewardDescription
-  )
+  // Build field values — stamp/points only
+  const progressText = cardType === "STAMP" || cardType === "POINTS"
+    ? formatProgressValue(
+        currentVisits,
+        totalVisits,
+        design.progressStyle,
+        hasReward,
+        design.customProgressLabel ?? rewardDescription
+      )
+    : ""
 
   const lbl = (text: string) => formatLabel(text, design.labelFormat)
 
@@ -129,18 +146,32 @@ export function WalletPassRenderer({
     switch (name) {
       case "restaurant":
         return { label: lbl("RESTAURANT"), value: restaurantName }
+      // Stamp/Points fields
       case "progress":
         return { label: lbl(progressLabel), value: progressText }
       case "nextReward":
         return { label: lbl("NEXT REWARD"), value: rewardDescription }
       case "totalVisits":
         return { label: lbl("TOTAL VISITS"), value: `${totalVisits}` }
+      case "memberNumber":
+        return { label: lbl("MEMBER"), value: `#${totalVisits}` }
+      // Coupon fields
+      case "discount":
+        return { label: lbl("DISCOUNT"), value: discountText ?? rewardDescription }
+      case "validUntil":
+        return { label: lbl("VALID UNTIL"), value: validUntil ?? "—" }
+      case "couponCode":
+        return { label: lbl("CODE"), value: couponCode ?? "—" }
+      // Membership fields
+      case "tierName":
+        return { label: lbl("TIER"), value: tierName ?? "Member" }
+      case "benefits":
+        return { label: lbl("BENEFITS"), value: benefits ?? "—" }
+      // Shared fields
       case "customerName":
         return { label: lbl("NAME"), value: customerName }
       case "memberSince":
         return { label: lbl("MEMBER SINCE"), value: memberSince }
-      case "memberNumber":
-        return { label: lbl("MEMBER"), value: `#${totalVisits}` }
       default:
         return { label: name, value: "—" }
     }
@@ -311,8 +342,8 @@ export function WalletPassRenderer({
               />
             )}
 
-            {/* Stamp grid overlay */}
-            {design.useStampGrid && (
+            {/* Stamp grid overlay (stamp cards only) */}
+            {cardType === "STAMP" && design.useStampGrid && (
               <StampGridOverlay
                 currentVisits={currentVisits}
                 totalVisits={totalVisits}
@@ -324,8 +355,8 @@ export function WalletPassRenderer({
               />
             )}
 
-            {/* SHOWCASE: progress text overlaid on strip (skip for stamp grid) */}
-            {design.shape === "SHOWCASE" && !design.useStampGrid && (
+            {/* SHOWCASE: primary field text overlaid on strip (skip for stamp grid) */}
+            {design.shape === "SHOWCASE" && !(cardType === "STAMP" && design.useStampGrid) && (
               <div
                 style={{
                   position: "absolute",
@@ -341,7 +372,7 @@ export function WalletPassRenderer({
                   whiteSpace: "nowrap",
                 }}
               >
-                {progressText}
+                {layout.apple.primary.length > 0 ? resolveField(layout.apple.primary[0]).value : ""}
               </div>
             )}
           </div>

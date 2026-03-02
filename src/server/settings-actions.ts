@@ -16,9 +16,11 @@ import type { CardType, CardShape, PatternStyle, ProgressStyle, FontFamily, Labe
 export type ProgramWithDesign = {
   id: string
   name: string
+  programType: string
   visitsRequired: number
   rewardDescription: string
   rewardExpiryDays: number
+  config: unknown
   termsAndConditions: string | null
   status: string
   startsAt: Date
@@ -68,7 +70,7 @@ const updateLoyaltyProgramSchema = z.object({
   restaurantId: z.string().min(1),
   programId: z.string().min(1),
   name: z.string().min(1, "Program name is required").max(100),
-  visitsRequired: z.number().int().min(3).max(30),
+  visitsRequired: z.number().int().min(1).max(30),
   rewardDescription: z.string().min(1, "Reward description is required").max(200),
   rewardExpiryDays: z.number().int().min(0).max(365),
   termsAndConditions: z.string().max(5000).optional().default(""),
@@ -76,6 +78,7 @@ const updateLoyaltyProgramSchema = z.object({
   startsAt: z.coerce.date(),
   endsAt: z.coerce.date().nullable().optional(),
   resetProgress: z.boolean().optional().default(false),
+  config: z.record(z.string(), z.any()).optional(),
 })
 
 const inviteTeamMemberSchema = z.object({
@@ -133,9 +136,11 @@ const saveCardDesignSchema = z.object({
 const createLoyaltyProgramSchema = z.object({
   restaurantId: z.string().min(1),
   name: z.string().min(1, "Program name is required").max(100),
-  visitsRequired: z.number().int().min(3).max(30).optional().default(10),
+  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP"]).optional().default("STAMP_CARD"),
+  visitsRequired: z.number().int().min(1).max(30).optional().default(10),
   rewardDescription: z.string().min(1, "Reward description is required").max(200),
   rewardExpiryDays: z.number().int().min(0).max(365).optional().default(90),
+  config: z.record(z.string(), z.any()).optional().default({}),
 })
 
 // ─── Get Settings Data ──────────────────────────────────────
@@ -163,9 +168,11 @@ export async function getSettingsData() {
   const programs: ProgramWithDesign[] = rawPrograms.map((p) => ({
     id: p.id,
     name: p.name,
+    programType: p.programType,
     visitsRequired: p.visitsRequired,
     rewardDescription: p.rewardDescription,
     rewardExpiryDays: p.rewardExpiryDays,
+    config: p.config,
     termsAndConditions: p.termsAndConditions,
     status: p.status,
     startsAt: p.startsAt,
@@ -323,17 +330,32 @@ export async function createLoyaltyProgram(input: z.infer<typeof createLoyaltyPr
     return { error: `Program limit reached (${programCheck.limit}). Upgrade your plan to create more programs.` }
   }
 
+  // For COUPON/MEMBERSHIP, visitsRequired defaults to 1 (not used for stamp logic)
+  const visitsRequired = parsed.programType === "STAMP_CARD"
+    ? parsed.visitsRequired
+    : 1
+
+  // Map program type to default card type
+  const defaultCardType = parsed.programType === "COUPON"
+    ? "COUPON" as const
+    : parsed.programType === "MEMBERSHIP"
+      ? "TIER" as const
+      : "STAMP" as const
+
   // Create the program with a default card design
   const program = await db.loyaltyProgram.create({
     data: {
       restaurantId: parsed.restaurantId,
       name: sanitizeText(parsed.name, 100),
-      visitsRequired: parsed.visitsRequired,
+      programType: parsed.programType,
+      visitsRequired,
       rewardDescription: parsed.rewardDescription,
       rewardExpiryDays: parsed.rewardExpiryDays,
+      config: JSON.parse(JSON.stringify(parsed.config ?? {})),
       status: "DRAFT",
       cardDesign: {
         create: {
+          cardType: defaultCardType,
           shape: "CLEAN",
           patternStyle: "NONE",
           progressStyle: "NUMBERS",
@@ -406,6 +428,36 @@ export async function archiveLoyaltyProgram(restaurantId: string, programId: str
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard/programs")
   revalidatePath("/dashboard")
+  return { success: true }
+}
+
+export async function activateProgram(restaurantId: string, programId: string) {
+  await assertRestaurantRole(restaurantId, "owner")
+
+  const program = await db.loyaltyProgram.findUnique({
+    where: { id: programId },
+    select: { restaurantId: true, status: true },
+  })
+
+  if (!program || program.restaurantId !== restaurantId) {
+    return { error: "Loyalty program not found" }
+  }
+
+  if (program.status === "ACTIVE") {
+    return { error: "Program is already active" }
+  }
+
+  if (program.status === "ARCHIVED") {
+    return { error: "Cannot activate an archived program" }
+  }
+
+  await db.loyaltyProgram.update({
+    where: { id: programId },
+    data: { status: "ACTIVE" },
+  })
+
+  revalidatePath("/dashboard/programs")
+  revalidatePath(`/dashboard/programs/${programId}`)
   return { success: true }
 }
 
@@ -1411,6 +1463,7 @@ export async function updateLoyaltyProgram(input: z.infer<typeof updateLoyaltyPr
         status: parsed.status,
         startsAt: parsed.startsAt,
         endsAt: parsed.endsAt ?? null,
+        ...(parsed.config ? { config: JSON.parse(JSON.stringify(parsed.config)) } : {}),
       },
     })
 

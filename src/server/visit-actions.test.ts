@@ -200,6 +200,7 @@ describe("registerVisit", () => {
       loyaltyProgram: {
         id: "program-1",
         name: "Test Program",
+        programType: "STAMP_CARD",
         visitsRequired: 10,
         rewardDescription: "Free coffee",
         rewardExpiryDays: 30,
@@ -235,6 +236,136 @@ describe("registerVisit", () => {
       enrollmentId: "enrollment-1",
       updateType: "VISIT",
     })
+  })
+})
+
+describe("redeemCoupon", () => {
+  function createCouponEnrollment(overrides?: Record<string, unknown>) {
+    return createMockEnrollment({
+      loyaltyProgram: {
+        id: "program-1",
+        name: "Summer Coupon",
+        programType: "COUPON",
+        config: {
+          discountType: "percentage",
+          discountValue: 20,
+          couponDescription: "20% off your order",
+          redemptionLimit: "single",
+        },
+        rewardDescription: "20% off",
+        rewardExpiryDays: 30,
+        status: "ACTIVE",
+        endsAt: null,
+      },
+      ...overrides,
+    })
+  }
+
+  it("redeems AVAILABLE reward and marks enrollment COMPLETED for single-use", async () => {
+    const { redeemCoupon } = await import("./visit-actions")
+
+    const enrollment = createCouponEnrollment()
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+    mockDb.reward.findFirst.mockResolvedValue({ id: "reward-1" })
+
+    const result = await redeemCoupon("enrollment-1")
+
+    expect(result.success).toBe(true)
+    expect(result.discountText).toBe("20% off")
+    expect(result.redemptionLimit).toBe("single")
+    expect(result.programName).toBe("Summer Coupon")
+    expect(mockDb.$transaction).toHaveBeenCalledOnce()
+  })
+
+  it("redeems reward and auto-creates new one for unlimited", async () => {
+    const { redeemCoupon } = await import("./visit-actions")
+
+    const enrollment = createCouponEnrollment({
+      loyaltyProgram: {
+        id: "program-1",
+        name: "Unlimited Coupon",
+        programType: "COUPON",
+        config: {
+          discountType: "freebie",
+          discountValue: 0,
+          couponDescription: "Free dessert",
+          redemptionLimit: "unlimited",
+        },
+        rewardDescription: "Free dessert",
+        rewardExpiryDays: 30,
+        status: "ACTIVE",
+        endsAt: null,
+      },
+    })
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+    mockDb.reward.findFirst.mockResolvedValue({ id: "reward-1" })
+
+    const result = await redeemCoupon("enrollment-1")
+
+    expect(result.success).toBe(true)
+    expect(result.redemptionLimit).toBe("unlimited")
+
+    // Verify transaction created a new reward
+    const txFn = mockDb.$transaction.mock.calls[0]![0] as Function
+    const tx = mockDb._tx
+    await txFn(tx)
+
+    expect(tx.reward.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "AVAILABLE",
+          enrollmentId: "enrollment-1",
+        }),
+      })
+    )
+  })
+
+  it("returns error when no AVAILABLE reward", async () => {
+    const { redeemCoupon } = await import("./visit-actions")
+
+    const enrollment = createCouponEnrollment()
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+    mockDb.reward.findFirst.mockResolvedValue(null)
+
+    const result = await redeemCoupon("enrollment-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBe("No available coupon to redeem")
+  })
+
+  it("returns error when enrollment not found", async () => {
+    const { redeemCoupon } = await import("./visit-actions")
+
+    mockDb.enrollment.findUnique.mockResolvedValue(null)
+
+    const result = await redeemCoupon("nonexistent")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBe("Enrollment not found")
+  })
+
+  it("returns error when not COUPON type", async () => {
+    const { redeemCoupon } = await import("./visit-actions")
+
+    const enrollment = createMockEnrollment() // default is STAMP_CARD
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+
+    const result = await redeemCoupon("enrollment-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBe("This is not a coupon program")
+  })
+
+  it("returns error when enrollment not ACTIVE", async () => {
+    const { redeemCoupon } = await import("./visit-actions")
+
+    const enrollment = createCouponEnrollment({ status: "COMPLETED" })
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+
+    const result = await redeemCoupon("enrollment-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toContain("completed")
   })
 })
 

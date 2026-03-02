@@ -10,15 +10,18 @@ import type { CardType, CardShape, PatternStyle, ProgressStyle, FontFamily, Labe
 export type ProgramListItem = {
   id: string
   name: string
+  programType: string
   status: string
   visitsRequired: number
   rewardDescription: string
   rewardExpiryDays: number
+  config: unknown
   startsAt: Date
   endsAt: Date | null
   createdAt: Date
   enrollmentCount: number
   cardDesign: {
+    cardType: string
     shape: string
     primaryColor: string | null
     secondaryColor: string | null
@@ -35,10 +38,12 @@ export type ProgramListItem = {
 export type ProgramDetail = {
   id: string
   name: string
+  programType: string
   status: string
   visitsRequired: number
   rewardDescription: string
   rewardExpiryDays: number
+  config: unknown
   termsAndConditions: string | null
   startsAt: Date
   endsAt: Date | null
@@ -66,6 +71,7 @@ export async function getProgramsList(): Promise<ProgramListItem[]> {
       },
       cardDesign: {
         select: {
+          cardType: true,
           shape: true,
           primaryColor: true,
           secondaryColor: true,
@@ -89,10 +95,12 @@ export async function getProgramsList(): Promise<ProgramListItem[]> {
     .map((p) => ({
       id: p.id,
       name: p.name,
+      programType: p.programType,
       status: p.status,
       visitsRequired: p.visitsRequired,
       rewardDescription: p.rewardDescription,
       rewardExpiryDays: p.rewardExpiryDays,
+      config: p.config,
       startsAt: p.startsAt,
       endsAt: p.endsAt,
       createdAt: p.createdAt,
@@ -145,10 +153,12 @@ export async function getProgramDetail(programId: string): Promise<ProgramDetail
   return {
     id: program.id,
     name: program.name,
+    programType: program.programType,
     status: program.status,
     visitsRequired: program.visitsRequired,
     rewardDescription: program.rewardDescription,
     rewardExpiryDays: program.rewardExpiryDays,
+    config: program.config,
     termsAndConditions: program.termsAndConditions,
     startsAt: program.startsAt,
     endsAt: program.endsAt,
@@ -184,9 +194,11 @@ export async function getProgramForSettings(programId: string): Promise<ProgramW
   return {
     id: program.id,
     name: program.name,
+    programType: program.programType,
     visitsRequired: program.visitsRequired,
     rewardDescription: program.rewardDescription,
     rewardExpiryDays: program.rewardExpiryDays,
+    config: program.config,
     termsAndConditions: program.termsAndConditions,
     status: program.status,
     startsAt: program.startsAt,

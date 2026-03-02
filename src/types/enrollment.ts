@@ -22,6 +22,7 @@ export type EnrollmentSummary = {
   enrollmentId: string
   programId: string
   programName: string
+  programType: string
   currentCycleVisits: number
   visitsRequired: number
   totalVisits: number
@@ -36,6 +37,7 @@ export type EnrollmentDetail = {
   enrollmentId: string
   programId: string
   programName: string
+  programType: string
   programStatus: ProgramStatus
   currentCycleVisits: number
   visitsRequired: number
@@ -54,9 +56,11 @@ export type EnrollmentDetail = {
 export type ProgramWithDesign = {
   id: string
   name: string
+  programType: string
   visitsRequired: number
   rewardDescription: string
   rewardExpiryDays: number
+  config: unknown
   status: ProgramStatus
   startsAt: Date
   endsAt: Date | null
@@ -84,6 +88,7 @@ export type ProgramWithDesign = {
 export type PublicProgramInfo = {
   id: string
   name: string
+  programType: string
   visitsRequired: number
   rewardDescription: string
   cardDesign: {

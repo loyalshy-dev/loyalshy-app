@@ -24,6 +24,8 @@ export default async function ProgramQrCodePage(props: {
     select: {
       id: true,
       name: true,
+      programType: true,
+      config: true,
       rewardDescription: true,
       visitsRequired: true,
       cardDesign: {
@@ -60,6 +62,8 @@ export default async function ProgramQrCodePage(props: {
         {
           id: program.id,
           name: program.name,
+          programType: program.programType,
+          programConfig: program.config,
           rewardDescription: program.rewardDescription,
           visitsRequired: program.visitsRequired,
           cardDesign: program.cardDesign ?? null,
