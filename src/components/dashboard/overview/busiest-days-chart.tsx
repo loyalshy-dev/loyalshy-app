@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import {
   BarChart,
   Bar,
@@ -36,7 +37,10 @@ type BusiestDaysChartProps = {
 }
 
 export function BusiestDaysChart({ data }: BusiestDaysChartProps) {
+  const [mounted, setMounted] = useState(false)
   const maxVisits = Math.max(...data.map((d) => d.visits), 1)
+
+  useEffect(() => setMounted(true), [])
 
   return (
     <div className="rounded-lg border border-border bg-card p-5">
@@ -44,7 +48,7 @@ export function BusiestDaysChart({ data }: BusiestDaysChartProps) {
         Busiest Days
       </h3>
       <div className="h-[200px]">
-        <ResponsiveContainer width="100%" height="100%">
+        {!mounted ? null : <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
             margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
@@ -75,7 +79,7 @@ export function BusiestDaysChart({ data }: BusiestDaysChartProps) {
               ))}
             </Bar>
           </BarChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer>}
       </div>
     </div>
   )

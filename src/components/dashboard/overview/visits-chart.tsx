@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import {
   AreaChart,
   Area,
@@ -51,9 +51,12 @@ type VisitsChartProps = {
 }
 
 export function VisitsChart({ initialData, initialRange }: VisitsChartProps) {
+  const [mounted, setMounted] = useState(false)
   const [range, setRange] = useState<Range>(initialRange)
   const [data, setData] = useState(initialData)
   const [isPending, startTransition] = useTransition()
+
+  useEffect(() => setMounted(true), [])
 
   function handleRangeChange(newRange: Range) {
     setRange(newRange)
@@ -100,7 +103,7 @@ export function VisitsChart({ initialData, initialRange }: VisitsChartProps) {
       <div
         className={`h-[200px] sm:h-[260px] transition-opacity duration-200 ${isPending ? "opacity-50" : ""}`}
       >
-        <ResponsiveContainer width="100%" height="100%">
+        {!mounted ? null : <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data}
             margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
@@ -147,7 +150,7 @@ export function VisitsChart({ initialData, initialRange }: VisitsChartProps) {
               fill="url(#visitsFill)"
             />
           </AreaChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer>}
       </div>
     </div>
   )

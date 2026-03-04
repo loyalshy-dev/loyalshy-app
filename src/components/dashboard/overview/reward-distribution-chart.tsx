@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import type { RewardDistributionItem } from "@/server/analytics"
 
@@ -44,6 +45,9 @@ export function RewardDistributionChart({
   visitsRequired,
   programName,
 }: RewardDistributionChartProps) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   const chartData = data.map((d) => ({
     ...d,
     name: `${d.position}/${visitsRequired} visits`,
@@ -67,28 +71,30 @@ export function RewardDistributionChart({
         </div>
       ) : (
         <div className="h-[200px] relative">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={55}
-                outerRadius={85}
-                dataKey="count"
-                paddingAngle={2}
-                stroke="none"
-              >
-                {chartData.map((_, i) => (
-                  <Cell
-                    key={i}
-                    fill={getSegmentColor(i, chartData.length)}
-                  />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-            </PieChart>
-          </ResponsiveContainer>
+          {mounted && (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={85}
+                  dataKey="count"
+                  paddingAngle={2}
+                  stroke="none"
+                >
+                  {chartData.map((_, i) => (
+                    <Cell
+                      key={i}
+                      fill={getSegmentColor(i, chartData.length)}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center">
               <span className="text-xl font-semibold tabular-nums">
