@@ -31,8 +31,8 @@ enum SubscriptionStatus {
 
 enum Plan {
   STARTER    @map("starter")
-  PRO        @map("pro")
-  BUSINESS   @map("business")
+  GROWTH     @map("growth")
+  SCALE      @map("scale")
   ENTERPRISE @map("enterprise")
 
   @@map("plan")
@@ -434,6 +434,7 @@ model Reward {
   redeemedById     String?
   description      String?
   pointsCost       Int?
+  revealedAt       DateTime?
 
   customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
   restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)

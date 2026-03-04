@@ -10,8 +10,10 @@ import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { buildCardUrl } from "@/lib/card-access"
-import { parseCouponConfig } from "@/lib/program-config"
+import { parseCouponConfig, parseMinigameConfig } from "@/lib/program-config"
+import { verifyCardSignature } from "@/lib/card-access"
 import type { PublicProgramInfo } from "@/types/enrollment"
+import type { MinigameConfig } from "@/types/program-types"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -94,6 +96,7 @@ export async function getRestaurantBySlug(
           programType: true,
           visitsRequired: true,
           rewardDescription: true,
+          config: true,
           cardDesign: {
             select: {
               cardType: true,
@@ -135,6 +138,7 @@ export async function getRestaurantBySlug(
       programType: p.programType,
       visitsRequired: p.visitsRequired,
       rewardDescription: p.rewardDescription,
+      config: p.config,
       cardDesign: p.cardDesign
         ? {
             cardType: p.cardDesign.cardType,
@@ -179,6 +183,8 @@ export type EnrollmentCardData = {
     config: unknown
     cardDesign: PublicProgramInfo["cardDesign"]
   }
+  unrevealedReward: { rewardId: string; description: string } | null
+  minigameConfig: MinigameConfig | null
 }
 
 export async function getEnrollmentCardData(
@@ -194,9 +200,8 @@ export async function getEnrollmentCardData(
       totalVisits: true,
       status: true,
       rewards: {
-        where: { status: "AVAILABLE" },
-        select: { id: true },
-        take: 1,
+        where: { status: { in: ["AVAILABLE", "REDEEMED"] } },
+        select: { id: true, status: true, revealedAt: true, description: true },
       },
       customer: {
         select: { fullName: true },
@@ -248,13 +253,21 @@ export async function getEnrollmentCardData(
   if (enrollment.loyaltyProgram.status !== "ACTIVE") return null
 
   const cd = enrollment.loyaltyProgram.cardDesign
+
+  // Find first unrevealed reward (has description, revealedAt is null)
+  const unrevealed = enrollment.rewards.find(
+    (r) => r.revealedAt === null && r.description != null
+  )
+
+  const mgConfig = parseMinigameConfig(enrollment.loyaltyProgram.config)
+
   return {
     enrollmentId: enrollment.id,
     walletPassId: enrollment.walletPassId,
     customerName: enrollment.customer.fullName,
     currentCycleVisits: enrollment.currentCycleVisits,
     totalVisits: enrollment.totalVisits,
-    hasAvailableReward: enrollment.rewards.length > 0,
+    hasAvailableReward: enrollment.rewards.some((r) => r.status === "AVAILABLE"),
     enrollmentStatus: enrollment.status,
     restaurant: enrollment.loyaltyProgram.restaurant,
     program: {
@@ -281,6 +294,10 @@ export async function getEnrollmentCardData(
           }
         : null,
     },
+    unrevealedReward: unrevealed
+      ? { rewardId: unrevealed.id, description: unrevealed.description! }
+      : null,
+    minigameConfig: mgConfig,
   }
 }
 
@@ -795,4 +812,70 @@ async function issuePassForEnrollment(
       error: "Failed to generate your wallet pass. Please try again.",
     }
   }
+}
+
+// ─── Reveal Prize (public, HMAC-protected) ──────────────────
+
+const revealPrizeSchema = z.object({
+  rewardId: z.string().min(1),
+  enrollmentId: z.string().min(1),
+  signature: z.string().min(1),
+})
+
+export async function revealPrize(
+  rewardId: string,
+  enrollmentId: string,
+  signature: string
+): Promise<{ success: boolean; error?: string }> {
+  const parsed = revealPrizeSchema.safeParse({ rewardId, enrollmentId, signature })
+  if (!parsed.success) {
+    return { success: false, error: "Invalid request" }
+  }
+
+  // Verify HMAC signature (same as card page access)
+  if (!verifyCardSignature(enrollmentId, signature)) {
+    return { success: false, error: "Access denied" }
+  }
+
+  // Find the unrevealed reward (AVAILABLE for stamp cards, REDEEMED for coupons)
+  const reward = await db.reward.findFirst({
+    where: {
+      id: rewardId,
+      enrollmentId,
+      status: { in: ["AVAILABLE", "REDEEMED"] },
+      revealedAt: null,
+    },
+    select: { id: true, enrollmentId: true },
+  })
+
+  if (!reward) {
+    return { success: false, error: "Reward not found or already revealed" }
+  }
+
+  // Mark as revealed
+  await db.reward.update({
+    where: { id: reward.id },
+    data: { revealedAt: new Date() },
+  })
+
+  // Trigger wallet pass update to refresh pass content
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    select: { walletPassType: true },
+  })
+
+  if (enrollment && enrollment.walletPassType !== "NONE") {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) =>
+        tasks.trigger("update-wallet-pass", {
+          enrollmentId,
+          updateType: "REWARD_EARNED" as const,
+        })
+      )
+      .catch((err: unknown) =>
+        console.error("Wallet pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
+      )
+  }
+
+  return { success: true }
 }

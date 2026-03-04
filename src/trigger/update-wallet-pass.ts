@@ -59,6 +59,7 @@ export const updateWalletPassTask = task({
                 select: {
                   id: true,
                   name: true,
+                  slug: true,
                   brandColor: true,
                   secondaryColor: true,
                   logo: true,
@@ -73,8 +74,7 @@ export const updateWalletPassTask = task({
           },
           rewards: {
             where: { status: "AVAILABLE" },
-            select: { id: true },
-            take: 1,
+            select: { id: true, revealedAt: true, description: true },
           },
           deviceRegistrations: {
             select: { pushToken: true },
@@ -93,6 +93,9 @@ export const updateWalletPassTask = task({
       const program = enrollment.loyaltyProgram
       const cardDesign = program.cardDesign
       const hasAvailableReward = enrollment.rewards.length > 0
+      const unrevealedReward = enrollment.rewards.find(
+        (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt === null && r.description != null
+      )
 
       if (enrollment.walletPassType === "APPLE" && enrollment.walletPassSerialNumber) {
         // ── Apple Wallet: Touch updatedAt + send APNs push ──
@@ -139,7 +142,8 @@ export const updateWalletPassTask = task({
           program,
           hasAvailableReward,
           payload.updateType,
-          cardDesign
+          cardDesign,
+          !!unrevealedReward
         )
 
         // Log the update
@@ -179,6 +183,7 @@ type EnrollmentForGoogle = {
   loyaltyProgram: {
     id: string
     restaurant: {
+      slug: string
       brandColor: string | null
     }
   }
@@ -210,7 +215,8 @@ async function patchGooglePass(
   program: ProgramForGoogle,
   hasAvailableReward: boolean,
   updateType: string,
-  cardDesign?: CardDesignRow
+  cardDesign?: CardDesignRow,
+  hasUnrevealedPrize?: boolean
 ): Promise<{ status: number }> {
   const { getAccessToken } = await import("@/lib/wallet/google/credentials")
   const {
@@ -320,6 +326,22 @@ async function patchGooglePass(
     secondaryLoyaltyPoints,
     accountName: enrollment.customer.fullName,
     textModulesData,
+  }
+
+  // Add reveal link if there's an unrevealed prize
+  if (hasUnrevealedPrize && enrollment.loyaltyProgram.restaurant.slug) {
+    const { signCardAccess } = await import("@/lib/card-access")
+    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
+    const slug = enrollment.loyaltyProgram.restaurant.slug
+    const sig = signCardAccess(enrollment.id)
+    const cardPageUrl = `${baseUrl}/join/${slug}/card/${enrollment.id}?sig=${sig}`
+    patchBody.linksModuleData = {
+      uris: [{
+        uri: cardPageUrl,
+        description: "Reveal your prize!",
+        id: "revealLink",
+      }],
+    }
   }
 
   // Stamp grid hero image: only for STAMP_CARD programs

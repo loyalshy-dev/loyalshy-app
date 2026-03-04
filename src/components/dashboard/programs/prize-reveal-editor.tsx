@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { updateMinigameConfig } from "@/server/settings-actions"
 import { parseMinigameConfig } from "@/lib/program-config"
-import { ScratchCard, SlotMachine, WheelOfFortune } from "@/components/dashboard/minigames"
+import { ScratchCard, SlotMachine, WheelOfFortune } from "@/components/minigames"
 import type { PrizeItem } from "@/types/program-types"
 
 type PrizeRevealForm = {
@@ -70,28 +70,30 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
     ? prizeNames[0]
     : program.rewardDescription || "Free reward!"
 
-  function onSubmit(data: PrizeRevealForm) {
-    startTransition(async () => {
-      const filteredPrizes = prizes
-        .filter((p) => p.name.trim())
-        .map((p) => ({ name: p.name.trim(), weight: p.weight }))
-      const result = await updateMinigameConfig({
-        restaurantId: program.restaurantId,
-        programId: program.id,
-        enabled: data.minigameEnabled,
-        gameType: data.minigameType,
-        ...(filteredPrizes.length > 0 ? { prizes: filteredPrizes } : {}),
-        ...(primaryColor ? { primaryColor } : {}),
-        ...(accentColor ? { accentColor } : {}),
+  function handleSave() {
+    handleSubmit((data: PrizeRevealForm) => {
+      startTransition(async () => {
+        const filteredPrizes = prizes
+          .filter((p) => p.name.trim())
+          .map((p) => ({ name: p.name.trim(), weight: p.weight }))
+        const result = await updateMinigameConfig({
+          restaurantId: program.restaurantId,
+          programId: program.id,
+          enabled: data.minigameEnabled,
+          gameType: data.minigameType,
+          ...(filteredPrizes.length > 0 ? { prizes: filteredPrizes } : {}),
+          ...(primaryColor ? { primaryColor } : {}),
+          ...(accentColor ? { accentColor } : {}),
+        })
+        if ("error" in result) {
+          toast.error(String(result.error))
+        } else {
+          setPrizesChanged(false)
+          setColorsChanged(false)
+          toast.success("Prize reveal settings saved")
+        }
       })
-      if ("error" in result) {
-        toast.error(String(result.error))
-      } else {
-        setPrizesChanged(false)
-        setColorsChanged(false)
-        toast.success("Prize reveal settings saved")
-      }
-    })
+    })()
   }
 
   function addPrize() {
@@ -120,7 +122,7 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold tracking-tight">Prize Reveal</h2>
         <p className="text-[13px] text-muted-foreground mt-1">
@@ -376,7 +378,8 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
       {/* Save button */}
       <div className="flex justify-end pt-2">
         <Button
-          type="submit"
+          type="button"
+          onClick={handleSave}
           disabled={(!isDirty && !prizesChanged && !colorsChanged) || isArchived || isPending}
           className="gap-1.5"
         >
@@ -384,6 +387,6 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
           Save Changes
         </Button>
       </div>
-    </form>
+    </div>
   )
 }

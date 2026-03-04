@@ -641,6 +641,7 @@ export async function registerVisit(
           status: "AVAILABLE",
           expiresAt,
           description: selectedPrize ?? null,
+          revealedAt: (selectedPrize && parseMinigameConfig(program.config)?.enabled) ? null : new Date(),
         },
       })
     } else {
@@ -787,6 +788,7 @@ export async function redeemCoupon(
         redeemedAt: new Date(),
         redeemedById: session.user.id,
         ...(selectedPrize ? { description: selectedPrize } : {}),
+        revealedAt: (selectedPrize && mgConfig?.enabled) ? null : new Date(),
       },
     })
 

@@ -53,6 +53,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
           restaurant: {
             select: {
               name: true,
+              slug: true,
               logo: true,
               logoApple: true,
               brandColor: true,
@@ -66,8 +67,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       },
       rewards: {
         where: { status: "AVAILABLE" },
-        select: { id: true },
-        take: 1,
+        select: { id: true, revealedAt: true, description: true },
       },
     },
   })
@@ -119,6 +119,11 @@ export async function GET(request: Request, { params }: { params: Params }) {
       programType: program.programType,
       programConfig: program.config,
       pointsBalance: enrollment.pointsBalance,
+      enrollmentId: enrollment.id,
+      restaurantSlug: restaurant.slug,
+      hasUnrevealedPrize: enrollment.rewards.some(
+        (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt === null && r.description != null
+      ),
     })
 
     // Log update

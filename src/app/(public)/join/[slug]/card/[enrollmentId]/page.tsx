@@ -44,6 +44,7 @@ export default async function CardPage({ params, searchParams }: PageProps) {
       data={data}
       enrollmentId={enrollmentId}
       restaurantSlug={slug}
+      signature={sig}
     />
   )
 }

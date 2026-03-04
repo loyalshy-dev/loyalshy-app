@@ -50,11 +50,10 @@ import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
 import { parsePointsConfig, getCheapestCatalogItem } from "@/lib/program-config"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
-import { MinigameStep } from "@/components/dashboard/minigames"
 
 // ─── Types ──────────────────────────────────────────────────
 
-type Step = "search" | "program" | "confirm" | "minigame" | "success"
+type Step = "search" | "program" | "confirm" | "success"
 
 type RegisterVisitDialogProps = {
   open: boolean
@@ -253,16 +252,6 @@ export function RegisterVisitDialog({
     }, ms)
   }
 
-  // Check if minigame should be shown
-  function shouldShowMinigame(enrollment: EnrollmentSummary): boolean {
-    if (!enrollment.minigameConfig?.enabled) return false
-    try {
-      return localStorage.getItem(`minigame-dismissed:${enrollment.enrollmentId}`) !== "1"
-    } catch {
-      return true
-    }
-  }
-
   // Confirm visit registration
   function handleConfirm() {
     if (!selectedEnrollment) return
@@ -299,10 +288,7 @@ export function RegisterVisitDialog({
         toast.success(`Visit registered for ${selectedCustomer?.fullName}`)
       }
 
-      // Route to minigame or success
-      if (result.wasRewardEarned && shouldShowMinigame(selectedEnrollment)) {
-        setStep("minigame")
-      } else {
+      {
         setStep("success")
         autoDismiss()
       }
@@ -332,10 +318,7 @@ export function RegisterVisitDialog({
         { description: result.discountText }
       )
 
-      // Route to minigame or success
-      if (shouldShowMinigame(selectedEnrollment)) {
-        setStep("minigame")
-      } else {
+      {
         setStep("success")
         autoDismiss()
       }
@@ -559,18 +542,6 @@ export function RegisterVisitDialog({
             onRedeemPoints={handleRedeemPoints}
             onBack={handleBack}
             cardDesign={selectedEnrollment?.cardDesign ?? null}
-          />
-        )}
-        {step === "minigame" && selectedEnrollment && (
-          <MinigameStep
-            gameType={selectedEnrollment.minigameConfig!.gameType}
-            rewardText={couponResult?.selectedPrize ?? couponResult?.discountText ?? rewardDescription}
-            enrollmentId={selectedEnrollment.enrollmentId}
-            prizes={selectedEnrollment.minigameConfig?.prizes?.map((p) => p.name)}
-            primaryColor={selectedEnrollment.minigameConfig?.primaryColor}
-            accentColor={selectedEnrollment.minigameConfig?.accentColor}
-            onComplete={() => { setStep("success"); autoDismiss() }}
-            onSkip={() => { setStep("success"); autoDismiss() }}
           />
         )}
         {step === "success" && selectedCustomer && (
@@ -1270,11 +1241,15 @@ function SuccessStep({
           <p className="text-[13px] text-muted-foreground mt-1 text-center">
             {customer.fullName} — {couponResult.programName}
           </p>
-          {couponResult.discountText && (
+          {couponResult.selectedPrize ? (
+            <p className="text-[14px] font-semibold text-brand mt-2">
+              {couponResult.selectedPrize}
+            </p>
+          ) : couponResult.discountText ? (
             <p className="text-[14px] font-semibold text-brand mt-2">
               {couponResult.discountText}
             </p>
-          )}
+          ) : null}
           {couponResult.redemptionLimit === "unlimited" && (
             <p className="text-[11px] text-muted-foreground mt-2">
               A new coupon has been issued automatically

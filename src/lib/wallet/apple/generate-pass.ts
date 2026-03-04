@@ -45,6 +45,11 @@ export type PassGenerationInput = {
   programConfig?: unknown
   // Points balance for POINTS program type
   pointsBalance?: number
+  // Enrollment + restaurant slug for generating card page links (prize reveal)
+  enrollmentId?: string
+  restaurantSlug?: string
+  // Whether there is an unrevealed prize to reveal
+  hasUnrevealedPrize?: boolean
 }
 
 // ─── Generate Pass ──────────────────────────────────────────
@@ -395,6 +400,19 @@ export async function generateApplePass(
       key: "socials",
       label: "Social Media",
       value: socialParts.join("\n"),
+    })
+  }
+
+  // Prize reveal link — shown when an unrevealed prize is pending
+  if (input.hasUnrevealedPrize && input.enrollmentId && input.restaurantSlug) {
+    const { signCardAccess } = await import("../../card-access")
+    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
+    const sig = signCardAccess(input.enrollmentId)
+    const cardPageUrl = `${baseUrl}/join/${input.restaurantSlug}/card/${input.enrollmentId}?sig=${sig}`
+    pass.backFields.push({
+      key: "revealLink",
+      label: "Prize Ready!",
+      value: `You have a prize waiting to be revealed! Tap here to play:\n${cardPageUrl}`,
     })
   }
 

@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect, useTransition } from "react"
+import { useState, useEffect, useTransition, useCallback } from "react"
 import { Loader2, Bookmark, CheckCircle2 } from "lucide-react"
-import { requestWalletPass } from "@/server/onboarding-actions"
+import { requestWalletPass, revealPrize } from "@/server/onboarding-actions"
 import type { EnrollmentCardData } from "@/server/onboarding-actions"
 import { computeTextColor } from "@/lib/wallet/card-design"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
+import { MinigameStep } from "@/components/minigames"
 import { parseCouponConfig, formatCouponValue, parseMembershipConfig } from "@/lib/program-config"
 
 type Platform = "apple" | "google"
@@ -38,14 +39,25 @@ type CardPageClientProps = {
   data: EnrollmentCardData
   enrollmentId: string
   restaurantSlug: string
+  signature: string
 }
 
-export function CardPageClient({ data, enrollmentId, restaurantSlug }: CardPageClientProps) {
+export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }: CardPageClientProps) {
   const [platform, setPlatform] = useState<Platform>("apple")
   const [showBothPlatforms, setShowBothPlatforms] = useState(false)
   const [isRequestingPass, startPassTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [revealed, setRevealed] = useState(false)
+
+  const showMinigame = !!data.unrevealedReward && !!data.minigameConfig?.enabled && !revealed
+
+  const handleMinigameComplete = useCallback(() => {
+    if (!data.unrevealedReward) return
+    // Call revealPrize server action (fire-and-forget for UX, errors are non-critical)
+    revealPrize(data.unrevealedReward.rewardId, enrollmentId, signature).catch(() => {})
+    setRevealed(true)
+  }, [data.unrevealedReward, enrollmentId, signature])
 
   useEffect(() => {
     const detected = detectPlatform()
@@ -109,6 +121,39 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug }: CardPageC
         window.location.href = res.saveUrl
       }
     })
+  }
+
+  if (showMinigame) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center p-4 bg-background">
+        <div className="w-full max-w-md space-y-4">
+          <div className="text-center space-y-1">
+            <h1 className="text-xl font-semibold tracking-tight">
+              You earned a reward!
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {data.restaurant.name} — {data.program.name}
+            </p>
+          </div>
+          <MinigameStep
+            gameType={data.minigameConfig!.gameType}
+            rewardText={data.unrevealedReward!.description}
+            enrollmentId={enrollmentId}
+            prizes={data.minigameConfig?.prizes?.map((p) => p.name)}
+            primaryColor={data.minigameConfig?.primaryColor}
+            accentColor={data.minigameConfig?.accentColor}
+            onComplete={handleMinigameComplete}
+            onSkip={handleMinigameComplete}
+          />
+          <div className="text-center">
+            <p className="text-[11px] text-muted-foreground/70">
+              Powered by{" "}
+              <span className="font-medium text-muted-foreground">Loyalshy</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
