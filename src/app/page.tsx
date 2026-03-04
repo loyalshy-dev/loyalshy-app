@@ -2,8 +2,7 @@ import type { Metadata } from "next"
 import { Suspense } from "react"
 import { MarketingNavbar } from "@/components/marketing/navbar"
 import { Hero } from "@/components/marketing/hero"
-import { SocialProof } from "@/components/marketing/social-proof"
-import { DashboardPreview } from "@/components/marketing/dashboard-preview"
+import { FeatureShowcase } from "@/components/marketing/dashboard-preview"
 import { HowItWorks } from "@/components/marketing/how-it-works"
 import { Features } from "@/components/marketing/features"
 import { WalletPreview } from "@/components/marketing/wallet-preview"
@@ -34,8 +33,8 @@ function JsonLd() {
       "Digital loyalty card SaaS for restaurants. Create Apple and Google Wallet passes, track visits, and reward your best customers.",
     offers: {
       "@type": "AggregateOffer",
-      priceCurrency: "USD",
-      lowPrice: "0",
+      priceCurrency: "EUR",
+      lowPrice: "19",
       highPrice: "79",
       offerCount: "3",
     },
@@ -133,9 +132,8 @@ async function ShowcaseContent() {
 
   return (
     <>
-      <Hero showcaseCards={showcaseCards} showcaseDesigns={showcaseDesigns} />
-      <SocialProof />
-      <DashboardPreview />
+      <Hero />
+      <FeatureShowcase />
       <HowItWorks />
       <WalletPreview showcaseCards={showcaseCards} showcaseDesigns={showcaseDesigns} />
       <Features />
@@ -149,15 +147,14 @@ async function ShowcaseContent() {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ background: "var(--mk-bg)" }}>
       <JsonLd />
       <MarketingNavbar />
       <main>
         <Suspense fallback={
           <>
             <Hero />
-            <SocialProof />
-            <DashboardPreview />
+            <FeatureShowcase />
             <HowItWorks />
             <WalletPreview />
             <Features />

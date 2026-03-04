@@ -1,16 +1,4 @@
-/**
- * Features — Marketing section component
- *
- * Usage:
- *   import { Features } from "@/components/marketing/features"
- *   <Features />
- *
- * Server Component — no client-side interactivity required.
- */
-
 import { Smartphone, Wallet, BarChart3, Users, Palette, QrCode } from "lucide-react"
-
-// ─── Feature Data ──────────────────────────────────────────
 
 const features = [
   {
@@ -51,8 +39,6 @@ const features = [
   },
 ] as const
 
-// ─── Feature Card ──────────────────────────────────────────
-
 type FeatureCardProps = {
   icon: typeof features[number]["icon"]
   title: string
@@ -61,24 +47,41 @@ type FeatureCardProps = {
 
 function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
   return (
-    <div className="group relative flex flex-col gap-4 rounded-xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-border/80">
-      {/* Subtle top-edge gradient accent on hover */}
+    <div className="group relative mk-card-glass flex flex-col gap-4 p-6 hover:-translate-y-1">
+      {/* Top-edge accent on hover */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px rounded-t-xl bg-gradient-to-r from-transparent via-brand/40 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+        className="absolute inset-x-0 top-0 h-px rounded-t-2xl opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+        style={{
+          background: "linear-gradient(90deg, transparent, oklch(0.55 0.2 265 / 0.4), transparent)",
+        }}
       />
 
-      {/* Icon */}
-      <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-muted/60 transition-colors duration-200 group-hover:bg-brand/8 group-hover:border-brand/20">
-        <Icon className="size-5 text-muted-foreground transition-colors duration-200 group-hover:text-brand" strokeWidth={1.5} />
+      <div
+        className="flex size-10 items-center justify-center rounded-lg transition-colors duration-200 group-hover:bg-[oklch(0.55_0.2_265/0.08)]"
+        style={{
+          background: "var(--mk-surface)",
+          border: "1px solid var(--mk-border)",
+        }}
+      >
+        <Icon
+          className="size-5 transition-colors duration-200 group-hover:text-[oklch(0.55_0.2_265)]"
+          strokeWidth={1.5}
+          style={{ color: "var(--mk-text-muted)" }}
+        />
       </div>
 
-      {/* Text */}
       <div className="space-y-1.5">
-        <h3 className="text-[14px] font-semibold text-foreground tracking-tight">
+        <h3
+          className="text-[14px] font-semibold"
+          style={{ color: "var(--mk-text)", letterSpacing: "-0.01em" }}
+        >
           {title}
         </h3>
-        <p className="text-[13px] leading-relaxed text-muted-foreground">
+        <p
+          className="text-[13px] leading-relaxed"
+          style={{ color: "var(--mk-text-muted)" }}
+        >
           {description}
         </p>
       </div>
@@ -86,30 +89,35 @@ function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
   )
 }
 
-// ─── Component ─────────────────────────────────────────────
-
 export function Features() {
   return (
     <section
       id="features"
-      className="py-24 sm:py-32 bg-muted/30"
+      className="py-24 sm:py-32"
+      style={{ background: "var(--mk-surface)" }}
     >
       <div className="mx-auto max-w-5xl px-6 lg:px-8">
-
-        {/* — Heading — */}
         <div className="mx-auto max-w-2xl text-center mb-14 sm:mb-16">
-          <p className="text-[13px] font-medium text-brand uppercase tracking-widest mb-3">
+          <p
+            className="text-[13px] font-medium uppercase tracking-widest mb-3"
+            style={{ color: "var(--mk-brand-purple)" }}
+          >
             Features
           </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
+          <h2
+            className="text-3xl sm:text-4xl font-semibold"
+            style={{ color: "var(--mk-text)", letterSpacing: "-0.025em" }}
+          >
             Everything you need
           </h2>
-          <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
+          <p
+            className="mt-4 text-[15px] leading-relaxed"
+            style={{ color: "var(--mk-text-muted)" }}
+          >
             Built for restaurants that take customer loyalty seriously
           </p>
         </div>
 
-        {/* — Grid — */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
             <FeatureCard

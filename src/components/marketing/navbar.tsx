@@ -16,21 +16,6 @@ import {
 } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 
-/*
- * Usage example:
- *
- * import { MarketingNavbar } from "@/components/marketing/navbar"
- *
- * export default function LandingLayout({ children }: { children: React.ReactNode }) {
- *   return (
- *     <>
- *       <MarketingNavbar />
- *       <main>{children}</main>
- *     </>
- *   )
- * }
- */
-
 interface NavLink {
   label: string
   href: string
@@ -50,10 +35,7 @@ export function MarketingNavbar() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 8)
     }
-
-    // Set initial state in case page loads mid-scroll
     handleScroll()
-
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
@@ -63,12 +45,11 @@ export function MarketingNavbar() {
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-200",
         scrolled
-          ? "border-b border-border/60 bg-background/80 backdrop-blur-lg"
+          ? "border-b border-[var(--mk-border)] bg-[var(--mk-bg)]/80 backdrop-blur-lg"
           : "border-b border-transparent bg-transparent"
       )}
     >
-      <div className="mx-auto flex h-14 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-
+      <div className="mx-auto flex h-24 w-full items-center justify-between px-6 sm:px-8 lg:px-10">
         {/* Logo */}
         <Link
           href="/"
@@ -78,16 +59,16 @@ export function MarketingNavbar() {
           <Image
             src="/logo.svg"
             alt="Loyalshy"
-            width={120}
-            height={32}
-            className="h-10 w-auto dark:invert"
+            width={160}
+            height={44}
+            className="h-14 w-auto dark:invert"
             priority
           />
         </Link>
 
         {/* Center nav links — desktop only */}
         <nav
-          className="hidden md:flex md:items-center md:gap-1"
+          className="hidden md:flex md:items-center md:gap-3"
           aria-label="Main navigation"
         >
           {NAV_LINKS.map((link) => (
@@ -95,10 +76,11 @@ export function MarketingNavbar() {
               key={link.href}
               href={link.href}
               className={cn(
-                "rounded-md px-3 py-1.5 text-[13px] font-medium text-muted-foreground",
-                "transition-colors duration-150 hover:text-foreground",
+                "rounded-md px-5 py-2.5 text-base font-medium transition-colors duration-150",
+                "hover:text-[var(--mk-text)]",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               )}
+              style={{ color: "var(--mk-text-muted)" }}
             >
               {link.label}
             </Link>
@@ -106,22 +88,20 @@ export function MarketingNavbar() {
         </nav>
 
         {/* Right side actions — desktop */}
-        <div className="hidden items-center gap-2 md:flex">
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="text-[13px] font-medium text-muted-foreground hover:text-foreground"
+        <div className="hidden items-center gap-5 md:flex">
+          <Link
+            href="/login"
+            className="text-base font-medium transition-colors"
+            style={{ color: "var(--mk-text-muted)" }}
           >
-            <Link href="/login">Log In</Link>
-          </Button>
-          <Button
-            size="sm"
-            asChild
-            className="text-[13px] font-medium"
+            Log In
+          </Link>
+          <Link
+            href="/register"
+            className="mk-btn-primary !py-3 !px-8 !text-base"
           >
-            <Link href="/register">Start Free Trial</Link>
-          </Button>
+            Start Free Trial
+          </Link>
         </div>
 
         {/* Mobile: hamburger trigger */}
@@ -130,7 +110,8 @@ export function MarketingNavbar() {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="md:hidden text-muted-foreground"
+              className="md:hidden"
+              style={{ color: "var(--mk-text-muted)" }}
               aria-label="Open menu"
             >
               <Menu className="size-4.5" />
@@ -162,7 +143,6 @@ export function MarketingNavbar() {
                     className="text-muted-foreground"
                     aria-label="Close menu"
                   >
-                    {/* Using inline SVG to avoid importing X separately */}
                     <svg
                       width="15"
                       height="15"
@@ -183,7 +163,6 @@ export function MarketingNavbar() {
               </div>
             </SheetHeader>
 
-            {/* Mobile nav links */}
             <nav
               className="flex flex-col px-3 py-4"
               aria-label="Mobile navigation"
@@ -204,7 +183,6 @@ export function MarketingNavbar() {
               ))}
             </nav>
 
-            {/* Mobile CTA buttons */}
             <div className="flex flex-col gap-2 border-t border-border px-4 py-4">
               <Button
                 variant="outline"
@@ -216,15 +194,13 @@ export function MarketingNavbar() {
                   Log In
                 </Link>
               </Button>
-              <Button
-                size="sm"
-                asChild
-                className="w-full text-[13px] font-medium"
+              <Link
+                href="/register"
+                onClick={() => setMobileOpen(false)}
+                className="mk-btn-primary w-full text-center !text-[13px]"
               >
-                <Link href="/register" onClick={() => setMobileOpen(false)}>
-                  Start Free Trial
-                </Link>
-              </Button>
+                Start Free Trial
+              </Link>
             </div>
           </SheetContent>
         </Sheet>

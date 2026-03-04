@@ -1,24 +1,11 @@
-/**
- * Testimonials — Marketing section component
- *
- * Usage:
- *   import { Testimonials } from "@/components/marketing/testimonials"
- *   <Testimonials />
- *
- * Server Component — no client-side interactivity required.
- * Avatar colors are deterministically derived from the testimonial name
- * using the same palette convention as the dashboard's top-customers component.
- */
-
 // ─── Avatar Color Palette ──────────────────────────────────
-// OKLCH-derived palette — matches globals.css chart tokens
 const AVATAR_COLORS: { bg: string; text: string }[] = [
-  { bg: "bg-chart-1/15", text: "text-chart-1" },
-  { bg: "bg-chart-2/15", text: "text-chart-2" },
-  { bg: "bg-chart-3/15", text: "text-chart-3" },
-  { bg: "bg-chart-4/15", text: "text-chart-4" },
-  { bg: "bg-chart-5/15", text: "text-chart-5" },
-  { bg: "bg-brand/15",   text: "text-brand"   },
+  { bg: "oklch(0.55 0.22 265 / 0.12)", text: "oklch(0.50 0.20 265)" },
+  { bg: "oklch(0.60 0.15 185 / 0.12)", text: "oklch(0.50 0.13 185)" },
+  { bg: "oklch(0.65 0.12 145 / 0.12)", text: "oklch(0.48 0.12 145)" },
+  { bg: "oklch(0.70 0.14 75 / 0.12)",  text: "oklch(0.55 0.14 75)" },
+  { bg: "oklch(0.60 0.18 330 / 0.12)", text: "oklch(0.50 0.16 330)" },
+  { bg: "oklch(0.55 0.2 265 / 0.12)",  text: "oklch(0.50 0.18 265)" },
 ]
 
 function getAvatarColor(name: string): { bg: string; text: string } {
@@ -37,8 +24,6 @@ function getInitials(name: string): string {
     .toUpperCase()
     .slice(0, 2)
 }
-
-// ─── Testimonial Data ──────────────────────────────────────
 
 const testimonials = [
   {
@@ -91,9 +76,7 @@ const testimonials = [
   },
 ] as const
 
-// ─── Quote Icon ────────────────────────────────────────────
-
-function QuoteIcon({ className }: { className?: string }) {
+function QuoteIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       aria-hidden="true"
@@ -102,13 +85,12 @@ function QuoteIcon({ className }: { className?: string }) {
       viewBox="0 0 20 16"
       fill="currentColor"
       className={className}
+      style={style}
     >
       <path d="M0 16V9.5C0 5.9 2.3 2.9 6.9 0l1.4 1.8C5.8 3.3 4.4 5.2 4 8h3.5V16H0zm10 0V9.5C10 5.9 12.3 2.9 16.9 0l1.4 1.8C15.8 3.3 14.4 5.2 14 8h3.5V16H10z" />
     </svg>
   )
 }
-
-// ─── Testimonial Card ──────────────────────────────────────
 
 type TestimonialCardProps = {
   name: string
@@ -123,45 +105,41 @@ function TestimonialCard({ name, role, quote, stat, statLabel }: TestimonialCard
   const initials = getInitials(name)
 
   return (
-    <div className="flex flex-col gap-5 rounded-xl border border-border bg-card p-6">
+    <div className="mk-card-glass flex flex-col gap-5 p-6">
       {/* Stat highlight */}
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold tracking-tight text-brand">
+        <span className="mk-gradient-text text-2xl font-bold tracking-tight">
           {stat}
         </span>
-        <span className="text-[12px] font-medium text-muted-foreground">
+        <span className="text-[12px] font-medium" style={{ color: "var(--mk-text-dimmed)" }}>
           {statLabel}
         </span>
       </div>
 
-      {/* Quote icon */}
-      <QuoteIcon className="size-4 text-brand/40 shrink-0" />
+      <QuoteIcon className="size-4 shrink-0" style={{ color: "oklch(0.55 0.2 265 / 0.3)" }} />
 
-      {/* Quote text */}
       <blockquote className="flex-1">
-        <p className="text-[14px] leading-relaxed text-foreground/80">
+        <p className="text-[14px] leading-relaxed" style={{ color: "var(--mk-text-muted)" }}>
           {quote}
         </p>
       </blockquote>
 
-      {/* Divider */}
-      <div className="h-px bg-border" />
+      <div className="h-px" style={{ background: "var(--mk-border)" }} />
 
-      {/* Author */}
       <div className="flex items-center gap-3">
-        {/* Avatar circle with initials */}
         <div
-          className={`flex size-9 shrink-0 items-center justify-center rounded-full ${color.bg} ${color.text} text-[11px] font-semibold tracking-wide select-none`}
+          className="flex size-9 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold tracking-wide select-none"
+          style={{ background: color.bg, color: color.text }}
           aria-label={`Avatar for ${name}`}
         >
           {initials}
         </div>
 
         <div className="min-w-0">
-          <p className="text-[13px] font-semibold text-foreground truncate">
+          <p className="text-[13px] font-semibold truncate" style={{ color: "var(--mk-text)" }}>
             {name}
           </p>
-          <p className="text-[12px] text-muted-foreground truncate">
+          <p className="text-[12px] truncate" style={{ color: "var(--mk-text-dimmed)" }}>
             {role}
           </p>
         </div>
@@ -170,30 +148,35 @@ function TestimonialCard({ name, role, quote, stat, statLabel }: TestimonialCard
   )
 }
 
-// ─── Component ─────────────────────────────────────────────
-
 export function Testimonials() {
   return (
     <section
       id="testimonials"
-      className="py-24 sm:py-32 bg-background"
+      className="py-24 sm:py-32"
+      style={{ background: "var(--mk-bg)" }}
     >
       <div className="mx-auto max-w-5xl px-6 lg:px-8">
-
-        {/* — Heading — */}
         <div className="mx-auto max-w-2xl text-center mb-14 sm:mb-16">
-          <p className="text-[13px] font-medium text-brand uppercase tracking-widest mb-3">
+          <p
+            className="text-[13px] font-medium uppercase tracking-widest mb-3"
+            style={{ color: "var(--mk-brand-purple)" }}
+          >
             Testimonials
           </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
+          <h2
+            className="text-3xl sm:text-4xl font-semibold"
+            style={{ color: "var(--mk-text)", letterSpacing: "-0.025em" }}
+          >
             Loved by restaurant owners
           </h2>
-          <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
+          <p
+            className="mt-4 text-[15px] leading-relaxed"
+            style={{ color: "var(--mk-text-muted)" }}
+          >
             See how restaurants are growing repeat business with Loyalshy
           </p>
         </div>
 
-        {/* — Grid: 2 rows x 3 columns — */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial) => (
             <TestimonialCard

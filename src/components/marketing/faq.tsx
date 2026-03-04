@@ -1,17 +1,11 @@
 "use client"
 
-// Usage:
-// import { FAQ } from "@/components/marketing/faq"
-// <FAQ /> — drop into any landing page section
-
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-
-// ─── FAQ Data ─────────────────────────────────────────────────────────────────
 
 const FAQ_ITEMS = [
   {
@@ -36,7 +30,7 @@ const FAQ_ITEMS = [
     id: "free-trial",
     question: "Can I try it for free?",
     answer:
-      "Absolutely! The Starter plan comes with a 14-day free trial. No credit card required to start. You can also use the Free plan indefinitely with up to 50 customers.",
+      "Absolutely! The Starter plan comes with a 14-day free trial. No credit card required to start.",
   },
   {
     id: "cancel",
@@ -64,43 +58,59 @@ const FAQ_ITEMS = [
   },
 ] as const
 
-// ─── FAQ Section ──────────────────────────────────────────────────────────────
-
 export function FAQ() {
   return (
     <section
       id="faq"
       className="py-24 px-4 sm:px-6"
-      style={{ background: "var(--background)" }}
+      style={{ background: "var(--mk-bg)" }}
     >
       <div className="mx-auto max-w-3xl">
-        {/* Heading */}
         <div className="text-center mb-12">
-          <p className="mb-3 inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--muted)] px-3 py-1 text-[11px] font-semibold tracking-[0.08em] uppercase text-[var(--muted-foreground)]">
+          <p
+            className="mb-3 inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-[0.08em] uppercase"
+            style={{
+              border: "1px solid var(--mk-border)",
+              background: "var(--mk-surface)",
+              color: "var(--mk-text-dimmed)",
+            }}
+          >
             FAQ
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--foreground)] mb-4">
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-4"
+            style={{ color: "var(--mk-text)", letterSpacing: "-0.025em" }}
+          >
             Frequently asked questions
           </h2>
-          <p className="text-[15px] text-[var(--muted-foreground)]">
+          <p className="text-[15px]" style={{ color: "var(--mk-text-muted)" }}>
             Everything you need to know about Loyalshy.
           </p>
         </div>
 
-        {/* Accordion */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden divide-y divide-[var(--border)]">
+        <div className="mk-card-glass overflow-hidden">
           <Accordion type="single" collapsible className="w-full">
-            {FAQ_ITEMS.map((item) => (
+            {FAQ_ITEMS.map((item, i) => (
               <AccordionItem
                 key={item.id}
                 value={item.id}
-                // Override default border-b since we use divide on parent
                 className="border-b-0 px-6"
+                style={
+                  i < FAQ_ITEMS.length - 1
+                    ? { borderBottom: "1px solid var(--mk-border)" }
+                    : undefined
+                }
               >
-                <AccordionTrigger className="text-[13px] font-medium text-[var(--foreground)] hover:no-underline py-5 gap-6">
+                <AccordionTrigger
+                  className="text-[13px] font-medium hover:no-underline py-5 gap-6"
+                  style={{ color: "var(--mk-text)" }}
+                >
                   {item.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-[13px] text-[var(--muted-foreground)] leading-relaxed pb-5 pt-0">
+                <AccordionContent
+                  className="text-[13px] leading-relaxed pb-5 pt-0"
+                  style={{ color: "var(--mk-text-muted)" }}
+                >
                   {item.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -108,12 +118,12 @@ export function FAQ() {
           </Accordion>
         </div>
 
-        {/* Still have questions nudge */}
-        <p className="mt-8 text-center text-[13px] text-[var(--muted-foreground)]">
+        <p className="mt-8 text-center text-[13px]" style={{ color: "var(--mk-text-muted)" }}>
           Still have questions?{" "}
           <a
             href="mailto:hello@loyalshy.com"
-            className="font-medium text-[var(--foreground)] underline underline-offset-4 hover:opacity-70 transition-opacity"
+            className="font-medium underline underline-offset-4 transition-opacity hover:opacity-70"
+            style={{ color: "var(--mk-text)" }}
           >
             Email us
           </a>{" "}
