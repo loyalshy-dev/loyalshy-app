@@ -4,7 +4,7 @@ import { buildClassId, buildObjectId, buildProgramClassId, buildEnrollmentObject
 import { buildSaveUrl } from "./jwt-utils"
 import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters } from "../card-design"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig } from "../../program-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem } from "../../program-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -39,6 +39,7 @@ export type GooglePassGenerationInput = {
   // Program type + config for type-specific pass content
   programType?: string
   programConfig?: unknown
+  pointsBalance?: number
 }
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -77,9 +78,10 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   // Type-specific row field paths
   const isCoupon = input.programType === "COUPON"
   const isMembership = input.programType === "MEMBERSHIP"
+  const isPoints = input.programType === "POINTS"
 
   // Determine which text module fields to reference in rows
-  const row1Start = isCoupon ? "couponCode" : isMembership ? "benefits" : "nextReward"
+  const row1Start = isCoupon ? "couponCode" : isMembership ? "benefits" : isPoints ? "earnRate" : "nextReward"
   const row1End = "memberSince"
   const row2Field = isCoupon ? "couponCode" : isMembership ? "benefits" : "nextReward"
   const row3Field = "memberSince"
@@ -134,6 +136,7 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
     if (!name) return "Loyalty Card"
     if (isCoupon) return name
     if (isMembership) return `${name} Membership`
+    if (isPoints) return `${name} Points`
     return `${name} Loyalty`
   })()
 
@@ -334,6 +337,7 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
   // Parse type-specific config
   const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
   const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
+  const pointsConfig = input.programType === "POINTS" ? parsePointsConfig(input.programConfig) : null
 
   // Type-specific loyalty points and text modules
   let loyaltyPoints: Record<string, unknown>
@@ -364,6 +368,19 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
     }
     textModulesData = [
       { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
+      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
+    ]
+  } else if (input.programType === "POINTS" && pointsConfig) {
+    loyaltyPoints = {
+      label: formatLabel("POINTS", labelFmt),
+      balance: { int: input.pointsBalance ?? 0 },
+    }
+    const cheapestItem = getCheapestCatalogItem(pointsConfig)
+    secondaryLoyaltyPoints = cheapestItem
+      ? { label: formatLabel("NEXT REWARD", labelFmt), balance: { string: `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` } }
+      : { label: formatLabel("TOTAL VISITS", labelFmt), balance: { int: input.totalVisits } }
+    textModulesData = [
+      { id: "earnRate", header: formatLabel("EARN RATE", labelFmt), body: `${pointsConfig.pointsPerVisit} points per visit` },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
   } else {

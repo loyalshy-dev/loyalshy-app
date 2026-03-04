@@ -1,9 +1,9 @@
-import { Stamp, Ticket, Crown } from "lucide-react"
+import { Stamp, Ticket, Crown, Coins } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 // ─── Program Type ────────────────────────────────────────────
 
-export type ProgramType = "STAMP_CARD" | "COUPON" | "MEMBERSHIP"
+export type ProgramType = "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS"
 
 // ─── Type-specific configs (stored in LoyaltyProgram.config JSON) ───
 
@@ -25,6 +25,18 @@ export type MembershipConfig = {
   terms?: string
 }
 
+export type PointsCatalogItem = {
+  id: string
+  name: string
+  description?: string
+  pointsCost: number
+}
+
+export type PointsConfig = {
+  pointsPerVisit: number
+  catalog: PointsCatalogItem[]
+}
+
 // ─── Program type metadata ──────────────────────────────────
 
 export type ProgramTypeMeta = {
@@ -34,6 +46,14 @@ export type ProgramTypeMeta = {
   description: string
   defaultCardType: "STAMP" | "COUPON" | "POINTS" | "TIER"
 }
+
+// ─── Minigame config (stored in LoyaltyProgram.config JSON) ───
+
+export type MinigameType = "scratch" | "slots" | "wheel"
+export type PrizeItem = { name: string; weight: number }
+export type MinigameConfig = { enabled: boolean; gameType: MinigameType; prizes?: PrizeItem[]; primaryColor?: string; accentColor?: string }
+
+// ─── Program type metadata ──────────────────────────────────
 
 export const PROGRAM_TYPE_META: Record<ProgramType, ProgramTypeMeta> = {
   STAMP_CARD: {
@@ -56,5 +76,12 @@ export const PROGRAM_TYPE_META: Record<ProgramType, ProgramTypeMeta> = {
     icon: Crown,
     description: "Exclusive membership with ongoing perks and benefits",
     defaultCardType: "TIER",
+  },
+  POINTS: {
+    label: "Points Program",
+    shortLabel: "Points",
+    icon: Coins,
+    description: "Earn points per visit, redeem from a reward catalog",
+    defaultCardType: "POINTS",
   },
 }

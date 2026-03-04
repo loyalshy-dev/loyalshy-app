@@ -12,7 +12,7 @@ import {
 } from "./constants"
 import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters } from "../card-design"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig } from "../../program-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem } from "../../program-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -43,6 +43,8 @@ export type PassGenerationInput = {
   // Program type + config for type-specific pass content
   programType?: string
   programConfig?: unknown
+  // Points balance for POINTS program type
+  pointsBalance?: number
 }
 
 // ─── Generate Pass ──────────────────────────────────────────
@@ -145,6 +147,7 @@ export async function generateApplePass(
     const name = input.programName ?? input.restaurantName
     if (input.programType === "COUPON") return `${name} Coupon`
     if (input.programType === "MEMBERSHIP") return `${name} Membership`
+    if (input.programType === "POINTS") return `${name} Points Card`
     return `${name} Loyalty Card`
   })()
 
@@ -201,6 +204,8 @@ export async function generateApplePass(
   // Parse type-specific config for field data
   const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
   const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
+  const pointsConfig = input.programType === "POINTS" ? parsePointsConfig(input.programConfig) : null
+  const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Field data map — all labels go through formatLabel
   const fieldData: Record<string, { key: string; label: string; value: string }> = {
@@ -218,6 +223,10 @@ export async function generateApplePass(
     // TIER/MEMBERSHIP fields
     tierName: { key: "tierName", label: formatLabel("TIER", labelFmt), value: membershipConfig?.membershipTier ?? "" },
     benefits: { key: "benefits", label: formatLabel("BENEFITS", labelFmt), value: membershipConfig?.benefits ?? "" },
+    // POINTS fields
+    pointsBalance: { key: "pointsBalance", label: formatLabel("POINTS", labelFmt), value: String(input.pointsBalance ?? 0) },
+    nextRewardPoints: { key: "nextRewardPoints", label: formatLabel("NEXT REWARD", labelFmt), value: cheapestItem ? `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` : "" },
+    earnRate: { key: "earnRate", label: formatLabel("EARN RATE", labelFmt), value: pointsConfig ? `${pointsConfig.pointsPerVisit} pts/visit` : "" },
   }
 
   // Populate header fields
@@ -291,6 +300,23 @@ export async function generateApplePass(
       key: "membershipTerms",
       label: "Membership",
       value: `Show this pass when visiting to check in. Your membership entitles you to the benefits listed above.`,
+    })
+  } else if (input.programType === "POINTS" && pointsConfig) {
+    pass.backFields.push({
+      key: "pointsBalance",
+      label: "POINTS BALANCE",
+      value: String(input.pointsBalance ?? 0),
+    })
+    pass.backFields.push({
+      key: "earnRate",
+      label: "EARN RATE",
+      value: `${pointsConfig.pointsPerVisit} points per visit`,
+    })
+    const catalogText = pointsConfig.catalog.map(item => `${item.name}: ${item.pointsCost} pts`).join("\n")
+    pass.backFields.push({
+      key: "rewardCatalog",
+      label: "REWARD CATALOG",
+      value: catalogText,
     })
   } else {
     // STAMP_CARD (default)

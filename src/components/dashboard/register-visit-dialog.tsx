@@ -19,6 +19,7 @@ import {
   ScanLine,
   Ticket,
   Crown,
+  Coins,
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -35,19 +36,25 @@ import {
   registerVisit,
   redeemCoupon,
   checkInMember,
+  earnPoints,
+  redeemPoints,
   lookupEnrollmentByWalletPassId,
   type VisitSearchResult,
   type RedeemCouponResult,
   type CheckInResult,
+  type EarnPointsResult,
+  type RedeemPointsResult,
 } from "@/server/visit-actions"
 import type { EnrollmentSummary } from "@/types/enrollment"
 import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
+import { parsePointsConfig, getCheapestCatalogItem } from "@/lib/program-config"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
+import { MinigameStep } from "@/components/dashboard/minigames"
 
 // ─── Types ──────────────────────────────────────────────────
 
-type Step = "search" | "program" | "confirm" | "success"
+type Step = "search" | "program" | "confirm" | "minigame" | "success"
 
 type RegisterVisitDialogProps = {
   open: boolean
@@ -105,6 +112,8 @@ export function RegisterVisitDialog({
   })
   const [couponResult, setCouponResult] = useState<RedeemCouponResult | null>(null)
   const [checkInResult, setCheckInResult] = useState<CheckInResult | null>(null)
+  const [earnPointsResult, setEarnPointsResult] = useState<EarnPointsResult | null>(null)
+  const [redeemPointsResult, setRedeemPointsResult] = useState<RedeemPointsResult | null>(null)
   const [scanMode, setScanMode] = useState(false)
   const [scanError, setScanError] = useState<string | null>(null)
   const [isScanLooking, setIsScanLooking] = useState(false)
@@ -171,6 +180,8 @@ export function RegisterVisitDialog({
         setSelectedEnrollment(null)
         setCouponResult(null)
         setCheckInResult(null)
+        setEarnPointsResult(null)
+        setRedeemPointsResult(null)
         setScanMode(false)
         setScanError(null)
         setIsScanLooking(false)
@@ -235,6 +246,23 @@ export function RegisterVisitDialog({
     setStep("confirm")
   }
 
+  // Helper to start auto-dismiss timer
+  function autoDismiss(ms = 2500) {
+    autoDismissRef.current = setTimeout(() => {
+      onOpenChange(false)
+    }, ms)
+  }
+
+  // Check if minigame should be shown
+  function shouldShowMinigame(enrollment: EnrollmentSummary): boolean {
+    if (!enrollment.minigameConfig?.enabled) return false
+    try {
+      return localStorage.getItem(`minigame-dismissed:${enrollment.enrollmentId}`) !== "1"
+    } catch {
+      return true
+    }
+  }
+
   // Confirm visit registration
   function handleConfirm() {
     if (!selectedEnrollment) return
@@ -255,7 +283,6 @@ export function RegisterVisitDialog({
         visitsRequired: result.visitsRequired,
         programName: result.programName ?? selectedEnrollment.programName,
       })
-      setStep("success")
 
       // Haptic feedback
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -272,10 +299,13 @@ export function RegisterVisitDialog({
         toast.success(`Visit registered for ${selectedCustomer?.fullName}`)
       }
 
-      // Auto-dismiss after 2.5 seconds
-      autoDismissRef.current = setTimeout(() => {
-        onOpenChange(false)
-      }, 2500)
+      // Route to minigame or success
+      if (result.wasRewardEarned && shouldShowMinigame(selectedEnrollment)) {
+        setStep("minigame")
+      } else {
+        setStep("success")
+        autoDismiss()
+      }
     })
   }
 
@@ -292,7 +322,6 @@ export function RegisterVisitDialog({
       }
 
       setCouponResult(result)
-      setStep("success")
 
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
         navigator.vibrate(10)
@@ -303,9 +332,13 @@ export function RegisterVisitDialog({
         { description: result.discountText }
       )
 
-      autoDismissRef.current = setTimeout(() => {
-        onOpenChange(false)
-      }, 2500)
+      // Route to minigame or success
+      if (shouldShowMinigame(selectedEnrollment)) {
+        setStep("minigame")
+      } else {
+        setStep("success")
+        autoDismiss()
+      }
     })
   }
 
@@ -330,9 +363,63 @@ export function RegisterVisitDialog({
 
       toast.success(`Check-in recorded for ${selectedCustomer?.fullName}`)
 
-      autoDismissRef.current = setTimeout(() => {
-        onOpenChange(false)
-      }, 2500)
+      autoDismiss()
+    })
+  }
+
+  // Earn points for a POINTS program visit
+  function handleEarnPoints() {
+    if (!selectedEnrollment) return
+
+    startRegister(async () => {
+      const result = await earnPoints(selectedEnrollment.enrollmentId)
+
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to earn points")
+        return
+      }
+
+      setEarnPointsResult(result)
+
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(10)
+      }
+
+      toast.success(
+        `+${result.pointsEarned} pts earned for ${selectedCustomer?.fullName}`,
+        { description: `New balance: ${result.newBalance} pts` }
+      )
+
+      setStep("success")
+      autoDismiss()
+    })
+  }
+
+  // Redeem a catalog item for a POINTS program
+  function handleRedeemPoints(catalogItemId: string) {
+    if (!selectedEnrollment) return
+
+    startRegister(async () => {
+      const result = await redeemPoints(selectedEnrollment.enrollmentId, catalogItemId)
+
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to redeem reward")
+        return
+      }
+
+      setRedeemPointsResult(result)
+
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(10)
+      }
+
+      toast.success(
+        `Reward redeemed for ${selectedCustomer?.fullName}`,
+        { description: result.itemName }
+      )
+
+      setStep("success")
+      autoDismiss()
     })
   }
 
@@ -468,8 +555,22 @@ export function RegisterVisitDialog({
             onConfirm={handleConfirm}
             onConfirmCoupon={handleConfirmCoupon}
             onConfirmCheckIn={handleConfirmCheckIn}
+            onEarnPoints={handleEarnPoints}
+            onRedeemPoints={handleRedeemPoints}
             onBack={handleBack}
             cardDesign={selectedEnrollment?.cardDesign ?? null}
+          />
+        )}
+        {step === "minigame" && selectedEnrollment && (
+          <MinigameStep
+            gameType={selectedEnrollment.minigameConfig!.gameType}
+            rewardText={couponResult?.selectedPrize ?? couponResult?.discountText ?? rewardDescription}
+            enrollmentId={selectedEnrollment.enrollmentId}
+            prizes={selectedEnrollment.minigameConfig?.prizes?.map((p) => p.name)}
+            primaryColor={selectedEnrollment.minigameConfig?.primaryColor}
+            accentColor={selectedEnrollment.minigameConfig?.accentColor}
+            onComplete={() => { setStep("success"); autoDismiss() }}
+            onSkip={() => { setStep("success"); autoDismiss() }}
           />
         )}
         {step === "success" && selectedCustomer && (
@@ -482,6 +583,8 @@ export function RegisterVisitDialog({
             programName={resultVisits.programName}
             couponResult={couponResult}
             checkInResult={checkInResult}
+            earnPointsResult={earnPointsResult}
+            redeemPointsResult={redeemPointsResult}
             onClose={() => onOpenChange(false)}
           />
         )}
@@ -681,12 +784,20 @@ function ProgramPickerStep({
           {activeEnrollments.map((enrollment) => {
             const isCoupon = enrollment.programType === "COUPON"
             const isMembership = enrollment.programType === "MEMBERSHIP"
+            const isPoints = enrollment.programType === "POINTS"
+            const pointsConfig = isPoints ? parsePointsConfig(enrollment.programConfig) : null
+            const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
+            const pointsBalance = enrollment.pointsBalance ?? 0
             const pct = isCoupon || isMembership
               ? 100
-              : Math.min(
-                  (enrollment.currentCycleVisits / enrollment.visitsRequired) * 100,
-                  100
-                )
+              : isPoints
+                ? cheapestItem
+                  ? Math.min((pointsBalance / cheapestItem.pointsCost) * 100, 100)
+                  : 0
+                : Math.min(
+                    (enrollment.currentCycleVisits / enrollment.visitsRequired) * 100,
+                    100
+                  )
 
             return (
               <button
@@ -700,6 +811,8 @@ function ProgramPickerStep({
                     <Crown className="size-5 text-brand" />
                   ) : isCoupon ? (
                     <Ticket className="size-5 text-brand" />
+                  ) : isPoints ? (
+                    <Coins className="size-5 text-brand" />
                   ) : (
                     <CreditCard className="size-5 text-brand" />
                   )}
@@ -719,6 +832,11 @@ function ProgramPickerStep({
                         Membership
                       </span>
                     )}
+                    {isPoints && (
+                      <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
+                        {pointsBalance} pts
+                      </span>
+                    )}
                   </div>
                   {isMembership ? (
                     <p className="text-[12px] text-muted-foreground mt-1">
@@ -728,6 +846,18 @@ function ProgramPickerStep({
                     <p className="text-[12px] font-medium text-success mt-1">
                       Ready to redeem
                     </p>
+                  ) : isPoints ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-[120px]">
+                        <div
+                          className="h-full rounded-full bg-brand transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-[12px] font-medium tabular-nums text-muted-foreground">
+                        {cheapestItem ? `${pointsBalance}/${cheapestItem.pointsCost} for reward` : `${pointsBalance} pts`}
+                      </span>
+                    </div>
                   ) : (
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-[120px]">
@@ -775,6 +905,8 @@ function ConfirmStep({
   onConfirm,
   onConfirmCoupon,
   onConfirmCheckIn,
+  onEarnPoints,
+  onRedeemPoints,
   onBack,
   cardDesign = null,
 }: {
@@ -784,6 +916,8 @@ function ConfirmStep({
   onConfirm: () => void
   onConfirmCoupon: () => void
   onConfirmCheckIn: () => void
+  onEarnPoints: () => void
+  onRedeemPoints: (catalogItemId: string) => void
   onBack: () => void
   /** Card design for the selected enrollment's program. Pass once
    *  EnrollmentSummary includes cardDesign data. */
@@ -816,14 +950,20 @@ function ConfirmStep({
 
   const isCoupon = enrollment.programType === "COUPON"
   const isMembership = enrollment.programType === "MEMBERSHIP"
+  const isPoints = enrollment.programType === "POINTS"
   const filled = enrollment.currentCycleVisits
   const nextVisit = filled + 1
   const visitsRequired = enrollment.visitsRequired
+  const pointsConfig = isPoints ? parsePointsConfig(enrollment.programConfig) : null
+  const pointsBalance = enrollment.pointsBalance ?? 0
+  const affordableCatalogItems = pointsConfig
+    ? pointsConfig.catalog.filter((item) => pointsBalance >= item.pointsCost)
+    : []
 
   // Build WalletPassDesign from card design data when available
   const visitSf = cardDesign ? parseStripFilters(cardDesign.editorConfig) : { useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
   const visitSg = visitSf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
-  const resolvedCardType = isMembership ? "TIER" : isCoupon ? "COUPON" : "STAMP"
+  const resolvedCardType = isMembership ? "TIER" : isCoupon ? "COUPON" : isPoints ? "POINTS" : "STAMP"
   const design: WalletPassDesign | null = cardDesign
     ? {
         cardType: resolvedCardType as WalletPassDesign["cardType"],
@@ -863,7 +1003,7 @@ function ConfirmStep({
           <ArrowLeft className="size-4" />
         </Button>
         <DialogTitle className="text-base">
-          {isMembership ? "Member Check-in" : isCoupon ? "Redeem Coupon" : "Confirm Visit"}
+          {isMembership ? "Member Check-in" : isCoupon ? "Redeem Coupon" : isPoints ? "Points" : "Confirm Visit"}
         </DialogTitle>
       </div>
 
@@ -882,7 +1022,9 @@ function ConfirmStep({
               ? `${enrollment.programName} — Member Check-in`
               : isCoupon
                 ? `${enrollment.programName} — Coupon Redemption`
-                : `${enrollment.programName} — Visit #${enrollment.totalVisits + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
+                : isPoints
+                  ? `${enrollment.programName} — ${pointsBalance} pts balance`
+                  : `${enrollment.programName} — Visit #${enrollment.totalVisits + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
           </p>
         </div>
       </div>
@@ -896,8 +1038,8 @@ function ConfirmStep({
             programName={enrollment.programName}
             restaurantName=""
             customerName={customer.fullName}
-            currentVisits={isCoupon || isMembership ? 1 : nextVisit}
-            totalVisits={isCoupon || isMembership ? 1 : visitsRequired}
+            currentVisits={isCoupon || isMembership || isPoints ? 1 : nextVisit}
+            totalVisits={isCoupon || isMembership || isPoints ? 1 : visitsRequired}
             rewardDescription=""
             compact
             width={280}
@@ -917,29 +1059,102 @@ function ConfirmStep({
             <p className="text-[13px] font-medium text-center">Ready to redeem</p>
           </div>
         </div>
+      ) : isPoints ? (
+        <div className="px-6">
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-4">
+            <Coins className="size-8 text-brand" />
+            <p className="text-[22px] font-bold tabular-nums text-brand">{pointsBalance} pts</p>
+            {pointsConfig && (
+              <p className="text-[12px] text-muted-foreground">
+                +{pointsConfig.pointsPerVisit} pts per visit
+              </p>
+            )}
+          </div>
+        </div>
       ) : (
         <StampCard filled={filled} total={visitsRequired} highlightNext />
       )}
 
-      {/* Confirm button */}
-      <div className="p-4 pt-6">
-        <Button
-          className="w-full h-11 text-[14px] font-medium gap-2"
-          onClick={isMembership ? onConfirmCheckIn : isCoupon ? onConfirmCoupon : onConfirm}
-          disabled={isRegistering}
-        >
-          {isRegistering ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : isMembership ? (
-            <Crown className="size-4" />
-          ) : isCoupon ? (
-            <Ticket className="size-4" />
-          ) : (
-            <Stamp className="size-4" />
+      {/* Confirm button(s) */}
+      {isPoints ? (
+        <div className="p-4 pt-4 space-y-3">
+          {/* Primary: earn points */}
+          <Button
+            className="w-full h-11 text-[14px] font-medium gap-2"
+            onClick={onEarnPoints}
+            disabled={isRegistering}
+          >
+            {isRegistering ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Coins className="size-4" />
+            )}
+            {pointsConfig ? `Earn +${pointsConfig.pointsPerVisit} pts` : "Earn Points"}
+          </Button>
+
+          {/* Secondary: redeem catalog */}
+          {pointsConfig && pointsConfig.catalog.length > 0 && (
+            <div className="rounded-xl border border-border bg-card overflow-hidden">
+              <p className="px-3 py-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
+                Redeem a reward
+              </p>
+              <div className="divide-y divide-border">
+                {pointsConfig.catalog.map((item) => {
+                  const canAfford = pointsBalance >= item.pointsCost
+                  return (
+                    <div
+                      key={item.id}
+                      className={`flex items-center gap-3 px-3 py-2.5 ${canAfford ? "" : "opacity-50"}`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-medium truncate">{item.name}</p>
+                        {item.description && (
+                          <p className="text-[11px] text-muted-foreground truncate">{item.description}</p>
+                        )}
+                        <p className="text-[11px] font-semibold text-brand tabular-nums">
+                          {item.pointsCost} pts
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={canAfford ? "default" : "outline"}
+                        className="shrink-0 h-7 text-[12px] px-2.5"
+                        onClick={() => onRedeemPoints(item.id)}
+                        disabled={isRegistering || !canAfford}
+                      >
+                        {isRegistering ? (
+                          <Loader2 className="size-3 animate-spin" />
+                        ) : (
+                          "Redeem"
+                        )}
+                      </Button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           )}
-          {isMembership ? "Check In" : isCoupon ? "Redeem Coupon" : "Register Visit"}
-        </Button>
-      </div>
+        </div>
+      ) : (
+        <div className="p-4 pt-6">
+          <Button
+            className="w-full h-11 text-[14px] font-medium gap-2"
+            onClick={isMembership ? onConfirmCheckIn : isCoupon ? onConfirmCoupon : onConfirm}
+            disabled={isRegistering}
+          >
+            {isRegistering ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : isMembership ? (
+              <Crown className="size-4" />
+            ) : isCoupon ? (
+              <Ticket className="size-4" />
+            ) : (
+              <Stamp className="size-4" />
+            )}
+            {isMembership ? "Check In" : isCoupon ? "Redeem Coupon" : "Register Visit"}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
@@ -1009,6 +1224,8 @@ function SuccessStep({
   programName,
   couponResult,
   checkInResult,
+  earnPointsResult,
+  redeemPointsResult,
   onClose,
 }: {
   customer: VisitSearchResult
@@ -1019,6 +1236,8 @@ function SuccessStep({
   programName: string
   couponResult: RedeemCouponResult | null
   checkInResult: CheckInResult | null
+  earnPointsResult: EarnPointsResult | null
+  redeemPointsResult: RedeemPointsResult | null
   onClose: () => void
 }) {
   return (
@@ -1059,6 +1278,49 @@ function SuccessStep({
           {couponResult.redemptionLimit === "unlimited" && (
             <p className="text-[11px] text-muted-foreground mt-2">
               A new coupon has been issued automatically
+            </p>
+          )}
+        </>
+      ) : redeemPointsResult ? (
+        <>
+          <div className="relative">
+            <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
+              <PartyPopper className="size-10 text-success animate-[bounce-in_0.5s_ease-out_0.2s_both]" />
+            </div>
+            <ConfettiDots />
+          </div>
+          <p className="text-xl font-bold mt-6">Reward Redeemed!</p>
+          <p className="text-[13px] text-muted-foreground mt-1 text-center">
+            {customer.fullName} — {redeemPointsResult.programName}
+          </p>
+          {redeemPointsResult.itemName && (
+            <p className="text-[14px] font-semibold text-brand mt-2">
+              {redeemPointsResult.itemName}
+            </p>
+          )}
+          {redeemPointsResult.pointsSpent !== undefined && redeemPointsResult.newBalance !== undefined && (
+            <p className="text-[12px] text-muted-foreground mt-1 tabular-nums">
+              -{redeemPointsResult.pointsSpent} pts &mdash; {redeemPointsResult.newBalance} pts remaining
+            </p>
+          )}
+        </>
+      ) : earnPointsResult ? (
+        <>
+          <div className="flex size-20 items-center justify-center rounded-full bg-brand/10 animate-[scale-in_0.4s_ease-out]">
+            <Coins className="size-10 text-brand animate-[bounce-in_0.5s_ease-out_0.2s_both]" />
+          </div>
+          <p className="text-xl font-bold mt-6">Points Earned!</p>
+          <p className="text-[13px] text-muted-foreground mt-1 text-center">
+            {customer.fullName} — {earnPointsResult.programName}
+          </p>
+          {earnPointsResult.pointsEarned !== undefined && (
+            <p className="text-[18px] font-bold text-brand mt-3 tabular-nums">
+              +{earnPointsResult.pointsEarned} pts
+            </p>
+          )}
+          {earnPointsResult.newBalance !== undefined && (
+            <p className="text-[12px] text-muted-foreground mt-1 tabular-nums">
+              New balance: {earnPointsResult.newBalance} pts
             </p>
           )}
         </>

@@ -136,7 +136,7 @@ const saveCardDesignSchema = z.object({
 const createLoyaltyProgramSchema = z.object({
   restaurantId: z.string().min(1),
   name: z.string().min(1, "Program name is required").max(100),
-  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP"]).optional().default("STAMP_CARD"),
+  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS"]).optional().default("STAMP_CARD"),
   visitsRequired: z.number().int().min(1).max(30).optional().default(10),
   rewardDescription: z.string().min(1, "Reward description is required").max(200),
   rewardExpiryDays: z.number().int().min(0).max(365).optional().default(90),
@@ -330,7 +330,7 @@ export async function createLoyaltyProgram(input: z.infer<typeof createLoyaltyPr
     return { error: `Program limit reached (${programCheck.limit}). Upgrade your plan to create more programs.` }
   }
 
-  // For COUPON/MEMBERSHIP, visitsRequired defaults to 1 (not used for stamp logic)
+  // For COUPON/MEMBERSHIP/POINTS, visitsRequired defaults to 1 (not used for stamp logic)
   const visitsRequired = parsed.programType === "STAMP_CARD"
     ? parsed.visitsRequired
     : 1
@@ -340,7 +340,9 @@ export async function createLoyaltyProgram(input: z.infer<typeof createLoyaltyPr
     ? "COUPON" as const
     : parsed.programType === "MEMBERSHIP"
       ? "TIER" as const
-      : "STAMP" as const
+      : parsed.programType === "POINTS"
+        ? "POINTS" as const
+        : "STAMP" as const
 
   // Create the program with a default card design
   const program = await db.loyaltyProgram.create({
@@ -1595,6 +1597,50 @@ export async function updateLoyaltyProgram(input: z.infer<typeof updateLoyaltyPr
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard/programs")
   revalidatePath("/dashboard")
+  return { success: true }
+}
+
+// ─── Update Minigame Config ─────────────────────────────────
+
+const updateMinigameConfigSchema = z.object({
+  restaurantId: z.string().min(1),
+  programId: z.string().min(1),
+  enabled: z.boolean(),
+  gameType: z.enum(["scratch", "slots", "wheel"]),
+  prizes: z.array(z.object({ name: z.string().min(1).max(100), weight: z.number().int().min(1).max(10) })).min(1).max(8).optional(),
+  primaryColor: z.string().max(50).optional(),
+  accentColor: z.string().max(50).optional(),
+})
+
+export async function updateMinigameConfig(input: z.infer<typeof updateMinigameConfigSchema>) {
+  const parsed = updateMinigameConfigSchema.parse(input)
+  await assertRestaurantRole(parsed.restaurantId, "owner")
+
+  const program = await db.loyaltyProgram.findUnique({
+    where: { id: parsed.programId },
+    select: { config: true, restaurantId: true, programType: true },
+  })
+
+  if (!program || program.restaurantId !== parsed.restaurantId) {
+    return { error: "Loyalty program not found" }
+  }
+
+  if (program.programType !== "STAMP_CARD" && program.programType !== "COUPON") {
+    return { error: "Prize reveal is only available for stamp card and coupon programs" }
+  }
+
+  const existingConfig = (program.config && typeof program.config === "object" ? program.config : {}) as Record<string, unknown>
+  const updatedConfig = {
+    ...existingConfig,
+    minigame: { enabled: parsed.enabled, gameType: parsed.gameType, ...(parsed.prizes?.length ? { prizes: parsed.prizes } : {}), ...(parsed.primaryColor ? { primaryColor: parsed.primaryColor } : {}), ...(parsed.accentColor ? { accentColor: parsed.accentColor } : {}) },
+  }
+
+  await db.loyaltyProgram.update({
+    where: { id: parsed.programId },
+    data: { config: JSON.parse(JSON.stringify(updatedConfig)) },
+  })
+
+  revalidatePath(`/dashboard/programs/${parsed.programId}`)
   return { success: true }
 }
 

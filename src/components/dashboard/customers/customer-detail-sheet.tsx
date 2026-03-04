@@ -6,6 +6,7 @@ import {
   Stamp,
   Ticket,
   Crown,
+  Coins,
   Gift,
   Pencil,
   Trash2,
@@ -51,6 +52,7 @@ import { redeemReward } from "@/server/reward-actions"
 import type { EnrollmentDetail } from "@/types/enrollment"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
+import { parsePointsConfig, getCheapestCatalogItem } from "@/lib/program-config"
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -122,6 +124,7 @@ const visitTypeIcons: Record<string, typeof Stamp> = {
   STAMP_CARD: Stamp,
   COUPON: Ticket,
   MEMBERSHIP: Crown,
+  POINTS: Coins,
 }
 
 function buildWalletDesign(enrollment: EnrollmentDetail): WalletPassDesign | null {
@@ -152,12 +155,26 @@ function buildWalletDesign(enrollment: EnrollmentDetail): WalletPassDesign | nul
   }
 }
 
+function getPointsRendererProps(enrollment: EnrollmentDetail) {
+  const config = parsePointsConfig(enrollment.programConfig)
+  const cheapest = config ? getCheapestCatalogItem(config) : null
+  return {
+    currentVisits: enrollment.pointsBalance ?? 0,
+    totalVisits: cheapest?.pointsCost ?? 100,
+    rewardDescription: cheapest?.name ?? enrollment.rewardDescription,
+  }
+}
+
 function getProgressText(enrollment: EnrollmentDetail): string {
   switch (enrollment.programType) {
     case "COUPON":
       return enrollment.status === "COMPLETED" ? "Coupon redeemed" : "Ready to redeem"
     case "MEMBERSHIP":
       return "Active member"
+    case "POINTS": {
+      const balance = enrollment.pointsBalance ?? 0
+      return `${balance} pts`
+    }
     default: {
       const remaining = enrollment.visitsRequired - enrollment.currentCycleVisits
       return `${remaining} visit${remaining !== 1 ? "s" : ""} until ${enrollment.rewardDescription}`
@@ -171,6 +188,8 @@ function getCompactProgressText(enrollment: EnrollmentDetail): string {
       return enrollment.status === "COMPLETED" ? "Redeemed" : "Coupon"
     case "MEMBERSHIP":
       return "Member"
+    case "POINTS":
+      return `${enrollment.pointsBalance ?? 0} pts`
     default:
       return `${enrollment.currentCycleVisits}/${enrollment.visitsRequired}`
   }
@@ -601,9 +620,13 @@ function EnrollmentProgressSection({
               format="apple"
               restaurantName=""
               programName={enrollment.programName}
-              currentVisits={enrollment.currentCycleVisits}
-              totalVisits={enrollment.visitsRequired}
-              rewardDescription={enrollment.rewardDescription}
+              {...(enrollment.programType === "POINTS"
+                ? getPointsRendererProps(enrollment)
+                : {
+                    currentVisits: enrollment.currentCycleVisits,
+                    totalVisits: enrollment.visitsRequired,
+                    rewardDescription: enrollment.rewardDescription,
+                  })}
               compact
               width={220}
             />
@@ -657,9 +680,13 @@ function EnrollmentProgressSection({
                   format="apple"
                   restaurantName=""
                   programName={enrollment.programName}
-                  currentVisits={enrollment.currentCycleVisits}
-                  totalVisits={enrollment.visitsRequired}
-                  rewardDescription={enrollment.rewardDescription}
+                  {...(enrollment.programType === "POINTS"
+                    ? getPointsRendererProps(enrollment)
+                    : {
+                        currentVisits: enrollment.currentCycleVisits,
+                        totalVisits: enrollment.visitsRequired,
+                        rewardDescription: enrollment.rewardDescription,
+                      })}
                   compact
                   width={120}
                   height={160}

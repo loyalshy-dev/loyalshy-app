@@ -557,4 +557,240 @@ describe("searchCustomersForVisit", () => {
 
     expect(result.customers).toEqual([])
   })
+
+  it("includes minigameConfig in enrollment summary when config has minigame", async () => {
+    const { searchCustomersForVisit } = await import("./visit-actions")
+
+    const mockCustomers = [
+      {
+        id: "c1",
+        fullName: "Jane Doe",
+        email: "jane@example.com",
+        phone: null,
+        totalVisits: 5,
+        lastVisitAt: new Date(),
+        enrollments: [
+          {
+            id: "e1",
+            currentCycleVisits: 3,
+            totalVisits: 5,
+            walletPassType: "NONE",
+            status: "ACTIVE",
+            loyaltyProgram: {
+              id: "program-1",
+              name: "Test Program",
+              programType: "STAMP_CARD",
+              visitsRequired: 10,
+              config: { minigame: { enabled: true, gameType: "scratch" } },
+              cardDesign: null,
+            },
+          },
+        ],
+      },
+    ]
+    mockDb.customer.findMany.mockResolvedValue(mockCustomers)
+
+    const result = await searchCustomersForVisit("Jane")
+
+    expect(result.customers[0].enrollments[0].minigameConfig).toEqual({
+      enabled: true,
+      gameType: "scratch",
+    })
+  })
+
+  it("sets minigameConfig to null when no minigame in config", async () => {
+    const { searchCustomersForVisit } = await import("./visit-actions")
+
+    const mockCustomers = [
+      {
+        id: "c1",
+        fullName: "Jane Doe",
+        email: "jane@example.com",
+        phone: null,
+        totalVisits: 5,
+        lastVisitAt: new Date(),
+        enrollments: [
+          {
+            id: "e1",
+            currentCycleVisits: 3,
+            totalVisits: 5,
+            walletPassType: "NONE",
+            status: "ACTIVE",
+            loyaltyProgram: {
+              id: "program-1",
+              name: "Test Program",
+              programType: "STAMP_CARD",
+              visitsRequired: 10,
+              config: {},
+              cardDesign: null,
+            },
+          },
+        ],
+      },
+    ]
+    mockDb.customer.findMany.mockResolvedValue(mockCustomers)
+
+    const result = await searchCustomersForVisit("Jane")
+
+    expect(result.customers[0].enrollments[0].minigameConfig).toBeNull()
+  })
+})
+
+// ─── Earn Points ──────────────────────────────────────────────
+
+describe("earnPoints", () => {
+  function createPointsEnrollment(overrides?: Record<string, unknown>) {
+    return createMockEnrollment({
+      pointsBalance: 30,
+      loyaltyProgram: {
+        id: "program-1",
+        name: "Rewards Points",
+        programType: "POINTS",
+        config: {
+          pointsPerVisit: 10,
+          catalog: [
+            { id: "item-1", name: "Free Coffee", pointsCost: 50 },
+            { id: "item-2", name: "Free Meal", pointsCost: 100 },
+          ],
+        },
+        rewardDescription: "Free Coffee",
+        rewardExpiryDays: 90,
+        status: "ACTIVE",
+        endsAt: null,
+      },
+      ...overrides,
+    })
+  }
+
+  it("adds points to balance", async () => {
+    const { earnPoints } = await import("./visit-actions")
+
+    const enrollment = createPointsEnrollment({ pointsBalance: 30, totalVisits: 5 })
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+    mockDb.visit.findFirst.mockResolvedValue(null)
+
+    const result = await earnPoints("enrollment-1")
+
+    expect(result.success).toBe(true)
+    expect(result.pointsEarned).toBe(10)
+    expect(result.newBalance).toBe(40)
+    expect(result.totalVisits).toBe(6)
+  })
+
+  it("rejects non-POINTS programs", async () => {
+    const { earnPoints } = await import("./visit-actions")
+
+    const enrollment = createMockEnrollment() // STAMP_CARD
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+
+    const result = await earnPoints("enrollment-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toContain("points programs")
+  })
+
+  it("prevents double earn within 1 minute", async () => {
+    const { earnPoints } = await import("./visit-actions")
+
+    const enrollment = createPointsEnrollment()
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+    mockDb.visit.findFirst.mockResolvedValue({ id: "recent-visit" })
+
+    const result = await earnPoints("enrollment-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toContain("less than a minute ago")
+  })
+
+  it("rejects frozen enrollment", async () => {
+    const { earnPoints } = await import("./visit-actions")
+
+    const enrollment = createPointsEnrollment({ status: "FROZEN" })
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+
+    const result = await earnPoints("enrollment-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toContain("frozen")
+  })
+})
+
+// ─── Redeem Points ────────────────────────────────────────────
+
+describe("redeemPoints", () => {
+  function createPointsEnrollment(overrides?: Record<string, unknown>) {
+    return createMockEnrollment({
+      pointsBalance: 60,
+      loyaltyProgram: {
+        id: "program-1",
+        name: "Rewards Points",
+        programType: "POINTS",
+        config: {
+          pointsPerVisit: 10,
+          catalog: [
+            { id: "item-1", name: "Free Coffee", pointsCost: 50 },
+            { id: "item-2", name: "Free Meal", pointsCost: 100 },
+          ],
+        },
+        rewardDescription: "Free Coffee",
+        rewardExpiryDays: 90,
+        status: "ACTIVE",
+        endsAt: null,
+      },
+      ...overrides,
+    })
+  }
+
+  it("deducts points and creates REDEEMED reward with description and pointsCost", async () => {
+    const { redeemPoints } = await import("./visit-actions")
+
+    const enrollment = createPointsEnrollment({ pointsBalance: 60 })
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+
+    const result = await redeemPoints("enrollment-1", "item-1")
+
+    expect(result.success).toBe(true)
+    expect(result.itemName).toBe("Free Coffee")
+    expect(result.pointsSpent).toBe(50)
+    expect(result.newBalance).toBe(10)
+
+    // Verify transaction was called
+    expect(mockDb.$transaction).toHaveBeenCalled()
+  })
+
+  it("rejects insufficient balance", async () => {
+    const { redeemPoints } = await import("./visit-actions")
+
+    const enrollment = createPointsEnrollment({ pointsBalance: 30 })
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+
+    const result = await redeemPoints("enrollment-1", "item-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toContain("Insufficient points")
+  })
+
+  it("rejects invalid catalog item ID", async () => {
+    const { redeemPoints } = await import("./visit-actions")
+
+    const enrollment = createPointsEnrollment()
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+
+    const result = await redeemPoints("enrollment-1", "nonexistent-item")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toContain("Catalog item not found")
+  })
+
+  it("rejects non-POINTS programs", async () => {
+    const { redeemPoints } = await import("./visit-actions")
+
+    const enrollment = createMockEnrollment() // STAMP_CARD
+    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+
+    const result = await redeemPoints("enrollment-1", "item-1")
+
+    expect(result.success).toBe(false)
+    expect(result.error).toContain("not a points program")
+  })
 })

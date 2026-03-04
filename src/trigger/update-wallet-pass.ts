@@ -7,7 +7,7 @@ import { createDb } from "./db"
 
 type UpdateWalletPassPayload = {
   enrollmentId: string
-  updateType: "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "PROGRAM_CHANGE" | "ENROLLMENT_FROZEN" | "CHECK_IN"
+  updateType: "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "PROGRAM_CHANGE" | "ENROLLMENT_FROZEN" | "CHECK_IN" | "POINTS_EARNED" | "POINTS_REDEEMED"
 }
 
 // ─── Task ───────────────────────────────────────────────────
@@ -31,6 +31,7 @@ export const updateWalletPassTask = task({
           id: true,
           currentCycleVisits: true,
           totalVisits: true,
+          pointsBalance: true,
           enrolledAt: true,
           updatedAt: true,
           walletPassId: true,
@@ -170,6 +171,7 @@ type EnrollmentForGoogle = {
   id: string
   currentCycleVisits: number
   totalVisits: number
+  pointsBalance: number
   enrolledAt: Date
   customer: {
     fullName: string
@@ -226,7 +228,7 @@ async function patchGooglePass(
   const token = await getAccessToken()
 
   const { formatProgressValue, formatLabel } = await import("@/lib/wallet/card-design")
-  const { parseCouponConfig, formatCouponValue, parseMembershipConfig } = await import("@/lib/program-config")
+  const { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem } = await import("@/lib/program-config")
   type ProgressStyle = import("@/lib/wallet/card-design").ProgressStyle
   type LabelFormat = import("@/lib/wallet/card-design").LabelFormat
 
@@ -245,6 +247,7 @@ async function patchGooglePass(
 
   const couponConfig = program.programType === "COUPON" ? parseCouponConfig(program.config) : null
   const membershipConfig = program.programType === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
+  const pointsConfig = program.programType === "POINTS" ? parsePointsConfig(program.config) : null
 
   if (program.programType === "COUPON" && couponConfig) {
     loyaltyPoints = {
@@ -270,6 +273,19 @@ async function patchGooglePass(
     }
     textModulesData = [
       { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
+      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
+    ]
+  } else if (program.programType === "POINTS" && pointsConfig) {
+    loyaltyPoints = {
+      label: formatLabel("POINTS", labelFmt),
+      balance: { int: enrollment.pointsBalance ?? 0 },
+    }
+    const cheapestItem = getCheapestCatalogItem(pointsConfig)
+    secondaryLoyaltyPoints = cheapestItem
+      ? { label: formatLabel("NEXT REWARD", labelFmt), balance: { string: `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` } }
+      : { label: formatLabel("TOTAL VISITS", labelFmt), balance: { int: enrollment.totalVisits } }
+    textModulesData = [
+      { id: "earnRate", header: formatLabel("EARN RATE", labelFmt), body: `${pointsConfig.pointsPerVisit} points per visit` },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
   } else {

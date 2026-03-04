@@ -45,7 +45,8 @@ import {
   deleteProgram,
 } from "@/server/settings-actions"
 import type { ProgramWithDesign, ProgramDeleteCounts } from "@/server/settings-actions"
-import { parseCouponConfig, parseMembershipConfig } from "@/lib/program-config"
+import { parseCouponConfig, parseMembershipConfig, parsePointsConfig } from "@/lib/program-config"
+import type { PointsCatalogItem } from "@/types/program-types"
 import { PROGRAM_TYPE_META, type ProgramType } from "@/types/program-types"
 
 type LoyaltyForm = {
@@ -103,9 +104,17 @@ export function ProgramEditor({
   const isStampCard = programType === "STAMP_CARD"
   const isCoupon = programType === "COUPON"
   const isMembership = programType === "MEMBERSHIP"
+  const isPoints = programType === "POINTS"
 
   const couponConfig = isCoupon ? parseCouponConfig(program.config) : null
   const membershipConfig = isMembership ? parseMembershipConfig(program.config) : null
+  const pointsConfig = isPoints ? parsePointsConfig(program.config) : null
+  const [pointsPerVisit, setPointsPerVisit] = useState<number>(
+    pointsConfig?.pointsPerVisit ?? 10
+  )
+  const [catalogItems, setCatalogItems] = useState<PointsCatalogItem[]>(
+    pointsConfig?.catalog ?? []
+  )
 
   const {
     register,
@@ -142,7 +151,6 @@ export function ProgramEditor({
   const visitsChanged =
     Number(visitsRequired) !== program.visitsRequired
   const validDuration = watch("validDuration")
-
   function buildConfig(data: LoyaltyForm): Record<string, unknown> | undefined {
     if (isCoupon) {
       return {
@@ -163,6 +171,12 @@ export function ProgramEditor({
           ? { customDurationDays: data.customDurationDays }
           : {}),
         terms: data.termsAndConditions || undefined,
+      }
+    }
+    if (isPoints) {
+      return {
+        pointsPerVisit,
+        catalog: catalogItems,
       }
     }
     return undefined
@@ -472,6 +486,180 @@ export function ProgramEditor({
                 placeholder="e.g., VIP Member"
                 disabled={isArchived}
               />
+            </div>
+          </>
+        )}
+
+        {/* Points-specific fields */}
+        {isPoints && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor={`points-per-visit-${program.id}`}>Points Per Visit</Label>
+              <Input
+                id={`points-per-visit-${program.id}`}
+                type="number"
+                min={1}
+                max={100}
+                value={pointsPerVisit}
+                onChange={(e) => setPointsPerVisit(Number(e.target.value))}
+                disabled={isArchived}
+              />
+              <p className="text-xs text-muted-foreground">
+                Points awarded to customers each time they visit (1–100).
+              </p>
+            </div>
+
+            <div className="sm:col-span-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm font-medium">Reward Catalog</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Items customers can redeem with their points (up to 20).
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isArchived || catalogItems.length >= 20}
+                  onClick={() =>
+                    setCatalogItems((prev) => [
+                      ...prev,
+                      {
+                        id: crypto.randomUUID(),
+                        name: "",
+                        description: "",
+                        pointsCost: 100,
+                      },
+                    ])
+                  }
+                >
+                  Add Item
+                </Button>
+              </div>
+
+              {catalogItems.length === 0 && (
+                <p className="text-xs text-muted-foreground border border-dashed border-border rounded-md px-3 py-4 text-center">
+                  No catalog items yet. Add at least one reward for customers to redeem.
+                </p>
+              )}
+
+              <div className="space-y-2">
+                {catalogItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="rounded-md border border-border p-3 space-y-2"
+                  >
+                    {/* Row 1: Name + Points Cost */}
+                    <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
+                      <div className="space-y-1">
+                        <Label
+                          htmlFor={`catalog-name-${item.id}`}
+                          className="text-xs text-muted-foreground"
+                        >
+                          Reward Name
+                        </Label>
+                        <Input
+                          id={`catalog-name-${item.id}`}
+                          value={item.name}
+                          placeholder="e.g., Free Coffee"
+                          disabled={isArchived}
+                          onChange={(e) =>
+                            setCatalogItems((prev) =>
+                              prev.map((ci, i) =>
+                                i === index ? { ...ci, name: e.target.value } : ci
+                              )
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1 w-28 shrink-0">
+                        <Label
+                          htmlFor={`catalog-cost-${item.id}`}
+                          className="text-xs text-muted-foreground"
+                        >
+                          Points Cost
+                        </Label>
+                        <Input
+                          id={`catalog-cost-${item.id}`}
+                          type="number"
+                          min={1}
+                          max={100000}
+                          value={item.pointsCost}
+                          disabled={isArchived}
+                          onChange={(e) =>
+                            setCatalogItems((prev) =>
+                              prev.map((ci, i) =>
+                                i === index
+                                  ? { ...ci, pointsCost: Number(e.target.value) }
+                                  : ci
+                              )
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                    {/* Row 2: Description + Remove */}
+                    <div className="flex gap-2 items-end">
+                      <div className="space-y-1 flex-1">
+                        <Label
+                          htmlFor={`catalog-desc-${item.id}`}
+                          className="text-xs text-muted-foreground"
+                        >
+                          Description (optional)
+                        </Label>
+                        <Input
+                          id={`catalog-desc-${item.id}`}
+                          value={item.description ?? ""}
+                          placeholder="Short description..."
+                          disabled={isArchived}
+                          onChange={(e) =>
+                            setCatalogItems((prev) =>
+                              prev.map((ci, i) =>
+                                i === index
+                                  ? { ...ci, description: e.target.value }
+                                  : ci
+                              )
+                            )
+                          }
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        disabled={isArchived}
+                        aria-label="Remove catalog item"
+                        onClick={() =>
+                          setCatalogItems((prev) =>
+                            prev.filter((_, i) => i !== index)
+                          )
+                        }
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
+              <Input
+                id={`reward-${program.id}`}
+                {...register("rewardDescription", {
+                  required: "Reward description is required",
+                })}
+                placeholder="e.g., Redeem points for free items"
+                disabled={isArchived}
+              />
+              {errors.rewardDescription && (
+                <p className="text-xs text-destructive">
+                  {errors.rewardDescription.message}
+                </p>
+              )}
             </div>
           </>
         )}

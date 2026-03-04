@@ -28,6 +28,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       id: true,
       currentCycleVisits: true,
       totalVisits: true,
+      pointsBalance: true,
       walletPassSerialNumber: true,
       walletPassId: true,
       enrolledAt: true,
@@ -117,6 +118,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       cardDesign,
       programType: program.programType,
       programConfig: program.config,
+      pointsBalance: enrollment.pointsBalance,
     })
 
     // Log update

@@ -144,7 +144,7 @@ export async function getCustomers(
   }
 
   // Filter by program type
-  const validTypes = ["STAMP_CARD", "COUPON", "MEMBERSHIP"]
+  const validTypes = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS"]
   if (programType !== "all" && validTypes.includes(programType)) {
     where.enrollments = {
       some: {
@@ -264,6 +264,7 @@ export async function getCustomerDetail(
               programType: true,
               visitsRequired: true,
               rewardDescription: true,
+              config: true,
               status: true,
               cardDesign: {
                 select: {
@@ -321,6 +322,8 @@ export async function getCustomerDetail(
     currentCycleVisits: e.currentCycleVisits,
     visitsRequired: e.loyaltyProgram.visitsRequired,
     totalVisits: e.totalVisits,
+    pointsBalance: e.pointsBalance,
+    programConfig: e.loyaltyProgram.config,
     totalRewardsRedeemed: e.totalRewardsRedeemed,
     rewardDescription: e.loyaltyProgram.rewardDescription,
     status: e.status,

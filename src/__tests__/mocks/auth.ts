@@ -97,6 +97,7 @@ export function createMockEnrollment(overrides?: Record<string, unknown>) {
     currentCycleVisits: 3,
     totalVisits: 13,
     totalRewardsRedeemed: 0,
+    pointsBalance: 0,
     walletPassId: null,
     walletPassSerialNumber: null,
     walletPassType: "NONE",

@@ -3,18 +3,18 @@
 import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { createLoyaltyProgram } from "@/server/settings-actions"
-import { PROGRAM_TYPE_META, type ProgramType } from "@/types/program-types"
+import { PROGRAM_TYPE_META, type ProgramType, type PointsCatalogItem } from "@/types/program-types"
 
 // ─── Step 1: Type selector ─────────────────────────────────
 
 function TypeSelector({ onSelect }: { onSelect: (type: ProgramType) => void }) {
-  const types: ProgramType[] = ["STAMP_CARD", "COUPON", "MEMBERSHIP"]
+  const types: ProgramType[] = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS"]
 
   return (
     <div className="space-y-3">
@@ -526,6 +526,246 @@ function MembershipForm({
   )
 }
 
+type PointsFormData = {
+  name: string
+  pointsPerVisit: number
+  rewardExpiryDays: number
+}
+
+type CatalogRow = {
+  id: string
+  name: string
+  description: string
+  pointsCost: number
+}
+
+function PointsForm({
+  restaurantId,
+  onCreated,
+  onBack,
+}: {
+  restaurantId: string
+  onCreated: () => void
+  onBack: () => void
+}) {
+  const [isPending, startTransition] = useTransition()
+  const [catalog, setCatalog] = useState<CatalogRow[]>([
+    { id: crypto.randomUUID(), name: "", description: "", pointsCost: 50 },
+  ])
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<PointsFormData>({
+    defaultValues: {
+      name: "",
+      pointsPerVisit: 10,
+      rewardExpiryDays: 90,
+    },
+  })
+
+  function addCatalogItem() {
+    if (catalog.length >= 20) return
+    setCatalog((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), name: "", description: "", pointsCost: 50 },
+    ])
+  }
+
+  function removeCatalogItem(id: string) {
+    setCatalog((prev) => prev.filter((item) => item.id !== id))
+  }
+
+  function updateCatalogItem(id: string, field: keyof Omit<CatalogRow, "id">, value: string | number) {
+    setCatalog((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    )
+  }
+
+  function onSubmit(data: PointsFormData) {
+    // Validate catalog rows have names and valid pointsCost
+    const invalidRow = catalog.find(
+      (item) => !item.name.trim() || item.pointsCost < 1
+    )
+    if (invalidRow) {
+      toast.error("All catalog items must have a name and a points cost of at least 1")
+      return
+    }
+
+    startTransition(async () => {
+      const catalogItems: PointsCatalogItem[] = catalog.map((item) => ({
+        id: crypto.randomUUID(),
+        name: item.name.trim(),
+        description: item.description.trim() || undefined,
+        pointsCost: item.pointsCost,
+      }))
+
+      // Auto-compute rewardDescription from cheapest catalog item
+      const cheapest = [...catalogItems].sort((a, b) => a.pointsCost - b.pointsCost)[0]
+      const rewardDescription = cheapest ? cheapest.name : "Points Reward"
+
+      const config = {
+        pointsPerVisit: data.pointsPerVisit,
+        catalog: catalogItems,
+      }
+
+      const result = await createLoyaltyProgram({
+        restaurantId,
+        programType: "POINTS",
+        name: data.name,
+        visitsRequired: 1,
+        rewardDescription,
+        rewardExpiryDays: data.rewardExpiryDays,
+        config,
+      })
+      if ("error" in result) {
+        toast.error(String(result.error))
+      } else {
+        toast.success("Points program created")
+        reset()
+        setCatalog([{ id: crypto.randomUUID(), name: "", description: "", pointsCost: 50 }])
+        onCreated()
+      }
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <button
+        type="button"
+        onClick={onBack}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-3 w-3" />
+        Back to type selection
+      </button>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="points-name">Program Name</Label>
+          <Input
+            id="points-name"
+            {...register("name", { required: "Program name is required" })}
+            placeholder="e.g., Reward Points, Loyalty Points"
+          />
+          {errors.name && (
+            <p className="text-xs text-destructive">{errors.name.message}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="points-per-visit">Points Per Visit</Label>
+          <Input
+            id="points-per-visit"
+            type="number"
+            min={1}
+            max={100}
+            {...register("pointsPerVisit", { valueAsNumber: true })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="points-expiry">Reward Expiry (Days)</Label>
+          <Input
+            id="points-expiry"
+            type="number"
+            min={0}
+            max={365}
+            {...register("rewardExpiryDays", { valueAsNumber: true })}
+          />
+        </div>
+      </div>
+
+      {/* Reward Catalog */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>Reward Catalog</Label>
+          <span className="text-xs text-muted-foreground">{catalog.length}/20 items</span>
+        </div>
+        <div className="space-y-2">
+          {catalog.map((item, index) => (
+            <div key={item.id} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] items-start rounded-md border border-border bg-muted/20 p-3">
+              <div className="space-y-1">
+                <Label htmlFor={`catalog-name-${item.id}`} className="text-xs text-muted-foreground">
+                  Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id={`catalog-name-${item.id}`}
+                  value={item.name}
+                  onChange={(e) => updateCatalogItem(item.id, "name", e.target.value)}
+                  placeholder="e.g., Free Coffee"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor={`catalog-desc-${item.id}`} className="text-xs text-muted-foreground">
+                  Description
+                </Label>
+                <Input
+                  id={`catalog-desc-${item.id}`}
+                  value={item.description}
+                  onChange={(e) => updateCatalogItem(item.id, "description", e.target.value)}
+                  placeholder="Optional"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor={`catalog-cost-${item.id}`} className="text-xs text-muted-foreground">
+                  Points Cost <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id={`catalog-cost-${item.id}`}
+                  type="number"
+                  min={1}
+                  value={item.pointsCost}
+                  onChange={(e) => updateCatalogItem(item.id, "pointsCost", Number(e.target.value))}
+                  className="h-8 text-xs w-24"
+                />
+              </div>
+              <div className="flex items-end pb-0.5">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  onClick={() => removeCatalogItem(item.id)}
+                  disabled={catalog.length === 1}
+                  aria-label={`Remove catalog item ${index + 1}`}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addCatalogItem}
+          disabled={catalog.length >= 20}
+          className="w-full"
+        >
+          <Plus className="h-3.5 w-3.5 mr-1.5" />
+          Add Catalog Item
+        </Button>
+      </div>
+
+      <div className="flex justify-end">
+        <Button type="submit" size="sm" disabled={isPending}>
+          {isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+              Creating...
+            </>
+          ) : (
+            "Create Points Program"
+          )}
+        </Button>
+      </div>
+    </form>
+  )
+}
+
 // ─── Main Component ─────────────────────────────────────────
 
 export function CreateProgramForm({
@@ -554,5 +794,7 @@ export function CreateProgramForm({
       return <CouponForm {...formProps} />
     case "MEMBERSHIP":
       return <MembershipForm {...formProps} />
+    case "POINTS":
+      return <PointsForm {...formProps} />
   }
 }

@@ -60,7 +60,7 @@ export type TopCustomerItem = {
 export type ProgramSummaryItem = {
   id: string
   name: string
-  programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP"
+  programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS"
   activeEnrollments: number
   totalVisits: number
   redeemedRewards: number

@@ -144,6 +144,7 @@ enum ProgramType {
   STAMP_CARD @map("stamp_card")
   COUPON     @map("coupon")
   MEMBERSHIP @map("membership")
+  POINTS     @map("points")
 
   @@map("program_type")
 }
@@ -345,6 +346,7 @@ model Enrollment {
   currentCycleVisits     Int              @default(0)
   totalVisits            Int              @default(0)
   totalRewardsRedeemed   Int              @default(0)
+  pointsBalance          Int              @default(0)
   walletPassId           String?          @unique
   walletPassSerialNumber String?          @unique
   walletPassType         WalletPassType   @default(NONE)
@@ -430,6 +432,8 @@ model Reward {
   redeemedAt       DateTime?
   expiresAt        DateTime
   redeemedById     String?
+  description      String?
+  pointsCost       Int?
 
   customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
   restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)

@@ -175,7 +175,7 @@ export type EnrollmentCardData = {
     name: string
     visitsRequired: number
     rewardDescription: string
-    programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP"
+    programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS"
     config: unknown
     cardDesign: PublicProgramInfo["cardDesign"]
   }
@@ -618,6 +618,7 @@ type EnrollmentPassData = {
   customerCreatedAt: Date
   currentCycleVisits: number
   totalVisits: number
+  pointsBalance?: number
   walletPassId: string | null
   walletPassSerialNumber: string | null
   walletPassType: string
@@ -680,6 +681,7 @@ async function issuePassForEnrollment(
         cardDesign,
         programType: program.programType,
         programConfig: program.config,
+        pointsBalance: enrollment.pointsBalance ?? 0,
       })
 
       // Store wallet fields on Enrollment (not Customer)
@@ -753,6 +755,7 @@ async function issuePassForEnrollment(
       programEndsAt: program.endsAt,
       programType: program.programType,
       programConfig: program.config,
+      pointsBalance: enrollment.pointsBalance ?? 0,
     })
 
     // Store wallet fields on Enrollment (not Customer)

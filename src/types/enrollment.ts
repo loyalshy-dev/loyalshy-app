@@ -26,9 +26,12 @@ export type EnrollmentSummary = {
   currentCycleVisits: number
   visitsRequired: number
   totalVisits: number
+  pointsBalance?: number
+  programConfig?: unknown
   status: EnrollmentStatus
   walletPassType: WalletPassType
   cardDesign: EnrollmentCardDesign
+  minigameConfig: { enabled: boolean; gameType: "scratch" | "slots" | "wheel"; prizes?: { name: string; weight: number }[]; primaryColor?: string; accentColor?: string } | null
 }
 
 // ─── Detail (used in customer detail sheet) ──────────────────
@@ -42,6 +45,8 @@ export type EnrollmentDetail = {
   currentCycleVisits: number
   visitsRequired: number
   totalVisits: number
+  pointsBalance?: number
+  programConfig?: unknown
   totalRewardsRedeemed: number
   rewardDescription: string
   status: EnrollmentStatus

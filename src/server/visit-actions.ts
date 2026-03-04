@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { assertAuthenticated, getRestaurantForUser, assertRestaurantAccess } from "@/lib/dal"
-import { parseCouponConfig, formatCouponValue } from "@/lib/program-config"
+import { parseCouponConfig, formatCouponValue, parsePointsConfig, parseMinigameConfig } from "@/lib/program-config"
 import type { EnrollmentSummary } from "@/types/enrollment"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -34,6 +34,7 @@ export type RedeemCouponResult = {
   error?: string
   couponDescription?: string
   discountText?: string
+  selectedPrize?: string
   redemptionLimit?: "single" | "unlimited"
   programName?: string
 }
@@ -43,6 +44,24 @@ export type CheckInResult = {
   error?: string
   totalCheckIns?: number
   memberSince?: Date
+  programName?: string
+}
+
+export type EarnPointsResult = {
+  success: boolean
+  error?: string
+  pointsEarned?: number
+  newBalance?: number
+  totalVisits?: number
+  programName?: string
+}
+
+export type RedeemPointsResult = {
+  success: boolean
+  error?: string
+  itemName?: string
+  pointsSpent?: number
+  newBalance?: number
   programName?: string
 }
 
@@ -107,6 +126,7 @@ export async function lookupEnrollmentByWalletPassId(
           programType: true,
           visitsRequired: true,
           status: true,
+          config: true,
           cardDesign: {
             select: {
               cardType: true,
@@ -182,6 +202,7 @@ export async function lookupEnrollmentByWalletPassId(
       id: true,
       currentCycleVisits: true,
       totalVisits: true,
+      pointsBalance: true,
       walletPassType: true,
       status: true,
       loyaltyProgram: {
@@ -190,6 +211,7 @@ export async function lookupEnrollmentByWalletPassId(
           name: true,
           programType: true,
           visitsRequired: true,
+          config: true,
           cardDesign: {
             select: {
               cardType: true,
@@ -225,6 +247,8 @@ export async function lookupEnrollmentByWalletPassId(
       currentCycleVisits: e.currentCycleVisits,
       visitsRequired: e.loyaltyProgram.visitsRequired,
       totalVisits: e.totalVisits,
+      pointsBalance: e.pointsBalance,
+      programConfig: e.loyaltyProgram.config,
       status: e.status,
       walletPassType: e.walletPassType,
       cardDesign: e.loyaltyProgram.cardDesign
@@ -241,6 +265,7 @@ export async function lookupEnrollmentByWalletPassId(
             stripImageUrl: e.loyaltyProgram.cardDesign.stripImageUrl,
           }
         : null,
+      minigameConfig: parseMinigameConfig(e.loyaltyProgram.config),
     })),
   }
 
@@ -252,6 +277,8 @@ export async function lookupEnrollmentByWalletPassId(
     currentCycleVisits: enrollment.currentCycleVisits,
     visitsRequired: enrollment.loyaltyProgram.visitsRequired,
     totalVisits: enrollment.totalVisits,
+    pointsBalance: enrollment.pointsBalance,
+    programConfig: enrollment.loyaltyProgram.config,
     status: enrollment.status,
     walletPassType: enrollment.walletPassType,
     cardDesign: enrollment.loyaltyProgram.cardDesign
@@ -268,6 +295,7 @@ export async function lookupEnrollmentByWalletPassId(
           stripImageUrl: enrollment.loyaltyProgram.cardDesign.stripImageUrl,
         }
       : null,
+    minigameConfig: parseMinigameConfig(enrollment.loyaltyProgram.config),
   }
 
   return {
@@ -319,6 +347,7 @@ export async function searchCustomersForVisit(
           id: true,
           currentCycleVisits: true,
           totalVisits: true,
+          pointsBalance: true,
           walletPassType: true,
           status: true,
           loyaltyProgram: {
@@ -327,6 +356,7 @@ export async function searchCustomersForVisit(
               name: true,
               programType: true,
               visitsRequired: true,
+              config: true,
               cardDesign: {
                 select: {
                   cardType: true,
@@ -367,6 +397,8 @@ export async function searchCustomersForVisit(
         currentCycleVisits: e.currentCycleVisits,
         visitsRequired: e.loyaltyProgram.visitsRequired,
         totalVisits: e.totalVisits,
+        pointsBalance: e.pointsBalance,
+        programConfig: e.loyaltyProgram.config,
         status: e.status,
         walletPassType: e.walletPassType,
         cardDesign: e.loyaltyProgram.cardDesign
@@ -383,9 +415,22 @@ export async function searchCustomersForVisit(
               stripImageUrl: e.loyaltyProgram.cardDesign.stripImageUrl,
             }
           : null,
+        minigameConfig: parseMinigameConfig(e.loyaltyProgram.config),
       })),
     })),
   }
+}
+
+// ─── Weighted Random Prize Selection ─────────────────────────
+
+function weightedRandomPrize(prizes: { name: string; weight: number }[]): string {
+  const totalWeight = prizes.reduce((sum, p) => sum + p.weight, 0)
+  let rand = Math.random() * totalWeight
+  for (const prize of prizes) {
+    rand -= prize.weight
+    if (rand <= 0) return prize.name
+  }
+  return prizes[prizes.length - 1].name
 }
 
 // ─── Register Visit ─────────────────────────────────────────
@@ -431,6 +476,7 @@ export async function registerVisit(
           visitsRequired: true,
           rewardDescription: true,
           rewardExpiryDays: true,
+          config: true,
           status: true,
           endsAt: true,
         },
@@ -550,6 +596,15 @@ export async function registerVisit(
   const newCustomerTotalVisits = enrollment.customer.totalVisits + 1
   const wasRewardEarned = newCycleVisits >= program.visitsRequired
 
+  // Pick a weighted random prize if minigame has prizes configured
+  let selectedPrize: string | undefined
+  if (wasRewardEarned) {
+    const mgConfig = parseMinigameConfig(program.config)
+    if (mgConfig?.enabled && mgConfig.prizes?.length) {
+      selectedPrize = weightedRandomPrize(mgConfig.prizes)
+    }
+  }
+
   // Run everything in a transaction
   await db.$transaction(async (tx) => {
     // Create Visit record
@@ -585,6 +640,7 @@ export async function registerVisit(
           enrollmentId: enrollment.id,
           status: "AVAILABLE",
           expiresAt,
+          description: selectedPrize ?? null,
         },
       })
     } else {
@@ -626,7 +682,7 @@ export async function registerVisit(
   return {
     success: true,
     wasRewardEarned,
-    rewardDescription: wasRewardEarned ? program.rewardDescription : undefined,
+    rewardDescription: wasRewardEarned ? (selectedPrize ?? program.rewardDescription) : undefined,
     newCycleVisits: wasRewardEarned ? 0 : newCycleVisits,
     newTotalVisits: newEnrollmentTotalVisits,
     visitsRequired: program.visitsRequired,
@@ -715,6 +771,13 @@ export async function redeemCoupon(
 
   const redemptionLimit = couponConfig?.redemptionLimit ?? "single"
 
+  // Pick a weighted random prize if minigame has prizes configured
+  let selectedPrize: string | undefined
+  const mgConfig = parseMinigameConfig(program.config)
+  if (mgConfig?.enabled && mgConfig.prizes?.length) {
+    selectedPrize = weightedRandomPrize(mgConfig.prizes)
+  }
+
   await db.$transaction(async (tx) => {
     // Mark reward as redeemed
     await tx.reward.update({
@@ -723,6 +786,7 @@ export async function redeemCoupon(
         status: "REDEEMED",
         redeemedAt: new Date(),
         redeemedById: session.user.id,
+        ...(selectedPrize ? { description: selectedPrize } : {}),
       },
     })
 
@@ -778,6 +842,7 @@ export async function redeemCoupon(
     success: true,
     couponDescription: couponConfig?.couponDescription ?? program.rewardDescription,
     discountText,
+    selectedPrize,
     redemptionLimit,
     programName: program.name,
   }
@@ -921,6 +986,287 @@ export async function checkInMember(
     success: true,
     totalCheckIns: newEnrollmentTotalVisits,
     memberSince: enrollment.enrolledAt,
+    programName: program.name,
+  }
+}
+
+// ─── Earn Points ──────────────────────────────────────────────
+
+export async function earnPoints(
+  enrollmentId: string
+): Promise<EarnPointsResult> {
+  const session = await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+
+  if (!restaurant) {
+    return { success: false, error: "No restaurant found" }
+  }
+
+  await assertRestaurantAccess(restaurant.id)
+
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          restaurantId: true,
+          deletedAt: true,
+          totalVisits: true,
+          fullName: true,
+        },
+      },
+      loyaltyProgram: {
+        select: {
+          id: true,
+          name: true,
+          programType: true,
+          config: true,
+          status: true,
+          endsAt: true,
+        },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.deletedAt) {
+    return { success: false, error: "Customer has been deleted" }
+  }
+
+  if (enrollment.status !== "ACTIVE") {
+    return {
+      success: false,
+      error: `This enrollment is ${enrollment.status.toLowerCase()}`,
+    }
+  }
+
+  if (enrollment.loyaltyProgram.status !== "ACTIVE") {
+    return { success: false, error: "This loyalty program is no longer active" }
+  }
+
+  if (enrollment.loyaltyProgram.programType !== "POINTS") {
+    return { success: false, error: "Earning points is only available for points programs" }
+  }
+
+  const program = enrollment.loyaltyProgram
+  const pointsConfig = parsePointsConfig(program.config)
+
+  if (!pointsConfig) {
+    return { success: false, error: "Invalid points program configuration" }
+  }
+
+  // Prevent double earn within 1 minute
+  const oneMinuteAgo = new Date(Date.now() - 60_000)
+  const recentVisit = await db.visit.findFirst({
+    where: {
+      enrollmentId: enrollment.id,
+      createdAt: { gte: oneMinuteAgo },
+    },
+    select: { id: true },
+  })
+
+  if (recentVisit) {
+    return {
+      success: false,
+      error: "Points were already earned for this enrollment less than a minute ago",
+    }
+  }
+
+  const pointsEarned = pointsConfig.pointsPerVisit
+  const newBalance = enrollment.pointsBalance + pointsEarned
+  const newEnrollmentTotalVisits = enrollment.totalVisits + 1
+  const newCustomerTotalVisits = enrollment.customer.totalVisits + 1
+
+  await db.$transaction(async (tx) => {
+    await tx.visit.create({
+      data: {
+        customerId: enrollment.customer.id,
+        restaurantId: restaurant.id,
+        loyaltyProgramId: program.id,
+        enrollmentId: enrollment.id,
+        registeredById: session.user.id,
+        visitNumber: newEnrollmentTotalVisits,
+      },
+    })
+
+    await tx.enrollment.update({
+      where: { id: enrollment.id },
+      data: {
+        pointsBalance: newBalance,
+        totalVisits: newEnrollmentTotalVisits,
+      },
+    })
+
+    await tx.customer.update({
+      where: { id: enrollment.customer.id },
+      data: {
+        totalVisits: newCustomerTotalVisits,
+        lastVisitAt: new Date(),
+      },
+    })
+  })
+
+  // Dispatch wallet pass update
+  if (enrollment.walletPassType !== "NONE") {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) =>
+        tasks.trigger("update-wallet-pass", {
+          enrollmentId: enrollment.id,
+          updateType: "POINTS_EARNED",
+        })
+      )
+      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/programs")
+
+  return {
+    success: true,
+    pointsEarned,
+    newBalance,
+    totalVisits: newEnrollmentTotalVisits,
+    programName: program.name,
+  }
+}
+
+// ─── Redeem Points ────────────────────────────────────────────
+
+export async function redeemPoints(
+  enrollmentId: string,
+  catalogItemId: string
+): Promise<RedeemPointsResult> {
+  const session = await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+
+  if (!restaurant) {
+    return { success: false, error: "No restaurant found" }
+  }
+
+  await assertRestaurantAccess(restaurant.id)
+
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          restaurantId: true,
+          deletedAt: true,
+          fullName: true,
+        },
+      },
+      loyaltyProgram: {
+        select: {
+          id: true,
+          name: true,
+          programType: true,
+          config: true,
+          rewardExpiryDays: true,
+          status: true,
+        },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.deletedAt) {
+    return { success: false, error: "Customer has been deleted" }
+  }
+
+  if (enrollment.status !== "ACTIVE") {
+    return {
+      success: false,
+      error: `This enrollment is ${enrollment.status.toLowerCase()}`,
+    }
+  }
+
+  if (enrollment.loyaltyProgram.programType !== "POINTS") {
+    return { success: false, error: "This is not a points program" }
+  }
+
+  const program = enrollment.loyaltyProgram
+  const pointsConfig = parsePointsConfig(program.config)
+
+  if (!pointsConfig) {
+    return { success: false, error: "Invalid points program configuration" }
+  }
+
+  const catalogItem = pointsConfig.catalog.find((item) => item.id === catalogItemId)
+  if (!catalogItem) {
+    return { success: false, error: "Catalog item not found" }
+  }
+
+  if (enrollment.pointsBalance < catalogItem.pointsCost) {
+    return { success: false, error: "Insufficient points balance" }
+  }
+
+  const newBalance = enrollment.pointsBalance - catalogItem.pointsCost
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + (program.rewardExpiryDays || 90))
+
+  await db.$transaction(async (tx) => {
+    await tx.reward.create({
+      data: {
+        customerId: enrollment.customer.id,
+        restaurantId: restaurant.id,
+        loyaltyProgramId: program.id,
+        enrollmentId: enrollment.id,
+        status: "REDEEMED",
+        redeemedAt: new Date(),
+        redeemedById: session.user.id,
+        expiresAt,
+        description: catalogItem.name,
+        pointsCost: catalogItem.pointsCost,
+      },
+    })
+
+    await tx.enrollment.update({
+      where: { id: enrollment.id },
+      data: {
+        pointsBalance: newBalance,
+        totalRewardsRedeemed: { increment: 1 },
+      },
+    })
+  })
+
+  // Dispatch wallet pass update
+  if (enrollment.walletPassType !== "NONE") {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) =>
+        tasks.trigger("update-wallet-pass", {
+          enrollmentId: enrollment.id,
+          updateType: "POINTS_REDEEMED",
+        })
+      )
+      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/programs")
+
+  return {
+    success: true,
+    itemName: catalogItem.name,
+    pointsSpent: catalogItem.pointsCost,
+    newBalance,
     programName: program.name,
   }
 }

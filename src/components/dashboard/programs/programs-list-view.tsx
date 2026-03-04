@@ -11,7 +11,7 @@ import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-desig
 import { statusConfig } from "./program-status"
 import { CreateProgramForm } from "./create-program-form"
 import { PROGRAM_TYPE_META, type ProgramType } from "@/types/program-types"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/program-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, formatPointsValue } from "@/lib/program-config"
 import { cn } from "@/lib/utils"
 import type { ProgramListItem } from "@/server/program-actions"
 
@@ -59,6 +59,11 @@ function getTypeSubtitle(program: ProgramListItem): string {
       const config = parseMembershipConfig(program.config)
       const tier = config?.membershipTier ?? "Member"
       return `${tier} | ${program.enrollmentCount} members`
+    }
+    case "POINTS": {
+      const pConfig = parsePointsConfig(program.config)
+      const subtitle = pConfig ? `${pConfig.pointsPerVisit} pts/visit` : "Points"
+      return `${subtitle} | ${program.enrollmentCount} enrolled`
     }
     default:
       return `${program.enrollmentCount} enrolled`
@@ -128,6 +133,7 @@ export function ProgramsListView({
     STAMP_CARD: programs.filter((p) => p.programType === "STAMP_CARD").length,
     COUPON: programs.filter((p) => p.programType === "COUPON").length,
     MEMBERSHIP: programs.filter((p) => p.programType === "MEMBERSHIP").length,
+    POINTS: programs.filter((p) => p.programType === "POINTS").length,
   }
 
   const filteredPrograms =
@@ -140,6 +146,7 @@ export function ProgramsListView({
     { key: "STAMP_CARD", label: "Stamp Cards" },
     { key: "COUPON", label: "Coupons" },
     { key: "MEMBERSHIP", label: "Memberships" },
+    { key: "POINTS", label: "Points" },
   ]
 
   // Only show filter tabs if there's more than one type
