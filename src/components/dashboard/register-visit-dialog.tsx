@@ -621,7 +621,7 @@ function SearchStep({
         </div>
       </div>
 
-      <ScrollArea className="max-h-[50vh] min-h-[120px]">
+      <ScrollArea className="max-h-[50vh] min-h-30">
         <div className="px-4 pb-4">
           {!query.trim() ? (
             <div className="flex flex-col items-center gap-2 py-10 text-center">
@@ -650,7 +650,7 @@ function SearchStep({
                   <button
                     key={customer.id}
                     type="button"
-                    className="flex items-center gap-3 w-full rounded-lg px-3 py-3 min-h-[48px] text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex items-center gap-3 w-full rounded-lg px-3 py-3 min-h-12 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     onClick={() => onSelect(customer)}
                   >
                     <div
@@ -673,7 +673,7 @@ function SearchStep({
                           <p className="text-[13px] font-semibold tabular-nums text-brand">
                             {primary.currentCycleVisits}/{primary.visitsRequired}
                           </p>
-                          <p className="text-[11px] text-muted-foreground truncate max-w-[100px]">
+                          <p className="text-[11px] text-muted-foreground truncate max-w-25">
                             {activeEnrollments.length > 1
                               ? `${activeEnrollments.length} programs`
                               : primary.programName}
@@ -745,7 +745,7 @@ function ProgramPickerStep({
       </div>
 
       {/* Program cards */}
-      <ScrollArea className="max-h-[50vh] min-h-[120px]">
+      <ScrollArea className="max-h-[50vh] min-h-30">
         <div className="px-4 py-3 space-y-2">
           {activeEnrollments.length === 0 && (
             <div className="text-center py-8">
@@ -819,7 +819,7 @@ function ProgramPickerStep({
                     </p>
                   ) : isPoints ? (
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-[120px]">
+                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-30">
                         <div
                           className="h-full rounded-full bg-brand transition-all"
                           style={{ width: `${pct}%` }}
@@ -831,7 +831,7 @@ function ProgramPickerStep({
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-[120px]">
+                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-30">
                         <div
                           className="h-full rounded-full bg-brand transition-all"
                           style={{ width: `${pct}%` }}

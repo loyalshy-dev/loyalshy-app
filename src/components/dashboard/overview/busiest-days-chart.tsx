@@ -47,7 +47,7 @@ export function BusiestDaysChart({ data }: BusiestDaysChartProps) {
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
         Busiest Days
       </h3>
-      <div className="h-[200px]">
+      <div className="h-50">
         {!mounted ? null : <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}

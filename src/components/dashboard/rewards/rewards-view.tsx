@@ -94,7 +94,7 @@ export function RewardsView({
           <select
             value={selectedProgramId}
             onChange={(e) => handleProgramChange(e.target.value)}
-            className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-w-[160px]"
+            className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-w-40"
           >
             <option value="">All Programs</option>
             {programs.map((p) => (

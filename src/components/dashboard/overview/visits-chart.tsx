@@ -101,7 +101,7 @@ export function VisitsChart({ initialData, initialRange }: VisitsChartProps) {
         </div>
       </div>
       <div
-        className={`h-[200px] sm:h-[260px] transition-opacity duration-200 ${isPending ? "opacity-50" : ""}`}
+        className={`h-50 sm:h-65 transition-opacity duration-200 ${isPending ? "opacity-50" : ""}`}
       >
         {!mounted ? null : <ResponsiveContainer width="100%" height="100%">
           <AreaChart

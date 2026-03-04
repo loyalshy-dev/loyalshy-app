@@ -262,7 +262,7 @@ export function RewardTable({
             >
               {getInitials(name)}
             </div>
-            <span className="text-[13px] font-medium truncate max-w-[160px]">
+            <span className="text-[13px] font-medium truncate max-w-40">
               {name}
             </span>
           </div>
@@ -275,7 +275,7 @@ export function RewardTable({
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
           <Gift className="size-3.5 text-brand shrink-0" />
-          <span className="text-[13px] truncate max-w-[140px]">
+          <span className="text-[13px] truncate max-w-35">
             {row.original.description}
           </span>
         </div>
@@ -441,7 +441,7 @@ export function RewardTable({
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="min-h-[44px]">
+                  <TableRow key={row.id} className="min-h-11">
                     {row.getVisibleCells().map((cell) => {
                       const meta = cell.column.columnDef.meta as { className?: string } | undefined
                       return (

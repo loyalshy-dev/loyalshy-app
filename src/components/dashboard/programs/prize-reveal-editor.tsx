@@ -145,7 +145,7 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
             {...register("minigameEnabled")}
             disabled={isArchived}
           />
-          <div className="w-9 h-5 bg-muted rounded-full peer peer-checked:bg-brand transition-colors after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full" />
+          <div className="w-9 h-5 bg-muted rounded-full peer peer-checked:bg-brand transition-colors after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full" />
         </label>
       </div>
 

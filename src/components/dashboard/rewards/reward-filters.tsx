@@ -68,7 +68,7 @@ export function RewardFilters({
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-2 flex-1">
         {/* Search */}
-        <div className="relative flex-1 min-w-[180px]">
+        <div className="relative flex-1 min-w-45">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Search by customer name..."
@@ -84,7 +84,7 @@ export function RewardFilters({
             type="date"
             value={initialDateFrom}
             onChange={(e) => updateParam("dateFrom", e.target.value)}
-            className="h-9 text-[13px] w-[140px]"
+            className="h-9 text-[13px] w-35"
             placeholder="From"
           />
           <span className="text-[13px] text-muted-foreground">to</span>
@@ -92,7 +92,7 @@ export function RewardFilters({
             type="date"
             value={initialDateTo}
             onChange={(e) => updateParam("dateTo", e.target.value)}
-            className="h-9 text-[13px] w-[140px]"
+            className="h-9 text-[13px] w-35"
             placeholder="To"
           />
           {hasDateFilter && (

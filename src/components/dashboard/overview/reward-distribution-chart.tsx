@@ -66,11 +66,11 @@ export function RewardDistributionChart({
         )}
       </h3>
       {totalCustomers === 0 ? (
-        <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">
+        <div className="flex items-center justify-center h-50 text-sm text-muted-foreground">
           No customers yet
         </div>
       ) : (
-        <div className="h-[200px] relative">
+        <div className="h-50 relative">
           {mounted && (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
