@@ -36,6 +36,7 @@ import {
 } from "@/lib/wallet/template-matcher"
 import type { ExtractedPalette } from "@/lib/color-extraction"
 import type { RestaurantCategory } from "@/lib/wallet/card-templates"
+import { PROGRAM_TYPE_META, type ProgramType, type CouponConfig, type MembershipConfig, type PointsConfig } from "@/types/program-types"
 import {
   Check,
   ChevronRight,
@@ -55,6 +56,7 @@ import {
   CakeSlice,
   Sparkles,
   ChevronDown,
+  ArrowLeft,
 } from "lucide-react"
 
 // ─── Step definitions ───────────────────────────────────────
@@ -62,8 +64,8 @@ import {
 const STEPS = [
   { number: 1, label: "Account", icon: Check },
   { number: 2, label: "Restaurant", icon: Store },
-  { number: 3, label: "Branding", icon: Palette },
-  { number: 4, label: "Loyalty", icon: Gift },
+  { number: 3, label: "Loyalty", icon: Gift },
+  { number: 4, label: "Branding", icon: Palette },
   { number: 5, label: "Setup", icon: Rocket },
   { number: 6, label: "Done", icon: PartyPopper },
 ] as const
@@ -138,16 +140,16 @@ export default function RegisterPage() {
         />
       )}
       {currentStep === 3 && restaurantId && (
-        <BrandingStep
+        <LoyaltyStep
           restaurantId={restaurantId}
           onNext={() => goToStep(4)}
-          onSkip={() => goToStep(4)}
         />
       )}
       {currentStep === 4 && restaurantId && (
-        <LoyaltyStep
+        <BrandingStep
           restaurantId={restaurantId}
           onNext={() => goToStep(5)}
+          onSkip={() => goToStep(5)}
         />
       )}
       {currentStep === 5 && restaurantId && (
@@ -873,6 +875,8 @@ function BrandingStep({
 
 // ─── Step 4: Loyalty Program ────────────────────────────────
 
+const PROGRAM_TYPES = Object.entries(PROGRAM_TYPE_META) as [ProgramType, typeof PROGRAM_TYPE_META[ProgramType]][]
+
 function LoyaltyStep({
   restaurantId,
   onNext,
@@ -880,20 +884,75 @@ function LoyaltyStep({
   restaurantId: string
   onNext: () => void
 }) {
+  const [phase, setPhase] = useState<"select" | "configure">("select")
+  const [programType, setProgramType] = useState<ProgramType>("STAMP_CARD")
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Stamp Card state
   const [visitsRequired, setVisitsRequired] = useState(10)
   const [rewardDescription, setRewardDescription] = useState("Free meal")
   const [rewardExpiryDays, setRewardExpiryDays] = useState(90)
-  const [isLoading, setIsLoading] = useState(false)
+
+  // Coupon state
+  const [discountType, setDiscountType] = useState<"percentage" | "fixed" | "freebie">("percentage")
+  const [discountValue, setDiscountValue] = useState(10)
+  const [couponDescription, setCouponDescription] = useState("")
+  const [redemptionLimit, setRedemptionLimit] = useState<"single" | "unlimited">("single")
+
+  // Membership state
+  const [membershipTier, setMembershipTier] = useState("Gold")
+  const [benefits, setBenefits] = useState("")
+  const [validDuration, setValidDuration] = useState<"monthly" | "yearly" | "lifetime">("yearly")
+
+  // Points state
+  const [pointsPerVisit, setPointsPerVisit] = useState(10)
+  const [catalogItem, setCatalogItem] = useState({ name: "", pointsCost: 100 })
+
+  function handleSelectType(type: ProgramType) {
+    setProgramType(type)
+    // Reset reward description to something type-appropriate
+    if (type === "STAMP_CARD") setRewardDescription("Free meal")
+    else if (type === "COUPON") setRewardDescription("Discount coupon")
+    else if (type === "MEMBERSHIP") setRewardDescription("Membership perks")
+    else if (type === "POINTS") setRewardDescription("Points reward")
+    setPhase("configure")
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsLoading(true)
 
+    let config: Record<string, unknown> = {}
+
+    if (programType === "COUPON") {
+      config = {
+        discountType,
+        discountValue,
+        couponDescription: couponDescription || undefined,
+        redemptionLimit,
+      } satisfies Partial<CouponConfig>
+    } else if (programType === "MEMBERSHIP") {
+      config = {
+        membershipTier,
+        benefits: benefits || undefined,
+        validDuration,
+      } satisfies Partial<MembershipConfig>
+    } else if (programType === "POINTS") {
+      config = {
+        pointsPerVisit,
+        catalog: catalogItem.name
+          ? [{ id: "1", name: catalogItem.name, pointsCost: catalogItem.pointsCost }]
+          : [],
+      } satisfies Partial<PointsConfig>
+    }
+
     const result = await setupLoyaltyProgram({
       restaurantId,
-      visitsRequired,
+      programType,
+      visitsRequired: programType === "STAMP_CARD" ? visitsRequired : 1,
       rewardDescription,
       rewardExpiryDays,
+      config: Object.keys(config).length > 0 ? config : undefined,
     })
 
     if ("error" in result && result.error) {
@@ -905,111 +964,395 @@ function LoyaltyStep({
     onNext()
   }
 
+  // Phase 1: Type selection
+  if (phase === "select") {
+    return (
+      <Card>
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10">
+            <Gift className="size-5 text-primary" />
+          </div>
+          <CardTitle className="text-xl font-bold">Choose your program type</CardTitle>
+          <CardDescription>
+            Pick the loyalty program that best fits your business.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {PROGRAM_TYPES.map(([type, meta]) => {
+              const Icon = meta.icon
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => handleSelectType(type)}
+                  className="group flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-all hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                    <Icon className="size-4.5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{meta.label}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {meta.description}
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Phase 2: Type-specific configuration
+  const typeMeta = PROGRAM_TYPE_META[programType]
+  const TypeIcon = typeMeta.icon
+
   return (
     <Card>
       <CardHeader className="text-center">
         <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10">
-          <Gift className="size-5 text-primary" />
+          <TypeIcon className="size-5 text-primary" />
         </div>
-        <CardTitle className="text-xl font-bold">Set up your loyalty program</CardTitle>
+        <CardTitle className="text-xl font-bold">Configure your {typeMeta.shortLabel.toLowerCase()} program</CardTitle>
         <CardDescription>
-          Define how customers earn rewards at your restaurant.
+          Set up the details for your {typeMeta.label.toLowerCase()}.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Visits required */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="visits-required">Visits to earn a reward</Label>
-              <span className="text-sm font-semibold tabular-nums">
-                {visitsRequired}
-              </span>
-            </div>
-            <input
-              id="visits-required"
-              type="range"
-              min={3}
-              max={30}
-              value={visitsRequired}
-              onChange={(e) => setVisitsRequired(parseInt(e.target.value))}
-              className="w-full accent-primary"
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>3 visits</span>
-              <span>30 visits</span>
-            </div>
-          </div>
-
-          {/* Reward description */}
-          <div className="space-y-2">
-            <Label htmlFor="reward-desc">Reward description</Label>
-            <Input
-              id="reward-desc"
-              type="text"
-              placeholder="e.g. Free coffee, 20% off, Free dessert"
-              value={rewardDescription}
-              onChange={(e) => setRewardDescription(e.target.value)}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              What customers get after {visitsRequired} visits.
-            </p>
-          </div>
-
-          {/* Expiry days */}
-          <div className="space-y-2">
-            <Label htmlFor="expiry-days">Reward expires after (days)</Label>
-            <Input
-              id="expiry-days"
-              type="number"
-              min={0}
-              max={365}
-              value={rewardExpiryDays}
-              onChange={(e) => setRewardExpiryDays(parseInt(e.target.value) || 0)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Set to 0 for no expiration. Default is 90 days.
-            </p>
-          </div>
-
-          {/* Preview */}
-          <div className="rounded-xl border bg-muted/30 p-4">
-            <p className="text-xs font-medium text-muted-foreground mb-2">
-              Preview
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="flex gap-1">
-                {Array.from({ length: Math.min(visitsRequired, 15) }).map(
-                  (_, i) => (
-                    <div
-                      key={i}
-                      className="size-3 rounded-full bg-primary/20"
-                    />
-                  )
-                )}
-                {visitsRequired > 15 && (
-                  <span className="text-xs text-muted-foreground">
-                    +{visitsRequired - 15}
+          {/* ── Stamp Card fields ── */}
+          {programType === "STAMP_CARD" && (
+            <>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="visits-required">Visits to earn a reward</Label>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {visitsRequired}
                   </span>
+                </div>
+                <input
+                  id="visits-required"
+                  type="range"
+                  min={3}
+                  max={30}
+                  value={visitsRequired}
+                  onChange={(e) => setVisitsRequired(parseInt(e.target.value))}
+                  className="w-full accent-primary"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>3 visits</span>
+                  <span>30 visits</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reward-desc">Reward description</Label>
+                <Input
+                  id="reward-desc"
+                  type="text"
+                  placeholder="e.g. Free coffee, 20% off, Free dessert"
+                  value={rewardDescription}
+                  onChange={(e) => setRewardDescription(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  What customers get after {visitsRequired} visits.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="expiry-days">Reward expires after (days)</Label>
+                <Input
+                  id="expiry-days"
+                  type="number"
+                  min={0}
+                  max={365}
+                  value={rewardExpiryDays}
+                  onChange={(e) => setRewardExpiryDays(parseInt(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Set to 0 for no expiration. Default is 90 days.
+                </p>
+              </div>
+              {/* Stamp preview */}
+              <div className="rounded-xl border bg-muted/30 p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Preview</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1">
+                    {Array.from({ length: Math.min(visitsRequired, 15) }).map((_, i) => (
+                      <div key={i} className="size-3 rounded-full bg-primary/20" />
+                    ))}
+                    {visitsRequired > 15 && (
+                      <span className="text-xs text-muted-foreground">+{visitsRequired - 15}</span>
+                    )}
+                  </div>
+                </div>
+                <p className="text-sm mt-2">
+                  After <strong>{visitsRequired}</strong> visits → <strong>{rewardDescription}</strong>
+                </p>
+                {rewardExpiryDays > 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Expires {rewardExpiryDays} days after earned
+                  </p>
                 )}
               </div>
-            </div>
-            <p className="text-sm mt-2">
-              After <strong>{visitsRequired}</strong> visits →{" "}
-              <strong>{rewardDescription}</strong>
-            </p>
-            {rewardExpiryDays > 0 && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Expires {rewardExpiryDays} days after earned
-              </p>
-            )}
-          </div>
+            </>
+          )}
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? <LoadingSpinner /> : <ChevronRight className="size-4" />}
-            Continue
-          </Button>
+          {/* ── Coupon fields ── */}
+          {programType === "COUPON" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="discount-type">Discount type</Label>
+                <select
+                  id="discount-type"
+                  value={discountType}
+                  onChange={(e) => setDiscountType(e.target.value as typeof discountType)}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="percentage">Percentage off</option>
+                  <option value="fixed">Fixed amount off</option>
+                  <option value="freebie">Free item</option>
+                </select>
+              </div>
+              {discountType !== "freebie" && (
+                <div className="space-y-2">
+                  <Label htmlFor="discount-value">
+                    {discountType === "percentage" ? "Percentage" : "Amount"}
+                  </Label>
+                  <Input
+                    id="discount-value"
+                    type="number"
+                    min={1}
+                    max={discountType === "percentage" ? 100 : 10000}
+                    value={discountValue}
+                    onChange={(e) => setDiscountValue(parseInt(e.target.value) || 0)}
+                  />
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="coupon-desc">Coupon description</Label>
+                <Input
+                  id="coupon-desc"
+                  type="text"
+                  placeholder="e.g. 10% off your next order"
+                  value={couponDescription}
+                  onChange={(e) => setCouponDescription(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="redemption-limit">Redemption</Label>
+                <select
+                  id="redemption-limit"
+                  value={redemptionLimit}
+                  onChange={(e) => setRedemptionLimit(e.target.value as typeof redemptionLimit)}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="single">One-time use</option>
+                  <option value="unlimited">Unlimited uses</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reward-desc-coupon">Reward label</Label>
+                <Input
+                  id="reward-desc-coupon"
+                  type="text"
+                  placeholder="e.g. Discount coupon"
+                  value={rewardDescription}
+                  onChange={(e) => setRewardDescription(e.target.value)}
+                  required
+                />
+              </div>
+              {/* Coupon preview */}
+              <div className="rounded-xl border bg-muted/30 p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Preview</p>
+                <p className="text-sm font-semibold">
+                  {discountType === "percentage"
+                    ? `${discountValue}% off`
+                    : discountType === "fixed"
+                      ? `$${discountValue} off`
+                      : "Free item"}
+                </p>
+                {couponDescription && (
+                  <p className="text-xs text-muted-foreground mt-1">{couponDescription}</p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  {redemptionLimit === "single" ? "Single use" : "Unlimited uses"}
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* ── Membership fields ── */}
+          {programType === "MEMBERSHIP" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="membership-tier">Membership tier</Label>
+                <Input
+                  id="membership-tier"
+                  type="text"
+                  placeholder="e.g. Gold, VIP, Premium"
+                  value={membershipTier}
+                  onChange={(e) => setMembershipTier(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="benefits">Benefits</Label>
+                <Input
+                  id="benefits"
+                  type="text"
+                  placeholder="e.g. 10% off all orders, priority seating"
+                  value={benefits}
+                  onChange={(e) => setBenefits(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Describe the perks members receive.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="valid-duration">Duration</Label>
+                <select
+                  id="valid-duration"
+                  value={validDuration}
+                  onChange={(e) => setValidDuration(e.target.value as typeof validDuration)}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="lifetime">Lifetime</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reward-desc-membership">Reward label</Label>
+                <Input
+                  id="reward-desc-membership"
+                  type="text"
+                  placeholder="e.g. Membership perks"
+                  value={rewardDescription}
+                  onChange={(e) => setRewardDescription(e.target.value)}
+                  required
+                />
+              </div>
+              {/* Membership preview */}
+              <div className="rounded-xl border bg-muted/30 p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Preview</p>
+                <p className="text-sm font-semibold">{membershipTier} Member</p>
+                {benefits && (
+                  <p className="text-xs text-muted-foreground mt-1">{benefits}</p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1 capitalize">{validDuration} membership</p>
+              </div>
+            </>
+          )}
+
+          {/* ── Points fields ── */}
+          {programType === "POINTS" && (
+            <>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="points-per-visit">Points per visit</Label>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {pointsPerVisit}
+                  </span>
+                </div>
+                <input
+                  id="points-per-visit"
+                  type="range"
+                  min={1}
+                  max={100}
+                  value={pointsPerVisit}
+                  onChange={(e) => setPointsPerVisit(parseInt(e.target.value))}
+                  className="w-full accent-primary"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>1 point</span>
+                  <span>100 points</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reward-desc-points">Reward description</Label>
+                <Input
+                  id="reward-desc-points"
+                  type="text"
+                  placeholder="e.g. Free coffee"
+                  value={rewardDescription}
+                  onChange={(e) => setRewardDescription(e.target.value)}
+                  required
+                />
+              </div>
+              <Separator />
+              <div className="space-y-3">
+                <p className="text-sm font-medium">First reward item (optional)</p>
+                <div className="space-y-2">
+                  <Label htmlFor="catalog-name">Item name</Label>
+                  <Input
+                    id="catalog-name"
+                    type="text"
+                    placeholder="e.g. Free coffee"
+                    value={catalogItem.name}
+                    onChange={(e) => setCatalogItem({ ...catalogItem, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="catalog-cost">Points cost</Label>
+                  <Input
+                    id="catalog-cost"
+                    type="number"
+                    min={1}
+                    max={10000}
+                    value={catalogItem.pointsCost}
+                    onChange={(e) =>
+                      setCatalogItem({ ...catalogItem, pointsCost: parseInt(e.target.value) || 1 })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="expiry-days-points">Reward expires after (days)</Label>
+                <Input
+                  id="expiry-days-points"
+                  type="number"
+                  min={0}
+                  max={365}
+                  value={rewardExpiryDays}
+                  onChange={(e) => setRewardExpiryDays(parseInt(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Set to 0 for no expiration.
+                </p>
+              </div>
+              {/* Points preview */}
+              <div className="rounded-xl border bg-muted/30 p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Preview</p>
+                <p className="text-sm">
+                  Earn <strong>{pointsPerVisit}</strong> points per visit
+                </p>
+                {catalogItem.name && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {catalogItem.name} — {catalogItem.pointsCost} points
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPhase("select")}
+              className="shrink-0"
+            >
+              <ArrowLeft className="size-4" />
+              Back
+            </Button>
+            <Button type="submit" className="flex-1" disabled={isLoading}>
+              {isLoading ? <LoadingSpinner /> : <ChevronRight className="size-4" />}
+              Continue
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

@@ -13,6 +13,7 @@ const createRestaurantSchema = z.object({
   name: z.string().min(1, "Restaurant name is required").max(100),
   address: z.string().max(200).optional().default(""),
   phone: z.string().max(30).optional().default(""),
+  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS"]).optional().default("STAMP_CARD"),
 })
 
 const updateBrandingSchema = z.object({
@@ -35,9 +36,11 @@ const applyCardDesignSchema = z.object({
 
 const setupLoyaltySchema = z.object({
   restaurantId: z.string().min(1),
-  visitsRequired: z.number().int().min(3).max(30),
+  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS"]).optional().default("STAMP_CARD"),
+  visitsRequired: z.number().int().min(1).max(30).optional().default(10),
   rewardDescription: z.string().min(1, "Reward description is required").max(200),
-  rewardExpiryDays: z.number().int().min(0).max(365),
+  rewardExpiryDays: z.number().int().min(0).max(365).optional().default(90),
+  config: z.record(z.string(), z.unknown()).optional(),
 })
 
 // ─── Slug Helpers ───────────────────────────────────────────
@@ -68,7 +71,7 @@ async function generateUniqueSlug(name: string): Promise<string> {
 
 // ─── Create Restaurant ─────────────────────────────────────
 
-export async function createRestaurant(input: z.infer<typeof createRestaurantSchema>) {
+export async function createRestaurant(input: z.input<typeof createRestaurantSchema>) {
   const session = await assertAuthenticated()
   const parsed = createRestaurantSchema.parse(input)
 
@@ -110,27 +113,38 @@ export async function createRestaurant(input: z.infer<typeof createRestaurantSch
       },
     })
 
-    // 4. Create default loyalty program
+    // 4. Map program type to card type
+    const programType = parsed.programType
+    const defaultCardType = programType === "COUPON"
+      ? "COUPON" as const
+      : programType === "MEMBERSHIP"
+        ? "TIER" as const
+        : programType === "POINTS"
+          ? "POINTS" as const
+          : "STAMP" as const
+
+    // 5. Create default loyalty program
     const loyaltyProgram = await tx.loyaltyProgram.create({
       data: {
         restaurantId: restaurant.id,
         name: "Loyalty Program",
-        programType: "STAMP_CARD",
-        visitsRequired: 10,
+        programType,
+        visitsRequired: programType === "STAMP_CARD" ? 10 : 1,
         rewardDescription: "Free reward",
         rewardExpiryDays: 90,
         status: "ACTIVE",
       },
     })
 
-    // 5. Create default card design linked to the loyalty program
+    // 6. Create default card design linked to the loyalty program
     await tx.cardDesign.create({
       data: {
         loyaltyProgramId: loyaltyProgram.id,
+        cardType: defaultCardType,
       },
     })
 
-    // 6. Link user to restaurant
+    // 7. Link user to restaurant
     await tx.user.update({
       where: { id: session.user.id },
       data: { restaurantId: restaurant.id },
@@ -224,7 +238,7 @@ export async function uploadOnboardingLogo(formData: FormData) {
 
 // ─── Setup Loyalty Program ─────────────────────────────────
 
-export async function setupLoyaltyProgram(input: z.infer<typeof setupLoyaltySchema>) {
+export async function setupLoyaltyProgram(input: z.input<typeof setupLoyaltySchema>) {
   const session = await assertAuthenticated()
   const parsed = setupLoyaltySchema.parse(input)
 
@@ -241,20 +255,46 @@ export async function setupLoyaltyProgram(input: z.infer<typeof setupLoyaltySche
   // Find the default loyalty program created during restaurant setup
   const program = await db.loyaltyProgram.findFirst({
     where: { restaurantId: parsed.restaurantId },
+    include: { cardDesign: { select: { id: true } } },
   })
 
   if (!program) {
     return { error: "Loyalty program not found" }
   }
 
-  await db.loyaltyProgram.update({
-    where: { id: program.id },
-    data: {
-      visitsRequired: parsed.visitsRequired,
-      rewardDescription: parsed.rewardDescription,
-      rewardExpiryDays: parsed.rewardExpiryDays,
-    },
-  })
+  // Map program type to card type
+  const programType = parsed.programType
+  const cardType = programType === "COUPON"
+    ? "COUPON" as const
+    : programType === "MEMBERSHIP"
+      ? "TIER" as const
+      : programType === "POINTS"
+        ? "POINTS" as const
+        : "STAMP" as const
+
+  const visitsRequired = programType === "STAMP_CARD"
+    ? parsed.visitsRequired
+    : 1
+
+  await db.$transaction([
+    db.loyaltyProgram.update({
+      where: { id: program.id },
+      data: {
+        programType,
+        visitsRequired,
+        rewardDescription: parsed.rewardDescription,
+        rewardExpiryDays: parsed.rewardExpiryDays,
+        config: parsed.config ? JSON.parse(JSON.stringify(parsed.config)) : undefined,
+      },
+    }),
+    // Update card design's cardType to match
+    ...(program.cardDesign
+      ? [db.cardDesign.update({
+          where: { id: program.cardDesign.id },
+          data: { cardType },
+        })]
+      : []),
+  ])
 
   return { success: true }
 }
