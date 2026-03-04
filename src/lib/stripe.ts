@@ -11,7 +11,7 @@ export type { PlanId, PlanDefinition } from "./plans"
 function getStripeClient(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error("STRIPE_SECRET_KEY is not set")
-  return new Stripe(key, { apiVersion: "2026-01-28.clover" as Stripe.LatestApiVersion })
+  return new Stripe(key, { apiVersion: "2026-02-25.clover" as Stripe.LatestApiVersion })
 }
 
 // Lazy singleton — avoid construction at import time (build safety)
@@ -33,8 +33,11 @@ import type { PlanId } from "./plans"
 
 export const STRIPE_PRICE_LOOKUP_KEYS: Record<string, PlanId> = {
   starter_monthly: "STARTER",
-  pro_monthly: "PRO",
-  business_monthly: "BUSINESS",
+  starter_annual: "STARTER",
+  growth_monthly: "GROWTH",
+  growth_annual: "GROWTH",
+  scale_monthly: "SCALE",
+  scale_annual: "SCALE",
 }
 
 export function getPlanForPriceLookupKey(lookupKey: string): PlanId {

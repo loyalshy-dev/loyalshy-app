@@ -4,10 +4,10 @@
  * Usage:
  *   STRIPE_SECRET_KEY=sk_test_... npx tsx scripts/seed-stripe.ts
  *
- * This creates (or updates) three Stripe Products with monthly prices:
- *   - Loyalshy Starter ($15/month, lookup_key: starter_monthly)
- *   - Loyalshy Pro ($39/month, lookup_key: pro_monthly)
- *   - Loyalshy Business ($79/month, lookup_key: business_monthly)
+ * This creates (or updates) three Stripe Products with monthly + annual prices:
+ *   - Loyalshy Starter (€19/month, €15/month annual, lookup_keys: starter_monthly, starter_annual)
+ *   - Loyalshy Growth  (€39/month, €31/month annual, lookup_keys: growth_monthly, growth_annual)
+ *   - Loyalshy Scale   (€79/month, €63/month annual, lookup_keys: scale_monthly, scale_annual)
  *
  * Idempotent: uses metadata.loyalshy_plan to skip existing products.
  */
@@ -23,22 +23,28 @@ const plans = [
     loyalshyPlan: "STARTER",
     name: "Loyalshy Starter",
     description: "Up to 200 customers, 2 staff, full analytics, custom branding.",
-    priceAmount: 1500, // cents ($15/month)
-    lookupKey: "starter_monthly",
+    prices: [
+      { amount: 1900, interval: "month" as const, lookupKey: "starter_monthly" },
+      { amount: 1500, interval: "month" as const, lookupKey: "starter_annual", intervalCount: 12 },
+    ],
   },
   {
-    loyalshyPlan: "PRO",
-    name: "Loyalshy Pro",
+    loyalshyPlan: "GROWTH",
+    name: "Loyalshy Growth",
     description: "Up to 1,000 customers, 5 staff, email support.",
-    priceAmount: 3900, // cents ($39/month)
-    lookupKey: "pro_monthly",
+    prices: [
+      { amount: 3900, interval: "month" as const, lookupKey: "growth_monthly" },
+      { amount: 3100, interval: "month" as const, lookupKey: "growth_annual", intervalCount: 12 },
+    ],
   },
   {
-    loyalshyPlan: "BUSINESS",
-    name: "Loyalshy Business",
+    loyalshyPlan: "SCALE",
+    name: "Loyalshy Scale",
     description: "Unlimited customers, 15 staff, priority support.",
-    priceAmount: 7900, // cents ($79/month)
-    lookupKey: "business_monthly",
+    prices: [
+      { amount: 7900, interval: "month" as const, lookupKey: "scale_monthly" },
+      { amount: 6300, interval: "month" as const, lookupKey: "scale_annual", intervalCount: 12 },
+    ],
   },
 ]
 
@@ -71,25 +77,32 @@ async function main() {
       console.log(`Created product "${plan.name}": ${product.id}`)
     }
 
-    // Check if price with lookup_key exists
-    const prices = await stripe.prices.list({
-      product: product.id,
-      active: true,
-      lookup_keys: [plan.lookupKey],
-    })
-
-    if (prices.data.length > 0) {
-      console.log(`  Price "${plan.lookupKey}" already exists: ${prices.data[0].id}`)
-    } else {
-      const price = await stripe.prices.create({
+    for (const priceConfig of plan.prices) {
+      // Check if price with lookup_key exists
+      const prices = await stripe.prices.list({
         product: product.id,
-        unit_amount: plan.priceAmount,
-        currency: "usd",
-        recurring: { interval: "month" },
-        lookup_key: plan.lookupKey,
-        transfer_lookup_key: true,
+        active: true,
+        lookup_keys: [priceConfig.lookupKey],
       })
-      console.log(`  Created price "${plan.lookupKey}": ${price.id} ($${plan.priceAmount / 100}/month)`)
+
+      if (prices.data.length > 0) {
+        console.log(`  Price "${priceConfig.lookupKey}" already exists: ${prices.data[0].id}`)
+      } else {
+        const recurring: Stripe.PriceCreateParams.Recurring = priceConfig.intervalCount
+          ? { interval: "year" }
+          : { interval: priceConfig.interval }
+
+        const price = await stripe.prices.create({
+          product: product.id,
+          unit_amount: priceConfig.amount,
+          currency: "eur",
+          recurring,
+          lookup_key: priceConfig.lookupKey,
+          transfer_lookup_key: true,
+        })
+        const label = priceConfig.intervalCount ? `€${priceConfig.amount / 100}/mo (annual)` : `€${priceConfig.amount / 100}/month`
+        console.log(`  Created price "${priceConfig.lookupKey}": ${price.id} (${label})`)
+      }
     }
 
     console.log()

@@ -23,15 +23,15 @@ import { isUpgrade, type PlanId } from "@/lib/plans"
 
 const planAccents: Record<string, string> = {
   STARTER: "bg-brand/10 text-brand",
-  PRO: "bg-chart-1/10 text-chart-1",
-  BUSINESS: "bg-chart-2/10 text-chart-2",
+  GROWTH: "bg-chart-1/10 text-chart-1",
+  SCALE: "bg-chart-2/10 text-chart-2",
   ENTERPRISE: "bg-chart-4/10 text-chart-4",
 }
 
 const planBorders: Record<string, string> = {
   STARTER: "border-brand/30 ring-1 ring-brand/20",
-  PRO: "border-chart-1/30",
-  BUSINESS: "border-chart-2/30",
+  GROWTH: "border-chart-1/30",
+  SCALE: "border-chart-2/30",
   ENTERPRISE: "border-chart-4/30",
 }
 
@@ -54,12 +54,15 @@ function getStatusBadge(status: string) {
 
 // ─── Component ─────────────────────────────────────────────
 
+type BillingPeriod = "monthly" | "annual"
+
 export function BillingSettings({ data }: { data: BillingData }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly")
 
   const { restaurant, usage, plans } = data
   const currentPlan = restaurant.plan as PlanId
@@ -313,18 +316,47 @@ export function BillingSettings({ data }: { data: BillingData }) {
       {/* Plan Comparison */}
       <div className="rounded-lg border border-border bg-card">
         <div className="border-b border-border px-6 py-4">
-          <h2 className="text-sm font-semibold">Plans</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Choose the plan that fits your business.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold">Plans</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Choose the plan that fits your business.
+              </p>
+            </div>
+            <div className="flex items-center gap-1 rounded-full border border-border bg-muted/30 p-0.5">
+              <button
+                type="button"
+                onClick={() => setBillingPeriod("monthly")}
+                className={`rounded-full px-3 py-1 text-[11px] font-medium transition-all ${
+                  billingPeriod === "monthly"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                onClick={() => setBillingPeriod("annual")}
+                className={`rounded-full px-3 py-1 text-[11px] font-medium transition-all ${
+                  billingPeriod === "annual"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Annual
+              </button>
+            </div>
+          </div>
         </div>
         <div className="p-6">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {(["STARTER", "PRO", "BUSINESS", "ENTERPRISE"] as const).map((planId) => {
+            {(["STARTER", "GROWTH", "SCALE", "ENTERPRISE"] as const).map((planId) => {
               const plan = plans[planId]
               const isCurrent = currentPlan === planId
               const isEnterprise = planId === "ENTERPRISE"
-              const lookupKey = planId === "STARTER" ? "starter_monthly" : planId === "PRO" ? "pro_monthly" : planId === "BUSINESS" ? "business_monthly" : null
+              const lookupKey = isEnterprise ? null : `${planId.toLowerCase()}_${billingPeriod}`
+              const displayPrice = billingPeriod === "annual" ? plan.annualPrice : plan.price
 
               return (
                 <div
@@ -348,10 +380,17 @@ export function BillingSettings({ data }: { data: BillingData }) {
                   <p className="text-xs text-muted-foreground mt-0.5">{plan.description}</p>
 
                   <div className="mt-3 mb-4">
-                    {plan.price === null ? (
+                    {displayPrice === null ? (
                       <p className="text-2xl font-bold tracking-tight">Custom</p>
                     ) : (
-                      <p className="text-2xl font-bold tracking-tight">${plan.price}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                      <>
+                        <p className="text-2xl font-bold tracking-tight">{displayPrice}€<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                        {billingPeriod === "annual" && plan.price !== null && (
+                          <p className="text-[10px] text-emerald-600 mt-0.5">
+                            Save {(plan.price - (plan.annualPrice ?? 0)) * 12}€/year
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
 

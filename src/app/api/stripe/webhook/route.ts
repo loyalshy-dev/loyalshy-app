@@ -10,8 +10,11 @@ import { stripe, mapSubscriptionStatus, getSubscriptionIdFromInvoice } from "@/l
 // Map Stripe price lookup keys to Loyalshy plan enum values
 const LOOKUP_KEY_TO_PLAN: Record<string, string> = {
   starter_monthly: "STARTER",
-  pro_monthly: "PRO",
-  business_monthly: "BUSINESS",
+  starter_annual: "STARTER",
+  growth_monthly: "GROWTH",
+  growth_annual: "GROWTH",
+  scale_monthly: "SCALE",
+  scale_annual: "SCALE",
 }
 
 export async function POST(request: NextRequest) {

@@ -78,7 +78,7 @@ describe("checkCustomerLimit", () => {
   it("never approaching for unlimited plans", async () => {
     const { checkCustomerLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "BUSINESS", subscriptionStatus: "ACTIVE" })
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "SCALE", subscriptionStatus: "ACTIVE" })
     mockDb.customer.count.mockResolvedValue(10_000)
 
     const result = await checkCustomerLimit("restaurant-1")
@@ -126,11 +126,11 @@ describe("checkProgramLimit", () => {
     expect(result.limit).toBe(1)
   })
 
-  it("allows multiple programs on PRO plan", async () => {
+  it("allows multiple programs on GROWTH plan", async () => {
     const { checkProgramLimit } = await import("./billing-actions")
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "PRO", subscriptionStatus: "ACTIVE" })
-    mockDb.loyaltyProgram.count.mockResolvedValue(2) // PRO limit is 3
+    mockDb.restaurant.findUnique.mockResolvedValue({ plan: "GROWTH", subscriptionStatus: "ACTIVE" })
+    mockDb.loyaltyProgram.count.mockResolvedValue(2) // GROWTH limit is 3
 
     const result = await checkProgramLimit("restaurant-1")
 

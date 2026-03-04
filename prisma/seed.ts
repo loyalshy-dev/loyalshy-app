@@ -36,7 +36,7 @@ async function main() {
       website: "https://burgerpalace.example.com",
       timezone: "America/New_York",
       subscriptionStatus: "ACTIVE",
-      plan: "PRO",
+      plan: "GROWTH",
       settings: { onboardingComplete: true },
     },
   })

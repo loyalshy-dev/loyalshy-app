@@ -164,17 +164,20 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
   // Compute type-specific props for a program
   function getTypeProps(program: PublicProgramInfo) {
     if (program.programType === "COUPON") {
-      const config = parseCouponConfig(program.cardDesign ? undefined : undefined) // config not on PublicProgramInfo yet
+      const config = parseCouponConfig(program.config)
       return {
-        discountText: program.rewardDescription,
-        validUntil: "No expiry",
-        couponCode: undefined as string | undefined,
+        discountText: config ? formatCouponValue(config) : program.rewardDescription,
+        validUntil: config?.validUntil
+          ? new Date(config.validUntil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+          : "No expiry",
+        couponCode: config?.couponCode ?? undefined,
       }
     }
     if (program.programType === "MEMBERSHIP") {
+      const config = parseMembershipConfig(program.config)
       return {
-        tierName: program.rewardDescription,
-        benefits: "Exclusive perks",
+        tierName: config?.membershipTier ?? program.rewardDescription,
+        benefits: config?.benefits ?? "Exclusive perks",
       }
     }
     return {}

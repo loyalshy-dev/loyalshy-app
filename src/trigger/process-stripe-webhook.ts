@@ -156,8 +156,11 @@ export const processStripeWebhookTask = task({
 function lookupKeyToPlan(lookupKey?: string): string {
   const map: Record<string, string> = {
     starter_monthly: "STARTER",
-    pro_monthly: "PRO",
-    business_monthly: "BUSINESS",
+    starter_annual: "STARTER",
+    growth_monthly: "GROWTH",
+    growth_annual: "GROWTH",
+    scale_monthly: "SCALE",
+    scale_annual: "SCALE",
   }
   return lookupKey ? (map[lookupKey] ?? "STARTER") : "STARTER"
 }

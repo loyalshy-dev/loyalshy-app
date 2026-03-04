@@ -11,6 +11,7 @@ type RewardFiltersProps = {
   dateFrom: string
   dateTo: string
   totalResults: number
+  basePath?: string
 }
 
 export function RewardFilters({
@@ -18,6 +19,7 @@ export function RewardFilters({
   dateFrom: initialDateFrom,
   dateTo: initialDateTo,
   totalResults,
+  basePath = "/dashboard/rewards",
 }: RewardFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -33,7 +35,7 @@ export function RewardFilters({
         params.delete("search")
       }
       params.delete("page")
-      router.push(`/dashboard/rewards?${params.toString()}`)
+      router.push(`${basePath}?${params.toString()}`)
     }, 300)
     return () => clearTimeout(timeout)
   }, [search, searchParams, router])
@@ -47,7 +49,7 @@ export function RewardFilters({
         params.delete(key)
       }
       params.delete("page")
-      router.push(`/dashboard/rewards?${params.toString()}`)
+      router.push(`${basePath}?${params.toString()}`)
     },
     [searchParams, router]
   )
@@ -59,7 +61,7 @@ export function RewardFilters({
     params.delete("dateFrom")
     params.delete("dateTo")
     params.delete("page")
-    router.push(`/dashboard/rewards?${params.toString()}`)
+    router.push(`${basePath}?${params.toString()}`)
   }
 
   return (

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect, useRef, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -45,9 +45,75 @@ import {
   deleteProgram,
 } from "@/server/settings-actions"
 import type { ProgramWithDesign, ProgramDeleteCounts } from "@/server/settings-actions"
-import { parseCouponConfig, parseMembershipConfig, parsePointsConfig } from "@/lib/program-config"
+import { parseCouponConfig, parseMembershipConfig, parseMinigameConfig, parsePointsConfig } from "@/lib/program-config"
 import type { PointsCatalogItem } from "@/types/program-types"
 import { PROGRAM_TYPE_META, type ProgramType } from "@/types/program-types"
+import { PrizeRevealEditor } from "@/components/dashboard/programs/prize-reveal-editor"
+
+// ─── Section Nav (scroll-spy) ────────────────────────────────────────
+
+function SectionNav({ sections }: { sections: { id: string; label: string }[] }) {
+  const [activeId, setActiveId] = useState(sections[0]?.id ?? "")
+  const observerRef = useRef<IntersectionObserver | null>(null)
+
+  useEffect(() => {
+    observerRef.current?.disconnect()
+
+    const ratios = new Map<string, number>()
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          ratios.set(entry.target.id, entry.intersectionRatio)
+        }
+        // Pick the section with the highest visible ratio
+        let best = ""
+        let bestRatio = -1
+        for (const { id } of sections) {
+          const r = ratios.get(id) ?? 0
+          if (r > bestRatio) {
+            bestRatio = r
+            best = id
+          }
+        }
+        if (best) setActiveId(best)
+      },
+      { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: "-80px 0px -40% 0px" }
+    )
+
+    for (const { id } of sections) {
+      const el = document.getElementById(id)
+      if (el) observerRef.current.observe(el)
+    }
+
+    return () => observerRef.current?.disconnect()
+  }, [sections])
+
+  const scrollTo = useCallback((id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [])
+
+  return (
+    <nav className="space-y-1" aria-label="Page sections">
+      {sections.map(({ id, label }) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => scrollTo(id)}
+          className={`block w-full text-left text-[13px] px-2.5 py-1.5 rounded-md transition-colors ${
+            activeId === id
+              ? "text-foreground font-medium bg-accent/50"
+              : "text-muted-foreground hover:text-foreground hover:bg-accent/30"
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </nav>
+  )
+}
+
+// ─── Types ───────────────────────────────────────────────────────────
 
 type LoyaltyForm = {
   name: string
@@ -80,6 +146,8 @@ type Restaurant = {
   secondaryColor: string | null
 }
 
+// ─── Program Editor ──────────────────────────────────────────────────
+
 export function ProgramEditor({
   program,
   restaurant,
@@ -107,6 +175,8 @@ export function ProgramEditor({
   const isPoints = programType === "POINTS"
 
   const couponConfig = isCoupon ? parseCouponConfig(program.config) : null
+  const minigameConfig = (isStampCard || isCoupon) ? parseMinigameConfig(program.config) : null
+  const hasPrizes = !!(minigameConfig?.enabled && minigameConfig.prizes?.length)
   const membershipConfig = isMembership ? parseMembershipConfig(program.config) : null
   const pointsConfig = isPoints ? parsePointsConfig(program.config) : null
   const [pointsPerVisit, setPointsPerVisit] = useState<number>(
@@ -151,12 +221,13 @@ export function ProgramEditor({
   const visitsChanged =
     Number(visitsRequired) !== program.visitsRequired
   const validDuration = watch("validDuration")
+  const discountType = watch("discountType")
   function buildConfig(data: LoyaltyForm): Record<string, unknown> | undefined {
     if (isCoupon) {
       return {
         discountType: data.discountType,
-        discountValue: data.discountValue,
-        couponDescription: data.couponDescription || undefined,
+        discountValue: data.discountType === "freebie" ? 0 : data.discountValue,
+        couponDescription: data.rewardDescription || undefined,
         validUntil: data.validUntil || undefined,
         redemptionLimit: data.redemptionLimit,
         terms: data.termsAndConditions || undefined,
@@ -272,647 +343,740 @@ export function ProgramEditor({
   const isDraft = program.status === "DRAFT"
   const typeMeta = PROGRAM_TYPE_META[programType]
 
+  // Build sections list based on program type
+  const navSections: { id: string; label: string }[] = [
+    { id: "details", label: "Details" },
+    ...(isStampCard ? [{ id: "stamps", label: "Stamps" }] : []),
+    ...(isCoupon ? [{ id: "coupon", label: "Coupon" }] : []),
+    ...(isMembership ? [{ id: "membership", label: "Membership" }] : []),
+    ...(isPoints ? [{ id: "points", label: "Points" }] : []),
+    { id: "schedule", label: "Schedule" },
+    { id: "terms", label: "Terms" },
+    ...((isStampCard || isCoupon) ? [{ id: "prize-reveal", label: "Prize Reveal" }] : []),
+    { id: "danger", label: "Danger" },
+  ]
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {/* Program Type badge */}
-      {typeMeta && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <typeMeta.icon className="h-3.5 w-3.5" />
-          <span className="font-medium">{typeMeta.label}</span>
-        </div>
-      )}
-
-      {/* Program Details */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor={`name-${program.id}`}>Program Name</Label>
-          <Input
-            id={`name-${program.id}`}
-            {...register("name", { required: "Program name is required" })}
-            disabled={isArchived}
-          />
-          {errors.name && (
-            <p className="text-xs text-destructive">{errors.name.message}</p>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex gap-8">
+        {/* Left column — sections */}
+        <div className="flex-1 min-w-0 space-y-6">
+          {/* Program Type badge */}
+          {typeMeta && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <typeMeta.icon className="h-3.5 w-3.5" />
+              <span className="font-medium">{typeMeta.label}</span>
+            </div>
           )}
-        </div>
 
-        {/* Stamp-only fields */}
-        {isStampCard && (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor={`visits-${program.id}`}>Visits Required</Label>
-              <Input
-                id={`visits-${program.id}`}
-                type="number"
-                min={3}
-                max={30}
-                {...register("visitsRequired", { valueAsNumber: true })}
-                disabled={isArchived}
-              />
-              <p className="text-xs text-muted-foreground">
-                Number of visits before a customer earns a reward (3-30).
-              </p>
+          {/* ─── Section 1: Program Details ─────────────────────── */}
+          <section id="details" className="scroll-mt-24 space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold">Program Details</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Basic information about your program.</p>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor={`expiry-${program.id}`}>
-                Reward Expiry (Days)
-              </Label>
+              <Label htmlFor={`name-${program.id}`}>Program Name</Label>
               <Input
-                id={`expiry-${program.id}`}
-                type="number"
-                min={0}
-                max={365}
-                {...register("rewardExpiryDays", { valueAsNumber: true })}
+                id={`name-${program.id}`}
+                {...register("name", { required: "Program name is required" })}
                 disabled={isArchived}
               />
-              <p className="text-xs text-muted-foreground">
-                Set to 0 for rewards that never expire.
-              </p>
-            </div>
-
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
-              <Input
-                id={`reward-${program.id}`}
-                {...register("rewardDescription", {
-                  required: "Reward description is required",
-                })}
-                placeholder="e.g., Free coffee or dessert"
-                disabled={isArchived}
-              />
-              {errors.rewardDescription && (
-                <p className="text-xs text-destructive">
-                  {errors.rewardDescription.message}
-                </p>
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name.message}</p>
               )}
             </div>
-          </>
-        )}
+          </section>
 
-        {/* Coupon-specific fields */}
-        {isCoupon && (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor={`discount-type-${program.id}`}>Discount Type</Label>
-              <select
-                id={`discount-type-${program.id}`}
-                {...register("discountType")}
-                disabled={isArchived}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="percentage">Percentage Off</option>
-                <option value="fixed">Fixed Amount Off</option>
-                <option value="freebie">Free Item</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor={`discount-value-${program.id}`}>Discount Value</Label>
-              <Input
-                id={`discount-value-${program.id}`}
-                type="number"
-                min={0}
-                max={10000}
-                {...register("discountValue", { valueAsNumber: true })}
-                disabled={isArchived}
-              />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor={`coupon-desc-${program.id}`}>Coupon Description</Label>
-              <Input
-                id={`coupon-desc-${program.id}`}
-                {...register("couponDescription")}
-                placeholder="e.g., Get 20% off your next order"
-                disabled={isArchived}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor={`valid-until-${program.id}`}>Valid Until</Label>
-              <Input
-                id={`valid-until-${program.id}`}
-                type="date"
-                {...register("validUntil")}
-                disabled={isArchived}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor={`redemption-limit-${program.id}`}>Redemption Limit</Label>
-              <select
-                id={`redemption-limit-${program.id}`}
-                {...register("redemptionLimit")}
-                disabled={isArchived}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="single">Single Use</option>
-                <option value="unlimited">Unlimited</option>
-              </select>
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
-              <Input
-                id={`reward-${program.id}`}
-                {...register("rewardDescription", {
-                  required: "Reward description is required",
-                })}
-                placeholder="e.g., 20% off"
-                disabled={isArchived}
-              />
-            </div>
-          </>
-        )}
+          {/* ─── Section 2: Type-specific Config ────────────────── */}
 
-        {/* Membership-specific fields */}
-        {isMembership && (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor={`tier-${program.id}`}>Membership Tier</Label>
-              <Input
-                id={`tier-${program.id}`}
-                {...register("membershipTier", { required: "Tier name is required" })}
-                placeholder="e.g., VIP, Gold, Premium"
-                disabled={isArchived}
-              />
-              {errors.membershipTier && (
-                <p className="text-xs text-destructive">{errors.membershipTier.message}</p>
-              )}
+          {/* Stamp Config */}
+          {isStampCard && (
+            <section id="stamps" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
+              <div>
+                <h3 className="text-sm font-semibold">Stamp Configuration</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Configure visits required and reward details.</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor={`visits-${program.id}`}>Visits Required</Label>
+                  <Input
+                    id={`visits-${program.id}`}
+                    type="number"
+                    min={3}
+                    max={30}
+                    {...register("visitsRequired", { valueAsNumber: true })}
+                    disabled={isArchived}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Number of visits before a customer earns a reward (3-30).
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor={`expiry-${program.id}`}>
+                    Reward Expiry (Days)
+                  </Label>
+                  <Input
+                    id={`expiry-${program.id}`}
+                    type="number"
+                    min={0}
+                    max={365}
+                    {...register("rewardExpiryDays", { valueAsNumber: true })}
+                    disabled={isArchived}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Set to 0 for rewards that never expire.
+                  </p>
+                </div>
+
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
+                  <Input
+                    id={`reward-${program.id}`}
+                    {...register("rewardDescription", {
+                      required: "Reward description is required",
+                    })}
+                    placeholder="e.g., Free coffee or dessert"
+                    disabled={isArchived || hasPrizes}
+                  />
+                  {hasPrizes ? (
+                    <p className="text-xs text-muted-foreground">
+                      Auto-generated from prize reveal prizes. Edit prizes below to update.
+                    </p>
+                  ) : errors.rewardDescription ? (
+                    <p className="text-xs text-destructive">
+                      {errors.rewardDescription.message}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Coupon Config */}
+          {isCoupon && (
+            <section id="coupon" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
+              <div>
+                <h3 className="text-sm font-semibold">Coupon Configuration</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Set the discount type, value, and usage limits.</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor={`discount-type-${program.id}`}>Discount Type</Label>
+                  <select
+                    id={`discount-type-${program.id}`}
+                    {...register("discountType")}
+                    disabled={isArchived}
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="percentage">Percentage Off</option>
+                    <option value="fixed">Fixed Amount Off</option>
+                    <option value="freebie">Free Item</option>
+                  </select>
+                </div>
+                {discountType !== "freebie" && (
+                  <div className="space-y-2">
+                    <Label htmlFor={`discount-value-${program.id}`}>
+                      {discountType === "percentage" ? "Discount (%)" : "Discount Amount"}
+                    </Label>
+                    <Input
+                      id={`discount-value-${program.id}`}
+                      type="number"
+                      min={1}
+                      max={discountType === "percentage" ? 100 : 10000}
+                      {...register("discountValue", { valueAsNumber: true })}
+                      disabled={isArchived}
+                    />
+                  </div>
+                )}
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor={`reward-${program.id}`}>Description</Label>
+                  <Input
+                    id={`reward-${program.id}`}
+                    {...register("rewardDescription", {
+                      required: "Description is required",
+                    })}
+                    placeholder="e.g., Get 20% off your next order"
+                    disabled={isArchived || hasPrizes}
+                  />
+                  {hasPrizes ? (
+                    <p className="text-xs text-muted-foreground">
+                      Auto-generated from prize reveal prizes. Edit prizes below to update.
+                    </p>
+                  ) : errors.rewardDescription ? (
+                    <p className="text-xs text-destructive">
+                      {errors.rewardDescription.message}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`valid-until-${program.id}`}>Valid Until</Label>
+                  <Input
+                    id={`valid-until-${program.id}`}
+                    type="date"
+                    {...register("validUntil")}
+                    disabled={isArchived}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`redemption-limit-${program.id}`}>Redemption Limit</Label>
+                  <select
+                    id={`redemption-limit-${program.id}`}
+                    {...register("redemptionLimit")}
+                    disabled={isArchived}
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="single">Single Use</option>
+                    <option value="unlimited">Unlimited</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Membership Config */}
+          {isMembership && (
+            <section id="membership" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
+              <div>
+                <h3 className="text-sm font-semibold">Membership Configuration</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Define membership tiers, duration, and benefits.</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor={`tier-${program.id}`}>Membership Tier</Label>
+                  <Input
+                    id={`tier-${program.id}`}
+                    {...register("membershipTier", { required: "Tier name is required" })}
+                    placeholder="e.g., VIP, Gold, Premium"
+                    disabled={isArchived}
+                  />
+                  {errors.membershipTier && (
+                    <p className="text-xs text-destructive">{errors.membershipTier.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`duration-${program.id}`}>Duration</Label>
+                  <select
+                    id={`duration-${program.id}`}
+                    {...register("validDuration")}
+                    disabled={isArchived}
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="lifetime">Lifetime</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                {validDuration === "custom" && (
+                  <div className="space-y-2">
+                    <Label htmlFor={`custom-days-${program.id}`}>Custom Duration (Days)</Label>
+                    <Input
+                      id={`custom-days-${program.id}`}
+                      type="number"
+                      min={1}
+                      max={3650}
+                      {...register("customDurationDays", { valueAsNumber: true })}
+                      disabled={isArchived}
+                    />
+                  </div>
+                )}
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor={`benefits-${program.id}`}>Benefits</Label>
+                  <Textarea
+                    id={`benefits-${program.id}`}
+                    {...register("benefits", { required: "Benefits are required" })}
+                    placeholder="List the perks members receive..."
+                    rows={3}
+                    disabled={isArchived}
+                  />
+                  {errors.benefits && (
+                    <p className="text-xs text-destructive">{errors.benefits.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
+                  <Input
+                    id={`reward-${program.id}`}
+                    {...register("rewardDescription", {
+                      required: "Reward description is required",
+                    })}
+                    placeholder="e.g., VIP Member"
+                    disabled={isArchived}
+                  />
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Points Config */}
+          {isPoints && (
+            <section id="points" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
+              <div>
+                <h3 className="text-sm font-semibold">Points Configuration</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Set how points are earned and what they can be redeemed for.</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor={`points-per-visit-${program.id}`}>Points Per Visit</Label>
+                  <Input
+                    id={`points-per-visit-${program.id}`}
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={pointsPerVisit}
+                    onChange={(e) => setPointsPerVisit(Number(e.target.value))}
+                    disabled={isArchived}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Points awarded to customers each time they visit (1–100).
+                  </p>
+                </div>
+
+                <div className="sm:col-span-2 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-sm font-medium">Reward Catalog</Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Items customers can redeem with their points (up to 20).
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isArchived || catalogItems.length >= 20}
+                      onClick={() =>
+                        setCatalogItems((prev) => [
+                          ...prev,
+                          {
+                            id: crypto.randomUUID(),
+                            name: "",
+                            description: "",
+                            pointsCost: 100,
+                          },
+                        ])
+                      }
+                    >
+                      Add Item
+                    </Button>
+                  </div>
+
+                  {catalogItems.length === 0 && (
+                    <p className="text-xs text-muted-foreground border border-dashed border-border rounded-md px-3 py-4 text-center">
+                      No catalog items yet. Add at least one reward for customers to redeem.
+                    </p>
+                  )}
+
+                  <div className="space-y-2">
+                    {catalogItems.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className="rounded-md border border-border p-3 space-y-2"
+                      >
+                        {/* Row 1: Name + Points Cost */}
+                        <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
+                          <div className="space-y-1">
+                            <Label
+                              htmlFor={`catalog-name-${item.id}`}
+                              className="text-xs text-muted-foreground"
+                            >
+                              Reward Name
+                            </Label>
+                            <Input
+                              id={`catalog-name-${item.id}`}
+                              value={item.name}
+                              placeholder="e.g., Free Coffee"
+                              disabled={isArchived}
+                              onChange={(e) =>
+                                setCatalogItems((prev) =>
+                                  prev.map((ci, i) =>
+                                    i === index ? { ...ci, name: e.target.value } : ci
+                                  )
+                                )
+                              }
+                            />
+                          </div>
+                          <div className="space-y-1 w-28 shrink-0">
+                            <Label
+                              htmlFor={`catalog-cost-${item.id}`}
+                              className="text-xs text-muted-foreground"
+                            >
+                              Points Cost
+                            </Label>
+                            <Input
+                              id={`catalog-cost-${item.id}`}
+                              type="number"
+                              min={1}
+                              max={100000}
+                              value={item.pointsCost}
+                              disabled={isArchived}
+                              onChange={(e) =>
+                                setCatalogItems((prev) =>
+                                  prev.map((ci, i) =>
+                                    i === index
+                                      ? { ...ci, pointsCost: Number(e.target.value) }
+                                      : ci
+                                  )
+                                )
+                              }
+                            />
+                          </div>
+                        </div>
+                        {/* Row 2: Description + Remove */}
+                        <div className="flex gap-2 items-end">
+                          <div className="space-y-1 flex-1">
+                            <Label
+                              htmlFor={`catalog-desc-${item.id}`}
+                              className="text-xs text-muted-foreground"
+                            >
+                              Description (optional)
+                            </Label>
+                            <Input
+                              id={`catalog-desc-${item.id}`}
+                              value={item.description ?? ""}
+                              placeholder="Short description..."
+                              disabled={isArchived}
+                              onChange={(e) =>
+                                setCatalogItems((prev) =>
+                                  prev.map((ci, i) =>
+                                    i === index
+                                      ? { ...ci, description: e.target.value }
+                                      : ci
+                                  )
+                                )
+                              }
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            disabled={isArchived}
+                            aria-label="Remove catalog item"
+                            onClick={() =>
+                              setCatalogItems((prev) =>
+                                prev.filter((_, i) => i !== index)
+                              )
+                            }
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
+                  <Input
+                    id={`reward-${program.id}`}
+                    {...register("rewardDescription", {
+                      required: "Reward description is required",
+                    })}
+                    placeholder="e.g., Redeem points for free items"
+                    disabled={isArchived}
+                  />
+                  {errors.rewardDescription && (
+                    <p className="text-xs text-destructive">
+                      {errors.rewardDescription.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ─── Section 3: Schedule ────────────────────────────── */}
+          <section id="schedule" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
+            <div>
+              <h3 className="text-sm font-semibold">Schedule</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Control when the program is active and accepting customers.</p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor={`duration-${program.id}`}>Duration</Label>
-              <select
-                id={`duration-${program.id}`}
-                {...register("validDuration")}
-                disabled={isArchived}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-                <option value="lifetime">Lifetime</option>
-                <option value="custom">Custom</option>
-              </select>
-            </div>
-            {validDuration === "custom" && (
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor={`custom-days-${program.id}`}>Custom Duration (Days)</Label>
+                <Label htmlFor={`status-${program.id}`}>Status</Label>
+                <select
+                  id={`status-${program.id}`}
+                  {...register("status")}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={isArchived}
+                >
+                  <option value="DRAFT">Draft</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="ARCHIVED">Archived</option>
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  Only active programs accept new {isStampCard ? "visits" : "customers"}.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor={`starts-${program.id}`}>Start Date</Label>
                 <Input
-                  id={`custom-days-${program.id}`}
-                  type="number"
-                  min={1}
-                  max={3650}
-                  {...register("customDurationDays", { valueAsNumber: true })}
+                  id={`starts-${program.id}`}
+                  type="date"
+                  {...register("startsAt")}
                   disabled={isArchived}
                 />
               </div>
-            )}
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor={`benefits-${program.id}`}>Benefits</Label>
-              <Textarea
-                id={`benefits-${program.id}`}
-                {...register("benefits", { required: "Benefits are required" })}
-                placeholder="List the perks members receive..."
-                rows={3}
-                disabled={isArchived}
-              />
-              {errors.benefits && (
-                <p className="text-xs text-destructive">{errors.benefits.message}</p>
-              )}
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
-              <Input
-                id={`reward-${program.id}`}
-                {...register("rewardDescription", {
-                  required: "Reward description is required",
-                })}
-                placeholder="e.g., VIP Member"
-                disabled={isArchived}
-              />
-            </div>
-          </>
-        )}
 
-        {/* Points-specific fields */}
-        {isPoints && (
-          <>
+              <div className="space-y-2">
+                <Label htmlFor={`ends-${program.id}`}>End Date (Optional)</Label>
+                <Input
+                  id={`ends-${program.id}`}
+                  type="date"
+                  {...register("endsAt")}
+                  disabled={isArchived}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty for an open-ended program.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* ─── Section 4: Terms & Conditions ──────────────────── */}
+          <section id="terms" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
+            <div>
+              <h3 className="text-sm font-semibold">Terms & Conditions</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Optional terms displayed on the wallet pass.</p>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor={`points-per-visit-${program.id}`}>Points Per Visit</Label>
-              <Input
-                id={`points-per-visit-${program.id}`}
-                type="number"
-                min={1}
-                max={100}
-                value={pointsPerVisit}
-                onChange={(e) => setPointsPerVisit(Number(e.target.value))}
+              <Textarea
+                id={`terms-${program.id}`}
+                {...register("termsAndConditions")}
+                placeholder="Optional terms shown on the wallet pass..."
+                rows={4}
                 disabled={isArchived}
               />
-              <p className="text-xs text-muted-foreground">
-                Points awarded to customers each time they visit (1–100).
-              </p>
+            </div>
+          </section>
+
+          {/* ─── Section 5: Prize Reveal (stamp card & coupon) ──── */}
+          {(isStampCard || isCoupon) && (
+            <section id="prize-reveal" className="scroll-mt-24 border-t border-border pt-6">
+              <PrizeRevealEditor
+                program={{
+                  id: program.id,
+                  name: program.name,
+                  programType: program.programType,
+                  config: program.config,
+                  rewardDescription: program.rewardDescription,
+                  status: program.status,
+                  restaurantId: restaurant.id,
+                }}
+              />
+            </section>
+          )}
+
+          {/* Visits Changed Warning (stamp only) */}
+          {isStampCard && showWarning && visitsChanged && (
+            <div className="rounded-lg border border-warning/50 bg-warning/5 p-4">
+              <div className="flex gap-3">
+                <AlertTriangle className="h-5 w-5 shrink-0 text-warning" />
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm font-medium">
+                      Changing visits required from {program.visitsRequired} to{" "}
+                      {visitsRequired}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      This will affect customers currently in a cycle. Choose how
+                      to handle existing progress:
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name={`progressOption-${program.id}`}
+                        checked={!resetProgress}
+                        onChange={() => setResetProgress(false)}
+                        className="accent-foreground"
+                      />
+                      <span className="text-sm">
+                        Keep existing progress -- customers retain their current
+                        visit count
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name={`progressOption-${program.id}`}
+                        checked={resetProgress}
+                        onChange={() => setResetProgress(true)}
+                        className="accent-foreground"
+                      />
+                      <span className="text-sm">
+                        Reset all progress -- all customers start fresh at 0 visits
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ─── Actions Row ────────────────────────────────────── */}
+          <div className="flex items-center justify-between border-t border-border pt-4">
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                asChild
+              >
+                <Link href={`/dashboard/programs/${program.id}/design`}>
+                  <Paintbrush className="h-3.5 w-3.5" />
+                  Card Design
+                </Link>
+              </Button>
             </div>
 
-            <div className="sm:col-span-2 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-sm font-medium">Reward Catalog</Label>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Items customers can redeem with their points (up to 20).
+            <div className="flex items-center gap-2">
+              {isDirty && (
+                <p className="text-xs text-warning font-medium">
+                  Unsaved changes
+                </p>
+              )}
+              {showWarning && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowWarning(false)}
+                >
+                  Cancel
+                </Button>
+              )}
+              <Button
+                type="submit"
+                disabled={isPending || isArchived || (!isDirty && !showWarning)}
+                size="sm"
+              >
+                {isPending
+                  ? "Saving..."
+                  : showWarning
+                    ? "Confirm & Save"
+                    : "Save changes"}
+              </Button>
+            </div>
+          </div>
+
+          {/* ─── Section 6: Danger Zone ─────────────────────────── */}
+          <section id="danger" className="scroll-mt-24 space-y-4 border-t border-destructive/30 pt-6">
+            <h3 className="text-sm font-semibold text-destructive">Danger Zone</h3>
+
+            {/* Activate (DRAFT only) */}
+            {isDraft && (
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">Activate program</p>
+                  <p className="text-xs text-muted-foreground">
+                    Make this program live so customers can start earning visits.
                   </p>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  disabled={isArchived || catalogItems.length >= 20}
-                  onClick={() =>
-                    setCatalogItems((prev) => [
-                      ...prev,
-                      {
-                        id: crypto.randomUUID(),
-                        name: "",
-                        description: "",
-                        pointsCost: 100,
-                      },
-                    ])
-                  }
+                  className="shrink-0 gap-1.5"
+                  onClick={handleActivate}
+                  disabled={isDangerPending}
                 >
-                  Add Item
+                  {isDangerPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Play className="h-3.5 w-3.5" />
+                  )}
+                  Activate
                 </Button>
               </div>
+            )}
 
-              {catalogItems.length === 0 && (
-                <p className="text-xs text-muted-foreground border border-dashed border-border rounded-md px-3 py-4 text-center">
-                  No catalog items yet. Add at least one reward for customers to redeem.
-                </p>
-              )}
-
-              <div className="space-y-2">
-                {catalogItems.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className="rounded-md border border-border p-3 space-y-2"
-                  >
-                    {/* Row 1: Name + Points Cost */}
-                    <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor={`catalog-name-${item.id}`}
-                          className="text-xs text-muted-foreground"
-                        >
-                          Reward Name
-                        </Label>
-                        <Input
-                          id={`catalog-name-${item.id}`}
-                          value={item.name}
-                          placeholder="e.g., Free Coffee"
-                          disabled={isArchived}
-                          onChange={(e) =>
-                            setCatalogItems((prev) =>
-                              prev.map((ci, i) =>
-                                i === index ? { ...ci, name: e.target.value } : ci
-                              )
-                            )
-                          }
-                        />
-                      </div>
-                      <div className="space-y-1 w-28 shrink-0">
-                        <Label
-                          htmlFor={`catalog-cost-${item.id}`}
-                          className="text-xs text-muted-foreground"
-                        >
-                          Points Cost
-                        </Label>
-                        <Input
-                          id={`catalog-cost-${item.id}`}
-                          type="number"
-                          min={1}
-                          max={100000}
-                          value={item.pointsCost}
-                          disabled={isArchived}
-                          onChange={(e) =>
-                            setCatalogItems((prev) =>
-                              prev.map((ci, i) =>
-                                i === index
-                                  ? { ...ci, pointsCost: Number(e.target.value) }
-                                  : ci
-                              )
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
-                    {/* Row 2: Description + Remove */}
-                    <div className="flex gap-2 items-end">
-                      <div className="space-y-1 flex-1">
-                        <Label
-                          htmlFor={`catalog-desc-${item.id}`}
-                          className="text-xs text-muted-foreground"
-                        >
-                          Description (optional)
-                        </Label>
-                        <Input
-                          id={`catalog-desc-${item.id}`}
-                          value={item.description ?? ""}
-                          placeholder="Short description..."
-                          disabled={isArchived}
-                          onChange={(e) =>
-                            setCatalogItems((prev) =>
-                              prev.map((ci, i) =>
-                                i === index
-                                  ? { ...ci, description: e.target.value }
-                                  : ci
-                              )
-                            )
-                          }
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        disabled={isArchived}
-                        aria-label="Remove catalog item"
-                        onClick={() =>
-                          setCatalogItems((prev) =>
-                            prev.filter((_, i) => i !== index)
-                          )
-                        }
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+            {/* Archive (ACTIVE only) */}
+            {program.status === "ACTIVE" && (
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">Archive program</p>
+                  <p className="text-xs text-muted-foreground">
+                    Active enrollments will be frozen and customers won&apos;t earn new visits.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 gap-1.5 text-warning hover:text-warning"
+                  onClick={() => setShowArchiveDialog(true)}
+                  disabled={isDangerPending}
+                >
+                  <Archive className="h-3.5 w-3.5" />
+                  Archive
+                </Button>
               </div>
-            </div>
+            )}
 
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
-              <Input
-                id={`reward-${program.id}`}
-                {...register("rewardDescription", {
-                  required: "Reward description is required",
-                })}
-                placeholder="e.g., Redeem points for free items"
-                disabled={isArchived}
-              />
-              {errors.rewardDescription && (
-                <p className="text-xs text-destructive">
-                  {errors.rewardDescription.message}
-                </p>
-              )}
-            </div>
-          </>
-        )}
+            {/* Reactivate (ARCHIVED only) */}
+            {isArchived && (
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">Reactivate program</p>
+                  <p className="text-xs text-muted-foreground">
+                    Set the program back to active and unfreeze all frozen enrollments.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 gap-1.5"
+                  onClick={() => setShowReactivateDialog(true)}
+                  disabled={isDangerPending}
+                >
+                  <ArchiveRestore className="h-3.5 w-3.5" />
+                  Reactivate
+                </Button>
+              </div>
+            )}
 
-        {/* Shared fields */}
-        <div className="space-y-2">
-          <Label htmlFor={`status-${program.id}`}>Status</Label>
-          <select
-            id={`status-${program.id}`}
-            {...register("status")}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isArchived}
-          >
-            <option value="DRAFT">Draft</option>
-            <option value="ACTIVE">Active</option>
-            <option value="ARCHIVED">Archived</option>
-          </select>
-          <p className="text-xs text-muted-foreground">
-            Only active programs accept new visits.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor={`starts-${program.id}`}>Start Date</Label>
-          <Input
-            id={`starts-${program.id}`}
-            type="date"
-            {...register("startsAt")}
-            disabled={isArchived}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor={`ends-${program.id}`}>End Date (Optional)</Label>
-          <Input
-            id={`ends-${program.id}`}
-            type="date"
-            {...register("endsAt")}
-            disabled={isArchived}
-          />
-          <p className="text-xs text-muted-foreground">
-            Leave empty for an open-ended program.
-          </p>
-        </div>
-      </div>
-
-      {/* Terms & Conditions */}
-      <div className="space-y-2">
-        <Label htmlFor={`terms-${program.id}`}>Terms & Conditions</Label>
-        <Textarea
-          id={`terms-${program.id}`}
-          {...register("termsAndConditions")}
-          placeholder="Optional terms shown on the wallet pass..."
-          rows={4}
-          disabled={isArchived}
-        />
-      </div>
-
-      {/* Visits Changed Warning (stamp only) */}
-      {isStampCard && showWarning && visitsChanged && (
-        <div className="rounded-lg border border-warning/50 bg-warning/5 p-4">
-          <div className="flex gap-3">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-warning" />
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm font-medium">
-                  Changing visits required from {program.visitsRequired} to{" "}
-                  {visitsRequired}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  This will affect customers currently in a cycle. Choose how
-                  to handle existing progress:
+            {/* Delete (all statuses) */}
+            <div className="flex items-center justify-between gap-4 border-t border-destructive/20 pt-4">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">Delete program</p>
+                <p className="text-xs text-muted-foreground">
+                  Permanently delete this program, including all enrollments, visits, and rewards. This cannot be undone.
                 </p>
               </div>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`progressOption-${program.id}`}
-                    checked={!resetProgress}
-                    onChange={() => setResetProgress(false)}
-                    className="accent-foreground"
-                  />
-                  <span className="text-sm">
-                    Keep existing progress -- customers retain their current
-                    visit count
-                  </span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`progressOption-${program.id}`}
-                    checked={resetProgress}
-                    onChange={() => setResetProgress(true)}
-                    className="accent-foreground"
-                  />
-                  <span className="text-sm">
-                    Reset all progress -- all customers start fresh at 0 visits
-                  </span>
-                </label>
-              </div>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="shrink-0 gap-1.5"
+                onClick={() => {
+                  setDeleteConfirmName("")
+                  setDeleteCounts(null)
+                  setShowDeleteDialog(true)
+                }}
+                disabled={isDangerPending}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Actions Row */}
-      <div className="flex items-center justify-between border-t border-border pt-4">
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            asChild
-          >
-            <Link href={`/dashboard/programs/${program.id}/design`}>
-              <Paintbrush className="h-3.5 w-3.5" />
-              Card Design
-            </Link>
-          </Button>
+          </section>
         </div>
 
-        <div className="flex items-center gap-2">
-          {isDirty && (
-            <p className="text-xs text-warning font-medium">
-              Unsaved changes
-            </p>
-          )}
-          {showWarning && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowWarning(false)}
-            >
-              Cancel
-            </Button>
-          )}
-          <Button
-            type="submit"
-            disabled={isPending || isArchived || (!isDirty && !showWarning)}
-            size="sm"
-          >
-            {isPending
-              ? "Saving..."
-              : showWarning
-                ? "Confirm & Save"
-                : "Save changes"}
-          </Button>
-        </div>
-      </div>
-
-      {/* ─── Danger Zone ─────────────────────────────────────── */}
-      <div className="rounded-lg border border-destructive/30 p-4 space-y-4 mt-2">
-        <h3 className="text-sm font-semibold text-destructive">Danger Zone</h3>
-
-        {/* Activate (DRAFT only) */}
-        {isDraft && (
-          <div className="flex items-center justify-between gap-4">
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">Activate program</p>
-              <p className="text-xs text-muted-foreground">
-                Make this program live so customers can start earning visits.
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="shrink-0 gap-1.5"
-              onClick={handleActivate}
-              disabled={isDangerPending}
-            >
-              {isDangerPending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Play className="h-3.5 w-3.5" />
-              )}
-              Activate
-            </Button>
+        {/* Right column — sticky section nav */}
+        <div className="hidden lg:block w-44 shrink-0">
+          <div className="sticky top-24">
+            <SectionNav sections={navSections} />
           </div>
-        )}
-
-        {/* Archive (ACTIVE only) */}
-        {program.status === "ACTIVE" && (
-          <div className="flex items-center justify-between gap-4">
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">Archive program</p>
-              <p className="text-xs text-muted-foreground">
-                Active enrollments will be frozen and customers won&apos;t earn new visits.
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="shrink-0 gap-1.5 text-warning hover:text-warning"
-              onClick={() => setShowArchiveDialog(true)}
-              disabled={isDangerPending}
-            >
-              <Archive className="h-3.5 w-3.5" />
-              Archive
-            </Button>
-          </div>
-        )}
-
-        {/* Reactivate (ARCHIVED only) */}
-        {isArchived && (
-          <div className="flex items-center justify-between gap-4">
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">Reactivate program</p>
-              <p className="text-xs text-muted-foreground">
-                Set the program back to active and unfreeze all frozen enrollments.
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="shrink-0 gap-1.5"
-              onClick={() => setShowReactivateDialog(true)}
-              disabled={isDangerPending}
-            >
-              <ArchiveRestore className="h-3.5 w-3.5" />
-              Reactivate
-            </Button>
-          </div>
-        )}
-
-        {/* Delete (all statuses) */}
-        <div className="flex items-center justify-between gap-4 border-t border-destructive/20 pt-4">
-          <div className="space-y-0.5">
-            <p className="text-sm font-medium">Delete program</p>
-            <p className="text-xs text-muted-foreground">
-              Permanently delete this program, including all enrollments, visits, and rewards. This cannot be undone.
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            className="shrink-0 gap-1.5"
-            onClick={() => {
-              setDeleteConfirmName("")
-              setDeleteCounts(null)
-              setShowDeleteDialog(true)
-            }}
-            disabled={isDangerPending}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            Delete
-          </Button>
         </div>
       </div>
 

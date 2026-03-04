@@ -96,6 +96,7 @@ export type PublicProgramInfo = {
   programType: string
   visitsRequired: number
   rewardDescription: string
+  config: unknown
   cardDesign: {
     cardType: string
     showStrip: boolean

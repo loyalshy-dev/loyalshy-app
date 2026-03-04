@@ -69,9 +69,6 @@ export function ProgramTabNav({
     { label: getRewardsTabLabel(programType), href: `${basePath}/rewards` },
     { label: "Card Design", href: `${basePath}/design`, ownerOnly: true },
     { label: "QR Code", href: `${basePath}/qr-code`, ownerOnly: true },
-    ...(programType === "STAMP_CARD" || programType === "COUPON"
-      ? [{ label: "Prize Reveal", href: `${basePath}/prize-reveal`, ownerOnly: true }]
-      : []),
     { label: "Settings", href: `${basePath}/settings`, ownerOnly: true },
   ]
 

@@ -73,6 +73,7 @@ type RewardTableProps = {
   order: "asc" | "desc"
   activeTab: string
   onRedeem: (reward: RewardRow) => void
+  basePath?: string
 }
 
 // ─── Mobile Card Component ──────────────────────────────────
@@ -207,6 +208,7 @@ export function RewardTable({
   order,
   activeTab,
   onRedeem,
+  basePath = "/dashboard/rewards",
 }: RewardTableProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -220,7 +222,7 @@ export function RewardTable({
         params.delete(key)
       }
     }
-    router.push(`/dashboard/rewards?${params.toString()}`)
+    router.push(`${basePath}?${params.toString()}`)
   }
 
   function toggleSort(field: string) {

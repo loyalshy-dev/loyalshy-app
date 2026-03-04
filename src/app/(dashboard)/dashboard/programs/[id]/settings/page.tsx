@@ -24,18 +24,16 @@ export default async function ProgramSettingsPage(props: {
   }
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
-      <ProgramEditor
-        program={program}
-        restaurant={{
-          id: restaurant.id,
-          name: restaurant.name,
-          slug: restaurant.slug,
-          logo: restaurant.logo,
-          brandColor: restaurant.brandColor,
-          secondaryColor: restaurant.secondaryColor,
-        }}
-      />
-    </div>
+    <ProgramEditor
+      program={program}
+      restaurant={{
+        id: restaurant.id,
+        name: restaurant.name,
+        slug: restaurant.slug,
+        logo: restaurant.logo,
+        brandColor: restaurant.brandColor,
+        secondaryColor: restaurant.secondaryColor,
+      }}
+    />
   )
 }

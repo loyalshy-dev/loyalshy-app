@@ -9,28 +9,28 @@ import {
 
 describe("PLANS", () => {
   it("defines all four plans", () => {
-    expect(Object.keys(PLANS)).toEqual(["STARTER", "PRO", "BUSINESS", "ENTERPRISE"])
+    expect(Object.keys(PLANS)).toEqual(["STARTER", "GROWTH", "SCALE", "ENTERPRISE"])
   })
 
   it("STARTER plan has correct limits", () => {
     expect(PLANS.STARTER.customerLimit).toBe(200)
     expect(PLANS.STARTER.staffLimit).toBe(2)
     expect(PLANS.STARTER.programLimit).toBe(1)
-    expect(PLANS.STARTER.price).toBe(15)
+    expect(PLANS.STARTER.price).toBe(19)
   })
 
-  it("PRO plan has correct limits", () => {
-    expect(PLANS.PRO.customerLimit).toBe(1_000)
-    expect(PLANS.PRO.staffLimit).toBe(5)
-    expect(PLANS.PRO.programLimit).toBe(3)
-    expect(PLANS.PRO.price).toBe(39)
+  it("GROWTH plan has correct limits", () => {
+    expect(PLANS.GROWTH.customerLimit).toBe(1_000)
+    expect(PLANS.GROWTH.staffLimit).toBe(5)
+    expect(PLANS.GROWTH.programLimit).toBe(3)
+    expect(PLANS.GROWTH.price).toBe(39)
   })
 
-  it("BUSINESS plan has unlimited customers", () => {
-    expect(PLANS.BUSINESS.customerLimit).toBe(Infinity)
-    expect(PLANS.BUSINESS.staffLimit).toBe(15)
-    expect(PLANS.BUSINESS.programLimit).toBe(10)
-    expect(PLANS.BUSINESS.price).toBe(79)
+  it("SCALE plan has unlimited customers", () => {
+    expect(PLANS.SCALE.customerLimit).toBe(Infinity)
+    expect(PLANS.SCALE.staffLimit).toBe(15)
+    expect(PLANS.SCALE.programLimit).toBe(10)
+    expect(PLANS.SCALE.price).toBe(79)
   })
 
   it("ENTERPRISE plan has unlimited everything", () => {
@@ -47,13 +47,13 @@ describe("getPlanLimits", () => {
     expect(limits).toEqual({ customerLimit: 200, staffLimit: 2, programLimit: 1 })
   })
 
-  it("returns correct limits for PRO plan", () => {
-    const limits = getPlanLimits("PRO")
+  it("returns correct limits for GROWTH plan", () => {
+    const limits = getPlanLimits("GROWTH")
     expect(limits).toEqual({ customerLimit: 1_000, staffLimit: 5, programLimit: 3 })
   })
 
-  it("returns correct limits for BUSINESS plan", () => {
-    const limits = getPlanLimits("BUSINESS")
+  it("returns correct limits for SCALE plan", () => {
+    const limits = getPlanLimits("SCALE")
     expect(limits).toEqual({ customerLimit: Infinity, staffLimit: 15, programLimit: 10 })
   })
 
@@ -64,35 +64,35 @@ describe("getPlanLimits", () => {
 })
 
 describe("isUpgrade", () => {
-  it("STARTER → PRO is an upgrade", () => {
-    expect(isUpgrade("STARTER", "PRO")).toBe(true)
+  it("STARTER → GROWTH is an upgrade", () => {
+    expect(isUpgrade("STARTER", "GROWTH")).toBe(true)
   })
 
-  it("STARTER → BUSINESS is an upgrade", () => {
-    expect(isUpgrade("STARTER", "BUSINESS")).toBe(true)
+  it("STARTER → SCALE is an upgrade", () => {
+    expect(isUpgrade("STARTER", "SCALE")).toBe(true)
   })
 
   it("STARTER → ENTERPRISE is an upgrade", () => {
     expect(isUpgrade("STARTER", "ENTERPRISE")).toBe(true)
   })
 
-  it("PRO → BUSINESS is an upgrade", () => {
-    expect(isUpgrade("PRO", "BUSINESS")).toBe(true)
+  it("GROWTH → SCALE is an upgrade", () => {
+    expect(isUpgrade("GROWTH", "SCALE")).toBe(true)
   })
 
-  it("BUSINESS → ENTERPRISE is an upgrade", () => {
-    expect(isUpgrade("BUSINESS", "ENTERPRISE")).toBe(true)
+  it("SCALE → ENTERPRISE is an upgrade", () => {
+    expect(isUpgrade("SCALE", "ENTERPRISE")).toBe(true)
   })
 
   it("same plan is NOT an upgrade", () => {
     expect(isUpgrade("STARTER", "STARTER")).toBe(false)
-    expect(isUpgrade("PRO", "PRO")).toBe(false)
+    expect(isUpgrade("GROWTH", "GROWTH")).toBe(false)
   })
 
   it("downgrade is NOT an upgrade", () => {
-    expect(isUpgrade("PRO", "STARTER")).toBe(false)
+    expect(isUpgrade("GROWTH", "STARTER")).toBe(false)
     expect(isUpgrade("ENTERPRISE", "STARTER")).toBe(false)
-    expect(isUpgrade("BUSINESS", "PRO")).toBe(false)
+    expect(isUpgrade("SCALE", "GROWTH")).toBe(false)
   })
 })
 
@@ -101,12 +101,24 @@ describe("getPlanForPriceLookupKey", () => {
     expect(getPlanForPriceLookupKey("starter_monthly")).toBe("STARTER")
   })
 
-  it("maps pro_monthly to PRO", () => {
-    expect(getPlanForPriceLookupKey("pro_monthly")).toBe("PRO")
+  it("maps starter_annual to STARTER", () => {
+    expect(getPlanForPriceLookupKey("starter_annual")).toBe("STARTER")
   })
 
-  it("maps business_monthly to BUSINESS", () => {
-    expect(getPlanForPriceLookupKey("business_monthly")).toBe("BUSINESS")
+  it("maps growth_monthly to GROWTH", () => {
+    expect(getPlanForPriceLookupKey("growth_monthly")).toBe("GROWTH")
+  })
+
+  it("maps growth_annual to GROWTH", () => {
+    expect(getPlanForPriceLookupKey("growth_annual")).toBe("GROWTH")
+  })
+
+  it("maps scale_monthly to SCALE", () => {
+    expect(getPlanForPriceLookupKey("scale_monthly")).toBe("SCALE")
+  })
+
+  it("maps scale_annual to SCALE", () => {
+    expect(getPlanForPriceLookupKey("scale_annual")).toBe("SCALE")
   })
 
   it("returns STARTER for unknown lookup keys", () => {

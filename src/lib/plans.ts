@@ -1,6 +1,6 @@
 // ─── Plan Definitions (shared between client and server) ──
 
-export type PlanId = "STARTER" | "PRO" | "BUSINESS" | "ENTERPRISE"
+export type PlanId = "STARTER" | "GROWTH" | "SCALE" | "ENTERPRISE"
 
 export type PlanDefinition = {
   id: PlanId
@@ -19,8 +19,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     id: "STARTER",
     name: "Starter",
     description: "For small restaurants getting started",
-    price: 15,
-    annualPrice: 12,
+    price: 19,
+    annualPrice: 15,
     customerLimit: 200,
     staffLimit: 2,
     programLimit: 1,
@@ -33,9 +33,9 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       "Dashboard analytics",
     ],
   },
-  PRO: {
-    id: "PRO",
-    name: "Pro",
+  GROWTH: {
+    id: "GROWTH",
+    name: "Growth",
     description: "For growing restaurants",
     price: 39,
     annualPrice: 31,
@@ -52,9 +52,9 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       "Email support",
     ],
   },
-  BUSINESS: {
-    id: "BUSINESS",
-    name: "Business",
+  SCALE: {
+    id: "SCALE",
+    name: "Scale",
     description: "For serious loyalty programs",
     price: 79,
     annualPrice: 63,
@@ -81,7 +81,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     staffLimit: Infinity,
     programLimit: Infinity,
     features: [
-      "Everything in Business",
+      "Everything in Scale",
       "Unlimited staff members",
       "Unlimited programs",
       "Dedicated support",
@@ -92,7 +92,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
 
 // ─── Plan Helpers ─────────────────────────────────────────
 
-const PLAN_ORDER: PlanId[] = ["STARTER", "PRO", "BUSINESS", "ENTERPRISE"]
+const PLAN_ORDER: PlanId[] = ["STARTER", "GROWTH", "SCALE", "ENTERPRISE"]
 
 export function isUpgrade(currentPlan: PlanId, newPlan: PlanId): boolean {
   return PLAN_ORDER.indexOf(newPlan) > PLAN_ORDER.indexOf(currentPlan)

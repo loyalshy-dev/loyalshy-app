@@ -1,7 +1,7 @@
 const planConfig: Record<string, { label: string; color: string }> = {
   STARTER: { label: "Starter", color: "bg-muted-foreground/60" },
-  PRO: { label: "Pro", color: "bg-blue-500" },
-  BUSINESS: { label: "Business", color: "bg-violet-500" },
+  GROWTH: { label: "Growth", color: "bg-blue-500" },
+  SCALE: { label: "Scale", color: "bg-violet-500" },
   ENTERPRISE: { label: "Enterprise", color: "bg-amber-500" },
 }
 
@@ -10,7 +10,7 @@ type PlanBreakdownProps = {
 }
 
 export function PlanBreakdown({ data }: PlanBreakdownProps) {
-  const allPlans = ["STARTER", "PRO", "BUSINESS", "ENTERPRISE"]
+  const allPlans = ["STARTER", "GROWTH", "SCALE", "ENTERPRISE"]
   const countMap = new Map(data.map((d) => [d.plan, d.count]))
   const total = data.reduce((sum, d) => sum + d.count, 0)
 

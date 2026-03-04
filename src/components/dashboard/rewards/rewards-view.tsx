@@ -134,6 +134,7 @@ export function RewardsView({
             dateFrom={dateFrom}
             dateTo={dateTo}
             totalResults={result.total}
+            basePath={basePath}
           />
 
           {/* Table */}
@@ -146,6 +147,7 @@ export function RewardsView({
             order={order}
             activeTab={tab}
             onRedeem={handleRedeem}
+            basePath={basePath}
           />
         </>
       )}

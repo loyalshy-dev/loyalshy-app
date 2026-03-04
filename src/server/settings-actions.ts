@@ -1568,6 +1568,13 @@ export async function updateLoyaltyProgram(input: z.infer<typeof updateLoyaltyPr
   const visitsChanged = currentProgram.visitsRequired !== parsed.visitsRequired
 
   await db.$transaction(async (tx) => {
+    // Merge new config with existing config to preserve keys like `minigame`
+    let mergedConfig: Record<string, unknown> | undefined
+    if (parsed.config) {
+      const existingConfig = (currentProgram.config && typeof currentProgram.config === "object" ? currentProgram.config : {}) as Record<string, unknown>
+      mergedConfig = { ...existingConfig, ...parsed.config }
+    }
+
     // Update loyalty program
     await tx.loyaltyProgram.update({
       where: { id: parsed.programId },
@@ -1580,7 +1587,7 @@ export async function updateLoyaltyProgram(input: z.infer<typeof updateLoyaltyPr
         status: parsed.status,
         startsAt: parsed.startsAt,
         endsAt: parsed.endsAt ?? null,
-        ...(parsed.config ? { config: JSON.parse(JSON.stringify(parsed.config)) } : {}),
+        ...(mergedConfig ? { config: JSON.parse(JSON.stringify(mergedConfig)) } : {}),
       },
     })
 
@@ -1635,9 +1642,17 @@ export async function updateMinigameConfig(input: z.infer<typeof updateMinigameC
     minigame: { enabled: parsed.enabled, gameType: parsed.gameType, ...(parsed.prizes?.length ? { prizes: parsed.prizes } : {}), ...(parsed.primaryColor ? { primaryColor: parsed.primaryColor } : {}), ...(parsed.accentColor ? { accentColor: parsed.accentColor } : {}) },
   }
 
+  // Auto-generate rewardDescription from prize names when prizes are configured
+  const prizeNames = parsed.enabled && parsed.prizes?.length
+    ? parsed.prizes.map((p) => p.name).join(", ")
+    : undefined
+
   await db.loyaltyProgram.update({
     where: { id: parsed.programId },
-    data: { config: JSON.parse(JSON.stringify(updatedConfig)) },
+    data: {
+      config: JSON.parse(JSON.stringify(updatedConfig)),
+      ...(prizeNames ? { rewardDescription: prizeNames } : {}),
+    },
   })
 
   revalidatePath(`/dashboard/programs/${parsed.programId}`)
