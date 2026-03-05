@@ -122,7 +122,7 @@ export function ProgramTabNav({
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-border overflow-x-auto">
+      <div className="flex gap-1 border-b border-border overflow-x-auto scrollbar-none">
         {visibleTabs.map((tab) => {
           const active = isActive(tab.href)
           return (

@@ -2,8 +2,11 @@
 
 import React from "react"
 import { usePathname } from "next/navigation"
-import { Menu, Plus, Search } from "lucide-react"
+import { Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import { ThemeToggle } from "@/components/theme-toggle"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,7 +17,6 @@ import {
 } from "@/components/ui/breadcrumb"
 
 type TopbarProps = {
-  onOpenMobileSidebar: () => void
   onOpenCommandPalette: () => void
   onOpenRegisterVisit: () => void
 }
@@ -33,7 +35,6 @@ const breadcrumbLabels: Record<string, string> = {
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export function Topbar({
-  onOpenMobileSidebar,
   onOpenCommandPalette,
   onOpenRegisterVisit,
 }: TopbarProps) {
@@ -42,17 +43,9 @@ export function Topbar({
 
   return (
     <header className="flex items-center justify-between gap-4 h-14 px-4 lg:px-6 border-b border-border bg-background/80 backdrop-blur-sm shrink-0">
-      <div className="flex items-center gap-3">
-        {/* Mobile menu trigger */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={onOpenMobileSidebar}
-          aria-label="Open menu"
-        >
-          <Menu className="size-5" />
-        </Button>
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-1 data-[orientation=vertical]:h-4" />
 
         {/* Breadcrumbs */}
         <Breadcrumb>
@@ -115,6 +108,9 @@ export function Topbar({
         >
           <Search className="size-4" />
         </Button>
+
+        {/* Theme toggle */}
+        <ThemeToggle />
 
         {/* Register Visit CTA */}
         <Button size="sm" className="gap-1.5" onClick={onOpenRegisterVisit}>

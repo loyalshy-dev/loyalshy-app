@@ -4,12 +4,11 @@ import { useState } from "react"
 import Link from "next/link"
 import { AlertTriangle, Clock, Lock, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { Sidebar } from "./sidebar"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { AppSidebar } from "./sidebar"
 import { Topbar } from "./topbar"
 import { CommandPalette } from "./command-palette"
 import { MobileNav } from "./mobile-nav"
-import { MobileSidebar } from "./mobile-sidebar"
 import { RegisterVisitDialog } from "./register-visit-dialog"
 
 type DashboardShellProps = {
@@ -34,7 +33,6 @@ export function DashboardShell({
   orgRole,
   children,
 }: DashboardShellProps) {
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [commandOpen, setCommandOpen] = useState(false)
   const [registerVisitOpen, setRegisterVisitOpen] = useState(false)
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(() => {
@@ -70,89 +68,75 @@ export function DashboardShell({
   const showSubscriptionGate = restaurant?.subscriptionStatus === "CANCELED"
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <div className="flex h-svh overflow-hidden bg-background">
-        {/* Desktop sidebar */}
-        <Sidebar user={user} restaurant={restaurant} orgRole={orgRole} />
+    <SidebarProvider>
+      <AppSidebar user={user} restaurant={restaurant} orgRole={orgRole} />
 
-        {/* Mobile sidebar sheet */}
-        <MobileSidebar
-          open={mobileSidebarOpen}
-          onOpenChange={setMobileSidebarOpen}
-          user={user}
-          restaurant={restaurant}
-          orgRole={orgRole}
+      <SidebarInset className="min-w-0">
+        <Topbar
+          onOpenCommandPalette={() => setCommandOpen(true)}
+          onOpenRegisterVisit={handleRegisterVisit}
         />
 
-        {/* Main content area */}
-        <div className="flex flex-1 flex-col min-w-0">
-          <Topbar
-            onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
-            onOpenCommandPalette={() => setCommandOpen(true)}
-            onOpenRegisterVisit={handleRegisterVisit}
-          />
+        {/* Subscription banners */}
+        {showTrialBanner && (
+          <div className="flex items-center justify-between gap-3 border-b border-amber-500/20 bg-amber-500/5 px-4 lg:px-6 py-2.5">
+            <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
+              <Clock className="h-3.5 w-3.5 shrink-0" />
+              <span>
+                <strong>{trialDaysRemaining} day{trialDaysRemaining !== 1 ? "s" : ""}</strong> left in your trial.{" "}
+                <Link href="/dashboard/settings?tab=billing" className="underline underline-offset-2 font-medium hover:text-amber-900 dark:hover:text-amber-300">
+                  Upgrade now
+                </Link>
+              </span>
+            </div>
+            <button onClick={dismissTrialBanner} className="text-amber-600/60 hover:text-amber-700 dark:text-amber-400/60 dark:hover:text-amber-300" aria-label="Dismiss trial banner">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
 
-          {/* Subscription banners */}
-          {showTrialBanner && (
-            <div className="flex items-center justify-between gap-3 border-b border-amber-500/20 bg-amber-500/5 px-4 lg:px-6 py-2.5">
-              <div className="flex items-center gap-2 text-sm text-amber-700">
-                <Clock className="h-3.5 w-3.5 shrink-0" />
-                <span>
-                  <strong>{trialDaysRemaining} day{trialDaysRemaining !== 1 ? "s" : ""}</strong> left in your trial.{" "}
-                  <Link href="/dashboard/settings?tab=billing" className="underline underline-offset-2 font-medium hover:text-amber-900">
-                    Upgrade now
-                  </Link>
-                </span>
+        {showPastDueBanner && (
+          <div className="flex items-center justify-between gap-3 border-b border-red-500/20 bg-red-500/5 px-4 lg:px-6 py-2.5">
+            <div className="flex items-center gap-2 text-sm text-red-700 dark:text-red-400">
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+              <span>
+                Payment failed.{" "}
+                <Link href="/dashboard/settings?tab=billing" className="underline underline-offset-2 font-medium hover:text-red-900 dark:hover:text-red-300">
+                  Update your payment method
+                </Link>
+              </span>
+            </div>
+            <button onClick={() => setPastDueBannerDismissed(true)} className="text-red-600/60 hover:text-red-700 dark:text-red-400/60 dark:hover:text-red-300" aria-label="Dismiss payment banner">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
+        <main className="flex-1 overflow-y-auto pb-[72px] md:pb-0">
+          {showSubscriptionGate ? (
+            <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted mb-4">
+                <Lock className="h-6 w-6 text-muted-foreground" />
               </div>
-              <button onClick={dismissTrialBanner} className="text-amber-600/60 hover:text-amber-700" aria-label="Dismiss trial banner">
-                <X className="h-3.5 w-3.5" />
-              </button>
+              <h2 className="text-lg font-semibold tracking-tight">
+                Your subscription has ended
+              </h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-md">
+                Your subscription was canceled. Upgrade to a plan to continue
+                using Loyalshy and access your dashboard.
+              </p>
+              <Button asChild className="mt-6">
+                <Link href="/dashboard/settings?tab=billing">
+                  Choose a plan
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="mx-auto w-full max-w-6xl px-4 lg:px-6 py-6">
+              {children}
             </div>
           )}
-
-          {showPastDueBanner && (
-            <div className="flex items-center justify-between gap-3 border-b border-red-500/20 bg-red-500/5 px-4 lg:px-6 py-2.5">
-              <div className="flex items-center gap-2 text-sm text-red-700">
-                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                <span>
-                  Payment failed.{" "}
-                  <Link href="/dashboard/settings?tab=billing" className="underline underline-offset-2 font-medium hover:text-red-900">
-                    Update your payment method
-                  </Link>
-                </span>
-              </div>
-              <button onClick={() => setPastDueBannerDismissed(true)} className="text-red-600/60 hover:text-red-700" aria-label="Dismiss payment banner">
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
-
-          <main className="flex-1 overflow-y-auto pb-[72px] md:pb-0">
-            {showSubscriptionGate ? (
-              <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted mb-4">
-                  <Lock className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Your subscription has ended
-                </h2>
-                <p className="text-sm text-muted-foreground mt-2 max-w-md">
-                  Your subscription was canceled. Upgrade to a plan to continue
-                  using Loyalshy and access your dashboard.
-                </p>
-                <Button asChild className="mt-6">
-                  <Link href="/dashboard/settings?tab=billing">
-                    Choose a plan
-                  </Link>
-                </Button>
-              </div>
-            ) : (
-              <div className="mx-auto w-full max-w-6xl px-4 lg:px-6 py-6">
-                {children}
-              </div>
-            )}
-          </main>
-        </div>
+        </main>
 
         {/* Mobile bottom nav */}
         <MobileNav onOpenRegisterVisit={handleRegisterVisit} />
@@ -169,7 +153,7 @@ export function DashboardShell({
           open={registerVisitOpen}
           onOpenChange={setRegisterVisitOpen}
         />
-      </div>
-    </TooltipProvider>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

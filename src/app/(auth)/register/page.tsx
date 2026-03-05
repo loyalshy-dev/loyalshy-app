@@ -1418,7 +1418,7 @@ function TrialSetupStep({
           )}
           {status === "done" && (
             <>
-              <div className="flex size-12 items-center justify-center rounded-full bg-green-100 text-green-600">
+              <div className="flex size-12 items-center justify-center rounded-full bg-success/10 text-success">
                 <Check className="size-6" />
               </div>
               <div>
@@ -1469,8 +1469,8 @@ function DoneStep({
     <Card>
       <CardContent className="py-8">
         <div className="flex flex-col items-center text-center space-y-6">
-          <div className="flex size-14 items-center justify-center rounded-full bg-green-100">
-            <PartyPopper className="size-7 text-green-600" />
+          <div className="flex size-14 items-center justify-center rounded-full bg-success/10">
+            <PartyPopper className="size-7 text-success" />
           </div>
 
           <div>
@@ -1562,10 +1562,10 @@ function getPasswordStrength(password: string): {
   if (/[0-9]/.test(password)) score++
   if (/[^a-zA-Z0-9]/.test(password)) score++
 
-  if (score <= 2) return { score, label: "Weak", color: "bg-red-500" }
-  if (score <= 3) return { score, label: "Fair", color: "bg-yellow-500" }
-  if (score <= 4) return { score, label: "Good", color: "bg-blue-500" }
-  return { score, label: "Strong", color: "bg-green-500" }
+  if (score <= 2) return { score, label: "Weak", color: "bg-destructive" }
+  if (score <= 3) return { score, label: "Fair", color: "bg-warning" }
+  if (score <= 4) return { score, label: "Good", color: "bg-brand" }
+  return { score, label: "Strong", color: "bg-success" }
 }
 
 function PasswordStrength({ password }: { password: string }) {

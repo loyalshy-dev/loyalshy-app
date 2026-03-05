@@ -344,7 +344,7 @@ export function QrCodeDisplay({
           <div className="flex flex-col items-center space-y-6">
             {/* Poster mockup: accent bar + QR code + info */}
             <div
-              className="w-full max-w-xs rounded-2xl overflow-hidden shadow-md border border-border bg-white"
+              className="w-full max-w-xs rounded-2xl overflow-hidden shadow-md border border-border bg-card"
               style={{ borderTopColor: accentColor, borderTopWidth: 4 }}
             >
               {/* Colored accent strip */}
@@ -357,13 +357,13 @@ export function QrCodeDisplay({
                 {/* QR code */}
                 <div className="relative">
                   <div
-                    className="w-44 h-44 rounded-xl bg-white p-3 shadow-sm border border-border"
+                    className="w-44 h-44 rounded-xl bg-background p-3 shadow-sm border border-border"
                     dangerouslySetInnerHTML={{ __html: qrSvg }}
                   />
                   {/* Restaurant logo overlay in center */}
                   {restaurant.logo && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-white border-2 border-white shadow-sm">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-background border-2 border-background shadow-sm">
                         <Image
                           src={restaurant.logo}
                           alt=""
@@ -378,11 +378,11 @@ export function QrCodeDisplay({
 
                 {/* Restaurant / program info */}
                 <div className="text-center space-y-0.5">
-                  <h3 className="font-semibold text-[14px] text-gray-900">{restaurant.name}</h3>
+                  <h3 className="font-semibold text-[14px] text-foreground">{restaurant.name}</h3>
                   {activeProgram ? (
                     <>
-                      <p className="text-[12px] font-medium text-gray-700">{activeProgram.name}</p>
-                      <p className="text-[11px] text-gray-400">
+                      <p className="text-[12px] font-medium text-muted-foreground">{activeProgram.name}</p>
+                      <p className="text-[11px] text-muted-foreground/60">
                         {activeProgram.programType === "COUPON" && couponConfig
                           ? formatCouponValue(couponConfig)
                           : activeProgram.programType === "MEMBERSHIP" && membershipConfig
@@ -391,7 +391,7 @@ export function QrCodeDisplay({
                       </p>
                     </>
                   ) : (
-                    <p className="text-[11px] text-gray-400">
+                    <p className="text-[11px] text-muted-foreground/60">
                       Choose from {programs.length} programs
                     </p>
                   )}

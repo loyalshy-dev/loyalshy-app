@@ -93,15 +93,15 @@
   --chart-4: oklch(0.7 0.14 75);
   --chart-5: oklch(0.6 0.18 330);
 
-  /* — Dark sidebar: Linear/Vercel-style — */
-  --sidebar: oklch(0.16 0.005 285);
-  --sidebar-foreground: oklch(0.75 0.01 285);
-  --sidebar-primary: oklch(0.97 0 0);
-  --sidebar-primary-foreground: oklch(0.16 0.005 285);
-  --sidebar-accent: oklch(0.22 0.008 285);
-  --sidebar-accent-foreground: oklch(0.92 0 0);
-  --sidebar-border: oklch(0.25 0.008 285);
-  --sidebar-ring: oklch(0.4 0.01 285);
+  /* — Sidebar: light in light mode, dark in dark mode — */
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.45 0.01 285);
+  --sidebar-primary: oklch(0.13 0.005 285);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.945 0.004 285);
+  --sidebar-accent-foreground: oklch(0.13 0.005 285);
+  --sidebar-border: oklch(0.915 0.005 285);
+  --sidebar-ring: oklch(0.21 0.006 285);
 }
 
 .dark {
@@ -149,8 +149,18 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden;
   }
+}
+
+/* ─── Scrollbar Utilities ────────────────────────────────── */
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 /* ─── Safe Area Utilities ─────────────────────────────────── */

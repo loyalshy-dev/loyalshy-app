@@ -43,24 +43,24 @@ export default function GlobalError({
             <h1 className="text-xl font-semibold tracking-tight">
               Something went wrong
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               An unexpected error occurred. Our team has been notified.
             </p>
             {error.digest && (
-              <p className="text-xs text-gray-400 font-mono">
+              <p className="text-xs text-muted-foreground/60 font-mono">
                 Error ID: {error.digest}
               </p>
             )}
             <div className="flex justify-center gap-3 pt-2">
               <button
                 onClick={reset}
-                className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 Try again
               </button>
               <a
                 href="/"
-                className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
               >
                 Go home
               </a>
