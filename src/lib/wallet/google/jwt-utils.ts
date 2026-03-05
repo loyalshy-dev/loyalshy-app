@@ -24,9 +24,14 @@ export function signJwt(payload: Record<string, unknown>): string {
   }
 
   const now = Math.floor(Date.now() / 1000)
+  const origins = process.env.BETTER_AUTH_URL
+    ? [process.env.BETTER_AUTH_URL]
+    : ["https://localhost:3000"]
+
   const fullPayload = {
     iss: key.client_email,
     aud: "google",
+    origins,
     typ: "savetowallet",
     iat: now,
     ...payload,

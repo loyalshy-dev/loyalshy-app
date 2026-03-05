@@ -13,7 +13,7 @@ import {
   LayoutGrid,
 } from "lucide-react"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
-import { parseStripFilters } from "@/lib/wallet/card-design"
+import { parseStripFilters, parseStampGridConfig } from "@/lib/wallet/card-design"
 import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/program-config"
 
 type SizePreset = {
@@ -125,6 +125,8 @@ export function QrCodeDisplay({
         patternStyle: (activeProgramDesign.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
         stripImagePosition: qrSf?.stripImagePosition,
         stripImageZoom: qrSf?.stripImageZoom,
+        useStampGrid: qrSf?.useStampGrid,
+        stampGridConfig: activeProgramDesign.editorConfig ? parseStampGridConfig(activeProgramDesign.editorConfig) : undefined,
       }
     : null
 
@@ -168,7 +170,19 @@ export function QrCodeDisplay({
   }, [generateQrSvg])
 
   async function copyUrl() {
-    await navigator.clipboard.writeText(joinUrl)
+    try {
+      await navigator.clipboard.writeText(joinUrl)
+    } catch {
+      // Fallback for insecure contexts (HTTP)
+      const textarea = document.createElement("textarea")
+      textarea.value = joinUrl
+      textarea.style.position = "fixed"
+      textarea.style.opacity = "0"
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand("copy")
+      document.body.removeChild(textarea)
+    }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

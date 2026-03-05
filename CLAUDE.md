@@ -102,6 +102,7 @@ Multi-tenant SaaS for restaurants to create digital loyalty cards with Apple/Goo
   /components       → Reusable UI components
     /ui             → Shadcn components
     /card-renderer  → Shared CardRenderer used across all surfaces
+    /minigames      → Prize reveal minigames (scratch card, slots, wheel) — shared by dashboard + public card page
     /studio         → Studio editor components (layout, toolbar, canvas, panels)
     /dashboard      → Dashboard-specific components
       /programs     → Program list view, tab nav, editor, create form
@@ -166,7 +167,7 @@ The full plan is in `loyalty-card-plan-v4.md`. Phases:
 - [x] Phase 10A — Program Types Foundation (ProgramType enum on LoyaltyProgram, config JSON column, 2-step create form, type-aware list/detail/settings/tabs, stamp-only visit guard, 131 tests passing)
 - [x] Phase 10B — Coupon Redemption Flow (redeemCoupon server action, auto-create Reward on coupon enrollment, coupon redemption in register-visit dialog, single/unlimited coupon support, 137 tests passing)
 - [x] Phase 10C — Membership Check-in Flow (checkInMember server action, CHECK_IN wallet pass update, register-visit dialog includes MEMBERSHIP, Crown icon, 144 tests passing)
-- [x] Phase 10D — Type-specific Wallet Passes (Apple/Google pass generators type-aware via cardType→getFieldLayout, COUPON fields: discount/validUntil/couponCode, MEMBERSHIP fields: tier/benefits/memberSince, stamp grid guarded to STAMP/POINTS only, programType+config wired through all callers, Google PATCH type-dispatch)
+- [x] Phase 10D — Type-specific Wallet Passes (Apple/Google pass generators type-aware via cardType→getFieldLayout, COUPON fields: discount/validUntil/couponCode, MEMBERSHIP fields: tier/benefits/memberSince, stamp grid guarded to STAMP/POINTS only, programType+config wired through all callers, Google PATCH type-dispatch for all 4 types, coupon prize assigned at enrollment for immediate minigame play, reveal link in initial JWT + PATCH, redeemed state on coupon pass, endsAt/status validation on all actions)
 - [x] Phase 10E — POINTS Program Type (ProgramType.POINTS, pointsBalance on Enrollment, description+pointsCost on Reward, PointsConfig/catalog, earnPoints+redeemPoints actions, wallet pass POINTS dispatch, create form+editor+register-visit dialog+programs list, 177 tests passing)
 - [x] Phase 11 — Admin Showcase Cards (ShowcaseCard model, admin CRUD at /admin/showcase, full-page studio editor reusing existing panels, marketing landing page fetches from DB with hardcoded fallback, max 5 cards, 144 tests passing)
 - [ ] Phase 6.1 — Production deployment
@@ -206,7 +207,7 @@ Update the "Current Progress" section above to track what's done.
 10. Enrollment (pivot: Customer × LoyaltyProgram — cycle visits, wallet pass, status)
 11. Customer (end user — identity + denormalized totalVisits)
 12. Visit (stamp/check-in, linked to Enrollment)
-13. Reward (linked to Enrollment)
+13. Reward (linked to Enrollment; `revealedAt` nullable — null means prize minigame not yet played by customer)
 14. CardDesign (per LoyaltyProgram; typed columns for wallet passes + `editorConfig` JSON for rich studio editor; `cardType`: STAMP/POINTS/TIER/COUPON)
 15. WalletPassLog (linked to Enrollment)
 16. StaffInvitation (custom invite flow with tokens — NOT Better Auth's Invitation)
