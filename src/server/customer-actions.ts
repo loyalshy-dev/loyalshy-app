@@ -302,6 +302,7 @@ export async function getCustomerDetail(
         select: {
           id: true,
           status: true,
+          description: true,
           earnedAt: true,
           redeemedAt: true,
           expiresAt: true,
@@ -370,7 +371,7 @@ export async function getCustomerDetail(
       earnedAt: r.earnedAt,
       redeemedAt: r.redeemedAt,
       expiresAt: r.expiresAt,
-      description: r.loyaltyProgram.rewardDescription,
+      description: r.description ?? r.loyaltyProgram.rewardDescription,
       programName: r.loyaltyProgram.name,
     })),
   }

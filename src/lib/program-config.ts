@@ -75,6 +75,27 @@ export function parseMinigameConfig(config: unknown): MinigameConfig | null {
   return result.success ? result.data : null
 }
 
+/** Returns prize names from minigame config, or falls back to rewardDescription */
+export function getWalletRewardText(config: unknown, rewardDescription: string): string {
+  const minigame = parseMinigameConfig(config)
+  if (minigame?.enabled && minigame.prizes?.length) {
+    return minigame.prizes.map((p) => p.name).join(", ")
+  }
+  return rewardDescription
+}
+
+// ─── Weighted Random Prize Selection ─────────────────────────
+
+export function weightedRandomPrize(prizes: { name: string; weight: number }[]): string {
+  const totalWeight = prizes.reduce((sum, p) => sum + p.weight, 0)
+  let rand = Math.random() * totalWeight
+  for (const prize of prizes) {
+    rand -= prize.weight
+    if (rand <= 0) return prize.name
+  }
+  return prizes[prizes.length - 1].name
+}
+
 // ─── Formatters ─────────────────────────────────────────────
 
 export function formatCouponValue(config: CouponConfig): string {

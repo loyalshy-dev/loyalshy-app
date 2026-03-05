@@ -73,8 +73,8 @@ export const updateWalletPassTask = task({
             },
           },
           rewards: {
-            where: { status: "AVAILABLE" },
-            select: { id: true, revealedAt: true, description: true },
+            where: { status: { in: ["AVAILABLE", "REDEEMED"] } },
+            select: { id: true, status: true, revealedAt: true, description: true },
           },
           deviceRegistrations: {
             select: { pushToken: true },
@@ -92,9 +92,14 @@ export const updateWalletPassTask = task({
 
       const program = enrollment.loyaltyProgram
       const cardDesign = program.cardDesign
-      const hasAvailableReward = enrollment.rewards.length > 0
+      const hasAvailableReward = enrollment.rewards.some(
+        (r: { status: string }) => r.status === "AVAILABLE"
+      )
       const unrevealedReward = enrollment.rewards.find(
         (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt === null && r.description != null
+      )
+      const revealedReward = enrollment.rewards.find(
+        (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt !== null && r.description != null
       )
 
       if (enrollment.walletPassType === "APPLE" && enrollment.walletPassSerialNumber) {
@@ -143,7 +148,8 @@ export const updateWalletPassTask = task({
           hasAvailableReward,
           payload.updateType,
           cardDesign,
-          !!unrevealedReward
+          !!unrevealedReward,
+          revealedReward?.description ?? null
         )
 
         // Log the update
@@ -173,6 +179,7 @@ export const updateWalletPassTask = task({
 
 type EnrollmentForGoogle = {
   id: string
+  status: string
   currentCycleVisits: number
   totalVisits: number
   pointsBalance: number
@@ -216,7 +223,8 @@ async function patchGooglePass(
   hasAvailableReward: boolean,
   updateType: string,
   cardDesign?: CardDesignRow,
-  hasUnrevealedPrize?: boolean
+  hasUnrevealedPrize?: boolean,
+  revealedPrize?: string | null
 ): Promise<{ status: number }> {
   const { getAccessToken } = await import("@/lib/wallet/google/credentials")
   const {
@@ -234,7 +242,7 @@ async function patchGooglePass(
   const token = await getAccessToken()
 
   const { formatProgressValue, formatLabel } = await import("@/lib/wallet/card-design")
-  const { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem } = await import("@/lib/program-config")
+  const { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem, getWalletRewardText } = await import("@/lib/program-config")
   type ProgressStyle = import("@/lib/wallet/card-design").ProgressStyle
   type LabelFormat = import("@/lib/wallet/card-design").LabelFormat
 
@@ -256,15 +264,26 @@ async function patchGooglePass(
   const pointsConfig = program.programType === "POINTS" ? parsePointsConfig(program.config) : null
 
   if (program.programType === "COUPON" && couponConfig) {
+    // Show revealed prize, prize names (if minigame), or generic discount
+    const isRedeemed = enrollment.status === "COMPLETED"
+    const prizeText = getWalletRewardText(program.config, formatCouponValue(couponConfig))
+    const hasPrizes = prizeText !== formatCouponValue(couponConfig)
+    const discountLabel = isRedeemed ? "REDEEMED" : (revealedPrize ? "YOUR PRIZE" : (hasPrizes ? "PRIZES" : "DISCOUNT"))
+    const discountValue = isRedeemed
+      ? `${revealedPrize ?? prizeText} (Used)`
+      : (revealedPrize ?? prizeText)
     loyaltyPoints = {
-      label: formatLabel("DISCOUNT", labelFmt),
-      balance: { string: formatCouponValue(couponConfig) },
+      label: formatLabel(discountLabel, labelFmt),
+      balance: { string: discountValue },
     }
+    const validUntilText = couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"
     secondaryLoyaltyPoints = {
-      label: formatLabel("VALID UNTIL", labelFmt),
-      balance: { string: couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+      label: formatLabel(isRedeemed ? "STATUS" : "VALID UNTIL", labelFmt),
+      balance: { string: isRedeemed ? "Redeemed" : validUntilText },
     }
     textModulesData = [
+      { id: "discount", header: formatLabel(discountLabel, labelFmt), body: discountValue },
+      { id: "validUntil", header: formatLabel(isRedeemed ? "STATUS" : "VALID UNTIL", labelFmt), body: isRedeemed ? "Redeemed" : validUntilText },
       ...(couponConfig.couponCode ? [{ id: "couponCode", header: formatLabel("CODE", labelFmt), body: couponConfig.couponCode }] : []),
       { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
     ]
@@ -315,7 +334,11 @@ async function patchGooglePass(
       balance: { int: enrollment.totalVisits },
     }
     textModulesData = [
-      { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: program.rewardDescription },
+      {
+        id: "nextReward",
+        header: formatLabel(revealedPrize ? "YOUR PRIZE" : "NEXT REWARD", labelFmt),
+        body: revealedPrize ?? getWalletRewardText(program.config, program.rewardDescription),
+      },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
   }
@@ -328,7 +351,7 @@ async function patchGooglePass(
     textModulesData,
   }
 
-  // Add reveal link if there's an unrevealed prize
+  // Add reveal link if there's an unrevealed prize, clear it otherwise
   if (hasUnrevealedPrize && enrollment.loyaltyProgram.restaurant.slug) {
     const { signCardAccess } = await import("@/lib/card-access")
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
@@ -342,32 +365,38 @@ async function patchGooglePass(
         id: "revealLink",
       }],
     }
+  } else {
+    patchBody.linksModuleData = { uris: [] }
   }
 
   // Stamp grid hero image: only for STAMP_CARD programs
   const isStampCard = !program.programType || program.programType === "STAMP_CARD"
-  const { parseStripFilters } = await import("@/lib/wallet/card-design")
+  const { parseStripFilters, parseStampGridConfig } = await import("@/lib/wallet/card-design")
   const triggerStripFilters = parseStripFilters(cardDesign?.editorConfig)
   const isTriggerStampGrid = triggerStripFilters.useStampGrid || cardDesign?.patternStyle === "stamp_grid" || cardDesign?.patternStyle === "STAMP_GRID"
   if (isStampCard && isTriggerStampGrid && cardDesign?.showStrip !== false) {
-    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
-    patchBody.heroImage = {
-      sourceUri: { uri: `${baseUrl}/api/wallet/strip/${enrollment.id}?v=${Date.now()}` },
-      contentDescription: {
-        defaultValue: { language: "en", value: "Stamp progress" },
-      },
+    const stampGridUrl = await generateStampGridToR2(enrollment, program, cardDesign ?? null, triggerStripFilters, hasAvailableReward)
+    if (stampGridUrl) {
+      patchBody.heroImage = {
+        sourceUri: { uri: stampGridUrl },
+        contentDescription: {
+          defaultValue: { language: "en", value: "Stamp progress" },
+        },
+      }
     }
   }
 
   // For design changes, also update hero image (stamp card only for stamp grid)
   if (updateType === "DESIGN_CHANGE" || updateType === "PROGRAM_CHANGE") {
     if (isStampCard && isTriggerStampGrid && cardDesign?.showStrip !== false) {
-      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
-      patchBody.heroImage = {
-        sourceUri: { uri: `${baseUrl}/api/wallet/strip/${enrollment.id}?v=${Date.now()}` },
-        contentDescription: {
-          defaultValue: { language: "en", value: "Stamp progress" },
-        },
+      const stampGridUrl = await generateStampGridToR2(enrollment, program, cardDesign ?? null, triggerStripFilters, hasAvailableReward)
+      if (stampGridUrl) {
+        patchBody.heroImage = {
+          sourceUri: { uri: stampGridUrl },
+          contentDescription: {
+            defaultValue: { language: "en", value: "Stamp progress" },
+          },
+        }
       }
     } else {
       const heroUrl = cardDesign?.stripImageGoogle ?? cardDesign?.generatedStripGoogle
@@ -400,6 +429,47 @@ async function patchGooglePass(
   }
 
   return { status: response.status }
+}
+
+// ─── Stamp Grid → R2 Upload (for Google Wallet PATCH) ──────
+
+async function generateStampGridToR2(
+  enrollment: { id: string; currentCycleVisits: number },
+  program: { id: string; visitsRequired: number },
+  cardDesign: CardDesignRow,
+  stripFilters: Awaited<ReturnType<typeof import("@/lib/wallet/card-design").parseStripFilters>>,
+  hasAvailableReward: boolean,
+): Promise<string | null> {
+  try {
+    const { parseStampGridConfig } = await import("@/lib/wallet/card-design")
+    const { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } = await import("@/lib/wallet/strip-image")
+    const { uploadFile } = await import("@/lib/storage")
+
+    const config = parseStampGridConfig(cardDesign?.editorConfig)
+    const stripPrimary = stripFilters.stripColor1 ?? cardDesign?.primaryColor ?? "#1a1a2e"
+    const stripSecondary = stripFilters.stripColor2 ?? (cardDesign as Record<string, unknown>)?.secondaryColor as string ?? "#ffffff"
+
+    const buffer = await generateStampGridImage({
+      currentVisits: enrollment.currentCycleVisits,
+      totalVisits: program.visitsRequired,
+      hasReward: hasAvailableReward,
+      config,
+      primaryColor: stripPrimary,
+      secondaryColor: stripSecondary,
+      textColor: (cardDesign as Record<string, unknown>)?.textColor as string ?? "#ffffff",
+      width: GOOGLE_HERO_WIDTH,
+      height: GOOGLE_HERO_HEIGHT,
+      stripImageUrl: cardDesign?.stripImageGoogle,
+      stripOpacity: stripFilters.stripOpacity,
+      stripGrayscale: stripFilters.stripGrayscale,
+    })
+
+    const key = `strip-images/${program.id}/google-stamp-grid-${enrollment.id}.png`
+    return await uploadFile(buffer, key, "image/png")
+  } catch (err) {
+    console.error("Failed to generate stamp grid for R2:", err instanceof Error ? err.message : err)
+    return null
+  }
 }
 
 // ─── APNs Push ──────────────────────────────────────────────

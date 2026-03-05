@@ -52,7 +52,7 @@ import { redeemReward } from "@/server/reward-actions"
 import type { EnrollmentDetail } from "@/types/enrollment"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
-import { parsePointsConfig, getCheapestCatalogItem } from "@/lib/program-config"
+import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText } from "@/lib/program-config"
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -177,7 +177,7 @@ function getProgressText(enrollment: EnrollmentDetail): string {
     }
     default: {
       const remaining = enrollment.visitsRequired - enrollment.currentCycleVisits
-      return `${remaining} visit${remaining !== 1 ? "s" : ""} until ${enrollment.rewardDescription}`
+      return `${remaining} visit${remaining !== 1 ? "s" : ""} until ${getWalletRewardText(enrollment.programConfig, enrollment.rewardDescription)}`
     }
   }
 }
@@ -625,7 +625,7 @@ function EnrollmentProgressSection({
                 : {
                     currentVisits: enrollment.currentCycleVisits,
                     totalVisits: enrollment.visitsRequired,
-                    rewardDescription: enrollment.rewardDescription,
+                    rewardDescription: getWalletRewardText(enrollment.programConfig, enrollment.rewardDescription),
                   })}
               compact
               width={220}
@@ -685,7 +685,7 @@ function EnrollmentProgressSection({
                     : {
                         currentVisits: enrollment.currentCycleVisits,
                         totalVisits: enrollment.visitsRequired,
-                        rewardDescription: enrollment.rewardDescription,
+                        rewardDescription: getWalletRewardText(enrollment.programConfig, enrollment.rewardDescription),
                       })}
                   compact
                   width={120}

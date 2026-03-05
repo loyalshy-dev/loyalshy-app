@@ -54,6 +54,7 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
     formState: { isDirty },
     watch,
     setValue,
+    reset,
   } = useForm<PrizeRevealForm>({
     defaultValues: {
       minigameEnabled: minigameConfig?.enabled ?? false,
@@ -88,6 +89,7 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
         if ("error" in result) {
           toast.error(String(result.error))
         } else {
+          reset(data)
           setPrizesChanged(false)
           setColorsChanged(false)
           toast.success("Prize reveal settings saved")
@@ -376,17 +378,21 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
       )}
 
       {/* Save button */}
-      <div className="flex justify-end pt-2">
-        <Button
-          type="button"
-          onClick={handleSave}
-          disabled={(!isDirty && !prizesChanged && !colorsChanged) || isArchived || isPending}
-          className="gap-1.5"
-        >
-          {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          Save Changes
-        </Button>
-      </div>
+      {(isDirty || prizesChanged || colorsChanged) && (
+        <div className="flex items-center justify-end gap-3 rounded-lg border border-border bg-muted/50 px-4 py-3">
+          <p className="text-xs text-muted-foreground">Unsaved prize reveal changes</p>
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={isArchived || isPending}
+            size="sm"
+            className="gap-1.5"
+          >
+            {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            Save Prize Settings
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

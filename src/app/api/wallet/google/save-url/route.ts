@@ -59,6 +59,7 @@ export async function POST(request: Request) {
         id: true,
         currentCycleVisits: true,
         totalVisits: true,
+        pointsBalance: true,
         walletPassId: true,
         enrolledAt: true,
         customer: {
@@ -72,6 +73,8 @@ export async function POST(request: Request) {
           select: {
             id: true,
             name: true,
+            programType: true,
+            config: true,
             visitsRequired: true,
             rewardDescription: true,
             rewardExpiryDays: true,
@@ -81,6 +84,7 @@ export async function POST(request: Request) {
               select: {
                 id: true,
                 name: true,
+                slug: true,
                 logo: true,
                 logoGoogle: true,
                 brandColor: true,
@@ -93,9 +97,9 @@ export async function POST(request: Request) {
           },
         },
         rewards: {
-          where: { status: "AVAILABLE" },
-          select: { id: true },
-          take: 1,
+          where: { status: { in: ["AVAILABLE", "REDEEMED"] } },
+          select: { id: true, revealedAt: true, description: true },
+          take: 5,
         },
       },
     })
@@ -123,7 +127,11 @@ export async function POST(request: Request) {
       restaurant
     )
 
-    const saveUrl = generateGoogleWalletSaveUrl({
+    const hasUnrevealedPrize = enrollment.rewards.some(
+      (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt === null && r.description != null
+    )
+
+    const saveUrl = await generateGoogleWalletSaveUrl({
       customerId: enrollment.customer.id,
       restaurantId: restaurant.id,
       walletPassId,
@@ -148,6 +156,11 @@ export async function POST(request: Request) {
       enrollmentId: enrollment.id,
       cardDesign,
       programEndsAt: program.endsAt,
+      programType: program.programType,
+      programConfig: program.config,
+      pointsBalance: enrollment.pointsBalance ?? 0,
+      hasUnrevealedPrize,
+      restaurantSlug: restaurant.slug,
     })
 
     return NextResponse.json({ saveUrl })

@@ -3,8 +3,10 @@ import "server-only"
 import { buildClassId, buildObjectId, buildProgramClassId, buildEnrollmentObjectId } from "./constants"
 import { buildSaveUrl } from "./jwt-utils"
 import type { CardDesignData, CardType } from "../card-design"
-import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters } from "../card-design"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem } from "../../program-config"
+import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig } from "../card-design"
+import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
+import { uploadFile } from "../../storage"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem, getWalletRewardText } from "../../program-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -40,6 +42,9 @@ export type GooglePassGenerationInput = {
   programType?: string
   programConfig?: unknown
   pointsBalance?: number
+  // Prize reveal
+  hasUnrevealedPrize?: boolean
+  restaurantSlug?: string
 }
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -80,52 +85,46 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   const isMembership = input.programType === "MEMBERSHIP"
   const isPoints = input.programType === "POINTS"
 
-  // Determine which text module fields to reference in rows
-  const row1Start = isCoupon ? "couponCode" : isMembership ? "benefits" : isPoints ? "earnRate" : "nextReward"
-  const row1End = "memberSince"
-  const row2Field = isCoupon ? "couponCode" : isMembership ? "benefits" : "nextReward"
-  const row3Field = "memberSince"
-
-  // Build card row template
+  // Build card row template — all types use textModulesData references
   const cardRowTemplateInfos: Record<string, unknown>[] = []
 
-  if (layout.google.rows >= 1) {
+  if (isCoupon) {
+    // Row 1: Discount + Valid Until
     cardRowTemplateInfos.push({
       twoItems: {
-        startItem: {
-          firstValue: {
-            fields: [{ fieldPath: `object.textModulesData['${row1Start}']` }],
-          },
-        },
-        endItem: {
-          firstValue: {
-            fields: [{ fieldPath: `object.textModulesData['${row1End}']` }],
-          },
-        },
+        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['discount']" }] } },
+        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['validUntil']" }] } },
       },
     })
-  }
-
-  if (layout.google.rows >= 2) {
+    // Row 2: Coupon code (if any) + Added date
     cardRowTemplateInfos.push({
-      oneItem: {
-        item: {
-          firstValue: {
-            fields: [{ fieldPath: `object.textModulesData['${row2Field}']` }],
-          },
-        },
+      twoItems: {
+        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['couponCode']" }] } },
+        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
       },
     })
-  }
-
-  if (layout.google.rows >= 3) {
+  } else if (isMembership) {
+    // Row 1: Tier + Check-ins
     cardRowTemplateInfos.push({
-      oneItem: {
-        item: {
-          firstValue: {
-            fields: [{ fieldPath: `object.textModulesData['${row3Field}']` }],
-          },
-        },
+      twoItems: {
+        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['tier']" }] } },
+        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['checkIns']" }] } },
+      },
+    })
+    // Row 2: Benefits + Member since
+    cardRowTemplateInfos.push({
+      twoItems: {
+        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['benefits']" }] } },
+        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
+      },
+    })
+  } else {
+    // Stamp/Points: nextReward + memberSince
+    const textRow1Start = isPoints ? "earnRate" : "nextReward"
+    cardRowTemplateInfos.push({
+      twoItems: {
+        startItem: { firstValue: { fields: [{ fieldPath: `object.textModulesData['${textRow1Start}']` }] } },
+        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
       },
     })
   }
@@ -153,14 +152,15 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
     securityAnimation: { animationType: "FOIL_SHIMMER" },
   }
 
-  // Program logo (required for Loyalty)
+  // Program logo (required for Loyalty classes)
+  const logoUrl = googleLogo ?? "https://developers.google.com/static/wallet/site-assets/images/pass-builder/pass_google_logo.jpg"
+  loyaltyClass.programLogo = {
+    sourceUri: { uri: logoUrl },
+    contentDescription: {
+      defaultValue: { language: "en", value: `${input.restaurantName} logo` },
+    },
+  }
   if (googleLogo) {
-    loyaltyClass.programLogo = {
-      sourceUri: { uri: googleLogo },
-      contentDescription: {
-        defaultValue: { language: "en", value: `${input.restaurantName} logo` },
-      },
-    }
     loyaltyClass.wideProgramLogo = {
       sourceUri: { uri: googleLogo },
       contentDescription: {
@@ -169,11 +169,11 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
     }
   }
 
-  // Card row template override
-  if (cardRowTemplateInfos.length > 0) {
-    loyaltyClass.classTemplateInfo = {
-      cardTemplateOverride: { cardRowTemplateInfos },
-    }
+  // Card template override
+  loyaltyClass.classTemplateInfo = {
+    cardTemplateOverride: {
+      cardRowTemplateInfos,
+    },
   }
 
   // Homepage
@@ -286,23 +286,12 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
     ]
   }
 
-  // Discoverable program (optional — helps Google surface the card)
-  loyaltyClass.discoverableProgram = {
-    merchantSigninInfo: {
-      signinWebsite: {
-        uri: input.restaurantWebsite ?? "https://loyalshy.com",
-        description: input.restaurantName,
-      },
-    },
-    state: "TRUSTED_TESTERS",
-  }
-
   return loyaltyClass
 }
 
 // ─── Build Loyalty Object (one per enrollment or customer) ────────────
 
-function buildLoyaltyObject(input: GooglePassGenerationInput) {
+async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   // Use enrollment-scoped object ID when enrollmentId is available, otherwise fall back to customer
   const objectId = input.enrollmentId
     ? buildEnrollmentObjectId(input.enrollmentId)
@@ -312,9 +301,7 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
     ? buildProgramClassId(input.programId)
     : buildClassId(input.restaurantId)
   const design = input.cardDesign
-  const showStrip = design?.showStrip ?? false
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
-  const layout = getFieldLayout(cardType)
 
   const progressStyle = design?.progressStyle ?? "NUMBERS"
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
@@ -345,15 +332,21 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
   let textModulesData: Record<string, unknown>[]
 
   if (input.programType === "COUPON" && couponConfig) {
+    // When minigame is enabled with prizes, show prizes instead of generic discount
+    const prizeText = getWalletRewardText(input.programConfig, formatCouponValue(couponConfig))
+    const hasPrizes = prizeText !== formatCouponValue(couponConfig)
+    const discountLabel = hasPrizes ? "PRIZES" : "DISCOUNT"
     loyaltyPoints = {
-      label: formatLabel("DISCOUNT", labelFmt),
-      balance: { string: formatCouponValue(couponConfig) },
+      label: formatLabel(discountLabel, labelFmt),
+      balance: { string: prizeText },
     }
     secondaryLoyaltyPoints = {
       label: formatLabel("VALID UNTIL", labelFmt),
       balance: { string: couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
     }
     textModulesData = [
+      { id: "discount", header: formatLabel(discountLabel, labelFmt), body: prizeText },
+      { id: "validUntil", header: formatLabel("VALID UNTIL", labelFmt), body: couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
       ...(couponConfig.couponCode ? [{ id: "couponCode", header: formatLabel("CODE", labelFmt), body: couponConfig.couponCode }] : []),
       { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
     ]
@@ -367,6 +360,8 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
       balance: { int: input.totalVisits },
     }
     textModulesData = [
+      { id: "tier", header: formatLabel("TIER", labelFmt), body: membershipConfig.membershipTier },
+      { id: "checkIns", header: formatLabel("CHECK-INS", labelFmt), body: String(input.totalVisits) },
       { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
@@ -394,7 +389,7 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
       balance: { int: input.totalVisits },
     }
     textModulesData = [
-      { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: input.rewardDescription },
+      { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: getWalletRewardText(input.programConfig, input.rewardDescription) },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
   }
@@ -416,6 +411,20 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
     groupingInfo: { groupingId: input.restaurantId },
   }
 
+  // Add reveal link if there's an unrevealed prize
+  if (input.hasUnrevealedPrize && input.enrollmentId && input.restaurantSlug) {
+    const { signCardAccess } = await import("../../card-access")
+    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
+    const sig = signCardAccess(input.enrollmentId)
+    loyaltyObject.linksModuleData = {
+      uris: [{
+        uri: `${baseUrl}/join/${input.restaurantSlug}/card/${input.enrollmentId}?sig=${sig}`,
+        description: "Reveal your prize!",
+        id: "revealLink",
+      }],
+    }
+  }
+
   // Valid time interval for time-bound programs
   if (input.programEndsAt) {
     loyaltyObject.validTimeInterval = {
@@ -423,21 +432,27 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
     }
   }
 
-  // Hero image: use dynamic stamp grid route, static strip image, or logo
+  // Hero image (on object — shows as banner strip on the pass)
   const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
+  const showStrip = design?.showStrip ?? false
   const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
   let heroImageUrl: string | null = null
   if (showStrip) {
-    const stripFiltersG = design ? parseStripFilters(design.editorConfig) : { useStampGrid: false }
+    const stripFiltersG = parseStripFilters(design?.editorConfig)
     if (isStampType && (stripFiltersG.useStampGrid || design?.patternStyle === "STAMP_GRID") && input.enrollmentId) {
-      // Dynamic stamp grid: Google fetches from our API route each time
-      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
-      heroImageUrl = `${baseUrl}/api/wallet/strip/${input.enrollmentId}`
+      // Generate stamp grid PNG and upload to R2 so Google can access it
+      heroImageUrl = await generateAndUploadStampGrid(input, design, stripFiltersG)
     } else {
       heroImageUrl = design?.stripImageGoogle ?? design?.generatedStripGoogle ?? googleLogo
     }
-  } else {
+  } else if (isStampType) {
+    // Only use logo as hero for stamp/points cards — for coupon/membership it looks oversized
     heroImageUrl = googleLogo
+  }
+
+  // Google validates image URLs server-side — skip non-HTTPS URLs (local dev, private IPs)
+  if (heroImageUrl && !/^https:\/\//.test(heroImageUrl)) {
+    heroImageUrl = null
   }
 
   if (heroImageUrl) {
@@ -452,6 +467,42 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
   return loyaltyObject
 }
 
+// ─── Stamp Grid → R2 Upload ─────────────────────────────────
+
+async function generateAndUploadStampGrid(
+  input: GooglePassGenerationInput,
+  design: CardDesignData | null | undefined,
+  stripFilters: ReturnType<typeof parseStripFilters>,
+): Promise<string | null> {
+  try {
+    const config = parseStampGridConfig(design?.editorConfig)
+    const stripPrimary = stripFilters.stripColor1 ?? design?.primaryColor ?? "#1a1a2e"
+    const stripSecondary = stripFilters.stripColor2 ?? design?.secondaryColor ?? "#ffffff"
+
+    const buffer = await generateStampGridImage({
+      currentVisits: input.currentCycleVisits,
+      totalVisits: input.visitsRequired,
+      hasReward: input.hasAvailableReward,
+      config,
+      primaryColor: stripPrimary,
+      secondaryColor: stripSecondary,
+      textColor: design?.textColor ?? "#ffffff",
+      width: GOOGLE_HERO_WIDTH,
+      height: GOOGLE_HERO_HEIGHT,
+      stripImageUrl: design?.stripImageGoogle,
+      stripOpacity: stripFilters.stripOpacity,
+      stripGrayscale: stripFilters.stripGrayscale,
+    })
+
+    const key = `strip-images/${input.programId ?? input.restaurantId}/google-stamp-grid-${input.enrollmentId}.png`
+    return await uploadFile(buffer, key, "image/png")
+  } catch {
+    // Fall back to static strip or logo
+    const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
+    return design?.stripImageGoogle ?? design?.generatedStripGoogle ?? googleLogo
+  }
+}
+
 // ─── Generate Save-to-Wallet URL ────────────────────────────
 
 /**
@@ -459,11 +510,53 @@ function buildLoyaltyObject(input: GooglePassGenerationInput) {
  * and object definitions in a signed JWT. When the user taps
  * the link, Google creates/updates the class and object automatically.
  */
-export function generateGoogleWalletSaveUrl(
+export async function generateGoogleWalletSaveUrl(
   input: GooglePassGenerationInput
-): string {
+): Promise<string> {
   const loyaltyClass = buildLoyaltyClass(input)
-  const loyaltyObject = buildLoyaltyObject(input)
+  const loyaltyObject = await buildLoyaltyObject(input)
+
+  // Also PATCH the class via REST API to ensure updates (like logo changes)
+  // are applied to existing classes that Google may have cached
+  patchLoyaltyClass(loyaltyClass).catch(() => {})
 
   return buildSaveUrl([loyaltyClass], [loyaltyObject])
+}
+
+/**
+ * Best-effort PATCH of the loyalty class via REST API.
+ * Ensures class-level changes (logo, colors, template) propagate
+ * even when Google has cached an older version from a previous JWT.
+ */
+async function patchLoyaltyClass(loyaltyClass: Record<string, unknown>): Promise<void> {
+  try {
+    const { getAccessToken } = await import("./credentials")
+    const { GOOGLE_WALLET_API_BASE, GOOGLE_WALLET_ISSUER_ID } = await import("./constants")
+    if (!GOOGLE_WALLET_ISSUER_ID) return
+
+    const token = await getAccessToken()
+    const classId = loyaltyClass.id as string
+
+    // Must include reviewStatus when updating an approved class
+    const patchBody = { ...loyaltyClass, reviewStatus: "UNDER_REVIEW" }
+
+    const response = await fetch(
+      `${GOOGLE_WALLET_API_BASE}/loyaltyClass/${encodeURIComponent(classId)}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(patchBody),
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "")
+      console.error(`Loyalty class PATCH failed (${response.status}):`, errorText.slice(0, 200))
+    }
+  } catch {
+    // Best-effort — don't block pass generation
+  }
 }

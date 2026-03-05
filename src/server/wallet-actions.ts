@@ -212,9 +212,9 @@ export async function issueGoogleWalletPass(
         },
       },
       rewards: {
-        where: { status: "AVAILABLE" },
-        select: { id: true },
-        take: 1,
+        where: { status: { in: ["AVAILABLE", "REDEEMED"] } },
+        select: { id: true, revealedAt: true, description: true },
+        take: 5,
       },
     },
   })
@@ -231,6 +231,9 @@ export async function issueGoogleWalletPass(
   // Reuse existing walletPassId or generate a new one
   const walletPassId = enrollment.walletPassId ?? randomUUID()
   const hasAvailableReward = enrollment.rewards.length > 0
+  const hasUnrevealedPrize = enrollment.rewards.some(
+    (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt === null && r.description != null
+  )
 
   // Resolve card design from the program's cardDesign
   const cardDesign = resolveCardDesign(
@@ -239,7 +242,7 @@ export async function issueGoogleWalletPass(
   )
 
   try {
-    const saveUrl = generateGoogleWalletSaveUrl({
+    const saveUrl = await generateGoogleWalletSaveUrl({
       customerId: enrollment.customer.id,
       restaurantId: restaurant.id,
       walletPassId,
@@ -267,6 +270,8 @@ export async function issueGoogleWalletPass(
       programType: enrollment.loyaltyProgram.programType,
       programConfig: enrollment.loyaltyProgram.config,
       pointsBalance: enrollment.pointsBalance,
+      hasUnrevealedPrize,
+      restaurantSlug: restaurant.slug,
     })
 
     // Update enrollment with wallet pass fields

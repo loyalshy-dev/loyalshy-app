@@ -418,7 +418,7 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
         auxiliary: [],
       },
       google: {
-        rows: 3,
+        rows: 1,
         fields: ["discount", "validUntil", "couponCode", "customerName"],
       },
     }
@@ -433,7 +433,7 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
         auxiliary: [],
       },
       google: {
-        rows: 3,
+        rows: 1,
         fields: ["tierName", "benefits", "memberSince", "customerName"],
       },
     }
@@ -448,7 +448,7 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
       auxiliary: ["customerName"],
     },
     google: {
-      rows: 3,
+      rows: 1,
       fields: ["progress", "totalVisits", "nextReward", "memberSince", "customerName"],
     },
   }

@@ -10,7 +10,7 @@ import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { buildCardUrl } from "@/lib/card-access"
-import { parseCouponConfig, parseMinigameConfig } from "@/lib/program-config"
+import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/program-config"
 import { verifyCardSignature } from "@/lib/card-access"
 import type { PublicProgramInfo } from "@/types/enrollment"
 import type { MinigameConfig } from "@/types/program-types"
@@ -153,6 +153,7 @@ export async function getRestaurantBySlug(
             labelFormat: p.cardDesign.labelFormat,
             customProgressLabel: p.cardDesign.customProgressLabel,
             customMessage: p.cardDesign.customMessage,
+            editorConfig: p.cardDesign.editorConfig,
           }
         : null,
     })),
@@ -484,6 +485,11 @@ export async function joinProgram(
           ? new Date(Date.now() + program.rewardExpiryDays * 86_400_000)
           : new Date(Date.now() + 365 * 86_400_000) // default 1 year
 
+      // If minigame is enabled, assign a random prize immediately so customer can play the game
+      const mgConfig = parseMinigameConfig(program.config)
+      const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
+      const selectedPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
+
       await db.reward.create({
         data: {
           customerId: customer.id,
@@ -492,6 +498,7 @@ export async function joinProgram(
           enrollmentId: enrollment.id,
           status: "AVAILABLE",
           expiresAt,
+          ...(selectedPrize ? { description: selectedPrize, revealedAt: null } : {}),
         },
       })
 
@@ -647,6 +654,7 @@ async function issuePassForEnrollment(
   restaurant: {
     id: string
     name: string
+    slug: string
     logo: string | null
     logoApple: string | null
     logoGoogle: string | null
@@ -745,7 +753,11 @@ async function issuePassForEnrollment(
   const walletPassId = enrollment.walletPassId ?? randomUUID()
 
   try {
-    const saveUrl = generateGoogleWalletSaveUrl({
+    // Check if coupon has minigame with unrevealed prize
+    const mgConfig = parseMinigameConfig(program.config)
+    const hasUnrevealedPrize = program.programType === "COUPON" && !!mgConfig?.enabled && !!(mgConfig.prizes?.length)
+
+    const saveUrl = await generateGoogleWalletSaveUrl({
       customerId: enrollment.customerId,
       restaurantId: restaurant.id,
       walletPassId,
@@ -773,6 +785,8 @@ async function issuePassForEnrollment(
       programType: program.programType,
       programConfig: program.config,
       pointsBalance: enrollment.pointsBalance ?? 0,
+      hasUnrevealedPrize,
+      restaurantSlug: restaurant.slug,
     })
 
     // Store wallet fields on Enrollment (not Customer)
@@ -865,16 +879,24 @@ export async function revealPrize(
   })
 
   if (enrollment && enrollment.walletPassType !== "NONE") {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) =>
-        tasks.trigger("update-wallet-pass", {
-          enrollmentId,
-          updateType: "REWARD_EARNED" as const,
-        })
-      )
-      .catch((err: unknown) =>
-        console.error("Wallet pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
-      )
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId,
+            updateType: "REWARD_EARNED" as const,
+          })
+        )
+        .catch((err: unknown) =>
+          console.error("Wallet pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
+        )
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollmentId))
+        .catch((err: unknown) =>
+          console.error("Direct Google pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
+        )
+    }
   }
 
   return { success: true }

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { assertAuthenticated, getRestaurantForUser, assertRestaurantAccess } from "@/lib/dal"
-import { parseCouponConfig, formatCouponValue, parsePointsConfig, parseMinigameConfig } from "@/lib/program-config"
+import { parseCouponConfig, formatCouponValue, parsePointsConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/program-config"
 import type { EnrollmentSummary } from "@/types/enrollment"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -421,17 +421,7 @@ export async function searchCustomersForVisit(
   }
 }
 
-// ─── Weighted Random Prize Selection ─────────────────────────
 
-function weightedRandomPrize(prizes: { name: string; weight: number }[]): string {
-  const totalWeight = prizes.reduce((sum, p) => sum + p.weight, 0)
-  let rand = Math.random() * totalWeight
-  for (const prize of prizes) {
-    rand -= prize.weight
-    if (rand <= 0) return prize.name
-  }
-  return prizes[prizes.length - 1].name
-}
 
 // ─── Register Visit ─────────────────────────────────────────
 
@@ -666,15 +656,22 @@ export async function registerVisit(
   })
 
   // Dispatch wallet pass update via Trigger.dev (async background job)
+  // Falls back to direct update if Trigger.dev is not configured
   if (enrollment.walletPassType !== "NONE") {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) =>
-        tasks.trigger("update-wallet-pass", {
-          enrollmentId: enrollment.id,
-          updateType: wasRewardEarned ? "REWARD_EARNED" : "VISIT",
-        })
-      )
-      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: enrollment.id,
+            updateType: wasRewardEarned ? "REWARD_EARNED" : "VISIT",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollment.id))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
   }
 
   revalidatePath("/dashboard")
@@ -763,7 +760,7 @@ export async function redeemCoupon(
   // Find an available reward to redeem
   const reward = await db.reward.findFirst({
     where: { enrollmentId: enrollment.id, status: "AVAILABLE" },
-    select: { id: true },
+    select: { id: true, description: true, revealedAt: true },
   })
 
   if (!reward) {
@@ -772,23 +769,19 @@ export async function redeemCoupon(
 
   const redemptionLimit = couponConfig?.redemptionLimit ?? "single"
 
-  // Pick a weighted random prize if minigame has prizes configured
-  let selectedPrize: string | undefined
   const mgConfig = parseMinigameConfig(program.config)
-  if (mgConfig?.enabled && mgConfig.prizes?.length) {
-    selectedPrize = weightedRandomPrize(mgConfig.prizes)
-  }
+  const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
 
   await db.$transaction(async (tx) => {
-    // Mark reward as redeemed
+    // Mark reward as redeemed (prize was already assigned at enrollment)
     await tx.reward.update({
       where: { id: reward.id },
       data: {
         status: "REDEEMED",
         redeemedAt: new Date(),
         redeemedById: session.user.id,
-        ...(selectedPrize ? { description: selectedPrize } : {}),
-        revealedAt: (selectedPrize && mgConfig?.enabled) ? null : new Date(),
+        // If no minigame or prize wasn't revealed yet, mark as revealed now
+        ...(!reward.revealedAt ? { revealedAt: new Date() } : {}),
       },
     })
 
@@ -801,13 +794,15 @@ export async function redeemCoupon(
       },
     })
 
-    // For unlimited coupons, auto-create a new available reward
+    // For unlimited coupons, auto-create a new available reward (with prize if minigame enabled)
     if (redemptionLimit === "unlimited") {
       const expiresAt = couponConfig?.validUntil
         ? new Date(couponConfig.validUntil)
         : program.rewardExpiryDays > 0
           ? new Date(Date.now() + program.rewardExpiryDays * 86_400_000)
           : new Date(Date.now() + 365 * 86_400_000) // default 1 year
+
+      const nextPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
 
       await tx.reward.create({
         data: {
@@ -817,6 +812,7 @@ export async function redeemCoupon(
           enrollmentId: enrollment.id,
           status: "AVAILABLE",
           expiresAt,
+          ...(nextPrize ? { description: nextPrize, revealedAt: null } : {}),
         },
       })
     }
@@ -824,14 +820,20 @@ export async function redeemCoupon(
 
   // Dispatch wallet pass update
   if (enrollment.walletPassType !== "NONE") {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) =>
-        tasks.trigger("update-wallet-pass", {
-          enrollmentId: enrollment.id,
-          updateType: "REWARD_REDEEMED",
-        })
-      )
-      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: enrollment.id,
+            updateType: "REWARD_REDEEMED",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollment.id))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
   }
 
   revalidatePath("/dashboard")
@@ -844,7 +846,7 @@ export async function redeemCoupon(
     success: true,
     couponDescription: couponConfig?.couponDescription ?? program.rewardDescription,
     discountText,
-    selectedPrize,
+    selectedPrize: reward.description ?? undefined,
     redemptionLimit,
     programName: program.name,
   }
@@ -916,6 +918,11 @@ export async function checkInMember(
     return { success: false, error: "Check-in is only available for membership programs" }
   }
 
+  // Check program hasn't expired
+  if (enrollment.loyaltyProgram.endsAt && enrollment.loyaltyProgram.endsAt < new Date()) {
+    return { success: false, error: "This membership program has expired" }
+  }
+
   // Prevent double check-in within 1 minute
   const oneMinuteAgo = new Date(Date.now() - 60_000)
   const recentVisit = await db.visit.findFirst({
@@ -970,14 +977,20 @@ export async function checkInMember(
 
   // Dispatch wallet pass update via Trigger.dev
   if (enrollment.walletPassType !== "NONE") {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) =>
-        tasks.trigger("update-wallet-pass", {
-          enrollmentId: enrollment.id,
-          updateType: "CHECK_IN",
-        })
-      )
-      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: enrollment.id,
+            updateType: "CHECK_IN",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollment.id))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
   }
 
   revalidatePath("/dashboard")
@@ -1058,6 +1071,11 @@ export async function earnPoints(
     return { success: false, error: "Earning points is only available for points programs" }
   }
 
+  // Check program hasn't expired
+  if (enrollment.loyaltyProgram.endsAt && enrollment.loyaltyProgram.endsAt < new Date()) {
+    return { success: false, error: "This points program has expired" }
+  }
+
   const program = enrollment.loyaltyProgram
   const pointsConfig = parsePointsConfig(program.config)
 
@@ -1118,14 +1136,20 @@ export async function earnPoints(
 
   // Dispatch wallet pass update
   if (enrollment.walletPassType !== "NONE") {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) =>
-        tasks.trigger("update-wallet-pass", {
-          enrollmentId: enrollment.id,
-          updateType: "POINTS_EARNED",
-        })
-      )
-      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: enrollment.id,
+            updateType: "POINTS_EARNED",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollment.id))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
   }
 
   revalidatePath("/dashboard")
@@ -1175,6 +1199,7 @@ export async function redeemPoints(
           config: true,
           rewardExpiryDays: true,
           status: true,
+          endsAt: true,
         },
       },
     },
@@ -1201,6 +1226,15 @@ export async function redeemPoints(
 
   if (enrollment.loyaltyProgram.programType !== "POINTS") {
     return { success: false, error: "This is not a points program" }
+  }
+
+  if (enrollment.loyaltyProgram.status !== "ACTIVE") {
+    return { success: false, error: "This loyalty program is no longer active" }
+  }
+
+  // Check program hasn't expired
+  if (enrollment.loyaltyProgram.endsAt && enrollment.loyaltyProgram.endsAt < new Date()) {
+    return { success: false, error: "This points program has expired" }
   }
 
   const program = enrollment.loyaltyProgram
@@ -1250,14 +1284,20 @@ export async function redeemPoints(
 
   // Dispatch wallet pass update
   if (enrollment.walletPassType !== "NONE") {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) =>
-        tasks.trigger("update-wallet-pass", {
-          enrollmentId: enrollment.id,
-          updateType: "POINTS_REDEEMED",
-        })
-      )
-      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: enrollment.id,
+            updateType: "POINTS_REDEEMED",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollment.id))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
   }
 
   revalidatePath("/dashboard")

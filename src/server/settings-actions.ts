@@ -415,17 +415,31 @@ export async function archiveLoyaltyProgram(restaurantId: string, programId: str
   })
 
   // Trigger wallet updates for affected enrollments
-  import("@trigger.dev/sdk")
-    .then(({ tasks }) =>
-      tasks.trigger("update-all-passes", {
-        restaurantId,
-        programId,
-        reason: "PROGRAM_ARCHIVED",
+  if (process.env.TRIGGER_SECRET_KEY) {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) =>
+        tasks.trigger("update-all-passes", {
+          restaurantId,
+          programId,
+          reason: "PROGRAM_ARCHIVED",
+        })
+      )
+      .catch((err: unknown) =>
+        console.error("Failed to trigger bulk pass update:", err instanceof Error ? err.message : "Unknown error")
+      )
+  } else {
+    import("@/lib/wallet/google/update-pass")
+      .then(async ({ notifyGooglePassUpdate }) => {
+        const enrollments = await db.enrollment.findMany({
+          where: { loyaltyProgramId: programId, walletPassType: "GOOGLE" },
+          select: { id: true },
+        })
+        await Promise.allSettled(enrollments.map((e) => notifyGooglePassUpdate(e.id)))
       })
-    )
-    .catch((err: unknown) =>
-      console.error("Failed to trigger bulk pass update:", err instanceof Error ? err.message : "Unknown error")
-    )
+      .catch((err: unknown) =>
+        console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error")
+      )
+  }
 
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard/programs")
@@ -507,17 +521,31 @@ export async function reactivateProgram(restaurantId: string, programId: string)
   })
 
   // Trigger wallet updates for affected enrollments
-  import("@trigger.dev/sdk")
-    .then(({ tasks }) =>
-      tasks.trigger("update-all-passes", {
-        restaurantId,
-        programId,
-        reason: "PROGRAM_REACTIVATED",
+  if (process.env.TRIGGER_SECRET_KEY) {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) =>
+        tasks.trigger("update-all-passes", {
+          restaurantId,
+          programId,
+          reason: "PROGRAM_REACTIVATED",
+        })
+      )
+      .catch((err: unknown) =>
+        console.error("Failed to trigger bulk pass update:", err instanceof Error ? err.message : "Unknown error")
+      )
+  } else {
+    import("@/lib/wallet/google/update-pass")
+      .then(async ({ notifyGooglePassUpdate }) => {
+        const enrollments = await db.enrollment.findMany({
+          where: { loyaltyProgramId: programId, walletPassType: "GOOGLE", status: "ACTIVE" },
+          select: { id: true },
+        })
+        await Promise.allSettled(enrollments.map((e) => notifyGooglePassUpdate(e.id)))
       })
-    )
-    .catch((err: unknown) =>
-      console.error("Failed to trigger bulk pass update:", err instanceof Error ? err.message : "Unknown error")
-    )
+      .catch((err: unknown) =>
+        console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error")
+      )
+  }
 
   revalidatePath("/dashboard/programs")
   revalidatePath(`/dashboard/programs/${programId}`)
@@ -880,17 +908,31 @@ export async function saveCardDesign(input: z.infer<typeof saveCardDesignSchema>
   // If design hash changed, trigger bulk pass update for this program's enrollments only
   const hashChanged = existingDesign?.designHash !== newHash
   if (hashChanged) {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) =>
-        tasks.trigger("update-all-passes", {
-          restaurantId: program.restaurantId,
-          programId: parsed.programId,
-          reason: "DESIGN_CHANGE",
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-all-passes", {
+            restaurantId: program.restaurantId,
+            programId: parsed.programId,
+            reason: "DESIGN_CHANGE",
+          })
+        )
+        .catch((err: unknown) =>
+          console.error("Failed to trigger bulk pass update:", err instanceof Error ? err.message : "Unknown error")
+        )
+    } else {
+      import("@/lib/wallet/google/update-pass")
+        .then(async ({ notifyGooglePassUpdate }) => {
+          const enrollments = await db.enrollment.findMany({
+            where: { loyaltyProgramId: parsed.programId, walletPassType: "GOOGLE", status: "ACTIVE" },
+            select: { id: true },
+          })
+          await Promise.allSettled(enrollments.map((e) => notifyGooglePassUpdate(e.id)))
         })
-      )
-      .catch((err: unknown) =>
-        console.error("Failed to trigger bulk pass update:", err instanceof Error ? err.message : "Unknown error")
-      )
+        .catch((err: unknown) =>
+          console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error")
+        )
+    }
   }
 
   revalidatePath("/dashboard/settings")
@@ -1600,6 +1642,34 @@ export async function updateLoyaltyProgram(input: z.infer<typeof updateLoyaltyPr
       })
     }
   })
+
+  // Trigger wallet pass updates for all enrollments in this program
+  if (process.env.TRIGGER_SECRET_KEY) {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) =>
+        tasks.trigger("update-all-passes", {
+          restaurantId: parsed.restaurantId,
+          programId: parsed.programId,
+          reason: "PROGRAM_CHANGE",
+        })
+      )
+      .catch((err: unknown) =>
+        console.error("Failed to trigger bulk pass update:", err instanceof Error ? err.message : "Unknown error")
+      )
+  } else {
+    // Direct fallback for local dev without Trigger.dev
+    import("@/lib/wallet/google/update-pass")
+      .then(async ({ notifyGooglePassUpdate }) => {
+        const enrollments = await db.enrollment.findMany({
+          where: { loyaltyProgramId: parsed.programId, walletPassType: "GOOGLE", status: "ACTIVE" },
+          select: { id: true },
+        })
+        await Promise.allSettled(enrollments.map((e) => notifyGooglePassUpdate(e.id)))
+      })
+      .catch((err: unknown) =>
+        console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error")
+      )
+  }
 
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard/programs")

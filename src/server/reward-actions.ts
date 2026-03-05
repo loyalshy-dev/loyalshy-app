@@ -8,6 +8,7 @@ import {
   getRestaurantForUser,
   assertRestaurantAccess,
 } from "@/lib/dal"
+import { parseCouponConfig } from "@/lib/program-config"
 import { Prisma } from "@prisma/client"
 import { startOfMonth, subMonths } from "date-fns"
 
@@ -255,7 +256,7 @@ export async function redeemReward(
   // Verify staff has access to this restaurant
   await assertRestaurantAccess(restaurant.id)
 
-  // Find the reward
+  // Find the reward (include enrollment program type for coupon handling)
   const reward = await db.reward.findFirst({
     where: {
       id: rewardId,
@@ -267,6 +268,14 @@ export async function redeemReward(
       customerId: true,
       enrollmentId: true,
       expiresAt: true,
+      revealedAt: true,
+      enrollment: {
+        select: {
+          loyaltyProgram: {
+            select: { programType: true, config: true },
+          },
+        },
+      },
     },
   })
 
@@ -291,6 +300,11 @@ export async function redeemReward(
     return { success: false, error: "This reward has expired" }
   }
 
+  // Check if this is a single-use coupon (need to mark enrollment COMPLETED)
+  const isCoupon = reward.enrollment?.loyaltyProgram?.programType === "COUPON"
+  const couponConfig = isCoupon ? parseCouponConfig(reward.enrollment?.loyaltyProgram?.config) : null
+  const isSingleUse = couponConfig?.redemptionLimit === "single"
+
   // Redeem in a transaction
   await db.$transaction(async (tx) => {
     await tx.reward.update({
@@ -299,6 +313,8 @@ export async function redeemReward(
         status: "REDEEMED",
         redeemedAt: new Date(),
         redeemedById: session.user.id,
+        // If no minigame or prize wasn't revealed, mark as revealed now
+        ...(!reward.revealedAt ? { revealedAt: new Date() } : {}),
       },
     })
 
@@ -306,21 +322,31 @@ export async function redeemReward(
     if (reward.enrollmentId) {
       await tx.enrollment.update({
         where: { id: reward.enrollmentId },
-        data: { totalRewardsRedeemed: { increment: 1 } },
+        data: {
+          totalRewardsRedeemed: { increment: 1 },
+          // Mark single-use coupon enrollment as COMPLETED
+          ...(isSingleUse ? { status: "COMPLETED" } : {}),
+        },
       })
     }
   })
 
-  // Dispatch wallet pass update via Trigger.dev (async background job)
+  // Dispatch wallet pass update
   if (reward.enrollmentId) {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) =>
-        tasks.trigger("update-wallet-pass", {
-          enrollmentId: reward.enrollmentId,
-          updateType: "REWARD_REDEEMED",
-        })
-      )
-      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: reward.enrollmentId,
+            updateType: "REWARD_REDEEMED",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(reward.enrollmentId!))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
   }
 
   revalidatePath("/dashboard")

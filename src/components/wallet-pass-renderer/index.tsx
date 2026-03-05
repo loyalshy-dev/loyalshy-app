@@ -450,20 +450,7 @@ export function WalletPassRenderer({
     </div>
   )
 
-  // ─── Section: Branding ───
-  const brandingSection = (
-    <div
-      style={{
-        textAlign: "center",
-        fontSize: 9,
-        opacity: 0.35,
-        letterSpacing: "0.03em",
-        padding: "4px 0",
-      }}
-    >
-      Powered by Loyalshy
-    </div>
-  )
+  const brandingSection = null
 
   // ─── Section: Divider ───
   const dividerSection = (

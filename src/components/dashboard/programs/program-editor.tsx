@@ -128,6 +128,7 @@ type LoyaltyForm = {
   discountType: string
   discountValue: number
   couponDescription: string
+  couponCode: string
   validUntil: string
   redemptionLimit: string
   // Membership config fields
@@ -191,6 +192,7 @@ export function ProgramEditor({
     handleSubmit,
     formState: { errors, isDirty },
     watch,
+    reset,
   } = useForm<LoyaltyForm>({
     defaultValues: {
       name: program.name,
@@ -207,6 +209,7 @@ export function ProgramEditor({
       discountType: couponConfig?.discountType ?? "percentage",
       discountValue: couponConfig?.discountValue ?? 10,
       couponDescription: couponConfig?.couponDescription ?? "",
+      couponCode: couponConfig?.couponCode ?? "",
       validUntil: couponConfig?.validUntil ?? "",
       redemptionLimit: couponConfig?.redemptionLimit ?? "single",
       // Membership defaults
@@ -228,6 +231,7 @@ export function ProgramEditor({
         discountType: data.discountType,
         discountValue: data.discountType === "freebie" ? 0 : data.discountValue,
         couponDescription: data.rewardDescription || undefined,
+        couponCode: data.couponCode || undefined,
         validUntil: data.validUntil || undefined,
         redemptionLimit: data.redemptionLimit,
         terms: data.termsAndConditions || undefined,
@@ -279,6 +283,7 @@ export function ProgramEditor({
         toast.error(String(result.error))
       } else {
         toast.success("Program updated")
+        reset(data)
         setShowWarning(false)
         setResetProgress(false)
       }
@@ -518,6 +523,16 @@ export function ProgramEditor({
                     {...register("validUntil")}
                     disabled={isArchived}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`coupon-code-${program.id}`}>Coupon Code</Label>
+                  <Input
+                    id={`coupon-code-${program.id}`}
+                    {...register("couponCode")}
+                    placeholder="e.g., SAVE20"
+                    disabled={isArchived}
+                  />
+                  <p className="text-xs text-muted-foreground">Optional. Shown on the wallet pass and card page.</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor={`redemption-limit-${program.id}`}>Redemption Limit</Label>
@@ -938,34 +953,34 @@ export function ProgramEditor({
               </Button>
             </div>
 
-            <div className="flex items-center gap-2">
-              {isDirty && (
+            {(isDirty || showWarning) && (
+              <div className="flex items-center gap-2">
                 <p className="text-xs text-warning font-medium">
                   Unsaved changes
                 </p>
-              )}
-              {showWarning && (
+                {showWarning && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowWarning(false)}
+                  >
+                    Cancel
+                  </Button>
+                )}
                 <Button
-                  type="button"
-                  variant="ghost"
+                  type="submit"
+                  disabled={isPending || isArchived}
                   size="sm"
-                  onClick={() => setShowWarning(false)}
                 >
-                  Cancel
+                  {isPending
+                    ? "Saving..."
+                    : showWarning
+                      ? "Confirm & Save"
+                      : "Save changes"}
                 </Button>
-              )}
-              <Button
-                type="submit"
-                disabled={isPending || isArchived || (!isDirty && !showWarning)}
-                size="sm"
-              >
-                {isPending
-                  ? "Saving..."
-                  : showWarning
-                    ? "Confirm & Save"
-                    : "Save changes"}
-              </Button>
-            </div>
+              </div>
+            )}
           </div>
 
           {/* ─── Section 6: Danger Zone ─────────────────────────── */}
