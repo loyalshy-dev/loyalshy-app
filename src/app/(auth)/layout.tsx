@@ -19,11 +19,11 @@ async function AuthLayoutInner({
 
   if (session) {
     // Fully onboarded user — all auth pages are irrelevant
-    if (session.user.restaurantId) {
+    if (session.session.activeOrganizationId) {
       redirect("/dashboard")
     }
 
-    // Authenticated but no restaurant — mid-onboarding.
+    // Authenticated but no organization — mid-onboarding.
     // /register is valid (they need to finish); /login and /forgot-password are not.
     const headerList = await headers()
     const pathname = headerList.get("x-pathname") || ""

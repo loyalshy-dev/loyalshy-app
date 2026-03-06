@@ -9,36 +9,30 @@ export async function GET(
 ) {
   const { serialNumber } = await params
 
-  // Query Enrollment by walletPassSerialNumber instead of Customer
-  const enrollment = await db.enrollment.findUnique({
+  // Query PassInstance by walletPassSerialNumber
+  const passInstance = await db.passInstance.findUnique({
     where: { walletPassSerialNumber: serialNumber },
     select: {
       id: true,
-      currentCycleVisits: true,
-      totalVisits: true,
-      pointsBalance: true,
-      remainingUses: true,
+      data: true,
       walletPassSerialNumber: true,
       walletPassId: true,
-      enrolledAt: true,
-      customer: {
+      issuedAt: true,
+      contact: {
         select: {
           id: true,
           fullName: true,
           email: true,
         },
       },
-      loyaltyProgram: {
+      passTemplate: {
         select: {
           id: true,
           name: true,
-          programType: true,
+          passType: true,
           config: true,
-          visitsRequired: true,
-          rewardDescription: true,
-          rewardExpiryDays: true,
           termsAndConditions: true,
-          restaurant: {
+          organization: {
             select: {
               name: true,
               logo: true,
@@ -49,7 +43,7 @@ export async function GET(
               website: true,
             },
           },
-          cardDesign: true,
+          passDesign: true,
         },
       },
       rewards: {
@@ -60,45 +54,58 @@ export async function GET(
     },
   })
 
-  if (!enrollment || !enrollment.walletPassSerialNumber || !enrollment.walletPassId) {
+  if (!passInstance || !passInstance.walletPassSerialNumber || !passInstance.walletPassId) {
     return NextResponse.json({ error: "Pass not found" }, { status: 404 })
   }
 
-  const program = enrollment.loyaltyProgram
-  const restaurant = program.restaurant
+  const template = passInstance.passTemplate
+  const organization = template.organization
 
-  const cardDesign = resolveCardDesign(
-    program.cardDesign,
-    restaurant
+  // Extract data from the PassInstance.data JSON
+  const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
+  const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
+  const totalVisits = (instanceData.totalVisits as number) ?? 0
+  const pointsBalance = (instanceData.pointsBalance as number) ?? 0
+  const remainingUses = (instanceData.remainingUses as number) ?? 0
+
+  // Extract config values from PassTemplate.config JSON
+  const templateConfig = (template.config ?? {}) as Record<string, unknown>
+  const visitsRequired = (templateConfig.visitsRequired as number) ?? 10
+  const rewardDescription = (templateConfig.rewardDescription as string) ?? "Free reward"
+  const rewardExpiryDays = (templateConfig.rewardExpiryDays as number) ?? 30
+
+  const passDesign = resolveCardDesign(
+    template.passDesign,
+    organization
   )
 
   try {
     const passBuffer = await generateApplePass({
-      serialNumber: enrollment.walletPassSerialNumber,
-      authenticationToken: enrollment.walletPassId,
-      customerName: enrollment.customer.fullName,
-      customerEmail: enrollment.customer.email,
-      currentCycleVisits: enrollment.currentCycleVisits,
-      visitsRequired: program.visitsRequired,
-      totalVisits: enrollment.totalVisits,
-      memberSince: enrollment.enrolledAt,
-      hasAvailableReward: enrollment.rewards.length > 0,
-      restaurantName: restaurant.name,
-      restaurantLogo: restaurant.logo,
-      restaurantLogoApple: restaurant.logoApple,
-      brandColor: restaurant.brandColor,
-      secondaryColor: restaurant.secondaryColor,
-      rewardDescription: program.rewardDescription,
-      rewardExpiryDays: program.rewardExpiryDays,
-      termsAndConditions: program.termsAndConditions,
-      restaurantPhone: restaurant.phone,
-      restaurantWebsite: restaurant.website,
-      programName: program.name,
-      cardDesign,
-      programType: program.programType,
-      programConfig: program.config,
-      pointsBalance: enrollment.pointsBalance,
-      remainingUses: enrollment.remainingUses,
+      serialNumber: passInstance.walletPassSerialNumber,
+      authenticationToken: passInstance.walletPassId,
+      customerName: passInstance.contact.fullName,
+      customerEmail: passInstance.contact.email,
+      currentCycleVisits,
+      visitsRequired,
+      totalVisits,
+      memberSince: passInstance.issuedAt,
+      hasAvailableReward: passInstance.rewards.length > 0,
+      organizationName: organization.name,
+      organizationLogo: organization.logo,
+      organizationLogoApple: organization.logoApple,
+      brandColor: organization.brandColor,
+      secondaryColor: organization.secondaryColor,
+      rewardDescription,
+      rewardExpiryDays,
+      termsAndConditions: template.termsAndConditions,
+      organizationPhone: organization.phone,
+      organizationWebsite: organization.website,
+      programName: template.name,
+      cardDesign: passDesign,
+      programType: template.passType,
+      programConfig: template.config,
+      pointsBalance,
+      remainingUses,
     })
 
     return new NextResponse(new Uint8Array(passBuffer), {

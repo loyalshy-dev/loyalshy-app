@@ -10,21 +10,21 @@ import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { buildCardUrl } from "@/lib/card-access"
-import { parseCouponConfig, parsePrepaidConfig, parseMembershipConfig, computeMembershipExpiresAt, parseMinigameConfig, weightedRandomPrize } from "@/lib/program-config"
+import { parseCouponConfig, parsePrepaidConfig, parseMembershipConfig, computeMembershipExpiresAt, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 import { verifyCardSignature } from "@/lib/card-access"
-import type { PublicProgramInfo } from "@/types/enrollment"
-import type { MinigameConfig } from "@/types/program-types"
+import type { PublicTemplateInfo } from "@/types/pass-instance"
+import type { MinigameConfig } from "@/types/pass-types"
 
 // ─── Types ──────────────────────────────────────────────────
 
-export type RestaurantPublicInfo = {
+export type OrganizationPublicInfo = {
   id: string
   name: string
   slug: string
   logo: string | null
   brandColor: string | null
   secondaryColor: string | null
-  programs: PublicProgramInfo[]
+  templates: PublicTemplateInfo[]
 }
 
 export type OnboardingResult = {
@@ -32,18 +32,18 @@ export type OnboardingResult = {
   platform?: "apple" | "google"
   passBuffer?: string // base64 for Apple
   saveUrl?: string // for Google
-  customerName?: string
+  contactName?: string
   isReturning?: boolean
   error?: string
 }
 
 export type JoinResult = {
   success: boolean
-  enrollmentId?: string
-  customerName?: string
+  passInstanceId?: string
+  contactName?: string
   isReturning?: boolean
   currentCycleVisits?: number
-  totalVisits?: number
+  totalInteractions?: number
   hasAvailableReward?: boolean
   cardUrl?: string
   error?: string
@@ -64,22 +64,22 @@ const joinSchema = z.object({
     .max(30)
     .optional()
     .or(z.literal("")),
-  restaurantSlug: z.string().min(1),
-  programId: z.string().min(1),
+  organizationSlug: z.string().min(1),
+  templateId: z.string().min(1),
 })
 
 const passRequestSchema = z.object({
-  enrollmentId: z.string().min(1),
-  restaurantSlug: z.string().min(1),
+  passInstanceId: z.string().min(1),
+  organizationSlug: z.string().min(1),
   platform: z.enum(["apple", "google"]),
 })
 
-// ─── Get Restaurant by Slug (Public) ────────────────────────
+// ─── Get Organization by Slug (Public) ──────────────────────
 
-export async function getRestaurantBySlug(
+export async function getOrganizationBySlug(
   slug: string
-): Promise<RestaurantPublicInfo | null> {
-  const restaurant = await db.restaurant.findUnique({
+): Promise<OrganizationPublicInfo | null> {
+  const organization = await db.organization.findUnique({
     where: { slug },
     select: {
       id: true,
@@ -88,16 +88,14 @@ export async function getRestaurantBySlug(
       logo: true,
       brandColor: true,
       secondaryColor: true,
-      loyaltyPrograms: {
+      passTemplates: {
         where: { status: "ACTIVE" },
         select: {
           id: true,
           name: true,
-          programType: true,
-          visitsRequired: true,
-          rewardDescription: true,
+          passType: true,
           config: true,
-          cardDesign: {
+          passDesign: {
             select: {
               cardType: true,
               showStrip: true,
@@ -120,104 +118,102 @@ export async function getRestaurantBySlug(
     },
   })
 
-  if (!restaurant) return null
+  if (!organization) return null
 
-  // Must have at least one active program
-  if (restaurant.loyaltyPrograms.length === 0) return null
+  // Must have at least one active template
+  if (organization.passTemplates.length === 0) return null
 
+  // Extract visitsRequired and rewardDescription from config
   return {
-    id: restaurant.id,
-    name: restaurant.name,
-    slug: restaurant.slug,
-    logo: restaurant.logo,
-    brandColor: restaurant.brandColor,
-    secondaryColor: restaurant.secondaryColor,
-    programs: restaurant.loyaltyPrograms.map((p) => ({
-      id: p.id,
-      name: p.name,
-      programType: p.programType,
-      visitsRequired: p.visitsRequired,
-      rewardDescription: p.rewardDescription,
-      config: p.config,
-      cardDesign: p.cardDesign
-        ? {
-            cardType: p.cardDesign.cardType,
-            showStrip: p.cardDesign.showStrip,
-            primaryColor: p.cardDesign.primaryColor,
-            secondaryColor: p.cardDesign.secondaryColor,
-            textColor: p.cardDesign.textColor,
-            stripImageUrl: p.cardDesign.stripImageUrl,
-            patternStyle: p.cardDesign.patternStyle,
-            progressStyle: p.cardDesign.progressStyle,
-            fontFamily: p.cardDesign.fontFamily,
-            labelFormat: p.cardDesign.labelFormat,
-            customProgressLabel: p.cardDesign.customProgressLabel,
-            customMessage: p.cardDesign.customMessage,
-            editorConfig: p.cardDesign.editorConfig,
-          }
-        : null,
-    })),
+    id: organization.id,
+    name: organization.name,
+    slug: organization.slug,
+    logo: organization.logo,
+    brandColor: organization.brandColor,
+    secondaryColor: organization.secondaryColor,
+    templates: organization.passTemplates.map((t) => {
+      return {
+        id: t.id,
+        name: t.name,
+        passType: t.passType,
+        description: null,
+        config: t.config,
+        passDesign: t.passDesign
+          ? {
+              cardType: t.passDesign.cardType,
+              showStrip: t.passDesign.showStrip,
+              primaryColor: t.passDesign.primaryColor,
+              secondaryColor: t.passDesign.secondaryColor,
+              textColor: t.passDesign.textColor,
+              stripImageUrl: t.passDesign.stripImageUrl,
+              patternStyle: t.passDesign.patternStyle,
+              progressStyle: t.passDesign.progressStyle,
+              fontFamily: t.passDesign.fontFamily,
+              labelFormat: t.passDesign.labelFormat,
+              customProgressLabel: t.passDesign.customProgressLabel,
+              customMessage: t.passDesign.customMessage,
+              editorConfig: t.passDesign.editorConfig,
+            }
+          : null,
+      }
+    }),
   }
 }
 
-// ─── Get Enrollment Card Data (for persistent card page) ────
+// ─── Get Pass Instance Card Data (for persistent card page) ──
 
-export type EnrollmentCardData = {
-  enrollmentId: string
+export type PassInstanceCardData = {
+  passInstanceId: string
   walletPassId: string | null
-  customerName: string
+  contactName: string
   currentCycleVisits: number
-  totalVisits: number
+  totalInteractions: number
   hasAvailableReward: boolean
   remainingUses: number
-  enrollmentStatus: "ACTIVE" | "COMPLETED" | "FROZEN" | "SUSPENDED" | "EXPIRED"
-  restaurant: {
+  passInstanceStatus: "ACTIVE" | "COMPLETED" | "SUSPENDED" | "EXPIRED" | "REVOKED" | "VOIDED"
+  organization: {
     name: string
     slug: string
     logo: string | null
     brandColor: string | null
   }
-  program: {
+  template: {
     name: string
     visitsRequired: number
     rewardDescription: string
-    programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "PREPAID"
+    passType: string
     config: unknown
-    cardDesign: PublicProgramInfo["cardDesign"]
+    passDesign: PublicTemplateInfo["passDesign"]
   }
   unrevealedReward: { rewardId: string; description: string } | null
   minigameConfig: MinigameConfig | null
 }
 
-export async function getEnrollmentCardData(
-  enrollmentId: string,
-  restaurantSlug: string
-): Promise<EnrollmentCardData | null> {
-  const enrollment = await db.enrollment.findUnique({
-    where: { id: enrollmentId },
+export async function getPassInstanceCardData(
+  passInstanceId: string,
+  organizationSlug: string
+): Promise<PassInstanceCardData | null> {
+  const passInstance = await db.passInstance.findUnique({
+    where: { id: passInstanceId },
     select: {
       id: true,
       walletPassId: true,
-      currentCycleVisits: true,
-      totalVisits: true,
-      remainingUses: true,
+      data: true,
       status: true,
       rewards: {
         where: { status: { in: ["AVAILABLE", "REDEEMED"] } },
         select: { id: true, status: true, revealedAt: true, description: true },
       },
-      customer: {
+      contact: {
         select: { fullName: true },
       },
-      loyaltyProgram: {
+      passTemplate: {
         select: {
           name: true,
-          visitsRequired: true,
-          rewardDescription: true,
           status: true,
-          programType: true,
+          passType: true,
           config: true,
-          cardDesign: {
+          passDesign: {
             select: {
               cardType: true,
               showStrip: true,
@@ -234,7 +230,7 @@ export async function getEnrollmentCardData(
               editorConfig: true,
             },
           },
-          restaurant: {
+          organization: {
             select: {
               name: true,
               slug: true,
@@ -247,54 +243,63 @@ export async function getEnrollmentCardData(
     },
   })
 
-  if (!enrollment) return null
+  if (!passInstance) return null
 
-  // Verify the enrollment belongs to the restaurant with the given slug
-  if (enrollment.loyaltyProgram.restaurant.slug !== restaurantSlug) return null
+  // Verify the pass instance belongs to the organization with the given slug
+  if (passInstance.passTemplate.organization.slug !== organizationSlug) return null
 
-  // Only show cards for active programs
-  if (enrollment.loyaltyProgram.status !== "ACTIVE") return null
+  // Only show cards for active templates
+  if (passInstance.passTemplate.status !== "ACTIVE") return null
 
-  const cd = enrollment.loyaltyProgram.cardDesign
+  const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
+  const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
+  const totalInteractions = (instanceData.totalInteractions as number) ?? 0
+  const remainingUses = (instanceData.remainingUses as number) ?? 0
+
+  const templateConfig = (passInstance.passTemplate.config as Record<string, unknown>) ?? {}
+  const visitsRequired = (templateConfig.visitsRequired as number) ?? 10
+  const rewardDescription = (templateConfig.rewardDescription as string) ?? "Free reward"
+
+  const pd = passInstance.passTemplate.passDesign
 
   // Find first unrevealed reward (has description, revealedAt is null)
-  const unrevealed = enrollment.rewards.find(
+  const unrevealed = passInstance.rewards.find(
     (r) => r.revealedAt === null && r.description != null
   )
 
-  const mgConfig = parseMinigameConfig(enrollment.loyaltyProgram.config)
+  const mgConfig = parseMinigameConfig(passInstance.passTemplate.config)
 
   return {
-    enrollmentId: enrollment.id,
-    walletPassId: enrollment.walletPassId,
-    customerName: enrollment.customer.fullName,
-    currentCycleVisits: enrollment.currentCycleVisits,
-    totalVisits: enrollment.totalVisits,
-    remainingUses: enrollment.remainingUses,
-    hasAvailableReward: enrollment.rewards.some((r) => r.status === "AVAILABLE"),
-    enrollmentStatus: enrollment.status,
-    restaurant: enrollment.loyaltyProgram.restaurant,
-    program: {
-      name: enrollment.loyaltyProgram.name,
-      visitsRequired: enrollment.loyaltyProgram.visitsRequired,
-      rewardDescription: enrollment.loyaltyProgram.rewardDescription,
-      programType: enrollment.loyaltyProgram.programType,
-      config: enrollment.loyaltyProgram.config,
-      cardDesign: cd
+    passInstanceId: passInstance.id,
+    walletPassId: passInstance.walletPassId,
+    contactName: passInstance.contact.fullName,
+    currentCycleVisits,
+    totalInteractions,
+    remainingUses,
+    hasAvailableReward: passInstance.rewards.some((r) => r.status === "AVAILABLE"),
+    passInstanceStatus: passInstance.status,
+    organization: passInstance.passTemplate.organization,
+    template: {
+      name: passInstance.passTemplate.name,
+      visitsRequired,
+      rewardDescription,
+      passType: passInstance.passTemplate.passType,
+      config: passInstance.passTemplate.config,
+      passDesign: pd
         ? {
-            cardType: cd.cardType,
-            showStrip: cd.showStrip,
-            primaryColor: cd.primaryColor,
-            secondaryColor: cd.secondaryColor,
-            textColor: cd.textColor,
-            stripImageUrl: cd.stripImageUrl,
-            patternStyle: cd.patternStyle,
-            progressStyle: cd.progressStyle,
-            fontFamily: cd.fontFamily,
-            labelFormat: cd.labelFormat,
-            customProgressLabel: cd.customProgressLabel,
-            customMessage: cd.customMessage,
-            editorConfig: cd.editorConfig,
+            cardType: pd.cardType,
+            showStrip: pd.showStrip,
+            primaryColor: pd.primaryColor,
+            secondaryColor: pd.secondaryColor,
+            textColor: pd.textColor,
+            stripImageUrl: pd.stripImageUrl,
+            patternStyle: pd.patternStyle,
+            progressStyle: pd.progressStyle,
+            fontFamily: pd.fontFamily,
+            labelFormat: pd.labelFormat,
+            customProgressLabel: pd.customProgressLabel,
+            customMessage: pd.customMessage,
+            editorConfig: pd.editorConfig,
           }
         : null,
     },
@@ -305,9 +310,9 @@ export async function getEnrollmentCardData(
   }
 }
 
-// ─── Join Program (enrollment only, no wallet pass) ─────────
+// ─── Join Template (pass instance creation, no wallet pass) ──
 
-export async function joinProgram(
+export async function joinTemplate(
   formData: FormData
 ): Promise<JoinResult> {
   // Rate limit by IP
@@ -322,8 +327,8 @@ export async function joinProgram(
     fullName: formData.get("fullName") as string,
     email: formData.get("email") as string,
     phone: formData.get("phone") as string,
-    restaurantSlug: formData.get("restaurantSlug") as string,
-    programId: formData.get("programId") as string,
+    organizationSlug: formData.get("organizationSlug") as string,
+    templateId: formData.get("templateId") as string,
   }
 
   const parsed = joinSchema.safeParse(raw)
@@ -334,37 +339,40 @@ export async function joinProgram(
     }
   }
 
-  const { restaurantSlug, programId } = parsed.data
+  const { organizationSlug, templateId } = parsed.data
   const fullName = sanitizeText(parsed.data.fullName, 100)
   const cleanEmail = parsed.data.email ? sanitizeText(parsed.data.email, 255) || null : null
   const cleanPhone = parsed.data.phone ? sanitizeText(parsed.data.phone, 30) || null : null
 
-  // Fetch restaurant
-  const restaurant = await db.restaurant.findUnique({
-    where: { slug: restaurantSlug },
+  // Fetch organization
+  const organization = await db.organization.findUnique({
+    where: { slug: organizationSlug },
     select: { id: true },
   })
 
-  if (!restaurant) {
-    return { success: false, error: "Restaurant not found" }
+  if (!organization) {
+    return { success: false, error: "Organization not found" }
   }
 
-  // Fetch the specific program
-  const program = await db.loyaltyProgram.findFirst({
+  // Fetch the specific template
+  const template = await db.passTemplate.findFirst({
     where: {
-      id: programId,
-      restaurantId: restaurant.id,
+      id: templateId,
+      organizationId: organization.id,
       status: "ACTIVE",
     },
-    select: { id: true, programType: true, config: true, rewardExpiryDays: true },
+    select: { id: true, passType: true, config: true },
   })
 
-  if (!program) {
-    return { success: false, error: "No active loyalty program found" }
+  if (!template) {
+    return { success: false, error: "No active pass template found" }
   }
 
-  // ── Find or create customer ──
-  let customer: {
+  const templateConfig = (template.config as Record<string, unknown>) ?? {}
+  const rewardExpiryDays = (templateConfig.rewardExpiryDays as number) ?? 90
+
+  // ── Find or create contact ──
+  let contact: {
     id: string
     fullName: string
     createdAt: Date
@@ -372,9 +380,9 @@ export async function joinProgram(
   } | null = null
 
   if (cleanEmail) {
-    customer = await db.customer.findUnique({
+    contact = await db.contact.findUnique({
       where: {
-        restaurantId_email: { restaurantId: restaurant.id, email: cleanEmail },
+        organizationId_email: { organizationId: organization.id, email: cleanEmail },
       },
       select: {
         id: true,
@@ -385,11 +393,11 @@ export async function joinProgram(
     })
   }
 
-  if (!customer && cleanPhone) {
-    customer = await db.customer.findUnique({
+  if (!contact && cleanPhone) {
+    contact = await db.contact.findUnique({
       where: {
-        restaurantId_phone: {
-          restaurantId: restaurant.id,
+        organizationId_phone: {
+          organizationId: organization.id,
           phone: cleanPhone,
         },
       },
@@ -402,13 +410,13 @@ export async function joinProgram(
     })
   }
 
-  const isReturningCustomer = !!customer
+  const isReturningContact = !!contact
 
-  // Create new customer if not found
-  if (!customer) {
-    customer = await db.customer.create({
+  // Create new contact if not found
+  if (!contact) {
+    contact = await db.contact.create({
       data: {
-        restaurantId: restaurant.id,
+        organizationId: organization.id,
         fullName,
         email: cleanEmail,
         phone: cleanPhone,
@@ -422,18 +430,24 @@ export async function joinProgram(
     })
   }
 
-  // ── Find or create enrollment for this program ──
-  let enrollment = await db.enrollment.findUnique({
+  // ── Find or create pass instance for this template ──
+  type PassInstanceShape = {
+    id: string
+    data: import("@prisma/client").Prisma.JsonValue
+    status: import("@prisma/client").PassInstanceStatus
+    walletPassId: string | null
+    rewards: { id: string }[]
+  }
+  let passInstance: PassInstanceShape | null = await db.passInstance.findUnique({
     where: {
-      customerId_loyaltyProgramId: {
-        customerId: customer.id,
-        loyaltyProgramId: program.id,
+      contactId_passTemplateId: {
+        contactId: contact.id,
+        passTemplateId: template.id,
       },
     },
     select: {
       id: true,
-      currentCycleVisits: true,
-      totalVisits: true,
+      data: true,
       status: true,
       walletPassId: true,
       rewards: {
@@ -444,38 +458,47 @@ export async function joinProgram(
     },
   })
 
-  const isReturningEnrollment = !!enrollment
+  const isReturningInstance = !!passInstance
 
-  // Ensure returning enrollments have a walletPassId for the browser card QR
-  if (enrollment && !enrollment.walletPassId) {
+  // Ensure returning instances have a walletPassId for the browser card QR
+  if (passInstance && !passInstance.walletPassId) {
     const walletPassId = randomUUID()
-    await db.enrollment.update({
-      where: { id: enrollment.id },
+    await db.passInstance.update({
+      where: { id: passInstance.id },
       data: { walletPassId },
     })
-    enrollment = { ...enrollment, walletPassId }
+    passInstance = { ...passInstance, walletPassId } as PassInstanceShape
   }
 
-  if (!enrollment) {
+  if (!passInstance) {
     // Generate walletPassId upfront so the browser card page has a scannable QR
     const walletPassId = randomUUID()
-    // Type-specific enrollment data
-    const prepaidConfig = program.programType === "PREPAID" ? parsePrepaidConfig(program.config) : null
-    const membershipConfig = program.programType === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
 
-    enrollment = await db.enrollment.create({
+    // Type-specific instance data
+    const prepaidConfig = template.passType === "PREPAID" ? parsePrepaidConfig(template.config) : null
+    const membershipConfig = template.passType === "MEMBERSHIP" ? parseMembershipConfig(template.config) : null
+
+    const instanceDataObj: Record<string, unknown> = {
+      currentCycleVisits: 0,
+      totalInteractions: 0,
+    }
+    if (prepaidConfig) {
+      instanceDataObj.remainingUses = prepaidConfig.totalUses
+    }
+
+    passInstance = await db.passInstance.create({
       data: {
-        customerId: customer.id,
-        loyaltyProgramId: program.id,
+        contactId: contact.id,
+        passTemplateId: template.id,
         walletPassId,
-        ...(prepaidConfig ? { remainingUses: prepaidConfig.totalUses } : {}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data: instanceDataObj as any,
         ...(prepaidConfig?.validUntil ? { expiresAt: new Date(prepaidConfig.validUntil) } : {}),
         ...(membershipConfig ? { expiresAt: computeMembershipExpiresAt(membershipConfig) } : {}),
       },
       select: {
         id: true,
-        currentCycleVisits: true,
-        totalVisits: true,
+        data: true,
         status: true,
         walletPassId: true,
         rewards: {
@@ -484,56 +507,60 @@ export async function joinProgram(
           take: 1,
         },
       },
-    })
+    }) as PassInstanceShape
 
-    // Auto-create coupon reward for new COUPON enrollments
-    if (program.programType === "COUPON") {
-      const couponConfig = parseCouponConfig(program.config)
+    // Auto-create coupon reward for new COUPON pass instances
+    if (template.passType === "COUPON") {
+      const couponConfig = parseCouponConfig(template.config)
       const expiresAt = couponConfig?.validUntil
         ? new Date(couponConfig.validUntil)
-        : program.rewardExpiryDays > 0
-          ? new Date(Date.now() + program.rewardExpiryDays * 86_400_000)
+        : rewardExpiryDays > 0
+          ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
           : new Date(Date.now() + 365 * 86_400_000) // default 1 year
 
-      // If minigame is enabled, assign a random prize immediately so customer can play the game
-      const mgConfig = parseMinigameConfig(program.config)
+      // If minigame is enabled, assign a random prize immediately so contact can play the game
+      const mgConfig = parseMinigameConfig(template.config)
       const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
       const selectedPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
 
       await db.reward.create({
         data: {
-          customerId: customer.id,
-          restaurantId: restaurant.id,
-          loyaltyProgramId: program.id,
-          enrollmentId: enrollment.id,
+          contactId: contact.id,
+          organizationId: organization.id,
+          passTemplateId: template.id,
+          passInstanceId: passInstance.id,
           status: "AVAILABLE",
           expiresAt,
           ...(selectedPrize ? { description: selectedPrize, revealedAt: null } : {}),
         },
       })
 
-      // Update enrollment's rewards cache for return value
-      enrollment = { ...enrollment, rewards: [{ id: "auto-created" }] }
+      // Update instance's rewards cache for return value
+      passInstance = { ...passInstance!, rewards: [{ id: "auto-created" }] }
     }
   }
 
+  // At this point passInstance is always non-null (either existing or just created)
+  const finalPassInstance = passInstance!
+  const piData = (finalPassInstance.data as Record<string, unknown>) ?? {}
+
   return {
     success: true,
-    enrollmentId: enrollment.id,
-    customerName: customer.fullName,
-    isReturning: isReturningCustomer || isReturningEnrollment,
-    currentCycleVisits: enrollment.currentCycleVisits,
-    totalVisits: enrollment.totalVisits,
-    hasAvailableReward: enrollment.rewards.length > 0,
-    cardUrl: buildCardUrl(restaurantSlug, enrollment.id),
+    passInstanceId: finalPassInstance.id,
+    contactName: contact.fullName,
+    isReturning: isReturningContact || isReturningInstance,
+    currentCycleVisits: (piData.currentCycleVisits as number) ?? 0,
+    totalInteractions: (piData.totalInteractions as number) ?? 0,
+    hasAvailableReward: finalPassInstance.rewards.length > 0,
+    cardUrl: buildCardUrl(organizationSlug, finalPassInstance.id),
   }
 }
 
-// ─── Request Wallet Pass (separate from enrollment) ─────────
+// ─── Request Wallet Pass (separate from pass instance creation) ──
 
 export async function requestWalletPass(
-  enrollmentId: string,
-  restaurantSlug: string,
+  passInstanceId: string,
+  organizationSlug: string,
   platform: "apple" | "google"
 ): Promise<OnboardingResult> {
   // Rate limit by IP
@@ -544,30 +571,27 @@ export async function requestWalletPass(
     return { success: false, error: "Too many requests. Please try again later." }
   }
 
-  const parsed = passRequestSchema.safeParse({ enrollmentId, restaurantSlug, platform })
+  const parsed = passRequestSchema.safeParse({ passInstanceId, organizationSlug, platform })
   if (!parsed.success) {
     return { success: false, error: "Invalid request" }
   }
 
-  // Fetch enrollment with linked data
-  const enrollment = await db.enrollment.findUnique({
-    where: { id: parsed.data.enrollmentId },
+  // Fetch pass instance with linked data
+  const passInstance = await db.passInstance.findUnique({
+    where: { id: parsed.data.passInstanceId },
     select: {
       id: true,
-      currentCycleVisits: true,
-      totalVisits: true,
-      pointsBalance: true,
-      remainingUses: true,
+      data: true,
       walletPassId: true,
       walletPassSerialNumber: true,
-      walletPassType: true,
+      walletProvider: true,
       status: true,
       rewards: {
         where: { status: "AVAILABLE" },
         select: { id: true },
         take: 1,
       },
-      customer: {
+      contact: {
         select: {
           id: true,
           fullName: true,
@@ -575,19 +599,16 @@ export async function requestWalletPass(
           createdAt: true,
         },
       },
-      loyaltyProgram: {
+      passTemplate: {
         select: {
           id: true,
           name: true,
-          programType: true,
+          passType: true,
           config: true,
-          visitsRequired: true,
-          rewardDescription: true,
-          rewardExpiryDays: true,
           termsAndConditions: true,
           endsAt: true,
-          cardDesign: true,
-          restaurant: {
+          passDesign: true,
+          organization: {
             select: {
               id: true,
               name: true,
@@ -606,67 +627,79 @@ export async function requestWalletPass(
     },
   })
 
-  if (!enrollment) {
-    return { success: false, error: "Enrollment not found" }
+  if (!passInstance) {
+    return { success: false, error: "Pass instance not found" }
   }
 
-  // Verify the enrollment belongs to the restaurant with the given slug
-  if (enrollment.loyaltyProgram.restaurant.slug !== parsed.data.restaurantSlug) {
-    return { success: false, error: "Enrollment not found" }
+  // Verify the pass instance belongs to the organization with the given slug
+  if (passInstance.passTemplate.organization.slug !== parsed.data.organizationSlug) {
+    return { success: false, error: "Pass instance not found" }
   }
 
-  const restaurant = enrollment.loyaltyProgram.restaurant
-  const program = enrollment.loyaltyProgram
-  const customer = enrollment.customer
+  const organization = passInstance.passTemplate.organization
+  const template = passInstance.passTemplate
+  const contact = passInstance.contact
+  const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
+  const templateConfig = (template.config as Record<string, unknown>) ?? {}
 
   // Resolve card design for pass generation
-  const cardDesign = resolveCardDesign(program.cardDesign, restaurant)
+  const cardDesign = resolveCardDesign(template.passDesign, organization)
 
-  return issuePassForEnrollment(
+  return issuePassForInstance(
     {
-      enrollmentId: enrollment.id,
-      customerId: customer.id,
-      customerName: customer.fullName,
-      customerEmail: customer.email,
-      customerCreatedAt: customer.createdAt,
-      currentCycleVisits: enrollment.currentCycleVisits,
-      totalVisits: enrollment.totalVisits,
-      pointsBalance: enrollment.pointsBalance,
-      remainingUses: enrollment.remainingUses,
-      walletPassId: enrollment.walletPassId,
-      walletPassSerialNumber: enrollment.walletPassSerialNumber,
-      walletPassType: enrollment.walletPassType,
-      hasAvailableReward: enrollment.rewards.length > 0,
+      passInstanceId: passInstance.id,
+      contactId: contact.id,
+      contactName: contact.fullName,
+      contactEmail: contact.email,
+      contactCreatedAt: contact.createdAt,
+      currentCycleVisits: (instanceData.currentCycleVisits as number) ?? 0,
+      totalInteractions: (instanceData.totalInteractions as number) ?? 0,
+      pointsBalance: (instanceData.pointsBalance as number) ?? 0,
+      remainingUses: (instanceData.remainingUses as number) ?? 0,
+      walletPassId: passInstance.walletPassId,
+      walletPassSerialNumber: passInstance.walletPassSerialNumber,
+      walletProvider: passInstance.walletProvider,
+      hasAvailableReward: passInstance.rewards.length > 0,
     },
-    restaurant,
-    program,
+    organization,
+    {
+      id: template.id,
+      name: template.name,
+      passType: template.passType,
+      config: template.config,
+      visitsRequired: (templateConfig.visitsRequired as number) ?? 10,
+      rewardDescription: (templateConfig.rewardDescription as string) ?? "Free reward",
+      rewardExpiryDays: (templateConfig.rewardExpiryDays as number) ?? 90,
+      termsAndConditions: template.termsAndConditions,
+      endsAt: template.endsAt,
+    },
     parsed.data.platform,
-    true, // requesting a pass after enrollment is always a "returning" action
+    true, // requesting a pass after instance creation is always a "returning" action
     cardDesign,
   )
 }
 
 // ─── Issue Pass (shared between new and returning) ──────────
 
-type EnrollmentPassData = {
-  enrollmentId: string
-  customerId: string
-  customerName: string
-  customerEmail: string | null
-  customerCreatedAt: Date
+type InstancePassData = {
+  passInstanceId: string
+  contactId: string
+  contactName: string
+  contactEmail: string | null
+  contactCreatedAt: Date
   currentCycleVisits: number
-  totalVisits: number
+  totalInteractions: number
   pointsBalance?: number
   remainingUses?: number
   walletPassId: string | null
   walletPassSerialNumber: string | null
-  walletPassType: string
+  walletProvider: string
   hasAvailableReward: boolean
 }
 
-async function issuePassForEnrollment(
-  enrollment: EnrollmentPassData,
-  restaurant: {
+async function issuePassForInstance(
+  instance: InstancePassData,
+  organization: {
     id: string
     name: string
     slug: string
@@ -678,10 +711,10 @@ async function issuePassForEnrollment(
     phone: string | null
     website: string | null
   },
-  program: {
+  template: {
     id: string
     name: string
-    programType: string
+    passType: string
     config: unknown
     visitsRequired: number
     rewardDescription: string
@@ -694,57 +727,57 @@ async function issuePassForEnrollment(
   cardDesign?: import("@/lib/wallet/card-design").CardDesignData | null,
 ): Promise<OnboardingResult> {
   if (platform === "apple") {
-    const serialNumber = enrollment.walletPassSerialNumber ?? randomUUID()
-    const walletPassId = enrollment.walletPassId ?? randomUUID()
+    const serialNumber = instance.walletPassSerialNumber ?? randomUUID()
+    const walletPassId = instance.walletPassId ?? randomUUID()
 
     try {
       const passBuffer = await generateApplePass({
         serialNumber,
         authenticationToken: walletPassId,
-        customerName: enrollment.customerName,
-        customerEmail: enrollment.customerEmail,
-        currentCycleVisits: enrollment.currentCycleVisits,
-        visitsRequired: program.visitsRequired,
-        totalVisits: enrollment.totalVisits,
-        memberSince: enrollment.customerCreatedAt,
-        hasAvailableReward: enrollment.hasAvailableReward,
-        restaurantName: restaurant.name,
-        restaurantLogo: restaurant.logo,
-        restaurantLogoApple: restaurant.logoApple,
-        brandColor: restaurant.brandColor,
-        secondaryColor: restaurant.secondaryColor,
-        rewardDescription: program.rewardDescription,
-        rewardExpiryDays: program.rewardExpiryDays,
-        termsAndConditions: program.termsAndConditions,
-        restaurantPhone: restaurant.phone,
-        restaurantWebsite: restaurant.website,
+        customerName: instance.contactName,
+        customerEmail: instance.contactEmail,
+        currentCycleVisits: instance.currentCycleVisits,
+        visitsRequired: template.visitsRequired,
+        totalVisits: instance.totalInteractions,
+        memberSince: instance.contactCreatedAt,
+        hasAvailableReward: instance.hasAvailableReward,
+        organizationName: organization.name,
+        organizationLogo: organization.logo,
+        organizationLogoApple: organization.logoApple,
+        brandColor: organization.brandColor,
+        secondaryColor: organization.secondaryColor,
+        rewardDescription: template.rewardDescription,
+        rewardExpiryDays: template.rewardExpiryDays,
+        termsAndConditions: template.termsAndConditions,
+        organizationPhone: organization.phone,
+        organizationWebsite: organization.website,
         cardDesign,
-        programType: program.programType,
-        programConfig: program.config,
-        pointsBalance: enrollment.pointsBalance ?? 0,
-        remainingUses: enrollment.remainingUses ?? 0,
+        programType: template.passType,
+        programConfig: template.config,
+        pointsBalance: instance.pointsBalance ?? 0,
+        remainingUses: instance.remainingUses ?? 0,
       })
 
-      // Store wallet fields on Enrollment (not Customer)
-      await db.enrollment.update({
-        where: { id: enrollment.enrollmentId },
+      // Store wallet fields on PassInstance
+      await db.passInstance.update({
+        where: { id: instance.passInstanceId },
         data: {
           walletPassSerialNumber: serialNumber,
           walletPassId: walletPassId,
-          walletPassType: "APPLE",
+          walletProvider: "APPLE",
         },
       })
 
       await db.walletPassLog.create({
         data: {
-          enrollmentId: enrollment.enrollmentId,
-          customerId: enrollment.customerId,
+          passInstanceId: instance.passInstanceId,
+          contactId: instance.contactId,
           action: "CREATED",
           details: {
             source: "onboarding",
             isReturning,
             serialNumber,
-            programId: program.id,
+            templateId: template.id,
           },
         },
       })
@@ -753,7 +786,7 @@ async function issuePassForEnrollment(
         success: true,
         platform: "apple",
         passBuffer: passBuffer.toString("base64"),
-        customerName: enrollment.customerName,
+        contactName: instance.contactName,
         isReturning,
       }
     } catch (error) {
@@ -766,65 +799,65 @@ async function issuePassForEnrollment(
   }
 
   // Google Wallet
-  const walletPassId = enrollment.walletPassId ?? randomUUID()
+  const walletPassId = instance.walletPassId ?? randomUUID()
 
   try {
     // Check if coupon has minigame with unrevealed prize
-    const mgConfig = parseMinigameConfig(program.config)
-    const hasUnrevealedPrize = program.programType === "COUPON" && !!mgConfig?.enabled && !!(mgConfig.prizes?.length)
+    const mgConfig = parseMinigameConfig(template.config)
+    const hasUnrevealedPrize = template.passType === "COUPON" && !!mgConfig?.enabled && !!(mgConfig.prizes?.length)
 
     const saveUrl = await generateGoogleWalletSaveUrl({
-      customerId: enrollment.customerId,
-      restaurantId: restaurant.id,
+      contactId: instance.contactId,
+      organizationId: organization.id,
       walletPassId,
-      customerName: enrollment.customerName,
-      customerEmail: enrollment.customerEmail,
-      currentCycleVisits: enrollment.currentCycleVisits,
-      visitsRequired: program.visitsRequired,
-      totalVisits: enrollment.totalVisits,
-      memberSince: enrollment.customerCreatedAt,
-      hasAvailableReward: enrollment.hasAvailableReward,
-      restaurantName: restaurant.name,
-      restaurantLogo: restaurant.logo,
-      restaurantLogoGoogle: restaurant.logoGoogle,
-      brandColor: restaurant.brandColor,
-      rewardDescription: program.rewardDescription,
-      rewardExpiryDays: program.rewardExpiryDays,
-      termsAndConditions: program.termsAndConditions,
-      restaurantPhone: restaurant.phone,
-      restaurantWebsite: restaurant.website,
-      programName: program.name,
-      programId: program.id,
-      enrollmentId: enrollment.enrollmentId,
-      cardDesign,
-      programEndsAt: program.endsAt,
-      programType: program.programType,
-      programConfig: program.config,
-      pointsBalance: enrollment.pointsBalance ?? 0,
-      remainingUses: enrollment.remainingUses ?? 0,
+      contactName: instance.contactName,
+      contactEmail: instance.contactEmail,
+      currentCycleVisits: instance.currentCycleVisits,
+      visitsRequired: template.visitsRequired,
+      totalVisits: instance.totalInteractions,
+      memberSince: instance.contactCreatedAt,
+      hasAvailableReward: instance.hasAvailableReward,
+      organizationName: organization.name,
+      organizationLogo: organization.logo,
+      organizationLogoGoogle: organization.logoGoogle,
+      brandColor: organization.brandColor,
+      rewardDescription: template.rewardDescription,
+      rewardExpiryDays: template.rewardExpiryDays,
+      termsAndConditions: template.termsAndConditions,
+      organizationPhone: organization.phone,
+      organizationWebsite: organization.website,
+      templateName: template.name,
+      templateId: template.id,
+      passInstanceId: instance.passInstanceId,
+      passDesign: cardDesign,
+      templateEndsAt: template.endsAt,
+      passType: template.passType,
+      templateConfig: template.config,
+      pointsBalance: instance.pointsBalance ?? 0,
+      remainingUses: instance.remainingUses ?? 0,
       hasUnrevealedPrize,
-      restaurantSlug: restaurant.slug,
+      organizationSlug: organization.slug,
     })
 
-    // Store wallet fields on Enrollment (not Customer)
-    await db.enrollment.update({
-      where: { id: enrollment.enrollmentId },
+    // Store wallet fields on PassInstance
+    await db.passInstance.update({
+      where: { id: instance.passInstanceId },
       data: {
         walletPassId,
-        walletPassType: "GOOGLE",
+        walletProvider: "GOOGLE",
       },
     })
 
     await db.walletPassLog.create({
       data: {
-        enrollmentId: enrollment.enrollmentId,
-        customerId: enrollment.customerId,
+        passInstanceId: instance.passInstanceId,
+        contactId: instance.contactId,
         action: "CREATED",
         details: {
           source: "onboarding",
           isReturning,
           platform: "google",
-          programId: program.id,
+          templateId: template.id,
         },
       },
     })
@@ -833,7 +866,7 @@ async function issuePassForEnrollment(
       success: true,
       platform: "google",
       saveUrl,
-      customerName: enrollment.customerName,
+      contactName: instance.contactName,
       isReturning,
     }
   } catch (error) {
@@ -849,22 +882,22 @@ async function issuePassForEnrollment(
 
 const revealPrizeSchema = z.object({
   rewardId: z.string().min(1),
-  enrollmentId: z.string().min(1),
+  passInstanceId: z.string().min(1),
   signature: z.string().min(1),
 })
 
 export async function revealPrize(
   rewardId: string,
-  enrollmentId: string,
+  passInstanceId: string,
   signature: string
 ): Promise<{ success: boolean; error?: string }> {
-  const parsed = revealPrizeSchema.safeParse({ rewardId, enrollmentId, signature })
+  const parsed = revealPrizeSchema.safeParse({ rewardId, passInstanceId, signature })
   if (!parsed.success) {
     return { success: false, error: "Invalid request" }
   }
 
   // Verify HMAC signature (same as card page access)
-  if (!verifyCardSignature(enrollmentId, signature)) {
+  if (!verifyCardSignature(passInstanceId, signature)) {
     return { success: false, error: "Access denied" }
   }
 
@@ -872,11 +905,11 @@ export async function revealPrize(
   const reward = await db.reward.findFirst({
     where: {
       id: rewardId,
-      enrollmentId,
+      passInstanceId,
       status: { in: ["AVAILABLE", "REDEEMED"] },
       revealedAt: null,
     },
-    select: { id: true, enrollmentId: true },
+    select: { id: true, passInstanceId: true },
   })
 
   if (!reward) {
@@ -890,26 +923,26 @@ export async function revealPrize(
   })
 
   // Trigger wallet pass update to refresh pass content
-  const enrollment = await db.enrollment.findUnique({
-    where: { id: enrollmentId },
-    select: { walletPassType: true },
+  const passInstance = await db.passInstance.findUnique({
+    where: { id: passInstanceId },
+    select: { walletProvider: true },
   })
 
-  if (enrollment && enrollment.walletPassType !== "NONE") {
+  if (passInstance && passInstance.walletProvider !== "NONE") {
     if (process.env.TRIGGER_SECRET_KEY) {
       import("@trigger.dev/sdk")
         .then(({ tasks }) =>
           tasks.trigger("update-wallet-pass", {
-            enrollmentId,
+            passInstanceId,
             updateType: "REWARD_EARNED" as const,
           })
         )
         .catch((err: unknown) =>
           console.error("Wallet pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
         )
-    } else if (enrollment.walletPassType === "GOOGLE") {
+    } else if (passInstance.walletProvider === "GOOGLE") {
       import("@/lib/wallet/google/update-pass")
-        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollmentId))
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(passInstanceId))
         .catch((err: unknown) =>
           console.error("Direct Google pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
         )

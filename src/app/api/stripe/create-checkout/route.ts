@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
-import { assertAuthenticated, getRestaurantForUser, assertRestaurantRole } from "@/lib/dal"
+import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { stripe } from "@/lib/stripe"
 import { db } from "@/lib/db"
 
 export async function POST(request: NextRequest) {
   try {
     const session = await assertAuthenticated()
-    const restaurant = await getRestaurantForUser()
-    if (!restaurant) {
-      return NextResponse.json({ error: "No restaurant found" }, { status: 400 })
+    const organization = await getOrganizationForUser()
+    if (!organization) {
+      return NextResponse.json({ error: "No organization found" }, { status: 400 })
     }
 
-    await assertRestaurantRole(restaurant.id, "owner")
+    await assertOrganizationRole(organization.id, "owner")
 
     const { priceLookupKey } = await request.json()
 
@@ -33,20 +33,20 @@ export async function POST(request: NextRequest) {
     const price = prices.data[0]
 
     // Create or retrieve Stripe customer
-    let stripeCustomerId = restaurant.stripeCustomerId
+    let stripeCustomerId = organization.stripeCustomerId
 
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
         email: session.user.email,
-        name: restaurant.name,
+        name: organization.name,
         metadata: {
-          loyalshy_restaurant_id: restaurant.id,
+          organization_id: organization.id,
         },
       })
       stripeCustomerId = customer.id
 
-      await db.restaurant.update({
-        where: { id: restaurant.id },
+      await db.organization.update({
+        where: { id: organization.id },
         data: { stripeCustomerId },
       })
     }
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       cancel_url: `${baseUrl}/dashboard/settings?tab=billing&checkout=canceled`,
       subscription_data: {
         metadata: {
-          loyalshy_restaurant_id: restaurant.id,
+          organization_id: organization.id,
         },
       },
       allow_promotion_codes: true,

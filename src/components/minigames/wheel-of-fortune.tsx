@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo } from "react"
 
 type WheelOfFortuneProps = {
   rewardText: string
-  enrollmentId: string
+  passInstanceId: string
   onReveal: () => void
   prizes?: string[]
   primaryColor?: string
@@ -46,7 +46,7 @@ function truncateLabel(label: string, maxLen: number): string {
   return label.slice(0, maxLen - 1) + "\u2026"
 }
 
-export function WheelOfFortune({ rewardText, enrollmentId, onReveal, prizes, primaryColor, accentColor }: WheelOfFortuneProps) {
+export function WheelOfFortune({ rewardText, passInstanceId, onReveal, prizes, primaryColor, accentColor }: WheelOfFortuneProps) {
   const [spinning, setSpinning] = useState(false)
   const [showReward, setShowReward] = useState(false)
   const [rotation, setRotation] = useState(0)
@@ -61,8 +61,8 @@ export function WheelOfFortune({ rewardText, enrollmentId, onReveal, prizes, pri
   const hasPrizes = prizes && prizes.length > 0
   const labels = useMemo(() => (hasPrizes ? buildLabels(prizes) : DEFAULT_LABELS), [hasPrizes, prizes])
   const winSegment = useMemo(
-    () => (hasPrizes ? findWinSegment(labels, rewardText) : hashToSegment(enrollmentId)),
-    [hasPrizes, labels, rewardText, enrollmentId],
+    () => (hasPrizes ? findWinSegment(labels, rewardText) : hashToSegment(passInstanceId)),
+    [hasPrizes, labels, rewardText, passInstanceId],
   )
 
   const handleSpin = useCallback(() => {

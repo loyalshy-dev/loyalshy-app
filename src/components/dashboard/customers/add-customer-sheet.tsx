@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { addCustomer } from "@/server/customer-actions"
+import { addContact } from "@/server/contact-actions"
 
 const schema = z.object({
   fullName: z.string().min(1, "Name is required").max(100),
@@ -51,7 +51,7 @@ export function AddCustomerSheet({ open, onOpenChange }: AddCustomerSheetProps) 
       formData.set("email", data.email ?? "")
       formData.set("phone", data.phone ?? "")
 
-      const result = await addCustomer(formData)
+      const result = await addContact(formData)
 
       if (!result.success) {
         if (result.duplicateField) {

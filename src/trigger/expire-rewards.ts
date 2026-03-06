@@ -23,12 +23,12 @@ export const expireRewardsTask = schedules.task({
         },
         select: {
           id: true,
-          enrollmentId: true,
+          passInstanceId: true,
         },
       })
 
       if (expiredRewards.length === 0) {
-        return { expired: 0, enrollmentsAffected: 0 }
+        return { expired: 0, passInstancesAffected: 0 }
       }
 
       // Batch update to EXPIRED
@@ -39,28 +39,28 @@ export const expireRewardsTask = schedules.task({
         data: { status: "EXPIRED" },
       })
 
-      // Collect unique enrollment IDs for wallet pass updates
-      const enrollmentIdSet = new Set<string>()
+      // Collect unique pass instance IDs for wallet pass updates
+      const passInstanceIdSet = new Set<string>()
       for (const r of expiredRewards) {
-        if (r.enrollmentId) {
-          enrollmentIdSet.add(r.enrollmentId)
+        if (r.passInstanceId) {
+          passInstanceIdSet.add(r.passInstanceId)
         }
       }
-      const enrollmentIds = [...enrollmentIdSet]
+      const passInstanceIds = [...passInstanceIdSet]
 
-      // Batch trigger wallet pass updates for affected enrollments
-      if (enrollmentIds.length > 0) {
+      // Batch trigger wallet pass updates for affected pass instances
+      if (passInstanceIds.length > 0) {
         await tasks.batchTrigger<typeof updateWalletPassTask>(
           "update-wallet-pass",
-          enrollmentIds.map((enrollmentId) => ({
-            payload: { enrollmentId, updateType: "REWARD_EXPIRED" as const },
+          passInstanceIds.map((passInstanceId) => ({
+            payload: { passInstanceId, updateType: "REWARD_EXPIRED" as const },
           }))
         )
       }
 
       return {
         expired: result.count,
-        enrollmentsAffected: enrollmentIds.length,
+        passInstancesAffected: passInstanceIds.length,
       }
     } finally {
       await db.$disconnect()

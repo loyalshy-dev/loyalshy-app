@@ -1,27 +1,27 @@
 import { connection } from "next/server"
 import { notFound } from "next/navigation"
 import { assertAuthenticated } from "@/lib/dal"
-import { getProgramDetail } from "@/server/program-actions"
+import { getTemplateDetail } from "@/server/template-actions"
 import { Users, Stamp, Gift, CheckCircle, Ticket, Crown, Clock } from "lucide-react"
 import { statusConfig } from "@/components/dashboard/programs/program-status"
 import { format } from "date-fns"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, formatMembershipDuration, parsePrepaidConfig } from "@/lib/program-config"
-import { PROGRAM_TYPE_META, type ProgramType } from "@/types/program-types"
-import type { CouponConfig, MembershipConfig, PrepaidConfig } from "@/types/program-types"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, formatMembershipDuration, parsePrepaidConfig } from "@/lib/pass-config"
+import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
+import type { CouponConfig, MembershipConfig, PrepaidConfig } from "@/types/pass-types"
 import { CreditCard } from "lucide-react"
 
-function StampCardStats({ program }: { program: NonNullable<Awaited<ReturnType<typeof getProgramDetail>>> }) {
+function StampCardStats({ program }: { program: NonNullable<Awaited<ReturnType<typeof getTemplateDetail>>> }) {
   const stats = [
     {
-      label: "Enrollments",
-      value: program.enrollmentCount,
-      sub: `${program.activeEnrollmentCount} active`,
+      label: "Pass Instances",
+      value: program.passInstanceCount,
+      sub: `${program.activePassInstanceCount} active`,
       icon: Users,
     },
     {
-      label: "Total Visits",
-      value: program.totalVisits,
-      sub: `${program.visitsRequired} required`,
+      label: "Total Interactions",
+      value: program.totalInteractions,
+      sub: `${program.stampsRequired ?? 0} required`,
       icon: Stamp,
     },
     {
@@ -61,12 +61,12 @@ function StampCardStats({ program }: { program: NonNullable<Awaited<ReturnType<t
   )
 }
 
-function CouponStats({ program, config }: { program: NonNullable<Awaited<ReturnType<typeof getProgramDetail>>>, config: CouponConfig | null }) {
+function CouponStats({ program, config }: { program: NonNullable<Awaited<ReturnType<typeof getTemplateDetail>>>, config: CouponConfig | null }) {
   const stats = [
     {
       label: "Coupons Issued",
-      value: program.enrollmentCount,
-      sub: `${program.activeEnrollmentCount} active`,
+      value: program.passInstanceCount,
+      sub: `${program.activePassInstanceCount} active`,
       icon: Ticket,
     },
     {
@@ -112,23 +112,23 @@ function CouponStats({ program, config }: { program: NonNullable<Awaited<ReturnT
   )
 }
 
-function MembershipStats({ program, config }: { program: NonNullable<Awaited<ReturnType<typeof getProgramDetail>>>, config: MembershipConfig | null }) {
+function MembershipStats({ program, config }: { program: NonNullable<Awaited<ReturnType<typeof getTemplateDetail>>>, config: MembershipConfig | null }) {
   const stats = [
     {
       label: "Total Members",
-      value: program.enrollmentCount,
-      sub: `${program.activeEnrollmentCount} active`,
+      value: program.passInstanceCount,
+      sub: `${program.activePassInstanceCount} active`,
       icon: Users,
     },
     {
       label: "Active Members",
-      value: program.activeEnrollmentCount,
+      value: program.activePassInstanceCount,
       sub: "currently enrolled",
       icon: Crown,
     },
     {
       label: "Check-ins",
-      value: program.totalVisits,
+      value: program.totalInteractions,
       sub: "all time",
       icon: CheckCircle,
     },
@@ -163,21 +163,21 @@ function MembershipStats({ program, config }: { program: NonNullable<Awaited<Ret
   )
 }
 
-function StampCardDetails({ program }: { program: NonNullable<Awaited<ReturnType<typeof getProgramDetail>>> }) {
+function StampCardDetails({ program }: { program: NonNullable<Awaited<ReturnType<typeof getTemplateDetail>>> }) {
   return (
     <dl className="grid gap-4 sm:grid-cols-2 text-sm">
       <div>
         <dt className="text-muted-foreground text-xs">Reward</dt>
-        <dd className="mt-0.5 font-medium">{program.rewardDescription}</dd>
+        <dd className="mt-0.5 font-medium">{program.rewardDescription ?? "-"}</dd>
       </div>
       <div>
-        <dt className="text-muted-foreground text-xs">Visits Required</dt>
-        <dd className="mt-0.5 font-medium">{program.visitsRequired}</dd>
+        <dt className="text-muted-foreground text-xs">Interactions Required</dt>
+        <dd className="mt-0.5 font-medium">{program.stampsRequired ?? "-"}</dd>
       </div>
       <div>
         <dt className="text-muted-foreground text-xs">Reward Expiry</dt>
         <dd className="mt-0.5 font-medium">
-          {program.rewardExpiryDays === 0
+          {(program.rewardExpiryDays ?? 0) === 0
             ? "Never expires"
             : `${program.rewardExpiryDays} days`}
         </dd>
@@ -250,18 +250,18 @@ function MembershipDetails({ config }: { config: MembershipConfig | null }) {
   )
 }
 
-function PrepaidStats({ program }: { program: NonNullable<Awaited<ReturnType<typeof getProgramDetail>>> }) {
+function PrepaidStats({ program }: { program: NonNullable<Awaited<ReturnType<typeof getTemplateDetail>>> }) {
   const config = parsePrepaidConfig(program.config)
   const stats = [
     {
       label: "Passes Issued",
-      value: program.enrollmentCount,
-      sub: `${program.activeEnrollmentCount} active`,
+      value: program.passInstanceCount,
+      sub: `${program.activePassInstanceCount} active`,
       icon: CreditCard,
     },
     {
       label: "Total Uses",
-      value: program.totalVisits,
+      value: program.totalInteractions,
       sub: "all time",
       icon: CheckCircle,
     },
@@ -333,29 +333,29 @@ export default async function ProgramOverviewPage(props: {
   const { id: programId } = await props.params
   await assertAuthenticated()
 
-  const program = await getProgramDetail(programId)
+  const program = await getTemplateDetail(programId)
   if (!program) {
     notFound()
   }
 
-  const programType = (program.programType ?? "STAMP_CARD") as ProgramType
-  const typeMeta = PROGRAM_TYPE_META[programType]
-  const couponConfig = programType === "COUPON" ? parseCouponConfig(program.config) : null
-  const membershipConfig = programType === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
-  const prepaidConfig = programType === "PREPAID" ? parsePrepaidConfig(program.config) : null
+  const passType = (program.passType ?? "STAMP_CARD") as PassType
+  const typeMeta = PASS_TYPE_META[passType]
+  const couponConfig = passType === "COUPON" ? parseCouponConfig(program.config) : null
+  const membershipConfig = passType === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
+  const prepaidConfig = passType === "PREPAID" ? parsePrepaidConfig(program.config) : null
 
   return (
     <div className="space-y-6">
       {/* Stat cards */}
-      {programType === "STAMP_CARD" && <StampCardStats program={program} />}
-      {programType === "COUPON" && <CouponStats program={program} config={couponConfig} />}
-      {programType === "MEMBERSHIP" && <MembershipStats program={program} config={membershipConfig} />}
-      {programType === "PREPAID" && <PrepaidStats program={program} />}
+      {passType === "STAMP_CARD" && <StampCardStats program={program} />}
+      {passType === "COUPON" && <CouponStats program={program} config={couponConfig} />}
+      {passType === "MEMBERSHIP" && <MembershipStats program={program} config={membershipConfig} />}
+      {passType === "PREPAID" && <PrepaidStats program={program} />}
 
-      {/* Program details */}
+      {/* Template details */}
       <div className="rounded-lg border border-border bg-card p-6">
         <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-sm font-semibold">Program Details</h2>
+          <h2 className="text-sm font-semibold">Template Details</h2>
           {typeMeta && (
             <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
               <typeMeta.icon className="h-3 w-3" />
@@ -365,10 +365,10 @@ export default async function ProgramOverviewPage(props: {
         </div>
 
         {/* Type-specific details */}
-        {programType === "STAMP_CARD" && <StampCardDetails program={program} />}
-        {programType === "COUPON" && <CouponDetails config={couponConfig} />}
-        {programType === "MEMBERSHIP" && <MembershipDetails config={membershipConfig} />}
-        {programType === "PREPAID" && <PrepaidDetails config={prepaidConfig} />}
+        {passType === "STAMP_CARD" && <StampCardDetails program={program} />}
+        {passType === "COUPON" && <CouponDetails config={couponConfig} />}
+        {passType === "MEMBERSHIP" && <MembershipDetails config={membershipConfig} />}
+        {passType === "PREPAID" && <PrepaidDetails config={prepaidConfig} />}
 
         {/* Shared dates */}
         <dl className="grid gap-4 sm:grid-cols-2 text-sm mt-4 pt-4 border-t border-border">
@@ -392,7 +392,7 @@ export default async function ProgramOverviewPage(props: {
               {format(new Date(program.createdAt), "MMM d, yyyy")}
             </dd>
           </div>
-          {program.termsAndConditions && programType === "STAMP_CARD" && (
+          {program.termsAndConditions && passType === "STAMP_CARD" && (
             <div className="sm:col-span-2">
               <dt className="text-muted-foreground text-xs">
                 Terms & Conditions

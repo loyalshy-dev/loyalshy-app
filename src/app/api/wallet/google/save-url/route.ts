@@ -8,10 +8,10 @@ import { apiRouteLimiter } from "@/lib/rate-limit"
 /**
  * POST /api/wallet/google/save-url
  *
- * Generates a "Save to Google Wallet" URL for an enrollment.
- * Requires authentication — the enrollment must belong to the user's restaurant.
+ * Generates a "Save to Google Wallet" URL for a pass instance.
+ * Requires authentication — the pass instance must belong to the user's organization.
  *
- * Body: { enrollmentId: string }
+ * Body: { passInstanceId: string }
  * Returns: { saveUrl: string }
  */
 export async function POST(request: Request) {
@@ -31,57 +31,51 @@ export async function POST(request: Request) {
       )
     }
 
-    const body = (await request.json()) as { enrollmentId?: string }
-    const { enrollmentId } = body
+    const body = (await request.json()) as { passInstanceId?: string }
+    const { passInstanceId } = body
 
-    if (!enrollmentId) {
+    if (!passInstanceId) {
       return NextResponse.json(
-        { error: "enrollmentId is required" },
+        { error: "passInstanceId is required" },
         { status: 400 }
       )
     }
 
-    // Scope enrollment lookup to the user's restaurant
-    const restaurantId = session.user.restaurantId
-    if (!restaurantId) {
+    // Scope pass instance lookup to the user's active organization
+    const organizationId = session.session.activeOrganizationId
+    if (!organizationId) {
       return NextResponse.json(
-        { error: "No restaurant associated with your account" },
+        { error: "No organization associated with your session" },
         { status: 403 }
       )
     }
 
-    const enrollment = await db.enrollment.findFirst({
+    const passInstance = await db.passInstance.findFirst({
       where: {
-        id: enrollmentId,
-        customer: { restaurantId, deletedAt: null },
+        id: passInstanceId,
+        contact: { organizationId, deletedAt: null },
       },
       select: {
         id: true,
-        currentCycleVisits: true,
-        totalVisits: true,
-        pointsBalance: true,
-        remainingUses: true,
+        data: true,
         walletPassId: true,
-        enrolledAt: true,
-        customer: {
+        issuedAt: true,
+        contact: {
           select: {
             id: true,
             fullName: true,
             email: true,
           },
         },
-        loyaltyProgram: {
+        passTemplate: {
           select: {
             id: true,
             name: true,
-            programType: true,
+            passType: true,
             config: true,
-            visitsRequired: true,
-            rewardDescription: true,
-            rewardExpiryDays: true,
             termsAndConditions: true,
             endsAt: true,
-            restaurant: {
+            organization: {
               select: {
                 id: true,
                 name: true,
@@ -94,7 +88,7 @@ export async function POST(request: Request) {
                 website: true,
               },
             },
-            cardDesign: true,
+            passDesign: true,
           },
         },
         rewards: {
@@ -105,64 +99,77 @@ export async function POST(request: Request) {
       },
     })
 
-    if (!enrollment) {
+    if (!passInstance) {
       return NextResponse.json(
-        { error: "Enrollment not found" },
+        { error: "Pass instance not found" },
         { status: 404 }
       )
     }
 
-    const program = enrollment.loyaltyProgram
-    const restaurant = program.restaurant
+    const template = passInstance.passTemplate
+    const organization = template.organization
 
-    const walletPassId = enrollment.walletPassId
+    const walletPassId = passInstance.walletPassId
     if (!walletPassId) {
       return NextResponse.json(
-        { error: "Enrollment wallet pass not initialized. Issue pass from dashboard first." },
+        { error: "Pass instance wallet pass not initialized. Issue pass from dashboard first." },
         { status: 400 }
       )
     }
 
-    const cardDesign = resolveCardDesign(
-      program.cardDesign,
-      restaurant
+    // Extract data from the PassInstance.data JSON
+    const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
+    const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
+    const totalVisits = (instanceData.totalVisits as number) ?? 0
+    const pointsBalance = (instanceData.pointsBalance as number) ?? 0
+    const remainingUses = (instanceData.remainingUses as number) ?? 0
+
+    // Extract config values from PassTemplate.config JSON
+    const templateConfig = (template.config ?? {}) as Record<string, unknown>
+    const visitsRequired = (templateConfig.visitsRequired as number) ?? 10
+    const rewardDescription = (templateConfig.rewardDescription as string) ?? "Free reward"
+    const rewardExpiryDays = (templateConfig.rewardExpiryDays as number) ?? 30
+
+    const passDesign = resolveCardDesign(
+      template.passDesign,
+      organization
     )
 
-    const hasUnrevealedPrize = enrollment.rewards.some(
+    const hasUnrevealedPrize = passInstance.rewards.some(
       (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt === null && r.description != null
     )
 
     const saveUrl = await generateGoogleWalletSaveUrl({
-      customerId: enrollment.customer.id,
-      restaurantId: restaurant.id,
+      contactId: passInstance.contact.id,
+      organizationId: organization.id,
       walletPassId,
-      customerName: enrollment.customer.fullName,
-      customerEmail: enrollment.customer.email,
-      currentCycleVisits: enrollment.currentCycleVisits,
-      visitsRequired: program.visitsRequired,
-      totalVisits: enrollment.totalVisits,
-      memberSince: enrollment.enrolledAt,
-      hasAvailableReward: enrollment.rewards.length > 0,
-      restaurantName: restaurant.name,
-      restaurantLogo: restaurant.logo,
-      restaurantLogoGoogle: restaurant.logoGoogle,
-      brandColor: restaurant.brandColor,
-      rewardDescription: program.rewardDescription,
-      rewardExpiryDays: program.rewardExpiryDays,
-      termsAndConditions: program.termsAndConditions,
-      restaurantPhone: restaurant.phone,
-      restaurantWebsite: restaurant.website,
-      programName: program.name,
-      programId: program.id,
-      enrollmentId: enrollment.id,
-      cardDesign,
-      programEndsAt: program.endsAt,
-      programType: program.programType,
-      programConfig: program.config,
-      pointsBalance: enrollment.pointsBalance ?? 0,
-      remainingUses: enrollment.remainingUses ?? 0,
+      contactName: passInstance.contact.fullName,
+      contactEmail: passInstance.contact.email,
+      currentCycleVisits,
+      visitsRequired,
+      totalVisits,
+      memberSince: passInstance.issuedAt,
+      hasAvailableReward: passInstance.rewards.length > 0,
+      organizationName: organization.name,
+      organizationLogo: organization.logo,
+      organizationLogoGoogle: organization.logoGoogle,
+      brandColor: organization.brandColor,
+      rewardDescription,
+      rewardExpiryDays,
+      termsAndConditions: template.termsAndConditions,
+      organizationPhone: organization.phone,
+      organizationWebsite: organization.website,
+      templateName: template.name,
+      templateId: template.id,
+      passInstanceId: passInstance.id,
+      passDesign: passDesign,
+      templateEndsAt: template.endsAt,
+      passType: template.passType,
+      templateConfig: template.config,
+      pointsBalance,
+      remainingUses,
       hasUnrevealedPrize,
-      restaurantSlug: restaurant.slug,
+      organizationSlug: organization.slug,
     })
 
     return NextResponse.json({ saveUrl })

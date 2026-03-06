@@ -27,7 +27,7 @@ type MobileSidebarProps = {
     email: string
     image: string | null
   }
-  restaurant: {
+  organization: {
     name: string
     logo: string | null
   } | null
@@ -36,8 +36,8 @@ type MobileSidebarProps = {
 
 const navItems = [
   { label: "Overview", href: "/dashboard", icon: BarChart3 },
-  { label: "Customers", href: "/dashboard/customers", icon: Users },
-  { label: "Programs", href: "/dashboard/programs", icon: Layers },
+  { label: "Contacts", href: "/dashboard/customers", icon: Users },
+  { label: "Templates", href: "/dashboard/programs", icon: Layers },
 ]
 
 const ownerItems = [
@@ -57,7 +57,7 @@ export function MobileSidebar({
   open,
   onOpenChange,
   user,
-  restaurant,
+  organization,
   orgRole,
 }: MobileSidebarProps) {
   const pathname = usePathname()
@@ -77,21 +77,21 @@ export function MobileSidebar({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-[280px] p-0 bg-sidebar [&>button]:text-sidebar-foreground">
         <SheetHeader className="px-4 h-14 flex flex-row items-center gap-3 border-b border-sidebar-border">
-          {restaurant?.logo ? (
+          {organization?.logo ? (
             <img
-              src={restaurant.logo}
-              alt={restaurant.name}
+              src={organization.logo}
+              alt={organization.name}
               className="size-7 rounded-md object-cover"
             />
           ) : (
             <div className="size-7 rounded-md bg-sidebar-accent flex items-center justify-center">
               <span className="text-[11px] font-semibold text-sidebar-accent-foreground">
-                {restaurant ? getInitials(restaurant.name) : "L"}
+                {organization ? getInitials(organization.name) : "L"}
               </span>
             </div>
           )}
           <SheetTitle className="text-sm font-semibold text-sidebar-primary">
-            {restaurant?.name ?? "Loyalshy"}
+            {organization?.name ?? "Loyalshy"}
           </SheetTitle>
         </SheetHeader>
 

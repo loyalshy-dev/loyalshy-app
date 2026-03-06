@@ -21,46 +21,46 @@ export const generateAnalyticsSnapshotTask = schedules.task({
       const dayEnd = new Date(yesterday)
       dayEnd.setHours(23, 59, 59, 999)
 
-      // Get all active restaurants
-      const restaurants = await db.restaurant.findMany({
+      // Get all organizations
+      const organizations = await db.organization.findMany({
         select: { id: true },
       })
 
       let snapshotsCreated = 0
 
-      for (const restaurant of restaurants) {
-        const restaurantId = restaurant.id
+      for (const org of organizations) {
+        const organizationId = org.id
 
         // Compute daily aggregates
-        const [totalCustomers, newCustomers, totalVisits, rewardsEarned, rewardsRedeemed] =
+        const [totalContacts, newContacts, totalInteractions, rewardsEarned, rewardsRedeemed] =
           await Promise.all([
-            db.customer.count({
+            db.contact.count({
               where: {
-                restaurantId,
+                organizationId,
                 createdAt: { lte: dayEnd },
               },
             }),
-            db.customer.count({
+            db.contact.count({
               where: {
-                restaurantId,
+                organizationId,
                 createdAt: { gte: yesterday, lte: dayEnd },
               },
             }),
-            db.visit.count({
+            db.interaction.count({
               where: {
-                restaurantId,
+                organizationId,
                 createdAt: { gte: yesterday, lte: dayEnd },
               },
             }),
             db.reward.count({
               where: {
-                restaurantId,
+                organizationId,
                 earnedAt: { gte: yesterday, lte: dayEnd },
               },
             }),
             db.reward.count({
               where: {
-                restaurantId,
+                organizationId,
                 status: "REDEEMED",
                 redeemedAt: { gte: yesterday, lte: dayEnd },
               },
@@ -70,24 +70,24 @@ export const generateAnalyticsSnapshotTask = schedules.task({
         // Upsert to handle re-runs gracefully
         await db.analyticsSnapshot.upsert({
           where: {
-            restaurantId_date: {
-              restaurantId,
+            organizationId_date: {
+              organizationId,
               date: yesterday,
             },
           },
           create: {
-            restaurantId,
+            organizationId,
             date: yesterday,
-            totalCustomers,
-            newCustomers,
-            totalVisits,
+            totalContacts,
+            newContacts,
+            totalInteractions,
             rewardsEarned,
             rewardsRedeemed,
           },
           update: {
-            totalCustomers,
-            newCustomers,
-            totalVisits,
+            totalContacts,
+            newContacts,
+            totalInteractions,
             rewardsEarned,
             rewardsRedeemed,
           },
@@ -98,7 +98,7 @@ export const generateAnalyticsSnapshotTask = schedules.task({
 
       return {
         date: yesterday.toISOString().split("T")[0],
-        restaurantsProcessed: restaurants.length,
+        organizationsProcessed: organizations.length,
         snapshotsCreated,
       }
     } finally {

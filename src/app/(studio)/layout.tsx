@@ -20,7 +20,8 @@ async function StudioLayoutInner({
     redirect("/login")
   }
 
-  if (!session.user.restaurantId) {
+  // If user has no active organization, redirect to onboarding
+  if (!session.session.activeOrganizationId) {
     redirect("/register?step=2")
   }
 

@@ -26,12 +26,12 @@ export async function GET(request: Request, { params }: { params: Params }) {
   const serialNumbers = registrations.map((r: { serialNumber: string }) => r.serialNumber)
 
   // Filter by update time if passesUpdatedSince is provided
-  // Query Enrollment instead of Customer — walletPassSerialNumber lives on Enrollment
+  // Query PassInstance — walletPassSerialNumber lives on PassInstance
   const sinceDate = passesUpdatedSince
     ? new Date(passesUpdatedSince)
     : new Date(0)
 
-  const updatedEnrollments = await db.enrollment.findMany({
+  const updatedPassInstances = await db.passInstance.findMany({
     where: {
       walletPassSerialNumber: { in: serialNumbers },
       updatedAt: { gt: sinceDate },
@@ -39,18 +39,18 @@ export async function GET(request: Request, { params }: { params: Params }) {
     select: { walletPassSerialNumber: true, updatedAt: true },
   })
 
-  if (updatedEnrollments.length === 0) {
+  if (updatedPassInstances.length === 0) {
     return new NextResponse(null, { status: 204 })
   }
 
   // Find the most recent updatedAt
-  const lastUpdated = updatedEnrollments.reduce((latest: Date, e: { updatedAt: Date }) => {
-    return e.updatedAt > latest ? e.updatedAt : latest
+  const lastUpdated = updatedPassInstances.reduce((latest: Date, pi: { updatedAt: Date }) => {
+    return pi.updatedAt > latest ? pi.updatedAt : latest
   }, new Date(0))
 
   return NextResponse.json({
-    serialNumbers: updatedEnrollments
-      .map((e: { walletPassSerialNumber: string | null }) => e.walletPassSerialNumber)
+    serialNumbers: updatedPassInstances
+      .map((pi: { walletPassSerialNumber: string | null }) => pi.walletPassSerialNumber)
       .filter(Boolean),
     lastUpdated: lastUpdated.toISOString(),
   })

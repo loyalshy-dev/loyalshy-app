@@ -1,6 +1,6 @@
 import { connection } from "next/server"
 import { notFound } from "next/navigation"
-import { getRestaurantBySlug } from "@/server/onboarding-actions"
+import { getOrganizationBySlug } from "@/server/onboarding-actions"
 import { OnboardingForm } from "./onboarding-form"
 import type { Metadata } from "next"
 
@@ -11,18 +11,17 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  const restaurant = await getRestaurantBySlug(slug)
+  const org = await getOrganizationBySlug(slug)
 
-  if (!restaurant) {
+  if (!org) {
     return { title: "Not Found" }
   }
 
-  // Use the first active program for metadata description
-  const firstProgram = restaurant.programs[0]
-  const title = `Join ${restaurant.name}`
-  const description = firstProgram
-    ? `Get your digital loyalty card for ${restaurant.name}. ${firstProgram.rewardDescription} after ${firstProgram.visitsRequired} visits!`
-    : `Get your digital loyalty card for ${restaurant.name}.`
+  const firstTemplate = org.templates[0]
+  const title = `Join ${org.name}`
+  const description = firstTemplate
+    ? `Get your digital pass for ${org.name}.`
+    : `Get your digital pass for ${org.name}.`
 
   return {
     title,
@@ -39,11 +38,11 @@ export default async function JoinPage({ params, searchParams }: PageProps) {
   await connection()
   const { slug } = await params
   const { program } = await searchParams
-  const restaurant = await getRestaurantBySlug(slug)
+  const org = await getOrganizationBySlug(slug)
 
-  if (!restaurant) {
+  if (!org) {
     notFound()
   }
 
-  return <OnboardingForm restaurant={restaurant} preselectedProgramId={program} />
+  return <OnboardingForm organization={org} preselectedTemplateId={program} />
 }

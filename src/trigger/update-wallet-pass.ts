@@ -6,8 +6,8 @@ import { createDb } from "./db"
 // ─── Types ──────────────────────────────────────────────────
 
 type UpdateWalletPassPayload = {
-  enrollmentId: string
-  updateType: "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "PROGRAM_CHANGE" | "ENROLLMENT_FROZEN" | "CHECK_IN" | "POINTS_EARNED" | "POINTS_REDEEMED"
+  passInstanceId: string
+  updateType: "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "TEMPLATE_CHANGE" | "PASS_INSTANCE_SUSPENDED" | "CHECK_IN" | "POINTS_EARNED" | "POINTS_REDEEMED" | "PREPAID_USE" | "PREPAID_RECHARGE" | "GIFT_CHARGE" | "GIFT_REFUND" | "TICKET_SCAN" | "TICKET_VOID" | "ACCESS_GRANT" | "ACCESS_DENY" | "TRANSIT_BOARD" | "TRANSIT_EXIT" | "ID_VERIFY"
 }
 
 // ─── Task ───────────────────────────────────────────────────
@@ -25,37 +25,32 @@ export const updateWalletPassTask = task({
     const db = createDb()
 
     try {
-      const enrollment = await db.enrollment.findUnique({
-        where: { id: payload.enrollmentId },
+      const passInstance = await db.passInstance.findUnique({
+        where: { id: payload.passInstanceId },
         select: {
           id: true,
-          currentCycleVisits: true,
-          totalVisits: true,
-          pointsBalance: true,
-          enrolledAt: true,
+          data: true,
+          issuedAt: true,
           updatedAt: true,
           walletPassId: true,
           walletPassSerialNumber: true,
-          walletPassType: true,
+          walletProvider: true,
           status: true,
-          customer: {
+          contact: {
             select: {
               id: true,
               fullName: true,
               email: true,
             },
           },
-          loyaltyProgram: {
+          passTemplate: {
             select: {
               id: true,
               name: true,
-              programType: true,
+              passType: true,
               config: true,
-              visitsRequired: true,
-              rewardDescription: true,
-              rewardExpiryDays: true,
               termsAndConditions: true,
-              restaurant: {
+              organization: {
                 select: {
                   id: true,
                   name: true,
@@ -69,7 +64,7 @@ export const updateWalletPassTask = task({
                   website: true,
                 },
               },
-              cardDesign: true,
+              passDesign: true,
             },
           },
           rewards: {
@@ -82,35 +77,49 @@ export const updateWalletPassTask = task({
         },
       })
 
-      if (!enrollment) {
-        throw new AbortTaskRunError(`Enrollment ${payload.enrollmentId} not found`)
+      if (!passInstance) {
+        throw new AbortTaskRunError(`PassInstance ${payload.passInstanceId} not found`)
       }
 
-      if (enrollment.walletPassType === "NONE") {
+      if (passInstance.walletProvider === "NONE") {
         return { skipped: true, reason: "no_wallet_pass" }
       }
 
-      const program = enrollment.loyaltyProgram
-      const cardDesign = program.cardDesign
-      const hasAvailableReward = enrollment.rewards.some(
+      const template = passInstance.passTemplate
+      const passDesign = template.passDesign
+
+      // Extract data from PassInstance.data JSON
+      const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
+      const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
+      const totalVisits = (instanceData.totalVisits as number) ?? 0
+      const pointsBalance = (instanceData.pointsBalance as number) ?? 0
+      const remainingUses = (instanceData.remainingUses as number) ?? 0
+
+      // Extract config from PassTemplate.config JSON
+      const templateConfig = (template.config ?? {}) as Record<string, unknown>
+      const visitsRequired = (templateConfig.visitsRequired as number) ?? 10
+      const rewardDescription = (templateConfig.rewardDescription as string) ?? ""
+      const rewardExpiryDays = (templateConfig.rewardExpiryDays as number) ?? 30
+
+      const hasAvailableReward = passInstance.rewards.some(
         (r: { status: string }) => r.status === "AVAILABLE"
       )
-      const unrevealedReward = enrollment.rewards.find(
+      const unrevealedReward = passInstance.rewards.find(
         (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt === null && r.description != null
       )
-      const revealedReward = enrollment.rewards.find(
+      const revealedReward = passInstance.rewards.find(
         (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt !== null && r.description != null
       )
 
-      if (enrollment.walletPassType === "APPLE" && enrollment.walletPassSerialNumber) {
+      if (passInstance.walletProvider === "APPLE" && passInstance.walletPassSerialNumber) {
         // ── Apple Wallet: Touch updatedAt + send APNs push ──
-        await db.enrollment.update({
-          where: { id: enrollment.id },
+        await db.passInstance.update({
+          where: { id: passInstance.id },
           data: { updatedAt: new Date() },
         })
 
         // Send APNs push to all registered devices
-        const pushTokens = enrollment.deviceRegistrations.map(
+        const pushTokens = passInstance.deviceRegistrations.map(
           (d: { pushToken: string }) => d.pushToken
         )
         let pushResult = { sent: 0, failed: 0 }
@@ -122,7 +131,7 @@ export const updateWalletPassTask = task({
         // Log the update
         await db.walletPassLog.create({
           data: {
-            enrollmentId: enrollment.id,
+            passInstanceId: passInstance.id,
             action: pushTokens.length > 0 ? "PUSH_SENT" : "UPDATED",
             details: {
               trigger: payload.updateType,
@@ -140,14 +149,14 @@ export const updateWalletPassTask = task({
           pushSent: pushResult.sent,
           pushFailed: pushResult.failed,
         }
-      } else if (enrollment.walletPassType === "GOOGLE") {
+      } else if (passInstance.walletProvider === "GOOGLE") {
         // ── Google Wallet: PATCH the loyalty object via REST API ──
         const result = await patchGooglePass(
-          enrollment,
-          program,
+          { ...passInstance, data: instanceData, currentCycleVisits, totalVisits, pointsBalance },
+          { ...template, visitsRequired, rewardDescription },
           hasAvailableReward,
           payload.updateType,
-          cardDesign,
+          passDesign,
           !!unrevealedReward,
           revealedReward?.description ?? null
         )
@@ -155,7 +164,7 @@ export const updateWalletPassTask = task({
         // Log the update
         await db.walletPassLog.create({
           data: {
-            enrollmentId: enrollment.id,
+            passInstanceId: passInstance.id,
             action: "UPDATED",
             details: {
               trigger: payload.updateType,
@@ -177,35 +186,36 @@ export const updateWalletPassTask = task({
 
 // ─── Google Wallet PATCH ────────────────────────────────────
 
-type EnrollmentForGoogle = {
+type PassInstanceForGoogle = {
   id: string
   status: string
+  data: Record<string, unknown>
   currentCycleVisits: number
   totalVisits: number
   pointsBalance: number
-  enrolledAt: Date
-  customer: {
+  issuedAt: Date
+  contact: {
     fullName: string
   }
-  loyaltyProgram: {
+  passTemplate: {
     id: string
-    restaurant: {
+    organization: {
       slug: string
       brandColor: string | null
     }
   }
 }
 
-type ProgramForGoogle = {
+type TemplateForGoogle = {
   id: string
   name: string
-  programType?: string
+  passType?: string
   config?: unknown
   visitsRequired: number
   rewardDescription: string
 }
 
-type CardDesignRow = {
+type PassDesignRow = {
   primaryColor: string | null
   stripImageGoogle: string | null
   generatedStripGoogle: string | null
@@ -218,11 +228,11 @@ type CardDesignRow = {
 } | null
 
 async function patchGooglePass(
-  enrollment: EnrollmentForGoogle,
-  program: ProgramForGoogle,
+  passInstance: PassInstanceForGoogle,
+  template: TemplateForGoogle,
   hasAvailableReward: boolean,
   updateType: string,
-  cardDesign?: CardDesignRow,
+  passDesign?: PassDesignRow,
   hasUnrevealedPrize?: boolean,
   revealedPrize?: string | null
 ): Promise<{ status: number }> {
@@ -238,18 +248,18 @@ async function patchGooglePass(
     return { status: 0 }
   }
 
-  const objectId = buildEnrollmentObjectId(enrollment.id)
+  const objectId = buildEnrollmentObjectId(passInstance.id)
   const token = await getAccessToken()
 
   const { formatProgressValue, formatLabel } = await import("@/lib/wallet/card-design")
-  const { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem, getWalletRewardText } = await import("@/lib/program-config")
+  const { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem, getWalletRewardText } = await import("@/lib/pass-config")
   type ProgressStyle = import("@/lib/wallet/card-design").ProgressStyle
   type LabelFormat = import("@/lib/wallet/card-design").LabelFormat
 
-  const progressStyle = (cardDesign?.progressStyle ?? "NUMBERS") as ProgressStyle
-  const labelFmt = (cardDesign?.labelFormat ?? "UPPERCASE") as LabelFormat
+  const progressStyle = (passDesign?.progressStyle ?? "NUMBERS") as ProgressStyle
+  const labelFmt = (passDesign?.labelFormat ?? "UPPERCASE") as LabelFormat
 
-  const memberSinceFormatted = enrollment.enrolledAt.toLocaleDateString(
+  const memberSinceFormatted = passInstance.issuedAt.toLocaleDateString(
     "en-US",
     { month: "short", year: "numeric" }
   )
@@ -259,14 +269,20 @@ async function patchGooglePass(
   let secondaryLoyaltyPoints: Record<string, unknown>
   let textModulesData: Record<string, unknown>[]
 
-  const couponConfig = program.programType === "COUPON" ? parseCouponConfig(program.config) : null
-  const membershipConfig = program.programType === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
-  const pointsConfig = program.programType === "POINTS" ? parsePointsConfig(program.config) : null
+  const couponConfig = template.passType === "COUPON" ? parseCouponConfig(template.config) : null
+  const membershipConfig = template.passType === "MEMBERSHIP" ? parseMembershipConfig(template.config) : null
+  const pointsConfig = template.passType === "POINTS" ? parsePointsConfig(template.config) : null
+  const prepaidConfig = template.passType === "PREPAID" ? parsePrepaidConfig(template.config) : null
+  const giftCardConfig = template.passType === "GIFT_CARD" ? parseGiftCardConfig(template.config) : null
+  const ticketConfig = template.passType === "TICKET" ? parseTicketConfig(template.config) : null
+  const accessConfig = template.passType === "ACCESS" ? parseAccessConfig(template.config) : null
+  const transitConfig = template.passType === "TRANSIT" ? parseTransitConfig(template.config) : null
+  const businessIdConfig = template.passType === "BUSINESS_ID" ? parseBusinessIdConfig(template.config) : null
 
-  if (program.programType === "COUPON" && couponConfig) {
+  if (template.passType === "COUPON" && couponConfig) {
     // Show revealed prize, prize names (if minigame), or generic discount
-    const isRedeemed = enrollment.status === "COMPLETED"
-    const prizeText = getWalletRewardText(program.config, formatCouponValue(couponConfig))
+    const isRedeemed = passInstance.status === "COMPLETED"
+    const prizeText = getWalletRewardText(template.config, formatCouponValue(couponConfig))
     const hasPrizes = prizeText !== formatCouponValue(couponConfig)
     const discountLabel = isRedeemed ? "REDEEMED" : (revealedPrize ? "YOUR PRIZE" : (hasPrizes ? "PRIZES" : "DISCOUNT"))
     const discountValue = isRedeemed
@@ -287,42 +303,98 @@ async function patchGooglePass(
       ...(couponConfig.couponCode ? [{ id: "couponCode", header: formatLabel("CODE", labelFmt), body: couponConfig.couponCode }] : []),
       { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
     ]
-  } else if (program.programType === "MEMBERSHIP" && membershipConfig) {
+  } else if (template.passType === "MEMBERSHIP" && membershipConfig) {
     loyaltyPoints = {
       label: formatLabel("TIER", labelFmt),
       balance: { string: membershipConfig.membershipTier },
     }
     secondaryLoyaltyPoints = {
       label: formatLabel("CHECK-INS", labelFmt),
-      balance: { int: enrollment.totalVisits },
+      balance: { int: passInstance.totalVisits },
     }
     textModulesData = [
       { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
-  } else if (program.programType === "POINTS" && pointsConfig) {
+  } else if (template.passType === "POINTS" && pointsConfig) {
     loyaltyPoints = {
       label: formatLabel("POINTS", labelFmt),
-      balance: { int: enrollment.pointsBalance ?? 0 },
+      balance: { int: passInstance.pointsBalance ?? 0 },
     }
     const cheapestItem = getCheapestCatalogItem(pointsConfig)
     secondaryLoyaltyPoints = cheapestItem
       ? { label: formatLabel("NEXT REWARD", labelFmt), balance: { string: `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` } }
-      : { label: formatLabel("TOTAL VISITS", labelFmt), balance: { int: enrollment.totalVisits } }
+      : { label: formatLabel("TOTAL VISITS", labelFmt), balance: { int: passInstance.totalVisits } }
     textModulesData = [
       { id: "earnRate", header: formatLabel("EARN RATE", labelFmt), body: `${pointsConfig.pointsPerVisit} points per visit` },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
+  } else if (template.passType === "PREPAID" && prepaidConfig) {
+    const remaining = (passInstance.data.remainingUses as number) ?? 0
+    loyaltyPoints = { label: formatLabel("REMAINING", labelFmt), balance: { string: `${remaining} / ${prepaidConfig.totalUses}` } }
+    secondaryLoyaltyPoints = { label: formatLabel("USED", labelFmt), balance: { int: passInstance.totalVisits } }
+    textModulesData = [
+      { id: "remaining", header: formatLabel(`${prepaidConfig.useLabel.toUpperCase()}S LEFT`, labelFmt), body: `${remaining} / ${prepaidConfig.totalUses}` },
+      { id: "validUntil", header: formatLabel("VALID UNTIL", labelFmt), body: prepaidConfig.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+      { id: "totalUsed", header: formatLabel("TOTAL USED", labelFmt), body: String(passInstance.totalVisits) },
+      { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
+    ]
+  } else if (template.passType === "GIFT_CARD" && giftCardConfig) {
+    const balanceCents = (passInstance.data.balanceCents as number) ?? giftCardConfig.initialBalanceCents
+    const balanceStr = `${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}`
+    const initialStr = `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}`
+    loyaltyPoints = { label: formatLabel("BALANCE", labelFmt), balance: { string: balanceStr } }
+    secondaryLoyaltyPoints = { label: formatLabel("INITIAL VALUE", labelFmt), balance: { string: initialStr } }
+    textModulesData = [
+      { id: "balance", header: formatLabel("BALANCE", labelFmt), body: balanceStr },
+      { id: "initialValue", header: formatLabel("INITIAL VALUE", labelFmt), body: initialStr },
+    ]
+  } else if (template.passType === "TICKET" && ticketConfig) {
+    const scanCount = (passInstance.data.scanCount as number) ?? 0
+    loyaltyPoints = { label: formatLabel("EVENT", labelFmt), balance: { string: ticketConfig.eventName } }
+    secondaryLoyaltyPoints = { label: formatLabel("SCANS", labelFmt), balance: { string: `${scanCount} / ${ticketConfig.maxScans}` } }
+    textModulesData = [
+      { id: "eventDate", header: formatLabel("DATE", labelFmt), body: new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) },
+      { id: "venue", header: formatLabel("VENUE", labelFmt), body: ticketConfig.eventVenue },
+      { id: "scans", header: formatLabel("SCANS", labelFmt), body: `${scanCount} / ${ticketConfig.maxScans}` },
+      { id: "holder", header: formatLabel("HOLDER", labelFmt), body: passInstance.contact.fullName },
+    ]
+  } else if (template.passType === "ACCESS" && accessConfig) {
+    const totalGranted = (passInstance.data.totalGranted as number) ?? 0
+    loyaltyPoints = { label: formatLabel(accessConfig.accessLabel, labelFmt), balance: { string: "Active" } }
+    secondaryLoyaltyPoints = { label: formatLabel("TOTAL GRANTED", labelFmt), balance: { int: totalGranted } }
+    textModulesData = [
+      { id: "accessLabel", header: formatLabel(accessConfig.accessLabel, labelFmt), body: "Active" },
+      { id: "totalGranted", header: formatLabel("TOTAL GRANTED", labelFmt), body: String(totalGranted) },
+    ]
+  } else if (template.passType === "TRANSIT" && transitConfig) {
+    const isBoarded = (passInstance.data.isBoarded as boolean) ?? false
+    loyaltyPoints = { label: formatLabel("STATUS", labelFmt), balance: { string: isBoarded ? "BOARDED" : "NOT BOARDED" } }
+    secondaryLoyaltyPoints = { label: formatLabel("TYPE", labelFmt), balance: { string: transitConfig.transitType.toUpperCase() } }
+    textModulesData = [
+      { id: "origin", header: formatLabel("FROM", labelFmt), body: transitConfig.originName ?? "—" },
+      { id: "destination", header: formatLabel("TO", labelFmt), body: transitConfig.destinationName ?? "—" },
+      { id: "transitType", header: formatLabel("TYPE", labelFmt), body: transitConfig.transitType.toUpperCase() },
+      { id: "boardingStatus", header: formatLabel("STATUS", labelFmt), body: isBoarded ? "BOARDED" : "NOT BOARDED" },
+    ]
+  } else if (template.passType === "BUSINESS_ID" && businessIdConfig) {
+    const verifications = (passInstance.data.totalVerifications as number) ?? 0
+    loyaltyPoints = { label: formatLabel(businessIdConfig.idLabel, labelFmt), balance: { string: passInstance.contact.fullName } }
+    secondaryLoyaltyPoints = { label: formatLabel("VERIFICATIONS", labelFmt), balance: { int: verifications } }
+    textModulesData = [
+      { id: "idLabel", header: formatLabel(businessIdConfig.idLabel, labelFmt), body: passInstance.contact.fullName },
+      { id: "verifications", header: formatLabel("VERIFICATIONS", labelFmt), body: String(verifications) },
+    ]
   } else {
     // STAMP_CARD (default)
     const progressValue = formatProgressValue(
-      enrollment.currentCycleVisits,
-      program.visitsRequired,
+      passInstance.currentCycleVisits,
+      template.visitsRequired,
       progressStyle,
       hasAvailableReward
     )
-    const progressLabel = cardDesign?.customProgressLabel
-      ? cardDesign.customProgressLabel
+    const progressLabel = passDesign?.customProgressLabel
+      ? passDesign.customProgressLabel
       : hasAvailableReward ? "STATUS" : "PROGRESS"
 
     loyaltyPoints = {
@@ -331,33 +403,33 @@ async function patchGooglePass(
     }
     secondaryLoyaltyPoints = {
       label: formatLabel("TOTAL VISITS", labelFmt),
-      balance: { int: enrollment.totalVisits },
+      balance: { int: passInstance.totalVisits },
     }
     textModulesData = [
       {
         id: "nextReward",
         header: formatLabel(revealedPrize ? "YOUR PRIZE" : "NEXT REWARD", labelFmt),
-        body: revealedPrize ?? getWalletRewardText(program.config, program.rewardDescription),
+        body: revealedPrize ?? getWalletRewardText(template.config, template.rewardDescription),
       },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
   }
 
   const patchBody: Record<string, unknown> = {
-    classId: buildProgramClassId(program.id),
+    classId: buildProgramClassId(template.id),
     loyaltyPoints,
     secondaryLoyaltyPoints,
-    accountName: enrollment.customer.fullName,
+    accountName: passInstance.contact.fullName,
     textModulesData,
   }
 
   // Add reveal link if there's an unrevealed prize, clear it otherwise
-  if (hasUnrevealedPrize && enrollment.loyaltyProgram.restaurant.slug) {
+  if (hasUnrevealedPrize && passInstance.passTemplate.organization.slug) {
     const { signCardAccess } = await import("@/lib/card-access")
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
-    const slug = enrollment.loyaltyProgram.restaurant.slug
-    const sig = signCardAccess(enrollment.id)
-    const cardPageUrl = `${baseUrl}/join/${slug}/card/${enrollment.id}?sig=${sig}`
+    const slug = passInstance.passTemplate.organization.slug
+    const sig = signCardAccess(passInstance.id)
+    const cardPageUrl = `${baseUrl}/join/${slug}/card/${passInstance.id}?sig=${sig}`
     patchBody.linksModuleData = {
       uris: [{
         uri: cardPageUrl,
@@ -369,13 +441,19 @@ async function patchGooglePass(
     patchBody.linksModuleData = { uris: [] }
   }
 
-  // Stamp grid hero image: only for STAMP_CARD programs
-  const isStampCard = !program.programType || program.programType === "STAMP_CARD"
+  // Stamp grid hero image: only for STAMP_CARD templates
+  const isStampCard = !template.passType || template.passType === "STAMP_CARD"
   const { parseStripFilters, parseStampGridConfig } = await import("@/lib/wallet/card-design")
-  const triggerStripFilters = parseStripFilters(cardDesign?.editorConfig)
-  const isTriggerStampGrid = triggerStripFilters.useStampGrid || cardDesign?.patternStyle === "stamp_grid" || cardDesign?.patternStyle === "STAMP_GRID"
-  if (isStampCard && isTriggerStampGrid && cardDesign?.showStrip !== false) {
-    const stampGridUrl = await generateStampGridToR2(enrollment, program, cardDesign ?? null, triggerStripFilters, hasAvailableReward)
+  const triggerStripFilters = parseStripFilters(passDesign?.editorConfig)
+  const isTriggerStampGrid = triggerStripFilters.useStampGrid || passDesign?.patternStyle === "stamp_grid" || passDesign?.patternStyle === "STAMP_GRID"
+  if (isStampCard && isTriggerStampGrid && passDesign?.showStrip !== false) {
+    const stampGridUrl = await generateStampGridToR2(
+      { id: passInstance.id, currentCycleVisits: passInstance.currentCycleVisits },
+      { id: template.id, visitsRequired: template.visitsRequired },
+      passDesign ?? null,
+      triggerStripFilters,
+      hasAvailableReward
+    )
     if (stampGridUrl) {
       patchBody.heroImage = {
         sourceUri: { uri: stampGridUrl },
@@ -387,9 +465,15 @@ async function patchGooglePass(
   }
 
   // For design changes, also update hero image (stamp card only for stamp grid)
-  if (updateType === "DESIGN_CHANGE" || updateType === "PROGRAM_CHANGE") {
-    if (isStampCard && isTriggerStampGrid && cardDesign?.showStrip !== false) {
-      const stampGridUrl = await generateStampGridToR2(enrollment, program, cardDesign ?? null, triggerStripFilters, hasAvailableReward)
+  if (updateType === "DESIGN_CHANGE" || updateType === "TEMPLATE_CHANGE") {
+    if (isStampCard && isTriggerStampGrid && passDesign?.showStrip !== false) {
+      const stampGridUrl = await generateStampGridToR2(
+        { id: passInstance.id, currentCycleVisits: passInstance.currentCycleVisits },
+        { id: template.id, visitsRequired: template.visitsRequired },
+        passDesign ?? null,
+        triggerStripFilters,
+        hasAvailableReward
+      )
       if (stampGridUrl) {
         patchBody.heroImage = {
           sourceUri: { uri: stampGridUrl },
@@ -399,8 +483,8 @@ async function patchGooglePass(
         }
       }
     } else {
-      const heroUrl = cardDesign?.stripImageGoogle ?? cardDesign?.generatedStripGoogle
-      if (heroUrl && cardDesign?.showStrip !== false) {
+      const heroUrl = passDesign?.stripImageGoogle ?? passDesign?.generatedStripGoogle
+      if (heroUrl && passDesign?.showStrip !== false) {
         patchBody.heroImage = {
           sourceUri: { uri: heroUrl },
           contentDescription: {
@@ -431,12 +515,12 @@ async function patchGooglePass(
   return { status: response.status }
 }
 
-// ─── Stamp Grid → R2 Upload (for Google Wallet PATCH) ──────
+// ─── Stamp Grid -> R2 Upload (for Google Wallet PATCH) ──────
 
 async function generateStampGridToR2(
-  enrollment: { id: string; currentCycleVisits: number },
-  program: { id: string; visitsRequired: number },
-  cardDesign: CardDesignRow,
+  passInstance: { id: string; currentCycleVisits: number },
+  template: { id: string; visitsRequired: number },
+  passDesign: PassDesignRow,
   stripFilters: Awaited<ReturnType<typeof import("@/lib/wallet/card-design").parseStripFilters>>,
   hasAvailableReward: boolean,
 ): Promise<string | null> {
@@ -445,26 +529,26 @@ async function generateStampGridToR2(
     const { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } = await import("@/lib/wallet/strip-image")
     const { uploadFile } = await import("@/lib/storage")
 
-    const config = parseStampGridConfig(cardDesign?.editorConfig)
-    const stripPrimary = stripFilters.stripColor1 ?? cardDesign?.primaryColor ?? "#1a1a2e"
-    const stripSecondary = stripFilters.stripColor2 ?? (cardDesign as Record<string, unknown>)?.secondaryColor as string ?? "#ffffff"
+    const config = parseStampGridConfig(passDesign?.editorConfig)
+    const stripPrimary = stripFilters.stripColor1 ?? passDesign?.primaryColor ?? "#1a1a2e"
+    const stripSecondary = stripFilters.stripColor2 ?? (passDesign as Record<string, unknown>)?.secondaryColor as string ?? "#ffffff"
 
     const buffer = await generateStampGridImage({
-      currentVisits: enrollment.currentCycleVisits,
-      totalVisits: program.visitsRequired,
+      currentVisits: passInstance.currentCycleVisits,
+      totalVisits: template.visitsRequired,
       hasReward: hasAvailableReward,
       config,
       primaryColor: stripPrimary,
       secondaryColor: stripSecondary,
-      textColor: (cardDesign as Record<string, unknown>)?.textColor as string ?? "#ffffff",
+      textColor: (passDesign as Record<string, unknown>)?.textColor as string ?? "#ffffff",
       width: GOOGLE_HERO_WIDTH,
       height: GOOGLE_HERO_HEIGHT,
-      stripImageUrl: cardDesign?.stripImageGoogle,
+      stripImageUrl: passDesign?.stripImageGoogle,
       stripOpacity: stripFilters.stripOpacity,
       stripGrayscale: stripFilters.stripGrayscale,
     })
 
-    const key = `strip-images/${program.id}/google-stamp-grid-${enrollment.id}.png`
+    const key = `strip-images/${template.id}/google-stamp-grid-${passInstance.id}.png`
     return await uploadFile(buffer, key, "image/png")
   } catch (err) {
     console.error("Failed to generate stamp grid for R2:", err instanceof Error ? err.message : err)

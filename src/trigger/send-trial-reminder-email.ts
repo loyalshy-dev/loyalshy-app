@@ -17,7 +17,7 @@ export const sendTrialReminderEmailTask = schedules.task({
       const now = new Date()
       const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
 
-      // Find restaurants where trialEndsAt is 7, 3, or 1 days away
+      // Find organizations where trialEndsAt is 7, 3, or 1 days away
       const reminderDays = [7, 3, 1]
       let emailsSent = 0
 
@@ -31,7 +31,7 @@ export const sendTrialReminderEmailTask = schedules.task({
         const dayEnd = new Date(targetDate)
         dayEnd.setHours(23, 59, 59, 999)
 
-        const restaurants = await db.restaurant.findMany({
+        const organizations = await db.organization.findMany({
           where: {
             trialEndsAt: { gte: dayStart, lte: dayEnd },
             subscriptionStatus: "TRIALING",
@@ -40,25 +40,18 @@ export const sendTrialReminderEmailTask = schedules.task({
             id: true,
             name: true,
             slug: true,
+            members: {
+              where: { role: "owner" },
+              select: {
+                user: { select: { name: true, email: true } },
+              },
+              take: 1,
+            },
           },
         })
 
-        for (const restaurant of restaurants) {
-          // Find the org owner via organization membership (not User.role)
-          const org = await db.organization.findUnique({
-            where: { slug: restaurant.slug },
-            select: {
-              members: {
-                where: { role: "owner" },
-                select: {
-                  user: { select: { name: true, email: true } },
-                },
-                take: 1,
-              },
-            },
-          })
-
-          const owner = org?.members[0]?.user
+        for (const org of organizations) {
+          const owner = org.members[0]?.user
           if (!owner?.email) continue
 
           const daysLabel = daysAway === 1 ? "tomorrow" : `in ${daysAway} days`
@@ -85,19 +78,19 @@ export const sendTrialReminderEmailTask = schedules.task({
                     ${urgency}
                   </p>
                   <p style="color:#525252;font-size:15px;line-height:1.6;">
-                    Your restaurant <strong>${restaurant.name}</strong>'s trial period ends ${daysLabel}. Upgrade to a paid plan to keep all your customer data, wallet passes, and loyalty program running.
+                    Your organization <strong>${org.name}</strong>'s trial period ends ${daysLabel}. Upgrade to a paid plan to keep all your data, wallet passes, and templates running.
                   </p>
                   <a href="${baseUrl}/dashboard/settings?tab=billing" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;margin:16px 0;">
                     Upgrade Now
                   </a>
                   <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
-                  <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital Loyalty Cards</p>
+                  <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital Wallet Passes</p>
                 </div>
               `,
             })
             emailsSent++
           } catch {
-            // Continue with other restaurants if one email fails
+            // Continue with other organizations if one email fails
           }
         }
       }

@@ -10,8 +10,8 @@ import {
   Users,
   UserCheck,
 } from "lucide-react"
-import type { AdminRestaurantDetail } from "@/server/admin-actions"
-import { getAdminRestaurantDetail } from "@/server/admin-actions"
+import type { AdminOrganizationDetail } from "@/server/admin-actions"
+import { getAdminOrganizationDetail } from "@/server/admin-actions"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -58,28 +58,28 @@ const orgRoleLabels: Record<string, string> = {
   member: "Member",
 }
 
-type AdminRestaurantDetailSheetProps = {
-  restaurantId: string | null
+type AdminOrganizationDetailSheetProps = {
+  organizationId: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function AdminRestaurantDetailSheet({
-  restaurantId,
+export function AdminOrganizationDetailSheet({
+  organizationId,
   open,
   onOpenChange,
-}: AdminRestaurantDetailSheetProps) {
-  const [detail, setDetail] = useState<AdminRestaurantDetail | null>(null)
+}: AdminOrganizationDetailSheetProps) {
+  const [detail, setDetail] = useState<AdminOrganizationDetail | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!restaurantId || !open) return
+    if (!organizationId || !open) return
     setLoading(true)
-    getAdminRestaurantDetail(restaurantId)
+    getAdminOrganizationDetail(organizationId)
       .then(setDetail)
       .catch(() => setDetail(null))
       .finally(() => setLoading(false))
-  }, [restaurantId, open])
+  }, [organizationId, open])
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -148,23 +148,23 @@ export function AdminRestaurantDetailSheet({
                 <div className="rounded-lg border border-border p-3 text-center">
                   <Users className="size-3.5 text-muted-foreground mx-auto mb-1" />
                   <p className="text-lg font-semibold tabular-nums">
-                    {detail._count.users}
+                    {detail._count.members}
                   </p>
                   <p className="text-[11px] text-muted-foreground">Users</p>
                 </div>
                 <div className="rounded-lg border border-border p-3 text-center">
                   <Layers className="size-3.5 text-muted-foreground mx-auto mb-1" />
                   <p className="text-lg font-semibold tabular-nums">
-                    {detail._count.loyaltyPrograms}
+                    {detail._count.passTemplates}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">Programs</p>
+                  <p className="text-[11px] text-muted-foreground">Templates</p>
                 </div>
                 <div className="rounded-lg border border-border p-3 text-center">
                   <UserCheck className="size-3.5 text-muted-foreground mx-auto mb-1" />
                   <p className="text-lg font-semibold tabular-nums">
-                    {detail._count.customers}
+                    {detail._count.contacts}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">Customers</p>
+                  <p className="text-[11px] text-muted-foreground">Contacts</p>
                 </div>
               </div>
 
@@ -185,33 +185,31 @@ export function AdminRestaurantDetailSheet({
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-3">
                   Team Members
                 </p>
-                {detail.users.length === 0 ? (
+                {detail.members.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No team members.</p>
                 ) : (
                   <div className="space-y-2">
-                    {detail.users.map((u) => (
+                    {detail.members.map((m) => (
                       <div
-                        key={u.id}
+                        key={m.id}
                         className="flex items-center gap-2.5 p-2.5 rounded-md border border-border bg-muted/30"
                       >
                         <Avatar className="size-7">
                           <AvatarFallback className="text-[10px]">
-                            {getInitials(u.name)}
+                            {getInitials(m.user.name)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0 flex-1">
                           <p className="text-[13px] font-medium truncate">
-                            {u.name}
+                            {m.user.name}
                           </p>
                           <p className="text-[11px] text-muted-foreground truncate">
-                            {u.email}
+                            {m.user.email}
                           </p>
                         </div>
-                        {u.orgRole && (
-                          <Badge variant="outline" className="text-[11px] shrink-0">
-                            {orgRoleLabels[u.orgRole] ?? u.orgRole}
-                          </Badge>
-                        )}
+                        <Badge variant="outline" className="text-[11px] shrink-0">
+                          {orgRoleLabels[m.role] ?? m.role}
+                        </Badge>
                       </div>
                     ))}
                   </div>

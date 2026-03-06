@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { connection } from "next/server"
 import type { Metadata } from "next"
-import { getCurrentUser, getRestaurantForUser } from "@/lib/dal"
+import { getCurrentUser, getOrganizationForUser } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 
@@ -24,40 +24,34 @@ async function DashboardLayoutInner({
 
   const { user } = session
 
-  // If user has no restaurant, redirect to onboarding
-  if (!user.restaurantId) {
+  // If user has no active organization, redirect to onboarding
+  const activeOrgId = session.session.activeOrganizationId
+  if (!activeOrgId) {
     redirect("/register?step=2")
   }
 
-  // Fetch restaurant for this user
-  const restaurant = user.restaurantId
-    ? await db.restaurant.findUnique({
-        where: { id: user.restaurantId },
-        select: {
-          name: true,
-          slug: true,
-          logo: true,
-          plan: true,
-          subscriptionStatus: true,
-          trialEndsAt: true,
-        },
-      })
-    : null
+  // Fetch organization for this user
+  const organization = await db.organization.findUnique({
+    where: { id: activeOrgId },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      logo: true,
+      plan: true,
+      subscriptionStatus: true,
+      trialEndsAt: true,
+    },
+  })
 
-  // Determine the user's org role for this restaurant
+  // Determine the user's org role
   let orgRole: string | null = null
-  if (restaurant) {
-    const org = await db.organization.findUnique({
-      where: { slug: restaurant.slug },
-      select: { id: true },
+  if (organization) {
+    const member = await db.member.findFirst({
+      where: { organizationId: organization.id, userId: user.id },
+      select: { role: true },
     })
-    if (org) {
-      const member = await db.member.findFirst({
-        where: { organizationId: org.id, userId: user.id },
-        select: { role: true },
-      })
-      orgRole = member?.role ?? null
-    }
+    orgRole = member?.role ?? null
   }
 
   // Super admins always get owner-level access
@@ -72,13 +66,13 @@ async function DashboardLayoutInner({
         email: user.email,
         image: user.image,
       }}
-      restaurant={
-        restaurant
+      organization={
+        organization
           ? {
-              name: restaurant.name,
-              logo: restaurant.logo,
-              subscriptionStatus: restaurant.subscriptionStatus,
-              trialEndsAt: restaurant.trialEndsAt?.toISOString() ?? null,
+              name: organization.name,
+              logo: organization.logo,
+              subscriptionStatus: organization.subscriptionStatus,
+              trialEndsAt: organization.trialEndsAt?.toISOString() ?? null,
             }
           : null
       }

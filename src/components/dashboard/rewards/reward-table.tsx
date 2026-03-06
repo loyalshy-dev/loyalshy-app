@@ -97,12 +97,12 @@ function RewardCard({
         <div className="flex items-center gap-2.5 min-w-0">
           <div
             className="flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-medium text-white"
-            style={{ backgroundColor: getAvatarColor(reward.customerName) }}
+            style={{ backgroundColor: getAvatarColor(reward.contactName) }}
           >
-            {getInitials(reward.customerName)}
+            {getInitials(reward.contactName)}
           </div>
           <span className="text-[13px] font-medium truncate">
-            {reward.customerName}
+            {reward.contactName}
           </span>
         </div>
         <Badge
@@ -250,10 +250,10 @@ export function RewardTable({
 
   const columns: ColumnDef<RewardRow>[] = [
     {
-      accessorKey: "customerName",
-      header: () => <span className="text-[12px]">Customer</span>,
+      accessorKey: "contactName",
+      header: () => <span className="text-[12px]">Contact</span>,
       cell: ({ row }) => {
-        const name = row.original.customerName
+        const name = row.original.contactName
         return (
           <div className="flex items-center gap-2.5">
             <div

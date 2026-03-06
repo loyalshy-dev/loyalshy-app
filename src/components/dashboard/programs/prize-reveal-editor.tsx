@@ -7,27 +7,27 @@ import { Loader2, RotateCcw, Plus, Trash2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { updateMinigameConfig } from "@/server/settings-actions"
-import { parseMinigameConfig } from "@/lib/program-config"
+import { updateMinigameConfig } from "@/server/org-settings-actions"
+import { parseMinigameConfig } from "@/lib/pass-config"
 import { ScratchCard, SlotMachine, WheelOfFortune } from "@/components/minigames"
-import type { PrizeItem } from "@/types/program-types"
+import type { PrizeItem } from "@/types/pass-types"
 
 type PrizeRevealForm = {
   minigameEnabled: boolean
   minigameType: "scratch" | "slots" | "wheel"
 }
 
-type PrizeRevealProgram = {
+type PrizeRevealTemplate = {
   id: string
   name: string
-  programType: string
+  passType: string
   config: unknown
   rewardDescription: string
   status: string
-  restaurantId: string
+  organizationId: string
 }
 
-export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) {
+export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate }) {
   const [isPending, startTransition] = useTransition()
   const isArchived = program.status === "ARCHIVED"
   const minigameConfig = parseMinigameConfig(program.config)
@@ -78,8 +78,8 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
           .filter((p) => p.name.trim())
           .map((p) => ({ name: p.name.trim(), weight: p.weight }))
         const result = await updateMinigameConfig({
-          restaurantId: program.restaurantId,
-          programId: program.id,
+          organizationId: program.organizationId,
+          templateId: program.id,
           enabled: data.minigameEnabled,
           gameType: data.minigameType,
           ...(filteredPrizes.length > 0 ? { prizes: filteredPrizes } : {}),
@@ -352,7 +352,7 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
                       {type === "slots" && (
                         <SlotMachine
                           rewardText={previewRewardText}
-                          enrollmentId={`preview-${type}-${program.id}`}
+                          passInstanceId={`preview-${type}-${program.id}`}
                           onReveal={handlePreviewReveal}
                           autoStart={false}
                           primaryColor={primaryColor || undefined}
@@ -361,7 +361,7 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealProgram }) 
                       {type === "wheel" && (
                         <WheelOfFortune
                           rewardText={previewRewardText}
-                          enrollmentId={`preview-${type}-${program.id}`}
+                          passInstanceId={`preview-${type}-${program.id}`}
                           onReveal={handlePreviewReveal}
                           prizes={prizeNames.length > 0 ? prizeNames : undefined}
                           primaryColor={primaryColor || undefined}

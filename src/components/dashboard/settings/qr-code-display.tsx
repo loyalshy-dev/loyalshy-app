@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { parseStripFilters, parseStampGridConfig } from "@/lib/wallet/card-design"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/program-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/pass-config"
 
 type SizePreset = {
   id: string
@@ -66,35 +66,35 @@ type PartialCardDesign = {
   editorConfig?: unknown
 }
 
-type ProgramInfo = {
+type TemplateInfo = {
   id: string
   name: string
-  programType?: string
-  programConfig?: unknown
+  passType?: string
+  templateConfig?: unknown
   rewardDescription: string
   visitsRequired: number
   cardDesign?: PartialCardDesign | null
 }
 
 type QrCodeDisplayProps = {
-  restaurant: {
+  organization: {
     name: string
     slug: string
     logo: string | null
     brandColor: string | null
   }
-  programs: ProgramInfo[]
+  templates: TemplateInfo[]
 }
 
 export function QrCodeDisplay({
-  restaurant,
-  programs,
+  organization,
+  templates,
 }: QrCodeDisplayProps) {
-  const hasMultiplePrograms = programs.length > 1
+  const hasMultipleTemplates = templates.length > 1
 
   // "all" = generic join URL (picker), or a program id for deep-link
   const [activeTab, setActiveTab] = useState<string>(
-    hasMultiplePrograms ? "all" : programs[0]?.id ?? "all"
+    hasMultipleTemplates ? "all" : templates[0]?.id ?? "all"
   )
   const [qrSvg, setQrSvg] = useState<string>("")
   const [selectedSize, setSelectedSize] = useState<string>("table-tent")
@@ -102,43 +102,43 @@ export function QrCodeDisplay({
   const [downloading, setDownloading] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const activeProgram = programs.find((p) => p.id === activeTab) ?? null
-  const rewardDescription = activeProgram?.rewardDescription ?? programs[0]?.rewardDescription ?? "Free reward"
-  const visitsRequired = activeProgram?.visitsRequired ?? programs[0]?.visitsRequired ?? 10
+  const activeTemplate = templates.find((p) => p.id === activeTab) ?? null
+  const rewardDescription = activeTemplate?.rewardDescription ?? templates[0]?.rewardDescription ?? "Free reward"
+  const visitsRequired = activeTemplate?.visitsRequired ?? templates[0]?.visitsRequired ?? 10
 
   // Derive card design data for the active program (or first program as fallback)
-  const activeProgramDesign = activeProgram?.cardDesign ?? programs[0]?.cardDesign ?? null
-  const qrSf = activeProgramDesign ? parseStripFilters(activeProgramDesign.editorConfig) : null
-  const walletDesign: WalletPassDesign | null = activeProgramDesign
+  const activeTemplateDesign = activeTemplate?.cardDesign ?? templates[0]?.cardDesign ?? null
+  const qrSf = activeTemplateDesign ? parseStripFilters(activeTemplateDesign.editorConfig) : null
+  const walletDesign: WalletPassDesign | null = activeTemplateDesign
     ? {
-        cardType: (activeProgramDesign.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-        showStrip: activeProgramDesign.showStrip ?? true,
-        primaryColor: activeProgramDesign.primaryColor ?? "#1a1a2e",
-        secondaryColor: activeProgramDesign.secondaryColor ?? "#ffffff",
-        textColor: activeProgramDesign.textColor ?? "#ffffff",
-        progressStyle: (activeProgramDesign.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
-        labelFormat: (activeProgramDesign.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
-        customProgressLabel: activeProgramDesign.customProgressLabel ?? null,
-        stripImageUrl: activeProgramDesign.stripImageUrl ?? null,
+        cardType: (activeTemplateDesign.cardType ?? "STAMP") as WalletPassDesign["cardType"],
+        showStrip: activeTemplateDesign.showStrip ?? true,
+        primaryColor: activeTemplateDesign.primaryColor ?? "#1a1a2e",
+        secondaryColor: activeTemplateDesign.secondaryColor ?? "#ffffff",
+        textColor: activeTemplateDesign.textColor ?? "#ffffff",
+        progressStyle: (activeTemplateDesign.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
+        labelFormat: (activeTemplateDesign.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
+        customProgressLabel: activeTemplateDesign.customProgressLabel ?? null,
+        stripImageUrl: activeTemplateDesign.stripImageUrl ?? null,
         stripOpacity: qrSf?.stripOpacity ?? 1,
         stripGrayscale: qrSf?.stripGrayscale ?? false,
-        patternStyle: (activeProgramDesign.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
+        patternStyle: (activeTemplateDesign.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
         stripImagePosition: qrSf?.stripImagePosition,
         stripImageZoom: qrSf?.stripImageZoom,
         useStampGrid: qrSf?.useStampGrid,
-        stampGridConfig: activeProgramDesign.editorConfig ? parseStampGridConfig(activeProgramDesign.editorConfig) : undefined,
+        stampGridConfig: activeTemplateDesign.editorConfig ? parseStampGridConfig(activeTemplateDesign.editorConfig) : undefined,
       }
     : null
 
   // Type-specific preview data
-  const activeProgramType = activeProgram?.programType ?? programs[0]?.programType
-  const activeProgramConfig = activeProgram?.programConfig ?? programs[0]?.programConfig
-  const couponConfig = activeProgramType === "COUPON" ? parseCouponConfig(activeProgramConfig) : null
-  const membershipConfig = activeProgramType === "MEMBERSHIP" ? parseMembershipConfig(activeProgramConfig) : null
+  const activeTemplateType = activeTemplate?.passType ?? templates[0]?.passType
+  const activeTemplateConfig = activeTemplate?.templateConfig ?? templates[0]?.templateConfig
+  const couponConfig = activeTemplateType === "COUPON" ? parseCouponConfig(activeTemplateConfig) : null
+  const membershipConfig = activeTemplateType === "MEMBERSHIP" ? parseMembershipConfig(activeTemplateConfig) : null
   // Pull resolved primary color for the poster accent bar
   const accentColor =
-    activeProgramDesign?.primaryColor ??
-    restaurant.brandColor ??
+    activeTemplateDesign?.primaryColor ??
+    organization.brandColor ??
     "#1a1a2e"
 
   const [origin, setOrigin] = useState("")
@@ -146,10 +146,10 @@ export function QrCodeDisplay({
     setOrigin(window.location.origin)
   }, [])
 
-  const programId = activeTab === "all" ? null : activeTab
-  const joinPath = programId
-    ? `/join/${restaurant.slug}?program=${programId}`
-    : `/join/${restaurant.slug}`
+  const templateId = activeTab === "all" ? null : activeTab
+  const joinPath = templateId
+    ? `/join/${organization.slug}?program=${templateId}`
+    : `/join/${organization.slug}`
   const joinUrl = origin ? `${origin}${joinPath}` : joinPath
 
   const generateQrSvg = useCallback(async () => {
@@ -202,24 +202,24 @@ export function QrCodeDisplay({
       if (!ctx) return
 
       const posterAccentColor =
-        activeProgramDesign?.primaryColor ?? restaurant.brandColor ?? "#1a1a2e"
+        activeTemplateDesign?.primaryColor ?? organization.brandColor ?? "#1a1a2e"
 
       // Background
       ctx.fillStyle = "#ffffff"
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Brand color bar at top (uses card design primary or restaurant brand color)
+      // Brand color bar at top (uses card design primary or organization brand color)
       const barHeight = Math.round(canvas.height * 0.06)
       ctx.fillStyle = posterAccentColor
       ctx.fillRect(0, 0, canvas.width, barHeight)
 
-      // Restaurant name
+      // Organization name
       const nameFontSize = Math.round(canvas.width * 0.05)
       ctx.fillStyle = "#111111"
       ctx.font = `600 ${nameFontSize}px -apple-system, 'Segoe UI', sans-serif`
       ctx.textAlign = "center"
       ctx.fillText(
-        restaurant.name,
+        organization.name,
         canvas.width / 2,
         barHeight + nameFontSize + Math.round(canvas.height * 0.03)
       )
@@ -253,8 +253,8 @@ export function QrCodeDisplay({
       const subFontSize = Math.round(canvas.width * 0.035)
       ctx.fillStyle = "#666666"
       ctx.font = `500 ${subFontSize}px -apple-system, 'Segoe UI', sans-serif`
-      const scanText = activeProgram
-        ? `Scan to join ${activeProgram.name}`
+      const scanText = activeTemplate
+        ? `Scan to join ${activeTemplate.name}`
         : "Scan to join our loyalty program"
       ctx.fillText(
         scanText,
@@ -266,9 +266,9 @@ export function QrCodeDisplay({
       const rewardFontSize = Math.round(canvas.width * 0.028)
       ctx.fillStyle = "#999999"
       ctx.font = `400 ${rewardFontSize}px -apple-system, 'Segoe UI', sans-serif`
-      const rewardText = activeProgramType === "COUPON" && couponConfig
+      const rewardText = activeTemplateType === "COUPON" && couponConfig
         ? formatCouponValue(couponConfig)
-        : activeProgramType === "MEMBERSHIP" && membershipConfig
+        : activeTemplateType === "MEMBERSHIP" && membershipConfig
           ? `${membershipConfig.membershipTier} membership`
           : `Earn a free ${rewardDescription} after ${visitsRequired} visits`
       ctx.fillText(
@@ -292,11 +292,11 @@ export function QrCodeDisplay({
       )
 
       // Download
-      const suffix = activeProgram
-        ? `${activeProgram.name.toLowerCase().replace(/\s+/g, "-")}-${selectedSize}`
+      const suffix = activeTemplate
+        ? `${activeTemplate.name.toLowerCase().replace(/\s+/g, "-")}-${selectedSize}`
         : `qr-${selectedSize}`
       const link = document.createElement("a")
-      link.download = `${restaurant.slug}-${suffix}.png`
+      link.download = `${organization.slug}-${suffix}.png`
       link.href = canvas.toDataURL("image/png", 1.0)
       document.body.appendChild(link)
       link.click()
@@ -308,8 +308,8 @@ export function QrCodeDisplay({
 
   return (
     <div className="space-y-6">
-      {/* Program tabs — only shown when multiple programs exist */}
-      {hasMultiplePrograms && (
+      {/* Template tabs — only shown when multiple templates exist */}
+      {hasMultipleTemplates && (
         <div className="flex gap-1 rounded-lg border border-border bg-muted/50 p-1">
           <button
             onClick={() => setActiveTab("all")}
@@ -320,9 +320,9 @@ export function QrCodeDisplay({
             }`}
           >
             <LayoutGrid className="w-3.5 h-3.5" />
-            All Programs
+            All Templates
           </button>
-          {programs.map((program) => (
+          {templates.map((program) => (
             <button
               key={program.id}
               onClick={() => setActiveTab(program.id)}
@@ -360,12 +360,12 @@ export function QrCodeDisplay({
                     className="w-44 h-44 rounded-xl bg-background p-3 shadow-sm border border-border"
                     dangerouslySetInnerHTML={{ __html: qrSvg }}
                   />
-                  {/* Restaurant logo overlay in center */}
-                  {restaurant.logo && (
+                  {/* Organization logo overlay in center */}
+                  {organization.logo && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-10 h-10 rounded-lg overflow-hidden bg-background border-2 border-background shadow-sm">
                         <Image
-                          src={restaurant.logo}
+                          src={organization.logo}
                           alt=""
                           width={40}
                           height={40}
@@ -376,23 +376,23 @@ export function QrCodeDisplay({
                   )}
                 </div>
 
-                {/* Restaurant / program info */}
+                {/* Organization / template info */}
                 <div className="text-center space-y-0.5">
-                  <h3 className="font-semibold text-[14px] text-foreground">{restaurant.name}</h3>
-                  {activeProgram ? (
+                  <h3 className="font-semibold text-[14px] text-foreground">{organization.name}</h3>
+                  {activeTemplate ? (
                     <>
-                      <p className="text-[12px] font-medium text-muted-foreground">{activeProgram.name}</p>
+                      <p className="text-[12px] font-medium text-muted-foreground">{activeTemplate.name}</p>
                       <p className="text-[11px] text-muted-foreground/60">
-                        {activeProgram.programType === "COUPON" && couponConfig
+                        {activeTemplate.passType === "COUPON" && couponConfig
                           ? formatCouponValue(couponConfig)
-                          : activeProgram.programType === "MEMBERSHIP" && membershipConfig
+                          : activeTemplate.passType === "MEMBERSHIP" && membershipConfig
                             ? `${membershipConfig.membershipTier} membership`
-                            : `${activeProgram.rewardDescription} after ${activeProgram.visitsRequired} visits`}
+                            : `${activeTemplate.rewardDescription} after ${activeTemplate.visitsRequired} visits`}
                       </p>
                     </>
                   ) : (
                     <p className="text-[11px] text-muted-foreground/60">
-                      Choose from {programs.length} programs
+                      Choose from {templates.length} templates
                     </p>
                   )}
                 </div>
@@ -403,19 +403,19 @@ export function QrCodeDisplay({
                     <WalletPassRenderer
                       design={walletDesign}
                       format="apple"
-                      restaurantName={restaurant.name}
-                      logoUrl={restaurant.logo}
-                      programName={activeProgram?.name ?? programs[0]?.name ?? "Loyalty Program"}
+                      organizationName={organization.name}
+                      logoUrl={organization.logo}
+                      programName={activeTemplate?.name ?? templates[0]?.name ?? "Pass Template"}
                       rewardDescription={rewardDescription}
                       totalVisits={visitsRequired}
-                      currentVisits={activeProgramType === "STAMP_CARD" || !activeProgramType ? 0 : 0}
+                      currentVisits={activeTemplateType === "STAMP_CARD" || !activeTemplateType ? 0 : 0}
                       compact
                       // Coupon props
                       discountText={couponConfig ? formatCouponValue(couponConfig) : undefined}
                       couponCode={couponConfig?.couponCode}
                       validUntil={couponConfig?.validUntil
                         ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                        : activeProgramType === "COUPON" ? "No expiry" : undefined}
+                        : activeTemplateType === "COUPON" ? "No expiry" : undefined}
                       // Membership props
                       tierName={membershipConfig?.membershipTier}
                       benefits={membershipConfig?.benefits}
@@ -461,7 +461,7 @@ export function QrCodeDisplay({
                 <span className="shrink-0 w-5 h-5 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-foreground">
                   1
                 </span>
-                Print and display the QR code at your restaurant
+                Print and display the QR code at your organization
               </li>
               <li className="flex gap-3">
                 <span className="shrink-0 w-5 h-5 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-foreground">

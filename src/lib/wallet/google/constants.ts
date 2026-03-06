@@ -11,32 +11,36 @@ export const GOOGLE_WALLET_SAVE_BASE =
 
 /**
  * Build a class ID in Google Wallet format: {issuerId}.{suffix}
- * Uses restaurantId as the default scope.
+ * Uses organizationId as the default scope.
  */
-export function buildClassId(restaurantId: string): string {
-  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-restaurant-${restaurantId}`
+export function buildClassId(organizationId: string): string {
+  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-org-${organizationId}`
 }
 
 /**
- * Build a per-program class ID in Google Wallet format: {issuerId}.{suffix}
- * Each loyalty program gets its own Google Wallet class.
+ * Build a per-template class ID in Google Wallet format: {issuerId}.{suffix}
+ * Each pass template gets its own Google Wallet class.
  */
-export function buildProgramClassId(programId: string): string {
-  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-program-${programId}`
+export function buildTemplateClassId(templateId: string): string {
+  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-template-${templateId}`
 }
 
 /**
  * Build an object ID in Google Wallet format: {issuerId}.{suffix}
- * Legacy: scoped to customerId.
+ * Legacy: scoped to contactId.
  */
-export function buildObjectId(customerId: string): string {
-  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-customer-${customerId}`
+export function buildObjectId(contactId: string): string {
+  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-contact-${contactId}`
 }
 
 /**
- * Build an enrollment-scoped object ID in Google Wallet format: {issuerId}.{suffix}
- * Each enrollment gets its own Google Wallet object.
+ * Build a pass-instance-scoped object ID in Google Wallet format: {issuerId}.{suffix}
+ * Each pass instance gets its own Google Wallet object.
  */
-export function buildEnrollmentObjectId(enrollmentId: string): string {
-  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-enrollment-${enrollmentId}`
+export function buildPassInstanceObjectId(passInstanceId: string): string {
+  return `${GOOGLE_WALLET_ISSUER_ID}.loyalshy-pass-${passInstanceId}`
 }
+
+// ─── Legacy aliases (for backward compatibility during migration) ────
+export const buildProgramClassId = buildTemplateClassId
+export const buildEnrollmentObjectId = buildPassInstanceObjectId

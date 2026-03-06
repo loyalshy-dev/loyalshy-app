@@ -11,8 +11,8 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { format, parseISO } from "date-fns"
-import type { VisitsDataPoint } from "@/server/analytics"
-import { getVisitsOverTime } from "@/server/analytics"
+import type { InteractionsDataPoint } from "@/server/analytics"
+import { getInteractionsOverTime } from "@/server/analytics"
 
 type Range = "7d" | "30d" | "90d" | "12m"
 
@@ -28,7 +28,7 @@ function CustomTooltip({
   payload,
 }: {
   active?: boolean
-  payload?: { value: number; payload: VisitsDataPoint }[]
+  payload?: { value: number; payload: InteractionsDataPoint }[]
   label?: string
 }) {
   if (!active || !payload?.length) return null
@@ -45,12 +45,12 @@ function CustomTooltip({
   )
 }
 
-type VisitsChartProps = {
-  initialData: VisitsDataPoint[]
+type InteractionsChartProps = {
+  initialData: InteractionsDataPoint[]
   initialRange: Range
 }
 
-export function VisitsChart({ initialData, initialRange }: VisitsChartProps) {
+export function InteractionsChart({ initialData, initialRange }: InteractionsChartProps) {
   const [mounted, setMounted] = useState(false)
   const [range, setRange] = useState<Range>(initialRange)
   const [data, setData] = useState(initialData)
@@ -61,7 +61,7 @@ export function VisitsChart({ initialData, initialRange }: VisitsChartProps) {
   function handleRangeChange(newRange: Range) {
     setRange(newRange)
     startTransition(async () => {
-      const newData = await getVisitsOverTime(newRange)
+      const newData = await getInteractionsOverTime(newRange)
       setData(newData)
     })
   }
@@ -109,7 +109,7 @@ export function VisitsChart({ initialData, initialRange }: VisitsChartProps) {
             margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
           >
             <defs>
-              <linearGradient id="visitsFill" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="interactionsFill" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="0%"
                   stopColor="oklch(0.55 0.2 265)"
@@ -144,10 +144,10 @@ export function VisitsChart({ initialData, initialRange }: VisitsChartProps) {
             <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
-              dataKey="visits"
+              dataKey="interactions"
               stroke="oklch(0.55 0.2 265)"
               strokeWidth={2}
-              fill="url(#visitsFill)"
+              fill="url(#interactionsFill)"
             />
           </AreaChart>
         </ResponsiveContainer>}

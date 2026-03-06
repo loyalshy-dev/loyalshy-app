@@ -7,7 +7,7 @@ import { stripe, mapSubscriptionStatus, getSubscriptionIdFromInvoice } from "@/l
 // Verifies signature, then processes billing events inline.
 // Idempotency: uses DB-backed WebhookEvent table for cross-instance deduplication.
 
-// Map Stripe price lookup keys to Loyalshy plan enum values
+// Map Stripe price lookup keys to plan enum values
 const LOOKUP_KEY_TO_PLAN: Record<string, string> = {
   starter_monthly: "STARTER",
   starter_annual: "STARTER",
@@ -119,14 +119,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     { expand: ["items.data.price"] }
   )
 
-  const restaurantId = subscription.metadata?.loyalshy_restaurant_id
-  if (!restaurantId) {
-    console.error("No loyalshy_restaurant_id in subscription metadata")
+  const organizationId = subscription.metadata?.organization_id
+  if (!organizationId) {
+    console.error("No organization_id in subscription metadata")
     return
   }
 
-  await db.restaurant.update({
-    where: { id: restaurantId },
+  await db.organization.update({
+    where: { id: organizationId },
     data: {
       stripeSubscriptionId: subscription.id,
       stripeCustomerId: subscription.customer as string,
@@ -140,7 +140,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  const restaurant = await db.restaurant.findFirst({
+  const organization = await db.organization.findFirst({
     where: {
       OR: [
         { stripeSubscriptionId: subscription.id },
@@ -149,10 +149,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     },
   })
 
-  if (!restaurant) return
+  if (!organization) return
 
-  await db.restaurant.update({
-    where: { id: restaurant.id },
+  await db.organization.update({
+    where: { id: organization.id },
     data: {
       stripeSubscriptionId: subscription.id,
       plan: getPlanFromSubscription(subscription) as never,
@@ -165,7 +165,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  const restaurant = await db.restaurant.findFirst({
+  const organization = await db.organization.findFirst({
     where: {
       OR: [
         { stripeSubscriptionId: subscription.id },
@@ -174,10 +174,10 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     },
   })
 
-  if (!restaurant) return
+  if (!organization) return
 
-  await db.restaurant.update({
-    where: { id: restaurant.id },
+  await db.organization.update({
+    where: { id: organization.id },
     data: {
       subscriptionStatus: "CANCELED" as never,
       plan: "STARTER" as never,
@@ -191,7 +191,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   const subscriptionId = getSubscriptionIdFromInvoice(invoice as unknown as Record<string, unknown>)
   if (!subscriptionId) return
 
-  const restaurant = await db.restaurant.findFirst({
+  const organization = await db.organization.findFirst({
     where: {
       OR: [
         { stripeSubscriptionId: subscriptionId },
@@ -200,10 +200,10 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     },
   })
 
-  if (!restaurant) return
+  if (!organization) return
 
-  await db.restaurant.update({
-    where: { id: restaurant.id },
+  await db.organization.update({
+    where: { id: organization.id },
     data: { subscriptionStatus: "PAST_DUE" as never },
   })
 }
@@ -212,7 +212,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const subscriptionId = getSubscriptionIdFromInvoice(invoice as unknown as Record<string, unknown>)
   if (!subscriptionId) return
 
-  const restaurant = await db.restaurant.findFirst({
+  const organization = await db.organization.findFirst({
     where: {
       OR: [
         { stripeSubscriptionId: subscriptionId },
@@ -221,12 +221,12 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     },
   })
 
-  if (!restaurant) return
+  if (!organization) return
 
-  // If the restaurant was past_due, set back to active
-  if (restaurant.subscriptionStatus === "PAST_DUE") {
-    await db.restaurant.update({
-      where: { id: restaurant.id },
+  // If the organization was past_due, set back to active
+  if (organization.subscriptionStatus === "PAST_DUE") {
+    await db.organization.update({
+      where: { id: organization.id },
       data: { subscriptionStatus: "ACTIVE" as never },
     })
   }

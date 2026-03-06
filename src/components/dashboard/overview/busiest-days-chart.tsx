@@ -38,7 +38,7 @@ type BusiestDaysChartProps = {
 
 export function BusiestDaysChart({ data }: BusiestDaysChartProps) {
   const [mounted, setMounted] = useState(false)
-  const maxVisits = Math.max(...data.map((d) => d.visits), 1)
+  const maxInteractions = Math.max(...data.map((d) => d.interactions), 1)
 
   useEffect(() => setMounted(true), [])
 
@@ -66,12 +66,12 @@ export function BusiestDaysChart({ data }: BusiestDaysChartProps) {
               tickLine={false}
             />
             <Tooltip content={<CustomTooltip />} cursor={false} />
-            <Bar dataKey="visits" radius={[4, 4, 0, 0]} maxBarSize={36}>
+            <Bar dataKey="interactions" radius={[4, 4, 0, 0]} maxBarSize={36}>
               {data.map((entry, i) => (
                 <Cell
                   key={i}
                   fill={
-                    entry.visits === maxVisits
+                    entry.interactions === maxInteractions
                       ? "oklch(0.55 0.2 265)"
                       : "oklch(0.55 0.2 265 / 0.3)"
                   }

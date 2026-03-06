@@ -9,7 +9,7 @@ const PLACEHOLDER_PNG = Buffer.from(
 type IconBuffers = Record<string, Buffer>
 
 /**
- * Fetches the restaurant logo from a URL and returns icon buffers
+ * Fetches the organization logo from a URL and returns icon buffers
  * for the Apple Wallet pass. Falls back to a minimal placeholder if
  * the logo is unavailable.
  *

@@ -73,7 +73,7 @@ function showcaseToMarketing(dbCards: { designData: unknown; metadata: unknown }
 
     cards.push({
       templateId: (d.templateId as string) ?? "",
-      restaurantName: (m.restaurantName as string) ?? "Restaurant",
+      restaurantName: (m.organizationName as string) ?? (m.restaurantName as string) ?? "Organization",
       currentVisits: (m.currentVisits as number) ?? 5,
       totalVisits: (m.totalVisits as number) ?? 10,
       rewardDescription: (m.rewardDescription as string) ?? "Free reward",

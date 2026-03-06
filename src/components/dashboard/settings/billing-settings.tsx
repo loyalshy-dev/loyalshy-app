@@ -64,10 +64,10 @@ export function BillingSettings({ data }: { data: BillingData }) {
   const [isPending, startTransition] = useTransition()
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly")
 
-  const { restaurant, usage, plans } = data
-  const currentPlan = restaurant.plan as PlanId
-  const hasActiveSubscription = !!restaurant.stripeSubscriptionId &&
-    (restaurant.subscriptionStatus === "ACTIVE" || restaurant.subscriptionStatus === "TRIALING")
+  const { organization, usage, plans } = data
+  const currentPlan = organization.plan as PlanId
+  const hasActiveSubscription = !!organization.stripeSubscriptionId &&
+    (organization.subscriptionStatus === "ACTIVE" || organization.subscriptionStatus === "TRIALING")
 
   const checkoutStatus = searchParams.get("checkout")
 
@@ -120,8 +120,8 @@ export function BillingSettings({ data }: { data: BillingData }) {
   }
 
   // Days remaining for trial
-  const trialDaysRemaining = restaurant.trialEndsAt
-    ? Math.max(0, Math.ceil((new Date(restaurant.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  const trialDaysRemaining = organization.trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(organization.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : null
 
   return (
@@ -149,7 +149,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
       )}
 
       {/* Trial Banner */}
-      {restaurant.subscriptionStatus === "TRIALING" && trialDaysRemaining !== null && (
+      {organization.subscriptionStatus === "TRIALING" && trialDaysRemaining !== null && (
         <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
           <Clock className="h-4 w-4 text-amber-600 shrink-0" />
           <p className="text-sm text-amber-700">
@@ -160,7 +160,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
       )}
 
       {/* Past Due Banner */}
-      {restaurant.subscriptionStatus === "PAST_DUE" && (
+      {organization.subscriptionStatus === "PAST_DUE" && (
         <div className="flex items-center gap-3 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3">
           <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
           <div className="flex-1">
@@ -200,18 +200,18 @@ export function BillingSettings({ data }: { data: BillingData }) {
                   <p className="text-sm font-semibold">
                     {plans[currentPlan as keyof typeof plans]?.name ?? currentPlan} Plan
                   </p>
-                  {getStatusBadge(restaurant.subscriptionStatus)}
+                  {getStatusBadge(organization.subscriptionStatus)}
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {restaurant.subscriptionStatus === "TRIALING"
+                  {organization.subscriptionStatus === "TRIALING"
                     ? `Trial ends in ${trialDaysRemaining} day${trialDaysRemaining !== 1 ? "s" : ""}`
-                    : restaurant.subscriptionStatus === "CANCELED"
+                    : organization.subscriptionStatus === "CANCELED"
                       ? "Subscribe to continue using Loyalshy"
                       : "Your subscription renews monthly"}
                 </p>
               </div>
             </div>
-            {restaurant.stripeCustomerId && (
+            {organization.stripeCustomerId && (
               <Button
                 variant="outline"
                 size="sm"
@@ -240,35 +240,35 @@ export function BillingSettings({ data }: { data: BillingData }) {
         </div>
         <div className="p-6">
           <div className="grid gap-4 sm:grid-cols-2">
-            {/* Customers */}
+            {/* Contacts */}
             <div className="rounded-lg border border-border p-4">
               <div className="flex items-center gap-3">
                 <Building2 className="h-5 w-5 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">Customers</p>
+                  <p className="text-xs text-muted-foreground">Contacts</p>
                   <p className="text-sm font-semibold">
-                    {usage.customers.toLocaleString()} / {usage.customerLimit === Infinity ? "Unlimited" : usage.customerLimit.toLocaleString()}
+                    {usage.contacts.toLocaleString()} / {usage.contactLimit === Infinity ? "Unlimited" : usage.contactLimit.toLocaleString()}
                   </p>
                 </div>
               </div>
-              {usage.customerLimit !== Infinity && (
+              {usage.contactLimit !== Infinity && (
                 <div className="mt-3">
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        usage.customerPercent >= 100
+                        usage.contactPercent >= 100
                           ? "bg-red-500"
-                          : usage.customerPercent >= 80
+                          : usage.contactPercent >= 80
                             ? "bg-amber-500"
                             : "bg-brand"
                       }`}
-                      style={{ width: `${Math.min(usage.customerPercent, 100)}%` }}
+                      style={{ width: `${Math.min(usage.contactPercent, 100)}%` }}
                     />
                   </div>
-                  {usage.customerPercent >= 80 && usage.customerPercent < 100 && (
+                  {usage.contactPercent >= 80 && usage.contactPercent < 100 && (
                     <p className="text-[10px] text-amber-600 mt-1">Approaching limit</p>
                   )}
-                  {usage.customerPercent >= 100 && (
+                  {usage.contactPercent >= 100 && (
                     <p className="text-[10px] text-red-600 mt-1">Limit reached — upgrade to add more</p>
                   )}
                 </div>

@@ -26,10 +26,10 @@ type ChecklistItem = {
 }
 
 export function OnboardingChecklist({
-  restaurantId,
+  organizationId,
   data,
 }: {
-  restaurantId: string
+  organizationId: string
   data: OnboardingChecklistData
 }) {
   const [dismissed, setDismissed] = useState(false)
@@ -41,7 +41,7 @@ export function OnboardingChecklist({
     {
       id: "logo",
       label: "Upload your logo",
-      description: "Brand your loyalty cards with your restaurant's logo",
+      description: "Brand your passes with your organization's logo",
       completed: data.hasLogo,
       href: "/dashboard/settings?tab=general",
       icon: Image,
@@ -50,7 +50,7 @@ export function OnboardingChecklist({
       id: "loyalty",
       label: "Customize your loyalty card",
       description: "Set visits required, reward description, and expiry",
-      completed: data.hasCustomLoyalty,
+      completed: data.hasCustomTemplate,
       href: "/dashboard/settings?tab=loyalty",
       icon: Gift,
     },
@@ -63,10 +63,10 @@ export function OnboardingChecklist({
       icon: QrCode,
     },
     {
-      id: "customer",
-      label: "Register your first customer",
-      description: "Add a customer or have them scan your QR code",
-      completed: data.hasCustomer,
+      id: "contact",
+      label: "Register your first contact",
+      description: "Add a contact or have them scan your QR code",
+      completed: data.hasContact,
       href: "/dashboard/customers",
       icon: UserPlus,
     },
@@ -85,7 +85,7 @@ export function OnboardingChecklist({
 
   function handleDismiss() {
     startTransition(async () => {
-      await dismissOnboardingChecklist(restaurantId)
+      await dismissOnboardingChecklist(organizationId)
       setDismissed(true)
     })
   }

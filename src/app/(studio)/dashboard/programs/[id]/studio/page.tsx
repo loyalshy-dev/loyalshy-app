@@ -1,6 +1,6 @@
 import { connection } from "next/server"
 import { notFound, redirect } from "next/navigation"
-import { assertAuthenticated, getRestaurantForUser, assertRestaurantRole } from "@/lib/dal"
+import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
 import { StudioLayout } from "@/components/studio/studio-layout"
@@ -12,53 +12,53 @@ export default async function StudioPage(props: {
   const { id: programId } = await props.params
   await assertAuthenticated()
 
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) {
+  const organization = await getOrganizationForUser()
+  if (!organization) {
     redirect("/dashboard")
   }
 
-  await assertRestaurantRole(restaurant.id, "owner")
+  await assertOrganizationRole(organization.id, "owner")
 
-  const program = await db.loyaltyProgram.findFirst({
-    where: { id: programId, restaurantId: restaurant.id },
-    include: { cardDesign: true },
+  const program = await db.passTemplate.findFirst({
+    where: { id: programId, organizationId: organization.id },
+    include: { passDesign: true },
   })
 
   if (!program) {
     notFound()
   }
 
-  const walletPassCount = await db.enrollment.count({
+  const walletPassCount = await db.passInstance.count({
     where: {
-      loyaltyProgramId: programId,
-      walletPassType: { not: "NONE" },
+      passTemplateId: programId,
+      walletProvider: { not: "NONE" },
     },
   })
 
-  // Serialize card design for client
-  const cardDesign = program.cardDesign
-  const stripFilters = cardDesign ? parseStripFilters(cardDesign.editorConfig) : { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
+  // Serialize pass design for client
+  const passDesign = program.passDesign
+  const stripFilters = passDesign ? parseStripFilters(passDesign.editorConfig) : { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
   // Backward compat: old data has patternStyle="STAMP_GRID" in DB column
-  const isLegacyStampGrid = cardDesign?.patternStyle === "STAMP_GRID"
+  const isLegacyStampGrid = passDesign?.patternStyle === "STAMP_GRID"
   const useStampGrid = stripFilters.useStampGrid || isLegacyStampGrid
-  // Restore real pattern style — legacy "STAMP_GRID" becomes "NONE"
-  const realPatternStyle = isLegacyStampGrid ? "NONE" : (cardDesign?.patternStyle ?? "NONE")
-  const walletData = cardDesign
+  // Restore real pattern style -- legacy "STAMP_GRID" becomes "NONE"
+  const realPatternStyle = isLegacyStampGrid ? "NONE" : (passDesign?.patternStyle ?? "NONE")
+  const walletData = passDesign
     ? {
-        showStrip: cardDesign.showStrip as boolean,
-        primaryColor: cardDesign.primaryColor ?? "#1a1a2e",
-        secondaryColor: cardDesign.secondaryColor ?? "#ffffff",
-        textColor: cardDesign.textColor ?? "#ffffff",
+        showStrip: passDesign.showStrip as boolean,
+        primaryColor: passDesign.primaryColor ?? "#1a1a2e",
+        secondaryColor: passDesign.secondaryColor ?? "#ffffff",
+        textColor: passDesign.textColor ?? "#ffffff",
         patternStyle: realPatternStyle as string,
-        progressStyle: cardDesign.progressStyle as string,
-        fontFamily: cardDesign.fontFamily as string,
-        labelFormat: cardDesign.labelFormat as string,
-        customProgressLabel: cardDesign.customProgressLabel ?? "",
-        palettePreset: cardDesign.palettePreset ?? null,
-        templateId: cardDesign.templateId ?? null,
-        stripImageUrl: cardDesign.stripImageUrl ?? null,
-        stripImageApple: cardDesign.stripImageApple ?? null,
-        stripImageGoogle: cardDesign.stripImageGoogle ?? null,
+        progressStyle: passDesign.progressStyle as string,
+        fontFamily: passDesign.fontFamily as string,
+        labelFormat: passDesign.labelFormat as string,
+        customProgressLabel: passDesign.customProgressLabel ?? "",
+        palettePreset: passDesign.palettePreset ?? null,
+        templateId: passDesign.templateId ?? null,
+        stripImageUrl: passDesign.stripImageUrl ?? null,
+        stripImageApple: passDesign.stripImageApple ?? null,
+        stripImageGoogle: passDesign.stripImageGoogle ?? null,
         stripOpacity: stripFilters.stripOpacity,
         stripGrayscale: stripFilters.stripGrayscale,
         stripColor1: stripFilters.stripColor1,
@@ -68,32 +68,34 @@ export default async function StudioPage(props: {
         stripImagePosition: stripFilters.stripImagePosition,
         stripImageZoom: stripFilters.stripImageZoom,
         useStampGrid,
-        generatedStripApple: cardDesign.generatedStripApple ?? null,
-        generatedStripGoogle: cardDesign.generatedStripGoogle ?? null,
-        businessHours: cardDesign.businessHours ?? "",
-        mapAddress: cardDesign.mapAddress ?? "",
-        mapLatitude: cardDesign.mapLatitude ?? null,
-        mapLongitude: cardDesign.mapLongitude ?? null,
-        socialLinks: (cardDesign.socialLinks as Record<string, string>) ?? {},
-        customMessage: cardDesign.customMessage ?? "",
-        cardType: cardDesign.cardType as string,
-        stampGridConfig: parseStampGridConfig(cardDesign.editorConfig),
+        generatedStripApple: passDesign.generatedStripApple ?? null,
+        generatedStripGoogle: passDesign.generatedStripGoogle ?? null,
+        businessHours: passDesign.businessHours ?? "",
+        mapAddress: passDesign.mapAddress ?? "",
+        mapLatitude: passDesign.mapLatitude ?? null,
+        mapLongitude: passDesign.mapLongitude ?? null,
+        socialLinks: (passDesign.socialLinks as Record<string, string>) ?? {},
+        customMessage: passDesign.customMessage ?? "",
+        cardType: passDesign.cardType as string,
+        stampGridConfig: parseStampGridConfig(passDesign.editorConfig),
       }
     : null
 
+  const programConfig = program.config as Record<string, unknown> | null
+
   return (
     <StudioLayout
-      programId={programId}
-      programName={program.name}
-      programType={program.programType}
-      programConfig={program.config}
-      restaurantName={restaurant.name}
-      restaurantLogo={restaurant.logo}
-      restaurantLogoApple={restaurant.logoApple}
-      restaurantLogoGoogle={restaurant.logoGoogle}
-      restaurantId={restaurant.id}
-      visitsRequired={program.visitsRequired}
-      rewardDescription={program.rewardDescription}
+      templateId={programId}
+      templateName={program.name}
+      passType={program.passType}
+      templateConfig={program.config}
+      organizationName={organization.name}
+      organizationLogo={organization.logo}
+      organizationLogoApple={organization.logoApple}
+      organizationLogoGoogle={organization.logoGoogle}
+      organizationId={organization.id}
+      visitsRequired={(programConfig?.visitsRequired as number) ?? 10}
+      rewardDescription={(programConfig?.rewardDescription as string) ?? ""}
       walletData={walletData}
       walletPassCount={walletPassCount}
     />

@@ -14,44 +14,38 @@ type Params = Promise<{
 export async function GET(request: Request, { params }: { params: Params }) {
   const { serialNumber } = await params
 
-  const { valid, enrollmentId } = await validateApplePassAuth(
+  const { valid, passInstanceId } = await validateApplePassAuth(
     request,
     serialNumber
   )
-  if (!valid || !enrollmentId) {
+  if (!valid || !passInstanceId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const enrollment = await db.enrollment.findUnique({
-    where: { id: enrollmentId },
+  const passInstance = await db.passInstance.findUnique({
+    where: { id: passInstanceId },
     select: {
       id: true,
-      currentCycleVisits: true,
-      totalVisits: true,
-      pointsBalance: true,
-      remainingUses: true,
+      data: true,
       walletPassSerialNumber: true,
       walletPassId: true,
-      enrolledAt: true,
+      issuedAt: true,
       updatedAt: true,
-      customer: {
+      contact: {
         select: {
           id: true,
           fullName: true,
           email: true,
         },
       },
-      loyaltyProgram: {
+      passTemplate: {
         select: {
           id: true,
           name: true,
-          programType: true,
+          passType: true,
           config: true,
-          visitsRequired: true,
-          rewardDescription: true,
-          rewardExpiryDays: true,
           termsAndConditions: true,
-          restaurant: {
+          organization: {
             select: {
               name: true,
               slug: true,
@@ -63,7 +57,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
               website: true,
             },
           },
-          cardDesign: true,
+          passDesign: true,
         },
       },
       rewards: {
@@ -73,7 +67,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
     },
   })
 
-  if (!enrollment || !enrollment.walletPassSerialNumber || !enrollment.walletPassId) {
+  if (!passInstance || !passInstance.walletPassSerialNumber || !passInstance.walletPassId) {
     return NextResponse.json({ error: "Pass not found" }, { status: 404 })
   }
 
@@ -81,49 +75,62 @@ export async function GET(request: Request, { params }: { params: Params }) {
   const ifModifiedSince = request.headers.get("If-Modified-Since")
   if (ifModifiedSince) {
     const sinceDate = new Date(ifModifiedSince)
-    if (enrollment.updatedAt <= sinceDate) {
+    if (passInstance.updatedAt <= sinceDate) {
       return new NextResponse(null, { status: 304 })
     }
   }
 
-  const program = enrollment.loyaltyProgram
-  const restaurant = program.restaurant
+  const template = passInstance.passTemplate
+  const organization = template.organization
 
-  const cardDesign = resolveCardDesign(
-    program.cardDesign,
-    restaurant
+  // Extract data from the PassInstance.data JSON
+  const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
+  const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
+  const totalVisits = (instanceData.totalVisits as number) ?? 0
+  const pointsBalance = (instanceData.pointsBalance as number) ?? 0
+  const remainingUses = (instanceData.remainingUses as number) ?? 0
+
+  // Extract config values from PassTemplate.config JSON
+  const templateConfig = (template.config ?? {}) as Record<string, unknown>
+  const visitsRequired = (templateConfig.visitsRequired as number) ?? 10
+  const rewardDescription = (templateConfig.rewardDescription as string) ?? "Free reward"
+  const rewardExpiryDays = (templateConfig.rewardExpiryDays as number) ?? 30
+
+  const passDesign = resolveCardDesign(
+    template.passDesign,
+    organization
   )
 
   try {
     const passBuffer = await generateApplePass({
-      serialNumber: enrollment.walletPassSerialNumber,
-      authenticationToken: enrollment.walletPassId,
-      customerName: enrollment.customer.fullName,
-      customerEmail: enrollment.customer.email,
-      currentCycleVisits: enrollment.currentCycleVisits,
-      visitsRequired: program.visitsRequired,
-      totalVisits: enrollment.totalVisits,
-      memberSince: enrollment.enrolledAt,
-      hasAvailableReward: enrollment.rewards.length > 0,
-      restaurantName: restaurant.name,
-      restaurantLogo: restaurant.logo,
-      restaurantLogoApple: restaurant.logoApple,
-      brandColor: restaurant.brandColor,
-      secondaryColor: restaurant.secondaryColor,
-      rewardDescription: program.rewardDescription,
-      rewardExpiryDays: program.rewardExpiryDays,
-      termsAndConditions: program.termsAndConditions,
-      restaurantPhone: restaurant.phone,
-      restaurantWebsite: restaurant.website,
-      programName: program.name,
-      cardDesign,
-      programType: program.programType,
-      programConfig: program.config,
-      pointsBalance: enrollment.pointsBalance,
-      remainingUses: enrollment.remainingUses,
-      enrollmentId: enrollment.id,
-      restaurantSlug: restaurant.slug,
-      hasUnrevealedPrize: enrollment.rewards.some(
+      serialNumber: passInstance.walletPassSerialNumber,
+      authenticationToken: passInstance.walletPassId,
+      customerName: passInstance.contact.fullName,
+      customerEmail: passInstance.contact.email,
+      currentCycleVisits,
+      visitsRequired,
+      totalVisits,
+      memberSince: passInstance.issuedAt,
+      hasAvailableReward: passInstance.rewards.length > 0,
+      organizationName: organization.name,
+      organizationLogo: organization.logo,
+      organizationLogoApple: organization.logoApple,
+      brandColor: organization.brandColor,
+      secondaryColor: organization.secondaryColor,
+      rewardDescription,
+      rewardExpiryDays,
+      termsAndConditions: template.termsAndConditions,
+      organizationPhone: organization.phone,
+      organizationWebsite: organization.website,
+      programName: template.name,
+      cardDesign: passDesign,
+      programType: template.passType,
+      programConfig: template.config,
+      pointsBalance,
+      remainingUses,
+      passInstanceId: passInstance.id,
+      organizationSlug: organization.slug,
+      hasUnrevealedPrize: passInstance.rewards.some(
         (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt === null && r.description != null
       ),
     })
@@ -131,7 +138,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
     // Log update
     await db.walletPassLog.create({
       data: {
-        enrollmentId: enrollment.id,
+        passInstanceId: passInstance.id,
         action: "UPDATED",
         details: { trigger: "apple_wallet_fetch" },
       },
@@ -141,7 +148,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.apple.pkpass",
-        "Last-Modified": enrollment.updatedAt.toUTCString(),
+        "Last-Modified": passInstance.updatedAt.toUTCString(),
       },
     })
   } catch (error) {

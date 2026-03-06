@@ -15,16 +15,16 @@ import {
 } from "lucide-react"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import { CARD_TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/wallet/card-templates"
-import type { CardTemplate, RestaurantCategory } from "@/lib/wallet/card-templates"
+import type { CardTemplate, BusinessCategory } from "@/lib/wallet/card-templates"
 import { matchTemplates, applyPaletteToTemplate } from "@/lib/wallet/template-matcher"
 import type { ExtractedPalette } from "@/lib/color-extraction"
-import { extractPaletteFromLogoUrl } from "@/server/settings-actions"
+import { extractPaletteFromLogoUrl } from "@/server/org-settings-actions"
 import { getStampIconPaths, getRewardIconPaths } from "@/lib/wallet/stamp-icons"
 import type { CardType, StampGridConfig } from "@/lib/wallet/card-design"
 
 // ─── Vibe Options ───────────────────────────────────────────
 
-const VIBE_OPTIONS: { id: RestaurantCategory; label: string; icon: typeof Coffee }[] = [
+const VIBE_OPTIONS: { id: BusinessCategory; label: string; icon: typeof Coffee }[] = [
   { id: "cafe", label: "Cafe", icon: Coffee },
   { id: "fine-dining", label: "Fine Dining", icon: UtensilsCrossed },
   { id: "casual", label: "Casual", icon: Smile },
@@ -153,21 +153,21 @@ function TemplateSwatchPreview({
 
 type Props = {
   store: CardDesignStoreApi
-  restaurantId: string
-  restaurantLogo: string | null
+  organizationId: string
+  organizationLogo: string | null
   cardType?: CardType
 }
 
 // ─── Component ──────────────────────────────────────────────
 
-export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }: Props) {
+export function TemplatePanel({ store, organizationId, organizationLogo, cardType }: Props) {
   const currentTemplateId = useStore(store, (s) => s.wallet.templateId)
-  const [categoryFilter, setCategoryFilter] = useState<RestaurantCategory | "all">("all")
+  const [categoryFilter, setCategoryFilter] = useState<BusinessCategory | "all">("all")
 
   // Brand Match state
-  const [brandCategory, setBrandCategory] = useState<RestaurantCategory | null>(null)
+  const [brandCategory, setBrandCategory] = useState<BusinessCategory | null>(null)
   const [isMatching, setIsMatching] = useState(false)
-  const [matchResults, setMatchResults] = useState<{ template: CardTemplate; palette: ExtractedPalette | null; matchedCategory: RestaurantCategory | null }[] | null>(null)
+  const [matchResults, setMatchResults] = useState<{ template: CardTemplate; palette: ExtractedPalette | null; matchedCategory: BusinessCategory | null }[] | null>(null)
   const [matchPalette, setMatchPalette] = useState<ExtractedPalette | null>(null)
 
   // Cache palette per logo URL to avoid redundant server calls
@@ -203,7 +203,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
     })
   }
 
-  function applyMatchedTemplate(template: CardTemplate, palette: ExtractedPalette | null, category: RestaurantCategory | null = brandCategory) {
+  function applyMatchedTemplate(template: CardTemplate, palette: ExtractedPalette | null, category: BusinessCategory | null = brandCategory) {
     const design = applyPaletteToTemplate(template, palette, category)
     const s = store.getState()
     s.applyTemplate({
@@ -248,15 +248,15 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
     try {
       let palette: ExtractedPalette | null = null
 
-      // Extract palette from restaurant logo if available (cached per URL)
-      if (restaurantLogo) {
-        if (paletteCacheRef.current?.url === restaurantLogo) {
+      // Extract palette from organization logo if available (cached per URL)
+      if (organizationLogo) {
+        if (paletteCacheRef.current?.url === organizationLogo) {
           palette = paletteCacheRef.current.palette
         } else {
-          const result = await extractPaletteFromLogoUrl(restaurantId)
+          const result = await extractPaletteFromLogoUrl(organizationId)
           if ("palette" in result && result.palette) {
             palette = result.palette
-            paletteCacheRef.current = { url: restaurantLogo, palette }
+            paletteCacheRef.current = { url: organizationLogo, palette: palette! }
           }
         }
         if (palette) setMatchPalette(palette)
@@ -310,7 +310,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
           </span>
         </div>
 
-        {restaurantLogo && (
+        {organizationLogo && (
           <div
             style={{
               display: "flex",
@@ -324,7 +324,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={restaurantLogo}
+              src={organizationLogo}
               alt=""
               style={{ width: 28, height: 28, borderRadius: 4, objectFit: "cover" }}
             />
@@ -400,7 +400,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
 
         <button
           onClick={handleBrandMatch}
-          disabled={isMatching || (!restaurantLogo && !brandCategory)}
+          disabled={isMatching || (!organizationLogo && !brandCategory)}
           style={{
             width: "100%",
             padding: "7px 14px",
@@ -408,14 +408,14 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
             border: "none",
             backgroundColor: "var(--primary)",
             color: "var(--primary-foreground)",
-            cursor: isMatching || (!restaurantLogo && !brandCategory) ? "not-allowed" : "pointer",
+            cursor: isMatching || (!organizationLogo && !brandCategory) ? "not-allowed" : "pointer",
             fontSize: 12,
             fontWeight: 600,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: 6,
-            opacity: isMatching || (!restaurantLogo && !brandCategory) ? 0.5 : 1,
+            opacity: isMatching || (!organizationLogo && !brandCategory) ? 0.5 : 1,
           }}
         >
           {isMatching ? (
@@ -431,7 +431,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
           )}
         </button>
 
-        {!restaurantLogo && !brandCategory && (
+        {!organizationLogo && !brandCategory && (
           <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 4, textAlign: "center" }}>
             Upload a logo in the Logo panel or pick a vibe above
           </div>
@@ -492,7 +492,7 @@ export function TemplatePanel({ store, restaurantId, restaurantLogo, cardType }:
         {TEMPLATE_CATEGORIES.map((c) => (
           <button
             key={c.id}
-            onClick={() => setCategoryFilter(c.id as RestaurantCategory | "all")}
+            onClick={() => setCategoryFilter(c.id as BusinessCategory | "all")}
             style={{
               padding: "3px 8px",
               borderRadius: 4,

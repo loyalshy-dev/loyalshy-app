@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { parseMinigameConfig, minigameConfigSchema, parsePointsConfig, pointsConfigSchema, getCheapestCatalogItem } from "./program-config"
+import { parseMinigameConfig, minigameConfigSchema, parsePointsConfig, pointsConfigSchema, getCheapestCatalogItem } from "./pass-config"
 
 describe("parseMinigameConfig", () => {
   it("parses valid minigame config from nested config object", () => {

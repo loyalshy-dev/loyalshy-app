@@ -5,13 +5,13 @@ import crypto from "crypto"
 import { addDays } from "date-fns"
 import { headers } from "next/headers"
 import { db } from "@/lib/db"
-import { assertRestaurantRole } from "@/lib/dal"
+import { assertOrganizationRole } from "@/lib/dal"
 import { publicFormLimiter } from "@/lib/rate-limit"
 
 // ─── Schemas ────────────────────────────────────────────────
 
 const sendInvitationSchema = z.object({
-  restaurantId: z.string().min(1),
+  organizationId: z.string().min(1),
   email: z.string().email(),
   role: z.enum(["owner", "staff"]),
 })
@@ -22,12 +22,12 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
   const parsed = sendInvitationSchema.parse(input)
 
   // Only owners can invite staff
-  await assertRestaurantRole(parsed.restaurantId, "owner")
+  await assertOrganizationRole(parsed.organizationId, "owner")
 
   // Check for existing pending invitation
   const existing = await db.staffInvitation.findFirst({
     where: {
-      restaurantId: parsed.restaurantId,
+      organizationId: parsed.organizationId,
       email: parsed.email,
       accepted: false,
       expiresAt: { gt: new Date() },
@@ -38,14 +38,20 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     return { error: "An invitation has already been sent to this email" }
   }
 
-  // Check if user is already a member
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: parsed.restaurantId },
-    include: { users: { where: { email: parsed.email } } },
+  // Check if user is already a member of this organization
+  const org = await db.organization.findUnique({
+    where: { id: parsed.organizationId },
+    select: {
+      name: true,
+      members: {
+        select: { userId: true, user: { select: { email: true } } },
+      },
+    },
   })
 
-  if (restaurant?.users.length) {
-    return { error: "This user is already a member of your restaurant" }
+  const isMember = org?.members.some((m) => m.user.email === parsed.email)
+  if (isMember) {
+    return { error: "This user is already a member of your organization" }
   }
 
   // Generate invitation token
@@ -54,7 +60,7 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
 
   const invitation = await db.staffInvitation.create({
     data: {
-      restaurantId: parsed.restaurantId,
+      organizationId: parsed.organizationId,
       email: parsed.email,
       role: parsed.role === "owner" ? "OWNER" : "STAFF",
       token,
@@ -69,7 +75,7 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     .then(({ tasks }) =>
       tasks.trigger("send-invitation-email", {
         email: parsed.email,
-        restaurantName: restaurant?.name ?? "A restaurant",
+        organizationName: org?.name ?? "An organization",
         role: parsed.role,
         inviteUrl,
       })
@@ -92,7 +98,7 @@ export async function validateInvitationToken(token: string) {
 
   const invitation = await db.staffInvitation.findUnique({
     where: { token },
-    include: { restaurant: true },
+    include: { organization: true },
   })
 
   if (!invitation) {
@@ -112,8 +118,8 @@ export async function validateInvitationToken(token: string) {
       id: invitation.id,
       email: invitation.email,
       role: invitation.role,
-      restaurantName: invitation.restaurant.name,
-      restaurantId: invitation.restaurantId,
+      organizationName: invitation.organization.name,
+      organizationId: invitation.organizationId,
     },
   }
 }
@@ -146,17 +152,20 @@ export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitati
     return { error: "This invitation was sent to a different email address" }
   }
 
-  // Mark invitation as accepted and link user to restaurant
+  // Mark invitation as accepted and add user as org member
   await db.$transaction([
     db.staffInvitation.update({
       where: { id: invitation.id },
       data: { accepted: true },
     }),
-    db.user.update({
-      where: { id: parsed.userId },
-      data: { restaurantId: invitation.restaurantId },
+    db.member.create({
+      data: {
+        userId: parsed.userId,
+        organizationId: invitation.organizationId,
+        role: invitation.role === "OWNER" ? "owner" : "member",
+      },
     }),
   ])
 
-  return { success: true, restaurantId: invitation.restaurantId }
+  return { success: true, organizationId: invitation.organizationId }
 }

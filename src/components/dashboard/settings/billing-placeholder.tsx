@@ -4,16 +4,16 @@ import { CreditCard, Users, Building2, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
-type Restaurant = {
+type Organization = {
   id: string
   name: string
   plan: string
   subscriptionStatus: string
 }
 
-export function BillingPlaceholder({ restaurant }: { restaurant: Restaurant }) {
-  const planLabel = restaurant.plan
-  const statusLabel = restaurant.subscriptionStatus
+export function BillingPlaceholder({ organization }: { organization: Organization }) {
+  const planLabel = organization.plan
+  const statusLabel = organization.subscriptionStatus
 
   return (
     <div className="space-y-6">
@@ -39,7 +39,7 @@ export function BillingPlaceholder({ restaurant }: { restaurant: Restaurant }) {
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {restaurant.subscriptionStatus === "TRIALING"
+                  {organization.subscriptionStatus === "TRIALING"
                     ? "You're on a free trial"
                     : "Your subscription renews monthly"}
                 </p>

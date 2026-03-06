@@ -16,17 +16,17 @@ export default async function AdminOverviewPage() {
       <div>
         <h1 className="text-lg font-semibold tracking-tight">Platform Overview</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Global metrics across all restaurants and users.
+          Global metrics across all organizations and users.
         </p>
       </div>
 
       <AdminStatCards
         totalUsers={stats.totalUsers}
-        totalRestaurants={stats.totalRestaurants}
-        totalCustomers={stats.totalCustomers}
+        totalOrganizations={stats.totalOrganizations}
+        totalContacts={stats.totalContacts}
         estimatedMrr={stats.estimatedMrr}
         newUsersThisMonth={stats.newUsersThisMonth}
-        newRestaurantsThisMonth={stats.newRestaurantsThisMonth}
+        newOrganizationsThisMonth={stats.newOrganizationsThisMonth}
         activeSubscriptions={stats.activeSubscriptions}
       />
 

@@ -6,7 +6,7 @@ import { Search, X, Download, Stamp, Ticket, Crown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { exportCustomersCSV } from "@/server/customer-actions"
+import { exportContactsCSV } from "@/server/contact-actions"
 import { toast } from "sonner"
 
 const programTypeFilters = [
@@ -81,7 +81,7 @@ export function CustomerFilters({
   async function handleExport() {
     startExport(async () => {
       try {
-        const csv = await exportCustomersCSV()
+        const csv = await exportContactsCSV()
         const blob = new Blob([csv], { type: "text/csv" })
         const url = URL.createObjectURL(blob)
         const a = document.createElement("a")

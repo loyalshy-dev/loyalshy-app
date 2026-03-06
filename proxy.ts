@@ -29,7 +29,7 @@ export function proxy(request: NextRequest) {
 
   // Authenticated user on login/forgot-password → redirect to dashboard
   // NOTE: /register is NOT redirected here because the user may need to
-  // complete the multi-step onboarding (create restaurant, etc.).
+  // complete the multi-step onboarding (create organization, etc.).
   // The register page itself handles the redirect if onboarding is complete.
   if (sessionCookie && AUTH_PAGES_REDIRECT.some((p) => pathname.startsWith(p))) {
     return NextResponse.redirect(new URL("/dashboard", request.url))

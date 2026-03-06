@@ -22,7 +22,6 @@ beforeEach(() => {
     },
   }))
 
-  // Reset React cache by resetting modules
   mockGetSession.mockReset()
 })
 
@@ -72,24 +71,22 @@ describe("assertSuperAdmin", () => {
   })
 })
 
-describe("assertRestaurantAccess", () => {
-  it("allows super admin to access any restaurant", async () => {
+describe("assertOrganizationAccess", () => {
+  it("allows super admin to access any organization", async () => {
     const session = createMockSession({ role: "SUPER_ADMIN" })
     mockGetSession.mockResolvedValue(session)
 
-    const { assertRestaurantAccess } = await import("./dal")
-    const result = await assertRestaurantAccess("any-restaurant-id")
+    const { assertOrganizationAccess } = await import("./dal")
+    const result = await assertOrganizationAccess("any-org-id")
 
-    expect(result.member.role).toBe("owner") // super admins get owner role
-    expect(mockDb.restaurant.findUnique).not.toHaveBeenCalled() // skips DB lookup
+    expect(result.member.role).toBe("owner")
+    expect(mockDb.member.findFirst).not.toHaveBeenCalled()
   })
 
-  it("allows org member to access their restaurant", async () => {
+  it("allows org member to access their organization", async () => {
     const session = createMockSession()
     mockGetSession.mockResolvedValue(session)
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ slug: "test-restaurant" })
-    mockDb.organization.findUnique.mockResolvedValue({ id: "org-1", slug: "test-restaurant" })
     mockDb.member.findFirst.mockResolvedValue({
       id: "member-1",
       organizationId: "org-1",
@@ -98,8 +95,8 @@ describe("assertRestaurantAccess", () => {
       createdAt: new Date(),
     })
 
-    const { assertRestaurantAccess } = await import("./dal")
-    const result = await assertRestaurantAccess("restaurant-1")
+    const { assertOrganizationAccess } = await import("./dal")
+    const result = await assertOrganizationAccess("org-1")
 
     expect(result.member.role).toBe("member")
   })
@@ -108,46 +105,19 @@ describe("assertRestaurantAccess", () => {
     const session = createMockSession()
     mockGetSession.mockResolvedValue(session)
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ slug: "test-restaurant" })
-    mockDb.organization.findUnique.mockResolvedValue({ id: "org-1" })
     mockDb.member.findFirst.mockResolvedValue(null)
 
-    const { assertRestaurantAccess } = await import("./dal")
+    const { assertOrganizationAccess } = await import("./dal")
 
-    await expect(assertRestaurantAccess("restaurant-1")).rejects.toThrow(RedirectError)
-  })
-
-  it("redirects when restaurant does not exist", async () => {
-    const session = createMockSession()
-    mockGetSession.mockResolvedValue(session)
-
-    mockDb.restaurant.findUnique.mockResolvedValue(null)
-
-    const { assertRestaurantAccess } = await import("./dal")
-
-    await expect(assertRestaurantAccess("nonexistent")).rejects.toThrow(RedirectError)
-  })
-
-  it("redirects when organization not found", async () => {
-    const session = createMockSession()
-    mockGetSession.mockResolvedValue(session)
-
-    mockDb.restaurant.findUnique.mockResolvedValue({ slug: "test-restaurant" })
-    mockDb.organization.findUnique.mockResolvedValue(null)
-
-    const { assertRestaurantAccess } = await import("./dal")
-
-    await expect(assertRestaurantAccess("restaurant-1")).rejects.toThrow(RedirectError)
+    await expect(assertOrganizationAccess("org-1")).rejects.toThrow(RedirectError)
   })
 })
 
-describe("assertRestaurantRole", () => {
+describe("assertOrganizationRole", () => {
   it("allows owner when owner is required", async () => {
     const session = createMockSession()
     mockGetSession.mockResolvedValue(session)
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ slug: "test-restaurant" })
-    mockDb.organization.findUnique.mockResolvedValue({ id: "org-1" })
     mockDb.member.findFirst.mockResolvedValue({
       id: "member-1",
       organizationId: "org-1",
@@ -156,8 +126,8 @@ describe("assertRestaurantRole", () => {
       createdAt: new Date(),
     })
 
-    const { assertRestaurantRole } = await import("./dal")
-    const result = await assertRestaurantRole("restaurant-1", "owner")
+    const { assertOrganizationRole } = await import("./dal")
+    const result = await assertOrganizationRole("org-1", "owner")
 
     expect(result.member.role).toBe("owner")
   })
@@ -166,8 +136,6 @@ describe("assertRestaurantRole", () => {
     const session = createMockSession()
     mockGetSession.mockResolvedValue(session)
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ slug: "test-restaurant" })
-    mockDb.organization.findUnique.mockResolvedValue({ id: "org-1" })
     mockDb.member.findFirst.mockResolvedValue({
       id: "member-1",
       organizationId: "org-1",
@@ -176,8 +144,8 @@ describe("assertRestaurantRole", () => {
       createdAt: new Date(),
     })
 
-    const { assertRestaurantRole } = await import("./dal")
-    const result = await assertRestaurantRole("restaurant-1", "member")
+    const { assertOrganizationRole } = await import("./dal")
+    const result = await assertOrganizationRole("org-1", "member")
 
     expect(result.member.role).toBe("owner")
   })
@@ -186,8 +154,6 @@ describe("assertRestaurantRole", () => {
     const session = createMockSession()
     mockGetSession.mockResolvedValue(session)
 
-    mockDb.restaurant.findUnique.mockResolvedValue({ slug: "test-restaurant" })
-    mockDb.organization.findUnique.mockResolvedValue({ id: "org-1" })
     mockDb.member.findFirst.mockResolvedValue({
       id: "member-1",
       organizationId: "org-1",
@@ -196,48 +162,43 @@ describe("assertRestaurantRole", () => {
       createdAt: new Date(),
     })
 
-    const { assertRestaurantRole } = await import("./dal")
+    const { assertOrganizationRole } = await import("./dal")
 
-    await expect(assertRestaurantRole("restaurant-1", "owner")).rejects.toThrow(
+    await expect(assertOrganizationRole("org-1", "owner")).rejects.toThrow(
       RedirectError
     )
   })
 })
 
-describe("getRestaurantForUser", () => {
-  it("returns restaurant with active loyalty program", async () => {
-    const session = createMockSession({ restaurantId: "restaurant-1" })
+describe("getOrganizationForUser", () => {
+  it("returns organization with active pass templates", async () => {
+    const session = createMockSession()
     mockGetSession.mockResolvedValue(session)
 
-    const mockRestaurant = {
-      id: "restaurant-1",
+    const mockOrg = {
+      id: "org-1",
       name: "Test",
-      loyaltyPrograms: [{ id: "prog-1", status: "ACTIVE", cardDesign: null }],
+      passTemplates: [{ id: "tmpl-1", status: "ACTIVE", passDesign: null }],
     }
-    mockDb.restaurant.findUnique.mockResolvedValue(mockRestaurant)
+    mockDb.member.findFirst.mockResolvedValue({ organizationId: "org-1" })
+    mockDb.organization.findUnique.mockResolvedValue(mockOrg)
 
-    const { getRestaurantForUser } = await import("./dal")
-    const result = await getRestaurantForUser()
+    const { getOrganizationForUser } = await import("./dal")
+    const result = await getOrganizationForUser()
 
-    expect(result).toEqual(mockRestaurant)
-    expect(mockDb.restaurant.findUnique).toHaveBeenCalledWith({
-      where: { id: "restaurant-1" },
-      include: {
-        loyaltyPrograms: {
-          where: { status: "ACTIVE" },
-          include: { cardDesign: true },
-          orderBy: { createdAt: "asc" },
-        },
-      },
-    })
+    expect(result).toEqual(mockOrg)
   })
 
-  it("returns null when user has no restaurantId", async () => {
-    const session = createMockSession({ restaurantId: null })
+  it("returns null when user has no organization membership", async () => {
+    const session = createMockSession()
+    // No activeOrganizationId in session
+    session.session.activeOrganizationId = null
     mockGetSession.mockResolvedValue(session)
 
-    const { getRestaurantForUser } = await import("./dal")
-    const result = await getRestaurantForUser()
+    mockDb.member.findFirst.mockResolvedValue(null)
+
+    const { getOrganizationForUser } = await import("./dal")
+    const result = await getOrganizationForUser()
 
     expect(result).toBeNull()
   })

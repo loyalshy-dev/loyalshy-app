@@ -2,13 +2,13 @@ import type { CardType, PatternStyle, ProgressStyle, LabelFormat, StampGridConfi
 
 // ─── Types ──────────────────────────────────────────────
 
-export type RestaurantCategory = "cafe" | "fine-dining" | "casual" | "bar" | "bakery" | "general"
+export type BusinessCategory = "cafe" | "fine-dining" | "casual" | "bar" | "bakery" | "general"
 
 export type CardTemplate = {
   id: string
   name: string
   description: string
-  category: RestaurantCategory
+  category: BusinessCategory
   tags: string[]
   design: {
     cardType?: CardType // defaults to "STAMP" if undefined (backward compat)
@@ -31,7 +31,7 @@ export type CardTemplate = {
 
 // ─── Categories ─────────────────────────────────────────
 
-export const TEMPLATE_CATEGORIES: { id: RestaurantCategory | "all"; name: string }[] = [
+export const TEMPLATE_CATEGORIES: { id: BusinessCategory | "all"; name: string }[] = [
   { id: "all", name: "All" },
   { id: "cafe", name: "Cafe" },
   { id: "fine-dining", name: "Fine Dining" },
@@ -211,7 +211,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
   {
     id: "general-slate",
     name: "Slate Modern",
-    description: "Neutral and professional — works for any restaurant",
+    description: "Neutral and professional — works for any business",
     category: "general",
     tags: ["neutral", "professional", "universal"],
     design: {
@@ -719,7 +719,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
   {
     id: "general-modern-flex",
     name: "Modern Flex",
-    description: "Contemporary gradient with a points bar — adapts to any modern restaurant",
+    description: "Contemporary gradient with a points bar — adapts to any modern business",
     category: "general",
     tags: ["modern", "gradient", "points", "flexible", "contemporary"],
     design: {
@@ -906,7 +906,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
   {
     id: "stamp-grid-general",
     name: "Loyalty Stamps",
-    description: "Clean versatile stamp card — works for any restaurant",
+    description: "Clean versatile stamp card — works for any business",
     category: "general",
     tags: ["general", "stamps", "grid", "versatile", "universal"],
     design: {

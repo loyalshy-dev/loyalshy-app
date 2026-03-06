@@ -6,46 +6,57 @@ import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, getCheapestCatalogItem, getWalletRewardText } from "../../program-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem, getWalletRewardText } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
 export type GooglePassGenerationInput = {
-  customerId: string
-  restaurantId: string
+  contactId: string
+  organizationId: string
   walletPassId: string
-  customerName: string
-  customerEmail: string | null
+  contactName: string
+  contactEmail: string | null
   currentCycleVisits: number
   visitsRequired: number
   totalVisits: number
   memberSince: Date
   hasAvailableReward: boolean
-  restaurantName: string
-  restaurantLogo: string | null
-  restaurantLogoGoogle: string | null
+  organizationName: string
+  organizationLogo: string | null
+  organizationLogoGoogle: string | null
   brandColor: string | null
   rewardDescription: string
   rewardExpiryDays: number
   termsAndConditions: string | null
-  restaurantPhone: string | null
-  restaurantWebsite: string | null
-  // Multi-program fields
-  programName?: string
-  programId?: string
-  enrollmentId?: string
-  // Card design fields
-  cardDesign?: CardDesignData | null
-  // Program lifecycle
-  programEndsAt?: Date | null
-  // Program type + config for type-specific pass content
-  programType?: string
-  programConfig?: unknown
+  organizationPhone: string | null
+  organizationWebsite: string | null
+  // Multi-template fields
+  templateName?: string
+  templateId?: string
+  passInstanceId?: string
+  // Pass design fields
+  passDesign?: CardDesignData | null
+  // Template lifecycle
+  templateEndsAt?: Date | null
+  // Pass type + config for type-specific pass content
+  passType?: string
+  templateConfig?: unknown
   pointsBalance?: number
   remainingUses?: number
+  // Gift card data
+  giftBalanceCents?: number
+  giftCurrency?: string
+  // Ticket data
+  ticketScanCount?: number
+  // Access data
+  accessTotalGranted?: number
+  // Transit data
+  transitIsBoarded?: boolean
+  // Business ID data
+  businessIdVerifications?: number
   // Prize reveal
   hasUnrevealedPrize?: boolean
-  restaurantSlug?: string
+  organizationSlug?: string
 }
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -68,102 +79,156 @@ function normalizeSocialUrl(handle: string, platform: "instagram" | "facebook" |
   return `${bases[platform]}${cleaned}`
 }
 
-// ─── Build Loyalty Class (one per program or restaurant) ─────────────
+// ─── Build Loyalty Class (one per template or organization) ─────────────
 
 function buildLoyaltyClass(input: GooglePassGenerationInput) {
-  // Use per-program class ID when programId is available, otherwise fall back to restaurant
-  const classId = input.programId
-    ? buildProgramClassId(input.programId)
-    : buildClassId(input.restaurantId)
-  const design = input.cardDesign
+  // Use per-template class ID when templateId is available, otherwise fall back to organization
+  const classId = input.templateId
+    ? buildProgramClassId(input.templateId)
+    : buildClassId(input.organizationId)
+  const design = input.passDesign
   const hexBg = ensureHexColor(design?.primaryColor ?? input.brandColor, "#1a1a2e")
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
   const layout = getFieldLayout(cardType)
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
 
   // Type-specific row field paths
-  const isCoupon = input.programType === "COUPON"
-  const isMembership = input.programType === "MEMBERSHIP"
-  const isPoints = input.programType === "POINTS"
-  const isPrepaid = input.programType === "PREPAID"
-
   // Build card row template — all types use textModulesData references
   const cardRowTemplateInfos: Record<string, unknown>[] = []
 
-  if (isCoupon) {
-    // Row 1: Discount + Valid Until
-    cardRowTemplateInfos.push({
-      twoItems: {
-        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['discount']" }] } },
-        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['validUntil']" }] } },
-      },
-    })
-    // Row 2: Coupon code (if any) + Added date
-    cardRowTemplateInfos.push({
-      twoItems: {
-        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['couponCode']" }] } },
-        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
-      },
-    })
-  } else if (isMembership) {
-    // Row 1: Tier + Status
-    cardRowTemplateInfos.push({
-      twoItems: {
-        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['tier']" }] } },
-        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['status']" }] } },
-      },
-    })
-    // Row 2: Benefits + Member since
-    cardRowTemplateInfos.push({
-      twoItems: {
-        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['benefits']" }] } },
-        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
-      },
-    })
-  } else if (isPrepaid) {
-    // Row 1: Remaining + Use label
-    cardRowTemplateInfos.push({
-      twoItems: {
-        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['remaining']" }] } },
-        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['validUntil']" }] } },
-      },
-    })
-    // Row 2: Total uses + Added date
-    cardRowTemplateInfos.push({
-      twoItems: {
-        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['totalUsed']" }] } },
-        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
-      },
-    })
-  } else {
-    // Stamp/Points: nextReward + memberSince
-    const textRow1Start = isPoints ? "earnRate" : "nextReward"
-    cardRowTemplateInfos.push({
-      twoItems: {
-        startItem: { firstValue: { fields: [{ fieldPath: `object.textModulesData['${textRow1Start}']` }] } },
-        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
-      },
-    })
+  switch (input.passType) {
+    case "COUPON":
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['discount']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['validUntil']" }] } },
+        },
+      })
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['couponCode']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
+        },
+      })
+      break
+    case "MEMBERSHIP":
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['tier']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['status']" }] } },
+        },
+      })
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['benefits']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
+        },
+      })
+      break
+    case "PREPAID":
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['remaining']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['validUntil']" }] } },
+        },
+      })
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['totalUsed']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
+        },
+      })
+      break
+    case "GIFT_CARD":
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['balance']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['initialValue']" }] } },
+        },
+      })
+      break
+    case "TICKET":
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['eventDate']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['venue']" }] } },
+        },
+      })
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['scans']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['holder']" }] } },
+        },
+      })
+      break
+    case "ACCESS":
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['accessLabel']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['totalGranted']" }] } },
+        },
+      })
+      break
+    case "TRANSIT":
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['origin']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['destination']" }] } },
+        },
+      })
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['transitType']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['boardingStatus']" }] } },
+        },
+      })
+      break
+    case "BUSINESS_ID":
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['idLabel']" }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['verifications']" }] } },
+        },
+      })
+      break
+    default: {
+      // Stamp/Points
+      const textRow1Start = input.passType === "POINTS" ? "earnRate" : "nextReward"
+      cardRowTemplateInfos.push({
+        twoItems: {
+          startItem: { firstValue: { fields: [{ fieldPath: `object.textModulesData['${textRow1Start}']` }] } },
+          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
+        },
+      })
+      break
+    }
   }
 
   // Type-aware program display name
   const programDisplayName = (() => {
-    const name = input.programName
+    const name = input.templateName
     if (!name) return "Loyalty Card"
-    if (isCoupon) return name
-    if (isMembership) return `${name} Membership`
-    if (isPoints) return `${name} Points`
-    if (isPrepaid) return `${name} Pass`
-    return `${name} Loyalty`
+    switch (input.passType) {
+      case "COUPON": return name
+      case "MEMBERSHIP": return `${name} Membership`
+      case "POINTS": return `${name} Points`
+      case "PREPAID": return `${name} Pass`
+      case "GIFT_CARD": return `${name} Gift Card`
+      case "TICKET": return `${name} Ticket`
+      case "ACCESS": return `${name} Access`
+      case "TRANSIT": return `${name} Transit`
+      case "BUSINESS_ID": return `${name} ID`
+      default: return `${name} Loyalty`
+    }
   })()
 
   // Prefer Google-specific logo, fall back to general
-  const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
+  const googleLogo = input.organizationLogoGoogle ?? input.organizationLogo
 
   const loyaltyClass: Record<string, unknown> = {
     id: classId,
     programName: programDisplayName,
-    issuerName: input.restaurantName,
+    issuerName: input.organizationName,
     reviewStatus: "UNDER_REVIEW",
     hexBackgroundColor: hexBg,
     multipleDevicesAndHoldersAllowedStatus: "ONE_USER_ALL_DEVICES",
@@ -175,14 +240,14 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   loyaltyClass.programLogo = {
     sourceUri: { uri: logoUrl },
     contentDescription: {
-      defaultValue: { language: "en", value: `${input.restaurantName} logo` },
+      defaultValue: { language: "en", value: `${input.organizationName} logo` },
     },
   }
   if (googleLogo) {
     loyaltyClass.wideProgramLogo = {
       sourceUri: { uri: googleLogo },
       contentDescription: {
-        defaultValue: { language: "en", value: `${input.restaurantName} logo` },
+        defaultValue: { language: "en", value: `${input.organizationName} logo` },
       },
     }
   }
@@ -195,27 +260,27 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   }
 
   // Homepage
-  if (input.restaurantWebsite) {
+  if (input.organizationWebsite) {
     loyaltyClass.homepageUri = {
-      uri: input.restaurantWebsite,
-      description: input.restaurantName,
+      uri: input.organizationWebsite,
+      description: input.organizationName,
       id: "homepage",
     }
   }
 
-  // Links module for restaurant contact + socials
+  // Links module for organization contact + socials
   const linksUris: Record<string, unknown>[] = []
-  if (input.restaurantWebsite) {
+  if (input.organizationWebsite) {
     linksUris.push({
-      uri: input.restaurantWebsite,
-      description: input.restaurantName,
+      uri: input.organizationWebsite,
+      description: input.organizationName,
       id: "website",
     })
   }
-  if (input.restaurantPhone) {
+  if (input.organizationPhone) {
     linksUris.push({
-      uri: `tel:${input.restaurantPhone}`,
-      description: input.restaurantPhone,
+      uri: `tel:${input.organizationPhone}`,
+      description: input.organizationPhone,
       id: "phone",
     })
   }
@@ -307,18 +372,18 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   return loyaltyClass
 }
 
-// ─── Build Loyalty Object (one per enrollment or customer) ────────────
+// ─── Build Loyalty Object (one per pass instance or contact) ────────────
 
 async function buildLoyaltyObject(input: GooglePassGenerationInput) {
-  // Use enrollment-scoped object ID when enrollmentId is available, otherwise fall back to customer
-  const objectId = input.enrollmentId
-    ? buildEnrollmentObjectId(input.enrollmentId)
-    : buildObjectId(input.customerId)
-  // Use per-program class ID when programId is available
-  const classId = input.programId
-    ? buildProgramClassId(input.programId)
-    : buildClassId(input.restaurantId)
-  const design = input.cardDesign
+  // Use pass-instance-scoped object ID when passInstanceId is available, otherwise fall back to contact
+  const objectId = input.passInstanceId
+    ? buildEnrollmentObjectId(input.passInstanceId)
+    : buildObjectId(input.contactId)
+  // Use per-template class ID when templateId is available
+  const classId = input.templateId
+    ? buildProgramClassId(input.templateId)
+    : buildClassId(input.organizationId)
+  const design = input.passDesign
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
 
   const progressStyle = design?.progressStyle ?? "NUMBERS"
@@ -340,19 +405,24 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   })
 
   // Parse type-specific config
-  const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
-  const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
-  const pointsConfig = input.programType === "POINTS" ? parsePointsConfig(input.programConfig) : null
-  const prepaidConfig = input.programType === "PREPAID" ? parsePrepaidConfig(input.programConfig) : null
+  const couponConfig = input.passType === "COUPON" ? parseCouponConfig(input.templateConfig) : null
+  const membershipConfig = input.passType === "MEMBERSHIP" ? parseMembershipConfig(input.templateConfig) : null
+  const pointsConfig = input.passType === "POINTS" ? parsePointsConfig(input.templateConfig) : null
+  const prepaidConfig = input.passType === "PREPAID" ? parsePrepaidConfig(input.templateConfig) : null
+  const giftCardConfig = input.passType === "GIFT_CARD" ? parseGiftCardConfig(input.templateConfig) : null
+  const ticketConfig = input.passType === "TICKET" ? parseTicketConfig(input.templateConfig) : null
+  const accessConfig = input.passType === "ACCESS" ? parseAccessConfig(input.templateConfig) : null
+  const transitConfig = input.passType === "TRANSIT" ? parseTransitConfig(input.templateConfig) : null
+  const businessIdConfig = input.passType === "BUSINESS_ID" ? parseBusinessIdConfig(input.templateConfig) : null
 
   // Type-specific loyalty points and text modules
   let loyaltyPoints: Record<string, unknown>
   let secondaryLoyaltyPoints: Record<string, unknown>
   let textModulesData: Record<string, unknown>[]
 
-  if (input.programType === "COUPON" && couponConfig) {
+  if (input.passType === "COUPON" && couponConfig) {
     // When minigame is enabled with prizes, show prizes instead of generic discount
-    const prizeText = getWalletRewardText(input.programConfig, formatCouponValue(couponConfig))
+    const prizeText = getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig))
     const hasPrizes = prizeText !== formatCouponValue(couponConfig)
     const discountLabel = hasPrizes ? "PRIZES" : "DISCOUNT"
     loyaltyPoints = {
@@ -369,7 +439,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       ...(couponConfig.couponCode ? [{ id: "couponCode", header: formatLabel("CODE", labelFmt), body: couponConfig.couponCode }] : []),
       { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
     ]
-  } else if (input.programType === "MEMBERSHIP" && membershipConfig) {
+  } else if (input.passType === "MEMBERSHIP" && membershipConfig) {
     loyaltyPoints = {
       label: formatLabel("TIER", labelFmt),
       balance: { string: membershipConfig.membershipTier },
@@ -384,7 +454,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
-  } else if (input.programType === "PREPAID" && prepaidConfig) {
+  } else if (input.passType === "PREPAID" && prepaidConfig) {
     const remaining = input.remainingUses ?? 0
     const totalUsed = input.totalVisits
     loyaltyPoints = {
@@ -401,7 +471,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       { id: "totalUsed", header: formatLabel("TOTAL USED", labelFmt), body: String(totalUsed) },
       { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
     ]
-  } else if (input.programType === "POINTS" && pointsConfig) {
+  } else if (input.passType === "POINTS" && pointsConfig) {
     loyaltyPoints = {
       label: formatLabel("POINTS", labelFmt),
       balance: { int: input.pointsBalance ?? 0 },
@@ -414,6 +484,78 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       { id: "earnRate", header: formatLabel("EARN RATE", labelFmt), body: `${pointsConfig.pointsPerVisit} points per visit` },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
+  } else if (input.passType === "GIFT_CARD" && giftCardConfig) {
+    const balanceCents = input.giftBalanceCents ?? giftCardConfig.initialBalanceCents
+    const balanceStr = `${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}`
+    const initialStr = `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}`
+    loyaltyPoints = {
+      label: formatLabel("BALANCE", labelFmt),
+      balance: { string: balanceStr },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("INITIAL VALUE", labelFmt),
+      balance: { string: initialStr },
+    }
+    textModulesData = [
+      { id: "balance", header: formatLabel("BALANCE", labelFmt), body: balanceStr },
+      { id: "initialValue", header: formatLabel("INITIAL VALUE", labelFmt), body: initialStr },
+    ]
+  } else if (input.passType === "TICKET" && ticketConfig) {
+    loyaltyPoints = {
+      label: formatLabel("EVENT", labelFmt),
+      balance: { string: ticketConfig.eventName },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("SCANS", labelFmt),
+      balance: { string: `${input.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` },
+    }
+    textModulesData = [
+      { id: "eventDate", header: formatLabel("DATE", labelFmt), body: new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) },
+      { id: "venue", header: formatLabel("VENUE", labelFmt), body: ticketConfig.eventVenue },
+      { id: "scans", header: formatLabel("SCANS", labelFmt), body: `${input.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` },
+      { id: "holder", header: formatLabel("HOLDER", labelFmt), body: input.contactName },
+    ]
+  } else if (input.passType === "ACCESS" && accessConfig) {
+    loyaltyPoints = {
+      label: formatLabel(accessConfig.accessLabel, labelFmt),
+      balance: { string: "Active" },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("TOTAL GRANTED", labelFmt),
+      balance: { int: input.accessTotalGranted ?? 0 },
+    }
+    textModulesData = [
+      { id: "accessLabel", header: formatLabel(accessConfig.accessLabel, labelFmt), body: "Active" },
+      { id: "totalGranted", header: formatLabel("TOTAL GRANTED", labelFmt), body: String(input.accessTotalGranted ?? 0) },
+    ]
+  } else if (input.passType === "TRANSIT" && transitConfig) {
+    loyaltyPoints = {
+      label: formatLabel("STATUS", labelFmt),
+      balance: { string: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("TYPE", labelFmt),
+      balance: { string: transitConfig.transitType.toUpperCase() },
+    }
+    textModulesData = [
+      { id: "origin", header: formatLabel("FROM", labelFmt), body: transitConfig.originName ?? "—" },
+      { id: "destination", header: formatLabel("TO", labelFmt), body: transitConfig.destinationName ?? "—" },
+      { id: "transitType", header: formatLabel("TYPE", labelFmt), body: transitConfig.transitType.toUpperCase() },
+      { id: "boardingStatus", header: formatLabel("STATUS", labelFmt), body: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
+    ]
+  } else if (input.passType === "BUSINESS_ID" && businessIdConfig) {
+    loyaltyPoints = {
+      label: formatLabel(businessIdConfig.idLabel, labelFmt),
+      balance: { string: input.contactName },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("VERIFICATIONS", labelFmt),
+      balance: { int: input.businessIdVerifications ?? 0 },
+    }
+    textModulesData = [
+      { id: "idLabel", header: formatLabel(businessIdConfig.idLabel, labelFmt), body: input.contactName },
+      { id: "verifications", header: formatLabel("VERIFICATIONS", labelFmt), body: String(input.businessIdVerifications ?? 0) },
+    ]
   } else {
     // STAMP_CARD (default)
     loyaltyPoints = {
@@ -425,7 +567,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       balance: { int: input.totalVisits },
     }
     textModulesData = [
-      { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: getWalletRewardText(input.programConfig, input.rewardDescription) },
+      { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: getWalletRewardText(input.templateConfig, input.rewardDescription) },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
   }
@@ -435,7 +577,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     classId,
     state: "ACTIVE",
     accountId: input.walletPassId,
-    accountName: input.customerName,
+    accountName: input.contactName,
     loyaltyPoints,
     secondaryLoyaltyPoints,
     barcode: {
@@ -443,18 +585,18 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       value: input.walletPassId,
     },
     textModulesData,
-    // Group passes from the same restaurant together
-    groupingInfo: { groupingId: input.restaurantId },
+    // Group passes from the same organization together
+    groupingInfo: { groupingId: input.organizationId },
   }
 
   // Add reveal link if there's an unrevealed prize
-  if (input.hasUnrevealedPrize && input.enrollmentId && input.restaurantSlug) {
+  if (input.hasUnrevealedPrize && input.passInstanceId && input.organizationSlug) {
     const { signCardAccess } = await import("../../card-access")
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
-    const sig = signCardAccess(input.enrollmentId)
+    const sig = signCardAccess(input.passInstanceId)
     loyaltyObject.linksModuleData = {
       uris: [{
-        uri: `${baseUrl}/join/${input.restaurantSlug}/card/${input.enrollmentId}?sig=${sig}`,
+        uri: `${baseUrl}/join/${input.organizationSlug}/card/${input.passInstanceId}?sig=${sig}`,
         description: "Reveal your prize!",
         id: "revealLink",
       }],
@@ -462,20 +604,20 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   }
 
   // Valid time interval for time-bound programs
-  if (input.programEndsAt) {
+  if (input.templateEndsAt) {
     loyaltyObject.validTimeInterval = {
-      end: { date: input.programEndsAt.toISOString() },
+      end: { date: input.templateEndsAt.toISOString() },
     }
   }
 
   // Hero image (on object — shows as banner strip on the pass)
-  const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
+  const googleLogo = input.organizationLogoGoogle ?? input.organizationLogo
   const showStrip = design?.showStrip ?? false
   const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
   let heroImageUrl: string | null = null
   if (showStrip) {
     const stripFiltersG = parseStripFilters(design?.editorConfig)
-    if (isStampType && (stripFiltersG.useStampGrid || design?.patternStyle === "STAMP_GRID") && input.enrollmentId) {
+    if (isStampType && (stripFiltersG.useStampGrid || design?.patternStyle === "STAMP_GRID") && input.passInstanceId) {
       // Generate stamp grid PNG and upload to R2 so Google can access it
       heroImageUrl = await generateAndUploadStampGrid(input, design, stripFiltersG)
     } else {
@@ -495,7 +637,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     loyaltyObject.heroImage = {
       sourceUri: { uri: heroImageUrl },
       contentDescription: {
-        defaultValue: { language: "en", value: input.restaurantName },
+        defaultValue: { language: "en", value: input.organizationName },
       },
     }
   }
@@ -530,11 +672,11 @@ async function generateAndUploadStampGrid(
       stripGrayscale: stripFilters.stripGrayscale,
     })
 
-    const key = `strip-images/${input.programId ?? input.restaurantId}/google-stamp-grid-${input.enrollmentId}.png`
+    const key = `strip-images/${input.templateId ?? input.organizationId}/google-stamp-grid-${input.passInstanceId}.png`
     return await uploadFile(buffer, key, "image/png")
   } catch {
     // Fall back to static strip or logo
-    const googleLogo = input.restaurantLogoGoogle ?? input.restaurantLogo
+    const googleLogo = input.organizationLogoGoogle ?? input.organizationLogo
     return design?.stripImageGoogle ?? design?.generatedStripGoogle ?? googleLogo
   }
 }

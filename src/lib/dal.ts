@@ -14,7 +14,6 @@ export type AuthUser = {
   email: string
   image: string | null
   role: string
-  restaurantId: string | null
 }
 
 export type AuthSession = {
@@ -36,9 +35,6 @@ export type OrgMember = {
 }
 
 // ─── Core: getCurrentUser ───────────────────────────────────
-// Cached per-request via React cache(). This is the foundation
-// of all auth checks. Every Server Component and Server Action
-// that needs auth MUST call this (or a wrapper).
 
 export const getCurrentUser = cache(async (): Promise<AuthSession | null> => {
   const session = await auth.api.getSession({
@@ -54,10 +50,6 @@ export const getCurrentUser = cache(async (): Promise<AuthSession | null> => {
 
 // ─── Guards ─────────────────────────────────────────────────
 
-/**
- * Throws redirect to /login if no valid session.
- * Use in Server Components and Server Actions.
- */
 export async function assertAuthenticated(): Promise<AuthSession> {
   const session = await getCurrentUser()
   if (!session) {
@@ -66,10 +58,6 @@ export async function assertAuthenticated(): Promise<AuthSession> {
   return session
 }
 
-/**
- * Checks User.role === "SUPER_ADMIN" (global role).
- * Throws redirect if not authenticated or not a super admin.
- */
 export async function assertSuperAdmin(): Promise<AuthSession> {
   const session = await assertAuthenticated()
   if (session.user.role !== "SUPER_ADMIN") {
@@ -79,21 +67,21 @@ export async function assertSuperAdmin(): Promise<AuthSession> {
 }
 
 /**
- * Verifies user is a member of the restaurant's organization.
- * This checks org membership — the real tenant access control.
+ * Verifies user is a member of the organization.
+ * Direct lookup — no slug translation needed (org IS the tenant).
  */
-export async function assertRestaurantAccess(
-  restaurantId: string
+export async function assertOrganizationAccess(
+  organizationId: string
 ): Promise<{ session: AuthSession; member: OrgMember }> {
   const session = await assertAuthenticated()
 
-  // Super admins can access any restaurant
+  // Super admins can access any organization
   if (session.user.role === "SUPER_ADMIN") {
     return {
       session,
       member: {
         id: "super_admin",
-        organizationId: restaurantId,
+        organizationId,
         userId: session.user.id,
         role: "owner",
         createdAt: new Date(),
@@ -101,29 +89,9 @@ export async function assertRestaurantAccess(
     }
   }
 
-  // Look up the restaurant to get its slug, then find the matching org
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: restaurantId },
-    select: { slug: true },
-  })
-
-  if (!restaurant) {
-    redirect("/dashboard")
-  }
-
-  // Organizations are linked to restaurants by sharing the same slug
-  const org = await db.organization.findUnique({
-    where: { slug: restaurant.slug },
-  })
-
-  if (!org) {
-    redirect("/dashboard")
-  }
-
-  // Check if user is a member of this organization
   const member = await db.member.findFirst({
     where: {
-      organizationId: org.id,
+      organizationId,
       userId: session.user.id,
     },
   })
@@ -139,16 +107,15 @@ export async function assertRestaurantAccess(
 }
 
 /**
- * Verifies user has a specific role in the restaurant's organization.
- * e.g., assertRestaurantRole(restaurantId, "owner") for billing pages.
+ * Verifies user has a specific role in the organization.
+ * Role hierarchy: owner > admin > member
  */
-export async function assertRestaurantRole(
-  restaurantId: string,
+export async function assertOrganizationRole(
+  organizationId: string,
   requiredRole: "owner" | "admin" | "member"
 ): Promise<{ session: AuthSession; member: OrgMember }> {
-  const { session, member } = await assertRestaurantAccess(restaurantId)
+  const { session, member } = await assertOrganizationAccess(organizationId)
 
-  // Role hierarchy: owner > admin > member
   const roleHierarchy: Record<string, number> = {
     owner: 3,
     admin: 2,
@@ -166,61 +133,73 @@ export async function assertRestaurantRole(
 }
 
 /**
- * Returns the restaurant record for the current user.
- * Includes all ACTIVE loyalty programs with their card designs.
+ * Returns the organization for the current user.
+ * Uses session.activeOrganizationId or falls back to first membership.
+ * Includes all ACTIVE pass templates with their designs.
  */
-export async function getRestaurantForUser() {
+export async function getOrganizationForUser() {
   const session = await assertAuthenticated()
 
-  if (!session.user.restaurantId) {
+  let organizationId = session.session.activeOrganizationId
+
+  if (!organizationId) {
+    const membership = await db.member.findFirst({
+      where: { userId: session.user.id },
+      select: { organizationId: true },
+      orderBy: { createdAt: "asc" },
+    })
+    organizationId = membership?.organizationId ?? null
+  }
+
+  if (!organizationId) {
     return null
   }
 
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: session.user.restaurantId },
+  const organization = await db.organization.findUnique({
+    where: { id: organizationId },
     include: {
-      loyaltyPrograms: {
+      passTemplates: {
         where: { status: "ACTIVE" },
-        include: { cardDesign: true },
+        include: { passDesign: true },
         orderBy: { createdAt: "asc" },
       },
     },
   })
 
-  return restaurant
+  return organization
 }
 
 /**
- * Returns all ACTIVE programs for a restaurant with their card designs.
+ * Returns all ACTIVE templates for an organization with their designs.
  */
-export async function getActivePrograms(restaurantId: string) {
-  return db.loyaltyProgram.findMany({
-    where: { restaurantId, status: "ACTIVE" },
-    include: { cardDesign: true },
+export async function getActiveTemplates(organizationId: string) {
+  return db.passTemplate.findMany({
+    where: { organizationId, status: "ACTIVE" },
+    include: { passDesign: true },
     orderBy: { createdAt: "asc" },
   })
 }
 
 /**
- * Returns all enrollments for a customer in a restaurant, with program info.
+ * Returns all pass instances for a contact in an organization, with template info.
  */
-export async function getCustomerEnrollments(customerId: string, restaurantId: string) {
-  return db.enrollment.findMany({
+export async function getContactPassInstances(contactId: string, organizationId: string) {
+  return db.passInstance.findMany({
     where: {
-      customerId,
-      loyaltyProgram: { restaurantId },
+      contactId,
+      passTemplate: { organizationId },
     },
     include: {
-      loyaltyProgram: {
+      passTemplate: {
         select: {
           id: true,
           name: true,
-          visitsRequired: true,
-          rewardDescription: true,
+          passType: true,
+          config: true,
           status: true,
         },
       },
     },
-    orderBy: { enrolledAt: "asc" },
+    orderBy: { issuedAt: "asc" },
   })
 }

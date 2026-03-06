@@ -2,13 +2,13 @@
 
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
-import { assertRestaurantRole, getRestaurantForUser } from "@/lib/dal"
+import { assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
 
 // ─── Types ──────────────────────────────────────────────────
 
 export type JobLogEntry = {
   id: string
-  customerName: string
+  contactName: string
   action: string
   details: Record<string, unknown>
   createdAt: Date
@@ -22,24 +22,24 @@ export type JobLogsResult = {
 // ─── Get Recent Job Logs ────────────────────────────────────
 
 export async function getRecentJobLogs(page = 1, perPage = 25): Promise<JobLogsResult> {
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) redirect("/register?step=2")
+  const organization = await getOrganizationForUser()
+  if (!organization) redirect("/register?step=2")
 
-  await assertRestaurantRole(restaurant.id, "owner")
+  await assertOrganizationRole(organization.id, "owner")
 
   const skip = (page - 1) * perPage
 
   const [logs, total] = await Promise.all([
     db.walletPassLog.findMany({
       where: {
-        enrollment: {
-          customer: { restaurantId: restaurant.id },
+        passInstance: {
+          contact: { organizationId: organization.id },
         },
       },
       include: {
-        enrollment: {
+        passInstance: {
           select: {
-            customer: { select: { fullName: true } },
+            contact: { select: { fullName: true } },
           },
         },
       },
@@ -49,8 +49,8 @@ export async function getRecentJobLogs(page = 1, perPage = 25): Promise<JobLogsR
     }),
     db.walletPassLog.count({
       where: {
-        enrollment: {
-          customer: { restaurantId: restaurant.id },
+        passInstance: {
+          contact: { organizationId: organization.id },
         },
       },
     }),
@@ -59,7 +59,7 @@ export async function getRecentJobLogs(page = 1, perPage = 25): Promise<JobLogsR
   return {
     logs: logs.map((log) => ({
       id: log.id,
-      customerName: log.enrollment?.customer.fullName ?? "Unknown",
+      contactName: log.passInstance?.contact.fullName ?? "Unknown",
       action: log.action,
       details: log.details as Record<string, unknown>,
       createdAt: log.createdAt,

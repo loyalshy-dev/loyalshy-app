@@ -20,8 +20,8 @@ type InvitationData = {
   id: string
   email: string
   role: string
-  restaurantName: string
-  restaurantId: string
+  organizationName: string
+  organizationId: string
 }
 
 export function InviteForm({ token }: { token: string }) {
@@ -64,7 +64,7 @@ export function InviteForm({ token }: { token: string }) {
       return
     }
 
-    // Accept the invitation (link user to restaurant)
+    // Accept the invitation (link user to organization)
     const acceptResult = await acceptStaffInvitation({
       token,
       userId: data.user.id,
@@ -76,7 +76,7 @@ export function InviteForm({ token }: { token: string }) {
       return
     }
 
-    toast.success(`Welcome to ${invitation.restaurantName}!`)
+    toast.success(`Welcome to ${invitation.organizationName}!`)
     router.push("/dashboard")
     router.refresh()
   }
@@ -113,7 +113,7 @@ export function InviteForm({ token }: { token: string }) {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Join {invitation.restaurantName}</CardTitle>
+        <CardTitle className="text-2xl font-bold">Join {invitation.organizationName}</CardTitle>
         <CardDescription>
           You&apos;ve been invited as{" "}
           {invitation.role === "OWNER" ? "an owner" : "a staff member"}.

@@ -5,16 +5,16 @@ import { useStore } from "zustand"
 import { ChevronDown, RotateCcw } from "lucide-react"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import {
-  uploadRestaurantLogo,
-  deleteRestaurantLogo,
+  uploadOrganizationLogo,
+  deleteOrganizationLogo,
   uploadPlatformLogo,
   resetPlatformLogo,
-} from "@/server/settings-actions"
+} from "@/server/org-settings-actions"
 
 type Props = {
   store: CardDesignStoreApi
-  restaurantId: string
-  restaurantName: string
+  organizationId: string
+  organizationName: string
 }
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -50,7 +50,7 @@ function Placeholder({ initial, fontSize }: { initial: string; fontSize: number 
   )
 }
 
-export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
+export function LogoPanel({ store, organizationId, organizationName }: Props) {
   const logoAppleUrl = useStore(store, (s) => s.wallet.logoAppleUrl)
   const logoGoogleUrl = useStore(store, (s) => s.wallet.logoGoogleUrl)
 
@@ -61,7 +61,7 @@ export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
   const mainInputRef = useRef<HTMLInputElement>(null)
   const overrideInputRef = useRef<HTMLInputElement>(null)
 
-  const initial = restaurantName.charAt(0).toUpperCase()
+  const initial = organizationName.charAt(0).toUpperCase()
   const hasLogo = !!(logoAppleUrl || logoGoogleUrl)
 
   // ─── Main upload (auto-generates both platforms) ────────
@@ -70,9 +70,9 @@ export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
     setUploading(true)
     try {
       const formData = new FormData()
-      formData.set("restaurantId", restaurantId)
+      formData.set("organizationId", organizationId)
       formData.set("file", file)
-      const result = await uploadRestaurantLogo(formData)
+      const result = await uploadOrganizationLogo(formData)
       if ("appleUrl" in result && result.appleUrl && "googleUrl" in result && result.googleUrl) {
         store.getState().setWalletField("logoAppleUrl", result.appleUrl)
         store.getState().setWalletField("logoGoogleUrl", result.googleUrl)
@@ -83,7 +83,7 @@ export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
   }
 
   async function handleMainDelete() {
-    await deleteRestaurantLogo(restaurantId)
+    await deleteOrganizationLogo(organizationId)
     store.getState().setWalletField("logoAppleUrl", null)
     store.getState().setWalletField("logoGoogleUrl", null)
   }
@@ -94,7 +94,7 @@ export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
     setOverridePlatformUploading(platform)
     try {
       const formData = new FormData()
-      formData.set("restaurantId", restaurantId)
+      formData.set("organizationId", organizationId)
       formData.set("platform", platform)
       formData.set("file", file)
       const result = await uploadPlatformLogo(formData)
@@ -110,7 +110,7 @@ export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
   async function handleReset(platform: "apple" | "google") {
     setOverridePlatformUploading(platform)
     try {
-      const result = await resetPlatformLogo(restaurantId, platform)
+      const result = await resetPlatformLogo(organizationId, platform)
       if ("url" in result && result.url) {
         const field = platform === "apple" ? "logoAppleUrl" : "logoGoogleUrl"
         store.getState().setWalletField(field, result.url)
@@ -123,7 +123,7 @@ export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
   return (
     <div>
       {/* ─── Main upload ─────────────────────────────────── */}
-      <SectionHeader>Restaurant Logo</SectionHeader>
+      <SectionHeader>Organization Logo</SectionHeader>
 
       <input
         ref={mainInputRef}
@@ -218,7 +218,7 @@ export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={logoAppleUrl}
-                    alt={`${restaurantName} — Apple`}
+                    alt={`${organizationName} — Apple`}
                     style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
                   />
                 ) : (
@@ -249,7 +249,7 @@ export function LogoPanel({ store, restaurantId, restaurantName }: Props) {
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={logoGoogleUrl}
-                    alt={`${restaurantName} — Google`}
+                    alt={`${organizationName} — Google`}
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
                 ) : (

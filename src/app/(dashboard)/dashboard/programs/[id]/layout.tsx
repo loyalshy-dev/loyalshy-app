@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { connection } from "next/server"
 import { notFound } from "next/navigation"
-import { assertAuthenticated, getRestaurantForUser } from "@/lib/dal"
+import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { ProgramTabNav } from "@/components/dashboard/programs/program-tab-nav"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -17,15 +17,15 @@ async function ProgramLayoutInner({
   const { id: programId } = await params
   const session = await assertAuthenticated()
 
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) {
+  const organization = await getOrganizationForUser()
+  if (!organization) {
     notFound()
   }
 
-  // Validate program belongs to this restaurant
-  const program = await db.loyaltyProgram.findFirst({
-    where: { id: programId, restaurantId: restaurant.id },
-    select: { id: true, name: true, status: true, programType: true },
+  // Validate pass template belongs to this organization
+  const program = await db.passTemplate.findFirst({
+    where: { id: programId, organizationId: organization.id },
+    select: { id: true, name: true, status: true, passType: true },
   })
 
   if (!program) {
@@ -37,27 +37,21 @@ async function ProgramLayoutInner({
   if (session.user.role === "SUPER_ADMIN") {
     isOwner = true
   } else {
-    const org = await db.organization.findUnique({
-      where: { slug: restaurant.slug },
-      select: { id: true },
+    const member = await db.member.findFirst({
+      where: { organizationId: organization.id, userId: session.user.id },
+      select: { role: true },
     })
-    if (org) {
-      const member = await db.member.findFirst({
-        where: { organizationId: org.id, userId: session.user.id },
-        select: { role: true },
-      })
-      isOwner = member?.role === "owner"
-    }
+    isOwner = member?.role === "owner"
   }
 
   return (
     <div className="space-y-6">
       <ProgramTabNav
-        programId={program.id}
-        programName={program.name}
-        programStatus={program.status}
-        programType={program.programType}
-        restaurantId={restaurant.id}
+        templateId={program.id}
+        templateName={program.name}
+        templateStatus={program.status}
+        passType={program.passType}
+        organizationId={organization.id}
         isOwner={isOwner}
       />
       <Suspense

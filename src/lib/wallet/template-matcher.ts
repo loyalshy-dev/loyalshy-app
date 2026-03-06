@@ -1,4 +1,4 @@
-import { CARD_TEMPLATES, type CardTemplate, type RestaurantCategory } from "./card-templates"
+import { CARD_TEMPLATES, type CardTemplate, type BusinessCategory } from "./card-templates"
 import type { ExtractedPalette } from "@/lib/color-extraction"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { computeTextColor } from "./card-design"
@@ -6,7 +6,7 @@ import type { StampGridConfig } from "./card-design"
 
 // ─── Category → Stamp Icon Mapping ──────────────────────────
 
-const CATEGORY_STAMP_ICONS: Record<RestaurantCategory, string> = {
+const CATEGORY_STAMP_ICONS: Record<BusinessCategory, string> = {
   cafe: "coffee",
   "fine-dining": "utensils-crossed",
   casual: "pizza",
@@ -15,7 +15,7 @@ const CATEGORY_STAMP_ICONS: Record<RestaurantCategory, string> = {
   general: "heart",
 }
 
-const CATEGORY_REWARD_ICONS: Record<RestaurantCategory, string> = {
+const CATEGORY_REWARD_ICONS: Record<BusinessCategory, string> = {
   cafe: "reward-star",
   "fine-dining": "crown",
   casual: "gift",
@@ -84,7 +84,7 @@ const DARK_NEUTRAL_TEMPLATES = new Set([
  */
 export function matchTemplates(
   palette: ExtractedPalette | null,
-  category: RestaurantCategory | null,
+  category: BusinessCategory | null,
   limit: number = 4
 ): TemplateMatch[] {
   const scored: TemplateMatch[] = CARD_TEMPLATES.map((template) => {
@@ -151,12 +151,12 @@ export function matchTemplates(
  * Create a WalletPassDesign by merging template structure with palette colors.
  * If no palette, keeps template's original colors.
  * If category is provided and the template uses a stamp grid, overrides the
- * stamp icon to match the user's chosen restaurant vibe.
+ * stamp icon to match the user's chosen business vibe.
  */
 export function applyPaletteToTemplate(
   template: CardTemplate,
   palette: ExtractedPalette | null,
-  category?: RestaurantCategory | null
+  category?: BusinessCategory | null
 ): WalletPassDesign {
   const d = template.design
 

@@ -20,7 +20,7 @@ export default function SettingsError({
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage your restaurant configuration.
+          Manage your organization configuration.
         </p>
       </div>
 

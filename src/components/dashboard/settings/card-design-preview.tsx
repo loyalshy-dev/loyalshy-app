@@ -5,17 +5,17 @@ import Link from "next/link"
 import { Pencil, Smartphone, CreditCard } from "lucide-react"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/program-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/pass-config"
 
-type CardDesignPreviewProps = {
-  programId: string
-  programName: string
-  programType: string
-  programConfig: unknown
-  restaurantName: string
-  restaurantLogo: string | null
-  restaurantLogoApple: string | null
-  restaurantLogoGoogle: string | null
+type PassDesignPreviewProps = {
+  templateId: string
+  templateName: string
+  passType: string
+  templateConfig: unknown
+  organizationName: string
+  organizationLogo: string | null
+  organizationLogoApple: string | null
+  organizationLogoGoogle: string | null
   visitsRequired: number
   rewardDescription: string
   cardDesign: {
@@ -40,19 +40,19 @@ const FORMAT_TABS: { id: PreviewFormat; label: string; icon: React.ReactNode }[]
   { id: "google", label: "Google Wallet", icon: <CreditCard size={14} /> },
 ]
 
-export function CardDesignPreview({
-  programId,
-  programName,
-  programType,
-  programConfig,
-  restaurantName,
-  restaurantLogo,
-  restaurantLogoApple,
-  restaurantLogoGoogle,
+export function PassDesignPreview({
+  templateId,
+  templateName,
+  passType,
+  templateConfig,
+  organizationName,
+  organizationLogo,
+  organizationLogoApple,
+  organizationLogoGoogle,
   visitsRequired,
   rewardDescription,
   cardDesign,
-}: CardDesignPreviewProps) {
+}: PassDesignPreviewProps) {
   const [format, setFormat] = useState<PreviewFormat>("apple")
 
   const sf = cardDesign ? parseStripFilters(cardDesign.editorConfig) : null
@@ -85,12 +85,12 @@ export function CardDesignPreview({
 
   // Type-specific preview props
   const couponConfig = useMemo(
-    () => programType === "COUPON" ? parseCouponConfig(programConfig) : null,
-    [programType, programConfig]
+    () => passType === "COUPON" ? parseCouponConfig(templateConfig) : null,
+    [passType, templateConfig]
   )
   const membershipConfig = useMemo(
-    () => programType === "MEMBERSHIP" ? parseMembershipConfig(programConfig) : null,
-    [programType, programConfig]
+    () => passType === "MEMBERSHIP" ? parseMembershipConfig(templateConfig) : null,
+    [passType, templateConfig]
   )
 
   return (
@@ -104,7 +104,7 @@ export function CardDesignPreview({
           </p>
         </div>
         <Link
-          href={`/dashboard/programs/${programId}/studio`}
+          href={`/dashboard/programs/${templateId}/studio`}
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
         >
           <Pencil size={14} />
@@ -136,12 +136,12 @@ export function CardDesignPreview({
           <WalletPassRenderer
             design={design}
             format={format}
-            restaurantName={restaurantName}
-            logoUrl={restaurantLogo}
-            logoAppleUrl={restaurantLogoApple}
-            logoGoogleUrl={restaurantLogoGoogle}
-            programName={programName}
-            currentVisits={programType === "STAMP_CARD" ? 4 : 0}
+            organizationName={organizationName}
+            logoUrl={organizationLogo}
+            logoAppleUrl={organizationLogoApple}
+            logoGoogleUrl={organizationLogoGoogle}
+            programName={templateName}
+            currentVisits={passType === "STAMP_CARD" ? 4 : 0}
             totalVisits={visitsRequired}
             rewardDescription={rewardDescription}
             customerName="Jane D."
@@ -150,7 +150,7 @@ export function CardDesignPreview({
             couponCode={couponConfig?.couponCode}
             validUntil={couponConfig?.validUntil
               ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-              : programType === "COUPON" ? "No expiry" : undefined}
+              : passType === "COUPON" ? "No expiry" : undefined}
             // Membership props
             tierName={membershipConfig?.membershipTier}
             benefits={membershipConfig?.benefits}

@@ -17,7 +17,7 @@ import {
   Eye,
   MoreHorizontal,
 } from "lucide-react"
-import type { AdminRestaurantRow } from "@/server/admin-actions"
+import type { AdminOrganizationRow } from "@/server/admin-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -56,23 +56,23 @@ const planStyles: Record<string, string> = {
   ENTERPRISE: "bg-amber-500/10 text-amber-600 border-amber-500/20",
 }
 
-type AdminRestaurantTableProps = {
-  restaurants: AdminRestaurantRow[]
+type AdminOrganizationTableProps = {
+  organizations: AdminOrganizationRow[]
   pageCount: number
   sort: string
   order: "asc" | "desc"
   page: number
-  onSelectRestaurant: (id: string) => void
+  onSelectOrganization: (id: string) => void
 }
 
-export function AdminRestaurantTable({
-  restaurants,
+export function AdminOrganizationTable({
+  organizations,
   pageCount,
   sort,
   order,
   page,
-  onSelectRestaurant,
-}: AdminRestaurantTableProps) {
+  onSelectOrganization,
+}: AdminOrganizationTableProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -101,7 +101,7 @@ export function AdminRestaurantTable({
     updateParams({ page: p === 1 ? null : String(p) })
   }
 
-  const columns: ColumnDef<AdminRestaurantRow>[] = [
+  const columns: ColumnDef<AdminOrganizationRow>[] = [
     {
       accessorKey: "name",
       header: () => (
@@ -109,7 +109,7 @@ export function AdminRestaurantTable({
           className="flex items-center gap-1 hover:text-foreground"
           onClick={() => handleSort("name")}
         >
-          Restaurant
+          Organization
           <ArrowUpDown className="size-3" />
         </button>
       ),
@@ -154,12 +154,12 @@ export function AdminRestaurantTable({
     },
     {
       id: "counts",
-      header: "Users / Programs / Customers",
+      header: "Users / Templates / Contacts",
       cell: ({ row }) => {
         const c = row.original._count
         return (
           <span className="text-[13px] text-muted-foreground tabular-nums">
-            {c.users} / {c.loyaltyPrograms} / {c.customers}
+            {c.members} / {c.passTemplates} / {c.contacts}
           </span>
         )
       },
@@ -194,13 +194,13 @@ export function AdminRestaurantTable({
                 variant="ghost"
                 size="icon"
                 className="size-7"
-                aria-label="Restaurant actions"
+                aria-label="Organization actions"
               >
                 <MoreHorizontal className="size-3.5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => onSelectRestaurant(r.id)}>
+              <DropdownMenuItem onClick={() => onSelectOrganization(r.id)}>
                 <Eye className="size-4" />
                 View Details
               </DropdownMenuItem>
@@ -224,7 +224,7 @@ export function AdminRestaurantTable({
   ]
 
   const table = useReactTable({
-    data: restaurants,
+    data: organizations,
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
@@ -263,7 +263,7 @@ export function AdminRestaurantTable({
                   colSpan={columns.length}
                   className="h-32 text-center text-sm text-muted-foreground"
                 >
-                  No restaurants found.
+                  No organizations found.
                 </TableCell>
               </TableRow>
             ) : (
@@ -271,7 +271,7 @@ export function AdminRestaurantTable({
                 <TableRow
                   key={row.id}
                   className="cursor-pointer"
-                  onClick={() => onSelectRestaurant(row.original.id)}
+                  onClick={() => onSelectOrganization(row.original.id)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-2.5">

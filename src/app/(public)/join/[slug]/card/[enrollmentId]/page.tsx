@@ -1,7 +1,7 @@
 import { connection } from "next/server"
 import { notFound } from "next/navigation"
 import { verifyCardSignature } from "@/lib/card-access"
-import { getEnrollmentCardData } from "@/server/onboarding-actions"
+import { getPassInstanceCardData } from "@/server/onboarding-actions"
 import { CardPageClient } from "./card-page-client"
 import type { Metadata } from "next"
 
@@ -17,8 +17,8 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   if (!sig) return { title: "Access Denied" }
 
   return {
-    title: `My Loyalty Card`,
-    description: `View your digital loyalty card`,
+    title: `My Pass`,
+    description: `View your digital pass`,
     robots: { index: false, follow: false },
   }
 }
@@ -33,8 +33,8 @@ export default async function CardPage({ params, searchParams }: PageProps) {
     notFound()
   }
 
-  // Fetch enrollment data
-  const data = await getEnrollmentCardData(enrollmentId, slug)
+  // Fetch pass instance data
+  const data = await getPassInstanceCardData(enrollmentId, slug)
   if (!data) {
     notFound()
   }
@@ -42,8 +42,8 @@ export default async function CardPage({ params, searchParams }: PageProps) {
   return (
     <CardPageClient
       data={data}
-      enrollmentId={enrollmentId}
-      restaurantSlug={slug}
+      passInstanceId={enrollmentId}
+      organizationSlug={slug}
       signature={sig}
     />
   )

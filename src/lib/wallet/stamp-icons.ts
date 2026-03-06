@@ -1,5 +1,5 @@
 // ─── Stamp Icon Registry ────────────────────────────────────
-// Curated Lucide SVG icons for restaurant loyalty stamp grids.
+// Curated Lucide SVG icons for organization loyalty stamp grids.
 // Both client (inline <svg>) and server (strip-image.ts SVG generation)
 // consume the same path data from this registry.
 //

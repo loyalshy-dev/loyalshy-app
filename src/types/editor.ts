@@ -1,6 +1,6 @@
 // ─── Card Types ────────────────────────────────────────────
 
-export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID"
+export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID" | "GENERIC"
 
 // ─── Studio UI Types ──────────────────────────────────────
 

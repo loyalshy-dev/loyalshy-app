@@ -15,35 +15,44 @@ function createMockModel() {
     count: vi.fn(),
     upsert: vi.fn(),
     groupBy: vi.fn(),
+    deleteMany: vi.fn(),
+    updateMany: vi.fn(),
   }
 }
 
 export function createMockDb() {
   const mockTx = {
-    visit: createMockModel(),
-    customer: createMockModel(),
+    interaction: createMockModel(),
+    contact: createMockModel(),
     reward: createMockModel(),
-    restaurant: createMockModel(),
-    member: createMockModel(),
     organization: createMockModel(),
+    member: createMockModel(),
     staffInvitation: createMockModel(),
     walletPassLog: createMockModel(),
-    loyaltyProgram: createMockModel(),
-    enrollment: createMockModel(),
+    passTemplate: createMockModel(),
+    passInstance: createMockModel(),
+    passDesign: createMockModel(),
   }
 
   return {
-    restaurant: createMockModel(),
-    customer: createMockModel(),
-    visit: createMockModel(),
+    organization: createMockModel(),
+    contact: createMockModel(),
+    interaction: createMockModel(),
     reward: createMockModel(),
     member: createMockModel(),
-    organization: createMockModel(),
     staffInvitation: createMockModel(),
     walletPassLog: createMockModel(),
-    loyaltyProgram: createMockModel(),
-    enrollment: createMockModel(),
+    passTemplate: createMockModel(),
+    passInstance: createMockModel(),
+    passDesign: createMockModel(),
     user: createMockModel(),
+    analyticsSnapshot: createMockModel(),
+    deviceRegistration: createMockModel(),
+    webhookEvent: createMockModel(),
+    showcaseCard: createMockModel(),
+    invitation: createMockModel(),
+    session: createMockModel(),
+    account: createMockModel(),
     $transaction: vi.fn(async (fn: (tx: typeof mockTx) => Promise<unknown>) => {
       return fn(mockTx)
     }),

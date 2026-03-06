@@ -1,6 +1,6 @@
 import { connection } from "next/server"
 import { notFound } from "next/navigation"
-import { assertAuthenticated, getRestaurantForUser } from "@/lib/dal"
+import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
 import { getRewards, getRewardStats } from "@/server/reward-actions"
 import { RewardsView } from "@/components/dashboard/rewards/rewards-view"
 import { db } from "@/lib/db"
@@ -19,14 +19,14 @@ export default async function ProgramRewardsPage({
   const sp = await searchParams
   await assertAuthenticated()
 
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) {
+  const organization = await getOrganizationForUser()
+  if (!organization) {
     notFound()
   }
 
-  // Verify program belongs to this restaurant
-  const program = await db.loyaltyProgram.findFirst({
-    where: { id: programId, restaurantId: restaurant.id },
+  // Verify pass template belongs to this organization
+  const program = await db.passTemplate.findFirst({
+    where: { id: programId, organizationId: organization.id },
     select: { id: true, name: true },
   })
   if (!program) {
@@ -41,14 +41,14 @@ export default async function ProgramRewardsPage({
   const dateFrom = (sp.dateFrom as string) ?? ""
   const dateTo = (sp.dateTo as string) ?? ""
 
-  // Check if there are any rewards for this program
+  // Check if there are any rewards for this pass template
   const totalRewards = await db.reward.count({
-    where: { enrollment: { loyaltyProgramId: programId } },
+    where: { passInstance: { passTemplateId: programId } },
   })
   const isEmpty = totalRewards === 0
 
   const [result, stats] = await Promise.all([
-    getRewards({ tab, page, search, sort, order, dateFrom, dateTo, programId }),
+    getRewards({ tab, page, search, sort, order, dateFrom, dateTo, templateId: programId }),
     getRewardStats(programId),
   ])
 

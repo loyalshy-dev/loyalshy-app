@@ -40,7 +40,7 @@ type AppSidebarProps = {
     email: string
     image: string | null
   }
-  restaurant: {
+  organization: {
     name: string
     logo: string | null
   } | null
@@ -49,8 +49,8 @@ type AppSidebarProps = {
 
 const navItems = [
   { label: "Overview", href: "/dashboard", icon: BarChart3 },
-  { label: "Customers", href: "/dashboard/customers", icon: Users },
-  { label: "Programs", href: "/dashboard/programs", icon: Layers },
+  { label: "Contacts", href: "/dashboard/customers", icon: Users },
+  { label: "Templates", href: "/dashboard/programs", icon: Layers },
 ]
 
 const ownerItems = [
@@ -66,7 +66,7 @@ function getInitials(name: string) {
     .slice(0, 2)
 }
 
-export function AppSidebar({ user, restaurant, orgRole }: AppSidebarProps) {
+export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const isOwner = orgRole === "owner"
@@ -90,26 +90,26 @@ export function AppSidebar({ user, restaurant, orgRole }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon">
-      {/* Restaurant branding */}
+      {/* Organization branding */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="cursor-default hover:bg-transparent active:bg-transparent">
-              {restaurant?.logo ? (
+              {organization?.logo ? (
                 <img
-                  src={restaurant.logo}
-                  alt={restaurant.name}
+                  src={organization.logo}
+                  alt={organization.name}
                   className="size-7 rounded-md shrink-0 object-cover"
                 />
               ) : (
                 <div className="size-7 rounded-md bg-sidebar-accent flex items-center justify-center shrink-0">
                   <span className="text-[11px] font-semibold text-sidebar-accent-foreground">
-                    {restaurant ? getInitials(restaurant.name) : "L"}
+                    {organization ? getInitials(organization.name) : "L"}
                   </span>
                 </div>
               )}
               <span className="text-sm font-semibold text-sidebar-primary truncate">
-                {restaurant?.name ?? "Loyalshy"}
+                {organization?.name ?? "Loyalshy"}
               </span>
             </SidebarMenuButton>
           </SidebarMenuItem>

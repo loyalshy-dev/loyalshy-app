@@ -18,7 +18,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
   STARTER: {
     id: "STARTER",
     name: "Starter",
-    description: "For small restaurants getting started",
+    description: "For small businesses getting started",
     price: 19,
     annualPrice: 15,
     customerLimit: 200,
@@ -36,7 +36,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
   GROWTH: {
     id: "GROWTH",
     name: "Growth",
-    description: "For growing restaurants",
+    description: "For growing businesses",
     price: 39,
     annualPrice: 31,
     customerLimit: 1_000,

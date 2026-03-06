@@ -5,19 +5,19 @@ import { getAccessToken } from "./credentials"
 import {
   GOOGLE_WALLET_API_BASE,
   GOOGLE_WALLET_ISSUER_ID,
-  buildEnrollmentObjectId,
+  buildPassInstanceObjectId,
 } from "./constants"
 import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig } from "../card-design"
 import type { ProgressStyle, LabelFormat } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { getWalletRewardText, parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, getCheapestCatalogItem } from "../../program-config"
+import { getWalletRewardText, parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
 type GooglePassUpdateData = {
-  enrollmentId: string
-  customerName: string
+  passInstanceId: string
+  contactName: string
   currentCycleVisits: number
   visitsRequired: number
   totalVisits: number
@@ -25,14 +25,14 @@ type GooglePassUpdateData = {
   hasAvailableReward: boolean
   rewardDescription: string
   revealedPrize: string | null
-  restaurantName: string
+  organizationName: string
   brandColor: string | null
-  restaurantLogo: string | null
-  programName: string
+  organizationLogo: string | null
+  templateName: string
   memberSince: Date
-  // Program type
-  programType: string | null
-  programConfig: unknown
+  // Pass type
+  passType: string | null
+  templateConfig: unknown
   // Card design fields for formatting
   progressStyle: ProgressStyle
   labelFormat: LabelFormat
@@ -40,8 +40,19 @@ type GooglePassUpdateData = {
   heroImageUrl?: string | null
   revealLink?: string | null
   remainingUses?: number
-  // Enrollment status (for coupon redeemed display)
-  enrollmentStatus?: string
+  // Gift card data
+  giftBalanceCents?: number
+  giftCurrency?: string
+  // Ticket data
+  ticketScanCount?: number
+  // Access data
+  accessTotalGranted?: number
+  // Transit data
+  transitIsBoarded?: boolean
+  // Business ID data
+  businessIdVerifications?: number
+  // Pass instance status (for coupon redeemed display)
+  passInstanceStatus?: string
 }
 
 // ─── Update Google Wallet Pass ──────────────────────────────
@@ -56,7 +67,7 @@ async function patchGoogleWalletObject(
 ): Promise<void> {
   if (!GOOGLE_WALLET_ISSUER_ID) return
 
-  const objectId = buildEnrollmentObjectId(data.enrollmentId)
+  const objectId = buildPassInstanceObjectId(data.passInstanceId)
   const token = await getAccessToken()
 
   const labelFmt = data.labelFormat
@@ -71,14 +82,19 @@ async function patchGoogleWalletObject(
   let secondaryLoyaltyPoints: Record<string, unknown>
   let textModulesData: Record<string, unknown>[]
 
-  const couponConfig = data.programType === "COUPON" ? parseCouponConfig(data.programConfig) : null
-  const membershipConfig = data.programType === "MEMBERSHIP" ? parseMembershipConfig(data.programConfig) : null
-  const pointsConfig = data.programType === "POINTS" ? parsePointsConfig(data.programConfig) : null
-  const prepaidConfig = data.programType === "PREPAID" ? parsePrepaidConfig(data.programConfig) : null
+  const couponConfig = data.passType === "COUPON" ? parseCouponConfig(data.templateConfig) : null
+  const membershipConfig = data.passType === "MEMBERSHIP" ? parseMembershipConfig(data.templateConfig) : null
+  const pointsConfig = data.passType === "POINTS" ? parsePointsConfig(data.templateConfig) : null
+  const prepaidConfig = data.passType === "PREPAID" ? parsePrepaidConfig(data.templateConfig) : null
+  const giftCardConfig = data.passType === "GIFT_CARD" ? parseGiftCardConfig(data.templateConfig) : null
+  const ticketConfig = data.passType === "TICKET" ? parseTicketConfig(data.templateConfig) : null
+  const accessConfig = data.passType === "ACCESS" ? parseAccessConfig(data.templateConfig) : null
+  const transitConfig = data.passType === "TRANSIT" ? parseTransitConfig(data.templateConfig) : null
+  const businessIdConfig = data.passType === "BUSINESS_ID" ? parseBusinessIdConfig(data.templateConfig) : null
 
-  if (data.programType === "COUPON" && couponConfig) {
-    const isRedeemed = data.enrollmentStatus === "COMPLETED"
-    const prizeText = getWalletRewardText(data.programConfig, formatCouponValue(couponConfig))
+  if (data.passType === "COUPON" && couponConfig) {
+    const isRedeemed = data.passInstanceStatus === "COMPLETED"
+    const prizeText = getWalletRewardText(data.templateConfig, formatCouponValue(couponConfig))
     const hasPrizes = prizeText !== formatCouponValue(couponConfig)
     const discountLabel = isRedeemed ? "REDEEMED" : (data.revealedPrize ? "YOUR PRIZE" : (hasPrizes ? "PRIZES" : "DISCOUNT"))
     const discountValue = isRedeemed
@@ -99,9 +115,9 @@ async function patchGoogleWalletObject(
       ...(couponConfig.couponCode ? [{ id: "couponCode", header: formatLabel("CODE", labelFmt), body: couponConfig.couponCode }] : []),
       { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
     ]
-  } else if (data.programType === "MEMBERSHIP" && membershipConfig) {
-    const isSuspended = data.enrollmentStatus === "SUSPENDED"
-    const isExpired = data.enrollmentStatus === "EXPIRED"
+  } else if (data.passType === "MEMBERSHIP" && membershipConfig) {
+    const isSuspended = data.passInstanceStatus === "SUSPENDED"
+    const isExpired = data.passInstanceStatus === "EXPIRED"
     const statusText = isSuspended ? "Suspended" : isExpired ? "Expired" : "Active"
     loyaltyPoints = {
       label: formatLabel("TIER", labelFmt),
@@ -117,7 +133,7 @@ async function patchGoogleWalletObject(
       { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
-  } else if (data.programType === "PREPAID" && prepaidConfig) {
+  } else if (data.passType === "PREPAID" && prepaidConfig) {
     const remaining = data.remainingUses ?? 0
     loyaltyPoints = {
       label: formatLabel("REMAINING", labelFmt),
@@ -133,7 +149,7 @@ async function patchGoogleWalletObject(
       { id: "totalUsed", header: formatLabel("TOTAL USED", labelFmt), body: String(data.totalVisits) },
       { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
     ]
-  } else if (data.programType === "POINTS" && pointsConfig) {
+  } else if (data.passType === "POINTS" && pointsConfig) {
     loyaltyPoints = {
       label: formatLabel("POINTS", labelFmt),
       balance: { int: data.pointsBalance ?? 0 },
@@ -145,6 +161,48 @@ async function patchGoogleWalletObject(
     textModulesData = [
       { id: "earnRate", header: formatLabel("EARN RATE", labelFmt), body: `${pointsConfig.pointsPerVisit} points per visit` },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
+    ]
+  } else if (data.passType === "GIFT_CARD" && giftCardConfig) {
+    const balanceCents = data.giftBalanceCents ?? giftCardConfig.initialBalanceCents
+    const balanceStr = `${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}`
+    const initialStr = `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}`
+    loyaltyPoints = { label: formatLabel("BALANCE", labelFmt), balance: { string: balanceStr } }
+    secondaryLoyaltyPoints = { label: formatLabel("INITIAL VALUE", labelFmt), balance: { string: initialStr } }
+    textModulesData = [
+      { id: "balance", header: formatLabel("BALANCE", labelFmt), body: balanceStr },
+      { id: "initialValue", header: formatLabel("INITIAL VALUE", labelFmt), body: initialStr },
+    ]
+  } else if (data.passType === "TICKET" && ticketConfig) {
+    loyaltyPoints = { label: formatLabel("EVENT", labelFmt), balance: { string: ticketConfig.eventName } }
+    secondaryLoyaltyPoints = { label: formatLabel("SCANS", labelFmt), balance: { string: `${data.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` } }
+    textModulesData = [
+      { id: "eventDate", header: formatLabel("DATE", labelFmt), body: new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) },
+      { id: "venue", header: formatLabel("VENUE", labelFmt), body: ticketConfig.eventVenue },
+      { id: "scans", header: formatLabel("SCANS", labelFmt), body: `${data.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` },
+      { id: "holder", header: formatLabel("HOLDER", labelFmt), body: data.contactName },
+    ]
+  } else if (data.passType === "ACCESS" && accessConfig) {
+    loyaltyPoints = { label: formatLabel(accessConfig.accessLabel, labelFmt), balance: { string: "Active" } }
+    secondaryLoyaltyPoints = { label: formatLabel("TOTAL GRANTED", labelFmt), balance: { int: data.accessTotalGranted ?? 0 } }
+    textModulesData = [
+      { id: "accessLabel", header: formatLabel(accessConfig.accessLabel, labelFmt), body: "Active" },
+      { id: "totalGranted", header: formatLabel("TOTAL GRANTED", labelFmt), body: String(data.accessTotalGranted ?? 0) },
+    ]
+  } else if (data.passType === "TRANSIT" && transitConfig) {
+    loyaltyPoints = { label: formatLabel("STATUS", labelFmt), balance: { string: data.transitIsBoarded ? "BOARDED" : "NOT BOARDED" } }
+    secondaryLoyaltyPoints = { label: formatLabel("TYPE", labelFmt), balance: { string: transitConfig.transitType.toUpperCase() } }
+    textModulesData = [
+      { id: "origin", header: formatLabel("FROM", labelFmt), body: transitConfig.originName ?? "—" },
+      { id: "destination", header: formatLabel("TO", labelFmt), body: transitConfig.destinationName ?? "—" },
+      { id: "transitType", header: formatLabel("TYPE", labelFmt), body: transitConfig.transitType.toUpperCase() },
+      { id: "boardingStatus", header: formatLabel("STATUS", labelFmt), body: data.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
+    ]
+  } else if (data.passType === "BUSINESS_ID" && businessIdConfig) {
+    loyaltyPoints = { label: formatLabel(businessIdConfig.idLabel, labelFmt), balance: { string: data.contactName } }
+    secondaryLoyaltyPoints = { label: formatLabel("VERIFICATIONS", labelFmt), balance: { int: data.businessIdVerifications ?? 0 } }
+    textModulesData = [
+      { id: "idLabel", header: formatLabel(businessIdConfig.idLabel, labelFmt), body: data.contactName },
+      { id: "verifications", header: formatLabel("VERIFICATIONS", labelFmt), body: String(data.businessIdVerifications ?? 0) },
     ]
   } else {
     // STAMP_CARD (default)
@@ -178,7 +236,7 @@ async function patchGoogleWalletObject(
   const patchBody: Record<string, unknown> = {
     loyaltyPoints,
     secondaryLoyaltyPoints,
-    accountName: data.customerName,
+    accountName: data.contactName,
     textModulesData,
   }
 
@@ -186,7 +244,7 @@ async function patchGoogleWalletObject(
     patchBody.heroImage = {
       sourceUri: { uri: data.heroImageUrl },
       contentDescription: {
-        defaultValue: { language: "en", value: data.restaurantName },
+        defaultValue: { language: "en", value: data.organizationName },
       },
     }
   }
@@ -229,21 +287,21 @@ async function patchGoogleWalletObject(
 // ─── Notify Google Pass Update ──────────────────────────────
 
 /**
- * Notifies that an enrollment's Google Wallet pass needs updating.
- * Fetches current enrollment/customer/program/restaurant data and PATCHes the object.
+ * Notifies that a pass instance's Google Wallet pass needs updating.
+ * Fetches current passInstance/contact/template/organization data and PATCHes the object.
  */
 export async function notifyGooglePassUpdate(
-  enrollmentId: string
+  passInstanceId: string
 ): Promise<void> {
-  const enrollment = await db.enrollment.findUnique({
-    where: { id: enrollmentId },
+  const passInstance = await db.passInstance.findUnique({
+    where: { id: passInstanceId },
     include: {
-      customer: {
+      contact: {
         select: {
           id: true,
           fullName: true,
           createdAt: true,
-          restaurant: {
+          organization: {
             select: {
               id: true,
               name: true,
@@ -254,15 +312,13 @@ export async function notifyGooglePassUpdate(
           },
         },
       },
-      loyaltyProgram: {
+      passTemplate: {
         select: {
           id: true,
           name: true,
-          programType: true,
+          passType: true,
           config: true,
-          visitsRequired: true,
-          rewardDescription: true,
-          cardDesign: {
+          passDesign: {
             select: {
               primaryColor: true,
               secondaryColor: true,
@@ -286,39 +342,57 @@ export async function notifyGooglePassUpdate(
     },
   })
 
-  if (!enrollment || enrollment.walletPassType !== "GOOGLE") return
+  if (!passInstance || passInstance.walletProvider !== "GOOGLE") return
 
-  const cardDesign = enrollment.loyaltyProgram.cardDesign
-  const hasAvailableReward = enrollment.rewards.some((r) => r.status === "AVAILABLE")
-  const revealedReward = enrollment.rewards.find((r) => r.revealedAt !== null && r.description)
+  // Extract data from the PassInstance.data JSON
+  const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
+  const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
+  const totalVisits = (instanceData.totalVisits as number) ?? 0
+  const pointsBalance = (instanceData.pointsBalance as number) ?? 0
+  const remainingUses = (instanceData.remainingUses as number) ?? 0
+  const giftBalanceCents = (instanceData.balanceCents as number) ?? undefined
+  const giftCurrency = (instanceData.currency as string) ?? undefined
+  const ticketScanCount = (instanceData.scanCount as number) ?? 0
+  const accessTotalGranted = (instanceData.totalGranted as number) ?? 0
+  const transitIsBoarded = (instanceData.isBoarded as boolean) ?? false
+  const businessIdVerifications = (instanceData.totalVerifications as number) ?? 0
+
+  // Extract config values from PassTemplate.config JSON
+  const templateConfig = (passInstance.passTemplate.config ?? {}) as Record<string, unknown>
+  const visitsRequired = (templateConfig.visitsRequired as number) ?? 10
+  const rewardDescription = (templateConfig.rewardDescription as string) ?? "Free reward"
+
+  const passDesign = passInstance.passTemplate.passDesign
+  const hasAvailableReward = passInstance.rewards.some((r) => r.status === "AVAILABLE")
+  const revealedReward = passInstance.rewards.find((r) => r.revealedAt !== null && r.description)
 
   try {
     // Generate stamp grid hero image if applicable
     let heroImageUrl: string | null = null
-    const isStampCard = !enrollment.loyaltyProgram.programType || enrollment.loyaltyProgram.programType === "STAMP_CARD"
-    if (isStampCard && cardDesign?.showStrip !== false) {
-      const stripFilters = parseStripFilters(cardDesign?.editorConfig)
-      const isStampGrid = stripFilters.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
+    const isStampCard = !passInstance.passTemplate.passType || passInstance.passTemplate.passType === "STAMP_CARD"
+    if (isStampCard && passDesign?.showStrip !== false) {
+      const stripFilters = parseStripFilters(passDesign?.editorConfig)
+      const isStampGrid = stripFilters.useStampGrid || passDesign?.patternStyle === "STAMP_GRID"
       if (isStampGrid) {
         try {
-          const config = parseStampGridConfig(cardDesign?.editorConfig)
-          const stripPrimary = stripFilters.stripColor1 ?? cardDesign?.primaryColor ?? "#1a1a2e"
-          const stripSecondary = stripFilters.stripColor2 ?? cardDesign?.secondaryColor ?? "#ffffff"
+          const config = parseStampGridConfig(passDesign?.editorConfig)
+          const stripPrimary = stripFilters.stripColor1 ?? passDesign?.primaryColor ?? "#1a1a2e"
+          const stripSecondary = stripFilters.stripColor2 ?? passDesign?.secondaryColor ?? "#ffffff"
           const buffer = await generateStampGridImage({
-            currentVisits: enrollment.currentCycleVisits,
-            totalVisits: enrollment.loyaltyProgram.visitsRequired,
+            currentVisits: currentCycleVisits,
+            totalVisits: visitsRequired,
             hasReward: hasAvailableReward,
             config,
             primaryColor: stripPrimary,
             secondaryColor: stripSecondary,
-            textColor: cardDesign?.textColor ?? "#ffffff",
+            textColor: passDesign?.textColor ?? "#ffffff",
             width: GOOGLE_HERO_WIDTH,
             height: GOOGLE_HERO_HEIGHT,
-            stripImageUrl: cardDesign?.stripImageGoogle,
+            stripImageUrl: passDesign?.stripImageGoogle,
             stripOpacity: stripFilters.stripOpacity,
             stripGrayscale: stripFilters.stripGrayscale,
           })
-          const key = `strip-images/${enrollment.loyaltyProgram.id}/google-stamp-grid-${enrollment.id}.png`
+          const key = `strip-images/${passInstance.passTemplate.id}/google-stamp-grid-${passInstance.id}.png`
           heroImageUrl = await uploadFile(buffer, key, "image/png")
         } catch (err) {
           console.error("Failed to generate stamp grid:", err instanceof Error ? err.message : err)
@@ -328,41 +402,47 @@ export async function notifyGooglePassUpdate(
 
     // Build reveal link if there's an unrevealed prize
     let revealLink: string | null = null
-    const unrevealedReward = enrollment.rewards.find(
+    const unrevealedReward = passInstance.rewards.find(
       (r) => r.revealedAt === null && r.description != null
     )
     if (unrevealedReward) {
       const { signCardAccess } = await import("../../card-access")
       const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
-      const slug = enrollment.customer.restaurant.slug
-      const sig = signCardAccess(enrollment.id)
-      revealLink = `${baseUrl}/join/${slug}/card/${enrollment.id}?sig=${sig}`
+      const slug = passInstance.contact.organization.slug
+      const sig = signCardAccess(passInstance.id)
+      revealLink = `${baseUrl}/join/${slug}/card/${passInstance.id}?sig=${sig}`
     }
 
     await patchGoogleWalletObject({
-      enrollmentId: enrollment.id,
-      customerName: enrollment.customer.fullName,
-      currentCycleVisits: enrollment.currentCycleVisits,
-      visitsRequired: enrollment.loyaltyProgram.visitsRequired,
-      totalVisits: enrollment.totalVisits,
-      pointsBalance: enrollment.pointsBalance ?? 0,
-      remainingUses: enrollment.remainingUses ?? 0,
+      passInstanceId: passInstance.id,
+      contactName: passInstance.contact.fullName,
+      currentCycleVisits,
+      visitsRequired,
+      totalVisits,
+      pointsBalance,
+      remainingUses,
+      giftBalanceCents,
+      giftCurrency,
+      ticketScanCount,
+      accessTotalGranted,
+      transitIsBoarded,
+      businessIdVerifications,
       hasAvailableReward,
-      rewardDescription: getWalletRewardText(enrollment.loyaltyProgram.config, enrollment.loyaltyProgram.rewardDescription),
+      rewardDescription: getWalletRewardText(passInstance.passTemplate.config, rewardDescription),
       revealedPrize: revealedReward?.description ?? null,
-      restaurantName: enrollment.customer.restaurant.name,
-      brandColor: enrollment.customer.restaurant.brandColor,
-      restaurantLogo: enrollment.customer.restaurant.logo,
-      programName: enrollment.loyaltyProgram.name,
-      memberSince: enrollment.customer.createdAt,
-      programType: enrollment.loyaltyProgram.programType,
-      programConfig: enrollment.loyaltyProgram.config,
-      progressStyle: (cardDesign?.progressStyle as ProgressStyle) ?? "NUMBERS",
-      labelFormat: (cardDesign?.labelFormat as LabelFormat) ?? "UPPERCASE",
-      customProgressLabel: cardDesign?.customProgressLabel ?? null,
+      organizationName: passInstance.contact.organization.name,
+      brandColor: passInstance.contact.organization.brandColor,
+      organizationLogo: passInstance.contact.organization.logo,
+      templateName: passInstance.passTemplate.name,
+      memberSince: passInstance.contact.createdAt,
+      passType: passInstance.passTemplate.passType,
+      templateConfig: passInstance.passTemplate.config,
+      progressStyle: (passDesign?.progressStyle as ProgressStyle) ?? "NUMBERS",
+      labelFormat: (passDesign?.labelFormat as LabelFormat) ?? "UPPERCASE",
+      customProgressLabel: passDesign?.customProgressLabel ?? null,
       heroImageUrl,
       revealLink,
-      enrollmentStatus: enrollment.status,
+      passInstanceStatus: passInstance.status,
     })
   } catch (error) {
     console.error("Failed to update Google Wallet pass:", error instanceof Error ? error.message : "Unknown error")
@@ -371,7 +451,7 @@ export async function notifyGooglePassUpdate(
   // Log the update
   await db.walletPassLog.create({
     data: {
-      enrollmentId,
+      passInstanceId,
       action: "UPDATED",
       details: { trigger: "data_change", platform: "google" },
     },

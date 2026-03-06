@@ -1,7 +1,7 @@
 import { connection } from "next/server"
 import { notFound, redirect } from "next/navigation"
-import { assertAuthenticated, getRestaurantForUser, assertRestaurantRole } from "@/lib/dal"
-import { getProgramForSettings } from "@/server/program-actions"
+import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
+import { getTemplateForSettings } from "@/server/template-actions"
 import { ProgramEditor } from "@/components/dashboard/programs/program-editor"
 
 export default async function ProgramSettingsPage(props: {
@@ -11,14 +11,14 @@ export default async function ProgramSettingsPage(props: {
   const { id: programId } = await props.params
   await assertAuthenticated()
 
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) {
+  const organization = await getOrganizationForUser()
+  if (!organization) {
     redirect("/dashboard")
   }
 
-  await assertRestaurantRole(restaurant.id, "owner")
+  await assertOrganizationRole(organization.id, "owner")
 
-  const program = await getProgramForSettings(programId)
+  const program = await getTemplateForSettings(programId)
   if (!program) {
     notFound()
   }
@@ -26,13 +26,13 @@ export default async function ProgramSettingsPage(props: {
   return (
     <ProgramEditor
       program={program}
-      restaurant={{
-        id: restaurant.id,
-        name: restaurant.name,
-        slug: restaurant.slug,
-        logo: restaurant.logo,
-        brandColor: restaurant.brandColor,
-        secondaryColor: restaurant.secondaryColor,
+      organization={{
+        id: organization.id,
+        name: organization.name,
+        slug: organization.slug,
+        logo: organization.logo,
+        brandColor: organization.brandColor,
+        secondaryColor: organization.secondaryColor,
       }}
     />
   )

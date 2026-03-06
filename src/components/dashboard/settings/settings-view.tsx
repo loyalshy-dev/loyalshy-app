@@ -16,7 +16,7 @@ const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: st
   { id: "billing", label: "Billing", icon: CreditCard },
 ]
 
-type Restaurant = {
+type Organization = {
   id: string
   name: string
   slug: string
@@ -54,7 +54,7 @@ type PendingInvitation = {
 }
 
 type SettingsViewProps = {
-  restaurant: Restaurant
+  organization: Organization
   members: Member[]
   pendingInvitations: PendingInvitation[]
   activeTab: string
@@ -62,7 +62,7 @@ type SettingsViewProps = {
 }
 
 export function SettingsView({
-  restaurant,
+  organization,
   members,
   pendingInvitations,
   activeTab,
@@ -124,11 +124,11 @@ export function SettingsView({
 
       {/* Tab Content */}
       {currentTab === "general" && (
-        <GeneralSettingsForm restaurant={restaurant} />
+        <GeneralSettingsForm organization={organization} />
       )}
       {currentTab === "team" && (
         <TeamManagement
-          restaurant={restaurant}
+          organization={organization}
           members={members}
           pendingInvitations={pendingInvitations}
         />

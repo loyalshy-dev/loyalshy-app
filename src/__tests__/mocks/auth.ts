@@ -12,7 +12,6 @@ export function createMockSession(overrides?: Partial<AuthSession["user"]>): Aut
       email: "test@example.com",
       image: null,
       role: "USER",
-      restaurantId: "restaurant-1",
       ...overrides,
     },
     session: {
@@ -39,30 +38,33 @@ export function createMockMember(overrides?: Partial<OrgMember>): OrgMember {
 }
 
 /**
- * Creates a mock restaurant with active loyalty programs.
+ * Creates a mock organization with active pass templates.
  */
-export function createMockRestaurant(overrides?: Record<string, unknown>) {
+export function createMockOrganization(overrides?: Record<string, unknown>) {
   return {
-    id: "restaurant-1",
-    name: "Test Restaurant",
-    slug: "test-restaurant",
+    id: "org-1",
+    name: "Test Organization",
+    slug: "test-org",
     plan: "STARTER",
     subscriptionStatus: "ACTIVE",
     stripeCustomerId: "cus_test",
     stripeSubscriptionId: "sub_test",
     trialEndsAt: null,
-    loyaltyPrograms: [
+    passTemplates: [
       {
-        id: "program-1",
-        restaurantId: "restaurant-1",
-        name: "Test Program",
-        visitsRequired: 10,
-        rewardDescription: "Free coffee",
-        rewardExpiryDays: 30,
+        id: "template-1",
+        organizationId: "org-1",
+        name: "Test Template",
+        passType: "STAMP_CARD",
         status: "ACTIVE",
         startsAt: new Date("2026-01-01"),
         endsAt: null,
-        cardDesign: null,
+        config: {
+          stampsRequired: 10,
+          rewardDescription: "Free coffee",
+          rewardExpiryDays: 30,
+        },
+        passDesign: null,
       },
     ],
     ...overrides,
@@ -70,94 +72,99 @@ export function createMockRestaurant(overrides?: Record<string, unknown>) {
 }
 
 /**
- * Creates a mock customer.
+ * Creates a mock contact.
  */
-export function createMockCustomer(overrides?: Record<string, unknown>) {
+export function createMockContact(overrides?: Record<string, unknown>) {
   return {
-    id: "customer-1",
+    id: "contact-1",
     fullName: "Jane Doe",
     email: "jane@example.com",
     phone: null,
-    restaurantId: "restaurant-1",
-    totalVisits: 13,
-    lastVisitAt: new Date("2026-02-20"),
+    organizationId: "org-1",
+    totalInteractions: 13,
+    lastInteractionAt: new Date("2026-02-20"),
     deletedAt: null,
     ...overrides,
   }
 }
 
 /**
- * Creates a mock enrollment for testing.
+ * Creates a mock pass instance for testing.
  */
-export function createMockEnrollment(overrides?: Record<string, unknown>) {
+export function createMockPassInstance(overrides?: Record<string, unknown>) {
   return {
-    id: "enrollment-1",
-    customerId: "customer-1",
-    loyaltyProgramId: "program-1",
-    currentCycleVisits: 3,
-    totalVisits: 13,
-    totalRewardsRedeemed: 0,
-    pointsBalance: 0,
+    id: "instance-1",
+    contactId: "contact-1",
+    passTemplateId: "template-1",
     walletPassId: null,
     walletPassSerialNumber: null,
-    walletPassType: "NONE",
+    walletProvider: "NONE",
     status: "ACTIVE",
-    enrolledAt: new Date("2026-01-15"),
-    frozenAt: null,
-    customer: {
-      id: "customer-1",
-      restaurantId: "restaurant-1",
+    issuedAt: new Date("2026-01-15"),
+    expiresAt: null,
+    suspendedAt: null,
+    revokedAt: null,
+    data: {
+      currentCycleStamps: 3,
+      totalStamps: 13,
+      totalRewardsEarned: 0,
+    },
+    contact: {
+      id: "contact-1",
+      organizationId: "org-1",
       deletedAt: null,
-      totalVisits: 13,
+      totalInteractions: 13,
       fullName: "Jane Doe",
     },
-    loyaltyProgram: {
-      id: "program-1",
-      name: "Test Program",
-      programType: "STAMP_CARD",
-      visitsRequired: 10,
-      rewardDescription: "Free coffee",
-      rewardExpiryDays: 30,
+    passTemplate: {
+      id: "template-1",
+      name: "Test Template",
+      passType: "STAMP_CARD",
       status: "ACTIVE",
       endsAt: null,
+      config: {
+        stampsRequired: 10,
+        rewardDescription: "Free coffee",
+        rewardExpiryDays: 30,
+      },
     },
     ...overrides,
   }
 }
 
 /**
- * Sets up mock DAL functions to return authenticated session + restaurant.
+ * Sets up mock DAL functions to return authenticated session + organization.
  * Call this in beforeEach for server action tests.
  */
 export function setupMockAuth(
   session: AuthSession = createMockSession(),
-  restaurant = createMockRestaurant()
+  organization = createMockOrganization()
 ) {
   const mockGetCurrentUser = vi.fn().mockResolvedValue(session)
   const mockAssertAuthenticated = vi.fn().mockResolvedValue(session)
-  const mockAssertRestaurantAccess = vi.fn().mockResolvedValue({
+  const mockAssertOrganizationAccess = vi.fn().mockResolvedValue({
     session,
     member: createMockMember(),
   })
-  const mockAssertRestaurantRole = vi.fn().mockResolvedValue({
+  const mockAssertOrganizationRole = vi.fn().mockResolvedValue({
     session,
     member: createMockMember(),
   })
-  const mockGetRestaurantForUser = vi.fn().mockResolvedValue(restaurant)
+  const mockGetOrganizationForUser = vi.fn().mockResolvedValue(organization)
 
   vi.doMock("@/lib/dal", () => ({
     getCurrentUser: mockGetCurrentUser,
     assertAuthenticated: mockAssertAuthenticated,
-    assertRestaurantAccess: mockAssertRestaurantAccess,
-    assertRestaurantRole: mockAssertRestaurantRole,
-    getRestaurantForUser: mockGetRestaurantForUser,
+    assertOrganizationAccess: mockAssertOrganizationAccess,
+    assertOrganizationRole: mockAssertOrganizationRole,
+    getOrganizationForUser: mockGetOrganizationForUser,
   }))
 
   return {
     mockGetCurrentUser,
     mockAssertAuthenticated,
-    mockAssertRestaurantAccess,
-    mockAssertRestaurantRole,
-    mockGetRestaurantForUser,
+    mockAssertOrganizationAccess,
+    mockAssertOrganizationRole,
+    mockGetOrganizationForUser,
   }
 }

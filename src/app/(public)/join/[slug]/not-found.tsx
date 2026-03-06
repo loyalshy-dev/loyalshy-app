@@ -6,11 +6,11 @@ export default function JoinNotFound() {
       <div className="w-full max-w-md text-center space-y-4">
         <div className="text-6xl font-bold text-muted-foreground/30">404</div>
         <h1 className="text-xl font-semibold tracking-tight">
-          Restaurant not found
+          Organization not found
         </h1>
         <p className="text-sm text-muted-foreground">
           This loyalty program link doesn't exist or may have been removed.
-          Check with the restaurant for the correct QR code.
+          Check with the organization for the correct QR code.
         </p>
         <Link
           href="/"

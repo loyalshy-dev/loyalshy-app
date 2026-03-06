@@ -3,10 +3,10 @@ import { analyticsQueue } from "./queues"
 import { createDb } from "./db"
 import type { updateWalletPassTask } from "./update-wallet-pass"
 
-// ─── Freeze Expired Programs — Daily CRON at 1:30 AM UTC ───
+// ─── Archive Expired Templates — Daily CRON at 1:30 AM UTC ───
 
-export const freezeExpiredProgramsTask = schedules.task({
-  id: "freeze-expired-programs",
+export const archiveExpiredTemplatesTask = schedules.task({
+  id: "archive-expired-templates",
   cron: "30 1 * * *",
   queue: analyticsQueue,
   run: async () => {
@@ -15,8 +15,8 @@ export const freezeExpiredProgramsTask = schedules.task({
     try {
       const now = new Date()
 
-      // Find programs that are ACTIVE but have passed their end date
-      const expiredPrograms = await db.loyaltyProgram.findMany({
+      // Find templates that are ACTIVE but have passed their end date
+      const expiredTemplates = await db.passTemplate.findMany({
         where: {
           status: "ACTIVE",
           endsAt: { lt: now, not: null },
@@ -24,70 +24,70 @@ export const freezeExpiredProgramsTask = schedules.task({
         select: {
           id: true,
           name: true,
-          restaurantId: true,
+          organizationId: true,
         },
       })
 
-      if (expiredPrograms.length === 0) {
-        return { programsArchived: 0, enrollmentsFrozen: 0, walletUpdatesTriggered: 0 }
+      if (expiredTemplates.length === 0) {
+        return { templatesArchived: 0, passInstancesFrozen: 0, walletUpdatesTriggered: 0 }
       }
 
-      let totalEnrollmentsFrozen = 0
+      let totalPassInstancesFrozen = 0
       let totalWalletUpdatesTriggered = 0
 
-      for (const program of expiredPrograms) {
-        // Archive the program
-        await db.loyaltyProgram.update({
-          where: { id: program.id },
+      for (const template of expiredTemplates) {
+        // Archive the template
+        await db.passTemplate.update({
+          where: { id: template.id },
           data: { status: "ARCHIVED" },
         })
 
-        // Freeze all ACTIVE enrollments for this program
-        const frozenResult = await db.enrollment.updateMany({
+        // Suspend all ACTIVE pass instances for this template
+        const suspendedResult = await db.passInstance.updateMany({
           where: {
-            loyaltyProgramId: program.id,
+            passTemplateId: template.id,
             status: "ACTIVE",
           },
           data: {
-            status: "FROZEN",
-            frozenAt: now,
+            status: "SUSPENDED",
+            suspendedAt: now,
           },
         })
 
-        totalEnrollmentsFrozen += frozenResult.count
+        totalPassInstancesFrozen += suspendedResult.count
 
-        // Find frozen enrollments that have wallet passes so we can update them
-        const enrollmentsWithPasses = await db.enrollment.findMany({
+        // Find suspended pass instances that have wallet passes so we can update them
+        const passInstancesWithPasses = await db.passInstance.findMany({
           where: {
-            loyaltyProgramId: program.id,
-            status: "FROZEN",
-            walletPassType: { not: "NONE" },
+            passTemplateId: template.id,
+            status: "SUSPENDED",
+            walletProvider: { not: "NONE" },
           },
           select: { id: true },
         })
 
-        // Batch trigger wallet pass updates for frozen enrollments
-        if (enrollmentsWithPasses.length > 0) {
+        // Batch trigger wallet pass updates for suspended pass instances
+        if (passInstancesWithPasses.length > 0) {
           const BATCH_SIZE = 50
-          for (let i = 0; i < enrollmentsWithPasses.length; i += BATCH_SIZE) {
-            const batch = enrollmentsWithPasses.slice(i, i + BATCH_SIZE)
+          for (let i = 0; i < passInstancesWithPasses.length; i += BATCH_SIZE) {
+            const batch = passInstancesWithPasses.slice(i, i + BATCH_SIZE)
             await tasks.batchTrigger<typeof updateWalletPassTask>(
               "update-wallet-pass",
               batch.map((e) => ({
                 payload: {
-                  enrollmentId: e.id,
-                  updateType: "ENROLLMENT_FROZEN" as const,
+                  passInstanceId: e.id,
+                  updateType: "PASS_INSTANCE_SUSPENDED" as const,
                 },
               }))
             )
           }
-          totalWalletUpdatesTriggered += enrollmentsWithPasses.length
+          totalWalletUpdatesTriggered += passInstancesWithPasses.length
         }
       }
 
       return {
-        programsArchived: expiredPrograms.length,
-        enrollmentsFrozen: totalEnrollmentsFrozen,
+        templatesArchived: expiredTemplates.length,
+        passInstancesFrozen: totalPassInstancesFrozen,
         walletUpdatesTriggered: totalWalletUpdatesTriggered,
       }
     } finally {

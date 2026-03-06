@@ -17,7 +17,7 @@ type DashboardShellProps = {
     email: string
     image: string | null
   }
-  restaurant: {
+  organization: {
     name: string
     logo: string | null
     subscriptionStatus: string
@@ -29,7 +29,7 @@ type DashboardShellProps = {
 
 export function DashboardShell({
   user,
-  restaurant,
+  organization,
   orgRole,
   children,
 }: DashboardShellProps) {
@@ -48,28 +48,28 @@ export function DashboardShell({
   }
 
   // Compute trial days remaining
-  const trialDaysRemaining = restaurant?.trialEndsAt
-    ? Math.max(0, Math.ceil((new Date(restaurant.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  const trialDaysRemaining = organization?.trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(organization.trialEndsAt!).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : null
 
   const showTrialBanner = !trialBannerDismissed &&
-    restaurant?.subscriptionStatus === "TRIALING" &&
+    organization?.subscriptionStatus === "TRIALING" &&
     trialDaysRemaining !== null &&
     trialDaysRemaining <= 7
 
   const showPastDueBanner = !pastDueBannerDismissed &&
-    restaurant?.subscriptionStatus === "PAST_DUE"
+    organization?.subscriptionStatus === "PAST_DUE"
 
   function dismissTrialBanner() {
     setTrialBannerDismissed(true)
     try { sessionStorage.setItem("loyalshy_trial_banner_dismissed", "1") } catch {}
   }
 
-  const showSubscriptionGate = restaurant?.subscriptionStatus === "CANCELED"
+  const showSubscriptionGate = organization?.subscriptionStatus === "CANCELED"
 
   return (
     <SidebarProvider>
-      <AppSidebar user={user} restaurant={restaurant} orgRole={orgRole} />
+      <AppSidebar user={user} organization={organization} orgRole={orgRole} />
 
       <SidebarInset className="min-w-0">
         <Topbar

@@ -34,10 +34,10 @@ export const processStripeWebhookTask = task({
         case "customer.subscription.created":
         case "customer.subscription.updated": {
           const subscription = payload.data as Record<string, unknown>
-          const restaurantId = (subscription.metadata as Record<string, string>)?.loyalshy_restaurant_id
+          const organizationId = (subscription.metadata as Record<string, string>)?.organization_id
 
-          if (!restaurantId) {
-            return { processed: false, reason: "no_restaurant_id" }
+          if (!organizationId) {
+            return { processed: false, reason: "no_organization_id" }
           }
 
           const items = subscription.items as { data: Array<{ price: { lookup_key?: string } }> }
@@ -45,8 +45,8 @@ export const processStripeWebhookTask = task({
           const plan = lookupKeyToPlan(lookupKey)
           const status = mapSubscriptionStatus(subscription.status as string)
 
-          await db.restaurant.update({
-            where: { id: restaurantId },
+          await db.organization.update({
+            where: { id: organizationId },
             data: {
               stripeSubscriptionId: subscription.id as string,
               stripeCustomerId: subscription.customer as string,
@@ -64,7 +64,7 @@ export const processStripeWebhookTask = task({
         case "customer.subscription.deleted": {
           const subscription = payload.data as Record<string, unknown>
 
-          const restaurant = await db.restaurant.findFirst({
+          const organization = await db.organization.findFirst({
             where: {
               OR: [
                 { stripeSubscriptionId: subscription.id as string },
@@ -73,12 +73,12 @@ export const processStripeWebhookTask = task({
             },
           })
 
-          if (!restaurant) {
-            return { processed: false, reason: "restaurant_not_found" }
+          if (!organization) {
+            return { processed: false, reason: "organization_not_found" }
           }
 
-          await db.restaurant.update({
-            where: { id: restaurant.id },
+          await db.organization.update({
+            where: { id: organization.id },
             data: {
               subscriptionStatus: "CANCELED" as never,
               plan: "STARTER" as never,
@@ -97,7 +97,7 @@ export const processStripeWebhookTask = task({
             return { processed: false, reason: "no_subscription" }
           }
 
-          const restaurant = await db.restaurant.findFirst({
+          const organization = await db.organization.findFirst({
             where: {
               OR: [
                 { stripeSubscriptionId: subscriptionId },
@@ -106,9 +106,9 @@ export const processStripeWebhookTask = task({
             },
           })
 
-          if (restaurant) {
-            await db.restaurant.update({
-              where: { id: restaurant.id },
+          if (organization) {
+            await db.organization.update({
+              where: { id: organization.id },
               data: { subscriptionStatus: "PAST_DUE" as never },
             })
           }
@@ -123,7 +123,7 @@ export const processStripeWebhookTask = task({
             return { processed: false, reason: "no_subscription" }
           }
 
-          const restaurant = await db.restaurant.findFirst({
+          const organization = await db.organization.findFirst({
             where: {
               OR: [
                 { stripeSubscriptionId: subscriptionId },
@@ -132,9 +132,9 @@ export const processStripeWebhookTask = task({
             },
           })
 
-          if (restaurant && restaurant.subscriptionStatus === "PAST_DUE") {
-            await db.restaurant.update({
-              where: { id: restaurant.id },
+          if (organization && organization.subscriptionStatus === "PAST_DUE") {
+            await db.organization.update({
+              where: { id: organization.id },
               data: { subscriptionStatus: "ACTIVE" as never },
             })
           }

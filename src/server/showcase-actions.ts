@@ -12,7 +12,7 @@ import type { PatternStyle } from "@/lib/wallet/card-design"
 const MAX_SHOWCASE_CARDS = 5
 
 const metadataSchema = z.object({
-  restaurantName: z.string().min(1).max(100),
+  organizationName: z.string().min(1).max(100),
   customerName: z.string().min(1).max(100),
   memberSince: z.string().min(1).max(50),
   // Stamp/Points fields

@@ -20,7 +20,7 @@ export default function DashboardPageError({
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Your restaurant at a glance.
+          Your organization at a glance.
         </p>
       </div>
 

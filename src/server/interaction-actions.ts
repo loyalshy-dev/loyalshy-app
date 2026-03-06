@@ -1,0 +1,528 @@
+"use server"
+
+/**
+ * interaction-actions.ts
+ *
+ * Facade module adapting stamp-actions and implementing coupon/membership/
+ * points/prepaid interaction actions for register-visit-dialog.tsx.
+ *
+ * InteractionSearchResult aliases StampSearchResult so both naming
+ * conventions remain compatible.
+ */
+
+import { revalidatePath } from "next/cache"
+import { db } from "@/lib/db"
+import {
+  assertAuthenticated,
+  getOrganizationForUser,
+  assertOrganizationAccess,
+} from "@/lib/dal"
+import { parseCouponConfig, parsePointsConfig, parsePrepaidConfig, parseMinigameConfig, formatCouponValue, weightedRandomPrize } from "@/lib/pass-config"
+
+// NOTE: stamp-actions exports (searchContactsForStamp, registerStamp, lookupPassInstanceByWalletPassId)
+// must be imported directly from "@/server/stamp-actions" — Turbopack does not support
+// re-exporting server actions across "use server" module boundaries.
+
+// ─── Shared helper ────────────────────────────────────────────
+
+async function fetchPassInstanceForInteraction(passInstanceId: string) {
+  await assertAuthenticated()
+  const organization = await getOrganizationForUser()
+  if (!organization) return { error: "No organization found", organization: null, passInstance: null }
+  await assertOrganizationAccess(organization.id)
+
+  const passInstance = await db.passInstance.findUnique({
+    where: { id: passInstanceId },
+    include: {
+      contact: {
+        select: {
+          id: true,
+          organizationId: true,
+          deletedAt: true,
+          totalInteractions: true,
+        },
+      },
+      passTemplate: {
+        select: {
+          id: true,
+          name: true,
+          passType: true,
+          config: true,
+          status: true,
+          endsAt: true,
+        },
+      },
+    },
+  })
+
+  if (!passInstance) return { error: "Pass instance not found", organization: null, passInstance: null }
+  if (passInstance.contact.organizationId !== organization.id) return { error: "Pass instance not found", organization: null, passInstance: null }
+  if (passInstance.contact.deletedAt) return { error: "Contact has been deleted", organization: null, passInstance: null }
+  if (passInstance.status !== "ACTIVE") return { error: `This pass is ${passInstance.status.toLowerCase()}`, organization: null, passInstance: null }
+  if (passInstance.passTemplate.status !== "ACTIVE") return { error: "This pass template is no longer active", organization: null, passInstance: null }
+  if (passInstance.passTemplate.endsAt && passInstance.passTemplate.endsAt < new Date()) {
+    return { error: "This pass template has expired", organization: null, passInstance: null }
+  }
+
+  return { error: null, organization, passInstance }
+}
+
+function dispatchWalletUpdate(passInstanceId: string, walletProvider: string, updateType: string) {
+  if (walletProvider === "NONE") return
+  if (process.env.TRIGGER_SECRET_KEY) {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) => tasks.trigger("update-wallet-pass", { passInstanceId, updateType }))
+      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+  } else if (walletProvider === "GOOGLE") {
+    import("@/lib/wallet/google/update-pass")
+      .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(passInstanceId))
+      .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+  }
+}
+
+// ─── Coupon Redemption ───────────────────────────────────────
+
+export type RedeemCouponResult = {
+  success: boolean
+  error?: string
+  templateName?: string
+  discountText?: string
+  selectedPrize?: string
+  redemptionLimit?: "single" | "unlimited"
+}
+
+export async function redeemCoupon(
+  passInstanceId: string
+): Promise<RedeemCouponResult> {
+  const session = await assertAuthenticated()
+  const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
+
+  if (error || !organization || !passInstance) {
+    return { success: false, error: error ?? "Unknown error" }
+  }
+
+  if (passInstance.passTemplate.passType !== "COUPON") {
+    return { success: false, error: "This pass is not a coupon" }
+  }
+
+  const config = parseCouponConfig(passInstance.passTemplate.config)
+  const discountText = config ? formatCouponValue(config) : "Coupon"
+  const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
+  const isRedeemed = (instanceData.redeemed as boolean) ?? false
+
+  if (isRedeemed) {
+    return { success: false, error: "This coupon has already been redeemed" }
+  }
+
+  // Pick a prize if minigame is configured
+  let selectedPrize: string | undefined
+  const mgConfig = parseMinigameConfig(passInstance.passTemplate.config)
+  if (mgConfig?.enabled && mgConfig.prizes?.length) {
+    selectedPrize = weightedRandomPrize(mgConfig.prizes)
+  }
+
+  const isUnlimited = config?.redemptionLimit === "unlimited"
+
+  await db.$transaction(async (tx) => {
+    // Mark coupon as redeemed in data JSON
+    await tx.passInstance.update({
+      where: { id: passInstance.id },
+      data: {
+        data: { ...instanceData, redeemed: true, redeemedAt: new Date().toISOString() },
+        status: isUnlimited ? "ACTIVE" : "COMPLETED",
+      },
+    })
+
+    // Log interaction
+    await tx.interaction.create({
+      data: {
+        contactId: passInstance.contact.id,
+        organizationId: organization.id,
+        passTemplateId: passInstance.passTemplate.id,
+        passInstanceId: passInstance.id,
+        performedById: session.user.id,
+        type: "COUPON_REDEEM",
+        metadata: { discountText, selectedPrize },
+      },
+    })
+
+    // Update contact counters
+    await tx.contact.update({
+      where: { id: passInstance.contact.id },
+      data: {
+        totalInteractions: passInstance.contact.totalInteractions + 1,
+        lastInteractionAt: new Date(),
+      },
+    })
+
+    // For unlimited coupons, reissue a fresh pass instance
+    if (isUnlimited) {
+      await tx.passInstance.create({
+        data: {
+          contactId: passInstance.contact.id,
+          passTemplateId: passInstance.passTemplate.id,
+          walletProvider: "NONE",
+          status: "ACTIVE",
+          data: { redeemed: false },
+        },
+      })
+    }
+  })
+
+  dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "COUPON_REDEEM")
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+
+  return {
+    success: true,
+    templateName: passInstance.passTemplate.name,
+    discountText,
+    selectedPrize,
+    redemptionLimit: isUnlimited ? "unlimited" : "single",
+  }
+}
+
+// ─── Membership Check-in ─────────────────────────────────────
+
+export type CheckInResult = {
+  success: boolean
+  error?: string
+  templateName?: string
+  totalCheckIns?: number
+}
+
+export async function checkInMember(
+  passInstanceId: string
+): Promise<CheckInResult> {
+  const session = await assertAuthenticated()
+  const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
+
+  if (error || !organization || !passInstance) {
+    return { success: false, error: error ?? "Unknown error" }
+  }
+
+  if (passInstance.passTemplate.passType !== "MEMBERSHIP") {
+    return { success: false, error: "This pass is not a membership" }
+  }
+
+  const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
+  const totalCheckIns = ((instanceData.totalCheckIns as number) ?? 0) + 1
+
+  await db.$transaction(async (tx) => {
+    await tx.passInstance.update({
+      where: { id: passInstance.id },
+      data: {
+        data: {
+          ...instanceData,
+          totalCheckIns,
+          lastCheckInAt: new Date().toISOString(),
+        },
+      },
+    })
+
+    await tx.interaction.create({
+      data: {
+        contactId: passInstance.contact.id,
+        organizationId: organization.id,
+        passTemplateId: passInstance.passTemplate.id,
+        passInstanceId: passInstance.id,
+        performedById: session.user.id,
+        type: "CHECK_IN",
+        metadata: { totalCheckIns },
+      },
+    })
+
+    await tx.contact.update({
+      where: { id: passInstance.contact.id },
+      data: {
+        totalInteractions: passInstance.contact.totalInteractions + 1,
+        lastInteractionAt: new Date(),
+      },
+    })
+  })
+
+  dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "CHECK_IN")
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+
+  return {
+    success: true,
+    templateName: passInstance.passTemplate.name,
+    totalCheckIns,
+  }
+}
+
+// ─── Points Earn ─────────────────────────────────────────────
+
+export type EarnPointsResult = {
+  success: boolean
+  error?: string
+  templateName?: string
+  pointsEarned?: number
+  newBalance?: number
+}
+
+export async function earnPoints(
+  passInstanceId: string
+): Promise<EarnPointsResult> {
+  const session = await assertAuthenticated()
+  const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
+
+  if (error || !organization || !passInstance) {
+    return { success: false, error: error ?? "Unknown error" }
+  }
+
+  if (passInstance.passTemplate.passType !== "POINTS") {
+    return { success: false, error: "This pass is not a points card" }
+  }
+
+  const pConfig = parsePointsConfig(passInstance.passTemplate.config)
+  const pointsPerVisit = pConfig?.pointsPerVisit ?? 1
+
+  const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
+  const oldBalance = (instanceData.pointsBalance as number) ?? 0
+  const totalPointsEarned = (instanceData.totalPointsEarned as number) ?? 0
+  const newBalance = oldBalance + pointsPerVisit
+
+  await db.$transaction(async (tx) => {
+    await tx.passInstance.update({
+      where: { id: passInstance.id },
+      data: {
+        data: {
+          ...instanceData,
+          pointsBalance: newBalance,
+          totalPointsEarned: totalPointsEarned + pointsPerVisit,
+        },
+      },
+    })
+
+    await tx.interaction.create({
+      data: {
+        contactId: passInstance.contact.id,
+        organizationId: organization.id,
+        passTemplateId: passInstance.passTemplate.id,
+        passInstanceId: passInstance.id,
+        performedById: session.user.id,
+        type: "POINTS_EARN",
+        metadata: { pointsEarned: pointsPerVisit, newBalance },
+      },
+    })
+
+    await tx.contact.update({
+      where: { id: passInstance.contact.id },
+      data: {
+        totalInteractions: passInstance.contact.totalInteractions + 1,
+        lastInteractionAt: new Date(),
+      },
+    })
+  })
+
+  dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "POINTS_EARN")
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+
+  return {
+    success: true,
+    templateName: passInstance.passTemplate.name,
+    pointsEarned: pointsPerVisit,
+    newBalance,
+  }
+}
+
+// ─── Points Redeem ───────────────────────────────────────────
+
+export type RedeemPointsResult = {
+  success: boolean
+  error?: string
+  templateName?: string
+  itemName?: string
+  pointsSpent?: number
+  newBalance?: number
+}
+
+export async function redeemPoints(
+  passInstanceId: string,
+  catalogItemId: string
+): Promise<RedeemPointsResult> {
+  const session = await assertAuthenticated()
+  const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
+
+  if (error || !organization || !passInstance) {
+    return { success: false, error: error ?? "Unknown error" }
+  }
+
+  if (passInstance.passTemplate.passType !== "POINTS") {
+    return { success: false, error: "This pass is not a points card" }
+  }
+
+  const pConfig = parsePointsConfig(passInstance.passTemplate.config)
+  const catalogItem = pConfig?.catalog.find((item) => item.id === catalogItemId)
+  if (!catalogItem) {
+    return { success: false, error: "Reward not found in catalog" }
+  }
+
+  const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
+  const currentBalance = (instanceData.pointsBalance as number) ?? 0
+  const totalPointsSpent = (instanceData.totalPointsSpent as number) ?? 0
+
+  if (currentBalance < catalogItem.pointsCost) {
+    return { success: false, error: `Not enough points. Need ${catalogItem.pointsCost}, have ${currentBalance}` }
+  }
+
+  const newBalance = currentBalance - catalogItem.pointsCost
+
+  await db.$transaction(async (tx) => {
+    await tx.passInstance.update({
+      where: { id: passInstance.id },
+      data: {
+        data: {
+          ...instanceData,
+          pointsBalance: newBalance,
+          totalPointsSpent: totalPointsSpent + catalogItem.pointsCost,
+        },
+      },
+    })
+
+    await tx.interaction.create({
+      data: {
+        contactId: passInstance.contact.id,
+        organizationId: organization.id,
+        passTemplateId: passInstance.passTemplate.id,
+        passInstanceId: passInstance.id,
+        performedById: session.user.id,
+        type: "POINTS_REDEEM",
+        metadata: { itemId: catalogItemId, itemName: catalogItem.name, pointsSpent: catalogItem.pointsCost, newBalance },
+      },
+    })
+
+    await tx.reward.create({
+      data: {
+        contactId: passInstance.contact.id,
+        organizationId: organization.id,
+        passTemplateId: passInstance.passTemplate.id,
+        passInstanceId: passInstance.id,
+        status: "REDEEMED",
+        description: catalogItem.name,
+        revealedAt: new Date(),
+        redeemedAt: new Date(),
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+        pointsCost: catalogItem.pointsCost,
+      },
+    })
+
+    await tx.contact.update({
+      where: { id: passInstance.contact.id },
+      data: {
+        totalInteractions: passInstance.contact.totalInteractions + 1,
+        lastInteractionAt: new Date(),
+      },
+    })
+  })
+
+  dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "POINTS_REDEEM")
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+
+  return {
+    success: true,
+    templateName: passInstance.passTemplate.name,
+    itemName: catalogItem.name,
+    pointsSpent: catalogItem.pointsCost,
+    newBalance,
+  }
+}
+
+// ─── Prepaid Use ─────────────────────────────────────────────
+
+export type UsePrepaidResult = {
+  success: boolean
+  error?: string
+  templateName?: string
+  remainingUses?: number
+  totalUses?: number
+  useLabel?: string
+  isDepleted?: boolean
+}
+
+export async function usePrepaid(
+  passInstanceId: string
+): Promise<UsePrepaidResult> {
+  const session = await assertAuthenticated()
+  const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
+
+  if (error || !organization || !passInstance) {
+    return { success: false, error: error ?? "Unknown error" }
+  }
+
+  if (passInstance.passTemplate.passType !== "PREPAID") {
+    return { success: false, error: "This pass is not a prepaid pass" }
+  }
+
+  const prepaidConfig = parsePrepaidConfig(passInstance.passTemplate.config)
+  const totalUses = prepaidConfig?.totalUses ?? 0
+  const useLabel = prepaidConfig?.useLabel ?? "use"
+
+  const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
+  const currentRemaining = (instanceData.remainingUses as number) ?? 0
+  const totalUsed = (instanceData.totalUsed as number) ?? 0
+
+  if (currentRemaining <= 0) {
+    return { success: false, error: "This pass has no remaining uses" }
+  }
+
+  const newRemaining = currentRemaining - 1
+  const isDepleted = newRemaining <= 0
+
+  await db.$transaction(async (tx) => {
+    await tx.passInstance.update({
+      where: { id: passInstance.id },
+      data: {
+        data: {
+          ...instanceData,
+          remainingUses: newRemaining,
+          totalUsed: totalUsed + 1,
+          lastUsedAt: new Date().toISOString(),
+        },
+        status: isDepleted ? "COMPLETED" : "ACTIVE",
+      },
+    })
+
+    await tx.interaction.create({
+      data: {
+        contactId: passInstance.contact.id,
+        organizationId: organization.id,
+        passTemplateId: passInstance.passTemplate.id,
+        passInstanceId: passInstance.id,
+        performedById: session.user.id,
+        type: "PREPAID_USE",
+        metadata: { remainingUses: newRemaining, totalUsed: totalUsed + 1 },
+      },
+    })
+
+    await tx.contact.update({
+      where: { id: passInstance.contact.id },
+      data: {
+        totalInteractions: passInstance.contact.totalInteractions + 1,
+        lastInteractionAt: new Date(),
+      },
+    })
+  })
+
+  dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "PREPAID_USE")
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+
+  return {
+    success: true,
+    templateName: passInstance.passTemplate.name,
+    remainingUses: newRemaining,
+    totalUses,
+    useLabel,
+    isDepleted,
+  }
+}

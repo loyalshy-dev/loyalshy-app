@@ -43,16 +43,16 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  getCustomerDetail,
-  updateCustomer,
-  deleteCustomer,
-  type CustomerDetail,
-} from "@/server/customer-actions"
+  getContactDetail,
+  updateContact,
+  deleteContact,
+  type ContactDetail,
+} from "@/server/contact-actions"
 import { redeemReward } from "@/server/reward-actions"
-import type { EnrollmentDetail } from "@/types/enrollment"
+import type { PassInstanceDetail } from "@/types/pass-instance"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
-import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText, parsePrepaidConfig } from "@/lib/program-config"
+import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText, parsePrepaidConfig } from "@/lib/pass-config"
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -74,7 +74,7 @@ function getInitials(name: string): string {
     .toUpperCase()
 }
 
-const enrollmentStatusConfig: Record<
+const passInstanceStatusConfig: Record<
   string,
   { label: string; className: string }
 > = {
@@ -122,7 +122,7 @@ const rewardStatusConfig: Record<
   },
 }
 
-const visitTypeIcons: Record<string, typeof Stamp> = {
+const passTypeIcons: Record<string, typeof Stamp> = {
   STAMP_CARD: Stamp,
   COUPON: Ticket,
   MEMBERSHIP: Crown,
@@ -130,9 +130,9 @@ const visitTypeIcons: Record<string, typeof Stamp> = {
   PREPAID: CreditCard,
 }
 
-function buildWalletDesign(enrollment: EnrollmentDetail): WalletPassDesign | null {
-  if (!enrollment.cardDesign) return null
-  const cd = enrollment.cardDesign
+function buildWalletDesign(passInstance: PassInstanceDetail): WalletPassDesign | null {
+  if (!passInstance.passDesign) return null
+  const cd = passInstance.passDesign
   const ps = cd.patternStyle
   const sf = parseStripFilters(cd.editorConfig)
   const sg = sf.useStampGrid || ps === "STAMP_GRID"
@@ -158,92 +158,105 @@ function buildWalletDesign(enrollment: EnrollmentDetail): WalletPassDesign | nul
   }
 }
 
-function getRendererProps(enrollment: EnrollmentDetail) {
-  if (enrollment.programType === "POINTS") {
-    const config = parsePointsConfig(enrollment.programConfig)
+function getRendererProps(passInstance: PassInstanceDetail) {
+  const data = passInstance.data as Record<string, unknown> | null ?? {}
+  if (passInstance.passType === "POINTS") {
+    const config = parsePointsConfig(passInstance.templateConfig)
     const cheapest = config ? getCheapestCatalogItem(config) : null
+    const balance = (data as { pointsBalance?: number }).pointsBalance ?? 0
     return {
-      currentVisits: enrollment.pointsBalance ?? 0,
+      currentVisits: balance,
       totalVisits: cheapest?.pointsCost ?? 100,
-      rewardDescription: cheapest?.name ?? enrollment.rewardDescription,
+      rewardDescription: cheapest?.name ?? "",
     }
   }
-  if (enrollment.programType === "PREPAID") {
-    const config = parsePrepaidConfig(enrollment.programConfig)
+  if (passInstance.passType === "PREPAID") {
+    const config = parsePrepaidConfig(passInstance.templateConfig)
+    const remaining = (data as { remainingUses?: number }).remainingUses ?? 0
     return {
-      currentVisits: enrollment.totalVisits,
+      currentVisits: 0,
       totalVisits: config?.totalUses ?? 0,
-      rewardDescription: enrollment.rewardDescription,
-      remainingUses: enrollment.remainingUses ?? 0,
+      rewardDescription: "",
+      remainingUses: remaining,
       totalUses: config?.totalUses ?? 0,
       prepaidValidUntil: config?.validUntil ?? undefined,
     }
   }
+  const cycleData = data as { currentCycleStamps?: number }
+  const stampConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
+  const currentCycleVisits = cycleData.currentCycleStamps ?? 0
+  const visitsRequired = (stampConfig as { stampsRequired?: number }).stampsRequired ?? 10
+  const rewardDescription = (stampConfig as { rewardDescription?: string }).rewardDescription ?? ""
   return {
-    currentVisits: enrollment.currentCycleVisits,
-    totalVisits: enrollment.visitsRequired,
-    rewardDescription: getWalletRewardText(enrollment.programConfig, enrollment.rewardDescription),
+    currentVisits: currentCycleVisits,
+    totalVisits: visitsRequired,
+    rewardDescription: getWalletRewardText(passInstance.templateConfig, rewardDescription),
   }
 }
 
-function getProgressText(enrollment: EnrollmentDetail): string {
-  switch (enrollment.programType) {
+function getProgressText(passInstance: PassInstanceDetail): string {
+  const data = passInstance.data as Record<string, unknown> | null ?? {}
+  const stampConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
+  switch (passInstance.passType) {
     case "COUPON":
-      return enrollment.status === "COMPLETED" ? "Coupon redeemed" : "Ready to redeem"
+      return passInstance.status === "COMPLETED" ? "Coupon redeemed" : "Ready to redeem"
     case "MEMBERSHIP":
-      return enrollment.status === "SUSPENDED" ? "Suspended" : enrollment.status === "EXPIRED" ? "Expired" : "Active member"
+      return passInstance.status === "SUSPENDED" ? "Suspended" : passInstance.status === "EXPIRED" ? "Expired" : "Active member"
     case "POINTS": {
-      const balance = enrollment.pointsBalance ?? 0
+      const balance = (data as { pointsBalance?: number }).pointsBalance ?? 0
       return `${balance} pts`
     }
     case "PREPAID": {
-      const remaining = enrollment.remainingUses ?? 0
-      const config = parsePrepaidConfig(enrollment.programConfig)
+      const remaining = (data as { remainingUses?: number }).remainingUses ?? 0
+      const config = parsePrepaidConfig(passInstance.templateConfig)
       const total = config?.totalUses ?? 0
       return `${remaining} / ${total} ${config?.useLabel ?? "use"}s remaining`
     }
     default: {
-      const remaining = enrollment.visitsRequired - enrollment.currentCycleVisits
-      return `${remaining} visit${remaining !== 1 ? "s" : ""} until ${getWalletRewardText(enrollment.programConfig, enrollment.rewardDescription)}`
+      const currentCycleVisits = (data as { currentCycleStamps?: number }).currentCycleStamps ?? 0
+      const visitsRequired = (stampConfig as { stampsRequired?: number }).stampsRequired ?? 10
+      const rewardDescription = (stampConfig as { rewardDescription?: string }).rewardDescription ?? ""
+      const remaining = visitsRequired - currentCycleVisits
+      return `${remaining} visit${remaining !== 1 ? "s" : ""} until ${getWalletRewardText(passInstance.templateConfig, rewardDescription)}`
     }
   }
 }
 
 
-type CustomerDetailSheetProps = {
-  customerId: string | null
+type ContactDetailSheetProps = {
+  contactId: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCustomerDeleted: () => void
-  onRegisterVisit?: (customerId: string, customerName: string) => void
+  onContactDeleted: () => void
+  onRegisterVisit?: (contactId: string, customerName: string) => void
 }
 
-export function CustomerDetailSheet({
-  customerId,
+export function ContactDetailSheet({
+  contactId,
   open,
   onOpenChange,
-  onCustomerDeleted,
+  onContactDeleted,
   onRegisterVisit,
-}: CustomerDetailSheetProps) {
-  const [detail, setDetail] = useState<CustomerDetail | null>(null)
+}: ContactDetailSheetProps) {
+  const [detail, setDetail] = useState<ContactDetail | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, startDelete] = useTransition()
   const [redeemingRewardId, setRedeemingRewardId] = useState<string | null>(null)
-  const [visitProgramFilter, setVisitProgramFilter] = useState<string | null>(null)
-  const [rewardProgramFilter, setRewardProgramFilter] = useState<string | null>(null)
+  const [visitTemplateFilter, setVisitProgramFilter] = useState<string | null>(null)
+  const [rewardTemplateFilter, setRewardProgramFilter] = useState<string | null>(null)
 
-  // Fetch detail when customerId changes
+  // Fetch detail when contactId changes
   useEffect(() => {
-    if (!customerId || !open) {
+    if (!contactId || !open) {
       setDetail(null)
       setIsEditing(false)
       return
     }
 
     setIsLoading(true)
-    getCustomerDetail(customerId)
+    getContactDetail(contactId)
       .then((data) => {
         setDetail(data)
         setIsLoading(false)
@@ -252,17 +265,17 @@ export function CustomerDetailSheet({
         toast.error("Failed to load customer details")
         setIsLoading(false)
       })
-  }, [customerId, open])
+  }, [contactId, open])
 
   function handleDelete() {
-    if (!customerId) return
+    if (!contactId) return
     startDelete(async () => {
-      const result = await deleteCustomer(customerId)
+      const result = await deleteContact(contactId)
       if (result.success) {
-        toast.success("Customer deleted")
+        toast.success("Contact deleted")
         setShowDeleteDialog(false)
         onOpenChange(false)
-        onCustomerDeleted()
+        onContactDeleted()
       } else {
         toast.error(result.error ?? "Failed to delete customer")
       }
@@ -280,49 +293,46 @@ export function CustomerDetailSheet({
       }
       toast.success("Reward redeemed!")
       // Refresh detail
-      if (customerId) {
-        const updated = await getCustomerDetail(customerId)
+      if (contactId) {
+        const updated = await getContactDetail(contactId)
         if (updated) setDetail(updated)
       }
     })()
   }
 
-  // Compute aggregate stats from enrollments
-  const totalRewardsRedeemed = detail?.enrollments.reduce(
-    (sum, e) => sum + e.totalRewardsRedeemed,
-    0
-  ) ?? 0
+  // Compute aggregate stats from pass instances
+  const totalRewardsRedeemed = detail?.rewards.filter((r) => r.status === "REDEEMED").length ?? 0
   const activeRewards = detail?.rewards.filter((r) => r.status === "AVAILABLE").length ?? 0
 
-  // Unique program names for visit filter
-  const visitPrograms = useMemo(() => {
+  // Unique template names for interaction filter
+  const visitTemplates = useMemo(() => {
     if (!detail) return []
-    const names = new Set(detail.visits.map((v) => v.programName))
+    const names = new Set(detail.interactions.map((v) => v.templateName))
     return Array.from(names)
   }, [detail])
 
   const filteredVisits = useMemo(() => {
     if (!detail) return []
-    if (!visitProgramFilter) return detail.visits
-    return detail.visits.filter((v) => v.programName === visitProgramFilter)
-  }, [detail, visitProgramFilter])
+    if (!visitTemplateFilter) return detail.interactions
+    return detail.interactions.filter((v) => v.templateName === visitTemplateFilter)
+  }, [detail, visitTemplateFilter])
 
-  // Unique program names for reward filter
-  const rewardPrograms = useMemo(() => {
+  // Unique template names for reward filter
+  const rewardTemplates = useMemo(() => {
     if (!detail) return []
-    const names = new Set(detail.rewards.map((r) => r.programName))
+    const names = new Set(detail.rewards.map((r) => r.templateName))
     return Array.from(names)
   }, [detail])
 
   const filteredRewards = useMemo(() => {
     if (!detail) return []
-    if (!rewardProgramFilter) return detail.rewards
-    return detail.rewards.filter((r) => r.programName === rewardProgramFilter)
-  }, [detail, rewardProgramFilter])
+    if (!rewardTemplateFilter) return detail.rewards
+    return detail.rewards.filter((r) => r.templateName === rewardTemplateFilter)
+  }, [detail, rewardTemplateFilter])
 
-  // Primary enrollment type for context-aware button
-  const primaryEnrollment = detail?.enrollments.find((e) => e.status === "ACTIVE") ?? detail?.enrollments[0]
-  const primaryType = primaryEnrollment?.programType
+  // Primary pass instance type for context-aware button
+  const primaryPassInstance = detail?.passInstances.find((e) => e.status === "ACTIVE") ?? detail?.passInstances[0]
+  const primaryPassType = primaryPassInstance?.passType
 
   return (
     <>
@@ -331,7 +341,7 @@ export function CustomerDetailSheet({
           {isLoading ? (
             <>
               <SheetHeader className="sr-only">
-                <SheetTitle>Customer details</SheetTitle>
+                <SheetTitle>Contact details</SheetTitle>
               </SheetHeader>
               <DetailSkeleton />
             </>
@@ -372,17 +382,17 @@ export function CustomerDetailSheet({
                   <div className="flex flex-wrap items-center gap-2 mt-3">
                     <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1">
                       <CreditCard className="size-3" />
-                      {detail.enrollments.length} program{detail.enrollments.length !== 1 ? "s" : ""}
+                      {detail.passInstances.length} pass{detail.passInstances.length !== 1 ? "es" : ""}
                     </Badge>
                     <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1">
                       <CalendarDays className="size-3" />
                       Joined {format(new Date(detail.createdAt), "MMM d, yyyy")}
                     </Badge>
-                    {detail.lastVisitAt && (
+                    {detail.lastInteractionAt && (
                       <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1">
                         <Clock className="size-3" />
                         Last visit{" "}
-                        {formatDistanceToNow(new Date(detail.lastVisitAt), {
+                        {formatDistanceToNow(new Date(detail.lastInteractionAt), {
                           addSuffix: true,
                         })}
                       </Badge>
@@ -390,13 +400,13 @@ export function CustomerDetailSheet({
                   </div>
                 </SheetHeader>
 
-                {/* Enrollment Progress Rings */}
-                <EnrollmentProgressSection enrollments={detail.enrollments} />
+                {/* Pass Instance Progress Rings */}
+                <PassInstanceProgressSection passInstances={detail.passInstances} />
 
                 {/* Stats row */}
                 <div className="grid grid-cols-3 gap-4 px-6 pb-4">
                   <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
-                    <p className="text-lg font-semibold tabular-nums">{detail.totalVisits}</p>
+                    <p className="text-lg font-semibold tabular-nums">{detail.totalInteractions}</p>
                     <p className="text-[11px] text-muted-foreground">Total Visits</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
@@ -415,7 +425,7 @@ export function CustomerDetailSheet({
                 <Tabs defaultValue="visits">
                   <TabsList className="mx-6 mt-4 mb-0 h-8 bg-muted/50">
                     <TabsTrigger value="visits" className="text-[12px] h-6 px-3">
-                      Visits ({detail.visits.length})
+                      Visits ({detail.interactions.length})
                     </TabsTrigger>
                     <TabsTrigger value="rewards" className="text-[12px] h-6 px-3">
                       Rewards ({detail.rewards.length})
@@ -425,24 +435,24 @@ export function CustomerDetailSheet({
                   <TabsContent value="visits" className="mt-0">
                     <div className="px-6 pt-3 pb-4">
                       {/* Program filter pills */}
-                      {visitPrograms.length > 1 && (
+                      {visitTemplates.length > 1 && (
                         <div className="flex flex-wrap gap-1.5 mb-3">
                           <button
                             onClick={() => setVisitProgramFilter(null)}
                             className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
-                              !visitProgramFilter
+                              !visitTemplateFilter
                                 ? "bg-brand/10 text-brand border-brand/20"
                                 : "bg-transparent text-muted-foreground border-border hover:border-brand/30"
                             }`}
                           >
                             All
                           </button>
-                          {visitPrograms.map((name) => (
+                          {visitTemplates.map((name) => (
                             <button
                               key={name}
-                              onClick={() => setVisitProgramFilter(visitProgramFilter === name ? null : name)}
+                              onClick={() => setVisitProgramFilter(visitTemplateFilter === name ? null : name)}
                               className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
-                                visitProgramFilter === name
+                                visitTemplateFilter === name
                                   ? "bg-brand/10 text-brand border-brand/20"
                                   : "bg-transparent text-muted-foreground border-border hover:border-brand/30"
                               }`}
@@ -453,7 +463,7 @@ export function CustomerDetailSheet({
                         </div>
                       )}
 
-                      {detail.visits.length === 0 ? (
+                      {detail.interactions.length === 0 ? (
                         <p className="text-[13px] text-muted-foreground text-center py-8">
                           No visits recorded yet.
                         </p>
@@ -464,7 +474,7 @@ export function CustomerDetailSheet({
                       ) : (
                         <div className="space-y-0">
                           {filteredVisits.map((visit) => {
-                            const VisitIcon = visitTypeIcons[visit.programType] ?? Stamp
+                            const VisitIcon = passTypeIcons[visit.passType] ?? Stamp
                             return (
                             <div
                               key={visit.id}
@@ -475,10 +485,10 @@ export function CustomerDetailSheet({
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-[13px] font-medium">
-                                  {visit.programType === "MEMBERSHIP" ? "Check-in" : visit.programType === "PREPAID" ? `Use #${visit.visitNumber}` : `Visit #${visit.visitNumber}`}
-                                  {!visitProgramFilter && visitPrograms.length > 1 && (
+                                  {visit.passType === "MEMBERSHIP" ? "Check-in" : visit.passType === "PREPAID" ? "Use pass" : "Visit"}
+                                  {!visitTemplateFilter && visitTemplates.length > 1 && (
                                     <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
-                                      {visit.programName}
+                                      {visit.templateName}
                                     </span>
                                   )}
                                 </p>
@@ -504,24 +514,24 @@ export function CustomerDetailSheet({
                   <TabsContent value="rewards" className="mt-0">
                     <div className="px-6 pt-3 pb-4">
                       {/* Program filter pills */}
-                      {rewardPrograms.length > 1 && (
+                      {rewardTemplates.length > 1 && (
                         <div className="flex flex-wrap gap-1.5 mb-3">
                           <button
                             onClick={() => setRewardProgramFilter(null)}
                             className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
-                              !rewardProgramFilter
+                              !rewardTemplateFilter
                                 ? "bg-brand/10 text-brand border-brand/20"
                                 : "bg-transparent text-muted-foreground border-border hover:border-brand/30"
                             }`}
                           >
                             All
                           </button>
-                          {rewardPrograms.map((name) => (
+                          {rewardTemplates.map((name) => (
                             <button
                               key={name}
-                              onClick={() => setRewardProgramFilter(rewardProgramFilter === name ? null : name)}
+                              onClick={() => setRewardProgramFilter(rewardTemplateFilter === name ? null : name)}
                               className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
-                                rewardProgramFilter === name
+                                rewardTemplateFilter === name
                                   ? "bg-brand/10 text-brand border-brand/20"
                                   : "bg-transparent text-muted-foreground border-border hover:border-brand/30"
                               }`}
@@ -557,9 +567,9 @@ export function CustomerDetailSheet({
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[13px] font-medium">
                                     {reward.description}
-                                    {!rewardProgramFilter && rewardPrograms.length > 1 && (
+                                    {!rewardTemplateFilter && rewardTemplates.length > 1 && (
                                       <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
-                                        {reward.programName}
+                                        {reward.templateName}
                                       </span>
                                     )}
                                   </p>
@@ -605,14 +615,14 @@ export function CustomerDetailSheet({
               {/* Actions — pinned at bottom */}
               <div className="shrink-0 p-4 border-t border-border flex flex-wrap items-center gap-2">
                 {onRegisterVisit && (() => {
-                  const ActionIcon = primaryType === "PREPAID" ? CreditCard
-                    : primaryType === "MEMBERSHIP" ? Crown
-                    : primaryType === "COUPON" ? Ticket
-                    : primaryType === "POINTS" ? Coins
+                  const ActionIcon = primaryPassType === "PREPAID" ? CreditCard
+                    : primaryPassType === "MEMBERSHIP" ? Crown
+                    : primaryPassType === "COUPON" ? Ticket
+                    : primaryPassType === "POINTS" ? Coins
                     : Stamp
-                  const actionLabel = primaryType === "PREPAID" ? "Use Pass"
-                    : primaryType === "MEMBERSHIP" ? "Check In"
-                    : primaryType === "COUPON" ? "Redeem Coupon"
+                  const actionLabel = primaryPassType === "PREPAID" ? "Use Pass"
+                    : primaryPassType === "MEMBERSHIP" ? "Check In"
+                    : primaryPassType === "COUPON" ? "Redeem Coupon"
                     : "Register Visit"
                   return (
                     <Button
@@ -651,10 +661,10 @@ export function CustomerDetailSheet({
           ) : (
             <>
               <SheetHeader className="sr-only">
-                <SheetTitle>Customer details</SheetTitle>
+                <SheetTitle>Contact details</SheetTitle>
               </SheetHeader>
               <div className="flex items-center justify-center flex-1 text-[13px] text-muted-foreground">
-                Customer not found
+                Contact not found
               </div>
             </>
           )}
@@ -663,7 +673,7 @@ export function CustomerDetailSheet({
 
       {/* Edit Dialog */}
       {detail && (
-        <EditCustomerDialog
+        <EditContactDialog
           detail={detail}
           open={isEditing}
           onOpenChange={setIsEditing}
@@ -678,7 +688,7 @@ export function CustomerDetailSheet({
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-base">Delete Customer</DialogTitle>
+            <DialogTitle className="text-base">Delete Contact</DialogTitle>
             <DialogDescription className="text-[13px]">
               Are you sure you want to delete{" "}
               <span className="font-medium text-foreground">{detail?.fullName}</span>?
@@ -715,7 +725,7 @@ export function CustomerDetailSheet({
   )
 }
 
-// ─── Enrollment Cards Section ─────────────────────────────
+// ─── Pass Instance Cards Section ──────────────────────────
 
 const typeLabels: Record<string, string> = {
   STAMP_CARD: "Stamp Card",
@@ -725,14 +735,23 @@ const typeLabels: Record<string, string> = {
   PREPAID: "Prepaid Pass",
 }
 
-function EnrollmentCard({ enrollment }: { enrollment: EnrollmentDetail }) {
-  const TypeIcon = visitTypeIcons[enrollment.programType] ?? Stamp
-  const statusCfg = enrollmentStatusConfig[enrollment.status] ?? enrollmentStatusConfig.CANCELLED
-  const isInactive = enrollment.status !== "ACTIVE"
-  const design = buildWalletDesign(enrollment)
-  const walletLabel = enrollment.walletPassType === "APPLE" ? "Apple Wallet"
-    : enrollment.walletPassType === "GOOGLE" ? "Google Wallet"
+function PassInstanceCard({ passInstance }: { passInstance: PassInstanceDetail }) {
+  const TypeIcon = passTypeIcons[passInstance.passType] ?? Stamp
+  const statusCfg = passInstanceStatusConfig[passInstance.status] ?? passInstanceStatusConfig.CANCELLED
+  const isInactive = passInstance.status !== "ACTIVE"
+  const design = buildWalletDesign(passInstance)
+  const walletLabel = passInstance.walletProvider === "APPLE" ? "Apple Wallet"
+    : passInstance.walletProvider === "GOOGLE" ? "Google Wallet"
     : null
+
+  // Extract type-specific data from the data JSON
+  const data = passInstance.data as Record<string, unknown> | null ?? {}
+  const stampConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
+  const currentCycleVisits = (data as { currentCycleStamps?: number }).currentCycleStamps ?? 0
+  const visitsRequired = (stampConfig as { stampsRequired?: number }).stampsRequired ?? 10
+  const pointsBalance = (data as { pointsBalance?: number }).pointsBalance ?? 0
+  const remainingUses = (data as { remainingUses?: number }).remainingUses ?? 0
+  const membershipData = data as { totalCheckIns?: number }
 
   return (
     <div className={`rounded-lg border border-border p-3 ${isInactive ? "opacity-60" : ""}`}>
@@ -743,9 +762,8 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentDetail }) {
             <WalletPassRenderer
               design={design}
               format="apple"
-              restaurantName=""
-              programName={enrollment.programName}
-              {...getRendererProps(enrollment)}
+              programName={passInstance.templateName}
+              {...getRendererProps(passInstance)}
               compact
               width={72}
               height={96}
@@ -758,7 +776,7 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentDetail }) {
           {/* Header: icon + name + status */}
           <div className="flex items-center gap-1.5 mb-1.5">
             <TypeIcon className="size-3 text-brand shrink-0" />
-            <p className="text-[12px] font-medium truncate flex-1">{enrollment.programName}</p>
+            <p className="text-[12px] font-medium truncate flex-1">{passInstance.templateName}</p>
             <Badge
               variant="outline"
               className={`text-[10px] px-1.5 py-0 shrink-0 ${statusCfg.className}`}
@@ -768,58 +786,57 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentDetail }) {
           </div>
 
           {/* Type-specific content */}
-          {enrollment.programType === "STAMP_CARD" && (
+          {passInstance.passType === "STAMP_CARD" && (
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
                   <div
                     className="h-full rounded-full bg-brand transition-all"
-                    style={{ width: `${Math.min((enrollment.currentCycleVisits / enrollment.visitsRequired) * 100, 100)}%` }}
+                    style={{ width: `${Math.min((currentCycleVisits / visitsRequired) * 100, 100)}%` }}
                   />
                 </div>
                 <span className="text-[11px] tabular-nums font-medium">
-                  {enrollment.currentCycleVisits}/{enrollment.visitsRequired}
+                  {currentCycleVisits}/{visitsRequired}
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                {getProgressText(enrollment)}
+                {getProgressText(passInstance)}
               </p>
             </div>
           )}
 
-          {enrollment.programType === "COUPON" && (
+          {passInstance.passType === "COUPON" && (
             <p className="text-[11px] text-muted-foreground">
-              {enrollment.status === "COMPLETED" ? "Coupon redeemed" : "Ready to redeem"}
+              {passInstance.status === "COMPLETED" ? "Coupon redeemed" : "Ready to redeem"}
             </p>
           )}
 
-          {enrollment.programType === "MEMBERSHIP" && (
+          {passInstance.passType === "MEMBERSHIP" && (
             <div className="space-y-0.5">
-              {enrollment.expiresAt && (
+              {passInstance.expiresAt && (
                 <p className="text-[11px] text-muted-foreground">
-                  {enrollment.status === "EXPIRED" ? "Expired" : "Expires"} {format(new Date(enrollment.expiresAt), "MMM d, yyyy")}
+                  {passInstance.status === "EXPIRED" ? "Expired" : "Expires"} {format(new Date(passInstance.expiresAt), "MMM d, yyyy")}
                 </p>
               )}
-              {enrollment.status === "SUSPENDED" && enrollment.suspendedAt && (
+              {passInstance.status === "SUSPENDED" && passInstance.suspendedAt && (
                 <p className="text-[11px] text-warning">
-                  Suspended {format(new Date(enrollment.suspendedAt), "MMM d, yyyy")}
+                  Suspended {format(new Date(passInstance.suspendedAt), "MMM d, yyyy")}
                 </p>
               )}
-              {enrollment.status === "ACTIVE" && (
+              {passInstance.status === "ACTIVE" && (
                 <p className="text-[11px] text-muted-foreground">
-                  {enrollment.totalVisits} check-in{enrollment.totalVisits !== 1 ? "s" : ""}
+                  {membershipData.totalCheckIns ?? 0} check-in{(membershipData.totalCheckIns ?? 0) !== 1 ? "s" : ""}
                 </p>
               )}
             </div>
           )}
 
-          {enrollment.programType === "POINTS" && (() => {
-            const balance = enrollment.pointsBalance ?? 0
-            const config = parsePointsConfig(enrollment.programConfig)
+          {passInstance.passType === "POINTS" && (() => {
+            const config = parsePointsConfig(passInstance.templateConfig)
             const cheapest = config ? getCheapestCatalogItem(config) : null
             return (
               <div className="space-y-0.5">
-                <p className="text-base font-semibold tabular-nums leading-tight">{balance} <span className="text-[11px] font-normal text-muted-foreground">pts</span></p>
+                <p className="text-base font-semibold tabular-nums leading-tight">{pointsBalance} <span className="text-[11px] font-normal text-muted-foreground">pts</span></p>
                 {cheapest && (
                   <p className="text-[11px] text-muted-foreground">
                     Next: {cheapest.name} ({cheapest.pointsCost} pts)
@@ -829,11 +846,10 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentDetail }) {
             )
           })()}
 
-          {enrollment.programType === "PREPAID" && (() => {
-            const remaining = enrollment.remainingUses ?? 0
-            const config = parsePrepaidConfig(enrollment.programConfig)
+          {passInstance.passType === "PREPAID" && (() => {
+            const config = parsePrepaidConfig(passInstance.templateConfig)
             const total = config?.totalUses ?? 0
-            const pct = total > 0 ? Math.min((remaining / total) * 100, 100) : 0
+            const pct = total > 0 ? Math.min((remainingUses / total) * 100, 100) : 0
             const useLabel = config?.useLabel ?? "use"
             return (
               <div className="space-y-1">
@@ -845,18 +861,18 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentDetail }) {
                     />
                   </div>
                   <span className="text-[11px] tabular-nums font-medium">
-                    {remaining}/{total}
+                    {remainingUses}/{total}
                   </span>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  {remaining} {useLabel}{remaining !== 1 ? "s" : ""} remaining
+                  {remainingUses} {useLabel}{remainingUses !== 1 ? "s" : ""} remaining
                   {config?.validUntil && ` · Expires ${format(new Date(config.validUntil), "MMM d, yyyy")}`}
                 </p>
               </div>
             )
           })()}
 
-          {/* Footer: wallet indicator + enrolled date */}
+          {/* Footer: wallet indicator + issued date */}
           <div className="flex items-center gap-2 mt-1.5">
             {walletLabel && (
               <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
@@ -865,7 +881,7 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentDetail }) {
               </span>
             )}
             <span className="text-[10px] text-muted-foreground">
-              {walletLabel && "·"} Enrolled {format(new Date(enrollment.enrolledAt), "MMM d, yyyy")}
+              {walletLabel && "·"} Enrolled {format(new Date(passInstance.issuedAt), "MMM d, yyyy")}
             </span>
           </div>
         </div>
@@ -874,30 +890,30 @@ function EnrollmentCard({ enrollment }: { enrollment: EnrollmentDetail }) {
   )
 }
 
-function EnrollmentProgressSection({
-  enrollments,
+function PassInstanceProgressSection({
+  passInstances,
 }: {
-  enrollments: EnrollmentDetail[]
+  passInstances: PassInstanceDetail[]
 }) {
-  if (enrollments.length === 0) {
+  if (passInstances.length === 0) {
     return (
       <div className="flex flex-col items-center py-6">
-        <p className="text-[12px] text-muted-foreground">No program enrollments</p>
+        <p className="text-[12px] text-muted-foreground">No pass instances</p>
       </div>
     )
   }
 
-  // Sort: active first, then by enrolled date
-  const sorted = [...enrollments].sort((a, b) => {
+  // Sort: active first, then by issued date
+  const sorted = [...passInstances].sort((a, b) => {
     if (a.status === "ACTIVE" && b.status !== "ACTIVE") return -1
     if (a.status !== "ACTIVE" && b.status === "ACTIVE") return 1
-    return new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime()
+    return new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime()
   })
 
   return (
     <div className="px-6 py-4 space-y-2">
-      {sorted.map((enrollment) => (
-        <EnrollmentCard key={enrollment.enrollmentId} enrollment={enrollment} />
+      {sorted.map((passInstance) => (
+        <PassInstanceCard key={passInstance.passInstanceId} passInstance={passInstance} />
       ))}
     </div>
   )
@@ -905,19 +921,19 @@ function EnrollmentProgressSection({
 
 // ─── Edit Dialog ────────────────────────────────────────────
 
-type EditCustomerDialogProps = {
-  detail: CustomerDetail
+type EditContactDialogProps = {
+  detail: ContactDetail
   open: boolean
   onOpenChange: (open: boolean) => void
   onUpdated: (data: { fullName: string; email: string | null; phone: string | null }) => void
 }
 
-function EditCustomerDialog({
+function EditContactDialog({
   detail,
   open,
   onOpenChange,
   onUpdated,
-}: EditCustomerDialogProps) {
+}: EditContactDialogProps) {
   const [isUpdating, startUpdate] = useTransition()
 
   const {
@@ -936,12 +952,13 @@ function EditCustomerDialog({
   function onSubmit(data: { fullName: string; email: string; phone: string }) {
     startUpdate(async () => {
       const formData = new FormData()
-      formData.set("customerId", detail.id)
+      formData.set("contactId", detail.id)
+
       formData.set("fullName", data.fullName)
       formData.set("email", data.email)
       formData.set("phone", data.phone)
 
-      const result = await updateCustomer(formData)
+      const result = await updateContact(formData)
 
       if (!result.success) {
         if (result.duplicateField) {
@@ -952,7 +969,7 @@ function EditCustomerDialog({
         return
       }
 
-      toast.success("Customer updated")
+      toast.success("Contact updated")
       onUpdated({
         fullName: data.fullName,
         email: data.email || null,
@@ -965,7 +982,7 @@ function EditCustomerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-base">Edit Customer</DialogTitle>
+          <DialogTitle className="text-base">Edit Contact</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">

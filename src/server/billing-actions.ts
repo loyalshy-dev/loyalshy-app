@@ -1,13 +1,13 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { assertRestaurantRole, getRestaurantForUser } from "@/lib/dal"
-import { stripe, PLANS, getPlanLimits, isUpgrade, isActiveSubscription, type PlanId } from "@/lib/stripe"
+import { assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
+import { stripe, PLANS, getPlanLimits, isActiveSubscription, type PlanId } from "@/lib/stripe"
 
 // ─── Types ──────────────────────────────────────────────────
 
 export type BillingData = {
-  restaurant: {
+  organization: {
     id: string
     name: string
     plan: string
@@ -17,9 +17,9 @@ export type BillingData = {
     trialEndsAt: Date | null
   }
   usage: {
-    customers: number
-    customerLimit: number
-    customerPercent: number
+    contacts: number
+    contactLimit: number
+    contactPercent: number
     staff: number
     staffLimit: number
     staffPercent: number
@@ -31,48 +31,47 @@ export type BillingData = {
 
 export async function getBillingData(): Promise<BillingData | { error: string }> {
   try {
-    const restaurant = await getRestaurantForUser()
-    if (!restaurant) return { error: "No restaurant found" }
+    const organization = await getOrganizationForUser()
+    if (!organization) return { error: "No organization found" }
 
-    await assertRestaurantRole(restaurant.id, "owner")
+    await assertOrganizationRole(organization.id, "owner")
 
-    const plan = restaurant.plan as PlanId
+    const plan = organization.plan as PlanId
     const limits = getPlanLimits(plan)
 
-    // Count current customers
-    const customerCount = await db.customer.count({
-      where: { restaurantId: restaurant.id },
+    // Count current contacts
+    const contactCount = await db.contact.count({
+      where: { organizationId: organization.id },
     })
 
     // Count current staff (org members)
-    const org = await db.organization.findUnique({
-      where: { slug: restaurant.slug },
-      select: { _count: { select: { members: true } } },
+    const memberCount = await db.member.count({
+      where: { organizationId: organization.id },
     })
-    const staffCount = org?._count?.members ?? 1
+    const staffCount = memberCount ?? 1
 
-    const customerPercent = limits.customerLimit === Infinity
+    const contactPercent = limits.customerLimit === Infinity
       ? 0
-      : Math.round((customerCount / limits.customerLimit) * 100)
+      : Math.round((contactCount / limits.customerLimit) * 100)
 
     const staffPercent = limits.staffLimit === Infinity
       ? 0
       : Math.round((staffCount / limits.staffLimit) * 100)
 
     return {
-      restaurant: {
-        id: restaurant.id,
-        name: restaurant.name,
-        plan: restaurant.plan,
-        subscriptionStatus: restaurant.subscriptionStatus,
-        stripeCustomerId: restaurant.stripeCustomerId,
-        stripeSubscriptionId: restaurant.stripeSubscriptionId,
-        trialEndsAt: restaurant.trialEndsAt,
+      organization: {
+        id: organization.id,
+        name: organization.name,
+        plan: organization.plan,
+        subscriptionStatus: organization.subscriptionStatus,
+        stripeCustomerId: organization.stripeCustomerId,
+        stripeSubscriptionId: organization.stripeSubscriptionId,
+        trialEndsAt: organization.trialEndsAt,
       },
       usage: {
-        customers: customerCount,
-        customerLimit: limits.customerLimit,
-        customerPercent,
+        contacts: contactCount,
+        contactLimit: limits.customerLimit,
+        contactPercent,
         staff: staffCount,
         staffLimit: limits.staffLimit,
         staffPercent,
@@ -87,17 +86,17 @@ export async function getBillingData(): Promise<BillingData | { error: string }>
 // ─── Create Checkout Session ───────────────────────────────
 
 export async function createCheckoutSession(priceLookupKey: string): Promise<{ url: string } | { error: string }> {
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) return { error: "No restaurant found" }
+  const organization = await getOrganizationForUser()
+  if (!organization) return { error: "No organization found" }
 
-  await assertRestaurantRole(restaurant.id, "owner")
+  await assertOrganizationRole(organization.id, "owner")
 
   if (!priceLookupKey || typeof priceLookupKey !== "string") {
     return { error: "Missing price lookup key" }
   }
 
   // If user already has an active subscription, use the billing portal for plan changes
-  if (restaurant.stripeSubscriptionId && isActiveSubscription(restaurant.subscriptionStatus)) {
+  if (organization.stripeSubscriptionId && isActiveSubscription(organization.subscriptionStatus)) {
     return { error: "Use the billing portal to change your plan" }
   }
 
@@ -116,19 +115,19 @@ export async function createCheckoutSession(priceLookupKey: string): Promise<{ u
   const baseUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000"
 
   // Create or retrieve Stripe customer
-  let stripeCustomerId = restaurant.stripeCustomerId
+  let stripeCustomerId = organization.stripeCustomerId
 
   if (!stripeCustomerId) {
     const customer = await stripe.customers.create({
-      name: restaurant.name,
+      name: organization.name,
       metadata: {
-        loyalshy_restaurant_id: restaurant.id,
+        loyalshy_organization_id: organization.id,
       },
     })
     stripeCustomerId = customer.id
 
-    await db.restaurant.update({
-      where: { id: restaurant.id },
+    await db.organization.update({
+      where: { id: organization.id },
       data: { stripeCustomerId },
     })
   }
@@ -141,7 +140,7 @@ export async function createCheckoutSession(priceLookupKey: string): Promise<{ u
     cancel_url: `${baseUrl}/dashboard/settings?tab=billing&checkout=canceled`,
     subscription_data: {
       metadata: {
-        loyalshy_restaurant_id: restaurant.id,
+        loyalshy_organization_id: organization.id,
       },
     },
     allow_promotion_codes: true,
@@ -157,19 +156,19 @@ export async function createCheckoutSession(priceLookupKey: string): Promise<{ u
 // ─── Create Portal Session ─────────────────────────────────
 
 export async function createPortalSession(): Promise<{ url: string } | { error: string }> {
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) return { error: "No restaurant found" }
+  const organization = await getOrganizationForUser()
+  if (!organization) return { error: "No organization found" }
 
-  await assertRestaurantRole(restaurant.id, "owner")
+  await assertOrganizationRole(organization.id, "owner")
 
-  if (!restaurant.stripeCustomerId) {
+  if (!organization.stripeCustomerId) {
     return { error: "No billing account found. Please subscribe to a plan first." }
   }
 
   const baseUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000"
 
   const portalSession = await stripe.billingPortal.sessions.create({
-    customer: restaurant.stripeCustomerId,
+    customer: organization.stripeCustomerId,
     return_url: `${baseUrl}/dashboard/settings?tab=billing`,
   })
 
@@ -177,29 +176,26 @@ export async function createPortalSession(): Promise<{ url: string } | { error: 
 }
 
 // ─── Check Plan Limits ──────────────────────────────────────
-// Used by addCustomer and inviteTeamMember to enforce limits.
-// Also checks subscription status — canceled/past_due users cannot add resources.
 
-export async function checkCustomerLimit(restaurantId: string): Promise<{
+export async function checkContactLimit(organizationId: string): Promise<{
   allowed: boolean
   current: number
   limit: number
   approaching: boolean
 }> {
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: restaurantId },
+  const organization = await db.organization.findUnique({
+    where: { id: organizationId },
     select: { plan: true, subscriptionStatus: true },
   })
-  if (!restaurant) return { allowed: false, current: 0, limit: 0, approaching: false }
+  if (!organization) return { allowed: false, current: 0, limit: 0, approaching: false }
 
-  // Block resource creation for canceled subscriptions
-  if (!isActiveSubscription(restaurant.subscriptionStatus)) {
+  if (!isActiveSubscription(organization.subscriptionStatus)) {
     return { allowed: false, current: 0, limit: 0, approaching: false }
   }
 
-  const plan = restaurant.plan as PlanId
+  const plan = organization.plan as PlanId
   const { customerLimit } = getPlanLimits(plan)
-  const current = await db.customer.count({ where: { restaurantId } })
+  const current = await db.contact.count({ where: { organizationId } })
 
   return {
     allowed: current < customerLimit,
@@ -209,27 +205,27 @@ export async function checkCustomerLimit(restaurantId: string): Promise<{
   }
 }
 
-export async function checkProgramLimit(restaurantId: string): Promise<{
+export async function checkTemplateLimit(organizationId: string): Promise<{
   allowed: boolean
   current: number
   limit: number
   approaching: boolean
 }> {
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: restaurantId },
+  const organization = await db.organization.findUnique({
+    where: { id: organizationId },
     select: { plan: true, subscriptionStatus: true },
   })
-  if (!restaurant) return { allowed: false, current: 0, limit: 0, approaching: false }
+  if (!organization) return { allowed: false, current: 0, limit: 0, approaching: false }
 
-  if (!isActiveSubscription(restaurant.subscriptionStatus)) {
+  if (!isActiveSubscription(organization.subscriptionStatus)) {
     return { allowed: false, current: 0, limit: 0, approaching: false }
   }
 
-  const plan = restaurant.plan as PlanId
+  const plan = organization.plan as PlanId
   const { programLimit } = getPlanLimits(plan)
-  // Only count ACTIVE programs toward the limit (DRAFT programs are free to create)
-  const current = await db.loyaltyProgram.count({
-    where: { restaurantId, status: "ACTIVE" },
+  // Only count ACTIVE templates toward the limit
+  const current = await db.passTemplate.count({
+    where: { organizationId, status: "ACTIVE" },
   })
 
   return {
@@ -240,35 +236,34 @@ export async function checkProgramLimit(restaurantId: string): Promise<{
   }
 }
 
-export async function checkStaffLimit(restaurantId: string): Promise<{
+export async function checkStaffLimit(organizationId: string): Promise<{
   allowed: boolean
   current: number
   limit: number
   approaching: boolean
 }> {
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: restaurantId, },
-    select: { plan: true, slug: true, subscriptionStatus: true },
+  const organization = await db.organization.findUnique({
+    where: { id: organizationId },
+    select: { plan: true, subscriptionStatus: true },
   })
-  if (!restaurant) return { allowed: false, current: 0, limit: 0, approaching: false }
+  if (!organization) return { allowed: false, current: 0, limit: 0, approaching: false }
 
-  if (!isActiveSubscription(restaurant.subscriptionStatus)) {
+  if (!isActiveSubscription(organization.subscriptionStatus)) {
     return { allowed: false, current: 0, limit: 0, approaching: false }
   }
 
-  const plan = restaurant.plan as PlanId
+  const plan = organization.plan as PlanId
   const { staffLimit } = getPlanLimits(plan)
 
-  const org = await db.organization.findUnique({
-    where: { slug: restaurant.slug },
-    select: { _count: { select: { members: true } } },
+  const memberCount = await db.member.count({
+    where: { organizationId },
   })
-  const current = org?._count?.members ?? 1
+  const current = memberCount ?? 1
 
   // Also count pending invitations
   const pendingCount = await db.staffInvitation.count({
     where: {
-      restaurantId,
+      organizationId,
       accepted: false,
       expiresAt: { gt: new Date() },
     },

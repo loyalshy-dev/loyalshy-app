@@ -1,16 +1,16 @@
 import { parseStripFilters, parseStampGridConfig } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
-import type { PublicProgramInfo } from "@/types/enrollment"
+import type { PublicTemplateInfo } from "@/types/pass-instance"
 
 /**
- * Build a WalletPassDesign from a PublicProgramInfo's cardDesign.
+ * Build a WalletPassDesign from a PublicTemplateInfo's passDesign.
  * Extracts duplicated logic that was previously inline in onboarding-form.tsx.
  */
 export function buildWalletPassDesign(
-  cardDesign: PublicProgramInfo["cardDesign"]
+  passDesign: PublicTemplateInfo["passDesign"]
 ): WalletPassDesign {
-  const sf = cardDesign
-    ? parseStripFilters(cardDesign.editorConfig)
+  const sf = passDesign
+    ? parseStripFilters(passDesign.editorConfig)
     : {
         useStampGrid: false,
         stripColor1: null,
@@ -21,23 +21,23 @@ export function buildWalletPassDesign(
         stripImageZoom: 1,
       }
   const useStampGrid =
-    sf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
+    sf.useStampGrid || passDesign?.patternStyle === "STAMP_GRID"
 
   return {
-    cardType: (cardDesign?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-    showStrip: cardDesign?.showStrip ?? true,
-    primaryColor: cardDesign?.primaryColor ?? "#1a1a2e",
-    secondaryColor: cardDesign?.secondaryColor ?? "#ffffff",
-    textColor: cardDesign?.textColor ?? "#ffffff",
-    progressStyle: (cardDesign?.progressStyle ??
+    cardType: (passDesign?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
+    showStrip: passDesign?.showStrip ?? true,
+    primaryColor: passDesign?.primaryColor ?? "#1a1a2e",
+    secondaryColor: passDesign?.secondaryColor ?? "#ffffff",
+    textColor: passDesign?.textColor ?? "#ffffff",
+    progressStyle: (passDesign?.progressStyle ??
       "NUMBERS") as WalletPassDesign["progressStyle"],
-    labelFormat: (cardDesign?.labelFormat ??
+    labelFormat: (passDesign?.labelFormat ??
       "UPPERCASE") as WalletPassDesign["labelFormat"],
-    customProgressLabel: cardDesign?.customProgressLabel ?? null,
-    stripImageUrl: cardDesign?.stripImageUrl ?? null,
-    patternStyle: (cardDesign?.patternStyle === "STAMP_GRID"
+    customProgressLabel: passDesign?.customProgressLabel ?? null,
+    stripImageUrl: passDesign?.stripImageUrl ?? null,
+    patternStyle: (passDesign?.patternStyle === "STAMP_GRID"
       ? "NONE"
-      : (cardDesign?.patternStyle ?? "NONE")) as WalletPassDesign["patternStyle"],
+      : (passDesign?.patternStyle ?? "NONE")) as WalletPassDesign["patternStyle"],
     useStampGrid,
     stripColor1: sf.stripColor1 ?? null,
     stripColor2: sf.stripColor2 ?? null,
@@ -46,7 +46,7 @@ export function buildWalletPassDesign(
     stripImagePosition: sf.stripImagePosition,
     stripImageZoom: sf.stripImageZoom,
     stampGridConfig: useStampGrid
-      ? parseStampGridConfig(cardDesign!.editorConfig)
+      ? parseStampGridConfig(passDesign!.editorConfig)
       : undefined,
   }
 }

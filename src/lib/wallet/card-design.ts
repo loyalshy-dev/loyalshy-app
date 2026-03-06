@@ -2,7 +2,7 @@ import crypto from "crypto"
 
 // ─── Types ──────────────────────────────────────────────────
 
-export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID"
+export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID" | "GENERIC"
 export type PatternStyle = "NONE" | "DOTS" | "WAVES" | "GEOMETRIC" | "CHEVRON" | "CROSSHATCH" | "DIAMONDS" | "CONFETTI" | "SOLID_PRIMARY" | "SOLID_SECONDARY" | "STAMP_GRID"
 export type ProgressStyle = "NUMBERS" | "CIRCLES" | "SQUARES" | "STARS" | "STAMPS" | "PERCENTAGE" | "REMAINING"
 export type FontFamily = "SANS" | "SERIF" | "ROUNDED" | "MONO"
@@ -333,15 +333,15 @@ export function computeDesignHash(design: {
 // ─── Resolve Design ─────────────────────────────────────────
 
 /**
- * Merges a DB CardDesign row + restaurant fallbacks into a resolved CardDesignData.
- * The caller passes program-level cardDesign and restaurant-level color fallbacks.
+ * Merges a DB PassDesign row + organization fallbacks into a resolved CardDesignData.
+ * The caller passes template-level passDesign and organization-level color fallbacks.
  */
 export function resolveCardDesign(
   cardDesign: CardDesignRow | null,
-  restaurant: { brandColor: string | null; secondaryColor: string | null }
+  organization: { brandColor: string | null; secondaryColor: string | null }
 ): CardDesignData {
-  const primary = cardDesign?.primaryColor ?? restaurant.brandColor ?? "#1a1a2e"
-  const secondary = cardDesign?.secondaryColor ?? restaurant.secondaryColor ?? "#ffffff"
+  const primary = cardDesign?.primaryColor ?? organization.brandColor ?? "#1a1a2e"
+  const secondary = cardDesign?.secondaryColor ?? organization.secondaryColor ?? "#ffffff"
   const text = cardDesign?.textColor ?? computeTextColor(primary)
 
   return {
@@ -404,16 +404,17 @@ export type PassFieldLayout = {
  * One fixed layout per card type (INFO_RICH base — shows all data).
  * Strip visibility is controlled separately via `showStrip` on CardDesign.
  *
- * STAMP/POINTS: header=restaurant+memberNumber, primary=progress, secondary=nextReward+totalVisits+memberSince, auxiliary=customerName
- * COUPON: header=restaurant, primary=discount, secondary=validUntil+couponCode+customerName
- * TIER: header=restaurant, primary=tierName, secondary=benefits+memberSince+customerName
- * PREPAID: header=restaurant, primary=remaining, secondary=prepaidValidUntil+totalUsed+customerName
+ * STAMP/POINTS: header=organization+memberNumber, primary=progress, secondary=nextReward+totalVisits+memberSince, auxiliary=contactName
+ * COUPON: header=organization, primary=discount, secondary=validUntil+couponCode+contactName
+ * TIER: header=organization, primary=tierName, secondary=benefits+memberSince+contactName
+ * PREPAID: header=organization, primary=remaining, secondary=prepaidValidUntil+totalUsed+contactName
+ * GENERIC: header=organization, primary=title, secondary=description+contactName
  */
 export function getFieldLayout(cardType?: CardType): PassFieldLayout {
   if (cardType === "COUPON") {
     return {
       apple: {
-        header: ["restaurant"],
+        header: ["organization"],
         primary: ["discount"],
         secondary: ["validUntil", "couponCode", "customerName"],
         auxiliary: [],
@@ -428,7 +429,7 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
   if (cardType === "TIER") {
     return {
       apple: {
-        header: ["restaurant"],
+        header: ["organization"],
         primary: ["tierName"],
         secondary: ["benefits", "memberSince", "customerName"],
         auxiliary: [],
@@ -443,7 +444,7 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
   if (cardType === "PREPAID") {
     return {
       apple: {
-        header: ["restaurant"],
+        header: ["organization"],
         primary: ["remaining"],
         secondary: ["prepaidValidUntil", "totalUsed", "customerName"],
         auxiliary: [],
@@ -455,17 +456,32 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
     }
   }
 
+  if (cardType === "GENERIC") {
+    return {
+      apple: {
+        header: ["organization"],
+        primary: ["title"],
+        secondary: ["description", "contactName"],
+        auxiliary: [],
+      },
+      google: {
+        rows: 1,
+        fields: ["title", "description", "contactName"],
+      },
+    }
+  }
+
   // STAMP / POINTS (default)
   return {
     apple: {
-      header: ["restaurant", "memberNumber"],
+      header: ["organization", "memberNumber"],
       primary: ["progress"],
       secondary: ["nextReward", "totalVisits", "memberSince"],
-      auxiliary: ["customerName"],
+      auxiliary: ["contactName"],
     },
     google: {
       rows: 1,
-      fields: ["progress", "totalVisits", "nextReward", "memberSince", "customerName"],
+      fields: ["progress", "totalVisits", "nextReward", "memberSince", "contactName"],
     },
   }
 }

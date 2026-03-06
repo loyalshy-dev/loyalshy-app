@@ -5,7 +5,7 @@ import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import { formatProgressValue, type ProgressStyle, type StampGridConfig } from "@/lib/wallet/card-design"
 import { STAMP_ICONS, REWARD_ICONS, getStampIconPaths } from "@/lib/wallet/stamp-icons"
-import { uploadStampIcon, deleteStampIcon } from "@/server/settings-actions"
+import { uploadStampIcon, deleteStampIcon } from "@/server/org-settings-actions"
 
 // ─── Shared helpers ───────────────────────────────────────────
 

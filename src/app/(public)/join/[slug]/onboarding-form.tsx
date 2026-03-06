@@ -12,13 +12,26 @@ import {
   Smartphone,
   Bookmark,
 } from "lucide-react"
-import { joinProgram, requestWalletPass } from "@/server/onboarding-actions"
-import type { RestaurantPublicInfo, OnboardingResult, JoinResult } from "@/server/onboarding-actions"
-import type { PublicProgramInfo } from "@/types/enrollment"
+import { joinTemplate, requestWalletPass } from "@/server/onboarding-actions"
+import type { OrganizationPublicInfo, OnboardingResult, JoinResult } from "@/server/onboarding-actions"
+import type { PublicTemplateInfo } from "@/types/pass-instance"
 import { computeTextColor } from "@/lib/wallet/card-design"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/program-config"
+import { parseCouponConfig, parseMembershipConfig, parseStampCardConfig, formatCouponValue } from "@/lib/pass-config"
+
+// Convenience helpers to extract config fields from PublicTemplateInfo
+function getVisitsRequired(p: PublicTemplateInfo): number {
+  const cfg = p.config as Record<string, unknown> | null
+  if (cfg && typeof cfg.stampsRequired === "number") return cfg.stampsRequired
+  return 10
+}
+
+function getRewardDescription(p: PublicTemplateInfo): string {
+  const cfg = p.config as Record<string, unknown> | null
+  if (cfg && typeof cfg.rewardDescription === "string") return cfg.rewardDescription
+  return p.description ?? p.name
+}
 
 type Platform = "apple" | "google"
 type Step = "program-select" | "form" | "card-view" | "success"
@@ -48,21 +61,21 @@ function isAndroid(): boolean {
 }
 
 type OnboardingFormProps = {
-  restaurant: RestaurantPublicInfo
-  preselectedProgramId?: string
+  organization: OrganizationPublicInfo
+  preselectedTemplateId?: string
 }
 
-export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingFormProps) {
-  const programs = restaurant.programs
+export function OnboardingForm({ organization, preselectedTemplateId }: OnboardingFormProps) {
+  const programs = organization.templates
   const hasMultiplePrograms = programs.length > 1
 
-  // Resolve preselected program (must match a valid program)
-  const preselected = preselectedProgramId
-    ? programs.find((p) => p.id === preselectedProgramId) ?? null
+  // Resolve preselected template (must match a valid program)
+  const preselected = preselectedTemplateId
+    ? programs.find((p) => p.id === preselectedTemplateId) ?? null
     : null
 
-  // Auto-select if only one program OR if a valid preselectedProgramId was provided
-  const [selectedProgram, setSelectedProgram] = useState<PublicProgramInfo | null>(
+  // Auto-select if only one program OR if a valid preselectedTemplateId was provided
+  const [selectedProgram, setSelectedProgram] = useState<PublicTemplateInfo | null>(
     preselected ?? (hasMultiplePrograms ? null : programs[0] ?? null)
   )
   const [step, setStep] = useState<Step>(
@@ -87,20 +100,20 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
     }
   }, [])
 
-  function handleProgramSelect(program: PublicProgramInfo) {
+  function handleProgramSelect(program: PublicTemplateInfo) {
     setSelectedProgram(program)
     setStep("form")
   }
 
   function handleSubmit(formData: FormData) {
     setError(null)
-    formData.set("restaurantSlug", restaurant.slug)
+    formData.set("organizationSlug", organization.slug)
     if (selectedProgram) {
-      formData.set("programId", selectedProgram.id)
+      formData.set("templateId", selectedProgram.id)
     }
 
     startTransition(async () => {
-      const res = await joinProgram(formData)
+      const res = await joinTemplate(formData)
 
       if (!res.success) {
         setError(res.error ?? "Something went wrong")
@@ -113,13 +126,13 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
   }
 
   function handleAddToWallet(chosenPlatform: Platform) {
-    if (!joinResult?.enrollmentId) return
+    if (!joinResult?.passInstanceId) return
     setError(null)
 
     startPassTransition(async () => {
       const res = await requestWalletPass(
-        joinResult.enrollmentId!,
-        restaurant.slug,
+        joinResult.passInstanceId!,
+        organization.slug,
         chosenPlatform
       )
 
@@ -161,32 +174,32 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
     setStep("success")
   }
 
-  // Compute type-specific props for a program
-  function getTypeProps(program: PublicProgramInfo) {
-    if (program.programType === "COUPON") {
+  // Compute type-specific props for a template
+  function getTypeProps(program: PublicTemplateInfo) {
+    if (program.passType === "COUPON") {
       const config = parseCouponConfig(program.config)
       return {
-        discountText: config ? formatCouponValue(config) : program.rewardDescription,
+        discountText: config ? formatCouponValue(config) : getRewardDescription(program),
         validUntil: config?.validUntil
           ? new Date(config.validUntil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
           : "No expiry",
         couponCode: config?.couponCode ?? undefined,
       }
     }
-    if (program.programType === "MEMBERSHIP") {
+    if (program.passType === "MEMBERSHIP") {
       const config = parseMembershipConfig(program.config)
       return {
-        tierName: config?.membershipTier ?? program.rewardDescription,
+        tierName: config?.membershipTier ?? getRewardDescription(program),
         benefits: config?.benefits ?? "Exclusive perks",
       }
     }
     return {}
   }
 
-  // Use selected program's card design, falling back to first program or restaurant defaults
+  // Use selected program's card design, falling back to first program or organization defaults
   const activeProgram = selectedProgram ?? programs[0]
-  const design = activeProgram?.cardDesign
-  const brandColor = design?.primaryColor ?? restaurant.brandColor ?? "oklch(0.55 0.2 265)"
+  const design = activeProgram?.passDesign
+  const brandColor = design?.primaryColor ?? organization.brandColor ?? "oklch(0.55 0.2 265)"
   const textOnBrand = design?.textColor ?? computeTextColor(
     /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : "#4F46E5"
   )
@@ -232,9 +245,9 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
             <p className="text-muted-foreground text-sm">
               {addedToWallet
                 ? joinResult?.isReturning
-                  ? `Welcome back, ${joinResult.customerName}! Your loyalty card has been re-issued.`
-                  : `Your loyalty card for ${restaurant.name} is ready.`
-                : `Your loyalty card for ${restaurant.name} has been created.`}
+                  ? `Welcome back, ${joinResult.contactName}! Your loyalty card has been re-issued.`
+                  : `Your loyalty card for ${organization.name} is ready.`
+                : `Your loyalty card for ${organization.name} has been created.`}
             </p>
           </div>
 
@@ -295,8 +308,8 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
 
   // --- Card view screen (post-enrollment, pre-wallet) ---
   if (step === "card-view" && joinResult) {
-    const passDesign = activeProgram?.cardDesign
-      ? buildWalletPassDesign(activeProgram.cardDesign)
+    const passDesign = activeProgram?.passDesign
+      ? buildWalletPassDesign(activeProgram.passDesign)
       : null
 
     return (
@@ -309,8 +322,8 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
             </h1>
             <p className="text-muted-foreground text-sm">
               {joinResult.isReturning
-                ? `Welcome back, ${joinResult.customerName}!`
-                : `${joinResult.customerName}, here's your loyalty card for ${restaurant.name}.`}
+                ? `Welcome back, ${joinResult.contactName}!`
+                : `${joinResult.contactName}, here's your loyalty card for ${organization.name}.`}
             </p>
           </div>
 
@@ -320,13 +333,13 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
               <WalletPassRenderer
                 design={passDesign}
                 format="apple"
-                restaurantName={restaurant.name}
-                logoUrl={restaurant.logo}
+                organizationName={organization.name}
+                logoUrl={organization.logo}
                 programName={activeProgram.name}
-                customerName={joinResult.customerName}
+                customerName={joinResult.contactName}
                 currentVisits={joinResult.currentCycleVisits ?? 0}
-                totalVisits={activeProgram.visitsRequired}
-                rewardDescription={activeProgram.rewardDescription}
+                totalVisits={getVisitsRequired(activeProgram)}
+                rewardDescription={getRewardDescription(activeProgram)}
                 hasReward={joinResult.hasAvailableReward}
                 {...getTypeProps(activeProgram)}
               />
@@ -453,11 +466,11 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
         <div className="w-full max-w-md space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
-            {restaurant.logo && (
+            {organization.logo && (
               <div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden bg-muted">
                 <Image
-                  src={restaurant.logo}
-                  alt={restaurant.name}
+                  src={organization.logo}
+                  alt={organization.name}
                   width={80}
                   height={80}
                   className="w-full h-full object-cover"
@@ -467,7 +480,7 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
 
             <div className="space-y-2">
               <h1 className="text-2xl font-semibold tracking-tight">
-                {restaurant.name}
+                {organization.name}
               </h1>
               <p className="text-muted-foreground text-[15px]">
                 Choose a loyalty program to join
@@ -478,7 +491,7 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
           {/* Program cards */}
           <div className="space-y-3">
             {programs.map((program) => {
-              const programDesign = buildWalletPassDesign(program.cardDesign)
+              const programDesign = buildWalletPassDesign(program.passDesign)
 
               return (
                 <button
@@ -495,11 +508,11 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
                         compact
                         width={56}
                         height={72}
-                        restaurantName={restaurant.name}
-                        logoUrl={restaurant.logo}
+                        organizationName={organization.name}
+                        logoUrl={organization.logo}
                         programName={program.name}
                         currentVisits={0}
-                        totalVisits={program.visitsRequired}
+                        totalVisits={getVisitsRequired(program)}
                         rewardDescription=""
                         {...getTypeProps(program)}
                       />
@@ -510,11 +523,11 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
                         {program.name}
                       </h3>
                       <p className="text-[13px] text-muted-foreground mt-0.5">
-                        {program.programType === "COUPON"
-                          ? program.rewardDescription
-                          : program.programType === "MEMBERSHIP"
-                            ? `${program.rewardDescription}`
-                            : `${program.rewardDescription} after ${program.visitsRequired} visits`}
+                        {program.passType === "COUPON"
+                          ? getRewardDescription(program)
+                          : program.passType === "MEMBERSHIP"
+                            ? `${getRewardDescription(program)}`
+                            : `${getRewardDescription(program)} after ${getVisitsRequired(program)} visits`}
                       </p>
                     </div>
 
@@ -562,11 +575,11 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
 
         {/* Header */}
         <div className="text-center space-y-4">
-          {restaurant.logo && (
+          {organization.logo && (
             <div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden bg-muted">
               <Image
-                src={restaurant.logo}
-                alt={restaurant.name}
+                src={organization.logo}
+                alt={organization.name}
                 width={80}
                 height={80}
                 className="w-full h-full object-cover"
@@ -576,7 +589,7 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
 
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight">
-              {restaurant.name}
+              {organization.name}
             </h1>
             <p className="text-muted-foreground text-[15px]">
               {activeProgram?.name ?? "Get your digital loyalty card"}
@@ -593,8 +606,8 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
               }}
             >
               <Gift className="w-4 h-4" aria-hidden="true" />
-              {activeProgram.rewardDescription} after{" "}
-              {activeProgram.visitsRequired} visits
+              {getRewardDescription(activeProgram)} after{" "}
+              {getVisitsRequired(activeProgram)} visits
             </div>
           )}
         </div>
@@ -612,19 +625,19 @@ export function OnboardingForm({ restaurant, preselectedProgramId }: OnboardingF
         {activeProgram && (
           <div className="flex justify-center">
             {(() => {
-              const formDesign = buildWalletPassDesign(activeProgram.cardDesign)
+              const formDesign = buildWalletPassDesign(activeProgram.passDesign)
               return (
                 <WalletPassRenderer
                   design={formDesign}
                   format="apple"
                   compact
-                  restaurantName={restaurant.name}
-                  logoUrl={restaurant.logo}
+                  organizationName={organization.name}
+                  logoUrl={organization.logo}
                   programName={activeProgram.name}
                   customerName={name.trim() || undefined}
                   currentVisits={0}
-                  totalVisits={activeProgram.visitsRequired}
-                  rewardDescription={activeProgram.rewardDescription}
+                  totalVisits={getVisitsRequired(activeProgram)}
+                  rewardDescription={getRewardDescription(activeProgram)}
                   {...getTypeProps(activeProgram)}
                 />
               )

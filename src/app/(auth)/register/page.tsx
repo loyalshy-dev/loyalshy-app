@@ -18,10 +18,10 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import {
-  createRestaurant,
-  updateRestaurantBranding,
+  createOrganization,
+  updateOrganizationBranding,
   uploadOnboardingLogo,
-  setupLoyaltyProgram,
+  setupPassTemplate,
   initializeTrialSubscription,
   completeOnboarding,
   applyCardDesignFromBrand,
@@ -35,8 +35,8 @@ import {
   applyPaletteToTemplate,
 } from "@/lib/wallet/template-matcher"
 import type { ExtractedPalette } from "@/lib/color-extraction"
-import type { RestaurantCategory } from "@/lib/wallet/card-templates"
-import { PROGRAM_TYPE_META, type ProgramType, type CouponConfig, type MembershipConfig, type PointsConfig } from "@/types/program-types"
+import type { BusinessCategory } from "@/lib/wallet/card-templates"
+import { PASS_TYPE_META, type PassType, type CouponConfig, type MembershipConfig, type PointsConfig } from "@/types/pass-types"
 import {
   Check,
   ChevronRight,
@@ -63,7 +63,7 @@ import {
 
 const STEPS = [
   { number: 1, label: "Account", icon: Check },
-  { number: 2, label: "Restaurant", icon: Store },
+  { number: 2, label: "Organization", icon: Store },
   { number: 3, label: "Loyalty", icon: Gift },
   { number: 4, label: "Branding", icon: Palette },
   { number: 5, label: "Setup", icon: Rocket },
@@ -76,22 +76,32 @@ export default function RegisterPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const stepParam = searchParams.get("step")
+  const orgParam = searchParams.get("org")
+  const slugParam = searchParams.get("slug")
   const [currentStep, setCurrentStep] = useState(stepParam ? parseInt(stepParam) : 1)
-  const [restaurantId, setRestaurantId] = useState<string | null>(null)
-  const [restaurantSlug, setRestaurantSlug] = useState<string | null>(null)
+  const [organizationId, setOrganizationId] = useState<string | null>(orgParam)
+  const [organizationSlug, setOrganizationSlug] = useState<string | null>(slugParam)
 
   // Sync step with URL
   useEffect(() => {
     const s = stepParam ? parseInt(stepParam) : 1
     if (s >= 1 && s <= 6) setCurrentStep(s)
-  }, [stepParam])
+    if (orgParam && !organizationId) setOrganizationId(orgParam)
+    if (slugParam && !organizationSlug) setOrganizationSlug(slugParam)
+  }, [stepParam, orgParam, slugParam, organizationId, organizationSlug])
 
   const goToStep = useCallback(
-    (step: number) => {
+    (step: number, overrides?: { orgId?: string; slug?: string }) => {
       setCurrentStep(step)
-      router.push(`/register?step=${step}`, { scroll: false })
+      const params = new URLSearchParams()
+      params.set("step", String(step))
+      const oid = overrides?.orgId ?? organizationId
+      const osl = overrides?.slug ?? organizationSlug
+      if (oid) params.set("org", oid)
+      if (osl) params.set("slug", osl)
+      router.push(`/register?${params.toString()}`, { scroll: false })
     },
-    [router]
+    [router, organizationId, organizationSlug]
   )
 
   return (
@@ -131,37 +141,37 @@ export default function RegisterPage() {
       {/* Step content */}
       {currentStep === 1 && <AccountStep onNext={() => goToStep(2)} />}
       {currentStep === 2 && (
-        <RestaurantStep
+        <OrganizationStep
           onNext={(id, slug) => {
-            setRestaurantId(id)
-            setRestaurantSlug(slug)
-            goToStep(3)
+            setOrganizationId(id)
+            setOrganizationSlug(slug)
+            goToStep(3, { orgId: id, slug })
           }}
         />
       )}
-      {currentStep === 3 && restaurantId && (
+      {currentStep === 3 && organizationId && (
         <LoyaltyStep
-          restaurantId={restaurantId}
+          organizationId={organizationId}
           onNext={() => goToStep(4)}
         />
       )}
-      {currentStep === 4 && restaurantId && (
+      {currentStep === 4 && organizationId && (
         <BrandingStep
-          restaurantId={restaurantId}
+          organizationId={organizationId}
           onNext={() => goToStep(5)}
           onSkip={() => goToStep(5)}
         />
       )}
-      {currentStep === 5 && restaurantId && (
+      {currentStep === 5 && organizationId && (
         <TrialSetupStep
-          restaurantId={restaurantId}
+          organizationId={organizationId}
           onNext={() => goToStep(6)}
         />
       )}
-      {currentStep === 6 && restaurantId && (
+      {currentStep === 6 && organizationId && (
         <DoneStep
-          restaurantId={restaurantId}
-          restaurantSlug={restaurantSlug}
+          organizationId={organizationId}
+          organizationSlug={organizationSlug}
         />
       )}
     </div>
@@ -294,12 +304,12 @@ function AccountStep({ onNext }: { onNext: () => void }) {
   )
 }
 
-// ─── Step 2: Restaurant ─────────────────────────────────────
+// ─── Step 2: Organization ────────────────────────────────────
 
-function RestaurantStep({
+function OrganizationStep({
   onNext,
 }: {
-  onNext: (restaurantId: string, slug: string) => void
+  onNext: (organizationId: string, slug: string) => void
 }) {
   const [name, setName] = useState("")
   const [address, setAddress] = useState("")
@@ -310,12 +320,12 @@ function RestaurantStep({
     e.preventDefault()
     setIsLoading(true)
 
-    const result = await createRestaurant({ name, address, phone })
+    const result = await createOrganization({ name, address, phone })
 
     if ("error" in result && result.error) {
-      // If already has restaurant, continue
-      if (result.restaurantId) {
-        onNext(result.restaurantId, "")
+      // If already has organization, continue
+      if (result.organizationId) {
+        onNext(result.organizationId, "")
         return
       }
       toast.error(result.error)
@@ -323,9 +333,9 @@ function RestaurantStep({
       return
     }
 
-    if ("restaurantId" in result && result.restaurantId) {
-      toast.success("Restaurant created!")
-      onNext(result.restaurantId, result.slug ?? "")
+    if ("organizationId" in result && result.organizationId) {
+      toast.success("Organization created!")
+      onNext(result.organizationId, result.slug ?? "")
     }
   }
 
@@ -335,7 +345,7 @@ function RestaurantStep({
         <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10">
           <Store className="size-5 text-primary" />
         </div>
-        <CardTitle className="text-xl font-bold">Tell us about your restaurant</CardTitle>
+        <CardTitle className="text-xl font-bold">Tell us about your organization</CardTitle>
         <CardDescription>
           This information helps us set up your loyalty program.
         </CardDescription>
@@ -343,9 +353,9 @@ function RestaurantStep({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="restaurant-name">Restaurant name *</Label>
+            <Label htmlFor="org-name">Organization name *</Label>
             <Input
-              id="restaurant-name"
+              id="org-name"
               type="text"
               placeholder="e.g. Trattoria Bella"
               value={name}
@@ -355,9 +365,9 @@ function RestaurantStep({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="restaurant-address">Address</Label>
+            <Label htmlFor="org-address">Address</Label>
             <Input
-              id="restaurant-address"
+              id="org-address"
               type="text"
               placeholder="123 Main St, City"
               value={address}
@@ -365,9 +375,9 @@ function RestaurantStep({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="restaurant-phone">Phone</Label>
+            <Label htmlFor="org-phone">Phone</Label>
             <Input
-              id="restaurant-phone"
+              id="org-phone"
               type="tel"
               placeholder="+1 (555) 123-4567"
               value={phone}
@@ -386,7 +396,7 @@ function RestaurantStep({
 
 // ─── Step 3: Branding (3-phase flow) ─────────────────────────
 
-const VIBE_OPTIONS: { id: RestaurantCategory; label: string; icon: typeof Coffee }[] = [
+const VIBE_OPTIONS: { id: BusinessCategory; label: string; icon: typeof Coffee }[] = [
   { id: "cafe", label: "Cafe", icon: Coffee },
   { id: "fine-dining", label: "Fine Dining", icon: UtensilsCrossed },
   { id: "casual", label: "Casual", icon: Smile },
@@ -398,18 +408,18 @@ const VIBE_OPTIONS: { id: RestaurantCategory; label: string; icon: typeof Coffee
 type BrandingPhase = "input" | "processing" | "preview"
 
 function BrandingStep({
-  restaurantId,
+  organizationId,
   onNext,
   onSkip,
 }: {
-  restaurantId: string
+  organizationId: string
   onNext: () => void
   onSkip: () => void
 }) {
   const [phase, setPhase] = useState<BrandingPhase>("input")
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [palette, setPalette] = useState<ExtractedPalette | null>(null)
-  const [category, setCategory] = useState<RestaurantCategory | null>(null)
+  const [category, setCategory] = useState<BusinessCategory | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isApplying, setIsApplying] = useState(false)
 
@@ -432,7 +442,7 @@ function BrandingStep({
 
     setIsUploading(true)
     const formData = new FormData()
-    formData.set("restaurantId", restaurantId)
+    formData.set("organizationId", organizationId)
     formData.set("file", file)
 
     const result = await uploadOnboardingLogo(formData)
@@ -547,7 +557,7 @@ function BrandingStep({
     setIsApplying(true)
 
     const result = await applyCardDesignFromBrand({
-      restaurantId,
+      organizationId,
       primaryColor: currentDesign.primaryColor,
       secondaryColor: currentDesign.secondaryColor,
       textColor: currentDesign.textColor,
@@ -594,7 +604,7 @@ function BrandingStep({
         <CardContent className="space-y-6">
           {/* Logo upload */}
           <div className="space-y-2">
-            <Label>Restaurant logo</Label>
+            <Label>Organization logo</Label>
             <div className="flex items-center gap-4">
               <div className="flex size-16 items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/50">
                 {logoUrl ? (
@@ -657,7 +667,7 @@ function BrandingStep({
 
           {/* Vibe selector */}
           <div className="space-y-2">
-            <Label>What&apos;s your restaurant&apos;s vibe?</Label>
+            <Label>What&apos;s your brand&apos;s vibe?</Label>
             <div className="grid grid-cols-3 gap-2">
               {VIBE_OPTIONS.map((vibe) => {
                 const Icon = vibe.icon
@@ -768,7 +778,7 @@ function BrandingStep({
             <WalletPassRenderer
               design={currentDesign}
               format="apple"
-              restaurantName="Your Restaurant"
+              organizationName="Your Organization"
               logoUrl={logoUrl}
               width={260}
               height={357}
@@ -875,17 +885,17 @@ function BrandingStep({
 
 // ─── Step 4: Loyalty Program ────────────────────────────────
 
-const PROGRAM_TYPES = Object.entries(PROGRAM_TYPE_META) as [ProgramType, typeof PROGRAM_TYPE_META[ProgramType]][]
+const PROGRAM_TYPES = Object.entries(PASS_TYPE_META) as [PassType, typeof PASS_TYPE_META[PassType]][]
 
 function LoyaltyStep({
-  restaurantId,
+  organizationId,
   onNext,
 }: {
-  restaurantId: string
+  organizationId: string
   onNext: () => void
 }) {
   const [phase, setPhase] = useState<"select" | "configure">("select")
-  const [programType, setProgramType] = useState<ProgramType>("STAMP_CARD")
+  const [passType, setPassType] = useState<PassType>("STAMP_CARD")
   const [isLoading, setIsLoading] = useState(false)
 
   // Stamp Card state
@@ -908,8 +918,8 @@ function LoyaltyStep({
   const [pointsPerVisit, setPointsPerVisit] = useState(10)
   const [catalogItem, setCatalogItem] = useState({ name: "", pointsCost: 100 })
 
-  function handleSelectType(type: ProgramType) {
-    setProgramType(type)
+  function handleSelectType(type: PassType) {
+    setPassType(type)
     // Reset reward description to something type-appropriate
     if (type === "STAMP_CARD") setRewardDescription("Free meal")
     else if (type === "COUPON") setRewardDescription("Discount coupon")
@@ -924,20 +934,20 @@ function LoyaltyStep({
 
     let config: Record<string, unknown> = {}
 
-    if (programType === "COUPON") {
+    if (passType === "COUPON") {
       config = {
         discountType,
         discountValue,
         couponDescription: couponDescription || undefined,
         redemptionLimit,
       } satisfies Partial<CouponConfig>
-    } else if (programType === "MEMBERSHIP") {
+    } else if (passType === "MEMBERSHIP") {
       config = {
         membershipTier,
         benefits: benefits || undefined,
         validDuration,
       } satisfies Partial<MembershipConfig>
-    } else if (programType === "POINTS") {
+    } else if (passType === "POINTS") {
       config = {
         pointsPerVisit,
         catalog: catalogItem.name
@@ -946,10 +956,10 @@ function LoyaltyStep({
       } satisfies Partial<PointsConfig>
     }
 
-    const result = await setupLoyaltyProgram({
-      restaurantId,
-      programType,
-      visitsRequired: programType === "STAMP_CARD" ? visitsRequired : 1,
+    const result = await setupPassTemplate({
+      organizationId,
+      programType: passType as "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "PREPAID",
+      visitsRequired: passType === "STAMP_CARD" ? visitsRequired : 1,
       rewardDescription,
       rewardExpiryDays,
       config: Object.keys(config).length > 0 ? config : undefined,
@@ -1007,7 +1017,7 @@ function LoyaltyStep({
   }
 
   // Phase 2: Type-specific configuration
-  const typeMeta = PROGRAM_TYPE_META[programType]
+  const typeMeta = PASS_TYPE_META[passType]
   const TypeIcon = typeMeta.icon
 
   return (
@@ -1024,7 +1034,7 @@ function LoyaltyStep({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* ── Stamp Card fields ── */}
-          {programType === "STAMP_CARD" && (
+          {passType === "STAMP_CARD" && (
             <>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -1101,7 +1111,7 @@ function LoyaltyStep({
           )}
 
           {/* ── Coupon fields ── */}
-          {programType === "COUPON" && (
+          {passType === "COUPON" && (
             <>
               <div className="space-y-2">
                 <Label htmlFor="discount-type">Discount type</Label>
@@ -1185,7 +1195,7 @@ function LoyaltyStep({
           )}
 
           {/* ── Membership fields ── */}
-          {programType === "MEMBERSHIP" && (
+          {passType === "MEMBERSHIP" && (
             <>
               <div className="space-y-2">
                 <Label htmlFor="membership-tier">Membership tier</Label>
@@ -1248,7 +1258,7 @@ function LoyaltyStep({
           )}
 
           {/* ── Points fields ── */}
-          {programType === "POINTS" && (
+          {passType === "POINTS" && (
             <>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -1362,10 +1372,10 @@ function LoyaltyStep({
 // ─── Step 5: Trial Setup (automatic) ────────────────────────
 
 function TrialSetupStep({
-  restaurantId,
+  organizationId,
   onNext,
 }: {
-  restaurantId: string
+  organizationId: string
   onNext: () => void
 }) {
   const [status, setStatus] = useState<"loading" | "done" | "error">("loading")
@@ -1374,7 +1384,7 @@ function TrialSetupStep({
     let cancelled = false
 
     async function setup() {
-      const result = await initializeTrialSubscription(restaurantId)
+      const result = await initializeTrialSubscription(organizationId)
 
       if (cancelled) return
 
@@ -1384,7 +1394,7 @@ function TrialSetupStep({
         return
       }
 
-      await completeOnboarding(restaurantId)
+      await completeOnboarding(organizationId)
 
       if (!cancelled) {
         setStatus("done")
@@ -1399,7 +1409,7 @@ function TrialSetupStep({
     return () => {
       cancelled = true
     }
-  }, [restaurantId, onNext])
+  }, [organizationId, onNext])
 
   return (
     <Card>
@@ -1437,7 +1447,7 @@ function TrialSetupStep({
               <div>
                 <p className="text-lg font-semibold">Something went wrong</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Don&apos;t worry, your restaurant is set up. You can configure billing later.
+                  Don&apos;t worry, your organization is set up. You can configure billing later.
                 </p>
               </div>
               <Button onClick={onNext} className="mt-2">
@@ -1454,15 +1464,15 @@ function TrialSetupStep({
 // ─── Step 6: Done ───────────────────────────────────────────
 
 function DoneStep({
-  restaurantId,
-  restaurantSlug,
+  organizationId,
+  organizationSlug,
 }: {
-  restaurantId: string
-  restaurantSlug: string | null
+  organizationId: string
+  organizationSlug: string | null
 }) {
   const router = useRouter()
-  const joinUrl = restaurantSlug
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/join/${restaurantSlug}`
+  const joinUrl = organizationSlug
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/join/${organizationSlug}`
     : null
 
   return (
@@ -1476,7 +1486,7 @@ function DoneStep({
           <div>
             <h2 className="text-2xl font-bold">You&apos;re all set!</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Your restaurant is ready to welcome customers.
+              Your organization is ready to welcome contacts.
             </p>
           </div>
 

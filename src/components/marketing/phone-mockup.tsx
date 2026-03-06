@@ -282,7 +282,7 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
                         width={PHONE_CARD_W}
                         height={PHONE_CARD_H}
                         format="apple"
-                        restaurantName={card.restaurantName}
+                        organizationName={card.restaurantName}
                         currentVisits={card.currentVisits}
                         totalVisits={card.totalVisits}
                         rewardDescription={card.rewardDescription}

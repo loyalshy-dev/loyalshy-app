@@ -41,7 +41,7 @@ export function RedeemRewardDialog({
         return
       }
 
-      toast.success(`Reward redeemed for ${reward.customerName}`, {
+      toast.success(`Reward redeemed for ${reward.contactName}`, {
         description: reward.description,
       })
       onOpenChange(false)
@@ -59,7 +59,7 @@ export function RedeemRewardDialog({
         <DialogHeader>
           <DialogTitle className="text-base">Redeem Reward</DialogTitle>
           <DialogDescription className="text-[13px]">
-            Confirm this reward redemption for the customer.
+            Confirm this reward redemption for the contact.
           </DialogDescription>
         </DialogHeader>
 
@@ -72,7 +72,7 @@ export function RedeemRewardDialog({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-semibold truncate">
-                  {reward.customerName}
+                  {reward.contactName}
                 </p>
                 <p className="text-[13px] text-brand font-medium">
                   {reward.description}

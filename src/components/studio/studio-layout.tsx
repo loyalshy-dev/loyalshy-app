@@ -17,15 +17,15 @@ import { LabelsPanel } from "./panels/labels-panel"
 import { DetailsPanel } from "./panels/details-panel"
 import { TemplatePanel } from "./panels/template-panel"
 import { LogoPanel } from "./panels/logo-panel"
-import { saveCardDesign } from "@/server/settings-actions"
+import { savePassDesign as saveCardDesign } from "@/server/org-settings-actions"
 import type { StudioTool } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
-import type { ProgramType } from "@/types/program-types"
+import type { PassType } from "@/types/pass-types"
 
-/** Map ProgramType → CardType for visual rendering */
-function programTypeToCardType(programType: string): CardType {
-  switch (programType) {
+/** Map PassType → CardType for visual rendering */
+function passTypeToCardType(passType: string): CardType {
+  switch (passType) {
     case "COUPON": return "COUPON"
     case "MEMBERSHIP": return "TIER"
     case "PREPAID": return "PREPAID"
@@ -34,15 +34,15 @@ function programTypeToCardType(programType: string): CardType {
 }
 
 type StudioLayoutProps = {
-  programId: string
-  programName: string
-  programType: string
-  programConfig: unknown
-  restaurantName: string
-  restaurantLogo: string | null
-  restaurantLogoApple: string | null
-  restaurantLogoGoogle: string | null
-  restaurantId: string
+  templateId: string
+  templateName: string
+  passType: string
+  templateConfig: unknown
+  organizationName: string
+  organizationLogo: string | null
+  organizationLogoApple: string | null
+  organizationLogoGoogle: string | null
+  organizationId: string
   visitsRequired: number
   rewardDescription: string
   walletData: Record<string, unknown> | null
@@ -50,21 +50,21 @@ type StudioLayoutProps = {
 }
 
 export function StudioLayout({
-  programId,
-  programName,
-  programType,
-  programConfig,
-  restaurantName,
-  restaurantLogo,
-  restaurantLogoApple,
-  restaurantLogoGoogle,
-  restaurantId,
+  templateId,
+  templateName,
+  passType,
+  templateConfig,
+  organizationName,
+  organizationLogo,
+  organizationLogoApple,
+  organizationLogoGoogle,
+  organizationId,
   visitsRequired,
   rewardDescription,
   walletData,
   walletPassCount,
 }: StudioLayoutProps) {
-  const cardType = programTypeToCardType(programType)
+  const cardType = passTypeToCardType(passType)
   // Create store once per mount
   const storeRef = useRef<CardDesignStoreApi | null>(null)
   if (!storeRef.current) {
@@ -81,11 +81,11 @@ export function StudioLayout({
     if (walletData) {
       store.getState().hydrate(walletData as Partial<WalletState>)
     }
-    store.getState().setWalletField("logoAppleUrl", restaurantLogoApple ?? restaurantLogo)
-    store.getState().setWalletField("logoGoogleUrl", restaurantLogoGoogle ?? restaurantLogo)
+    store.getState().setWalletField("logoAppleUrl", organizationLogoApple ?? organizationLogo)
+    store.getState().setWalletField("logoGoogleUrl", organizationLogoGoogle ?? organizationLogo)
     // Mark clean after setting logos since it's not a design change
     store.getState().markClean()
-  }, [walletData, restaurantLogo, restaurantLogoApple, restaurantLogoGoogle, store])
+  }, [walletData, organizationLogo, organizationLogoApple, organizationLogoGoogle, store])
 
   // ─── Selectors ────────────────────────────────────────
 
@@ -140,7 +140,7 @@ export function StudioLayout({
 
     try {
       const result = await saveCardDesign({
-        programId,
+        templateId,
         cardType: state.wallet.cardType as "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID",
         showStrip: state.wallet.showStrip,
         primaryColor: state.wallet.primaryColor,
@@ -153,7 +153,7 @@ export function StudioLayout({
         labelFormat: state.wallet.labelFormat,
         customProgressLabel: state.wallet.customProgressLabel,
         palettePreset: state.wallet.palettePreset,
-        templateId: state.wallet.templateId,
+        templateId2: state.wallet.templateId ?? "",
         businessHours: state.wallet.businessHours,
         mapAddress: state.wallet.mapAddress,
         socialLinks: {
@@ -200,7 +200,7 @@ export function StudioLayout({
     } finally {
       store.getState().setSaving(false)
     }
-  }, [programId, walletPassCount, store])
+  }, [templateId, walletPassCount, store])
 
   // ─── Keyboard shortcuts ───────────────────────────────
 
@@ -230,21 +230,21 @@ export function StudioLayout({
 
     switch (ui.activeTool) {
       case "templates":
-        return <TemplatePanel store={store} restaurantId={restaurantId} restaurantLogo={restaurantLogo} cardType={cardType} />
+        return <TemplatePanel store={store} organizationId={organizationId} organizationLogo={organizationLogo} cardType={cardType} />
       case "colors":
         return <ColorsPanel store={store} />
       case "progress":
         return (
           <ProgressPanel
             store={store}
-            programId={programId}
+            programId={templateId}
             visitsRequired={visitsRequired}
           />
         )
       case "strip":
-        return <StripPanel store={store} programId={programId} />
+        return <StripPanel store={store} programId={templateId} />
       case "logo":
-        return <LogoPanel store={store} restaurantId={restaurantId} restaurantName={restaurantName} />
+        return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} />
       case "labels":
         return <LabelsPanel store={store} />
       case "details":
@@ -260,8 +260,8 @@ export function StudioLayout({
     <div style={{ height: "100dvh", display: "flex", flexDirection: "column" }}>
       {/* Top toolbar */}
       <StudioToolbar
-        programName={programName}
-        programId={programId}
+        programName={templateName}
+        programId={templateId}
         isDirty={ui.isDirty}
         isSaving={ui.isSaving}
         canUndo={canUndo}
@@ -292,11 +292,11 @@ export function StudioLayout({
             design={design}
             format={ui.previewFormat}
             deviceFrame={ui.deviceFrame}
-            restaurantName={restaurantName}
-            restaurantLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
-            programName={programName}
-            programType={programType}
-            programConfig={programConfig}
+            organizationName={organizationName}
+            organizationLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
+            templateName={templateName}
+            passType={passType}
+            templateConfig={templateConfig}
             visitsRequired={visitsRequired}
             rewardDescription={rewardDescription}
           />

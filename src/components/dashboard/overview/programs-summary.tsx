@@ -2,25 +2,27 @@
 
 import Link from "next/link"
 import { ChevronRight, Plus } from "lucide-react"
-import { PROGRAM_TYPE_META } from "@/types/program-types"
-import type { ProgramSummaryItem } from "@/server/analytics"
+import { PASS_TYPE_META } from "@/types/pass-types"
+import type { TemplateSummaryItem } from "@/server/analytics"
 
 type ProgramsSummaryProps = {
-  programs: ProgramSummaryItem[]
+  programs: TemplateSummaryItem[]
 }
 
-function getMetricLine(program: ProgramSummaryItem): string {
-  switch (program.programType) {
+function getMetricLine(program: TemplateSummaryItem): string {
+  switch (program.passType) {
     case "STAMP_CARD":
-      return `${program.activeEnrollments} enrolled \u00b7 ${program.redeemedRewards} rewards earned`
+      return `${program.activePassInstances} enrolled \u00b7 ${program.redeemedRewards} rewards earned`
     case "COUPON":
       return `${program.availableRewards + program.redeemedRewards} issued \u00b7 ${program.redeemedRewards} redeemed`
     case "MEMBERSHIP":
-      return `${program.activeEnrollments} members \u00b7 ${program.totalVisits} check-ins`
+      return `${program.activePassInstances} members \u00b7 ${program.totalInteractions} check-ins`
     case "POINTS":
-      return `${program.activeEnrollments} enrolled \u00b7 ${program.redeemedRewards} redeemed`
+      return `${program.activePassInstances} enrolled \u00b7 ${program.redeemedRewards} redeemed`
     case "PREPAID":
-      return `${program.activeEnrollments} issued \u00b7 ${program.totalVisits} uses`
+      return `${program.activePassInstances} issued \u00b7 ${program.totalInteractions} uses`
+    default:
+      return `${program.activePassInstances} enrolled`
   }
 }
 
@@ -54,7 +56,7 @@ export function ProgramsSummary({ programs }: ProgramsSummaryProps) {
       </h3>
       <div className="space-y-0">
         {programs.map((program) => {
-          const meta = PROGRAM_TYPE_META[program.programType]
+          const meta = PASS_TYPE_META[program.passType]
           const Icon = meta.icon
 
           return (

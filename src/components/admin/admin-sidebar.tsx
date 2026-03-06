@@ -34,14 +34,14 @@ type AdminSidebarProps = {
     name: string
     email: string
     image: string | null
-    restaurantId: string | null
+    organizationId: string | null
   }
 }
 
 const navItems = [
   { label: "Overview", href: "/admin", icon: BarChart3 },
   { label: "Users", href: "/admin/users", icon: Users },
-  { label: "Restaurants", href: "/admin/restaurants", icon: Building2 },
+  { label: "Organizations", href: "/admin/restaurants", icon: Building2 },
   { label: "Showcase", href: "/admin/showcase", icon: Image },
 ]
 
@@ -187,7 +187,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
             <DropdownMenuSeparator />
-            {user.restaurantId && (
+            {user.organizationId && (
               <>
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard">

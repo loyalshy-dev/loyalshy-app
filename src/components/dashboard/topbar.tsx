@@ -23,9 +23,9 @@ type TopbarProps = {
 
 const breadcrumbLabels: Record<string, string> = {
   dashboard: "Overview",
-  customers: "Customers",
+  customers: "Contacts",
   rewards: "Rewards",
-  programs: "Programs",
+  programs: "Templates",
   settings: "Settings",
   design: "Card Design",
   "qr-code": "QR Code",
@@ -115,7 +115,7 @@ export function Topbar({
         {/* Register Visit CTA */}
         <Button size="sm" className="gap-1.5" onClick={onOpenRegisterVisit}>
           <Plus className="size-3.5" />
-          <span className="hidden sm:inline">Register Visit</span>
+          <span className="hidden sm:inline">New Interaction</span>
         </Button>
       </div>
     </header>

@@ -10,12 +10,12 @@ import { assertSuperAdmin } from "@/lib/dal"
 
 export type AdminPlatformStats = {
   totalUsers: number
-  totalRestaurants: number
-  totalCustomers: number
-  totalVisits: number
+  totalOrganizations: number
+  totalContacts: number
+  totalInteractions: number
   totalRewards: number
   newUsersThisMonth: number
-  newRestaurantsThisMonth: number
+  newOrganizationsThisMonth: number
   activeSubscriptions: number
   estimatedMrr: number
   subscriptionBreakdown: { status: string; count: number }[]
@@ -30,10 +30,9 @@ export type AdminUserRow = {
   role: string
   banned: boolean
   banReason: string | null
-  restaurantId: string | null
-  restaurantName: string | null
   createdAt: Date
   emailVerified: boolean
+  organizationName?: string | null
 }
 
 export type AdminUsersResult = {
@@ -42,7 +41,7 @@ export type AdminUsersResult = {
   pageCount: number
 }
 
-export type AdminRestaurantRow = {
+export type AdminOrganizationRow = {
   id: string
   name: string
   slug: string
@@ -52,14 +51,14 @@ export type AdminRestaurantRow = {
   trialEndsAt: Date | null
   createdAt: Date
   _count: {
-    users: number
-    loyaltyPrograms: number
-    customers: number
+    members: number
+    passTemplates: number
+    contacts: number
   }
 }
 
-export type AdminRestaurantsResult = {
-  restaurants: AdminRestaurantRow[]
+export type AdminOrganizationsResult = {
+  organizations: AdminOrganizationRow[]
   total: number
   pageCount: number
 }
@@ -72,7 +71,7 @@ export type AdminUserSession = {
   userAgent: string | null
 }
 
-export type AdminRestaurantDetail = {
+export type AdminOrganizationDetail = {
   id: string
   name: string
   slug: string
@@ -82,17 +81,21 @@ export type AdminRestaurantDetail = {
   trialEndsAt: Date | null
   createdAt: Date
   _count: {
-    users: number
-    loyaltyPrograms: number
-    customers: number
+    members: number
+    passTemplates: number
+    contacts: number
   }
-  users: {
+  members: {
     id: string
-    name: string
-    email: string
-    image: string | null
+    userId: string
     role: string
-    orgRole: string | null
+    user: {
+      id: string
+      name: string
+      email: string
+      image: string | null
+      role: string
+    }
   }[]
 }
 
@@ -136,27 +139,27 @@ export async function getAdminPlatformStats(): Promise<AdminPlatformStats> {
 
   const [
     totalUsers,
-    totalRestaurants,
-    totalCustomers,
-    totalVisits,
+    totalOrganizations,
+    totalContacts,
+    totalInteractions,
     totalRewards,
     newUsersThisMonth,
-    newRestaurantsThisMonth,
+    newOrganizationsThisMonth,
     subscriptionGroups,
     planGroups,
   ] = await Promise.all([
     db.user.count(),
-    db.restaurant.count(),
-    db.customer.count(),
-    db.visit.count(),
+    db.organization.count(),
+    db.contact.count(),
+    db.interaction.count(),
     db.reward.count(),
     db.user.count({ where: { createdAt: { gte: monthStart } } }),
-    db.restaurant.count({ where: { createdAt: { gte: monthStart } } }),
-    db.restaurant.groupBy({
+    db.organization.count({ where: { createdAt: { gte: monthStart } } }),
+    db.organization.groupBy({
       by: ["subscriptionStatus"],
       _count: { id: true },
     }),
-    db.restaurant.groupBy({
+    db.organization.groupBy({
       by: ["plan"],
       _count: { id: true },
     }),
@@ -182,12 +185,12 @@ export async function getAdminPlatformStats(): Promise<AdminPlatformStats> {
 
   return {
     totalUsers,
-    totalRestaurants,
-    totalCustomers,
-    totalVisits,
+    totalOrganizations,
+    totalContacts,
+    totalInteractions,
     totalRewards,
     newUsersThisMonth,
-    newRestaurantsThisMonth,
+    newOrganizationsThisMonth,
     activeSubscriptions,
     estimatedMrr,
     subscriptionBreakdown,
@@ -232,9 +235,6 @@ export async function getAdminUsers(opts: GetAdminUsersOpts): Promise<AdminUsers
   const [users, total] = await Promise.all([
     db.user.findMany({
       where,
-      include: {
-        restaurant: { select: { name: true } },
-      },
       orderBy: { [sortField]: order },
       skip: (page - 1) * perPage,
       take: perPage,
@@ -251,8 +251,6 @@ export async function getAdminUsers(opts: GetAdminUsersOpts): Promise<AdminUsers
       role: u.role,
       banned: u.banned,
       banReason: u.banReason,
-      restaurantId: u.restaurantId,
-      restaurantName: u.restaurant?.name ?? null,
       createdAt: u.createdAt,
       emailVerified: u.emailVerified,
     })),
@@ -261,9 +259,9 @@ export async function getAdminUsers(opts: GetAdminUsersOpts): Promise<AdminUsers
   }
 }
 
-// ─── Restaurants List ──────────────────────────────────────
+// ─── Organizations List ──────────────────────────────────────
 
-type GetAdminRestaurantsOpts = {
+type GetAdminOrganizationsOpts = {
   page: number
   perPage: number
   search: string
@@ -272,7 +270,7 @@ type GetAdminRestaurantsOpts = {
   filter: "all" | "ACTIVE" | "TRIALING" | "PAST_DUE" | "CANCELED"
 }
 
-export async function getAdminRestaurants(opts: GetAdminRestaurantsOpts): Promise<AdminRestaurantsResult> {
+export async function getAdminOrganizations(opts: GetAdminOrganizationsOpts): Promise<AdminOrganizationsResult> {
   await assertSuperAdmin()
 
   const { page, perPage, search, sort, order, filter } = opts
@@ -293,15 +291,15 @@ export async function getAdminRestaurants(opts: GetAdminRestaurantsOpts): Promis
   const allowedSorts = ["name", "createdAt", "plan", "subscriptionStatus"]
   const sortField = allowedSorts.includes(sort) ? sort : "createdAt"
 
-  const [restaurants, total] = await Promise.all([
-    db.restaurant.findMany({
+  const [organizations, total] = await Promise.all([
+    db.organization.findMany({
       where,
       include: {
         _count: {
           select: {
-            users: true,
-            loyaltyPrograms: true,
-            customers: true,
+            members: true,
+            passTemplates: true,
+            contacts: true,
           },
         },
       },
@@ -309,83 +307,74 @@ export async function getAdminRestaurants(opts: GetAdminRestaurantsOpts): Promis
       skip: (page - 1) * perPage,
       take: perPage,
     }),
-    db.restaurant.count({ where }),
+    db.organization.count({ where }),
   ])
 
   return {
-    restaurants: restaurants.map((r) => ({
-      id: r.id,
-      name: r.name,
-      slug: r.slug,
-      plan: r.plan,
-      subscriptionStatus: r.subscriptionStatus,
-      stripeCustomerId: r.stripeCustomerId,
-      trialEndsAt: r.trialEndsAt,
-      createdAt: r.createdAt,
-      _count: r._count,
+    organizations: organizations.map((o) => ({
+      id: o.id,
+      name: o.name,
+      slug: o.slug,
+      plan: o.plan,
+      subscriptionStatus: o.subscriptionStatus,
+      stripeCustomerId: o.stripeCustomerId,
+      trialEndsAt: o.trialEndsAt,
+      createdAt: o.createdAt,
+      _count: o._count,
     })),
     total,
     pageCount: Math.ceil(total / perPage),
   }
 }
 
-// ─── Restaurant Detail ─────────────────────────────────────
+// ─── Organization Detail ─────────────────────────────────────
 
-export async function getAdminRestaurantDetail(id: string): Promise<AdminRestaurantDetail | null> {
+export async function getAdminOrganizationDetail(id: string): Promise<AdminOrganizationDetail | null> {
   await assertSuperAdmin()
 
-  const restaurant = await db.restaurant.findUnique({
+  const organization = await db.organization.findUnique({
     where: { id },
     include: {
       _count: {
         select: {
-          users: true,
-          loyaltyPrograms: true,
-          customers: true,
+          members: true,
+          passTemplates: true,
+          contacts: true,
         },
       },
-      users: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-          role: true,
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              role: true,
+            },
+          },
         },
       },
     },
   })
 
-  if (!restaurant) return null
-
-  // Look up org membership roles for each user
-  const org = await db.organization.findUnique({
-    where: { slug: restaurant.slug },
-    select: { id: true },
-  })
-
-  const members = org
-    ? await db.member.findMany({
-        where: { organizationId: org.id },
-        select: { userId: true, role: true },
-      })
-    : []
-
-  const memberRoleMap = new Map(members.map((m) => [m.userId, m.role]))
+  if (!organization) return null
 
   return {
-    id: restaurant.id,
-    name: restaurant.name,
-    slug: restaurant.slug,
-    plan: restaurant.plan,
-    subscriptionStatus: restaurant.subscriptionStatus,
-    stripeCustomerId: restaurant.stripeCustomerId,
-    trialEndsAt: restaurant.trialEndsAt,
-    createdAt: restaurant.createdAt,
-    _count: restaurant._count,
-    users: restaurant.users.map((u) => ({
-      ...u,
-      orgRole: memberRoleMap.get(u.id) ?? null,
+    id: organization.id,
+    name: organization.name,
+    slug: organization.slug,
+    plan: organization.plan,
+    subscriptionStatus: organization.subscriptionStatus,
+    stripeCustomerId: organization.stripeCustomerId,
+    trialEndsAt: organization.trialEndsAt,
+    createdAt: organization.createdAt,
+    _count: organization._count,
+    members: organization.members.map((m) => ({
+      id: m.id,
+      userId: m.userId,
+      role: m.role,
+      user: m.user,
     })),
   }
 }

@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns"
 import { Stamp, Ticket, Crown, Coins, CreditCard } from "lucide-react"
-import type { TopCustomerItem } from "@/server/analytics"
+import type { TopContactItem } from "@/server/analytics"
 
 function getInitials(name: string): string {
   return name
@@ -32,19 +32,19 @@ const typeIcons: Record<string, typeof Stamp> = {
   PREPAID: CreditCard,
 }
 
-type TopCustomersProps = {
-  customers: TopCustomerItem[]
+type TopContactsProps = {
+  contacts: TopContactItem[]
 }
 
-export function TopCustomers({ customers }: TopCustomersProps) {
-  if (customers.length === 0) {
+export function TopContacts({ contacts }: TopContactsProps) {
+  if (contacts.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-5">
         <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
-          Top Customers
+          Top Contacts
         </h3>
         <p className="text-sm text-muted-foreground py-8 text-center">
-          No customers yet
+          No contacts yet
         </p>
       </div>
     )
@@ -53,33 +53,33 @@ export function TopCustomers({ customers }: TopCustomersProps) {
   return (
     <div className="rounded-lg border border-border bg-card p-5">
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
-        Top Customers
+        Top Contacts
       </h3>
       <div className="space-y-0">
-        {customers.map((customer) => {
-          const TypeIcon = customer.primaryProgramType
-            ? typeIcons[customer.primaryProgramType]
+        {contacts.map((contact) => {
+          const TypeIcon = contact.primaryPassType
+            ? typeIcons[contact.primaryPassType]
             : null
 
           return (
             <div
-              key={customer.id}
+              key={contact.id}
               className="flex items-center gap-3 py-2.5 border-b border-border last:border-0"
             >
               <div
                 className="flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-medium text-white"
-                style={{ backgroundColor: getAvatarColor(customer.fullName) }}
+                style={{ backgroundColor: getAvatarColor(contact.fullName) }}
               >
-                {getInitials(customer.fullName)}
+                {getInitials(contact.fullName)}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-medium truncate">
-                  {customer.fullName}
+                  {contact.fullName}
                 </p>
-                {customer.lastVisitAt && (
+                {contact.lastInteractionAt && (
                   <p className="text-[11px] text-muted-foreground">
-                    Last visit{" "}
-                    {formatDistanceToNow(new Date(customer.lastVisitAt), {
+                    Last interaction{" "}
+                    {formatDistanceToNow(new Date(contact.lastInteractionAt), {
                       addSuffix: true,
                     })}
                   </p>
@@ -90,7 +90,7 @@ export function TopCustomers({ customers }: TopCustomersProps) {
                   <TypeIcon className="size-3 text-muted-foreground/60" />
                 )}
                 <span className="text-[12px] font-medium tabular-nums text-muted-foreground">
-                  {customer.engagementLabel}
+                  {contact.engagementLabel}
                 </span>
               </div>
             </div>

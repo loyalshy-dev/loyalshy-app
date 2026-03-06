@@ -12,7 +12,7 @@ import {
 } from "./constants"
 import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters } from "../card-design"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, getCheapestCatalogItem } from "../../program-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -26,16 +26,16 @@ export type PassGenerationInput = {
   totalVisits: number
   memberSince: Date
   hasAvailableReward: boolean
-  restaurantName: string
-  restaurantLogo: string | null
-  restaurantLogoApple: string | null
+  organizationName: string
+  organizationLogo: string | null
+  organizationLogoApple: string | null
   brandColor: string | null
   secondaryColor: string | null
   rewardDescription: string
   rewardExpiryDays: number
   termsAndConditions: string | null
-  restaurantPhone: string | null
-  restaurantWebsite: string | null
+  organizationPhone: string | null
+  organizationWebsite: string | null
   // Program name for multi-program display
   programName?: string
   // Card design fields
@@ -47,9 +47,20 @@ export type PassGenerationInput = {
   pointsBalance?: number
   // Remaining uses for PREPAID program type
   remainingUses?: number
-  // Enrollment + restaurant slug for generating card page links (prize reveal)
-  enrollmentId?: string
-  restaurantSlug?: string
+  // Gift card data
+  giftBalanceCents?: number
+  giftCurrency?: string
+  // Ticket data
+  ticketScanCount?: number
+  // Access data
+  accessTotalGranted?: number
+  // Transit data
+  transitIsBoarded?: boolean
+  // Business ID data
+  businessIdVerifications?: number
+  // Pass instance + org slug for generating card page links (prize reveal)
+  passInstanceId?: string
+  organizationSlug?: string
   // Whether there is an unrevealed prize to reveal
   hasUnrevealedPrize?: boolean
 }
@@ -135,7 +146,7 @@ export async function generateApplePass(
     }
   }
 
-  const icons = await getIconBuffers(input.restaurantLogoApple ?? input.restaurantLogo, stripImageUrl)
+  const icons = await getIconBuffers(input.organizationLogoApple ?? input.organizationLogo, stripImageUrl)
 
   // If we have a dynamically generated stamp grid buffer, inject it directly
   if (stampGridStripBuffer) {
@@ -151,12 +162,19 @@ export async function generateApplePass(
 
   // Type-aware pass description
   const passDescription = (() => {
-    const name = input.programName ?? input.restaurantName
-    if (input.programType === "COUPON") return `${name} Coupon`
-    if (input.programType === "MEMBERSHIP") return `${name} Membership`
-    if (input.programType === "POINTS") return `${name} Points Card`
-    if (input.programType === "PREPAID") return `${name} Pass`
-    return `${name} Loyalty Card`
+    const name = input.programName ?? input.organizationName
+    switch (input.programType) {
+      case "COUPON": return `${name} Coupon`
+      case "MEMBERSHIP": return `${name} Membership`
+      case "POINTS": return `${name} Points Card`
+      case "PREPAID": return `${name} Pass`
+      case "GIFT_CARD": return `${name} Gift Card`
+      case "TICKET": return `${name} Ticket`
+      case "ACCESS": return `${name} Access Pass`
+      case "TRANSIT": return `${name} Boarding Pass`
+      case "BUSINESS_ID": return `${name} ID`
+      default: return `${name} Loyalty Card`
+    }
   })()
 
   const pass = new PKPass(icons, certs, {
@@ -171,12 +189,19 @@ export async function generateApplePass(
     backgroundColor: colors.backgroundColor,
     foregroundColor: colors.foregroundColor,
     labelColor: colors.labelColor,
-    logoText: input.restaurantName,
+    logoText: input.organizationName,
     sharingProhibited: true,
   })
 
-  // Use storeCard for loyalty cards (supports strip images)
-  pass.type = "storeCard"
+  // Apple Wallet pass type mapping
+  switch (input.programType) {
+    case "TICKET": pass.type = "eventTicket"; break
+    case "TRANSIT": pass.type = "boardingPass"; break
+    case "MEMBERSHIP":
+    case "ACCESS":
+    case "BUSINESS_ID": pass.type = "generic"; break
+    default: pass.type = "storeCard"; break // STAMP_CARD, COUPON, POINTS, PREPAID, GIFT_CARD
+  }
 
   // Apple Watch notes:
   // - Strip images are NOT displayed on Apple Watch — only back fields and text fields render.
@@ -214,11 +239,16 @@ export async function generateApplePass(
   const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
   const pointsConfig = input.programType === "POINTS" ? parsePointsConfig(input.programConfig) : null
   const prepaidConfig = input.programType === "PREPAID" ? parsePrepaidConfig(input.programConfig) : null
+  const giftCardConfig = input.programType === "GIFT_CARD" ? parseGiftCardConfig(input.programConfig) : null
+  const ticketConfig = input.programType === "TICKET" ? parseTicketConfig(input.programConfig) : null
+  const accessConfig = input.programType === "ACCESS" ? parseAccessConfig(input.programConfig) : null
+  const transitConfig = input.programType === "TRANSIT" ? parseTransitConfig(input.programConfig) : null
+  const businessIdConfig = input.programType === "BUSINESS_ID" ? parseBusinessIdConfig(input.programConfig) : null
   const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Field data map — all labels go through formatLabel
   const fieldData: Record<string, { key: string; label: string; value: string }> = {
-    restaurant: { key: "restaurant", label: formatLabel("RESTAURANT", labelFmt), value: input.restaurantName },
+    organization: { key: "organization", label: formatLabel("ORGANIZATION", labelFmt), value: input.organizationName },
     memberNumber: { key: "memberNumber", label: formatLabel("MEMBER", labelFmt), value: `#${input.totalVisits}` },
     progress: { key: "progress", label: formatLabel(progressLabel, labelFmt), value: progressValue },
     nextReward: { key: "nextReward", label: formatLabel("NEXT REWARD", labelFmt), value: input.rewardDescription },
@@ -240,30 +270,76 @@ export async function generateApplePass(
     remaining: { key: "remaining", label: formatLabel("REMAINING", labelFmt), value: `${input.remainingUses ?? 0} / ${prepaidConfig?.totalUses ?? 0}` },
     prepaidValidUntil: { key: "prepaidValidUntil", label: formatLabel("VALID UNTIL", labelFmt), value: prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
     totalUsed: { key: "totalUsed", label: formatLabel("TOTAL USED", labelFmt), value: String(input.totalVisits) },
+    // GIFT_CARD fields
+    giftBalance: { key: "giftBalance", label: formatLabel("BALANCE", labelFmt), value: giftCardConfig ? `${giftCardConfig.currency} ${((input.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
+    giftInitial: { key: "giftInitial", label: formatLabel("INITIAL VALUE", labelFmt), value: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
+    // TICKET fields
+    eventName: { key: "eventName", label: formatLabel("EVENT", labelFmt), value: ticketConfig?.eventName ?? "" },
+    eventDate: { key: "eventDate", label: formatLabel("DATE", labelFmt), value: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
+    eventVenue: { key: "eventVenue", label: formatLabel("VENUE", labelFmt), value: ticketConfig?.eventVenue ?? "" },
+    scanStatus: { key: "scanStatus", label: formatLabel("SCANS", labelFmt), value: `${input.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
+    // ACCESS fields
+    accessLabel: { key: "accessLabel", label: formatLabel(accessConfig?.accessLabel ?? "ACCESS", labelFmt), value: "Granted" },
+    accessGranted: { key: "accessGranted", label: formatLabel("TOTAL GRANTED", labelFmt), value: String(input.accessTotalGranted ?? 0) },
+    // TRANSIT fields
+    transitType: { key: "transitType", label: formatLabel("TYPE", labelFmt), value: (transitConfig?.transitType ?? "other").toUpperCase() },
+    origin: { key: "origin", label: formatLabel("FROM", labelFmt), value: transitConfig?.originName ?? "" },
+    destination: { key: "destination", label: formatLabel("TO", labelFmt), value: transitConfig?.destinationName ?? "" },
+    boardingStatus: { key: "boardingStatus", label: formatLabel("STATUS", labelFmt), value: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
+    // BUSINESS_ID fields
+    idLabel: { key: "idLabel", label: formatLabel(businessIdConfig?.idLabel ?? "ID", labelFmt), value: input.customerName },
+    verifications: { key: "verifications", label: formatLabel("VERIFICATIONS", labelFmt), value: String(input.businessIdVerifications ?? 0) },
+    // Generic fields
+    title: { key: "title", label: formatLabel("TITLE", labelFmt), value: input.programName ?? "" },
+    description: { key: "description", label: formatLabel("DESCRIPTION", labelFmt), value: input.rewardDescription },
+    contactName: { key: "contactName", label: formatLabel("NAME", labelFmt), value: input.customerName },
   }
 
+  // Type-specific field overrides for new pass types
+  const appleLayout = (() => {
+    switch (input.programType) {
+      case "GIFT_CARD":
+        return { header: ["organization"], primary: ["giftBalance"], secondary: ["giftInitial", "customerName"], auxiliary: [] }
+      case "TICKET":
+        return { header: ["scanStatus"], primary: ["eventName"], secondary: ["eventDate", "eventVenue", "customerName"], auxiliary: [] }
+      case "ACCESS":
+        return { header: ["accessGranted"], primary: ["accessLabel"], secondary: ["customerName", "memberSince"], auxiliary: [] }
+      case "TRANSIT":
+        return { header: ["boardingStatus"], primary: ["origin"], secondary: ["destination", "transitType"], auxiliary: ["customerName"] }
+      case "BUSINESS_ID":
+        return { header: ["verifications"], primary: ["idLabel"], secondary: ["organization", "memberSince"], auxiliary: [] }
+      default:
+        return layout.apple
+    }
+  })()
+
   // Populate header fields
-  for (const fieldId of layout.apple.header) {
+  for (const fieldId of appleLayout.header) {
     const f = fieldData[fieldId]
     if (f) pass.headerFields.push(f)
   }
 
   // Populate primary fields
-  for (const fieldId of layout.apple.primary) {
+  for (const fieldId of appleLayout.primary) {
     const f = fieldData[fieldId]
     if (f) pass.primaryFields.push(f)
   }
 
   // Populate secondary fields
-  for (const fieldId of layout.apple.secondary) {
+  for (const fieldId of appleLayout.secondary) {
     const f = fieldData[fieldId]
     if (f) pass.secondaryFields.push(f)
   }
 
   // Populate auxiliary fields
-  for (const fieldId of layout.apple.auxiliary) {
+  for (const fieldId of appleLayout.auxiliary) {
     const f = fieldData[fieldId]
     if (f) pass.auxiliaryFields.push(f)
+  }
+
+  // Transit pass requires transitType for boardingPass
+  if (input.programType === "TRANSIT") {
+    (pass as unknown as Record<string, unknown>).transitType = "PKTransitTypeGeneric"
   }
 
   // ── Back fields: Program info, T&C, contact, card design extras ──
@@ -349,6 +425,56 @@ export async function generateApplePass(
       label: "How to Use",
       value: `Show this pass to staff each time you use a ${prepaidConfig.useLabel}. Your remaining balance will be updated automatically.`,
     })
+  } else if (input.programType === "GIFT_CARD" && giftCardConfig) {
+    const balanceCents = input.giftBalanceCents ?? giftCardConfig.initialBalanceCents
+    pass.backFields.push({
+      key: "giftDetails",
+      label: "Gift Card Details",
+      value: `Balance: ${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}\nInitial Value: ${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}${giftCardConfig.partialRedemption ? "\nPartial redemption is allowed." : "\nFull balance must be used at once."}`,
+    })
+    if (giftCardConfig.expiryMonths) {
+      pass.backFields.push({
+        key: "giftExpiry",
+        label: "Expiry",
+        value: `This gift card expires ${giftCardConfig.expiryMonths} months after issue.`,
+      })
+    }
+    pass.backFields.push({
+      key: "giftUsage",
+      label: "How to Use",
+      value: "Present this pass at checkout. Your balance will be deducted automatically.",
+    })
+  } else if (input.programType === "TICKET" && ticketConfig) {
+    pass.backFields.push(
+      {
+        key: "ticketEvent",
+        label: "Event",
+        value: `${ticketConfig.eventName}\n${new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}\n${ticketConfig.eventVenue}`,
+      },
+      {
+        key: "ticketScans",
+        label: "Scan Status",
+        value: `${input.ticketScanCount ?? 0} of ${ticketConfig.maxScans} scans used.`,
+      }
+    )
+  } else if (input.programType === "ACCESS" && accessConfig) {
+    pass.backFields.push({
+      key: "accessDetails",
+      label: `${accessConfig.accessLabel} Details`,
+      value: `Total grants: ${input.accessTotalGranted ?? 0}${accessConfig.maxDailyUses ? `\nDaily limit: ${accessConfig.maxDailyUses} uses` : ""}${accessConfig.validDays?.length ? `\nValid days: ${accessConfig.validDays.join(", ")}` : ""}${accessConfig.validTimeStart && accessConfig.validTimeEnd ? `\nValid hours: ${accessConfig.validTimeStart}–${accessConfig.validTimeEnd}` : ""}`,
+    })
+  } else if (input.programType === "TRANSIT" && transitConfig) {
+    pass.backFields.push({
+      key: "transitDetails",
+      label: "Transit Details",
+      value: `Type: ${transitConfig.transitType.toUpperCase()}${transitConfig.originName ? `\nFrom: ${transitConfig.originName}` : ""}${transitConfig.destinationName ? `\nTo: ${transitConfig.destinationName}` : ""}${transitConfig.departureDateTime ? `\nDeparture: ${new Date(transitConfig.departureDateTime).toLocaleString("en-US")}` : ""}`,
+    })
+  } else if (input.programType === "BUSINESS_ID" && businessIdConfig) {
+    pass.backFields.push({
+      key: "idDetails",
+      label: businessIdConfig.idLabel,
+      value: `Name: ${input.customerName}\nVerifications: ${input.businessIdVerifications ?? 0}`,
+    })
   } else {
     // STAMP_CARD (default)
     pass.backFields.push(
@@ -366,7 +492,12 @@ export async function generateApplePass(
   }
 
   // T&C from program or type-specific config
-  const termsText = (input.programType === "COUPON" ? couponConfig?.terms : input.programType === "MEMBERSHIP" ? membershipConfig?.terms : input.programType === "PREPAID" ? prepaidConfig?.terms : null) ?? input.termsAndConditions
+  const termsText = (
+    input.programType === "COUPON" ? couponConfig?.terms :
+    input.programType === "MEMBERSHIP" ? membershipConfig?.terms :
+    input.programType === "PREPAID" ? prepaidConfig?.terms :
+    null
+  ) ?? input.termsAndConditions
   if (termsText) {
     pass.backFields.push({
       key: "terms",
@@ -378,10 +509,10 @@ export async function generateApplePass(
   // Always include contact info — Apple HIG requires a way to reach the business
   {
     const contactParts: string[] = []
-    if (input.restaurantPhone) contactParts.push(input.restaurantPhone)
-    if (input.restaurantWebsite) contactParts.push(input.restaurantWebsite)
+    if (input.organizationPhone) contactParts.push(input.organizationPhone)
+    if (input.organizationWebsite) contactParts.push(input.organizationWebsite)
     if (contactParts.length === 0) {
-      contactParts.push(input.restaurantName)
+      contactParts.push(input.organizationName)
       contactParts.push("https://loyalshy.com")
     }
     pass.backFields.push({
@@ -430,11 +561,11 @@ export async function generateApplePass(
   }
 
   // Prize reveal link — shown when an unrevealed prize is pending
-  if (input.hasUnrevealedPrize && input.enrollmentId && input.restaurantSlug) {
+  if (input.hasUnrevealedPrize && input.passInstanceId && input.organizationSlug) {
     const { signCardAccess } = await import("../../card-access")
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
-    const sig = signCardAccess(input.enrollmentId)
-    const cardPageUrl = `${baseUrl}/join/${input.restaurantSlug}/card/${input.enrollmentId}?sig=${sig}`
+    const sig = signCardAccess(input.passInstanceId)
+    const cardPageUrl = `${baseUrl}/join/${input.organizationSlug}/card/${input.passInstanceId}?sig=${sig}`
     pass.backFields.push({
       key: "revealLink",
       label: "Prize Ready!",
@@ -448,12 +579,12 @@ export async function generateApplePass(
     value: "Loyalshy — Digital Loyalty Cards\nhttps://loyalshy.com",
   })
 
-  // Location relevance — shows pass on lock screen when near the restaurant
+  // Location relevance — shows pass on lock screen when near the organization
   if (design?.mapLatitude != null && design?.mapLongitude != null) {
     pass.setLocations({
       latitude: design.mapLatitude,
       longitude: design.mapLongitude,
-      relevantText: `You're near ${input.restaurantName}`,
+      relevantText: `You're near ${input.organizationName}`,
     })
   }
 

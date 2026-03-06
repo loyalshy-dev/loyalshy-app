@@ -1,7 +1,7 @@
 import { connection } from "next/server"
 import { assertSuperAdmin } from "@/lib/dal"
-import { getAdminRestaurants } from "@/server/admin-actions"
-import { AdminRestaurantsView } from "@/components/admin/restaurants/admin-restaurants-view"
+import { getAdminOrganizations } from "@/server/admin-actions"
+import { AdminOrganizationsView } from "@/components/admin/restaurants/admin-restaurants-view"
 
 export default async function AdminRestaurantsPage({
   searchParams,
@@ -25,7 +25,7 @@ export default async function AdminRestaurantsPage({
     ? params.filter
     : "all" as const
 
-  const result = await getAdminRestaurants({
+  const result = await getAdminOrganizations({
     page,
     perPage: 25,
     search,
@@ -35,8 +35,8 @@ export default async function AdminRestaurantsPage({
   })
 
   return (
-    <AdminRestaurantsView
-      restaurants={result.restaurants}
+    <AdminOrganizationsView
+      organizations={result.organizations}
       total={result.total}
       pageCount={result.pageCount}
       params={{ search, sort, order, page, filter }}

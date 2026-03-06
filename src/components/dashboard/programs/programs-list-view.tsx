@@ -10,28 +10,28 @@ import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-p
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
 import { statusConfig } from "./program-status"
 import { CreateProgramForm } from "./create-program-form"
-import { PROGRAM_TYPE_META, type ProgramType } from "@/types/program-types"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, formatPointsValue, parsePrepaidConfig } from "@/lib/program-config"
+import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, formatPointsValue, parsePrepaidConfig } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
-import type { ProgramListItem } from "@/server/program-actions"
+import type { TemplateListItem } from "@/server/template-actions"
 
-function buildDesign(cardDesign: ProgramListItem["cardDesign"]): WalletPassDesign {
-  const sf = cardDesign ? parseStripFilters(cardDesign.editorConfig) : null
-  const useStampGrid = sf ? (sf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID") : false
+function buildDesign(passDesign: TemplateListItem["passDesign"]): WalletPassDesign {
+  const sf = passDesign ? parseStripFilters(passDesign.editorConfig) : null
+  const useStampGrid = sf ? (sf.useStampGrid || passDesign?.patternStyle === "STAMP_GRID") : false
 
   return {
-    cardType: (cardDesign?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-    showStrip: cardDesign?.showStrip ?? true,
-    primaryColor: cardDesign?.primaryColor ?? "#1a1a2e",
-    secondaryColor: cardDesign?.secondaryColor ?? "#ffffff",
-    textColor: cardDesign?.textColor ?? "#ffffff",
-    progressStyle: (cardDesign?.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
-    labelFormat: (cardDesign?.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
-    customProgressLabel: cardDesign?.customProgressLabel ?? null,
-    stripImageUrl: cardDesign?.stripImageUrl ?? null,
+    cardType: (passDesign?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
+    showStrip: passDesign?.showStrip ?? true,
+    primaryColor: passDesign?.primaryColor ?? "#1a1a2e",
+    secondaryColor: passDesign?.secondaryColor ?? "#ffffff",
+    textColor: passDesign?.textColor ?? "#ffffff",
+    progressStyle: (passDesign?.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
+    labelFormat: (passDesign?.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
+    customProgressLabel: passDesign?.customProgressLabel ?? null,
+    stripImageUrl: passDesign?.stripImageUrl ?? null,
     stripOpacity: sf?.stripOpacity ?? 1,
     stripGrayscale: sf?.stripGrayscale ?? false,
-    patternStyle: (cardDesign?.patternStyle === "STAMP_GRID" ? "NONE" : cardDesign?.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
+    patternStyle: (passDesign?.patternStyle === "STAMP_GRID" ? "NONE" : passDesign?.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
     useStampGrid,
     stripColor1: sf?.stripColor1 ?? null,
     stripColor2: sf?.stripColor2 ?? null,
@@ -39,64 +39,71 @@ function buildDesign(cardDesign: ProgramListItem["cardDesign"]): WalletPassDesig
     patternColor: sf?.patternColor ?? null,
     stripImagePosition: sf?.stripImagePosition,
     stripImageZoom: sf?.stripImageZoom,
-    stampGridConfig: useStampGrid && cardDesign
-      ? parseStampGridConfig(cardDesign.editorConfig)
+    stampGridConfig: useStampGrid && passDesign
+      ? parseStampGridConfig(passDesign.editorConfig)
       : undefined,
   }
 }
 
-function getTypeSubtitle(program: ProgramListItem): string {
-  const type = program.programType as ProgramType
+function getTypeSubtitle(program: TemplateListItem): string {
+  const type = program.passType as PassType
+  const count = program.passInstanceCount
+  const templateCfg = program.config as Record<string, unknown> | null ?? {}
   switch (type) {
-    case "STAMP_CARD":
-      return `${program.visitsRequired} visits | ${program.enrollmentCount} enrolled`
+    case "STAMP_CARD": {
+      const stampsRequired = (templateCfg as { stampsRequired?: number }).stampsRequired ?? 10
+      return `${stampsRequired} visits | ${count} enrolled`
+    }
     case "COUPON": {
       const config = parseCouponConfig(program.config)
-      const discount = config ? formatCouponValue(config) : program.rewardDescription
-      return `${discount} | ${program.enrollmentCount} claimed`
+      const rewardDesc = (templateCfg as { rewardDescription?: string }).rewardDescription ?? ""
+      const discount = config ? formatCouponValue(config) : rewardDesc
+      return `${discount} | ${count} claimed`
     }
     case "MEMBERSHIP": {
       const config = parseMembershipConfig(program.config)
       const tier = config?.membershipTier ?? "Member"
-      return `${tier} | ${program.enrollmentCount} members`
+      return `${tier} | ${count} members`
     }
     case "POINTS": {
       const pConfig = parsePointsConfig(program.config)
       const subtitle = pConfig ? `${pConfig.pointsPerVisit} pts/visit` : "Points"
-      return `${subtitle} | ${program.enrollmentCount} enrolled`
+      return `${subtitle} | ${count} enrolled`
     }
     case "PREPAID": {
       const prepConfig = parsePrepaidConfig(program.config)
-      return `${prepConfig?.totalUses ?? 0} ${prepConfig?.useLabel ?? "use"}s | ${program.enrollmentCount} issued`
+      return `${prepConfig?.totalUses ?? 0} ${prepConfig?.useLabel ?? "use"}s | ${count} issued`
     }
     default:
-      return `${program.enrollmentCount} enrolled`
+      return `${count} enrolled`
   }
 }
 
-function ProgramCardPreview({
+function TemplateCardPreview({
   design,
   program,
-  restaurantName,
+  organizationName,
 }: {
   design: WalletPassDesign
-  program: ProgramListItem
-  restaurantName: string
+  program: TemplateListItem
+  organizationName: string
 }) {
-  const type = program.programType as ProgramType
+  const type = program.passType as PassType
   const couponConfig = type === "COUPON" ? parseCouponConfig(program.config) : null
   const membershipConfig = type === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
   const prepaidConfig = type === "PREPAID" ? parsePrepaidConfig(program.config) : null
+  const templateCfg = program.config as Record<string, unknown> | null ?? {}
+  const stampsRequired = (templateCfg as { stampsRequired?: number }).stampsRequired ?? 10
+  const rewardDescription = (templateCfg as { rewardDescription?: string }).rewardDescription ?? ""
 
   return (
     <WalletPassRenderer
       design={design}
       format="apple"
-      restaurantName={restaurantName}
       programName={program.name}
       currentVisits={4}
-      totalVisits={program.visitsRequired}
-      rewardDescription={program.rewardDescription}
+      totalVisits={stampsRequired}
+      rewardDescription={rewardDescription}
       compact
       width={180}
       height={250}
@@ -119,21 +126,21 @@ function ProgramCardPreview({
   )
 }
 
-type TypeFilter = "ALL" | ProgramType
+type TypeFilter = "ALL" | "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "PREPAID"
 
-type ProgramsListViewProps = {
-  programs: ProgramListItem[]
-  restaurantId: string
-  restaurantName: string
+type TemplatesListViewProps = {
+  programs: TemplateListItem[]
+  organizationId: string
+  organizationName: string
   isOwner: boolean
 }
 
-export function ProgramsListView({
+export function TemplatesListView({
   programs,
-  restaurantId,
-  restaurantName,
+  organizationId,
+  organizationName,
   isOwner,
-}: ProgramsListViewProps) {
+}: TemplatesListViewProps) {
   const router = useRouter()
   const [showCreate, setShowCreate] = useState(false)
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL")
@@ -141,17 +148,17 @@ export function ProgramsListView({
   // Count per type
   const typeCounts: Record<TypeFilter, number> = {
     ALL: programs.length,
-    STAMP_CARD: programs.filter((p) => p.programType === "STAMP_CARD").length,
-    COUPON: programs.filter((p) => p.programType === "COUPON").length,
-    MEMBERSHIP: programs.filter((p) => p.programType === "MEMBERSHIP").length,
-    POINTS: programs.filter((p) => p.programType === "POINTS").length,
-    PREPAID: programs.filter((p) => p.programType === "PREPAID").length,
+    STAMP_CARD: programs.filter((p) => p.passType === "STAMP_CARD").length,
+    COUPON: programs.filter((p) => p.passType === "COUPON").length,
+    MEMBERSHIP: programs.filter((p) => p.passType === "MEMBERSHIP").length,
+    POINTS: programs.filter((p) => p.passType === "POINTS").length,
+    PREPAID: programs.filter((p) => p.passType === "PREPAID").length,
   }
 
   const filteredPrograms =
     typeFilter === "ALL"
       ? programs
-      : programs.filter((p) => p.programType === typeFilter)
+      : programs.filter((p) => p.passType === typeFilter)
 
   const filterTabs: { key: TypeFilter; label: string }[] = [
     { key: "ALL", label: "All" },
@@ -200,7 +207,7 @@ export function ProgramsListView({
           </div>
           <div className="p-6">
             <CreateProgramForm
-              restaurantId={restaurantId}
+              organizationId={organizationId}
               onCreated={() => {
                 setShowCreate(false)
                 router.refresh()
@@ -265,8 +272,8 @@ export function ProgramsListView({
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filteredPrograms.map((program) => {
             const cfg = statusConfig[program.status] ?? statusConfig.DRAFT
-            const design = buildDesign(program.cardDesign)
-            const typeMeta = PROGRAM_TYPE_META[program.programType as ProgramType]
+            const design = buildDesign(program.passDesign)
+            const typeMeta = PASS_TYPE_META[program.passType as PassType]
             const TypeIcon = typeMeta?.icon
             return (
               <Link
@@ -276,10 +283,10 @@ export function ProgramsListView({
               >
                 {/* Card preview */}
                 <div className="flex justify-center bg-muted/40 py-4 px-4 border-b border-border">
-                  <ProgramCardPreview
+                  <TemplateCardPreview
                     design={design}
                     program={program}
-                    restaurantName={restaurantName}
+                    organizationName={organizationName ?? ""}
                   />
                 </div>
 

@@ -49,14 +49,14 @@ import {
   removeTeamMember,
   cancelInvitation,
   resendInvitation,
-} from "@/server/settings-actions"
+} from "@/server/org-settings-actions"
 
 type InviteForm = {
   email: string
   role: "owner" | "staff"
 }
 
-type Restaurant = {
+type Organization = {
   id: string
   name: string
 }
@@ -93,11 +93,11 @@ function getInitials(name: string) {
 }
 
 export function TeamManagement({
-  restaurant,
+  organization,
   members,
   pendingInvitations,
 }: {
-  restaurant: Restaurant
+  organization: Organization
   members: Member[]
   pendingInvitations: PendingInvitation[]
 }) {
@@ -122,7 +122,7 @@ export function TeamManagement({
   function onInviteSubmit(data: InviteForm) {
     startTransition(async () => {
       const result = await inviteTeamMember({
-        restaurantId: restaurant.id,
+        organizationId: organization.id,
         ...data,
       })
       if ("error" in result) {
@@ -138,7 +138,7 @@ export function TeamManagement({
   function handleRemoveMember() {
     if (!removeMember) return
     startTransition(async () => {
-      const result = await removeTeamMember(restaurant.id, removeMember.id)
+      const result = await removeTeamMember(organization.id, removeMember.id)
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
@@ -151,7 +151,7 @@ export function TeamManagement({
   function handleCancelInvitation() {
     if (!cancelInvite) return
     startTransition(async () => {
-      const result = await cancelInvitation(restaurant.id, cancelInvite.id)
+      const result = await cancelInvitation(organization.id, cancelInvite.id)
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
@@ -163,7 +163,7 @@ export function TeamManagement({
 
   function handleResendInvitation(invitation: PendingInvitation) {
     startTransition(async () => {
-      const result = await resendInvitation(restaurant.id, invitation.id)
+      const result = await resendInvitation(organization.id, invitation.id)
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
@@ -315,7 +315,7 @@ export function TeamManagement({
           <DialogHeader>
             <DialogTitle>Invite team member</DialogTitle>
             <DialogDescription>
-              Send an invitation to join {restaurant.name} as a team member.
+              Send an invitation to join {organization.name} as a team member.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onInviteSubmit)} className="space-y-4">
@@ -395,7 +395,7 @@ export function TeamManagement({
               <span className="font-medium text-foreground">
                 {removeMember?.user.name}
               </span>{" "}
-              from {restaurant.name}? They will lose access to the dashboard.
+              from {organization.name}? They will lose access to the dashboard.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

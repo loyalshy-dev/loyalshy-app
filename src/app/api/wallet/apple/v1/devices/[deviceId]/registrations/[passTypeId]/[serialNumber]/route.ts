@@ -49,7 +49,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
   }
 
   // Create new registration
-  // DeviceRegistration.serialNumber FK now points to Enrollment.walletPassSerialNumber
+  // DeviceRegistration.serialNumber FK now points to PassInstance.walletPassSerialNumber
   await db.deviceRegistration.create({
     data: {
       deviceLibraryIdentifier: deviceId,

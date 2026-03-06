@@ -28,7 +28,7 @@ import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 
 type ShowcaseStudioLayoutProps = {
   showcaseCardId: string
-  restaurantName: string
+  organizationName: string
   visitsRequired: number
   rewardDescription: string
   walletData: Record<string, unknown> | null
@@ -36,7 +36,7 @@ type ShowcaseStudioLayoutProps = {
 
 export function ShowcaseStudioLayout({
   showcaseCardId,
-  restaurantName,
+  organizationName,
   visitsRequired,
   rewardDescription,
   walletData,
@@ -218,7 +218,7 @@ export function ShowcaseStudioLayout({
 
     switch (ui.activeTool) {
       case "templates":
-        return <TemplatePanel store={store} restaurantId="" restaurantLogo={null} cardType={cardType} />
+        return <TemplatePanel store={store} organizationId="" organizationLogo={null} cardType={cardType} />
       case "colors":
         return <ColorsPanel store={store} />
       case "progress":
@@ -282,11 +282,11 @@ export function ShowcaseStudioLayout({
             design={design}
             format={ui.previewFormat}
             deviceFrame={ui.deviceFrame}
-            restaurantName={restaurantName}
-            restaurantLogo={null}
-            programName="Loyalty Card"
-            programType="STAMP_CARD"
-            programConfig={{}}
+            organizationName={organizationName}
+            organizationLogo={null}
+            templateName="Loyalty Card"
+            passType="STAMP_CARD"
+            templateConfig={{}}
             visitsRequired={visitsRequired}
             rewardDescription={rewardDescription}
           />

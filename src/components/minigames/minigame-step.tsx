@@ -10,7 +10,7 @@ import { WheelOfFortune } from "./wheel-of-fortune"
 type MinigameStepProps = {
   gameType: "scratch" | "slots" | "wheel"
   rewardText: string
-  enrollmentId: string
+  passInstanceId: string
   prizes?: string[]
   primaryColor?: string
   accentColor?: string
@@ -21,7 +21,7 @@ type MinigameStepProps = {
 export function MinigameStep({
   gameType,
   rewardText,
-  enrollmentId,
+  passInstanceId,
   prizes,
   primaryColor,
   accentColor,
@@ -42,13 +42,13 @@ export function MinigameStep({
     if (completeTimer.current) clearTimeout(completeTimer.current)
     if (dontShowAgain) {
       try {
-        localStorage.setItem(`minigame-dismissed:${enrollmentId}`, "1")
+        localStorage.setItem(`minigame-dismissed:${passInstanceId}`, "1")
       } catch {
         // localStorage unavailable
       }
     }
     onSkip()
-  }, [dontShowAgain, enrollmentId, onSkip])
+  }, [dontShowAgain, passInstanceId, onSkip])
 
   return (
     <div className="flex flex-col items-center py-6 px-4 animate-[minigame-fade-in_0.3s_ease-out]">
@@ -81,7 +81,7 @@ export function MinigameStep({
       {gameType === "slots" && (
         <SlotMachine
           rewardText={rewardText}
-          enrollmentId={enrollmentId}
+          passInstanceId={passInstanceId}
           onReveal={handleReveal}
           primaryColor={primaryColor}
         />
@@ -89,7 +89,7 @@ export function MinigameStep({
       {gameType === "wheel" && (
         <WheelOfFortune
           rewardText={rewardText}
-          enrollmentId={enrollmentId}
+          passInstanceId={passInstanceId}
           onReveal={handleReveal}
           prizes={prizes}
           primaryColor={primaryColor}

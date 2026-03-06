@@ -22,7 +22,7 @@ async function AdminLayoutInner({
         name: session.user.name,
         email: session.user.email,
         image: session.user.image,
-        restaurantId: session.user.restaurantId,
+        organizationId: null,
       }}
     >
       {children}

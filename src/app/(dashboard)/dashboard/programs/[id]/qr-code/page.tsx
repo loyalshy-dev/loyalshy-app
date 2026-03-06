@@ -1,6 +1,6 @@
 import { connection } from "next/server"
 import { notFound, redirect } from "next/navigation"
-import { assertAuthenticated, getRestaurantForUser, assertRestaurantRole } from "@/lib/dal"
+import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { QrCodeDisplay } from "@/components/dashboard/settings/qr-code-display"
 
@@ -11,24 +11,21 @@ export default async function ProgramQrCodePage(props: {
   const { id: programId } = await props.params
   await assertAuthenticated()
 
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) {
+  const organization = await getOrganizationForUser()
+  if (!organization) {
     redirect("/dashboard")
   }
 
-  await assertRestaurantRole(restaurant.id, "owner")
+  await assertOrganizationRole(organization.id, "owner")
 
-  // Verify program belongs to this restaurant and get its details
-  const program = await db.loyaltyProgram.findFirst({
-    where: { id: programId, restaurantId: restaurant.id },
+  const program = await db.passTemplate.findFirst({
+    where: { id: programId, organizationId: organization.id },
     select: {
       id: true,
       name: true,
-      programType: true,
+      passType: true,
       config: true,
-      rewardDescription: true,
-      visitsRequired: true,
-      cardDesign: {
+      passDesign: {
         select: {
           cardType: true,
           primaryColor: true,
@@ -52,21 +49,21 @@ export default async function ProgramQrCodePage(props: {
 
   return (
     <QrCodeDisplay
-      restaurant={{
-        name: restaurant.name,
-        slug: restaurant.slug,
-        logo: restaurant.logo,
-        brandColor: restaurant.brandColor,
+      organization={{
+        name: organization.name,
+        slug: organization.slug,
+        logo: organization.logo,
+        brandColor: organization.brandColor,
       }}
-      programs={[
+      templates={[
         {
           id: program.id,
           name: program.name,
-          programType: program.programType,
-          programConfig: program.config,
-          rewardDescription: program.rewardDescription,
-          visitsRequired: program.visitsRequired,
-          cardDesign: program.cardDesign ?? null,
+          passType: program.passType,
+          templateConfig: program.config,
+          rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
+          visitsRequired: (program.config as Record<string, unknown> | null)?.visitsRequired as number ?? 10,
+          cardDesign: program.passDesign ?? null,
         },
       ]}
     />

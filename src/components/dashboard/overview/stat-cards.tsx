@@ -2,7 +2,7 @@
 
 import { Users, Activity, Gift, Trophy, TrendingUp, TrendingDown, Stamp, Ticket, Crown, Coins, CreditCard } from "lucide-react"
 import { useAnimatedCounter } from "@/hooks/use-animated-counter"
-import type { EnrollmentsByType } from "@/server/analytics"
+import type { PassInstancesByType } from "@/server/analytics"
 
 type StatCardProps = {
   label: string
@@ -50,7 +50,7 @@ function StatCard({ label, value, change, icon, suffix }: StatCardProps) {
   )
 }
 
-const TYPE_PILLS: { key: keyof EnrollmentsByType; icon: typeof Stamp; label: string }[] = [
+const TYPE_PILLS: { key: keyof PassInstancesByType; icon: typeof Stamp; label: string }[] = [
   { key: "STAMP_CARD", icon: Stamp, label: "Stamp" },
   { key: "COUPON", icon: Ticket, label: "Coupon" },
   { key: "MEMBERSHIP", icon: Crown, label: "Member" },
@@ -58,8 +58,8 @@ const TYPE_PILLS: { key: keyof EnrollmentsByType; icon: typeof Stamp; label: str
   { key: "PREPAID", icon: CreditCard, label: "Prepaid" },
 ]
 
-function EnrollmentBreakdown({ enrollmentsByType, total }: { enrollmentsByType: EnrollmentsByType; total: number }) {
-  const activeTypes = TYPE_PILLS.filter((t) => enrollmentsByType[t.key] > 0)
+function PassInstanceBreakdown({ passInstancesByType, total }: { passInstancesByType: PassInstancesByType; total: number }) {
+  const activeTypes = TYPE_PILLS.filter((t) => passInstancesByType[t.key] > 0)
 
   if (activeTypes.length === 0) {
     return null
@@ -69,7 +69,7 @@ function EnrollmentBreakdown({ enrollmentsByType, total }: { enrollmentsByType: 
     <div className="flex flex-wrap gap-1.5 mt-1.5">
       {activeTypes.map((t) => {
         const Icon = t.icon
-        const count = enrollmentsByType[t.key]
+        const count = passInstancesByType[t.key]
         return (
           <span
             key={t.key}
@@ -85,40 +85,40 @@ function EnrollmentBreakdown({ enrollmentsByType, total }: { enrollmentsByType: 
 }
 
 type StatCardsProps = {
-  totalCustomers: number
-  totalCustomersChange: number
+  totalContacts: number
+  totalContactsChange: number
   activityThisMonth: number
   activityChange: number
   activeRewards: number
   rewardsRedeemedThisMonth: number
   rewardsRedeemedChange: number
-  activeEnrollments: number
-  enrollmentsByType: EnrollmentsByType
+  activePassInstances: number
+  passInstancesByType: PassInstancesByType
 }
 
 export function StatCards({
-  totalCustomers,
-  totalCustomersChange,
+  totalContacts,
+  totalContactsChange,
   activityThisMonth,
   activityChange,
   activeRewards,
   rewardsRedeemedThisMonth,
   rewardsRedeemedChange,
-  activeEnrollments,
-  enrollmentsByType,
+  activePassInstances,
+  passInstancesByType,
 }: StatCardsProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        label="Total Customers"
-        value={totalCustomers}
-        change={totalCustomersChange}
+        label="Total Contacts"
+        value={totalContacts}
+        change={totalContactsChange}
         icon={<Users className="size-4" />}
       />
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-[13px] font-medium text-muted-foreground">
-            Active Enrollments
+            Active Pass Instances
           </span>
           <span className="text-muted-foreground/60">
             <Activity className="size-4" />
@@ -126,9 +126,9 @@ export function StatCards({
         </div>
         <div>
           <span className="text-2xl font-semibold tracking-tight tabular-nums">
-            {activeEnrollments.toLocaleString()}
+            {activePassInstances.toLocaleString()}
           </span>
-          <EnrollmentBreakdown enrollmentsByType={enrollmentsByType} total={activeEnrollments} />
+          <PassInstanceBreakdown passInstancesByType={passInstancesByType} total={activePassInstances} />
         </div>
       </div>
       <StatCard

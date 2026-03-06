@@ -7,7 +7,7 @@ import { Globe, Phone, MapPin } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { updateRestaurantProfile } from "@/server/settings-actions"
+import { updateOrganizationProfile } from "@/server/org-settings-actions"
 
 const TIMEZONES = [
   "UTC",
@@ -39,7 +39,7 @@ type ProfileForm = {
   timezone: string
 }
 
-type Restaurant = {
+type Organization = {
   id: string
   name: string
   slug: string
@@ -52,7 +52,7 @@ type Restaurant = {
   timezone: string
 }
 
-export function GeneralSettingsForm({ restaurant }: { restaurant: Restaurant }) {
+export function GeneralSettingsForm({ organization }: { organization: Organization }) {
   const [isPending, startTransition] = useTransition()
 
   const {
@@ -61,46 +61,46 @@ export function GeneralSettingsForm({ restaurant }: { restaurant: Restaurant }) 
     formState: { errors, isDirty },
   } = useForm<ProfileForm>({
     defaultValues: {
-      name: restaurant.name,
-      address: restaurant.address ?? "",
-      phone: restaurant.phone ?? "",
-      website: restaurant.website ?? "",
-      timezone: restaurant.timezone,
+      name: organization.name,
+      address: organization.address ?? "",
+      phone: organization.phone ?? "",
+      website: organization.website ?? "",
+      timezone: organization.timezone,
     },
   })
 
   function onSubmit(data: ProfileForm) {
     startTransition(async () => {
-      const result = await updateRestaurantProfile({
-        restaurantId: restaurant.id,
+      const result = await updateOrganizationProfile({
+        organizationId: organization.id,
         ...data,
       })
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Restaurant profile updated")
+        toast.success("Organization profile updated")
       }
     })
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Restaurant Profile */}
+      {/* Organization Profile */}
       <div className="rounded-lg border border-border bg-card">
         <div className="border-b border-border px-6 py-4">
-          <h2 className="text-sm font-semibold">Restaurant Profile</h2>
+          <h2 className="text-sm font-semibold">Organization Profile</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Basic information about your restaurant.
+            Basic information about your organization.
           </p>
         </div>
         <div className="p-6 space-y-5">
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="name">Restaurant Name *</Label>
+              <Label htmlFor="name">Organization Name *</Label>
               <Input
                 id="name"
-                {...register("name", { required: "Restaurant name is required" })}
-                placeholder="My Restaurant"
+                {...register("name", { required: "Organization name is required" })}
+                placeholder="My Organization"
               />
               {errors.name && (
                 <p className="text-xs text-destructive">{errors.name.message}</p>
@@ -142,7 +142,7 @@ export function GeneralSettingsForm({ restaurant }: { restaurant: Restaurant }) 
               <Input
                 id="website"
                 {...register("website")}
-                placeholder="https://myrestaurant.com"
+                placeholder="https://myorganization.com"
               />
               {errors.website && (
                 <p className="text-xs text-destructive">{errors.website.message}</p>

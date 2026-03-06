@@ -22,7 +22,7 @@ export function blendColors(hex1: string, hex2: string, ratio: number): string {
   return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`
 }
 
-/** Returns pass colors derived from restaurant brand colors */
+/** Returns pass colors derived from organization brand colors */
 export function getPassColors(
   brandColor: string | null,
   secondaryColor: string | null,

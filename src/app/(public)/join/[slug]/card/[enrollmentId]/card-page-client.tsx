@@ -3,12 +3,12 @@
 import { useState, useEffect, useTransition, useCallback } from "react"
 import { Loader2, Bookmark, CheckCircle2 } from "lucide-react"
 import { requestWalletPass, revealPrize } from "@/server/onboarding-actions"
-import type { EnrollmentCardData } from "@/server/onboarding-actions"
+import type { PassInstanceCardData } from "@/server/onboarding-actions"
 import { computeTextColor } from "@/lib/wallet/card-design"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { MinigameStep } from "@/components/minigames"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePrepaidConfig } from "@/lib/program-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePrepaidConfig } from "@/lib/pass-config"
 
 type Platform = "apple" | "google"
 
@@ -36,13 +36,13 @@ function isAndroid(): boolean {
 }
 
 type CardPageClientProps = {
-  data: EnrollmentCardData
-  enrollmentId: string
-  restaurantSlug: string
+  data: PassInstanceCardData
+  passInstanceId: string
+  organizationSlug: string
   signature: string
 }
 
-export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }: CardPageClientProps) {
+export function CardPageClient({ data, passInstanceId, organizationSlug, signature }: CardPageClientProps) {
   const [platform, setPlatform] = useState<Platform>("apple")
   const [showBothPlatforms, setShowBothPlatforms] = useState(false)
   const [isRequestingPass, startPassTransition] = useTransition()
@@ -55,9 +55,9 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }
   const handleMinigameComplete = useCallback(() => {
     if (!data.unrevealedReward) return
     // Call revealPrize server action (fire-and-forget for UX, errors are non-critical)
-    revealPrize(data.unrevealedReward.rewardId, enrollmentId, signature).catch(() => {})
+    revealPrize(data.unrevealedReward.rewardId, passInstanceId, signature).catch(() => {})
     setRevealed(true)
-  }, [data.unrevealedReward, enrollmentId, signature])
+  }, [data.unrevealedReward, passInstanceId, signature])
 
   useEffect(() => {
     const detected = detectPlatform()
@@ -67,15 +67,15 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }
     }
   }, [])
 
-  const brandColor = data.program.cardDesign?.primaryColor ?? data.restaurant.brandColor ?? "oklch(0.55 0.2 265)"
-  const textOnBrand = data.program.cardDesign?.textColor ?? computeTextColor(
+  const brandColor = data.template.passDesign?.primaryColor ?? data.organization.brandColor ?? "oklch(0.55 0.2 265)"
+  const textOnBrand = data.template.passDesign?.textColor ?? computeTextColor(
     /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : "#4F46E5"
   )
-  const passDesign = buildWalletPassDesign(data.program.cardDesign)
+  const passDesign = buildWalletPassDesign(data.template.passDesign)
 
   // Coupon-specific props
-  const couponConfig = data.program.programType === "COUPON" ? parseCouponConfig(data.program.config) : null
-  const isRedeemed = data.program.programType === "COUPON" && data.enrollmentStatus === "COMPLETED"
+  const couponConfig = data.template.passType === "COUPON" ? parseCouponConfig(data.template.config) : null
+  const isRedeemed = data.template.passType === "COUPON" && data.passInstanceStatus === "COMPLETED"
   const discountText = couponConfig
     ? (isRedeemed ? `${formatCouponValue(couponConfig)} (Redeemed)` : formatCouponValue(couponConfig))
     : undefined
@@ -85,12 +85,12 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }
     : undefined
 
   // Membership-specific props
-  const membershipConfig = data.program.programType === "MEMBERSHIP" ? parseMembershipConfig(data.program.config) : null
+  const membershipConfig = data.template.passType === "MEMBERSHIP" ? parseMembershipConfig(data.template.config) : null
   const tierName = membershipConfig?.membershipTier ?? undefined
   const benefits = membershipConfig?.benefits ?? undefined
 
   // Prepaid-specific props
-  const prepaidConfig = data.program.programType === "PREPAID" ? parsePrepaidConfig(data.program.config) : null
+  const prepaidConfig = data.template.passType === "PREPAID" ? parsePrepaidConfig(data.template.config) : null
   const remainingUses = data.remainingUses ?? 0
   const totalUses = prepaidConfig?.totalUses ?? 0
   const prepaidValidUntil = prepaidConfig?.validUntil
@@ -101,7 +101,7 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }
     setError(null)
 
     startPassTransition(async () => {
-      const res = await requestWalletPass(enrollmentId, restaurantSlug, chosenPlatform)
+      const res = await requestWalletPass(passInstanceId, organizationSlug, chosenPlatform)
 
       if (!res.success) {
         setError(res.error ?? "Failed to generate wallet pass")
@@ -140,13 +140,13 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }
               You earned a reward!
             </h1>
             <p className="text-muted-foreground text-sm">
-              {data.restaurant.name} — {data.program.name}
+              {data.organization.name} — {data.template.name}
             </p>
           </div>
           <MinigameStep
             gameType={data.minigameConfig!.gameType}
             rewardText={data.unrevealedReward!.description}
-            enrollmentId={enrollmentId}
+            passInstanceId={passInstanceId}
             prizes={data.minigameConfig?.prizes?.map((p) => p.name)}
             primaryColor={data.minigameConfig?.primaryColor}
             accentColor={data.minigameConfig?.accentColor}
@@ -170,10 +170,10 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }
         {/* Header */}
         <div className="text-center space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">
-            {data.customerName}'s Card
+            {data.contactName}'s Card
           </h1>
           <p className="text-muted-foreground text-sm">
-            {data.restaurant.name} — {data.program.name}
+            {data.organization.name} — {data.template.name}
           </p>
         </div>
 
@@ -190,13 +190,13 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }
           <WalletPassRenderer
             design={passDesign}
             format="apple"
-            restaurantName={data.restaurant.name}
-            logoUrl={data.restaurant.logo}
-            programName={data.program.name}
-            customerName={data.customerName}
+            organizationName={data.organization.name}
+            logoUrl={data.organization.logo}
+            programName={data.template.name}
+            customerName={data.contactName}
             currentVisits={data.currentCycleVisits}
-            totalVisits={data.program.visitsRequired}
-            rewardDescription={data.program.rewardDescription}
+            totalVisits={data.template.visitsRequired}
+            rewardDescription={data.template.rewardDescription}
             hasReward={data.hasAvailableReward}
             qrValue={data.walletPassId ?? undefined}
             discountText={discountText}

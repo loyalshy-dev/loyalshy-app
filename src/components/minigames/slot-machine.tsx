@@ -14,7 +14,7 @@ import {
 
 type SlotMachineProps = {
   rewardText: string
-  enrollmentId: string
+  passInstanceId: string
   onReveal: () => void
   /** When false, user must tap to start. Defaults to true. */
   autoStart?: boolean
@@ -43,12 +43,12 @@ function buildReel(winIndex: number): number[] {
   return items
 }
 
-export function SlotMachine({ rewardText, enrollmentId, onReveal, autoStart = true, primaryColor }: SlotMachineProps) {
+export function SlotMachine({ rewardText, passInstanceId, onReveal, autoStart = true, primaryColor }: SlotMachineProps) {
   const [spinning, setSpinning] = useState(false)
   const [stopped, setStopped] = useState([false, false, false])
   const [showReward, setShowReward] = useState(false)
   const revealed = useRef(false)
-  const winIndex = useMemo(() => hashToIndex(enrollmentId), [enrollmentId])
+  const winIndex = useMemo(() => hashToIndex(passInstanceId), [passInstanceId])
 
   const reels = useMemo(
     () => [buildReel(winIndex), buildReel(winIndex), buildReel(winIndex)],

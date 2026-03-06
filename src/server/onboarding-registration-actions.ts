@@ -9,20 +9,20 @@ import { sanitizeText } from "@/lib/sanitize"
 
 // ─── Schemas ────────────────────────────────────────────────
 
-const createRestaurantSchema = z.object({
-  name: z.string().min(1, "Restaurant name is required").max(100),
+const createOrganizationSchema = z.object({
+  name: z.string().min(1, "Organization name is required").max(100),
   address: z.string().max(200).optional().default(""),
   phone: z.string().max(30).optional().default(""),
   programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID"]).optional().default("STAMP_CARD"),
 })
 
 const updateBrandingSchema = z.object({
-  restaurantId: z.string().min(1),
+  organizationId: z.string().min(1),
   brandColor: z.string().max(50).optional().default(""),
 })
 
 const applyCardDesignSchema = z.object({
-  restaurantId: z.string().min(1),
+  organizationId: z.string().min(1),
   primaryColor: z.string().min(4).max(9),
   secondaryColor: z.string().min(4).max(9),
   textColor: z.string().min(4).max(9),
@@ -34,14 +34,29 @@ const applyCardDesignSchema = z.object({
   editorConfig: z.record(z.string(), z.unknown()).optional(),
 })
 
-const setupLoyaltySchema = z.object({
-  restaurantId: z.string().min(1),
+const setupPassTemplateSchema = z.object({
+  organizationId: z.string().min(1),
   programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID"]).optional().default("STAMP_CARD"),
   visitsRequired: z.number().int().min(1).max(30).optional().default(10),
   rewardDescription: z.string().min(1, "Reward description is required").max(200),
   rewardExpiryDays: z.number().int().min(0).max(365).optional().default(90),
   config: z.record(z.string(), z.unknown()).optional(),
 })
+
+// ─── Auth Helpers ────────────────────────────────────────────
+
+/**
+ * Returns the organizationId for the current user (owner of their first/only org).
+ * Replaces the old User.organizationId field which no longer exists.
+ */
+async function getUserOrganizationId(userId: string): Promise<string | null> {
+  const member = await db.member.findFirst({
+    where: { userId, role: "owner" },
+    select: { organizationId: true },
+    orderBy: { createdAt: "asc" },
+  })
+  return member?.organizationId ?? null
+}
 
 // ─── Slug Helpers ───────────────────────────────────────────
 
@@ -58,10 +73,10 @@ function slugify(text: string): string {
 
 async function generateUniqueSlug(name: string): Promise<string> {
   const base = slugify(name)
-  if (!base) return `restaurant-${Date.now().toString(36)}`
+  if (!base) return `organization-${Date.now().toString(36)}`
 
   // Check if base slug is available
-  const existing = await db.restaurant.findUnique({ where: { slug: base } })
+  const existing = await db.organization.findUnique({ where: { slug: base } })
   if (!existing) return base
 
   // Append random suffix
@@ -69,24 +84,25 @@ async function generateUniqueSlug(name: string): Promise<string> {
   return `${base}-${suffix}`
 }
 
-// ─── Create Restaurant ─────────────────────────────────────
+// ─── Create Organization ─────────────────────────────────────
 
-export async function createRestaurant(input: z.input<typeof createRestaurantSchema>) {
+export async function createOrganization(input: z.input<typeof createOrganizationSchema>) {
   const session = await assertAuthenticated()
-  const parsed = createRestaurantSchema.parse(input)
+  const parsed = createOrganizationSchema.parse(input)
 
-  // Check if user already has a restaurant
-  if (session.user.restaurantId) {
-    return { error: "You already have a restaurant", restaurantId: session.user.restaurantId }
+  // Check if user already has an organization
+  const existingOrgId = await getUserOrganizationId(session.user.id)
+  if (existingOrgId) {
+    return { error: "You already have an organization", organizationId: existingOrgId }
   }
 
   const name = sanitizeText(parsed.name, 100)
   const slug = await generateUniqueSlug(name)
 
-  // Create Restaurant + Organization + LoyaltyProgram + CardDesign + Member in a transaction
+  // Create Organization + PassTemplate + PassDesign + Member in a transaction
   const result = await db.$transaction(async (tx) => {
-    // 1. Create restaurant
-    const restaurant = await tx.restaurant.create({
+    // 1. Create organization
+    const organization = await tx.organization.create({
       data: {
         name,
         slug,
@@ -96,24 +112,16 @@ export async function createRestaurant(input: z.input<typeof createRestaurantSch
       },
     })
 
-    // 2. Create matching organization (same slug convention)
-    const org = await tx.organization.create({
-      data: {
-        name,
-        slug,
-      },
-    })
-
-    // 3. Create member (owner role)
+    // 2. Create member (owner role)
     await tx.member.create({
       data: {
         userId: session.user.id,
-        organizationId: org.id,
+        organizationId: organization.id,
         role: "owner",
       },
     })
 
-    // 4. Map program type to card type
+    // 3. Map program type to card type
     const programType = parsed.programType
     const defaultCardType = programType === "COUPON"
       ? "COUPON" as const
@@ -123,57 +131,55 @@ export async function createRestaurant(input: z.input<typeof createRestaurantSch
           ? "POINTS" as const
           : "STAMP" as const
 
-    // 5. Create default loyalty program
-    const loyaltyProgram = await tx.loyaltyProgram.create({
+    // 4. Create default pass template
+    const passTemplate = await tx.passTemplate.create({
       data: {
-        restaurantId: restaurant.id,
-        name: "Loyalty Program",
-        programType,
-        visitsRequired: programType === "STAMP_CARD" ? 10 : 1,
-        rewardDescription: "Free reward",
-        rewardExpiryDays: 90,
+        organizationId: organization.id,
+        name: "Pass Template",
+        passType: programType,
+        config: {
+          visitsRequired: programType === "STAMP_CARD" ? 10 : 1,
+          rewardDescription: "Free reward",
+          rewardExpiryDays: 90,
+        },
         status: "ACTIVE",
       },
     })
 
-    // 6. Create default card design linked to the loyalty program
-    await tx.cardDesign.create({
+    // 5. Create default pass design linked to the pass template
+    await tx.passDesign.create({
       data: {
-        loyaltyProgramId: loyaltyProgram.id,
+        passTemplateId: passTemplate.id,
         cardType: defaultCardType,
       },
     })
 
-    // 7. Link user to restaurant
-    await tx.user.update({
-      where: { id: session.user.id },
-      data: { restaurantId: restaurant.id },
-    })
-
-    return restaurant
+    return organization
   })
 
-  return { success: true, restaurantId: result.id, slug: result.slug }
+  // Set the new organization as the active organization on the session
+  await db.session.updateMany({
+    where: { userId: session.user.id },
+    data: { activeOrganizationId: result.id },
+  })
+
+  return { success: true, organizationId: result.id, slug: result.slug }
 }
 
-// ─── Update Restaurant Branding ────────────────────────────
+// ─── Update Organization Branding ────────────────────────────
 
-export async function updateRestaurantBranding(input: z.infer<typeof updateBrandingSchema>) {
+export async function updateOrganizationBranding(input: z.infer<typeof updateBrandingSchema>) {
   const session = await assertAuthenticated()
   const parsed = updateBrandingSchema.parse(input)
 
-  // Verify user owns this restaurant
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { restaurantId: true },
-  })
-
-  if (user?.restaurantId !== parsed.restaurantId) {
+  // Verify user owns this organization
+  const userOrgId = await getUserOrganizationId(session.user.id)
+  if (userOrgId !== parsed.organizationId) {
     return { error: "Unauthorized" }
   }
 
-  await db.restaurant.update({
-    where: { id: parsed.restaurantId },
+  await db.organization.update({
+    where: { id: parsed.organizationId },
     data: {
       brandColor: parsed.brandColor || null,
     },
@@ -186,20 +192,16 @@ export async function updateRestaurantBranding(input: z.infer<typeof updateBrand
 
 export async function uploadOnboardingLogo(formData: FormData) {
   const session = await assertAuthenticated()
-  const restaurantId = formData.get("restaurantId") as string
+  const organizationId = formData.get("organizationId") as string
   const file = formData.get("file") as File
 
-  if (!restaurantId || !file) {
-    return { error: "Missing restaurant ID or file" }
+  if (!organizationId || !file) {
+    return { error: "Missing organization ID or file" }
   }
 
-  // Verify user owns this restaurant
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { restaurantId: true },
-  })
-
-  if (user?.restaurantId !== restaurantId) {
+  // Verify user owns this organization
+  const userOrgId = await getUserOrganizationId(session.user.id)
+  if (userOrgId !== organizationId) {
     return { error: "Unauthorized" }
   }
 
@@ -216,10 +218,10 @@ export async function uploadOnboardingLogo(formData: FormData) {
 
   const { uploadFile } = await import("@/lib/storage")
   const fileBuffer = Buffer.from(await file.arrayBuffer())
-  const logoUrl = await uploadFile(fileBuffer, `logos/${restaurantId}/${file.name}`, file.type)
+  const logoUrl = await uploadFile(fileBuffer, `logos/${organizationId}/${file.name}`, file.type)
 
-  await db.restaurant.update({
-    where: { id: restaurantId },
+  await db.organization.update({
+    where: { id: organizationId },
     data: { logo: logoUrl },
   })
 
@@ -236,30 +238,26 @@ export async function uploadOnboardingLogo(formData: FormData) {
   return { success: true, url: logoUrl, palette }
 }
 
-// ─── Setup Loyalty Program ─────────────────────────────────
+// ─── Setup Pass Template ─────────────────────────────────
 
-export async function setupLoyaltyProgram(input: z.input<typeof setupLoyaltySchema>) {
+export async function setupPassTemplate(input: z.input<typeof setupPassTemplateSchema>) {
   const session = await assertAuthenticated()
-  const parsed = setupLoyaltySchema.parse(input)
+  const parsed = setupPassTemplateSchema.parse(input)
 
-  // Verify user owns this restaurant
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { restaurantId: true },
-  })
-
-  if (user?.restaurantId !== parsed.restaurantId) {
+  // Verify user owns this organization
+  const userOrgId = await getUserOrganizationId(session.user.id)
+  if (userOrgId !== parsed.organizationId) {
     return { error: "Unauthorized" }
   }
 
-  // Find the default loyalty program created during restaurant setup
-  const program = await db.loyaltyProgram.findFirst({
-    where: { restaurantId: parsed.restaurantId },
-    include: { cardDesign: { select: { id: true } } },
+  // Find the default pass template created during organization setup
+  const template = await db.passTemplate.findFirst({
+    where: { organizationId: parsed.organizationId },
+    include: { passDesign: { select: { id: true } } },
   })
 
-  if (!program) {
-    return { error: "Loyalty program not found" }
+  if (!template) {
+    return { error: "Pass template not found" }
   }
 
   // Map program type to card type
@@ -277,20 +275,23 @@ export async function setupLoyaltyProgram(input: z.input<typeof setupLoyaltySche
     : 1
 
   await db.$transaction([
-    db.loyaltyProgram.update({
-      where: { id: program.id },
+    db.passTemplate.update({
+      where: { id: template.id },
       data: {
-        programType,
-        visitsRequired,
-        rewardDescription: parsed.rewardDescription,
-        rewardExpiryDays: parsed.rewardExpiryDays,
-        config: parsed.config ? JSON.parse(JSON.stringify(parsed.config)) : undefined,
+        passType: programType,
+        config: {
+          ...(template.config as Record<string, unknown> ?? {}),
+          visitsRequired,
+          rewardDescription: parsed.rewardDescription,
+          rewardExpiryDays: parsed.rewardExpiryDays,
+          ...(parsed.config ? parsed.config : {}),
+        },
       },
     }),
-    // Update card design's cardType to match
-    ...(program.cardDesign
-      ? [db.cardDesign.update({
-          where: { id: program.cardDesign.id },
+    // Update pass design's cardType to match
+    ...(template.passDesign
+      ? [db.passDesign.update({
+          where: { id: template.passDesign.id },
           data: { cardType },
         })]
       : []),
@@ -301,21 +302,17 @@ export async function setupLoyaltyProgram(input: z.input<typeof setupLoyaltySche
 
 // ─── Initialize Trial Subscription ─────────────────────────
 
-export async function initializeTrialSubscription(restaurantId: string) {
+export async function initializeTrialSubscription(organizationId: string) {
   const session = await assertAuthenticated()
 
-  // Verify user owns this restaurant
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { restaurantId: true },
-  })
-
-  if (user?.restaurantId !== restaurantId) {
+  // Verify user owns this organization
+  const userOrgId = await getUserOrganizationId(session.user.id)
+  if (userOrgId !== organizationId) {
     return { error: "Unauthorized" }
   }
 
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: restaurantId },
+  const organization = await db.organization.findUnique({
+    where: { id: organizationId },
     select: {
       stripeCustomerId: true,
       stripeSubscriptionId: true,
@@ -324,12 +321,12 @@ export async function initializeTrialSubscription(restaurantId: string) {
     },
   })
 
-  if (!restaurant) {
-    return { error: "Restaurant not found" }
+  if (!organization) {
+    return { error: "Organization not found" }
   }
 
   // Skip if already has subscription
-  if (restaurant.stripeSubscriptionId) {
+  if (organization.stripeSubscriptionId) {
     return { success: true, alreadySetup: true }
   }
 
@@ -337,12 +334,12 @@ export async function initializeTrialSubscription(restaurantId: string) {
     const { stripe } = await import("@/lib/stripe")
 
     // Create Stripe customer
-    let stripeCustomerId = restaurant.stripeCustomerId
+    let stripeCustomerId = organization.stripeCustomerId
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
         email: session.user.email,
-        name: restaurant.name,
-        metadata: { restaurantId },
+        name: organization.name,
+        metadata: { organizationId },
       })
       stripeCustomerId = customer.id
     }
@@ -378,8 +375,8 @@ export async function initializeTrialSubscription(restaurantId: string) {
       ? new Date(subscription.trial_end * 1000)
       : addDays(new Date(), 14)
 
-    await db.restaurant.update({
-      where: { id: restaurantId },
+    await db.organization.update({
+      where: { id: organizationId },
       data: {
         stripeCustomerId,
         stripeSubscriptionId: subscription.id,
@@ -395,8 +392,8 @@ export async function initializeTrialSubscription(restaurantId: string) {
         tasks.trigger("send-welcome-email", {
           email: session.user.email,
           name: session.user.name,
-          restaurantName: restaurant.name,
-          slug: restaurant.slug,
+          organizationName: organization.name,
+          slug: organization.slug,
         })
       )
       .catch((err: unknown) => console.error("Email dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
@@ -414,24 +411,20 @@ export async function applyCardDesignFromBrand(input: z.infer<typeof applyCardDe
   const session = await assertAuthenticated()
   const parsed = applyCardDesignSchema.parse(input)
 
-  // Verify user owns this restaurant
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { restaurantId: true },
-  })
-
-  if (user?.restaurantId !== parsed.restaurantId) {
+  // Verify user owns this organization
+  const userOrgId = await getUserOrganizationId(session.user.id)
+  if (userOrgId !== parsed.organizationId) {
     return { error: "Unauthorized" }
   }
 
-  // Find the default loyalty program
-  const program = await db.loyaltyProgram.findFirst({
-    where: { restaurantId: parsed.restaurantId },
-    include: { cardDesign: true },
+  // Find the default pass template
+  const template = await db.passTemplate.findFirst({
+    where: { organizationId: parsed.organizationId },
+    include: { passDesign: true },
   })
 
-  if (!program?.cardDesign) {
-    return { error: "Card design not found" }
+  if (!template?.passDesign) {
+    return { error: "Pass design not found" }
   }
 
   // Build update data
@@ -448,17 +441,17 @@ export async function applyCardDesignFromBrand(input: z.infer<typeof applyCardDe
   if (parsed.labelFormat) updateData.labelFormat = parsed.labelFormat
   if (parsed.editorConfig) {
     // Merge with existing editorConfig
-    const existing = (program.cardDesign.editorConfig as Record<string, unknown>) ?? {}
+    const existing = (template.passDesign.editorConfig as Record<string, unknown>) ?? {}
     updateData.editorConfig = { ...existing, ...parsed.editorConfig }
   }
 
   await db.$transaction([
-    db.cardDesign.update({
-      where: { id: program.cardDesign.id },
+    db.passDesign.update({
+      where: { id: template.passDesign.id },
       data: updateData,
     }),
-    db.restaurant.update({
-      where: { id: parsed.restaurantId },
+    db.organization.update({
+      where: { id: parsed.organizationId },
       data: { brandColor: parsed.primaryColor },
     }),
   ])
@@ -469,27 +462,23 @@ export async function applyCardDesignFromBrand(input: z.infer<typeof applyCardDe
 
 // ─── Complete Onboarding ───────────────────────────────────
 
-export async function completeOnboarding(restaurantId: string) {
+export async function completeOnboarding(organizationId: string) {
   const session = await assertAuthenticated()
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { restaurantId: true },
-  })
-
-  if (user?.restaurantId !== restaurantId) {
+  const userOrgId = await getUserOrganizationId(session.user.id)
+  if (userOrgId !== organizationId) {
     return { error: "Unauthorized" }
   }
 
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: restaurantId },
+  const organization = await db.organization.findUnique({
+    where: { id: organizationId },
     select: { settings: true },
   })
 
-  const currentSettings = (restaurant?.settings as Record<string, unknown>) ?? {}
+  const currentSettings = (organization?.settings as Record<string, unknown>) ?? {}
 
-  await db.restaurant.update({
-    where: { id: restaurantId },
+  await db.organization.update({
+    where: { id: organizationId },
     data: {
       settings: { ...currentSettings, onboardingComplete: true },
     },
@@ -503,101 +492,94 @@ export async function completeOnboarding(restaurantId: string) {
 
 export type OnboardingChecklistData = {
   hasLogo: boolean
-  hasCustomLoyalty: boolean
+  hasCustomTemplate: boolean
   hasQrPrinted: boolean
-  hasCustomer: boolean
+  hasContact: boolean
   hasStaff: boolean
   isDismissed: boolean
 }
 
-export async function getOnboardingChecklist(restaurantId: string): Promise<OnboardingChecklistData> {
-  // Verify the requesting user owns this restaurant
+export async function getOnboardingChecklist(organizationId: string): Promise<OnboardingChecklistData> {
+  // Verify the requesting user owns this organization
   const session = await assertAuthenticated()
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { restaurantId: true },
-  })
-  if (user?.restaurantId !== restaurantId) {
+  const userOrgId = await getUserOrganizationId(session.user.id)
+  if (userOrgId !== organizationId) {
     return {
       hasLogo: false,
-      hasCustomLoyalty: false,
+      hasCustomTemplate: false,
       hasQrPrinted: false,
-      hasCustomer: false,
+      hasContact: false,
       hasStaff: false,
       isDismissed: true,
     }
   }
 
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: restaurantId },
+  const organization = await db.organization.findUnique({
+    where: { id: organizationId },
     select: {
       logo: true,
       slug: true,
       settings: true,
-      _count: { select: { customers: true } },
+      _count: { select: { contacts: true } },
     },
   })
 
-  if (!restaurant) {
+  if (!organization) {
     return {
       hasLogo: false,
-      hasCustomLoyalty: false,
+      hasCustomTemplate: false,
       hasQrPrinted: false,
-      hasCustomer: false,
+      hasContact: false,
       hasStaff: false,
       isDismissed: true,
     }
   }
 
-  const settings = (restaurant.settings as Record<string, unknown>) ?? {}
+  const settings = (organization.settings as Record<string, unknown>) ?? {}
 
-  // Check loyalty program customization
-  const program = await db.loyaltyProgram.findFirst({
-    where: { restaurantId },
-    select: { visitsRequired: true, rewardDescription: true },
+  // Check pass template customization
+  const template = await db.passTemplate.findFirst({
+    where: { organizationId },
+    select: { config: true },
   })
 
-  const hasCustomLoyalty =
-    (program?.visitsRequired !== 10) ||
-    (program?.rewardDescription !== "Free reward")
+  const templateConfig = (template?.config as Record<string, unknown>) ?? {}
+  const hasCustomTemplate =
+    (templateConfig.visitsRequired !== 10) ||
+    (templateConfig.rewardDescription !== "Free reward")
 
-  // Check staff count
-  const org = await db.organization.findUnique({
-    where: { slug: restaurant.slug },
-    select: { _count: { select: { members: true } } },
+  // Check staff count (members on the organization)
+  const memberCount = await db.member.count({
+    where: { organizationId },
   })
 
   return {
-    hasLogo: !!restaurant.logo,
-    hasCustomLoyalty,
+    hasLogo: !!organization.logo,
+    hasCustomTemplate,
     hasQrPrinted: settings.qrPrinted === true,
-    hasCustomer: restaurant._count.customers > 0,
-    hasStaff: (org?._count?.members ?? 1) > 1,
+    hasContact: organization._count.contacts > 0,
+    hasStaff: memberCount > 1,
     isDismissed: settings.onboardingDismissed === true,
   }
 }
 
-export async function dismissOnboardingChecklist(restaurantId: string) {
+export async function dismissOnboardingChecklist(organizationId: string) {
   const session = await assertAuthenticated()
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { restaurantId: true },
-  })
-
-  if (user?.restaurantId !== restaurantId) {
+  const userOrgId = await getUserOrganizationId(session.user.id)
+  if (userOrgId !== organizationId) {
     return { error: "Unauthorized" }
   }
 
-  const restaurant = await db.restaurant.findUnique({
-    where: { id: restaurantId },
+  const organization = await db.organization.findUnique({
+    where: { id: organizationId },
     select: { settings: true },
   })
 
-  const currentSettings = (restaurant?.settings as Record<string, unknown>) ?? {}
+  const currentSettings = (organization?.settings as Record<string, unknown>) ?? {}
 
-  await db.restaurant.update({
-    where: { id: restaurantId },
+  await db.organization.update({
+    where: { id: organizationId },
     data: {
       settings: { ...currentSettings, onboardingDismissed: true },
     },

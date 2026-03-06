@@ -6,8 +6,8 @@ import { emailsQueue } from "./queues"
 type WelcomeEmailPayload = {
   email: string
   ownerName: string
-  restaurantName: string
-  restaurantSlug: string
+  organizationName: string
+  organizationSlug: string
 }
 
 // ─── Send Welcome Email ─────────────────────────────────────
@@ -28,7 +28,7 @@ export const sendWelcomeEmailTask = task({
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
     const dashboardUrl = `${baseUrl}/dashboard`
     const qrUrl = `${baseUrl}/dashboard/settings/qr-code`
-    const joinUrl = `${baseUrl}/join/${payload.restaurantSlug}`
+    const joinUrl = `${baseUrl}/join/${payload.organizationSlug}`
 
     const result = await resend.emails.send({
       from: "Loyalshy <noreply@loyalshy.com>",
@@ -38,7 +38,7 @@ export const sendWelcomeEmailTask = task({
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:520px;margin:0 auto;padding:40px 20px;">
           <h1 style="color:#171717;font-size:28px;margin-bottom:8px;">Welcome to Loyalshy!</h1>
           <p style="color:#525252;font-size:15px;line-height:1.6;">
-            Hi ${payload.ownerName}, your restaurant <strong>${payload.restaurantName}</strong> is all set up. Here's how to get started:
+            Hi ${payload.ownerName}, your organization <strong>${payload.organizationName}</strong> is all set up. Here's how to get started:
           </p>
 
           <div style="background:#fafafa;border-radius:8px;padding:20px;margin:24px 0;">

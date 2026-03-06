@@ -176,11 +176,11 @@ export function AdminUserTable({
       },
     },
     {
-      accessorKey: "restaurantName",
-      header: "Restaurant",
+      accessorKey: "organizationName",
+      header: "Organization",
       cell: ({ row }) => (
         <span className="text-[13px] text-muted-foreground">
-          {row.original.restaurantName ?? "\u2014"}
+          {row.original.organizationName ?? "\u2014"}
         </span>
       ),
     },

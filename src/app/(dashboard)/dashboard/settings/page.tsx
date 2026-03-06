@@ -1,6 +1,6 @@
 import { connection } from "next/server"
-import { assertAuthenticated, getRestaurantForUser, assertRestaurantRole } from "@/lib/dal"
-import { getSettingsData } from "@/server/settings-actions"
+import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
+import { getSettingsData } from "@/server/org-settings-actions"
 import { getBillingData } from "@/server/billing-actions"
 import { redirect } from "next/navigation"
 import { SettingsView } from "@/components/dashboard/settings/settings-view"
@@ -12,12 +12,12 @@ export default async function SettingsPage(props: {
   const searchParams = await props.searchParams
   await assertAuthenticated()
 
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) {
+  const organization = await getOrganizationForUser()
+  if (!organization) {
     redirect("/dashboard")
   }
 
-  await assertRestaurantRole(restaurant.id, "owner")
+  await assertOrganizationRole(organization.id, "owner")
 
   const activeTab = searchParams.tab ?? "general"
 
@@ -38,12 +38,12 @@ export default async function SettingsPage(props: {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage your restaurant and loyalty program settings.
+          Manage your organization settings.
         </p>
       </div>
 
       <SettingsView
-        restaurant={data.restaurant}
+        organization={data.organization}
         members={data.members}
         pendingInvitations={data.pendingInvitations}
         activeTab={activeTab}

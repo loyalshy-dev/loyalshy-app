@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { getCustomerColumns } from "./customer-columns"
-import type { CustomerRow } from "@/server/customer-actions"
+import type { ContactRow as CustomerRow } from "@/server/contact-actions"
 
 type CustomerTableProps = {
   customers: CustomerRow[]

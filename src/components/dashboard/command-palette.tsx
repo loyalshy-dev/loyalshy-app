@@ -54,7 +54,7 @@ export function CommandPalette({
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput placeholder="Search customers, actions, pages..." />
+      <CommandInput placeholder="Search contacts, actions, pages..." />
       <CommandList>
         <CommandEmpty>
           <div className="flex flex-col items-center gap-1 py-4">
@@ -68,13 +68,13 @@ export function CommandPalette({
             onSelect={() => runCommand(onRegisterVisit)}
           >
             <Stamp className="size-4" />
-            Register Visit
+            Register Interaction
           </CommandItem>
           <CommandItem
             onSelect={() => runCommand(() => router.push("/dashboard/customers?action=add"))}
           >
             <UserPlus className="size-4" />
-            Add Customer
+            Add Contact
           </CommandItem>
           <CommandItem
             onSelect={() => runCommand(() => router.push("/dashboard/rewards?action=redeem"))}
@@ -99,7 +99,7 @@ export function CommandPalette({
             }
           >
             <Users className="size-4" />
-            Customers
+            Contacts
           </CommandItem>
           <CommandItem
             onSelect={() =>
@@ -107,7 +107,7 @@ export function CommandPalette({
             }
           >
             <Layers className="size-4" />
-            Programs
+            Templates
           </CommandItem>
           <CommandItem
             onSelect={() =>

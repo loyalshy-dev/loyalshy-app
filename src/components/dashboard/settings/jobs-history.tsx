@@ -163,7 +163,7 @@ export function JobsHistory({ initialLogs, initialTotal }: JobsHistoryProps) {
               <tbody>
                 {logs.map((log) => (
                   <tr key={log.id} className="border-b last:border-b-0 hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-3 font-medium">{log.customerName}</td>
+                    <td className="px-4 py-3 font-medium">{log.contactName}</td>
                     <td className="px-4 py-3">
                       <ActionBadge action={log.action} />
                     </td>

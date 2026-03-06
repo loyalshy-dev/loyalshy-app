@@ -38,16 +38,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {
-  updateLoyaltyProgram,
-  archiveLoyaltyProgram,
-  activateProgram,
-  reactivateProgram,
-  deleteProgram,
-} from "@/server/settings-actions"
-import type { ProgramWithDesign, ProgramDeleteCounts } from "@/server/settings-actions"
-import { parseCouponConfig, parseMembershipConfig, parseMinigameConfig, parsePointsConfig, parsePrepaidConfig } from "@/lib/program-config"
-import type { PointsCatalogItem } from "@/types/program-types"
-import { PROGRAM_TYPE_META, type ProgramType } from "@/types/program-types"
+  updatePassTemplate,
+  archivePassTemplate,
+  activateTemplate as activateProgram,
+  reactivateTemplate as reactivateProgram,
+  deleteTemplate as deleteProgram,
+} from "@/server/org-settings-actions"
+import type { TemplateWithDesign, TemplateDeleteCounts } from "@/server/org-settings-actions"
+import { parseCouponConfig, parseMembershipConfig, parseMinigameConfig, parsePointsConfig, parsePrepaidConfig } from "@/lib/pass-config"
+import type { PointsCatalogItem } from "@/types/pass-types"
+import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { PrizeRevealEditor } from "@/components/dashboard/programs/prize-reveal-editor"
 
 // ─── Section Nav (scroll-spy) ────────────────────────────────────────
@@ -145,7 +145,7 @@ type LoyaltyForm = {
   prepaidTerms: string
 }
 
-type Restaurant = {
+type Organization = {
   id: string
   name: string
   slug: string
@@ -158,10 +158,10 @@ type Restaurant = {
 
 export function ProgramEditor({
   program,
-  restaurant,
+  organization,
 }: {
-  program: ProgramWithDesign
-  restaurant: Restaurant
+  program: TemplateWithDesign
+  organization: Organization
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -174,14 +174,20 @@ export function ProgramEditor({
   const [showReactivateDialog, setShowReactivateDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteConfirmName, setDeleteConfirmName] = useState("")
-  const [deleteCounts, setDeleteCounts] = useState<ProgramDeleteCounts | null>(null)
+  const [deleteCounts, setDeleteCounts] = useState<TemplateDeleteCounts | null>(null)
 
-  const programType = (program.programType ?? "STAMP_CARD") as ProgramType
+  const programType = (program.passType ?? "STAMP_CARD") as PassType
   const isStampCard = programType === "STAMP_CARD"
   const isCoupon = programType === "COUPON"
   const isMembership = programType === "MEMBERSHIP"
   const isPoints = programType === "POINTS"
   const isPrepaid = programType === "PREPAID"
+
+  // Extract stamp-card flat fields from config JSON
+  const stampConfig = program.config as Record<string, unknown> | null ?? {}
+  const programVisitsRequired = (stampConfig.stampsRequired as number) ?? (stampConfig.visitsRequired as number) ?? 10
+  const programRewardDescription = (stampConfig.rewardDescription as string) ?? ""
+  const programRewardExpiryDays = (stampConfig.rewardExpiryDays as number) ?? 90
 
   const couponConfig = isCoupon ? parseCouponConfig(program.config) : null
   const minigameConfig = (isStampCard || isCoupon) ? parseMinigameConfig(program.config) : null
@@ -205,9 +211,9 @@ export function ProgramEditor({
   } = useForm<LoyaltyForm>({
     defaultValues: {
       name: program.name,
-      visitsRequired: program.visitsRequired,
-      rewardDescription: program.rewardDescription,
-      rewardExpiryDays: program.rewardExpiryDays,
+      visitsRequired: programVisitsRequired,
+      rewardDescription: programRewardDescription,
+      rewardExpiryDays: programRewardExpiryDays,
       termsAndConditions: program.termsAndConditions ?? "",
       status: program.status as "DRAFT" | "ACTIVE" | "ARCHIVED",
       startsAt: new Date(program.startsAt).toISOString().slice(0, 10),
@@ -238,7 +244,7 @@ export function ProgramEditor({
 
   const visitsRequired = watch("visitsRequired")
   const visitsChanged =
-    Number(visitsRequired) !== program.visitsRequired
+    Number(visitsRequired) !== programVisitsRequired
   const validDuration = watch("validDuration")
   const discountType = watch("discountType")
   function buildConfig(data: LoyaltyForm): Record<string, unknown> | undefined {
@@ -290,20 +296,25 @@ export function ProgramEditor({
     }
 
     startTransition(async () => {
-      const config = buildConfig(data)
-      const result = await updateLoyaltyProgram({
-        restaurantId: restaurant.id,
-        programId: program.id,
-        name: data.name,
-        visitsRequired: isStampCard ? data.visitsRequired : 1,
+      const typeConfig = buildConfig(data)
+      const baseConfig = isStampCard ? {
+        stampsRequired: data.visitsRequired,
         rewardDescription: data.rewardDescription,
         rewardExpiryDays: data.rewardExpiryDays,
+      } : {}
+      const mergedConfig = typeConfig
+        ? { ...baseConfig, ...typeConfig }
+        : Object.keys(baseConfig).length > 0 ? baseConfig : undefined
+      const result = await updatePassTemplate({
+        organizationId: organization.id,
+        templateId: program.id,
+        name: data.name,
         termsAndConditions: data.termsAndConditions,
         status: data.status,
         startsAt: new Date(data.startsAt),
         endsAt: data.endsAt ? new Date(data.endsAt) : null,
         resetProgress,
-        ...(config ? { config } : {}),
+        ...(mergedConfig ? { config: mergedConfig } : {}),
       })
       if ("error" in result) {
         toast.error(String(result.error))
@@ -318,7 +329,7 @@ export function ProgramEditor({
 
   function handleArchive() {
     startDangerTransition(async () => {
-      const result = await archiveLoyaltyProgram(restaurant.id, program.id)
+      const result = await archivePassTemplate(organization.id, program.id)
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
@@ -331,7 +342,7 @@ export function ProgramEditor({
 
   function handleActivate() {
     startDangerTransition(async () => {
-      const result = await activateProgram(restaurant.id, program.id)
+      const result = await activateProgram(organization.id, program.id)
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
@@ -343,7 +354,7 @@ export function ProgramEditor({
 
   function handleReactivate() {
     startDangerTransition(async () => {
-      const result = await reactivateProgram(restaurant.id, program.id)
+      const result = await reactivateProgram(organization.id, program.id)
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
@@ -356,7 +367,7 @@ export function ProgramEditor({
 
   function handleDelete() {
     startDangerTransition(async () => {
-      const result = await deleteProgram(restaurant.id, program.id, deleteConfirmName)
+      const result = await deleteProgram(organization.id, program.id, deleteConfirmName)
       if ("error" in result) {
         if (result.counts) {
           setDeleteCounts(result.counts)
@@ -372,7 +383,7 @@ export function ProgramEditor({
 
   const isArchived = program.status === "ARCHIVED"
   const isDraft = program.status === "DRAFT"
-  const typeMeta = PROGRAM_TYPE_META[programType]
+  const typeMeta = PASS_TYPE_META[programType]
 
   // Build sections list based on program type
   const navSections: { id: string; label: string }[] = [
@@ -961,11 +972,11 @@ export function ProgramEditor({
                 program={{
                   id: program.id,
                   name: program.name,
-                  programType: program.programType,
+                  passType: program.passType,
                   config: program.config,
-                  rewardDescription: program.rewardDescription,
+                  rewardDescription: programRewardDescription,
                   status: program.status,
-                  restaurantId: restaurant.id,
+                  organizationId: organization.id,
                 }}
               />
             </section>
@@ -979,7 +990,7 @@ export function ProgramEditor({
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm font-medium">
-                      Changing visits required from {program.visitsRequired} to{" "}
+                      Changing visits required from {programVisitsRequired} to{" "}
                       {visitsRequired}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -1239,8 +1250,8 @@ export function ProgramEditor({
             <div className="rounded-md bg-destructive/10 p-3 text-sm space-y-1">
               <p className="font-medium text-destructive">The following data will be deleted:</p>
               <ul className="list-disc list-inside text-muted-foreground text-xs space-y-0.5">
-                <li>{deleteCounts.enrollments} enrollment{deleteCounts.enrollments !== 1 ? "s" : ""}</li>
-                <li>{deleteCounts.visits} visit{deleteCounts.visits !== 1 ? "s" : ""}</li>
+                <li>{deleteCounts.passInstances} pass instance{deleteCounts.passInstances !== 1 ? "s" : ""}</li>
+                <li>{deleteCounts.interactions} interaction{deleteCounts.interactions !== 1 ? "s" : ""}</li>
                 <li>{deleteCounts.rewards} reward{deleteCounts.rewards !== 1 ? "s" : ""}</li>
               </ul>
             </div>

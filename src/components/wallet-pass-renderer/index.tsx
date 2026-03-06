@@ -44,7 +44,7 @@ export type WalletPassDesign = {
 type WalletPassRendererProps = {
   design: WalletPassDesign
   format?: PreviewFormat
-  restaurantName?: string
+  organizationName?: string
   logoUrl?: string | null
   logoAppleUrl?: string | null
   logoGoogleUrl?: string | null
@@ -97,7 +97,7 @@ function textColorForBg(hex: string): string {
 export function WalletPassRenderer({
   design,
   format = "apple",
-  restaurantName = "Restaurant",
+  organizationName = "Organization",
   logoUrl,
   logoAppleUrl,
   logoGoogleUrl,
@@ -163,7 +163,8 @@ export function WalletPassRenderer({
   function resolveField(name: string) {
     switch (name) {
       case "restaurant":
-        return { label: lbl("RESTAURANT"), value: restaurantName }
+      case "organization":
+        return { label: lbl("ORGANIZATION"), value: organizationName }
       // Stamp/Points fields
       case "progress":
         return { label: lbl(progressLabel), value: progressText }
@@ -251,12 +252,12 @@ export function WalletPassRenderer({
               color: design.textColor,
             }}
           >
-            {restaurantName.charAt(0).toUpperCase()}
+            {organizationName.charAt(0).toUpperCase()}
           </span>
         )}
       </div>
 
-      {/* Restaurant name + optional header fields */}
+      {/* Organization name + optional header fields */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
@@ -267,7 +268,7 @@ export function WalletPassRenderer({
             whiteSpace: "nowrap",
           }}
         >
-          {restaurantName}
+          {organizationName}
         </div>
         {headerFields.length > 1 && (
           <div style={{ fontSize: 10, opacity: 0.6, marginTop: 1 }}>

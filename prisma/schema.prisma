@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// Loyalshy — Digital Loyalty Card SaaS
+// Loyalshy — Digital Wallet Pass Platform
 // Prisma v7 schema — PostgreSQL 18 with uuidv7()
 // ─────────────────────────────────────────────────────────────
 
@@ -38,12 +38,78 @@ enum Plan {
   @@map("plan")
 }
 
-enum WalletPassType {
+enum PassType {
+  STAMP_CARD  @map("stamp_card")
+  COUPON      @map("coupon")
+  MEMBERSHIP  @map("membership")
+  POINTS      @map("points")
+  PREPAID     @map("prepaid")
+  GIFT_CARD   @map("gift_card")
+  TICKET      @map("ticket")
+  ACCESS      @map("access")
+  TRANSIT     @map("transit")
+  BUSINESS_ID @map("business_id")
+
+  @@map("pass_type")
+}
+
+enum TemplateStatus {
+  DRAFT    @map("draft")
+  ACTIVE   @map("active")
+  ARCHIVED @map("archived")
+
+  @@map("template_status")
+}
+
+enum PassInstanceStatus {
+  ACTIVE    @map("active")
+  COMPLETED @map("completed")
+  SUSPENDED @map("suspended")
+  EXPIRED   @map("expired")
+  REVOKED   @map("revoked")
+  VOIDED    @map("voided")
+
+  @@map("pass_instance_status")
+}
+
+enum WalletProvider {
   APPLE  @map("apple")
   GOOGLE @map("google")
   NONE   @map("none")
 
-  @@map("wallet_pass_type")
+  @@map("wallet_provider")
+}
+
+enum InteractionType {
+  // Loyalty (stamp/coupon/membership/points/prepaid)
+  STAMP            @map("stamp")
+  COUPON_REDEEM    @map("coupon_redeem")
+  CHECK_IN         @map("check_in")
+  POINTS_EARN      @map("points_earn")
+  POINTS_REDEEM    @map("points_redeem")
+  PREPAID_USE      @map("prepaid_use")
+  PREPAID_RECHARGE @map("prepaid_recharge")
+  // Gift card
+  GIFT_CHARGE      @map("gift_charge")
+  GIFT_REFUND      @map("gift_refund")
+  // Ticket
+  TICKET_SCAN      @map("ticket_scan")
+  TICKET_VOID      @map("ticket_void")
+  // Access
+  ACCESS_GRANT     @map("access_grant")
+  ACCESS_DENY      @map("access_deny")
+  // Transit
+  TRANSIT_BOARD    @map("transit_board")
+  TRANSIT_EXIT     @map("transit_exit")
+  // Business ID
+  ID_VERIFY        @map("id_verify")
+  // Generic
+  STATUS_CHANGE    @map("status_change")
+  REWARD_EARNED    @map("reward_earned")
+  REWARD_REDEEMED  @map("reward_redeemed")
+  NOTE             @map("note")
+
+  @@map("interaction_type")
 }
 
 enum RewardStatus {
@@ -69,6 +135,8 @@ enum StaffRole {
 
   @@map("staff_role")
 }
+
+// ─── Design Enums ────────────────────────────────────────────
 
 enum PatternStyle {
   NONE            @map("none")
@@ -115,92 +183,94 @@ enum LabelFormat {
   @@map("label_format")
 }
 
-enum CardType {
+enum DesignCardType {
   STAMP   @map("stamp")
   POINTS  @map("points")
   TIER    @map("tier")
   COUPON  @map("coupon")
   PREPAID @map("prepaid")
+  GENERIC @map("generic")
 
-  @@map("card_type")
-}
-
-enum EnrollmentStatus {
-  ACTIVE    @map("active")
-  COMPLETED @map("completed")
-  FROZEN    @map("frozen")
-  SUSPENDED @map("suspended")
-  EXPIRED   @map("expired")
-
-  @@map("enrollment_status")
-}
-
-enum ProgramStatus {
-  DRAFT    @map("draft")
-  ACTIVE   @map("active")
-  ARCHIVED @map("archived")
-
-  @@map("program_status")
-}
-
-enum ProgramType {
-  STAMP_CARD @map("stamp_card")
-  COUPON     @map("coupon")
-  MEMBERSHIP @map("membership")
-  POINTS     @map("points")
-  PREPAID    @map("prepaid")
-
-  @@map("program_type")
+  @@map("design_card_type")
 }
 
 // ─── Better Auth Core Tables ─────────────────────────────────
 // These 4 models MUST match Better Auth's expected schema.
-// Custom fields (role, restaurantId) are added via additionalFields
-// in the auth config (Phase 0.3).
+// Custom fields (role) are added via additionalFields in auth config.
 
 model User {
-  id            String   @id @default(dbgenerated("uuidv7()::text"))
+  id            String    @id @default(dbgenerated("uuidv7()::text"))
   name          String
-  email         String   @unique
-  emailVerified Boolean  @default(false)
+  email         String    @unique
+  emailVerified Boolean   @default(false)
   image         String?
   role          UserRole  @default(USER)
   banned        Boolean   @default(false)
   banReason     String?
   banExpires    DateTime?
-  restaurantId  String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  restaurant       Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
-  sessions         Session[]
-  accounts         Account[]
-  members          Member[]
-  invitations      Invitation[]
-  registeredVisits Visit[]     @relation("RegisteredBy")
-  redeemedRewards  Reward[]    @relation("RedeemedBy")
+  sessions              Session[]
+  accounts              Account[]
+  members               Member[]
+  invitations           Invitation[]
+  performedInteractions Interaction[] @relation("PerformedBy")
+  redeemedRewards       Reward[]      @relation("RedeemedBy")
 
-  @@index([restaurantId])
   @@map("user")
 }
 
 model Session {
-  id                     String   @id @default(dbgenerated("uuidv7()::text"))
-  expiresAt              DateTime
-  token                  String   @unique
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
-  ipAddress              String?
-  userAgent              String?
-  userId                 String
-  activeOrganizationId   String?
+  id                   String   @id @default(dbgenerated("uuidv7()::text"))
+  expiresAt            DateTime
+  token                String   @unique
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  activeOrganizationId String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("session")
 }
 
+model Account {
+  id                    String    @id @default(dbgenerated("uuidv7()::text"))
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(dbgenerated("uuidv7()::text"))
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
 // ─── Better Auth Organization Plugin Tables ──────────────────
+// Organization now absorbs Restaurant fields (billing, branding).
 
 model Organization {
   id        String   @id @default(dbgenerated("uuidv7()::text"))
@@ -210,8 +280,32 @@ model Organization {
   metadata  String?
   createdAt DateTime @default(now())
 
-  members     Member[]
-  invitations Invitation[]
+  // Billing (absorbed from Restaurant)
+  subscriptionStatus   SubscriptionStatus @default(TRIALING)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  plan                 Plan               @default(STARTER)
+  trialEndsAt          DateTime?
+
+  // Branding (absorbed from Restaurant)
+  logoApple      String?
+  logoGoogle     String?
+  brandColor     String?
+  secondaryColor String?
+  address        String?
+  phone          String?
+  website        String?
+  timezone       String @default("UTC")
+  settings       Json   @default("{}")
+
+  members            Member[]
+  invitations        Invitation[]
+  passTemplates      PassTemplate[]
+  contacts           Contact[]
+  interactions       Interaction[]
+  rewards            Reward[]
+  staffInvitations   StaffInvitation[]
+  analyticsSnapshots AnalyticsSnapshot[]
 
   @@map("organization")
 }
@@ -248,242 +342,208 @@ model Invitation {
   @@map("invitation")
 }
 
-model Account {
-  id                    String    @id @default(dbgenerated("uuidv7()::text"))
-  accountId             String
-  providerId            String
-  userId                String
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([providerId, accountId])
-  @@map("account")
-}
-
-model Verification {
-  id         String   @id @default(dbgenerated("uuidv7()::text"))
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@map("verification")
-}
-
 // ─── Application Models ──────────────────────────────────────
 
-model Restaurant {
-  id                   String             @id @default(dbgenerated("uuidv7()::text"))
-  name                 String
-  slug                 String             @unique
-  logo                 String?
-  logoApple            String?
-  logoGoogle           String?
-  brandColor           String?
-  secondaryColor       String?
-  address              String?
-  phone                String?
-  website              String?
-  timezone             String             @default("UTC")
-  subscriptionStatus   SubscriptionStatus @default(TRIALING)
-  stripeCustomerId     String?            @unique
-  stripeSubscriptionId String?            @unique
-  plan                 Plan               @default(STARTER)
-  settings             Json               @default("{}")
-  trialEndsAt          DateTime?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-
-  users              User[]
-  loyaltyPrograms    LoyaltyProgram[]
-  customers          Customer[]
-  visits             Visit[]
-  rewards            Reward[]
-  staffInvitations   StaffInvitation[]
-  analyticsSnapshots AnalyticsSnapshot[]
-
-  @@map("restaurant")
-}
-
-model LoyaltyProgram {
-  id                 String        @id @default(dbgenerated("uuidv7()::text"))
-  restaurantId       String
+model PassTemplate {
+  id                 String         @id @default(dbgenerated("uuidv7()::text"))
+  organizationId     String
   name               String
-  programType        ProgramType   @default(STAMP_CARD)
-  visitsRequired     Int           @default(10)
-  rewardDescription  String
-  rewardExpiryDays   Int           @default(90)
-  status             ProgramStatus @default(ACTIVE)
-  startsAt           DateTime      @default(now())
+  description        String?        @db.Text
+  passType           PassType
+  status             TemplateStatus @default(DRAFT)
+  startsAt           DateTime       @default(now())
   endsAt             DateTime?
-  termsAndConditions String?       @db.Text
-  config             Json          @default("{}")
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  termsAndConditions String?        @db.Text
+  config             Json           @default("{}")
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 
-  restaurant  Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  enrollments Enrollment[]
-  visits      Visit[]
-  rewards     Reward[]
-  cardDesign  CardDesign?
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  passInstances PassInstance[]
+  passDesign    PassDesign?
+  rewards       Reward[]
+  interactions  Interaction[]
 
-  @@index([restaurantId])
-  @@index([restaurantId, status])
-  @@index([restaurantId, programType])
-  @@map("loyalty_program")
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, passType])
+  @@map("pass_template")
 }
 
-model Enrollment {
-  id                     String           @id @default(dbgenerated("uuidv7()::text"))
-  customerId             String
-  loyaltyProgramId       String
-  currentCycleVisits     Int              @default(0)
-  totalVisits            Int              @default(0)
-  totalRewardsRedeemed   Int              @default(0)
-  pointsBalance          Int              @default(0)
-  remainingUses          Int              @default(0)
-  walletPassId           String?          @unique
-  walletPassSerialNumber String?          @unique
-  walletPassType         WalletPassType   @default(NONE)
-  status                 EnrollmentStatus @default(ACTIVE)
-  enrolledAt             DateTime         @default(now())
-  frozenAt               DateTime?
-  suspendedAt            DateTime?
+model PassInstance {
+  id                     String             @id @default(dbgenerated("uuidv7()::text"))
+  contactId              String
+  passTemplateId         String
+  status                 PassInstanceStatus @default(ACTIVE)
+  walletProvider         WalletProvider     @default(NONE)
+  walletPassId           String?            @unique
+  walletPassSerialNumber String?            @unique
+  data                   Json               @default("{}")
+  issuedAt               DateTime           @default(now())
   expiresAt              DateTime?
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
+  suspendedAt            DateTime?
+  revokedAt              DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 
-  customer            Customer             @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  loyaltyProgram      LoyaltyProgram       @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
-  visits              Visit[]
+  contact             Contact              @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  passTemplate        PassTemplate         @relation(fields: [passTemplateId], references: [id], onDelete: Cascade)
+  interactions        Interaction[]
   rewards             Reward[]
   walletPassLogs      WalletPassLog[]
   deviceRegistrations DeviceRegistration[]
 
-  @@unique([customerId, loyaltyProgramId])
-  @@index([customerId])
-  @@index([loyaltyProgramId])
+  @@unique([contactId, passTemplateId])
+  @@index([contactId])
+  @@index([passTemplateId])
   @@index([walletPassSerialNumber])
   @@index([status])
-  @@map("enrollment")
+  @@index([passTemplateId, status])
+  @@map("pass_instance")
 }
 
-model Customer {
-  id           String    @id @default(dbgenerated("uuidv7()::text"))
-  restaurantId String
-  fullName     String
-  email        String?
-  phone        String?
-  totalVisits  Int       @default(0)
-  lastVisitAt  DateTime?
-  deletedAt    DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+model Contact {
+  id                String    @id @default(dbgenerated("uuidv7()::text"))
+  organizationId    String
+  fullName          String
+  email             String?
+  phone             String?
+  totalInteractions Int       @default(0)
+  lastInteractionAt DateTime?
+  metadata          Json      @default("{}")
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  restaurant  Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  enrollments Enrollment[]
-  visits      Visit[]
-  rewards     Reward[]
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  passInstances PassInstance[]
+  interactions  Interaction[]
+  rewards       Reward[]
 
-  @@unique([restaurantId, email])
-  @@unique([restaurantId, phone])
-  @@index([restaurantId, deletedAt])
-  @@index([restaurantId, totalVisits])
+  @@unique([organizationId, email])
+  @@unique([organizationId, phone])
+  @@index([organizationId, deletedAt])
+  @@index([organizationId, totalInteractions])
   @@index([email])
-  @@map("customer")
+  @@map("contact")
 }
 
-model Visit {
-  id               String   @id @default(dbgenerated("uuidv7()::text"))
-  customerId       String
-  restaurantId     String
-  loyaltyProgramId String
-  enrollmentId     String?
-  registeredById   String?
-  visitNumber      Int
-  createdAt        DateTime @default(now())
+model Interaction {
+  id             String          @id @default(dbgenerated("uuidv7()::text"))
+  contactId      String
+  organizationId String
+  passTemplateId String
+  passInstanceId String?
+  performedById  String?
+  type           InteractionType
+  metadata       Json            @default("{}")
+  createdAt      DateTime        @default(now())
 
-  customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  loyaltyProgram LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
-  enrollment     Enrollment?    @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
-  registeredBy   User?          @relation("RegisteredBy", fields: [registeredById], references: [id], onDelete: SetNull)
+  contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  passTemplate PassTemplate @relation(fields: [passTemplateId], references: [id], onDelete: Cascade)
+  passInstance PassInstance? @relation(fields: [passInstanceId], references: [id], onDelete: SetNull)
+  performedBy  User?        @relation("PerformedBy", fields: [performedById], references: [id], onDelete: SetNull)
 
-  @@index([customerId])
-  @@index([restaurantId])
-  @@index([enrollmentId])
-  @@index([createdAt])
-  @@index([restaurantId, createdAt])
-  @@index([customerId, createdAt])
-  @@map("visit")
+  @@index([organizationId, createdAt])
+  @@index([organizationId, type])
+  @@index([passInstanceId])
+  @@index([contactId, createdAt])
+  @@map("interaction")
 }
 
 model Reward {
-  id               String       @id @default(dbgenerated("uuidv7()::text"))
-  customerId       String
-  restaurantId     String
-  loyaltyProgramId String
-  enrollmentId     String?
-  status           RewardStatus @default(AVAILABLE)
-  earnedAt         DateTime     @default(now())
-  redeemedAt       DateTime?
-  expiresAt        DateTime
-  redeemedById     String?
-  description      String?
-  pointsCost       Int?
-  revealedAt       DateTime?
+  id             String       @id @default(dbgenerated("uuidv7()::text"))
+  contactId      String
+  organizationId String
+  passTemplateId String
+  passInstanceId String?
+  status         RewardStatus @default(AVAILABLE)
+  earnedAt       DateTime     @default(now())
+  redeemedAt     DateTime?
+  expiresAt      DateTime
+  redeemedById   String?
+  description    String?
+  pointsCost     Int?
+  revealedAt     DateTime?
 
-  customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  loyaltyProgram LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
-  enrollment     Enrollment?    @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
-  redeemedBy     User?          @relation("RedeemedBy", fields: [redeemedById], references: [id], onDelete: SetNull)
+  contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  passTemplate PassTemplate @relation(fields: [passTemplateId], references: [id], onDelete: Cascade)
+  passInstance PassInstance? @relation(fields: [passInstanceId], references: [id], onDelete: SetNull)
+  redeemedBy   User?        @relation("RedeemedBy", fields: [redeemedById], references: [id], onDelete: SetNull)
 
-  @@index([customerId])
-  @@index([enrollmentId])
+  @@index([contactId])
+  @@index([passInstanceId])
   @@index([status])
-  @@index([restaurantId, status])
-  @@index([restaurantId, expiresAt])
+  @@index([organizationId, status])
+  @@index([organizationId, expiresAt])
   @@map("reward")
 }
 
+model PassDesign {
+  id                   String         @id @default(dbgenerated("uuidv7()::text"))
+  passTemplateId       String         @unique
+  cardType             DesignCardType @default(STAMP)
+  showStrip            Boolean        @default(true) @map("show_strip")
+  primaryColor         String?
+  secondaryColor       String?
+  textColor            String?
+  stripImageUrl        String?
+  stripImageApple      String?
+  stripImageGoogle     String?
+  patternStyle         PatternStyle   @default(NONE)
+  progressStyle        ProgressStyle  @default(NUMBERS)
+  fontFamily           FontFamily     @default(SANS)
+  labelFormat          LabelFormat    @default(UPPERCASE)
+  customProgressLabel  String?        @db.VarChar(30)
+  generatedStripApple  String?
+  generatedStripGoogle String?
+  templateId           String?        @db.VarChar(50)
+  palettePreset        String?
+  businessHours        String?        @db.Text
+  mapAddress           String?
+  mapLatitude          Float?
+  mapLongitude         Float?
+  socialLinks          Json           @default("{}")
+  customMessage        String?        @db.Text
+  designHash           String         @default("")
+  editorConfig         Json           @default("{}")
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  passTemplate PassTemplate @relation(fields: [passTemplateId], references: [id], onDelete: Cascade)
+
+  @@map("pass_design")
+}
+
 model WalletPassLog {
-  id           String           @id @default(dbgenerated("uuidv7()::text"))
-  enrollmentId String?
-  customerId   String?
-  action       WalletPassAction
-  details      Json             @default("{}")
-  createdAt    DateTime         @default(now())
+  id             String           @id @default(dbgenerated("uuidv7()::text"))
+  passInstanceId String?
+  contactId      String?
+  action         WalletPassAction
+  details        Json             @default("{}")
+  createdAt      DateTime         @default(now())
 
-  enrollment Enrollment? @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  passInstance PassInstance? @relation(fields: [passInstanceId], references: [id], onDelete: Cascade)
 
-  @@index([enrollmentId])
+  @@index([passInstanceId])
   @@map("wallet_pass_log")
 }
 
 model StaffInvitation {
-  id           String    @id @default(dbgenerated("uuidv7()::text"))
-  restaurantId String
-  email        String
-  role         StaffRole
-  token        String    @unique
-  expiresAt    DateTime
-  accepted     Boolean   @default(false)
-  createdAt    DateTime  @default(now())
+  id             String    @id @default(dbgenerated("uuidv7()::text"))
+  organizationId String
+  email          String
+  role           StaffRole
+  token          String    @unique
+  expiresAt      DateTime
+  accepted       Boolean   @default(false)
+  createdAt      DateTime  @default(now())
 
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@index([restaurantId])
+  @@index([organizationId])
   @@map("staff_invitation")
 }
 
@@ -495,7 +555,7 @@ model DeviceRegistration {
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
-  enrollment Enrollment @relation(fields: [serialNumber], references: [walletPassSerialNumber], onDelete: Cascade)
+  passInstance PassInstance @relation(fields: [serialNumber], references: [walletPassSerialNumber], onDelete: Cascade)
 
   @@unique([deviceLibraryIdentifier, serialNumber])
   @@index([serialNumber])
@@ -503,30 +563,30 @@ model DeviceRegistration {
 }
 
 model WebhookEvent {
-  id               String   @id @default(dbgenerated("uuidv7()::text"))
-  stripeEventId    String   @unique
-  eventType        String
-  processedAt      DateTime @default(now())
+  id            String   @id @default(dbgenerated("uuidv7()::text"))
+  stripeEventId String   @unique
+  eventType     String
+  processedAt   DateTime @default(now())
 
   @@index([processedAt])
   @@map("webhook_event")
 }
 
 model AnalyticsSnapshot {
-  id              String   @id @default(dbgenerated("uuidv7()::text"))
-  restaurantId    String
-  date            DateTime @db.Date
-  totalCustomers  Int      @default(0)
-  newCustomers    Int      @default(0)
-  totalVisits     Int      @default(0)
-  rewardsEarned   Int      @default(0)
-  rewardsRedeemed Int      @default(0)
-  createdAt       DateTime @default(now())
+  id                String   @id @default(dbgenerated("uuidv7()::text"))
+  organizationId    String
+  date              DateTime @db.Date
+  totalContacts     Int      @default(0)
+  newContacts       Int      @default(0)
+  totalInteractions Int      @default(0)
+  rewardsEarned     Int      @default(0)
+  rewardsRedeemed   Int      @default(0)
+  createdAt         DateTime @default(now())
 
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@unique([restaurantId, date])
-  @@index([restaurantId, date])
+  @@unique([organizationId, date])
+  @@index([organizationId, date])
   @@map("analytics_snapshot")
 }
 
@@ -539,40 +599,4 @@ model ShowcaseCard {
   updatedAt  DateTime @updatedAt
 
   @@map("showcase_card")
-}
-
-model CardDesign {
-  id                  String       @id @default(dbgenerated("uuidv7()::text"))
-  loyaltyProgramId    String       @unique
-  cardType            CardType     @default(STAMP)
-  showStrip           Boolean      @default(true)  @map("show_strip")
-  primaryColor        String?
-  secondaryColor      String?
-  textColor           String?
-  stripImageUrl       String?
-  stripImageApple     String?
-  stripImageGoogle    String?
-  patternStyle        PatternStyle @default(NONE)
-  progressStyle       ProgressStyle @default(NUMBERS)
-  fontFamily          FontFamily    @default(SANS)
-  labelFormat         LabelFormat   @default(UPPERCASE)
-  customProgressLabel String?       @db.VarChar(30)
-  generatedStripApple  String?
-  generatedStripGoogle String?
-  templateId          String?       @db.VarChar(50)
-  palettePreset       String?
-  businessHours       String?      @db.Text
-  mapAddress          String?
-  mapLatitude         Float?
-  mapLongitude        Float?
-  socialLinks         Json         @default("{}")
-  customMessage       String?      @db.Text
-  designHash          String       @default("")
-  editorConfig        Json         @default("{}")
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
-
-  loyaltyProgram LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
-
-  @@map("card_design")
 }

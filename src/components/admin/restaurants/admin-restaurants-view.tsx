@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import type { AdminRestaurantRow } from "@/server/admin-actions"
-import { AdminRestaurantFilters } from "./admin-restaurant-filters"
-import { AdminRestaurantTable } from "./admin-restaurant-table"
-import { AdminRestaurantDetailSheet } from "./admin-restaurant-detail-sheet"
+import type { AdminOrganizationRow } from "@/server/admin-actions"
+import { AdminRestaurantFilters as AdminOrganizationFilters } from "./admin-restaurant-filters"
+import { AdminOrganizationTable } from "./admin-restaurant-table"
+import { AdminOrganizationDetailSheet } from "./admin-restaurant-detail-sheet"
 
-type AdminRestaurantsViewProps = {
-  restaurants: AdminRestaurantRow[]
+type AdminOrganizationsViewProps = {
+  organizations: AdminOrganizationRow[]
   total: number
   pageCount: number
   params: {
@@ -19,12 +19,12 @@ type AdminRestaurantsViewProps = {
   }
 }
 
-export function AdminRestaurantsView({
-  restaurants,
+export function AdminOrganizationsView({
+  organizations,
   total,
   pageCount,
   params,
-}: AdminRestaurantsViewProps) {
+}: AdminOrganizationsViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
 
@@ -36,29 +36,29 @@ export function AdminRestaurantsView({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">Restaurants</h1>
+        <h1 className="text-lg font-semibold tracking-tight">Organizations</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage all restaurants on the platform.
+          Manage all organizations on the platform.
         </p>
       </div>
 
-      <AdminRestaurantFilters
+      <AdminOrganizationFilters
         search={params.search}
         filter={params.filter}
         total={total}
       />
 
-      <AdminRestaurantTable
-        restaurants={restaurants}
+      <AdminOrganizationTable
+        organizations={organizations}
         pageCount={pageCount}
         sort={params.sort}
         order={params.order}
         page={params.page}
-        onSelectRestaurant={handleSelect}
+        onSelectOrganization={handleSelect}
       />
 
-      <AdminRestaurantDetailSheet
-        restaurantId={selectedId}
+      <AdminOrganizationDetailSheet
+        organizationId={selectedId}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
       />

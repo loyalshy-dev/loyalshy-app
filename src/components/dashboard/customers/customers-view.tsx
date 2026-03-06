@@ -3,54 +3,54 @@
 import { useState } from "react"
 import { UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { CustomerTable } from "./customer-table"
-import { CustomerFilters } from "./customer-filters"
-import { AddCustomerSheet } from "./add-customer-sheet"
-import { CustomerDetailSheet } from "./customer-detail-sheet"
-import { CustomerEmptyState } from "./customer-empty-state"
-import { RegisterVisitDialog } from "@/components/dashboard/register-visit-dialog"
-import type { CustomerRow, CustomerListResult } from "@/server/customer-actions"
+import { CustomerTable as ContactTable } from "./customer-table"
+import { CustomerFilters as ContactFilters } from "./customer-filters"
+import { AddCustomerSheet as AddContactSheet } from "./add-customer-sheet"
+import { ContactDetailSheet } from "./customer-detail-sheet"
+import { CustomerEmptyState as ContactEmptyState } from "./customer-empty-state"
+import { RegisterVisitDialog as RegisterInteractionDialog } from "@/components/dashboard/register-visit-dialog"
+import type { ContactRow, ContactListResult } from "@/server/contact-actions"
 
-type CustomersViewProps = {
-  result: CustomerListResult
+type ContactsViewProps = {
+  result: ContactListResult
   search: string
   sort: string
   order: "asc" | "desc"
   page: number
   hasReward: string
-  programType: string
+  templateType: string
   isEmpty: boolean
 }
 
-export function CustomersView({
+export function ContactsView({
   result,
   search,
   sort,
   order,
   page,
   hasReward,
-  programType,
+  templateType,
   isEmpty,
-}: CustomersViewProps) {
+}: ContactsViewProps) {
   const [addSheetOpen, setAddSheetOpen] = useState(false)
-  const [detailCustomerId, setDetailCustomerId] = useState<string | null>(null)
+  const [detailContactId, setDetailContactId] = useState<string | null>(null)
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
-  const [registerVisitOpen, setRegisterVisitOpen] = useState(false)
-  const [registerVisitCustomerId, setRegisterVisitCustomerId] = useState<string | null>(null)
-  const [registerVisitCustomerName, setRegisterVisitCustomerName] = useState<string | null>(null)
+  const [registerInteractionOpen, setRegisterInteractionOpen] = useState(false)
+  const [registerInteractionContactId, setRegisterInteractionContactId] = useState<string | null>(null)
+  const [registerInteractionContactName, setRegisterInteractionContactName] = useState<string | null>(null)
 
-  function handleViewDetail(customer: CustomerRow) {
-    setDetailCustomerId(customer.id)
+  function handleViewDetail(contact: ContactRow) {
+    setDetailContactId(contact.id)
     setDetailSheetOpen(true)
   }
 
-  function handleEdit(customer: CustomerRow) {
-    setDetailCustomerId(customer.id)
+  function handleEdit(contact: ContactRow) {
+    setDetailContactId(contact.id)
     setDetailSheetOpen(true)
   }
 
-  function handleDelete(customer: CustomerRow) {
-    setDetailCustomerId(customer.id)
+  function handleDelete(contact: ContactRow) {
+    setDetailContactId(contact.id)
     setDetailSheetOpen(true)
   }
 
@@ -59,9 +59,9 @@ export function CustomersView({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Customers</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Contacts</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">
-            Manage your loyalty program members.
+            Manage your pass holders.
           </p>
         </div>
         {!isEmpty && (
@@ -71,26 +71,26 @@ export function CustomersView({
             onClick={() => setAddSheetOpen(true)}
           >
             <UserPlus className="size-3.5" />
-            <span className="hidden sm:inline">Add Customer</span>
+            <span className="hidden sm:inline">Add Contact</span>
           </Button>
         )}
       </div>
 
       {isEmpty ? (
-        <CustomerEmptyState onAddCustomer={() => setAddSheetOpen(true)} />
+        <ContactEmptyState onAddCustomer={() => setAddSheetOpen(true)} />
       ) : (
         <>
           {/* Filters */}
-          <CustomerFilters
+          <ContactFilters
             search={search}
             hasReward={hasReward}
-            programType={programType}
+            programType={templateType}
             totalResults={result.total}
           />
 
           {/* Table */}
-          <CustomerTable
-            customers={result.customers}
+          <ContactTable
+            customers={result.contacts as Parameters<typeof ContactTable>[0]["customers"]}
             pageCount={result.pageCount}
             currentPage={page}
             total={result.total}
@@ -103,36 +103,36 @@ export function CustomersView({
         </>
       )}
 
-      {/* Add Customer Sheet */}
-      <AddCustomerSheet
+      {/* Add Contact Sheet */}
+      <AddContactSheet
         open={addSheetOpen}
         onOpenChange={setAddSheetOpen}
       />
 
-      {/* Customer Detail Sheet */}
-      <CustomerDetailSheet
-        customerId={detailCustomerId}
+      {/* Contact Detail Sheet */}
+      <ContactDetailSheet
+        contactId={detailContactId}
         open={detailSheetOpen}
         onOpenChange={(open) => {
           setDetailSheetOpen(open)
-          if (!open) setDetailCustomerId(null)
+          if (!open) setDetailContactId(null)
         }}
-        onCustomerDeleted={() => {
-          setDetailCustomerId(null)
+        onContactDeleted={() => {
+          setDetailContactId(null)
         }}
-        onRegisterVisit={(customerId, customerName) => {
-          setRegisterVisitCustomerId(customerId)
-          setRegisterVisitCustomerName(customerName)
-          setRegisterVisitOpen(true)
+        onRegisterVisit={(contactId, contactName) => {
+          setRegisterInteractionContactId(contactId)
+          setRegisterInteractionContactName(contactName)
+          setRegisterInteractionOpen(true)
         }}
       />
 
-      {/* Register Visit Dialog (from customer detail) */}
-      <RegisterVisitDialog
-        open={registerVisitOpen}
-        onOpenChange={setRegisterVisitOpen}
-        preselectedCustomerId={registerVisitCustomerId}
-        preselectedCustomerName={registerVisitCustomerName}
+      {/* Register Interaction Dialog (from contact detail) */}
+      <RegisterInteractionDialog
+        open={registerInteractionOpen}
+        onOpenChange={setRegisterInteractionOpen}
+        preselectedCustomerId={registerInteractionContactId}
+        preselectedCustomerName={registerInteractionContactName}
       />
     </div>
   )

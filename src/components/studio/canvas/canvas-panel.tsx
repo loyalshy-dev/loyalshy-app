@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import type { PreviewFormat, DeviceFrame } from "@/types/editor"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { DeviceFrameWrapper } from "./device-frame"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/program-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/pass-config"
 
 type PreviewState = string
 
@@ -29,11 +29,11 @@ type CanvasPanelProps = {
   design: WalletPassDesign
   format: PreviewFormat
   deviceFrame: DeviceFrame
-  restaurantName: string
-  restaurantLogo: string | null
-  programName: string
-  programType: string
-  programConfig: unknown
+  organizationName: string
+  organizationLogo: string | null
+  templateName: string
+  passType: string
+  templateConfig: unknown
   visitsRequired: number
   rewardDescription: string
 }
@@ -42,24 +42,24 @@ export function CanvasPanel({
   design,
   format,
   deviceFrame,
-  restaurantName,
-  restaurantLogo,
-  programName,
-  programType,
-  programConfig,
+  organizationName,
+  organizationLogo,
+  templateName,
+  passType,
+  templateConfig,
   visitsRequired,
   rewardDescription,
 }: CanvasPanelProps) {
   const previewStates: PreviewStateOption[] =
-    programType === "COUPON" ? COUPON_PREVIEW_STATES
-    : programType === "MEMBERSHIP" ? MEMBERSHIP_PREVIEW_STATES
+    passType === "COUPON" ? COUPON_PREVIEW_STATES
+    : passType === "MEMBERSHIP" ? MEMBERSHIP_PREVIEW_STATES
     : STAMP_PREVIEW_STATES
 
   const [previewState, setPreviewState] = useState<PreviewState>(previewStates[0].id)
 
   // Stamp-specific visit counts
   const currentVisits =
-    programType !== "STAMP_CARD"
+    passType !== "STAMP_CARD"
       ? 0
       : previewState === "completed"
         ? visitsRequired
@@ -69,24 +69,24 @@ export function CanvasPanel({
 
   // Coupon-specific preview data
   const couponPreview = useMemo(() => {
-    if (programType !== "COUPON") return {}
-    const config = parseCouponConfig(programConfig)
+    if (passType !== "COUPON") return {}
+    const config = parseCouponConfig(templateConfig)
     const discountText = config ? formatCouponValue(config) : rewardDescription
     const validUntil = config?.validUntil
       ? new Date(config.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
       : "No expiry"
     const couponCode = config?.couponCode ?? undefined
     return { discountText, validUntil, couponCode }
-  }, [programType, programConfig, rewardDescription])
+  }, [passType, templateConfig, rewardDescription])
 
   // Membership-specific preview data
   const membershipPreview = useMemo(() => {
-    if (programType !== "MEMBERSHIP") return {}
-    const config = parseMembershipConfig(programConfig)
+    if (passType !== "MEMBERSHIP") return {}
+    const config = parseMembershipConfig(templateConfig)
     const tierName = config?.membershipTier ?? "Member"
     const benefits = config?.benefits ?? "Exclusive perks"
     return { tierName, benefits }
-  }, [programType, programConfig])
+  }, [passType, templateConfig])
 
   return (
     <div
@@ -143,9 +143,9 @@ export function CanvasPanel({
         <WalletPassRenderer
           design={design}
           format={format}
-          restaurantName={restaurantName}
-          logoUrl={restaurantLogo}
-          programName={programName}
+          organizationName={organizationName}
+          logoUrl={organizationLogo}
+          programName={templateName}
           currentVisits={currentVisits}
           totalVisits={visitsRequired}
           rewardDescription={rewardDescription}

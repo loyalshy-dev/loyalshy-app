@@ -47,7 +47,7 @@ function getCardTypeFromDesign(card: ShowcaseCard | null): ProgramType {
 function getDefaults(card: ShowcaseCard | null): ShowcaseMetadata {
   if (!card) {
     return {
-      restaurantName: "",
+      organizationName: "",
       customerName: "",
       memberSince: "Jan 2026",
       currentVisits: 5,
@@ -62,7 +62,7 @@ function getDefaults(card: ShowcaseCard | null): ShowcaseMetadata {
   }
   const m = (card.metadata ?? {}) as Record<string, unknown>
   return {
-    restaurantName: (m.restaurantName as string) ?? "",
+    organizationName: (m.organizationName as string) ?? "",
     customerName: (m.customerName as string) ?? "",
     memberSince: (m.memberSince as string) ?? "Jan 2026",
     currentVisits: (m.currentVisits as number) ?? 5,
@@ -85,7 +85,7 @@ const TYPE_OPTIONS: { value: ProgramType; label: string; icon: typeof Stamp }[] 
 export function ShowcaseCardForm({ open, onOpenChange, editCard, onSuccess }: Props) {
   const defaults = getDefaults(editCard)
   const [programType, setProgramType] = useState<ProgramType>(getCardTypeFromDesign(editCard))
-  const [restaurantName, setRestaurantName] = useState(defaults.restaurantName)
+  const [organizationName, setRestaurantName] = useState(defaults.organizationName)
   const [customerName, setCustomerName] = useState(defaults.customerName)
   const [memberSince, setMemberSince] = useState(defaults.memberSince)
   // Stamp fields
@@ -108,7 +108,7 @@ export function ShowcaseCardForm({ open, onOpenChange, editCard, onSuccess }: Pr
     setPrevEditId(editCard?.id ?? null)
     const d = getDefaults(editCard)
     setProgramType(getCardTypeFromDesign(editCard))
-    setRestaurantName(d.restaurantName)
+    setRestaurantName(d.organizationName)
     setCustomerName(d.customerName)
     setMemberSince(d.memberSince)
     setCurrentVisits(d.currentVisits ?? 5)
@@ -125,7 +125,7 @@ export function ShowcaseCardForm({ open, onOpenChange, editCard, onSuccess }: Pr
     e.preventDefault()
 
     const metadata: ShowcaseMetadata = {
-      restaurantName,
+      organizationName,
       customerName,
       memberSince,
       currentVisits,
@@ -163,7 +163,7 @@ export function ShowcaseCardForm({ open, onOpenChange, editCard, onSuccess }: Pr
   }
 
   const isValid =
-    restaurantName.trim() &&
+    organizationName.trim() &&
     customerName.trim() &&
     memberSince.trim() &&
     (programType === "STAMP_CARD"
@@ -209,10 +209,10 @@ export function ShowcaseCardForm({ open, onOpenChange, editCard, onSuccess }: Pr
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="sc-restaurant">Restaurant Name</Label>
+            <Label htmlFor="sc-org-name">Organization Name</Label>
             <Input
-              id="sc-restaurant"
-              value={restaurantName}
+              id="sc-org-name"
+              value={organizationName}
               onChange={(e) => setRestaurantName(e.target.value)}
               placeholder="Aurum Kitchen"
               maxLength={100}

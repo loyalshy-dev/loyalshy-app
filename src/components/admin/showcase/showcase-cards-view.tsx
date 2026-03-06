@@ -79,7 +79,7 @@ function designDataToWalletDesign(data: unknown): WalletPassDesign {
 function getMetadata(card: ShowcaseCard): ShowcaseMetadata {
   const m = (card.metadata ?? {}) as Record<string, unknown>
   return {
-    restaurantName: (m.restaurantName as string) ?? "Restaurant",
+    organizationName: (m.organizationName as string) ?? (m.restaurantName as string) ?? "Organization",
     customerName: (m.customerName as string) ?? "Customer",
     memberSince: (m.memberSince as string) ?? "Jan 2026",
     currentVisits: (m.currentVisits as number) ?? 5,
@@ -159,7 +159,7 @@ export function ShowcaseCardsView({ initialCards }: Props) {
                   width={CARD_W}
                   height={CARD_H}
                   format="apple"
-                  restaurantName={meta.restaurantName}
+                  organizationName={meta.organizationName}
                   currentVisits={meta.currentVisits}
                   totalVisits={meta.totalVisits}
                   rewardDescription={meta.rewardDescription}
@@ -175,7 +175,7 @@ export function ShowcaseCardsView({ initialCards }: Props) {
 
               {/* Metadata */}
               <div className="mb-3 space-y-0.5">
-                <p className="text-sm font-medium">{meta.restaurantName}</p>
+                <p className="text-sm font-medium">{meta.organizationName}</p>
                 <p className="text-xs text-muted-foreground">
                   {design.cardType === "COUPON"
                     ? `${meta.discountText || "Coupon"} ${meta.couponCode ? `· ${meta.couponCode}` : ""}`

@@ -9,23 +9,23 @@ import {
 
 /**
  * Dynamic stamp grid strip image endpoint.
- * Returns a PNG image of the stamp grid for a given enrollment.
+ * Returns a PNG image of the stamp grid for a given pass instance.
  * Used by Google Wallet hero images — no auth needed (opaque UUIDv7 URL).
  */
 export async function GET(
   _request: Request,
-  props: { params: Promise<{ enrollmentId: string }> }
+  props: { params: Promise<{ passInstanceId: string }> }
 ) {
-  const { enrollmentId } = await props.params
+  const { passInstanceId } = await props.params
 
-  const enrollment = await db.enrollment.findUnique({
-    where: { id: enrollmentId },
+  const passInstance = await db.passInstance.findUnique({
+    where: { id: passInstanceId },
     select: {
-      currentCycleVisits: true,
-      loyaltyProgram: {
+      data: true,
+      passTemplate: {
         select: {
-          visitsRequired: true,
-          cardDesign: {
+          config: true,
+          passDesign: {
             select: {
               primaryColor: true,
               secondaryColor: true,
@@ -45,35 +45,43 @@ export async function GET(
     },
   })
 
-  if (!enrollment) {
+  if (!passInstance) {
     return new NextResponse(null, { status: 404 })
   }
 
-  const cardDesign = enrollment.loyaltyProgram.cardDesign
-  const stripFilters = parseStripFilters(cardDesign?.editorConfig)
-  const isStampGrid = stripFilters.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
-  if (!cardDesign || !isStampGrid) {
+  const passDesign = passInstance.passTemplate.passDesign
+  const stripFilters = parseStripFilters(passDesign?.editorConfig)
+  const isStampGrid = stripFilters.useStampGrid || passDesign?.patternStyle === "STAMP_GRID"
+  if (!passDesign || !isStampGrid) {
     return new NextResponse(null, { status: 404 })
   }
 
-  const config = parseStampGridConfig(cardDesign.editorConfig)
-  const hasReward = enrollment.rewards.length > 0
+  // Extract data from the PassInstance.data JSON
+  const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
+  const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
+
+  // Extract config values from PassTemplate.config JSON
+  const templateConfig = (passInstance.passTemplate.config ?? {}) as Record<string, unknown>
+  const visitsRequired = (templateConfig.visitsRequired as number) ?? 10
+
+  const config = parseStampGridConfig(passDesign.editorConfig)
+  const hasReward = passInstance.rewards.length > 0
 
   // Use strip-specific colors (fall back to card colors)
-  const stripPrimary = stripFilters.stripColor1 ?? cardDesign.primaryColor ?? "#1a1a2e"
-  const stripSecondary = stripFilters.stripColor2 ?? cardDesign.secondaryColor ?? "#ffffff"
+  const stripPrimary = stripFilters.stripColor1 ?? passDesign.primaryColor ?? "#1a1a2e"
+  const stripSecondary = stripFilters.stripColor2 ?? passDesign.secondaryColor ?? "#ffffff"
 
   const buffer = await generateStampGridImage({
-    currentVisits: enrollment.currentCycleVisits,
-    totalVisits: enrollment.loyaltyProgram.visitsRequired,
+    currentVisits: currentCycleVisits,
+    totalVisits: visitsRequired,
     hasReward,
     config,
     primaryColor: stripPrimary,
     secondaryColor: stripSecondary,
-    textColor: cardDesign.textColor ?? "#ffffff",
+    textColor: passDesign.textColor ?? "#ffffff",
     width: GOOGLE_HERO_WIDTH,
     height: GOOGLE_HERO_HEIGHT,
-    stripImageUrl: cardDesign.stripImageGoogle,
+    stripImageUrl: passDesign.stripImageGoogle,
     stripOpacity: stripFilters.stripOpacity,
     stripGrayscale: stripFilters.stripGrayscale,
   })

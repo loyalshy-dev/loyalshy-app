@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from "react"
 import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import type { PatternStyle } from "@/lib/wallet/card-design"
-import { uploadStripImage, deleteStripImage } from "@/server/settings-actions"
+import { uploadStripImage, deleteStripImage } from "@/server/org-settings-actions"
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (

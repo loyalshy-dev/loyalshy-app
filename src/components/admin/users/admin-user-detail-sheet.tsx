@@ -223,10 +223,10 @@ export function AdminUserDetailSheet({
               </div>
               <div className="col-span-2">
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                  Restaurant
+                  Organization
                 </p>
                 <p className="text-sm mt-0.5">
-                  {user.restaurantName ?? "\u2014"}
+                  {user.organizationName ?? "\u2014"}
                 </p>
               </div>
               {user.banned && user.banReason && (

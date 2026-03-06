@@ -5,7 +5,7 @@ import { emailsQueue } from "./queues"
 
 type InvitationEmailPayload = {
   email: string
-  restaurantName: string
+  organizationName: string
   role: "owner" | "staff"
   inviteUrl: string
 }
@@ -30,12 +30,12 @@ export const sendInvitationEmailTask = task({
     const result = await resend.emails.send({
       from: "Loyalshy <noreply@loyalshy.com>",
       to: payload.email,
-      subject: `You've been invited to ${payload.restaurantName} on Loyalshy`,
+      subject: `You've been invited to ${payload.organizationName} on Loyalshy`,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">
           <h2 style="color:#171717;font-size:24px;margin-bottom:8px;">You've been invited!</h2>
           <p style="color:#525252;font-size:15px;line-height:1.6;">
-            <strong>${payload.restaurantName}</strong> has invited you to join their team as ${roleLabel}.
+            <strong>${payload.organizationName}</strong> has invited you to join their team as ${roleLabel}.
           </p>
           <a href="${payload.inviteUrl}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;margin:16px 0;">
             Accept Invitation

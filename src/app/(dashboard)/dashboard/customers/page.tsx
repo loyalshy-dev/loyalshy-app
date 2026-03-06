@@ -1,7 +1,7 @@
 import { connection } from "next/server"
-import { assertAuthenticated, getRestaurantForUser } from "@/lib/dal"
-import { getCustomers } from "@/server/customer-actions"
-import { CustomersView } from "@/components/dashboard/customers/customers-view"
+import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
+import { getContacts } from "@/server/contact-actions"
+import { ContactsView as CustomersView } from "@/components/dashboard/customers/customers-view"
 import { db } from "@/lib/db"
 
 export default async function CustomersPage({
@@ -11,12 +11,12 @@ export default async function CustomersPage({
 }) {
   await connection()
   const session = await assertAuthenticated()
-  const restaurant = await getRestaurantForUser()
+  const organization = await getOrganizationForUser()
 
-  if (!restaurant) {
+  if (!organization) {
     return (
       <div className="flex items-center justify-center h-[50vh] text-[13px] text-muted-foreground">
-        No restaurant found. Please contact support.
+        No organization found. Please contact support.
       </div>
     )
   }
@@ -28,21 +28,21 @@ export default async function CustomersPage({
   const order = params.order === "asc" ? "asc" as const : "desc" as const
   const page = typeof params.page === "string" ? Math.max(1, parseInt(params.page, 10) || 1) : 1
   const hasReward = typeof params.reward === "string" ? params.reward : "all"
-  const programType = typeof params.type === "string" ? params.type : "all"
+  const passType = typeof params.type === "string" ? params.type : "all"
 
-  const result = await getCustomers({
+  const result = await getContacts({
     page,
     perPage: 20,
     search,
     sort,
     order,
     hasReward,
-    programType,
+    passType,
   })
 
-  // Check if this restaurant has ANY customers (for empty state)
-  const totalCustomerCount = await db.customer.count({
-    where: { restaurantId: restaurant.id },
+  // Check if this organization has ANY contacts (for empty state)
+  const totalContactCount = await db.contact.count({
+    where: { organizationId: organization.id },
   })
 
   return (
@@ -53,8 +53,8 @@ export default async function CustomersPage({
       order={order}
       page={page}
       hasReward={hasReward}
-      programType={programType}
-      isEmpty={totalCustomerCount === 0}
+      templateType={passType}
+      isEmpty={totalContactCount === 0}
     />
   )
 }

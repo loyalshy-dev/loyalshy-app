@@ -1,8 +1,8 @@
 import { connection } from "next/server"
 import { notFound, redirect } from "next/navigation"
-import { assertAuthenticated, getRestaurantForUser, assertRestaurantRole } from "@/lib/dal"
+import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { db } from "@/lib/db"
-import { CardDesignPreview } from "@/components/dashboard/settings/card-design-preview"
+import { PassDesignPreview } from "@/components/dashboard/settings/card-design-preview"
 
 export default async function ProgramDesignPage(props: {
   params: Promise<{ id: string }>
@@ -11,16 +11,16 @@ export default async function ProgramDesignPage(props: {
   const { id: programId } = await props.params
   await assertAuthenticated()
 
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) {
+  const organization = await getOrganizationForUser()
+  if (!organization) {
     redirect("/dashboard")
   }
 
-  await assertRestaurantRole(restaurant.id, "owner")
+  await assertOrganizationRole(organization.id, "owner")
 
-  const program = await db.loyaltyProgram.findFirst({
-    where: { id: programId, restaurantId: restaurant.id },
-    include: { cardDesign: true },
+  const program = await db.passTemplate.findFirst({
+    where: { id: programId, organizationId: organization.id },
+    include: { passDesign: true },
   })
 
   if (!program) {
@@ -28,31 +28,31 @@ export default async function ProgramDesignPage(props: {
   }
 
   return (
-    <CardDesignPreview
-      programId={programId}
-      programName={program.name}
-      programType={program.programType}
-      programConfig={program.config}
-      restaurantName={restaurant.name}
-      restaurantLogo={restaurant.logo}
-      restaurantLogoApple={restaurant.logoApple}
-      restaurantLogoGoogle={restaurant.logoGoogle}
-      visitsRequired={program.visitsRequired}
-      rewardDescription={program.rewardDescription}
+    <PassDesignPreview
+      templateId={programId}
+      templateName={program.name}
+      passType={program.passType}
+      templateConfig={program.config}
+      organizationName={organization.name}
+      organizationLogo={organization.logo}
+      organizationLogoApple={organization.logoApple}
+      organizationLogoGoogle={organization.logoGoogle}
+      visitsRequired={((program.config as Record<string, unknown> | null)?.stampsRequired as number) ?? 10}
+      rewardDescription={((program.config as Record<string, unknown> | null)?.rewardDescription as string) ?? "Free reward"}
       cardDesign={
-        program.cardDesign
+        program.passDesign
           ? {
-              cardType: program.cardDesign.cardType as string,
-              showStrip: program.cardDesign.showStrip as boolean,
-              primaryColor: program.cardDesign.primaryColor,
-              secondaryColor: program.cardDesign.secondaryColor,
-              textColor: program.cardDesign.textColor,
-              patternStyle: program.cardDesign.patternStyle as string,
-              progressStyle: program.cardDesign.progressStyle as string,
-              labelFormat: program.cardDesign.labelFormat as string,
-              customProgressLabel: program.cardDesign.customProgressLabel ?? null,
-              stripImageUrl: program.cardDesign.stripImageUrl ?? null,
-              editorConfig: program.cardDesign.editorConfig,
+              cardType: program.passDesign.cardType as string,
+              showStrip: program.passDesign.showStrip as boolean,
+              primaryColor: program.passDesign.primaryColor,
+              secondaryColor: program.passDesign.secondaryColor,
+              textColor: program.passDesign.textColor,
+              patternStyle: program.passDesign.patternStyle as string,
+              progressStyle: program.passDesign.progressStyle as string,
+              labelFormat: program.passDesign.labelFormat as string,
+              customProgressLabel: program.passDesign.customProgressLabel ?? null,
+              stripImageUrl: program.passDesign.stripImageUrl ?? null,
+              editorConfig: program.passDesign.editorConfig,
             }
           : null
       }

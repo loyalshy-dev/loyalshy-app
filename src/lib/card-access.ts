@@ -31,9 +31,9 @@ export function verifyCardSignature(
 
 /** Build the full card URL path with signature */
 export function buildCardUrl(
-  restaurantSlug: string,
+  organizationSlug: string,
   enrollmentId: string
 ): string {
   const sig = signCardAccess(enrollmentId)
-  return `/join/${restaurantSlug}/card/${enrollmentId}?sig=${sig}`
+  return `/join/${organizationSlug}/card/${enrollmentId}?sig=${sig}`
 }

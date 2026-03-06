@@ -10,7 +10,7 @@ type AdminShellProps = {
     name: string
     email: string
     image: string | null
-    restaurantId: string | null
+    organizationId: string | null
   }
   children: React.ReactNode
 }

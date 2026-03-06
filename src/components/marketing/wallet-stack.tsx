@@ -102,7 +102,7 @@ function LoyaltyCard({
         width={cardW}
         height={cardH}
         format="apple"
-        restaurantName={card.restaurantName}
+        organizationName={card.restaurantName}
         currentVisits={card.currentVisits}
         totalVisits={card.totalVisits}
         rewardDescription={card.rewardDescription}

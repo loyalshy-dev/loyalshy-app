@@ -1,21 +1,21 @@
 import { Suspense } from "react"
 import { connection } from "next/server"
-import { assertAuthenticated, getRestaurantForUser } from "@/lib/dal"
+import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
 import {
   getOverviewStats,
-  getVisitsOverTime,
+  getInteractionsOverTime,
   getBusiestDays,
-  getProgramsSummary,
+  getTemplatesSummary,
   getRecentActivity,
-  getTopCustomers,
+  getTopContacts,
 } from "@/server/analytics"
 import { getOnboardingChecklist } from "@/server/onboarding-registration-actions"
 import { StatCards } from "@/components/dashboard/overview/stat-cards"
-import { VisitsChart } from "@/components/dashboard/overview/visits-chart"
+import { InteractionsChart } from "@/components/dashboard/overview/visits-chart"
 import { BusiestDaysChart } from "@/components/dashboard/overview/busiest-days-chart"
 import { ProgramsSummary } from "@/components/dashboard/overview/programs-summary"
 import { RecentActivity } from "@/components/dashboard/overview/recent-activity"
-import { TopCustomers } from "@/components/dashboard/overview/top-customers"
+import { TopContacts } from "@/components/dashboard/overview/top-customers"
 import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist"
 import {
   StatCardsSkeleton,
@@ -34,7 +34,7 @@ export default async function OverviewPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Your restaurant at a glance.
+          Your organization at a glance.
         </p>
       </div>
 
@@ -47,7 +47,7 @@ export default async function OverviewPage() {
       </Suspense>
 
       <Suspense fallback={<VisitsChartSkeleton />}>
-        <VisitsChartSection />
+        <InteractionsChartSection />
       </Suspense>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -55,7 +55,7 @@ export default async function OverviewPage() {
           <BusiestDaysSection />
         </Suspense>
         <Suspense fallback={<SecondaryChartSkeleton />}>
-          <ProgramsSummarySection />
+          <TemplatesSummarySection />
         </Suspense>
       </div>
 
@@ -67,7 +67,7 @@ export default async function OverviewPage() {
         </div>
         <div className="lg:col-span-2">
           <Suspense fallback={<TopCustomersSkeleton />}>
-            <TopCustomersSection />
+            <TopContactsSection />
           </Suspense>
         </div>
       </div>
@@ -82,9 +82,9 @@ async function StatCardsSection() {
   return <StatCards {...stats} />
 }
 
-async function VisitsChartSection() {
-  const data = await getVisitsOverTime("30d")
-  return <VisitsChart initialData={data} initialRange="30d" />
+async function InteractionsChartSection() {
+  const data = await getInteractionsOverTime("30d")
+  return <InteractionsChart initialData={data} initialRange="30d" />
 }
 
 async function BusiestDaysSection() {
@@ -92,9 +92,9 @@ async function BusiestDaysSection() {
   return <BusiestDaysChart data={data} />
 }
 
-async function ProgramsSummarySection() {
-  const programs = await getProgramsSummary()
-  return <ProgramsSummary programs={programs} />
+async function TemplatesSummarySection() {
+  const templates = await getTemplatesSummary()
+  return <ProgramsSummary programs={templates} />
 }
 
 async function RecentActivitySection() {
@@ -102,17 +102,17 @@ async function RecentActivitySection() {
   return <RecentActivity items={items} />
 }
 
-async function TopCustomersSection() {
-  const customers = await getTopCustomers()
-  return <TopCustomers customers={customers} />
+async function TopContactsSection() {
+  const contacts = await getTopContacts()
+  return <TopContacts contacts={contacts} />
 }
 
 async function OnboardingChecklistSection() {
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) return null
+  const organization = await getOrganizationForUser()
+  if (!organization) return null
 
-  const data = await getOnboardingChecklist(restaurant.id)
+  const data = await getOnboardingChecklist(organization.id)
   if (data.isDismissed) return null
 
-  return <OnboardingChecklist restaurantId={restaurant.id} data={data} />
+  return <OnboardingChecklist organizationId={organization.id} data={data} />
 }

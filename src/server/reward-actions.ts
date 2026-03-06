@@ -5,10 +5,10 @@ import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import {
   assertAuthenticated,
-  getRestaurantForUser,
-  assertRestaurantAccess,
+  getOrganizationForUser,
+  assertOrganizationAccess,
 } from "@/lib/dal"
-import { parseCouponConfig } from "@/lib/program-config"
+import { parseCouponConfig } from "@/lib/pass-config"
 import { Prisma } from "@prisma/client"
 import { startOfMonth, subMonths } from "date-fns"
 
@@ -16,16 +16,16 @@ import { startOfMonth, subMonths } from "date-fns"
 
 export type RewardRow = {
   id: string
-  customerName: string
-  customerId: string
+  contactName: string
+  contactId: string
   description: string
   status: string
   earnedAt: Date
   redeemedAt: Date | null
   expiresAt: Date
   redeemedByName: string | null
-  programName: string
-  programId: string
+  templateName: string
+  templateId: string
 }
 
 export type RewardListResult = {
@@ -49,11 +49,11 @@ export type RedeemRewardResult = {
 
 // ─── Helpers ────────────────────────────────────────────────
 
-async function requireRestaurant() {
+async function requireOrganization() {
   await assertAuthenticated()
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) redirect("/register?step=2")
-  return restaurant
+  const organization = await getOrganizationForUser()
+  if (!organization) redirect("/register?step=2")
+  return organization
 }
 
 // ─── Get Rewards (Paginated, Tabbed, Searchable) ────────────
@@ -67,14 +67,14 @@ export type GetRewardsParams = {
   order?: "asc" | "desc"
   dateFrom?: string
   dateTo?: string
-  programId?: string
+  templateId?: string
 }
 
 export async function getRewards(
   params: GetRewardsParams
 ): Promise<RewardListResult> {
-  const restaurant = await requireRestaurant()
-  const restaurantId = restaurant.id
+  const organization = await requireOrganization()
+  const organizationId = organization.id
 
   const tab = params.tab ?? "available"
   const page = params.page ?? 1
@@ -85,11 +85,11 @@ export async function getRewards(
   const sortOrder = params.order ?? "desc"
 
   // Build where clause
-  const where: Record<string, unknown> = { restaurantId }
+  const where: Record<string, unknown> = { organizationId }
 
-  // Program filter
-  if (params.programId) {
-    where.loyaltyProgramId = params.programId
+  // Template filter
+  if (params.templateId) {
+    where.passTemplateId = params.templateId
   }
 
   // Status filter based on tab
@@ -105,9 +105,9 @@ export async function getRewards(
       break
   }
 
-  // Search by customer name
+  // Search by contact name
   if (search) {
-    where.customer = {
+    where.contact = {
       fullName: { contains: search, mode: "insensitive" },
     }
   }
@@ -136,9 +136,9 @@ export async function getRewards(
     db.reward.findMany({
       where: where as Prisma.RewardWhereInput,
       include: {
-        customer: { select: { id: true, fullName: true } },
-        loyaltyProgram: { select: { id: true, name: true, rewardDescription: true } },
-        enrollment: { select: { id: true, currentCycleVisits: true, totalVisits: true, totalRewardsRedeemed: true, status: true } },
+        contact: { select: { id: true, fullName: true } },
+        passTemplate: { select: { id: true, name: true } },
+        passInstance: { select: { id: true, data: true, status: true } },
         redeemedBy: { select: { name: true } },
       },
       orderBy: { [orderByField]: sortOrder },
@@ -151,16 +151,16 @@ export async function getRewards(
   return {
     rewards: rewards.map((r) => ({
       id: r.id,
-      customerName: r.customer.fullName,
-      customerId: r.customer.id,
-      description: r.loyaltyProgram.rewardDescription,
+      contactName: r.contact.fullName,
+      contactId: r.contact.id,
+      description: r.passTemplate.name,
       status: r.status,
       earnedAt: r.earnedAt,
       redeemedAt: r.redeemedAt,
       expiresAt: r.expiresAt,
       redeemedByName: r.redeemedBy?.name ?? null,
-      programName: r.loyaltyProgram.name,
-      programId: r.loyaltyProgram.id,
+      templateName: r.passTemplate.name,
+      templateId: r.passTemplate.id,
     })),
     total,
     pageCount: Math.ceil(total / perPage),
@@ -169,18 +169,18 @@ export async function getRewards(
 
 // ─── Get Reward Stats ───────────────────────────────────────
 
-export async function getRewardStats(programId?: string): Promise<RewardStats> {
-  const restaurant = await requireRestaurant()
-  const restaurantId = restaurant.id
+export async function getRewardStats(templateId?: string): Promise<RewardStats> {
+  const organization = await requireOrganization()
+  const organizationId = organization.id
 
   const now = new Date()
   const thisMonthStart = startOfMonth(now)
   const lastMonthStart = startOfMonth(subMonths(now, 1))
 
-  // Base where clause — scoped to program when provided
-  const baseWhere: Record<string, unknown> = { restaurantId }
-  if (programId) {
-    baseWhere.loyaltyProgramId = programId
+  // Base where clause
+  const baseWhere: Record<string, unknown> = { organizationId }
+  if (templateId) {
+    baseWhere.passTemplateId = templateId
   }
 
   const [totalAvailable, redeemedThisMonth, expiredThisMonth, totalRedeemed, totalExpired] =
@@ -210,23 +210,21 @@ export async function getRewardStats(programId?: string): Promise<RewardStats> {
       }),
     ])
 
-  // Redemption rate = redeemed / (redeemed + expired) — excludes still-available
   const completed = totalRedeemed + totalExpired
   const redemptionRate = completed > 0 ? Math.round((totalRedeemed / completed) * 100) : 0
 
-  // Average days from earnedAt to redeemedAt for redeemed rewards
-  const programFilter = programId
-    ? Prisma.sql`AND "loyaltyProgramId" = ${programId}`
+  const templateFilter = templateId
+    ? Prisma.sql`AND "passTemplateId" = ${templateId}`
     : Prisma.empty
 
   const avgResult = await db.$queryRaw<
     { avg_days: number | null }[]
   >`SELECT AVG(EXTRACT(EPOCH FROM ("redeemedAt" - "earnedAt")) / 86400)::float AS avg_days
     FROM reward
-    WHERE "restaurantId" = ${restaurantId}
+    WHERE "organizationId" = ${organizationId}
       AND status = 'redeemed'
       AND "redeemedAt" IS NOT NULL
-      ${programFilter}`
+      ${templateFilter}`
 
   const avgDaysToRedeem = avgResult[0]?.avg_days
     ? Math.round(avgResult[0].avg_days * 10) / 10
@@ -247,32 +245,31 @@ export async function redeemReward(
   rewardId: string
 ): Promise<RedeemRewardResult> {
   const session = await assertAuthenticated()
-  const restaurant = await getRestaurantForUser()
+  const organization = await getOrganizationForUser()
 
-  if (!restaurant) {
-    return { success: false, error: "No restaurant found" }
+  if (!organization) {
+    return { success: false, error: "No organization found" }
   }
 
-  // Verify staff has access to this restaurant
-  await assertRestaurantAccess(restaurant.id)
+  await assertOrganizationAccess(organization.id)
 
-  // Find the reward (include enrollment program type for coupon handling)
+  // Find the reward
   const reward = await db.reward.findFirst({
     where: {
       id: rewardId,
-      restaurantId: restaurant.id,
+      organizationId: organization.id,
     },
     select: {
       id: true,
       status: true,
-      customerId: true,
-      enrollmentId: true,
+      contactId: true,
+      passInstanceId: true,
       expiresAt: true,
       revealedAt: true,
-      enrollment: {
+      passInstance: {
         select: {
-          loyaltyProgram: {
-            select: { programType: true, config: true },
+          passTemplate: {
+            select: { passType: true, config: true },
           },
         },
       },
@@ -290,9 +287,7 @@ export async function redeemReward(
     }
   }
 
-  // Check if expired
   if (reward.expiresAt < new Date()) {
-    // Auto-expire it
     await db.reward.update({
       where: { id: rewardId },
       data: { status: "EXPIRED" },
@@ -300,9 +295,9 @@ export async function redeemReward(
     return { success: false, error: "This reward has expired" }
   }
 
-  // Check if this is a single-use coupon (need to mark enrollment COMPLETED)
-  const isCoupon = reward.enrollment?.loyaltyProgram?.programType === "COUPON"
-  const couponConfig = isCoupon ? parseCouponConfig(reward.enrollment?.loyaltyProgram?.config) : null
+  // Check if this is a single-use coupon
+  const isCoupon = reward.passInstance?.passTemplate?.passType === "COUPON"
+  const couponConfig = isCoupon ? parseCouponConfig(reward.passInstance?.passTemplate?.config) : null
   const isSingleUse = couponConfig?.redemptionLimit === "single"
 
   // Redeem in a transaction
@@ -313,18 +308,26 @@ export async function redeemReward(
         status: "REDEEMED",
         redeemedAt: new Date(),
         redeemedById: session.user.id,
-        // If no minigame or prize wasn't revealed, mark as revealed now
         ...(!reward.revealedAt ? { revealedAt: new Date() } : {}),
       },
     })
 
-    // Update enrollment's totalRewardsRedeemed if enrollment exists
-    if (reward.enrollmentId) {
-      await tx.enrollment.update({
-        where: { id: reward.enrollmentId },
+    // Update pass instance if needed
+    if (reward.passInstanceId) {
+      const currentInstance = await tx.passInstance.findUnique({
+        where: { id: reward.passInstanceId },
+        select: { data: true },
+      })
+      const instanceData = (currentInstance?.data as Record<string, unknown>) ?? {}
+      const totalRewardsRedeemed = ((instanceData.totalRewardsRedeemed as number) ?? 0) + 1
+
+      await tx.passInstance.update({
+        where: { id: reward.passInstanceId },
         data: {
-          totalRewardsRedeemed: { increment: 1 },
-          // Mark single-use coupon enrollment as COMPLETED
+          data: {
+            ...instanceData,
+            totalRewardsRedeemed,
+          },
           ...(isSingleUse ? { status: "COMPLETED" } : {}),
         },
       })
@@ -332,19 +335,19 @@ export async function redeemReward(
   })
 
   // Dispatch wallet pass update
-  if (reward.enrollmentId) {
+  if (reward.passInstanceId) {
     if (process.env.TRIGGER_SECRET_KEY) {
       import("@trigger.dev/sdk")
         .then(({ tasks }) =>
           tasks.trigger("update-wallet-pass", {
-            enrollmentId: reward.enrollmentId,
+            passInstanceId: reward.passInstanceId,
             updateType: "REWARD_REDEEMED",
           })
         )
         .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
     } else {
       import("@/lib/wallet/google/update-pass")
-        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(reward.enrollmentId!))
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(reward.passInstanceId!))
         .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
     }
   }
@@ -360,9 +363,9 @@ export async function redeemReward(
 
 export type RewardDetail = {
   id: string
-  customerName: string
+  contactName: string
   description: string
-  programName: string
+  templateName: string
   earnedAt: Date
   expiresAt: Date
   status: string
@@ -371,16 +374,16 @@ export type RewardDetail = {
 export async function getRewardDetail(
   rewardId: string
 ): Promise<RewardDetail | null> {
-  const restaurant = await requireRestaurant()
+  const organization = await requireOrganization()
 
   const reward = await db.reward.findFirst({
     where: {
       id: rewardId,
-      restaurantId: restaurant.id,
+      organizationId: organization.id,
     },
     include: {
-      customer: { select: { fullName: true } },
-      loyaltyProgram: { select: { name: true, rewardDescription: true } },
+      contact: { select: { fullName: true } },
+      passTemplate: { select: { name: true } },
     },
   })
 
@@ -388,9 +391,9 @@ export async function getRewardDetail(
 
   return {
     id: reward.id,
-    customerName: reward.customer.fullName,
-    description: reward.loyaltyProgram.rewardDescription,
-    programName: reward.loyaltyProgram.name,
+    contactName: reward.contact.fullName,
+    description: reward.passTemplate.name,
+    templateName: reward.passTemplate.name,
     earnedAt: reward.earnedAt,
     expiresAt: reward.expiresAt,
     status: reward.status,

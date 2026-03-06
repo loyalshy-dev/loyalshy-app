@@ -5,7 +5,13 @@ import { formatDistanceToNow } from "date-fns"
 import type { ActivityItem } from "@/server/analytics"
 
 const ACTIVITY_CONFIG = {
-  visit: {
+  interaction: {
+    icon: Eye,
+    verb: "registered an interaction",
+    color: "text-brand",
+    bg: "bg-brand/10",
+  },
+  stamp: {
     icon: Eye,
     verb: "registered a visit",
     color: "text-brand",
@@ -67,7 +73,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
           Recent Activity
         </h3>
         <p className="text-sm text-muted-foreground py-8 text-center">
-          No activity yet. Register your first visit to see it here.
+          No activity yet. Register your first interaction to see it here.
         </p>
       </div>
     )
@@ -95,7 +101,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] leading-snug">
-                  <span className="font-medium">{item.customerName}</span>
+                  <span className="font-medium">{item.contactName}</span>
                   {" "}
                   <span className="text-muted-foreground">{config.verb}</span>
                   {item.detail && (

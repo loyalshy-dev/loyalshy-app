@@ -52,7 +52,7 @@ export default async function ShowcaseStudioPage(props: {
   return (
     <ShowcaseStudioLayout
       showcaseCardId={id}
-      restaurantName={(metadata.restaurantName as string) ?? "Restaurant"}
+      organizationName={(metadata.organizationName as string) ?? (metadata.restaurantName as string) ?? "Organization"}
       visitsRequired={(metadata.totalVisits as number) ?? 10}
       rewardDescription={(metadata.rewardDescription as string) ?? "Free reward"}
       walletData={walletData}

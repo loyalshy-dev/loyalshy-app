@@ -1,5 +1,5 @@
 import { connection } from "next/server"
-import { assertAuthenticated, getRestaurantForUser, assertRestaurantRole } from "@/lib/dal"
+import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { redirect } from "next/navigation"
 import { getRecentJobLogs } from "@/server/jobs-actions"
 import { JobsHistory } from "@/components/dashboard/settings/jobs-history"
@@ -8,12 +8,12 @@ export default async function JobsPage() {
   await connection()
   await assertAuthenticated()
 
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) {
+  const organization = await getOrganizationForUser()
+  if (!organization) {
     redirect("/dashboard")
   }
 
-  await assertRestaurantRole(restaurant.id, "owner")
+  await assertOrganizationRole(organization.id, "owner")
 
   const { logs, total } = await getRecentJobLogs()
 

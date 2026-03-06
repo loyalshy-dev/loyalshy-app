@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import type { CustomerRow } from "@/server/customer-actions"
+import type { ContactRow as CustomerRow } from "@/server/contact-actions"
 
 const typeIcons: Record<string, typeof Stamp> = {
   STAMP_CARD: Stamp,
@@ -106,21 +106,21 @@ export function getCustomerColumns(
         </span>
       ),
       cell: ({ row }) => {
-        const { primaryEnrollment, enrollmentCount } = row.original
-        if (!primaryEnrollment) {
+        const { primaryPassInstance, passInstanceCount } = row.original
+        if (!primaryPassInstance) {
           return <span className="text-[12px] text-muted-foreground">—</span>
         }
-        const TypeIcon = typeIcons[primaryEnrollment.programType] ?? Stamp
-        const typeLabel = typeLabels[primaryEnrollment.programType] ?? "Program"
+        const TypeIcon = typeIcons[primaryPassInstance.passType] ?? Stamp
+        const typeLabel = typeLabels[primaryPassInstance.passType] ?? "Program"
         return (
           <div className="flex items-center gap-1.5">
             <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1 shrink-0">
               <TypeIcon className="size-3" />
               {typeLabel}
             </Badge>
-            {enrollmentCount > 1 && (
+            {passInstanceCount > 1 && (
               <span className="text-[10px] text-muted-foreground">
-                +{enrollmentCount - 1}
+                +{passInstanceCount - 1}
               </span>
             )}
           </div>
@@ -141,13 +141,17 @@ export function getCustomerColumns(
         </Button>
       ),
       cell: ({ row }) => {
-        const { primaryEnrollment, hasAvailableReward } = row.original
+        const { primaryPassInstance, hasAvailableReward } = row.original
 
-        if (!primaryEnrollment) {
+        if (!primaryPassInstance) {
           return <span className="text-[12px] text-muted-foreground">—</span>
         }
 
-        const { currentCycleVisits, visitsRequired, programType } = primaryEnrollment
+        const piData = (primaryPassInstance.data ?? {}) as Record<string, unknown>
+        const currentCycleVisits = (piData.currentCycleStamps as number) ?? (piData.currentCycleVisits as number) ?? 0
+        const piConfig = (primaryPassInstance.templateConfig ?? {}) as Record<string, unknown>
+        const visitsRequired = (piConfig.stampsRequired as number) ?? (piConfig.visitsRequired as number) ?? 10
+        const programType = primaryPassInstance.passType
 
         if (programType === "COUPON") {
           return (
@@ -166,14 +170,14 @@ export function getCustomerColumns(
         if (programType === "POINTS") {
           return (
             <span className="text-[13px] tabular-nums text-muted-foreground">
-              {primaryEnrollment.pointsBalance} pts
+              {(piData.pointsBalance as number) ?? 0} pts
             </span>
           )
         }
 
         if (programType === "PREPAID") {
-          const remaining = primaryEnrollment.remainingUses
-          const total = (primaryEnrollment.programConfig as { totalUses?: number } | null)?.totalUses ?? 0
+          const remaining = (piData.remainingUses as number) ?? 0
+          const total = (piConfig.totalUses as number) ?? 0
           const pct = total > 0 ? Math.min((remaining / total) * 100, 100) : 0
 
           return (
@@ -210,7 +214,7 @@ export function getCustomerColumns(
       },
     },
     {
-      accessorKey: "totalVisits",
+      accessorKey: "totalInteractions",
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -224,12 +228,12 @@ export function getCustomerColumns(
       ),
       cell: ({ row }) => (
         <span className="text-[13px] tabular-nums hidden sm:inline">
-          {row.original.totalVisits}
+          {row.original.totalInteractions}
         </span>
       ),
     },
     {
-      accessorKey: "lastVisitAt",
+      accessorKey: "lastInteractionAt",
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -242,7 +246,7 @@ export function getCustomerColumns(
         </Button>
       ),
       cell: ({ row }) => {
-        const date = row.original.lastVisitAt
+        const date = row.original.lastInteractionAt
         if (!date) return <span className="text-[13px] text-muted-foreground hidden md:inline">Never</span>
         return (
           <span className="text-[13px] text-muted-foreground hidden md:inline">

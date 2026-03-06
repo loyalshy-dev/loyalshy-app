@@ -39,21 +39,21 @@ function StatCard({ label, value, icon, prefix }: StatCardProps) {
 
 type AdminStatCardsProps = {
   totalUsers: number
-  totalRestaurants: number
-  totalCustomers: number
+  totalOrganizations: number
+  totalContacts: number
   estimatedMrr: number
   newUsersThisMonth: number
-  newRestaurantsThisMonth: number
+  newOrganizationsThisMonth: number
   activeSubscriptions: number
 }
 
 export function AdminStatCards({
   totalUsers,
-  totalRestaurants,
-  totalCustomers,
+  totalOrganizations,
+  totalContacts,
   estimatedMrr,
   newUsersThisMonth,
-  newRestaurantsThisMonth,
+  newOrganizationsThisMonth,
   activeSubscriptions,
 }: AdminStatCardsProps) {
   return (
@@ -65,13 +65,13 @@ export function AdminStatCards({
           icon={<Users className="size-4" />}
         />
         <StatCard
-          label="Restaurants"
-          value={totalRestaurants}
+          label="Organizations"
+          value={totalOrganizations}
           icon={<Building2 className="size-4" />}
         />
         <StatCard
-          label="Customers"
-          value={totalCustomers}
+          label="Contacts"
+          value={totalContacts}
           icon={<UserCheck className="size-4" />}
         />
         <StatCard
@@ -88,8 +88,8 @@ export function AdminStatCards({
           icon={<UserPlus className="size-4" />}
         />
         <StatCard
-          label="New Restaurants This Month"
-          value={newRestaurantsThisMonth}
+          label="New Organizations This Month"
+          value={newOrganizationsThisMonth}
           icon={<Store className="size-4" />}
         />
         <StatCard

@@ -1,5 +1,5 @@
 import { connection } from "next/server"
-import { assertAuthenticated, getRestaurantForUser } from "@/lib/dal"
+import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
 import { getRewards, getRewardStats } from "@/server/reward-actions"
 import { RewardsView } from "@/components/dashboard/rewards/rewards-view"
 import { db } from "@/lib/db"
@@ -22,14 +22,14 @@ export default async function RewardsPage({ searchParams }: RewardsPageProps) {
   const dateTo = (params.dateTo as string) ?? ""
   const programId = (params.programId as string) ?? ""
 
-  const restaurant = await getRestaurantForUser()
-  if (!restaurant) {
+  const organization = await getOrganizationForUser()
+  if (!organization) {
     return (
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Rewards</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            No restaurant found. Please set up your restaurant first.
+            No organization found. Please set up your organization first.
           </p>
         </div>
       </div>
@@ -38,18 +38,18 @@ export default async function RewardsPage({ searchParams }: RewardsPageProps) {
 
   // Check if there are any rewards at all (for empty state)
   const totalRewards = await db.reward.count({
-    where: { restaurantId: restaurant.id },
+    where: { organizationId: organization.id },
   })
   const isEmpty = totalRewards === 0
 
-  // Build available programs list for the program filter dropdown
-  const programs = (restaurant.loyaltyPrograms ?? []).map((p) => ({
+  // Build available pass templates list for the program filter dropdown
+  const programs = (organization.passTemplates ?? []).map((p) => ({
     id: p.id,
     name: p.name,
   }))
 
   const [result, stats] = await Promise.all([
-    getRewards({ tab, page, search, sort, order, dateFrom, dateTo, programId: programId || undefined }),
+    getRewards({ tab, page, search, sort, order, dateFrom, dateTo, templateId: programId || undefined }),
     getRewardStats(programId || undefined),
   ])
 

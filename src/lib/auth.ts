@@ -56,11 +56,6 @@ export const auth = betterAuth({
         defaultValue: "USER",
         input: false,
       },
-      restaurantId: {
-        type: "string",
-        required: false,
-        input: false,
-      },
     },
   },
 
@@ -82,8 +77,7 @@ export const auth = betterAuth({
 
   plugins: [
     organization({
-      allowUserToCreateOrganization: async (user) => {
-        // Only allow users without a restaurant to create one (during onboarding)
+      allowUserToCreateOrganization: async () => {
         return true
       },
       creatorRole: "owner",
@@ -102,6 +96,7 @@ export const auth = betterAuth({
 
   trustedOrigins: [
     process.env.BETTER_AUTH_URL || "http://localhost:3000",
+    "http://localhost:3000",
   ],
 })
 

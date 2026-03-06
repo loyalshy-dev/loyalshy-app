@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils"
 
 const tabs = [
   { label: "Overview", href: "/dashboard", icon: BarChart3 },
-  { label: "Customers", href: "/dashboard/customers", icon: Users },
+  { label: "Contacts", href: "/dashboard/customers", icon: Users },
   // center FAB slot (index 2) handled separately
-  { label: "Programs", href: "/dashboard/programs", icon: Layers },
+  { label: "Templates", href: "/dashboard/programs", icon: Layers },
   { label: "More", href: "/dashboard/settings", icon: MoreHorizontal },
 ]
 
