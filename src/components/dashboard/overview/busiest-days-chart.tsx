@@ -11,6 +11,7 @@ import {
   Cell,
 } from "recharts"
 import type { BusiestDayData } from "@/server/analytics"
+import { Card } from "@/components/ui/card"
 
 function CustomTooltip({
   active,
@@ -43,7 +44,7 @@ export function BusiestDaysChart({ data }: BusiestDaysChartProps) {
   useEffect(() => setMounted(true), [])
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <Card className="p-5">
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
         Busiest Days
       </h3>
@@ -81,6 +82,6 @@ export function BusiestDaysChart({ data }: BusiestDaysChartProps) {
           </BarChart>
         </ResponsiveContainer>}
       </div>
-    </div>
+    </Card>
   )
 }

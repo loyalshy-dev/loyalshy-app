@@ -3,6 +3,7 @@
 import { CreditCard, Users, Building2, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 
 type Organization = {
   id: string
@@ -18,7 +19,7 @@ export function BillingPlaceholder({ organization }: { organization: Organizatio
   return (
     <div className="space-y-6">
       {/* Current Plan */}
-      <div className="rounded-lg border border-border bg-card">
+      <Card>
         <div className="border-b border-border px-6 py-4">
           <h2 className="text-sm font-semibold">Current Plan</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -51,10 +52,10 @@ export function BillingPlaceholder({ organization }: { organization: Organizatio
             </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Usage Stats */}
-      <div className="rounded-lg border border-border bg-card">
+      <Card>
         <div className="border-b border-border px-6 py-4">
           <h2 className="text-sm font-semibold">Usage</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -79,7 +80,7 @@ export function BillingPlaceholder({ organization }: { organization: Organizatio
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Coming Soon Notice */}
       <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">

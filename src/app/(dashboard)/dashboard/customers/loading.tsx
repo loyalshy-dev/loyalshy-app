@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton"
+import { Card } from "@/components/ui/card"
 
 export default function CustomersLoading() {
   return (
@@ -29,7 +30,7 @@ export default function CustomersLoading() {
       </div>
 
       {/* Table skeleton */}
-      <div className="rounded-lg border border-border bg-card">
+      <Card>
         {/* Header row */}
         <div className="flex items-center gap-4 px-4 py-2.5 border-b border-border">
           <Skeleton className="h-4 w-16" />
@@ -74,7 +75,7 @@ export default function CustomersLoading() {
             <Skeleton className="size-6 rounded-md" />
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

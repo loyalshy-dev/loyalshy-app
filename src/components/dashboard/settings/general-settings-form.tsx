@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { updateOrganizationProfile } from "@/server/org-settings-actions"
+import { Card } from "@/components/ui/card"
 
 const TIMEZONES = [
   "UTC",
@@ -86,7 +87,7 @@ export function GeneralSettingsForm({ organization }: { organization: Organizati
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Organization Profile */}
-      <div className="rounded-lg border border-border bg-card">
+      <Card>
         <div className="border-b border-border px-6 py-4">
           <h2 className="text-sm font-semibold">Organization Profile</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -165,7 +166,7 @@ export function GeneralSettingsForm({ organization }: { organization: Organizati
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Save Button */}
       <div className="flex items-center justify-between">

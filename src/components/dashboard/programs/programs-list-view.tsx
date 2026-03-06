@@ -13,6 +13,7 @@ import { CreateProgramForm } from "./create-program-form"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, formatPointsValue, parsePrepaidConfig } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
+import { Card } from "@/components/ui/card"
 import type { TemplateListItem } from "@/server/template-actions"
 
 function buildDesign(passDesign: TemplateListItem["passDesign"]): WalletPassDesign {
@@ -198,7 +199,7 @@ export function TemplatesListView({
 
       {/* Create form */}
       {showCreate && (
-        <div className="rounded-lg border border-border bg-card">
+        <Card>
           <div className="border-b border-border px-6 py-4">
             <h2 className="text-sm font-semibold">New Program</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -214,7 +215,7 @@ export function TemplatesListView({
               }}
             />
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Type filter tabs */}
@@ -245,7 +246,7 @@ export function TemplatesListView({
 
       {/* Programs list */}
       {filteredPrograms.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card py-16 text-center">
+        <Card className="flex flex-col items-center justify-center py-16 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
             <Layers className="h-5 w-5 text-muted-foreground" />
           </div>
@@ -267,7 +268,7 @@ export function TemplatesListView({
               Create Program
             </Button>
           )}
-        </div>
+        </Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filteredPrograms.map((program) => {
@@ -276,10 +277,10 @@ export function TemplatesListView({
             const typeMeta = PASS_TYPE_META[program.passType as PassType]
             const TypeIcon = typeMeta?.icon
             return (
+              <Card asChild key={program.id}>
               <Link
-                key={program.id}
                 href={`/dashboard/programs/${program.id}`}
-                className="group rounded-lg border border-border bg-card overflow-hidden transition-all hover:bg-muted/30 hover:shadow-md"
+                className="group overflow-hidden transition-all hover:bg-muted/30 hover:shadow-md"
               >
                 {/* Card preview */}
                 <div className="flex justify-center bg-muted/40 py-4 px-4 border-b border-border">
@@ -322,6 +323,7 @@ export function TemplatesListView({
                   </div>
                 </div>
               </Link>
+              </Card>
             )
           })}
         </div>

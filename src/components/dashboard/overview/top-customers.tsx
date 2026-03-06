@@ -3,6 +3,7 @@
 import { formatDistanceToNow } from "date-fns"
 import { Stamp, Ticket, Crown, Coins, CreditCard } from "lucide-react"
 import type { TopContactItem } from "@/server/analytics"
+import { Card } from "@/components/ui/card"
 
 function getInitials(name: string): string {
   return name
@@ -39,19 +40,19 @@ type TopContactsProps = {
 export function TopContacts({ contacts }: TopContactsProps) {
   if (contacts.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-card p-5">
+      <Card className="p-5">
         <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
           Top Contacts
         </h3>
         <p className="text-sm text-muted-foreground py-8 text-center">
           No contacts yet
         </p>
-      </div>
+      </Card>
     )
   }
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <Card className="p-5">
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
         Top Contacts
       </h3>
@@ -97,6 +98,6 @@ export function TopContacts({ contacts }: TopContactsProps) {
           )
         })}
       </div>
-    </div>
+    </Card>
   )
 }

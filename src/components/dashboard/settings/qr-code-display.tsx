@@ -13,6 +13,7 @@ import {
   LayoutGrid,
 } from "lucide-react"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
+import { Card } from "@/components/ui/card"
 import { parseStripFilters, parseStampGridConfig } from "@/lib/wallet/card-design"
 import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/pass-config"
 
@@ -340,11 +341,11 @@ export function QrCodeDisplay({
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* QR Code preview */}
-        <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
+        <Card className="p-6 sm:p-8">
           <div className="flex flex-col items-center space-y-6">
             {/* Poster mockup: accent bar + QR code + info */}
             <div
-              className="w-full max-w-xs rounded-2xl overflow-hidden shadow-md border border-border bg-card"
+              className="w-full max-w-xs rounded-2xl overflow-hidden shadow-md bg-card"
               style={{ borderTopColor: accentColor, borderTopWidth: 4 }}
             >
               {/* Colored accent strip */}
@@ -446,12 +447,12 @@ export function QrCodeDisplay({
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Controls */}
         <div className="space-y-4">
           {/* How it works */}
-          <div className="rounded-xl border border-border bg-card p-5 space-y-3">
+          <Card className="p-5 space-y-3">
             <h3 className="font-medium text-[15px] flex items-center gap-2">
               <Smartphone className="w-4 h-4 text-muted-foreground" />
               How it works
@@ -476,10 +477,10 @@ export function QrCodeDisplay({
                 They enter their name and add the loyalty card to their wallet
               </li>
             </ol>
-          </div>
+          </Card>
 
           {/* Download options */}
-          <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+          <Card className="p-5 space-y-4">
             <h3 className="font-medium text-[15px] flex items-center gap-2">
               <Download className="w-4 h-4 text-muted-foreground" />
               Download for printing
@@ -527,10 +528,10 @@ export function QrCodeDisplay({
               <Download className="w-4 h-4" />
               {downloading ? "Generating..." : "Download PNG"}
             </button>
-          </div>
+          </Card>
 
           {/* NFC note */}
-          <div className="rounded-xl border border-border bg-card p-5 space-y-2">
+          <Card className="p-5 space-y-2">
             <h3 className="font-medium text-[15px]">NFC Tags</h3>
             <p className="text-sm text-muted-foreground">
               You can also program NFC tags with your join URL. When customers tap
@@ -542,7 +543,7 @@ export function QrCodeDisplay({
                 {joinUrl}
               </code>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Hidden canvas for PNG export */}

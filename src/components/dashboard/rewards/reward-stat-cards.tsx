@@ -2,6 +2,7 @@
 
 import { Gift, CheckCircle2, XCircle, Clock } from "lucide-react"
 import type { RewardStats } from "@/server/reward-actions"
+import { Card } from "@/components/ui/card"
 
 type RewardStatCardsProps = {
   stats: RewardStats
@@ -52,9 +53,9 @@ export function RewardStatCards({ stats }: RewardStatCardsProps) {
             : `${raw}${cfg.suffix ?? ""}`
 
         return (
-          <div
+          <Card
             key={cfg.key}
-            className="rounded-lg border border-border bg-card p-4 space-y-2"
+            className="p-4 space-y-2"
           >
             <div className="flex items-center justify-between">
               <p className="text-[13px] text-muted-foreground">{cfg.label}</p>
@@ -65,7 +66,7 @@ export function RewardStatCards({ stats }: RewardStatCardsProps) {
               </div>
             </div>
             <p className="text-2xl font-semibold tabular-nums">{value}</p>
-          </div>
+          </Card>
         )
       })}
     </div>

@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
 import type { BillingData } from "@/server/billing-actions"
 import { isUpgrade, type PlanId } from "@/lib/plans"
@@ -182,7 +183,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
       )}
 
       {/* Current Plan */}
-      <div className="rounded-lg border border-border bg-card">
+      <Card>
         <div className="border-b border-border px-6 py-4">
           <h2 className="text-sm font-semibold">Current Plan</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -228,10 +229,10 @@ export function BillingSettings({ data }: { data: BillingData }) {
             )}
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Usage */}
-      <div className="rounded-lg border border-border bg-card">
+      <Card>
         <div className="border-b border-border px-6 py-4">
           <h2 className="text-sm font-semibold">Usage</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -311,10 +312,10 @@ export function BillingSettings({ data }: { data: BillingData }) {
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Plan Comparison */}
-      <div className="rounded-lg border border-border bg-card">
+      <Card>
         <div className="border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
@@ -455,7 +456,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
             })}
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

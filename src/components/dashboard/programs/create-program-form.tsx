@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { createPassTemplate } from "@/server/org-settings-actions"
 import { PASS_TYPE_META, type PassType, type PointsCatalogItem } from "@/types/pass-types"
@@ -29,11 +30,11 @@ function TypeSelector({ onSelect }: { onSelect: (type: PassType) => void }) {
           const meta = PASS_TYPE_META[type]
           const Icon = meta.icon
           return (
+            <Card asChild key={type}>
             <button
-              key={type}
               type="button"
               onClick={() => onSelect(type)}
-              className="flex flex-col items-start gap-2 rounded-lg border border-border bg-card p-4 text-left transition-all hover:border-brand/40 hover:bg-muted/30 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex flex-col items-start gap-2 p-4 text-left transition-all hover:bg-muted/30 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand/10">
                 <Icon className="h-4.5 w-4.5 text-brand" />
@@ -45,6 +46,7 @@ function TypeSelector({ onSelect }: { onSelect: (type: PassType) => void }) {
                 </p>
               </div>
             </button>
+            </Card>
           )
         })}
       </div>

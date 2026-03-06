@@ -3,6 +3,7 @@
 import { Users, Activity, Gift, Trophy, TrendingUp, TrendingDown, Stamp, Ticket, Crown, Coins, CreditCard } from "lucide-react"
 import { useAnimatedCounter } from "@/hooks/use-animated-counter"
 import type { PassInstancesByType } from "@/server/analytics"
+import { Card } from "@/components/ui/card"
 
 type StatCardProps = {
   label: string
@@ -16,7 +17,7 @@ function StatCard({ label, value, change, icon, suffix }: StatCardProps) {
   const animatedValue = useAnimatedCounter(value)
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5 space-y-3">
+    <Card className="p-5 space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-[13px] font-medium text-muted-foreground">
           {label}
@@ -46,7 +47,7 @@ function StatCard({ label, value, change, icon, suffix }: StatCardProps) {
           </span>
         )}
       </div>
-    </div>
+    </Card>
   )
 }
 
@@ -115,7 +116,7 @@ export function StatCards({
         change={totalContactsChange}
         icon={<Users className="size-4" />}
       />
-      <div className="rounded-lg border border-border bg-card p-5 space-y-3">
+      <Card className="p-5 space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-[13px] font-medium text-muted-foreground">
             Active Pass Instances
@@ -130,7 +131,7 @@ export function StatCards({
           </span>
           <PassInstanceBreakdown passInstancesByType={passInstancesByType} total={activePassInstances} />
         </div>
-      </div>
+      </Card>
       <StatCard
         label="Activity This Month"
         value={activityThisMonth}

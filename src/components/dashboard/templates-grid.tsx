@@ -19,6 +19,7 @@ import {
   parsePrepaidConfig,
 } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
+import { Card } from "@/components/ui/card"
 import type { TemplateListItem } from "@/server/template-actions"
 
 function buildDesign(passDesign: TemplateListItem["passDesign"]): WalletPassDesign {
@@ -253,7 +254,7 @@ export function TemplatesGridView({
 
       {/* Create form */}
       {showCreate && (
-        <div className="rounded-lg border border-border bg-card">
+        <Card>
           <div className="border-b border-border px-6 py-4">
             <h2 className="text-sm font-semibold">New Program</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -270,7 +271,7 @@ export function TemplatesGridView({
               }}
             />
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Type filter tabs */}
@@ -300,7 +301,7 @@ export function TemplatesGridView({
 
       {/* Templates grid */}
       {filteredTemplates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card py-16 text-center">
+        <Card className="flex flex-col items-center justify-center py-16 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
             <Layers className="h-5 w-5 text-muted-foreground" />
           </div>
@@ -323,7 +324,7 @@ export function TemplatesGridView({
               New Program
             </Button>
           )}
-        </div>
+        </Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filteredTemplates.map((template) => {
@@ -333,10 +334,10 @@ export function TemplatesGridView({
             const typeMeta = PASS_TYPE_META[template.passType as PassType]
             const TypeIcon = typeMeta?.icon
             return (
+              <Card asChild key={template.id}>
               <Link
-                key={template.id}
                 href={`/dashboard/programs/${template.id}`}
-                className="group rounded-lg border border-border bg-card overflow-hidden transition-all hover:bg-muted/30 hover:shadow-md"
+                className="group overflow-hidden transition-all hover:bg-muted/30 hover:shadow-md"
               >
                 {/* Card preview */}
                 <div className="flex justify-center bg-muted/40 py-4 px-4 border-b border-border">
@@ -379,6 +380,7 @@ export function TemplatesGridView({
                   </div>
                 </div>
               </Link>
+              </Card>
             )
           })}
         </div>

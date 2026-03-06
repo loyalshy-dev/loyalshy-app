@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton"
+import { Card } from "@/components/ui/card"
 
 export default function SettingsLoading() {
   return (
@@ -17,7 +18,7 @@ export default function SettingsLoading() {
 
       {/* Content skeleton */}
       <div className="space-y-6">
-        <div className="rounded-lg border border-border bg-card p-6 space-y-4">
+        <Card className="p-6 space-y-4">
           <Skeleton className="h-5 w-40" />
           <Skeleton className="h-4 w-64" />
           <div className="grid gap-4 sm:grid-cols-2 mt-4">
@@ -38,9 +39,9 @@ export default function SettingsLoading() {
               <Skeleton className="h-9 w-full" />
             </div>
           </div>
-        </div>
+        </Card>
 
-        <div className="rounded-lg border border-border bg-card p-6 space-y-4">
+        <Card className="p-6 space-y-4">
           <Skeleton className="h-5 w-32" />
           <Skeleton className="h-4 w-48" />
           <div className="flex items-center gap-4 mt-4">
@@ -50,7 +51,7 @@ export default function SettingsLoading() {
               <Skeleton className="h-3 w-40" />
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   )

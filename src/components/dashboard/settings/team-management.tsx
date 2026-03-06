@@ -50,6 +50,7 @@ import {
   cancelInvitation,
   resendInvitation,
 } from "@/server/org-settings-actions"
+import { Card } from "@/components/ui/card"
 
 type InviteForm = {
   email: string
@@ -175,7 +176,7 @@ export function TeamManagement({
   return (
     <div className="space-y-6">
       {/* Team Members */}
-      <div className="rounded-lg border border-border bg-card">
+      <Card>
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div>
             <h2 className="text-sm font-semibold">Team Members</h2>
@@ -247,11 +248,11 @@ export function TeamManagement({
             </div>
           ))}
         </div>
-      </div>
+      </Card>
 
       {/* Pending Invitations */}
       {pendingInvitations.length > 0 && (
-        <div className="rounded-lg border border-border bg-card">
+        <Card>
           <div className="border-b border-border px-6 py-4">
             <h2 className="text-sm font-semibold">Pending Invitations</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -306,7 +307,7 @@ export function TeamManagement({
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Invite Dialog */}

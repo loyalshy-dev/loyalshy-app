@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { Card } from "@/components/ui/card"
 import {
   parseCouponConfig,
   parseMembershipConfig,
@@ -166,7 +167,7 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <Card className="p-4">
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <Icon className="h-4 w-4 text-muted-foreground" />
@@ -174,7 +175,7 @@ function StatCard({
       <p className="text-2xl font-semibold tracking-tight mt-1 tabular-nums">
         {value}
       </p>
-    </div>
+    </Card>
   )
 }
 
@@ -357,7 +358,7 @@ export function PassInstancesView({
 
       {/* Results */}
       {result.items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card py-16 text-center">
+        <Card className="flex flex-col items-center justify-center py-16 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
             <Users className="h-5 w-5 text-muted-foreground" />
           </div>
@@ -367,11 +368,11 @@ export function PassInstancesView({
               ? "No passes match your search."
               : "No passes have been issued for this program yet."}
           </p>
-        </div>
+        </Card>
       ) : (
         <>
           {/* Table */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <Card className="overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -463,7 +464,7 @@ export function PassInstancesView({
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
 
           {/* Pagination */}
           {totalPages > 1 && (

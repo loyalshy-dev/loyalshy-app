@@ -9,6 +9,7 @@ import { parseCouponConfig, parseMembershipConfig, formatCouponValue, formatMemb
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import type { CouponConfig, MembershipConfig, PrepaidConfig } from "@/types/pass-types"
 import { CreditCard } from "lucide-react"
+import { Card } from "@/components/ui/card"
 
 function StampCardStats({ program }: { program: NonNullable<Awaited<ReturnType<typeof getTemplateDetail>>> }) {
   const stats = [
@@ -41,9 +42,9 @@ function StampCardStats({ program }: { program: NonNullable<Awaited<ReturnType<t
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
-        <div
+        <Card
           key={stat.label}
-          className="rounded-lg border border-border bg-card p-4"
+          className="p-4"
         >
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">
@@ -55,7 +56,7 @@ function StampCardStats({ program }: { program: NonNullable<Awaited<ReturnType<t
             {stat.value}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">{stat.sub}</p>
-        </div>
+        </Card>
       ))}
     </div>
   )
@@ -92,9 +93,9 @@ function CouponStats({ program, config }: { program: NonNullable<Awaited<ReturnT
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
-        <div
+        <Card
           key={stat.label}
-          className="rounded-lg border border-border bg-card p-4"
+          className="p-4"
         >
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">
@@ -106,7 +107,7 @@ function CouponStats({ program, config }: { program: NonNullable<Awaited<ReturnT
             {stat.value}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">{stat.sub}</p>
-        </div>
+        </Card>
       ))}
     </div>
   )
@@ -143,9 +144,9 @@ function MembershipStats({ program, config }: { program: NonNullable<Awaited<Ret
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
-        <div
+        <Card
           key={stat.label}
-          className="rounded-lg border border-border bg-card p-4"
+          className="p-4"
         >
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">
@@ -157,7 +158,7 @@ function MembershipStats({ program, config }: { program: NonNullable<Awaited<Ret
             {stat.value}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">{stat.sub}</p>
-        </div>
+        </Card>
       ))}
     </div>
   )
@@ -282,9 +283,9 @@ function PrepaidStats({ program }: { program: NonNullable<Awaited<ReturnType<typ
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
-        <div
+        <Card
           key={stat.label}
-          className="rounded-lg border border-border bg-card p-4"
+          className="p-4"
         >
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">
@@ -296,7 +297,7 @@ function PrepaidStats({ program }: { program: NonNullable<Awaited<ReturnType<typ
             {stat.value}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">{stat.sub}</p>
-        </div>
+        </Card>
       ))}
     </div>
   )
@@ -353,7 +354,7 @@ export default async function ProgramOverviewPage(props: {
       {passType === "PREPAID" && <PrepaidStats program={program} />}
 
       {/* Template details */}
-      <div className="rounded-lg border border-border bg-card p-6">
+      <Card className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <h2 className="text-sm font-semibold">Template Details</h2>
           {typeMeta && (
@@ -403,7 +404,7 @@ export default async function ProgramOverviewPage(props: {
             </div>
           )}
         </dl>
-      </div>
+      </Card>
     </div>
   )
 }

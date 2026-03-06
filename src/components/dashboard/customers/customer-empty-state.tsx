@@ -2,6 +2,7 @@
 
 import { Users, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 
 type CustomerEmptyStateProps = {
   onAddCustomer: () => void
@@ -9,7 +10,7 @@ type CustomerEmptyStateProps = {
 
 export function CustomerEmptyState({ onAddCustomer }: CustomerEmptyStateProps) {
   return (
-    <div className="rounded-lg border border-border bg-card">
+    <Card>
       <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
         <div className="flex size-12 items-center justify-center rounded-full bg-muted mb-4">
           <Users className="size-6 text-muted-foreground" />
@@ -24,6 +25,6 @@ export function CustomerEmptyState({ onAddCustomer }: CustomerEmptyStateProps) {
           Add Customer
         </Button>
       </div>
-    </div>
+    </Card>
   )
 }

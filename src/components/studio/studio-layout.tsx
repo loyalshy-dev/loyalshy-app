@@ -23,7 +23,7 @@ import type { StudioTool, PreviewFormat } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 import type { ProgramConfigState } from "@/lib/stores/card-design-store"
-import { Save, Smartphone, Tablet, Palette, BarChart3, ImagePlus, MoreHorizontal, SlidersHorizontal } from "lucide-react"
+import { Save, Smartphone, Tablet, Palette, BarChart3, ImagePlus, MoreHorizontal, SlidersHorizontal, Undo2, Redo2 } from "lucide-react"
 
 /** Map PassType → CardType for visual rendering */
 function passTypeToCardType(passType: string): CardType {
@@ -403,110 +403,164 @@ export function StudioLayout({
 
   const isMobile = useIsMobile()
 
+  // In embedded mode, use a placeholder to measure the top offset,
+  // then render the studio as position:fixed to avoid all parent scrolling issues.
+  const placeholderRef = useRef<HTMLDivElement>(null)
+  const [topOffset, setTopOffset] = useState(0)
+  const [leftOffset, setLeftOffset] = useState(0)
+  useEffect(() => {
+    if (!embedded) return
+    function measure() {
+      const el = placeholderRef.current
+      if (!el) return
+      setTopOffset(Math.round(el.getBoundingClientRect().top))
+      setLeftOffset(Math.round(el.getBoundingClientRect().left))
+    }
+    measure()
+    window.addEventListener("resize", measure)
+    return () => window.removeEventListener("resize", measure)
+  }, [embedded])
+
   const isDirty = ui.isDirty || ui.isConfigDirty
 
-  return (
-    <div style={{
-      height: embedded ? "calc(100dvh - 120px)" : "100dvh",
-      display: "flex",
-      flexDirection: "column",
-    }}>
-      {/* Top toolbar — standalone mode only */}
-      {!embedded && (
-        <StudioToolbar
-          programName={templateName}
-          programId={templateId}
-          embedded={false}
-          isDirty={isDirty}
-          isSaving={ui.isSaving}
-          canUndo={canUndo}
-          canRedo={canRedo}
-          previewFormat={ui.previewFormat}
-          onSave={handleSave}
-          onUndo={() => temporalStore.getState().undo()}
-          onRedo={() => temporalStore.getState().redo()}
-          onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
-        />
-      )}
+  if (embedded) {
+    return (
+      <>
+        {/* Invisible placeholder to measure where the studio should start */}
+        <div ref={placeholderRef} style={{ height: 1, marginBottom: -1 }} />
+        <div
+          style={{
+            position: "fixed",
+            top: topOffset,
+            left: leftOffset,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            zIndex: 1,
+            backgroundColor: "var(--background)",
+          }}
+        >
+          {renderStudioContent()}
+        </div>
+      </>
+    )
+  }
 
-      {/* 2-panel layout (desktop) / stacked layout (mobile) */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
-        {/* Left: Scrollable sidebar with accordion sections */}
-        {!isMobile && (
-          <StudioSidebar
-            store={store}
-            passType={passType}
-            cardType={cardType}
-            templateId={templateId}
-            organizationId={organizationId}
-            organizationName={organizationName}
-            organizationLogo={organizationLogo}
-          />
-        )}
-
-        {/* Right: Canvas (clean background) */}
-        <div style={{ flex: 1, position: "relative", display: "flex" }}>
-          <CanvasPanel
-            design={design}
-            format={ui.previewFormat}
-            deviceFrame="minimal"
-            organizationName={organizationName}
-            organizationLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
-            templateName={programConfig.name || templateName}
-            passType={passType}
-            templateConfig={buildConfigPayload(passType, programConfig)}
-            visitsRequired={programConfig.stampsRequired}
-            rewardDescription={programConfig.rewardDescription}
-          />
-
-          {/* Floating controls — bottom right of canvas (embedded mode) */}
-          {embedded && !isMobile && (
-            <CanvasControls
-              previewFormat={ui.previewFormat}
-              onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
-              isDirty={isDirty}
-              isSaving={ui.isSaving}
-              onSave={handleSave}
+  function renderStudioContent() {
+    return (
+      <>
+        {/* 2-panel layout (desktop) / stacked layout (mobile) */}
+        <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
+          {/* Left: Scrollable sidebar with accordion sections */}
+          {!isMobile && (
+            <StudioSidebar
+              store={store}
+              passType={passType}
+              cardType={cardType}
+              templateId={templateId}
+              organizationId={organizationId}
+              organizationName={organizationName}
+              organizationLogo={organizationLogo}
             />
+          )}
+
+          {/* Right: Canvas (clean background) */}
+          <div style={{ flex: 1, position: "relative", display: "flex" }}>
+            <CanvasPanel
+              design={design}
+              format={ui.previewFormat}
+              deviceFrame="minimal"
+              organizationName={organizationName}
+              organizationLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
+              templateName={programConfig.name || templateName}
+              passType={passType}
+              templateConfig={buildConfigPayload(passType, programConfig)}
+              visitsRequired={programConfig.stampsRequired}
+              rewardDescription={programConfig.rewardDescription}
+            />
+
+            {/* Floating controls — bottom right of canvas (embedded mode) */}
+            {embedded && !isMobile && (
+              <CanvasControls
+                previewFormat={ui.previewFormat}
+                onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
+                isDirty={isDirty}
+                isSaving={ui.isSaving}
+                canUndo={canUndo}
+                canRedo={canRedo}
+                onUndo={() => temporalStore.getState().undo()}
+                onRedo={() => temporalStore.getState().redo()}
+                onSave={handleSave}
+              />
+            )}
+          </div>
+
+          {/* Mobile: panel overlay (bottom sheet style) */}
+          {ui.activeTool && isMobile && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                maxHeight: "60dvh",
+                backgroundColor: "var(--background)",
+                borderTop: "1px solid var(--border)",
+                borderRadius: "12px 12px 0 0",
+                overflow: "auto",
+                zIndex: 20,
+                boxShadow: "0 -4px 20px rgba(0,0,0,0.15)",
+              }}
+            >
+              <PanelShell
+                title=""
+                activeTool={ui.activeTool}
+                onClose={() => store.getState().setActiveTool(null)}
+              >
+                {renderMobilePanel()}
+              </PanelShell>
+            </div>
           )}
         </div>
 
-        {/* Mobile: panel overlay (bottom sheet style) */}
-        {ui.activeTool && isMobile && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              maxHeight: "60dvh",
-              backgroundColor: "var(--background)",
-              borderTop: "1px solid var(--border)",
-              borderRadius: "12px 12px 0 0",
-              overflow: "auto",
-              zIndex: 20,
-              boxShadow: "0 -4px 20px rgba(0,0,0,0.15)",
-            }}
-          >
-            <PanelShell
-              title=""
-              activeTool={ui.activeTool}
-              onClose={() => store.getState().setActiveTool(null)}
-            >
-              {renderMobilePanel()}
-            </PanelShell>
-          </div>
+        {/* Mobile: Bottom tool bar */}
+        {isMobile && (
+          <MobileToolBar
+            activeTool={ui.activeTool}
+            onToolSelect={(tool) => store.getState().setActiveTool(tool)}
+            cardType={cardType}
+          />
         )}
-      </div>
+      </>
+    )
+  }
 
-      {/* Mobile: Bottom tool bar */}
-      {isMobile && (
-        <MobileToolBar
-          activeTool={ui.activeTool}
-          onToolSelect={(tool) => store.getState().setActiveTool(tool)}
-          cardType={cardType}
-        />
-      )}
+  return (
+    <div
+      style={{
+        height: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      <StudioToolbar
+        programName={templateName}
+        programId={templateId}
+        embedded={false}
+        isDirty={isDirty}
+        isSaving={ui.isSaving}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        previewFormat={ui.previewFormat}
+        onSave={handleSave}
+        onUndo={() => temporalStore.getState().undo()}
+        onRedo={() => temporalStore.getState().redo()}
+        onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
+      />
+      {renderStudioContent()}
     </div>
   )
 }
@@ -532,12 +586,20 @@ function CanvasControls({
   onPreviewFormatChange,
   isDirty,
   isSaving,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
   onSave,
 }: {
   previewFormat: PreviewFormat
   onPreviewFormatChange: (fmt: PreviewFormat) => void
   isDirty: boolean
   isSaving: boolean
+  canUndo: boolean
+  canRedo: boolean
+  onUndo: () => void
+  onRedo: () => void
   onSave: () => void
 }) {
   return (
@@ -552,6 +614,56 @@ function CanvasControls({
         gap: 6,
       }}
     >
+      {/* Undo / Redo */}
+      <div
+        style={{
+          display: "flex",
+          gap: 2,
+          padding: 2,
+          borderRadius: 8,
+          backgroundColor: "var(--background)",
+          border: "1px solid var(--border)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        }}
+      >
+        <button
+          onClick={onUndo}
+          disabled={!canUndo}
+          style={{
+            padding: "5px 8px",
+            borderRadius: 6,
+            border: "none",
+            background: "none",
+            color: canUndo ? "var(--foreground)" : "var(--muted-foreground)",
+            cursor: canUndo ? "pointer" : "default",
+            opacity: canUndo ? 1 : 0.4,
+            display: "flex",
+            alignItems: "center",
+          }}
+          aria-label="Undo"
+        >
+          <Undo2 size={14} />
+        </button>
+        <button
+          onClick={onRedo}
+          disabled={!canRedo}
+          style={{
+            padding: "5px 8px",
+            borderRadius: 6,
+            border: "none",
+            background: "none",
+            color: canRedo ? "var(--foreground)" : "var(--muted-foreground)",
+            cursor: canRedo ? "pointer" : "default",
+            opacity: canRedo ? 1 : 0.4,
+            display: "flex",
+            alignItems: "center",
+          }}
+          aria-label="Redo"
+        >
+          <Redo2 size={14} />
+        </button>
+      </div>
+
       {/* Apple / Google toggle */}
       <div
         style={{

@@ -18,6 +18,7 @@ import type { PublicTemplateInfo } from "@/types/pass-instance"
 import { computeTextColor } from "@/lib/wallet/card-design"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
+import { Card } from "@/components/ui/card"
 import { parseCouponConfig, parseMembershipConfig, parseStampCardConfig, formatCouponValue } from "@/lib/pass-config"
 
 // Convenience helpers to extract config fields from PublicTemplateInfo
@@ -494,10 +495,10 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               const programDesign = buildWalletPassDesign(program.passDesign)
 
               return (
+                <Card asChild key={program.id}>
                 <button
-                  key={program.id}
                   onClick={() => handleProgramSelect(program)}
-                  className="w-full text-left rounded-xl border border-border bg-card p-4 hover:border-foreground/30 hover:bg-accent/50 transition-colors group"
+                  className="w-full text-left p-4 hover:bg-accent/50 hover:shadow-md transition-all group"
                 >
                   <div className="flex items-center gap-4">
                     {/* Card preview thumbnail */}
@@ -534,6 +535,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
                     <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
                   </div>
                 </button>
+                </Card>
               )
             })}
           </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import type { RewardDistributionItem } from "@/server/analytics"
+import { Card } from "@/components/ui/card"
 
 // Generate brand-tinted shades for the donut segments
 function getSegmentColor(index: number, total: number): string {
@@ -56,7 +57,7 @@ export function RewardDistributionChart({
   const totalCustomers = data.reduce((sum, d) => sum + d.count, 0)
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <Card className="p-5">
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
         Reward Cycle Progress
         {programName && (
@@ -106,6 +107,6 @@ export function RewardDistributionChart({
           </div>
         </div>
       )}
-    </div>
+    </Card>
   )
 }

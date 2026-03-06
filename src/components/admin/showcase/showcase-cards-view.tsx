@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
+import { Card } from "@/components/ui/card"
 import { ShowcaseCardForm } from "./showcase-card-form"
 import {
   deleteShowcaseCard,
@@ -147,9 +148,9 @@ export function ShowcaseCardsView({ initialCards }: Props) {
           const design = designDataToWalletDesign(card.designData)
 
           return (
-            <div
+            <Card
               key={card.id}
-              className="group relative rounded-xl border border-border bg-card p-4"
+              className="group relative p-4"
             >
               {/* Card preview */}
               <div className="mb-3 flex justify-center">
@@ -261,7 +262,7 @@ export function ShowcaseCardsView({ initialCards }: Props) {
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
-            </div>
+            </Card>
           )
         })}
 

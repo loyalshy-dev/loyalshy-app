@@ -5,6 +5,8 @@ const planConfig: Record<string, { label: string; color: string }> = {
   ENTERPRISE: { label: "Enterprise", color: "bg-amber-500" },
 }
 
+import { Card } from "@/components/ui/card"
+
 type PlanBreakdownProps = {
   data: { plan: string; count: number }[]
 }
@@ -15,7 +17,7 @@ export function PlanBreakdown({ data }: PlanBreakdownProps) {
   const total = data.reduce((sum, d) => sum + d.count, 0)
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+    <Card className="p-5 space-y-4">
       <h3 className="text-[13px] font-medium text-muted-foreground">
         Plan Distribution
       </h3>
@@ -43,6 +45,6 @@ export function PlanBreakdown({ data }: PlanBreakdownProps) {
           )
         })}
       </div>
-    </div>
+    </Card>
   )
 }

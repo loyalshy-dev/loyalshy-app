@@ -11,6 +11,7 @@ import {
   Heart,
   Clover,
 } from "lucide-react"
+import { Card } from "@/components/ui/card"
 
 type SlotMachineProps = {
   rewardText: string
@@ -92,8 +93,8 @@ export function SlotMachine({ rewardText, passInstanceId, onReveal, autoStart = 
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-[280px] mx-auto">
       {/* Slot machine housing */}
-      <div
-        className="relative flex items-center justify-center gap-2 rounded-xl border border-border bg-card p-4 shadow-sm w-full"
+      <Card
+        className="relative flex items-center justify-center gap-2 p-4 shadow-sm w-full"
         onClick={() => { if (!spinning && !autoStart) setSpinning(true) }}
       >
         {reels.map((reel, reelIdx) => (
@@ -143,7 +144,7 @@ export function SlotMachine({ rewardText, passInstanceId, onReveal, autoStart = 
             <p className="text-xs font-medium text-muted-foreground">Tap to spin</p>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Reward text */}
       {showReward && (

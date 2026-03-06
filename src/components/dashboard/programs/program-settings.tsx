@@ -41,6 +41,7 @@ import {
 } from "@/server/org-settings-actions"
 import type { TemplateDeleteCounts } from "@/server/org-settings-actions"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
+import { Card } from "@/components/ui/card"
 
 type ProgramSettingsProps = {
   program: {
@@ -137,7 +138,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
       {/* Status section */}
       <section className="space-y-4">
         <h3 className="text-sm font-semibold">Status</h3>
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-card p-4">
+        <Card className="flex items-center justify-between gap-4 p-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               {typeMeta && <typeMeta.icon className="h-4 w-4 text-muted-foreground" />}
@@ -147,7 +148,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
               Current status: <span className={`font-medium ${statusColor}`}>{statusLabel}</span>
             </p>
           </div>
-        </div>
+        </Card>
       </section>
 
       {/* Danger Zone */}

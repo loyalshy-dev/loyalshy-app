@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { getCustomerColumns } from "./customer-columns"
 import type { ContactRow as CustomerRow } from "@/server/contact-actions"
 
@@ -99,7 +100,7 @@ export function CustomerTable({
   })
 
   return (
-    <div className={`rounded-lg border border-border bg-card ${isPending ? "opacity-60" : ""} transition-opacity`}>
+    <Card className={`${isPending ? "opacity-60" : ""} transition-opacity`}>
       <div className="overflow-x-auto">
       <Table>
         <TableHeader>
@@ -199,6 +200,6 @@ export function CustomerTable({
           </div>
         </div>
       )}
-    </div>
+    </Card>
   )
 }

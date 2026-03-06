@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   ACTIVE: {
@@ -28,7 +29,7 @@ export function SubscriptionBreakdown({ data }: SubscriptionBreakdownProps) {
   const countMap = new Map(data.map((d) => [d.status, d.count]))
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+    <Card className="p-5 space-y-4">
       <h3 className="text-[13px] font-medium text-muted-foreground">
         Subscription Status
       </h3>
@@ -50,6 +51,6 @@ export function SubscriptionBreakdown({ data }: SubscriptionBreakdownProps) {
           )
         })}
       </div>
-    </div>
+    </Card>
   )
 }

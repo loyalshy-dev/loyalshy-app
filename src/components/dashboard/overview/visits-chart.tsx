@@ -13,6 +13,7 @@ import {
 import { format, parseISO } from "date-fns"
 import type { InteractionsDataPoint } from "@/server/analytics"
 import { getInteractionsOverTime } from "@/server/analytics"
+import { Card } from "@/components/ui/card"
 
 type Range = "7d" | "30d" | "90d" | "12m"
 
@@ -79,7 +80,7 @@ export function InteractionsChart({ initialData, initialRange }: InteractionsCha
     range === "7d" ? 0 : range === "30d" ? 4 : range === "90d" ? 13 : 29
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <Card className="p-5">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <h3 className="text-[13px] font-medium text-muted-foreground">
           Activity Over Time
@@ -152,6 +153,6 @@ export function InteractionsChart({ initialData, initialRange }: InteractionsCha
           </AreaChart>
         </ResponsiveContainer>}
       </div>
-    </div>
+    </Card>
   )
 }

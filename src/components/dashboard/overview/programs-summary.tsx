@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ChevronRight, Plus } from "lucide-react"
 import { PASS_TYPE_META } from "@/types/pass-types"
 import type { TemplateSummaryItem } from "@/server/analytics"
+import { Card } from "@/components/ui/card"
 
 type ProgramsSummaryProps = {
   programs: TemplateSummaryItem[]
@@ -29,7 +30,7 @@ function getMetricLine(program: TemplateSummaryItem): string {
 export function ProgramsSummary({ programs }: ProgramsSummaryProps) {
   if (programs.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-card p-5">
+      <Card className="p-5">
         <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
           Programs
         </h3>
@@ -45,12 +46,12 @@ export function ProgramsSummary({ programs }: ProgramsSummaryProps) {
             Create a program
           </Link>
         </div>
-      </div>
+      </Card>
     )
   }
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <Card className="p-5">
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
         Programs
       </h3>
@@ -81,6 +82,6 @@ export function ProgramsSummary({ programs }: ProgramsSummaryProps) {
           )
         })}
       </div>
-    </div>
+    </Card>
   )
 }

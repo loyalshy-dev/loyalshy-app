@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   searchContactsForStamp as searchContactsForInteraction,
@@ -930,10 +931,10 @@ function ProgramPickerStep({
                     )
 
             return (
+              <Card asChild key={passInstance.passInstanceId}>
               <button
-                key={passInstance.passInstanceId}
                 type="button"
-                className="flex items-center gap-3 w-full rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-brand/40 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex items-center gap-3 w-full p-4 text-left transition-all hover:bg-muted/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 onClick={() => onSelect(passInstance)}
               >
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand/10">
@@ -1033,6 +1034,7 @@ function ProgramPickerStep({
                 </div>
                 <ArrowLeft className="size-4 text-muted-foreground rotate-180 shrink-0" />
               </button>
+              </Card>
             )
           })}
         </div>
@@ -1306,7 +1308,7 @@ function ConfirmStep({
 
           {/* Secondary: redeem catalog */}
           {pointsConfig && pointsConfig.catalog.length > 0 && (
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <Card className="overflow-hidden">
               <p className="px-3 py-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
                 Redeem a reward
               </p>
@@ -1344,7 +1346,7 @@ function ConfirmStep({
                   )
                 })}
               </div>
-            </div>
+            </Card>
           )}
         </div>
       ) : isGiftCard ? (

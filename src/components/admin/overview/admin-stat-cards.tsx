@@ -10,6 +10,7 @@ import {
   CreditCard,
 } from "lucide-react"
 import { useAnimatedCounter } from "@/hooks/use-animated-counter"
+import { Card } from "@/components/ui/card"
 
 type StatCardProps = {
   label: string
@@ -22,7 +23,7 @@ function StatCard({ label, value, icon, prefix }: StatCardProps) {
   const animatedValue = useAnimatedCounter(value)
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5 space-y-3">
+    <Card className="p-5 space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-[13px] font-medium text-muted-foreground">
           {label}
@@ -33,7 +34,7 @@ function StatCard({ label, value, icon, prefix }: StatCardProps) {
         {prefix}
         {animatedValue.toLocaleString()}
       </span>
-    </div>
+    </Card>
   )
 }
 

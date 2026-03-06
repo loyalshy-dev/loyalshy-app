@@ -3,6 +3,7 @@
 import { Eye, Gift, Trophy, Crown, Ticket, CreditCard, Coins } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import type { ActivityItem } from "@/server/analytics"
+import { Card } from "@/components/ui/card"
 
 const ACTIVITY_CONFIG = {
   interaction: {
@@ -68,19 +69,19 @@ type RecentActivityProps = {
 export function RecentActivity({ items }: RecentActivityProps) {
   if (items.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-card p-5">
+      <Card className="p-5">
         <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
           Recent Activity
         </h3>
         <p className="text-sm text-muted-foreground py-8 text-center">
           No activity yet. Register your first interaction to see it here.
         </p>
-      </div>
+      </Card>
     )
   }
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <Card className="p-5">
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
         Recent Activity
       </h3>
@@ -123,6 +124,6 @@ export function RecentActivity({ items }: RecentActivityProps) {
           )
         })}
       </div>
-    </div>
+    </Card>
   )
 }
