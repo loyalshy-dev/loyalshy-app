@@ -88,17 +88,16 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
     /(auth)         → Login/Register/Forgot password
     /(dashboard)    → Protected dashboard routes
       /dashboard
-        /templates            → Templates list
-        /templates/[id]       → Template detail (layout + tab nav)
-        /templates/[id]/passes    → Per-template passes/rewards
-        /templates/[id]/design    → Card design editor (owner)
-        /templates/[id]/qr-code   → QR code (owner)
-        /templates/[id]/settings  → Template edit form (owner)
+        /programs             → Programs list
+        /programs/[id]        → Program detail (layout + tab nav)
+        /programs/[id]/passes     → Per-program passes with type-aware columns
+        /programs/[id]/design     → Embedded card design studio (owner)
+        /programs/[id]/qr-code    → QR code (owner)
+        /programs/[id]/settings   → Status management + delete (owner)
         /contacts             → Contact management
-        /rewards              → Cross-template rewards (not in sidebar)
+        /rewards              → Cross-program rewards (not in sidebar)
         /settings             → General, Team, Billing, Jobs (owner)
-    /(studio)       → Full-page card design studio (own layout, no dashboard shell)
-      /dashboard/templates/[id]/studio → Canva-like editor
+    /(studio)       → Redirects to /programs/[id]/design (studio now embedded)
     /(admin-studio) → Full-page showcase card studio (own layout, super_admin only)
       /admin/showcase/[id]/studio → Showcase card editor
     /(public)       → Landing, pricing, QR scan, card view pages
@@ -107,9 +106,9 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
     /ui             → Shadcn components
     /card-renderer  → Shared CardRenderer used across all surfaces
     /minigames      → Prize reveal minigames (scratch card, slots, wheel) — shared by dashboard + public card page
-    /studio         → Studio editor components (layout, toolbar, canvas, panels)
+    /studio         → Studio editor components (layout, toolbar, sidebar, canvas, panels)
     /dashboard      → Dashboard-specific components
-      /templates    → Template list view, tab nav, editor, create form
+      /programs     → Program list view, tab nav, pass instances, settings
     /admin/showcase → Showcase card management + studio adapter
     /marketing      → Landing page components
     /wallet         → Wallet pass components
@@ -241,18 +240,17 @@ Update the "Current Progress" section above to track what's done.
 
 ## Dashboard Navigation
 
-**Sidebar (all users):** Overview, Contacts, Templates
+**Sidebar (all users):** Overview, Contacts, Programs
 **Sidebar (owner only, after divider):** Settings
-**Mobile bottom nav:** Overview | Contacts | [+Register FAB] | Templates | More
+**Mobile bottom nav:** Overview | Contacts | [+Register FAB] | Programs | More
 
-### Templates (top-level entity)
-- `/dashboard/templates` — list of all templates (grid cards, status badges, pass instance counts)
-- `/dashboard/templates/[id]` — template overview with stat cards (layout provides tab nav)
-- `/dashboard/templates/[id]/passes` — per-template passes/rewards
-- `/dashboard/templates/[id]/design` — card design preview with "Open Studio" button (owner only)
-- `/dashboard/templates/[id]/studio` — full-page Canva-like card design editor (own layout, no dashboard shell)
-- `/dashboard/templates/[id]/qr-code` — QR code for this template (owner only)
-- `/dashboard/templates/[id]/settings` — template edit form (owner only)
+### Programs (top-level entity)
+- `/dashboard/programs` — list of all programs (grid cards, status badges, pass instance counts)
+- `/dashboard/programs/[id]` — program overview with stat cards (layout provides tab nav)
+- `/dashboard/programs/[id]/passes` — type-aware pass instances with stat cards, progress columns, status filters, row actions
+- `/dashboard/programs/[id]/design` — embedded card design studio with 2-panel layout (owner only)
+- `/dashboard/programs/[id]/qr-code` — QR code for this program (owner only)
+- `/dashboard/programs/[id]/settings` — status management (activate/archive/reactivate) + delete (owner only)
 
 ### Settings (account-level only)
 - General (organization profile)
@@ -260,7 +258,7 @@ Update the "Current Progress" section above to track what's done.
 - Billing (Stripe subscription)
 - Jobs (background jobs — separate page)
 
-**Note:** `/dashboard/rewards` still works (command palette, direct URL) but is not in sidebar.
+**Note:** `/dashboard/rewards` still works (command palette, direct URL) but is not in sidebar. `/dashboard/programs/[id]/studio` redirects to `/dashboard/programs/[id]/design`.
 
 ### Admin Panel (super_admin only)
 - `/admin` — overview stats
