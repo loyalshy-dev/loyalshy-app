@@ -132,7 +132,7 @@ export function DashboardShell({
               </Button>
             </div>
           ) : (
-            <div className="mx-auto w-full max-w-6xl px-4 lg:px-6 py-6">
+            <div className="w-full px-4 lg:px-6 py-6">
               {children}
             </div>
           )}

@@ -8,6 +8,7 @@ import {
   CircleUserRound,
   Tag,
   FileText,
+  SlidersHorizontal,
 } from "lucide-react"
 import type { StudioTool } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
@@ -25,6 +26,7 @@ type ToolItem = {
 }
 
 const TOOLS: ToolItem[] = [
+  { id: "program", label: "Program", icon: <SlidersHorizontal size={18} /> },
   { id: "templates", label: "Templates", icon: <LayoutGrid size={18} /> },
   { id: "colors", label: "Colors", icon: <Palette size={18} /> },
   { id: "progress", label: "Progress", icon: <BarChart3 size={18} /> },

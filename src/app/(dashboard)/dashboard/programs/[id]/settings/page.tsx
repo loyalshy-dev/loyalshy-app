@@ -1,8 +1,8 @@
 import { connection } from "next/server"
 import { notFound, redirect } from "next/navigation"
 import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
-import { getTemplateForSettings } from "@/server/template-actions"
-import { ProgramEditor } from "@/components/dashboard/programs/program-editor"
+import { db } from "@/lib/db"
+import { ProgramSettings } from "@/components/dashboard/programs/program-settings"
 
 export default async function ProgramSettingsPage(props: {
   params: Promise<{ id: string }>
@@ -18,22 +18,24 @@ export default async function ProgramSettingsPage(props: {
 
   await assertOrganizationRole(organization.id, "owner")
 
-  const program = await getTemplateForSettings(programId)
+  const program = await db.passTemplate.findFirst({
+    where: { id: programId, organizationId: organization.id },
+    select: {
+      id: true,
+      name: true,
+      passType: true,
+      status: true,
+    },
+  })
+
   if (!program) {
     notFound()
   }
 
   return (
-    <ProgramEditor
+    <ProgramSettings
       program={program}
-      organization={{
-        id: organization.id,
-        name: organization.name,
-        slug: organization.slug,
-        logo: organization.logo,
-        brandColor: organization.brandColor,
-        secondaryColor: organization.secondaryColor,
-      }}
+      organizationId={organization.id}
     />
   )
 }

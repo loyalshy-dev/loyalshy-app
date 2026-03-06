@@ -320,7 +320,7 @@ export function QrCodeDisplay({
             }`}
           >
             <LayoutGrid className="w-3.5 h-3.5" />
-            All Templates
+            All Programs
           </button>
           {templates.map((program) => (
             <button
@@ -392,7 +392,7 @@ export function QrCodeDisplay({
                     </>
                   ) : (
                     <p className="text-[11px] text-muted-foreground/60">
-                      Choose from {templates.length} templates
+                      Choose from {templates.length} programs
                     </p>
                   )}
                 </div>
@@ -405,7 +405,7 @@ export function QrCodeDisplay({
                       format="apple"
                       organizationName={organization.name}
                       logoUrl={organization.logo}
-                      programName={activeTemplate?.name ?? templates[0]?.name ?? "Pass Template"}
+                      programName={activeTemplate?.name ?? templates[0]?.name ?? "Program"}
                       rewardDescription={rewardDescription}
                       totalVisits={visitsRequired}
                       currentVisits={activeTemplateType === "STAMP_CARD" || !activeTemplateType ? 0 : 0}

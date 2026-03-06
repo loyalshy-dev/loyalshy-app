@@ -1,15 +1,8 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Undo2, Redo2, Save, Smartphone, Tablet, Monitor, Square } from "lucide-react"
-import type { DeviceFrame, PreviewFormat } from "@/types/editor"
-
-const DEVICE_FRAMES: { id: DeviceFrame; label: string; icon: React.ReactNode }[] = [
-  { id: "iphone", label: "iPhone", icon: <Smartphone size={14} /> },
-  { id: "pixel", label: "Pixel", icon: <Tablet size={14} /> },
-  { id: "minimal", label: "Minimal", icon: <Monitor size={14} /> },
-  { id: "none", label: "None", icon: <Square size={14} /> },
-]
+import { ArrowLeft, Undo2, Redo2, Save, Smartphone, Tablet } from "lucide-react"
+import type { PreviewFormat } from "@/types/editor"
 
 type StudioToolbarProps = {
   programName: string
@@ -19,12 +12,12 @@ type StudioToolbarProps = {
   canUndo: boolean
   canRedo: boolean
   previewFormat: PreviewFormat
-  deviceFrame: DeviceFrame
   onSave: () => void
   onUndo: () => void
   onRedo: () => void
   onPreviewFormatChange: (format: PreviewFormat) => void
-  onDeviceFrameChange: (frame: DeviceFrame) => void
+  /** When true, hide back button (tab nav handles navigation) */
+  embedded?: boolean
 }
 
 export function StudioToolbar({
@@ -35,19 +28,18 @@ export function StudioToolbar({
   canUndo,
   canRedo,
   previewFormat,
-  deviceFrame,
   onSave,
   onUndo,
   onRedo,
   onPreviewFormatChange,
-  onDeviceFrameChange,
+  embedded = false,
 }: StudioToolbarProps) {
   const router = useRouter()
 
   return (
     <div
       style={{
-        height: 52,
+        height: 48,
         borderBottom: "1px solid var(--border)",
         display: "flex",
         alignItems: "center",
@@ -57,28 +49,30 @@ export function StudioToolbar({
         flexShrink: 0,
       }}
     >
-      {/* Back button */}
-      <button
-        onClick={() => router.push(`/dashboard/programs/${programId}/design`)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "6px 10px",
-          borderRadius: 6,
-          border: "none",
-          background: "none",
-          color: "var(--muted-foreground)",
-          cursor: "pointer",
-          fontSize: 13,
-        }}
-        aria-label="Back to design"
-      >
-        <ArrowLeft size={16} />
-        <span style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {programName}
-        </span>
-      </button>
+      {/* Back button — hidden when embedded in dashboard tab */}
+      {!embedded && (
+        <button
+          onClick={() => router.push(`/dashboard/programs/${programId}/design`)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 10px",
+            borderRadius: 6,
+            border: "none",
+            background: "none",
+            color: "var(--muted-foreground)",
+            cursor: "pointer",
+            fontSize: 13,
+          }}
+          aria-label="Back to design"
+        >
+          <ArrowLeft size={16} />
+          <span style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {programName}
+          </span>
+        </button>
+      )}
 
       <div style={{ flex: 1 }} />
 
@@ -121,7 +115,7 @@ export function StudioToolbar({
       {/* Divider */}
       <div style={{ width: 1, height: 24, backgroundColor: "var(--border)" }} />
 
-      {/* Format selector — Apple / Google only */}
+      {/* Format selector — Apple / Google */}
       <div style={{ display: "flex", gap: 2, padding: "2px", borderRadius: 8, backgroundColor: "var(--muted)" }}>
         {(["apple", "google"] as PreviewFormat[]).map((fmt) => (
           <button
@@ -137,37 +131,14 @@ export function StudioToolbar({
               fontSize: 12,
               fontWeight: previewFormat === fmt ? 600 : 400,
               boxShadow: previewFormat === fmt ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
-            }}
-          >
-            {fmt === "apple" && <Smartphone size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />}
-            {fmt === "google" && <Tablet size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />}
-            {fmt.charAt(0).toUpperCase() + fmt.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {/* Device frame selector */}
-      <div style={{ display: "flex", gap: 1, padding: "2px", borderRadius: 8, backgroundColor: "var(--muted)" }}>
-        {DEVICE_FRAMES.map((frame) => (
-          <button
-            key={frame.id}
-            onClick={() => onDeviceFrameChange(frame.id)}
-            title={frame.label}
-            aria-label={`${frame.label} frame`}
-            aria-pressed={deviceFrame === frame.id}
-            style={{
-              padding: "4px 6px",
-              borderRadius: 6,
-              border: "none",
-              background: deviceFrame === frame.id ? "var(--background)" : "none",
-              color: deviceFrame === frame.id ? "var(--foreground)" : "var(--muted-foreground)",
-              cursor: "pointer",
               display: "flex",
               alignItems: "center",
-              boxShadow: deviceFrame === frame.id ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
+              gap: 4,
             }}
           >
-            {frame.icon}
+            {fmt === "apple" && <Smartphone size={13} />}
+            {fmt === "google" && <Tablet size={13} />}
+            {fmt.charAt(0).toUpperCase() + fmt.slice(1)}
           </button>
         ))}
       </div>

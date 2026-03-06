@@ -97,8 +97,6 @@ export function CanvasPanel({
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: "var(--muted)",
-        backgroundImage: "radial-gradient(circle, var(--border) 1px, transparent 1px)",
-        backgroundSize: "24px 24px",
         overflow: "auto",
         padding: 32,
         gap: 16,

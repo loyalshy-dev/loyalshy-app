@@ -11,6 +11,7 @@ type PanelShellProps = {
 }
 
 const PANEL_TITLES: Record<StudioTool, string> = {
+  program: "Program Settings",
   templates: "Templates",
   colors: "Colors & Themes",
   progress: "Progress Style",

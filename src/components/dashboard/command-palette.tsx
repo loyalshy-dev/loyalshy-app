@@ -3,15 +3,11 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import {
-  BarChart3,
-  Gift,
-  Layers,
+  LayoutGrid,
   Plus,
   Search,
   Settings,
   Stamp,
-  UserPlus,
-  Users,
 } from "lucide-react"
 import {
   CommandDialog,
@@ -54,7 +50,7 @@ export function CommandPalette({
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput placeholder="Search contacts, actions, pages..." />
+      <CommandInput placeholder="Search actions, pages..." />
       <CommandList>
         <CommandEmpty>
           <div className="flex flex-col items-center gap-1 py-4">
@@ -71,16 +67,10 @@ export function CommandPalette({
             Register Interaction
           </CommandItem>
           <CommandItem
-            onSelect={() => runCommand(() => router.push("/dashboard/customers?action=add"))}
+            onSelect={() => runCommand(() => router.push("/dashboard?action=create"))}
           >
-            <UserPlus className="size-4" />
-            Add Contact
-          </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/dashboard/rewards?action=redeem"))}
-          >
-            <Gift className="size-4" />
-            Redeem Reward
+            <Plus className="size-4" />
+            Create Program
           </CommandItem>
         </CommandGroup>
 
@@ -90,32 +80,8 @@ export function CommandPalette({
           <CommandItem
             onSelect={() => runCommand(() => router.push("/dashboard"))}
           >
-            <BarChart3 className="size-4" />
+            <LayoutGrid className="size-4" />
             Overview
-          </CommandItem>
-          <CommandItem
-            onSelect={() =>
-              runCommand(() => router.push("/dashboard/customers"))
-            }
-          >
-            <Users className="size-4" />
-            Contacts
-          </CommandItem>
-          <CommandItem
-            onSelect={() =>
-              runCommand(() => router.push("/dashboard/programs"))
-            }
-          >
-            <Layers className="size-4" />
-            Templates
-          </CommandItem>
-          <CommandItem
-            onSelect={() =>
-              runCommand(() => router.push("/dashboard/rewards"))
-            }
-          >
-            <Gift className="size-4" />
-            Rewards
           </CommandItem>
           <CommandItem
             onSelect={() =>

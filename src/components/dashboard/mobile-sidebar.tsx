@@ -37,7 +37,7 @@ type MobileSidebarProps = {
 const navItems = [
   { label: "Overview", href: "/dashboard", icon: BarChart3 },
   { label: "Contacts", href: "/dashboard/customers", icon: Users },
-  { label: "Templates", href: "/dashboard/programs", icon: Layers },
+  { label: "Programs", href: "/dashboard/programs", icon: Layers },
 ]
 
 const ownerItems = [

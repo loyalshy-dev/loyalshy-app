@@ -173,6 +173,169 @@ export async function getTemplateDetail(templateId: string): Promise<TemplateDet
   }
 }
 
+// ─── Get Template Pass Instances ────────────────────────────
+
+export type PassInstanceListItem = {
+  id: string
+  status: string
+  walletProvider: string
+  data: unknown
+  issuedAt: Date
+  expiresAt: Date | null
+  contact: {
+    id: string
+    fullName: string
+    email: string | null
+    phone: string | null
+  }
+  interactionCount: number
+  rewardCount: number
+}
+
+export async function getTemplatePassInstances(
+  templateId: string,
+  opts: {
+    page?: number
+    perPage?: number
+    search?: string
+    status?: string
+  } = {}
+): Promise<{ items: PassInstanceListItem[]; total: number; page: number; perPage: number }> {
+  const organization = await getOrganizationForUser()
+  if (!organization) return { items: [], total: 0, page: 1, perPage: 20 }
+
+  await assertOrganizationAccess(organization.id)
+
+  const page = opts.page ?? 1
+  const perPage = opts.perPage ?? 20
+  const skip = (page - 1) * perPage
+
+  const where: Record<string, unknown> = {
+    passTemplateId: templateId,
+    passTemplate: { organizationId: organization.id },
+  }
+
+  if (opts.status && opts.status !== "all") {
+    where.status = opts.status
+  }
+
+  if (opts.search) {
+    where.contact = {
+      OR: [
+        { fullName: { contains: opts.search, mode: "insensitive" } },
+        { email: { contains: opts.search, mode: "insensitive" } },
+        { phone: { contains: opts.search, mode: "insensitive" } },
+      ],
+    }
+  }
+
+  const [items, total] = await Promise.all([
+    db.passInstance.findMany({
+      where,
+      include: {
+        contact: {
+          select: { id: true, fullName: true, email: true, phone: true },
+        },
+        _count: {
+          select: { interactions: true, rewards: true },
+        },
+      },
+      orderBy: { issuedAt: "desc" },
+      skip,
+      take: perPage,
+    }),
+    db.passInstance.count({ where }),
+  ])
+
+  return {
+    items: items.map((pi) => ({
+      id: pi.id,
+      status: pi.status,
+      walletProvider: pi.walletProvider,
+      data: pi.data,
+      issuedAt: pi.issuedAt,
+      expiresAt: pi.expiresAt,
+      contact: pi.contact,
+      interactionCount: pi._count.interactions,
+      rewardCount: pi._count.rewards,
+    })),
+    total,
+    page,
+    perPage,
+  }
+}
+
+// ─── Pass Instance Stats (aggregated per template) ──────────
+
+export type PassInstanceStats = {
+  total: number
+  active: number
+  completed: number
+  suspended: number
+  expired: number
+  revoked: number
+  withWallet: number
+}
+
+export async function getTemplatePassStats(templateId: string): Promise<PassInstanceStats> {
+  const organization = await getOrganizationForUser()
+  if (!organization) return { total: 0, active: 0, completed: 0, suspended: 0, expired: 0, revoked: 0, withWallet: 0 }
+
+  await assertOrganizationAccess(organization.id)
+
+  const [total, active, completed, suspended, expired, revoked, withWallet] = await Promise.all([
+    db.passInstance.count({ where: { passTemplateId: templateId, passTemplate: { organizationId: organization.id } } }),
+    db.passInstance.count({ where: { passTemplateId: templateId, passTemplate: { organizationId: organization.id }, status: "ACTIVE" } }),
+    db.passInstance.count({ where: { passTemplateId: templateId, passTemplate: { organizationId: organization.id }, status: "COMPLETED" } }),
+    db.passInstance.count({ where: { passTemplateId: templateId, passTemplate: { organizationId: organization.id }, status: "SUSPENDED" } }),
+    db.passInstance.count({ where: { passTemplateId: templateId, passTemplate: { organizationId: organization.id }, status: "EXPIRED" } }),
+    db.passInstance.count({ where: { passTemplateId: templateId, passTemplate: { organizationId: organization.id }, status: "REVOKED" } }),
+    db.passInstance.count({ where: { passTemplateId: templateId, passTemplate: { organizationId: organization.id }, walletProvider: { not: "NONE" } } }),
+  ])
+
+  return { total, active, completed, suspended, expired, revoked, withWallet }
+}
+
+// ─── Update Pass Instance Status ──────────────────────────────
+
+export async function updatePassInstanceStatus(
+  passInstanceId: string,
+  newStatus: "ACTIVE" | "SUSPENDED" | "REVOKED"
+): Promise<{ success: true } | { error: string }> {
+  const organization = await getOrganizationForUser()
+  if (!organization) return { error: "Organization not found" }
+
+  await assertOrganizationRole(organization.id, "owner")
+
+  const passInstance = await db.passInstance.findFirst({
+    where: {
+      id: passInstanceId,
+      passTemplate: { organizationId: organization.id },
+    },
+    select: { id: true, status: true },
+  })
+
+  if (!passInstance) return { error: "Pass not found" }
+
+  const now = new Date()
+  const updateData: Record<string, unknown> = { status: newStatus }
+
+  if (newStatus === "SUSPENDED") {
+    updateData.suspendedAt = now
+  } else if (newStatus === "REVOKED") {
+    updateData.revokedAt = now
+  } else if (newStatus === "ACTIVE") {
+    updateData.suspendedAt = null
+  }
+
+  await db.passInstance.update({
+    where: { id: passInstanceId },
+    data: updateData,
+  })
+
+  return { success: true }
+}
+
 // ─── Get Template For Settings (owner only) ─────────────────
 
 export async function getTemplateForSettings(templateId: string): Promise<TemplateWithDesign | null> {

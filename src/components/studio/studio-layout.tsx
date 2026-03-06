@@ -7,9 +7,10 @@ import type { CardDesignStoreApi, WalletState } from "@/lib/stores/card-design-s
 import { useStore } from "zustand"
 import { useStoreWithEqualityFn } from "zustand/traditional"
 import { StudioToolbar } from "./studio-toolbar"
-import { ToolSelector } from "./tools/tool-selector"
+import { StudioSidebar } from "./studio-sidebar"
 import { CanvasPanel } from "./canvas/canvas-panel"
 import { PanelShell } from "./panels/panel-shell"
+import { ProgramPanel } from "./panels/program-panel"
 import { ColorsPanel } from "./panels/colors-panel"
 import { ProgressPanel } from "./panels/progress-panel"
 import { StripPanel } from "./panels/strip-panel"
@@ -17,11 +18,11 @@ import { LabelsPanel } from "./panels/labels-panel"
 import { DetailsPanel } from "./panels/details-panel"
 import { TemplatePanel } from "./panels/template-panel"
 import { LogoPanel } from "./panels/logo-panel"
-import { savePassDesign as saveCardDesign } from "@/server/org-settings-actions"
+import { savePassDesign as saveCardDesign, updatePassTemplate, updateMinigameConfig } from "@/server/org-settings-actions"
 import type { StudioTool } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
-import type { PassType } from "@/types/pass-types"
+import type { ProgramConfigState } from "@/lib/stores/card-design-store"
 
 /** Map PassType → CardType for visual rendering */
 function passTypeToCardType(passType: string): CardType {
@@ -33,11 +34,59 @@ function passTypeToCardType(passType: string): CardType {
   }
 }
 
+/** Build the type-specific config JSON from store state */
+function buildConfigPayload(passType: string, pc: ProgramConfigState): Record<string, unknown> {
+  switch (passType) {
+    case "STAMP_CARD":
+      return {
+        stampsRequired: pc.stampsRequired,
+        rewardDescription: pc.rewardDescription,
+        rewardExpiryDays: pc.rewardExpiryDays,
+      }
+    case "COUPON":
+      return {
+        discountType: pc.discountType,
+        discountValue: pc.discountValue,
+        couponCode: pc.couponCode || undefined,
+        couponDescription: pc.couponDescription || undefined,
+        validUntil: pc.validUntil || undefined,
+        redemptionLimit: pc.redemptionLimit,
+        terms: pc.terms || undefined,
+      }
+    case "MEMBERSHIP":
+      return {
+        membershipTier: pc.membershipTier,
+        benefits: pc.benefits,
+        validDuration: pc.validDuration,
+        customDurationDays: pc.validDuration === "custom" ? pc.customDurationDays : undefined,
+        autoRenew: pc.autoRenew,
+        terms: pc.terms || undefined,
+      }
+    case "POINTS":
+      return {
+        pointsPerVisit: pc.pointsPerVisit,
+        pointsLabel: pc.pointsLabel,
+      }
+    case "PREPAID":
+      return {
+        totalUses: pc.totalUses,
+        useLabel: pc.useLabel,
+        rechargeable: pc.rechargeable,
+        rechargeAmount: pc.rechargeable ? pc.rechargeAmount : undefined,
+        terms: pc.terms || undefined,
+      }
+    default:
+      return {}
+  }
+}
+
 type StudioLayoutProps = {
   templateId: string
   templateName: string
   passType: string
   templateConfig: unknown
+  templateStartsAt?: string
+  templateEndsAt?: string
   organizationName: string
   organizationLogo: string | null
   organizationLogoApple: string | null
@@ -47,6 +96,8 @@ type StudioLayoutProps = {
   rewardDescription: string
   walletData: Record<string, unknown> | null
   walletPassCount: number
+  /** When true, studio is embedded in the dashboard tab (no 100dvh, no back button) */
+  embedded?: boolean
 }
 
 export function StudioLayout({
@@ -54,6 +105,8 @@ export function StudioLayout({
   templateName,
   passType,
   templateConfig,
+  templateStartsAt = "",
+  templateEndsAt = "",
   organizationName,
   organizationLogo,
   organizationLogoApple,
@@ -63,6 +116,7 @@ export function StudioLayout({
   rewardDescription,
   walletData,
   walletPassCount,
+  embedded = false,
 }: StudioLayoutProps) {
   const cardType = passTypeToCardType(passType)
   // Create store once per mount
@@ -83,13 +137,51 @@ export function StudioLayout({
     }
     store.getState().setWalletField("logoAppleUrl", organizationLogoApple ?? organizationLogo)
     store.getState().setWalletField("logoGoogleUrl", organizationLogoGoogle ?? organizationLogo)
-    // Mark clean after setting logos since it's not a design change
+    // Hydrate program config from templateConfig
+    const cfg = (templateConfig ?? {}) as Record<string, unknown>
+    const minigame = (cfg.minigame as Record<string, unknown>) ?? {}
+    const minigamePrizes = (minigame.prizes as { name: string; weight: number }[]) ?? []
+    // Convert ISO dates to YYYY-MM-DD for date inputs
+    const toDateStr = (iso: string) => iso ? iso.slice(0, 10) : ""
+    store.getState().hydrateConfig({
+      name: (templateName ?? "") as string,
+      stampsRequired: (cfg.stampsRequired as number) ?? 10,
+      rewardDescription: (cfg.rewardDescription as string) ?? "",
+      rewardExpiryDays: (cfg.rewardExpiryDays as number) ?? 0,
+      discountType: (cfg.discountType as string) ?? "percentage",
+      discountValue: (cfg.discountValue as number) ?? 10,
+      couponCode: (cfg.couponCode as string) ?? "",
+      couponDescription: (cfg.couponDescription as string) ?? "",
+      validUntil: (cfg.validUntil as string) ?? "",
+      redemptionLimit: (cfg.redemptionLimit as string) ?? "single",
+      membershipTier: (cfg.membershipTier as string) ?? "Member",
+      benefits: (cfg.benefits as string) ?? "",
+      validDuration: (cfg.validDuration as string) ?? "1_year",
+      customDurationDays: (cfg.customDurationDays as number) ?? 365,
+      autoRenew: (cfg.autoRenew as boolean) ?? false,
+      pointsPerVisit: (cfg.pointsPerVisit as number) ?? 1,
+      pointsLabel: (cfg.pointsLabel as string) ?? "pts",
+      totalUses: (cfg.totalUses as number) ?? 10,
+      useLabel: (cfg.useLabel as string) ?? "use",
+      rechargeable: (cfg.rechargeable as boolean) ?? false,
+      rechargeAmount: (cfg.rechargeAmount as number) ?? 0,
+      startsAt: toDateStr(templateStartsAt),
+      endsAt: toDateStr(templateEndsAt),
+      minigameEnabled: (minigame.enabled as boolean) ?? false,
+      minigameType: ((minigame.gameType as string) ?? "scratch") as "scratch" | "slots" | "wheel",
+      minigamePrizes,
+      minigamePrimaryColor: (minigame.primaryColor as string) ?? "",
+      minigameAccentColor: (minigame.accentColor as string) ?? "",
+      terms: (cfg.terms as string) ?? "",
+    })
+    // Mark clean after setting logos and config since it's not a user change
     store.getState().markClean()
-  }, [walletData, organizationLogo, organizationLogoApple, organizationLogoGoogle, store])
+  }, [walletData, organizationLogo, organizationLogoApple, organizationLogoGoogle, store, templateConfig, templateName, templateStartsAt, templateEndsAt])
 
   // ─── Selectors ────────────────────────────────────────
 
   const wallet = useStore(store, (s) => s.wallet)
+  const programConfig = useStore(store, (s) => s.programConfig)
   const ui = useStore(store, (s) => s.ui)
 
   // Build WalletPassDesign from store state
@@ -131,7 +223,9 @@ export function StudioLayout({
 
   const handleSave = useCallback(async () => {
     const state = store.getState()
-    if (!state.ui.isDirty || state.ui.isSaving) return
+    const hasDesignChanges = state.ui.isDirty
+    const hasConfigChanges = state.ui.isConfigDirty
+    if ((!hasDesignChanges && !hasConfigChanges) || state.ui.isSaving) return
 
     const walletAtSaveStart = state.wallet
 
@@ -139,68 +233,122 @@ export function StudioLayout({
     state.setSaveError(null)
 
     try {
-      const result = await saveCardDesign({
-        templateId,
-        cardType: state.wallet.cardType as "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID",
-        showStrip: state.wallet.showStrip,
-        primaryColor: state.wallet.primaryColor,
-        secondaryColor: state.wallet.secondaryColor,
-        textColor: state.wallet.textColor,
-        autoTextColor: state.wallet.autoTextColor,
-        patternStyle: state.wallet.patternStyle,
-        progressStyle: state.wallet.progressStyle,
-        fontFamily: state.wallet.fontFamily,
-        labelFormat: state.wallet.labelFormat,
-        customProgressLabel: state.wallet.customProgressLabel,
-        palettePreset: state.wallet.palettePreset,
-        templateId2: state.wallet.templateId ?? "",
-        businessHours: state.wallet.businessHours,
-        mapAddress: state.wallet.mapAddress,
-        socialLinks: {
-          instagram: state.wallet.socialLinks.instagram ?? "",
-          facebook: state.wallet.socialLinks.facebook ?? "",
-          tiktok: state.wallet.socialLinks.tiktok ?? "",
-          x: state.wallet.socialLinks.x ?? "",
-        },
-        customMessage: state.wallet.customMessage,
-        stripOpacity: state.wallet.stripOpacity,
-        stripGrayscale: state.wallet.stripGrayscale,
-        stripColor1: state.wallet.stripColor1,
-        stripColor2: state.wallet.stripColor2,
-        stripFill: state.wallet.stripFill,
-        patternColor: state.wallet.patternColor,
-        useStampGrid: state.wallet.useStampGrid,
-        stampGridConfig: state.wallet.useStampGrid
-          ? state.wallet.stampGridConfig
-          : undefined,
-        stripImagePosition: (state.wallet.stripImagePosition.x !== 0.5 || state.wallet.stripImagePosition.y !== 0.5)
-          ? state.wallet.stripImagePosition
-          : undefined,
-        stripImageZoom: state.wallet.stripImageZoom !== 1
-          ? state.wallet.stripImageZoom
-          : undefined,
-      })
+      const promises: Promise<unknown>[] = []
 
-      if ("error" in result) {
-        store.getState().setSaveError(String(result.error))
-        toast.error(String(result.error))
+      // Save card design if dirty
+      if (hasDesignChanges) {
+        promises.push(
+          saveCardDesign({
+            templateId,
+            cardType: state.wallet.cardType as "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID",
+            showStrip: state.wallet.showStrip,
+            primaryColor: state.wallet.primaryColor,
+            secondaryColor: state.wallet.secondaryColor,
+            textColor: state.wallet.textColor,
+            autoTextColor: state.wallet.autoTextColor,
+            patternStyle: state.wallet.patternStyle,
+            progressStyle: state.wallet.progressStyle,
+            fontFamily: state.wallet.fontFamily,
+            labelFormat: state.wallet.labelFormat,
+            customProgressLabel: state.wallet.customProgressLabel,
+            palettePreset: state.wallet.palettePreset,
+            templateId2: state.wallet.templateId ?? "",
+            businessHours: state.wallet.businessHours,
+            mapAddress: state.wallet.mapAddress,
+            socialLinks: {
+              instagram: state.wallet.socialLinks.instagram ?? "",
+              facebook: state.wallet.socialLinks.facebook ?? "",
+              tiktok: state.wallet.socialLinks.tiktok ?? "",
+              x: state.wallet.socialLinks.x ?? "",
+            },
+            customMessage: state.wallet.customMessage,
+            stripOpacity: state.wallet.stripOpacity,
+            stripGrayscale: state.wallet.stripGrayscale,
+            stripColor1: state.wallet.stripColor1,
+            stripColor2: state.wallet.stripColor2,
+            stripFill: state.wallet.stripFill,
+            patternColor: state.wallet.patternColor,
+            useStampGrid: state.wallet.useStampGrid,
+            stampGridConfig: state.wallet.useStampGrid
+              ? state.wallet.stampGridConfig
+              : undefined,
+            stripImagePosition: (state.wallet.stripImagePosition.x !== 0.5 || state.wallet.stripImagePosition.y !== 0.5)
+              ? state.wallet.stripImagePosition
+              : undefined,
+            stripImageZoom: state.wallet.stripImageZoom !== 1
+              ? state.wallet.stripImageZoom
+              : undefined,
+          })
+        )
+      }
+
+      // Save program config if dirty
+      if (hasConfigChanges) {
+        const pc = state.programConfig
+        const configPayload = buildConfigPayload(passType, pc)
+        promises.push(
+          updatePassTemplate({
+            organizationId,
+            templateId,
+            name: pc.name,
+            termsAndConditions: pc.terms || "",
+            config: configPayload,
+            ...(pc.startsAt ? { startsAt: new Date(pc.startsAt) } : {}),
+            endsAt: pc.endsAt ? new Date(pc.endsAt) : null,
+          })
+        )
+
+        // Save minigame config separately (it merges into config.minigame)
+        if (passType === "STAMP_CARD" || passType === "COUPON") {
+          const filteredPrizes = pc.minigamePrizes
+            .filter((p) => p.name.trim())
+            .map((p) => ({ name: p.name.trim(), weight: p.weight }))
+          promises.push(
+            updateMinigameConfig({
+              organizationId,
+              templateId,
+              enabled: pc.minigameEnabled,
+              gameType: pc.minigameType,
+              ...(filteredPrizes.length > 0 ? { prizes: filteredPrizes } : {}),
+              ...(pc.minigamePrimaryColor ? { primaryColor: pc.minigamePrimaryColor } : {}),
+              ...(pc.minigameAccentColor ? { accentColor: pc.minigameAccentColor } : {}),
+            })
+          )
+        }
+      }
+
+      const results = await Promise.all(promises)
+
+      // Check for errors
+      const errors = results.filter((r): r is { error: string } =>
+        r != null && typeof r === "object" && "error" in r
+      )
+
+      if (errors.length > 0) {
+        const msg = errors.map((e) => e.error).join("; ")
+        store.getState().setSaveError(msg)
+        toast.error(msg)
       } else {
         const current = store.getState()
-        if (current.wallet === walletAtSaveStart) {
+        if (hasDesignChanges && current.wallet === walletAtSaveStart) {
           current.markClean()
         }
+        if (hasConfigChanges) {
+          current.markConfigClean()
+        }
+        const designResult = hasDesignChanges ? results[0] as { hashChanged?: boolean } : null
         toast.success(
-          result.hashChanged && walletPassCount > 0
-            ? `Design saved! Updating ${walletPassCount} wallet pass${walletPassCount !== 1 ? "es" : ""}...`
-            : "Design saved!"
+          designResult?.hashChanged && walletPassCount > 0
+            ? `Saved! Updating ${walletPassCount} wallet pass${walletPassCount !== 1 ? "es" : ""}...`
+            : "Saved!"
         )
       }
     } catch {
-      toast.error("Failed to save design")
+      toast.error("Failed to save")
     } finally {
       store.getState().setSaving(false)
     }
-  }, [templateId, walletPassCount, store])
+  }, [templateId, organizationId, passType, walletPassCount, store])
 
   // ─── Keyboard shortcuts ───────────────────────────────
 
@@ -223,30 +371,28 @@ export function StudioLayout({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [handleSave, temporalStore])
 
-  // ─── Panel routing ────────────────────────────────────
+  // ─── Mobile panel routing ──────────────────────────────
 
-  function renderPanel() {
+  function renderMobilePanel() {
     if (!ui.activeTool) return null
-
     switch (ui.activeTool) {
+      case "program":
+        return <ProgramPanel store={store} passType={passType} />
       case "templates":
         return <TemplatePanel store={store} organizationId={organizationId} organizationLogo={organizationLogo} cardType={cardType} />
       case "colors":
-        return <ColorsPanel store={store} />
-      case "progress":
         return (
-          <ProgressPanel
-            store={store}
-            programId={templateId}
-            visitsRequired={visitsRequired}
-          />
+          <>
+            <ColorsPanel store={store} />
+            <div style={{ marginTop: 16 }}><LabelsPanel store={store} /></div>
+          </>
         )
+      case "progress":
+        return <ProgressPanel store={store} programId={templateId} visitsRequired={programConfig.stampsRequired} />
       case "strip":
         return <StripPanel store={store} programId={templateId} />
       case "logo":
         return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} />
-      case "labels":
-        return <LabelsPanel store={store} />
       case "details":
         return <DetailsPanel store={store} />
       default:
@@ -257,65 +403,56 @@ export function StudioLayout({
   const isMobile = useIsMobile()
 
   return (
-    <div style={{ height: "100dvh", display: "flex", flexDirection: "column" }}>
+    <div style={{
+      height: embedded ? "100%" : "100dvh",
+      minHeight: embedded ? "calc(100dvh - 200px)" : undefined,
+      display: "flex",
+      flexDirection: "column",
+    }}>
       {/* Top toolbar */}
       <StudioToolbar
         programName={templateName}
         programId={templateId}
-        isDirty={ui.isDirty}
+        embedded={embedded}
+        isDirty={ui.isDirty || ui.isConfigDirty}
         isSaving={ui.isSaving}
         canUndo={canUndo}
         canRedo={canRedo}
         previewFormat={ui.previewFormat}
-        deviceFrame={ui.deviceFrame}
         onSave={handleSave}
         onUndo={() => temporalStore.getState().undo()}
         onRedo={() => temporalStore.getState().redo()}
         onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
-        onDeviceFrameChange={(frame) => store.getState().setDeviceFrame(frame)}
       />
 
-      {/* 3-panel layout (desktop) / stacked layout (mobile) */}
+      {/* 2-panel layout (desktop) / stacked layout (mobile) */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
-        {/* Left: Tool selector */}
+        {/* Left: Scrollable sidebar with accordion sections */}
         {!isMobile && (
-          <ToolSelector
-            activeTool={ui.activeTool}
-            onToolSelect={(tool) => store.getState().setActiveTool(tool)}
-            cardType={cardType}
-          />
-        )}
-
-        {/* Center: Canvas + floating Brand Match prompt */}
-        <div style={{ flex: 1, position: "relative", display: "flex" }}>
-          <CanvasPanel
-            design={design}
-            format={ui.previewFormat}
-            deviceFrame={ui.deviceFrame}
-            organizationName={organizationName}
-            organizationLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
-            templateName={templateName}
+          <StudioSidebar
+            store={store}
             passType={passType}
-            templateConfig={templateConfig}
-            visitsRequired={visitsRequired}
-            rewardDescription={rewardDescription}
+            cardType={cardType}
+            templateId={templateId}
+            organizationId={organizationId}
+            organizationName={organizationName}
+            organizationLogo={organizationLogo}
           />
-          <BrandMatchPrompt
-            visible={ui.activeTool !== "templates"}
-            onOpen={() => store.getState().setActiveTool("templates")}
-          />
-        </div>
-
-        {/* Right: Property panel */}
-        {ui.activeTool && !isMobile && (
-          <PanelShell
-            title=""
-            activeTool={ui.activeTool}
-            onClose={() => store.getState().setActiveTool(null)}
-          >
-            {renderPanel()}
-          </PanelShell>
         )}
+
+        {/* Right: Canvas (clean background) */}
+        <CanvasPanel
+          design={design}
+          format={ui.previewFormat}
+          deviceFrame="minimal"
+          organizationName={organizationName}
+          organizationLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
+          templateName={programConfig.name || templateName}
+          passType={passType}
+          templateConfig={buildConfigPayload(passType, programConfig)}
+          visitsRequired={programConfig.stampsRequired}
+          rewardDescription={programConfig.rewardDescription}
+        />
 
         {/* Mobile: panel overlay (bottom sheet style) */}
         {ui.activeTool && isMobile && (
@@ -339,7 +476,7 @@ export function StudioLayout({
               activeTool={ui.activeTool}
               onClose={() => store.getState().setActiveTool(null)}
             >
-              {renderPanel()}
+              {renderMobilePanel()}
             </PanelShell>
           </div>
         )}
@@ -353,81 +490,6 @@ export function StudioLayout({
           cardType={cardType}
         />
       )}
-    </div>
-  )
-}
-
-// ─── Brand Match Floating Prompt ─────────────────────────────
-
-import { Wand2, X as XIcon } from "lucide-react"
-
-function BrandMatchPrompt({
-  visible,
-  onOpen,
-}: {
-  visible: boolean
-  onOpen: () => void
-}) {
-  const [dismissed, setDismissed] = useState(false)
-
-  if (dismissed || !visible) return null
-
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen() } }}
-      style={{
-        position: "absolute",
-        bottom: 20,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 15,
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        padding: "8px 14px 8px 12px",
-        borderRadius: 10,
-        backgroundColor: "var(--primary)",
-        color: "var(--primary-foreground)",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-        animation: "brandMatchIn 0.4s ease-out",
-      }}
-      onClick={onOpen}
-    >
-      <Wand2 size={15} />
-      <span style={{ fontSize: 13, fontWeight: 600 }}>Match card to your brand</span>
-      <button
-        onClick={(e) => {
-          e.stopPropagation()
-          setDismissed(true)
-        }}
-        aria-label="Dismiss"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 18,
-          height: 18,
-          borderRadius: "50%",
-          border: "none",
-          backgroundColor: "rgba(255,255,255,0.2)",
-          color: "inherit",
-          cursor: "pointer",
-          marginLeft: 2,
-          padding: 0,
-        }}
-      >
-        <XIcon size={10} />
-      </button>
-      <style>{`
-        @keyframes brandMatchIn {
-          from { opacity: 0; transform: translateX(-50%) translateY(12px); }
-          to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-      `}</style>
     </div>
   )
 }
@@ -449,15 +511,16 @@ function useIsMobile(breakpoint = 768): boolean {
 // ─── Mobile Tool Bar ──────────────────────────────────────
 
 import {
-  LayoutGrid,
   Palette,
   BarChart3,
   ImagePlus,
   MoreHorizontal,
+  SlidersHorizontal,
 } from "lucide-react"
+import { ToolSelector } from "./tools/tool-selector"
 
 const MOBILE_QUICK_TOOLS: { id: StudioTool; label: string; icon: React.ReactNode }[] = [
-  { id: "templates", label: "Templates", icon: <LayoutGrid size={18} /> },
+  { id: "program", label: "Program", icon: <SlidersHorizontal size={18} /> },
   { id: "colors", label: "Colors", icon: <Palette size={18} /> },
   { id: "progress", label: "Progress", icon: <BarChart3 size={18} /> },
   { id: "strip", label: "Strip", icon: <ImagePlus size={18} /> },

@@ -1,29 +1,13 @@
 import { Suspense } from "react"
 import { connection } from "next/server"
+import { redirect } from "next/navigation"
 import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
-import {
-  getOverviewStats,
-  getInteractionsOverTime,
-  getBusiestDays,
-  getTemplatesSummary,
-  getRecentActivity,
-  getTopContacts,
-} from "@/server/analytics"
+import { getTemplatesList } from "@/server/template-actions"
 import { getOnboardingChecklist } from "@/server/onboarding-registration-actions"
-import { StatCards } from "@/components/dashboard/overview/stat-cards"
-import { InteractionsChart } from "@/components/dashboard/overview/visits-chart"
-import { BusiestDaysChart } from "@/components/dashboard/overview/busiest-days-chart"
-import { ProgramsSummary } from "@/components/dashboard/overview/programs-summary"
-import { RecentActivity } from "@/components/dashboard/overview/recent-activity"
-import { TopContacts } from "@/components/dashboard/overview/top-customers"
+import { db } from "@/lib/db"
 import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist"
-import {
-  StatCardsSkeleton,
-  VisitsChartSkeleton,
-  SecondaryChartSkeleton,
-  ActivitySkeleton,
-  TopCustomersSkeleton,
-} from "@/components/dashboard/overview/skeletons"
+import { TemplatesGridView } from "@/components/dashboard/templates-grid"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default async function OverviewPage() {
   await connection()
@@ -31,80 +15,59 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Your organization at a glance.
-        </p>
-      </div>
-
       <Suspense fallback={null}>
         <OnboardingChecklistSection />
       </Suspense>
 
-      <Suspense fallback={<StatCardsSkeleton />}>
-        <StatCardsSection />
+      <Suspense
+        fallback={
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-9 w-32" />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Skeleton className="h-85 rounded-lg" />
+              <Skeleton className="h-85 rounded-lg" />
+              <Skeleton className="h-85 rounded-lg" />
+            </div>
+          </div>
+        }
+      >
+        <TemplatesGridSection />
       </Suspense>
-
-      <Suspense fallback={<VisitsChartSkeleton />}>
-        <InteractionsChartSection />
-      </Suspense>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Suspense fallback={<SecondaryChartSkeleton />}>
-          <BusiestDaysSection />
-        </Suspense>
-        <Suspense fallback={<SecondaryChartSkeleton />}>
-          <TemplatesSummarySection />
-        </Suspense>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <div className="lg:col-span-3">
-          <Suspense fallback={<ActivitySkeleton />}>
-            <RecentActivitySection />
-          </Suspense>
-        </div>
-        <div className="lg:col-span-2">
-          <Suspense fallback={<TopCustomersSkeleton />}>
-            <TopContactsSection />
-          </Suspense>
-        </div>
-      </div>
     </div>
   )
 }
 
-// --- Async Server Components (streamed with Suspense) -------
+async function TemplatesGridSection() {
+  const session = await assertAuthenticated()
+  const organization = await getOrganizationForUser()
+  if (!organization) {
+    redirect("/register?step=2")
+  }
 
-async function StatCardsSection() {
-  const stats = await getOverviewStats()
-  return <StatCards {...stats} />
-}
+  const templates = await getTemplatesList()
 
-async function InteractionsChartSection() {
-  const data = await getInteractionsOverTime("30d")
-  return <InteractionsChart initialData={data} initialRange="30d" />
-}
+  let isOwner = false
+  if (session.user.role === "SUPER_ADMIN") {
+    isOwner = true
+  } else {
+    const member = await db.member.findFirst({
+      where: { organizationId: organization.id, userId: session.user.id },
+      select: { role: true },
+    })
+    isOwner = member?.role === "owner"
+  }
 
-async function BusiestDaysSection() {
-  const data = await getBusiestDays()
-  return <BusiestDaysChart data={data} />
-}
-
-async function TemplatesSummarySection() {
-  const templates = await getTemplatesSummary()
-  return <ProgramsSummary programs={templates} />
-}
-
-async function RecentActivitySection() {
-  const items = await getRecentActivity()
-  return <RecentActivity items={items} />
-}
-
-async function TopContactsSection() {
-  const contacts = await getTopContacts()
-  return <TopContacts contacts={contacts} />
+  return (
+    <TemplatesGridView
+      templates={templates}
+      organizationId={organization.id}
+      organizationName={organization.name}
+      isOwner={isOwner}
+    />
+  )
 }
 
 async function OnboardingChecklistSection() {

@@ -4,12 +4,10 @@ import { useCallback } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
-  BarChart3,
   ChevronsUpDown,
-  Layers,
+  LayoutGrid,
   LogOut,
   Settings,
-  Users,
 } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -48,9 +46,7 @@ type AppSidebarProps = {
 }
 
 const navItems = [
-  { label: "Overview", href: "/dashboard", icon: BarChart3 },
-  { label: "Contacts", href: "/dashboard/customers", icon: Users },
-  { label: "Templates", href: "/dashboard/programs", icon: Layers },
+  { label: "Overview", href: "/dashboard", icon: LayoutGrid },
 ]
 
 const ownerItems = [

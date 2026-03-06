@@ -1151,10 +1151,10 @@ function TicketForm({
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="ticket-name">Template Name</Label>
+          <Label htmlFor="ticket-name">Program Name</Label>
           <Input
             id="ticket-name"
-            {...register("name", { required: "Template name is required" })}
+            {...register("name", { required: "Program name is required" })}
             placeholder="e.g., Summer Concert 2026, Conference VIP"
           />
           {errors.name && (
@@ -1318,10 +1318,10 @@ function AccessForm({
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="access-name">Template Name</Label>
+          <Label htmlFor="access-name">Program Name</Label>
           <Input
             id="access-name"
-            {...register("name", { required: "Template name is required" })}
+            {...register("name", { required: "Program name is required" })}
             placeholder="e.g., Gym Access, Building Pass, Pool Entry"
           />
           {errors.name && (
@@ -1497,10 +1497,10 @@ function TransitForm({
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="transit-name">Template Name</Label>
+          <Label htmlFor="transit-name">Program Name</Label>
           <Input
             id="transit-name"
-            {...register("name", { required: "Template name is required" })}
+            {...register("name", { required: "Program name is required" })}
             placeholder="e.g., City Bus Pass, Train Ticket"
           />
           {errors.name && (
@@ -1641,10 +1641,10 @@ function BusinessIdForm({
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="bid-name">Template Name</Label>
+          <Label htmlFor="bid-name">Program Name</Label>
           <Input
             id="bid-name"
-            {...register("name", { required: "Template name is required" })}
+            {...register("name", { required: "Program name is required" })}
             placeholder="e.g., Employee Badge, Student ID, Volunteer Card"
           />
           {errors.name && (

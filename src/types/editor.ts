@@ -5,6 +5,7 @@ export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID" | "GEN
 // ─── Studio UI Types ──────────────────────────────────────
 
 export type StudioTool =
+  | "program"
   | "templates"
   | "colors"
   | "progress"

@@ -68,11 +68,11 @@ const updatePassTemplateSchema = z.object({
   organizationId: z.string().min(1),
   templateId: z.string().min(1),
   name: z.string().min(1, "Template name is required").max(100),
-  termsAndConditions: z.string().max(5000).optional().default(""),
-  status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
-  startsAt: z.coerce.date(),
+  termsAndConditions: z.string().max(5000).optional(),
+  status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(),
+  startsAt: z.coerce.date().optional(),
   endsAt: z.coerce.date().nullable().optional(),
-  resetProgress: z.boolean().optional().default(false),
+  resetProgress: z.boolean().optional(),
   config: z.record(z.string(), z.any()).optional(),
 })
 

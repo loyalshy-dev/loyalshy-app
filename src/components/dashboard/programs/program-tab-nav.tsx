@@ -4,7 +4,7 @@ import { useTransition } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Rocket, Loader2 } from "lucide-react"
+import { Rocket, Loader2, ArrowLeft } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { activateTemplate as activateProgram } from "@/server/org-settings-actions"
@@ -26,18 +26,42 @@ type Tab = {
   ownerOnly?: boolean
 }
 
+function getPassesTabLabel(passType: string): string {
+  switch (passType) {
+    case "TICKET":
+      return "Attendees"
+    case "MEMBERSHIP":
+    case "BUSINESS_ID":
+      return "Members"
+    case "GIFT_CARD":
+      return "Cards"
+    default:
+      return "Passes"
+  }
+}
+
+function hasRewardsTab(passType: string): boolean {
+  return ["STAMP_CARD", "COUPON", "POINTS"].includes(passType)
+}
+
 function getRewardsTabLabel(passType: string): string {
   switch (passType) {
     case "COUPON":
       return "Redemptions"
-    case "MEMBERSHIP":
-      return "Members"
     case "POINTS":
       return "Catalog"
-    case "PREPAID":
-      return "Usage"
     default:
       return "Rewards"
+  }
+}
+
+function getDistributionLabel(passType: string): string {
+  switch (passType) {
+    case "TICKET":
+    case "TRANSIT":
+      return "Distribution"
+    default:
+      return "QR Code"
   }
 }
 
@@ -60,7 +84,7 @@ export function ProgramTabNav({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Program activated! Customers can now join.")
+        toast.success("Program activated! Contacts can now receive passes.")
         router.refresh()
       }
     })
@@ -68,11 +92,25 @@ export function ProgramTabNav({
 
   const tabs: Tab[] = [
     { label: "Overview", href: basePath },
-    { label: getRewardsTabLabel(passType), href: `${basePath}/rewards` },
-    { label: "Card Design", href: `${basePath}/design`, ownerOnly: true },
-    { label: "QR Code", href: `${basePath}/qr-code`, ownerOnly: true },
-    { label: "Settings", href: `${basePath}/settings`, ownerOnly: true },
+    { label: getPassesTabLabel(passType), href: `${basePath}/passes` },
   ]
+
+  if (hasRewardsTab(passType)) {
+    tabs.push({
+      label: getRewardsTabLabel(passType),
+      href: `${basePath}/rewards`,
+    })
+  }
+
+  tabs.push(
+    { label: "Card Design", href: `${basePath}/design`, ownerOnly: true },
+    {
+      label: getDistributionLabel(passType),
+      href: `${basePath}/qr-code`,
+      ownerOnly: true,
+    },
+    { label: "Settings", href: `${basePath}/settings`, ownerOnly: true }
+  )
 
   const visibleTabs = tabs.filter((t) => !t.ownerOnly || isOwner)
 
@@ -85,8 +123,15 @@ export function ProgramTabNav({
 
   return (
     <div className="space-y-4">
-      {/* Header */}
+      {/* Back + Header */}
       <div className="flex items-center gap-3">
+        <Link
+          href="/dashboard"
+          className="flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          aria-label="Back to overview"
+        >
+          <ArrowLeft className="size-4" />
+        </Link>
         <h1 className="text-2xl font-semibold tracking-tight truncate">
           {templateName}
         </h1>
@@ -104,7 +149,8 @@ export function ProgramTabNav({
           <div className="flex items-center gap-2 min-w-0">
             <Rocket className="h-4 w-4 text-muted-foreground shrink-0" />
             <p className="text-[13px] text-muted-foreground truncate">
-              This program is in draft mode. Activate it to start accepting customers.
+              This program is in draft mode. Activate it to start issuing
+              passes.
             </p>
           </div>
           <Button

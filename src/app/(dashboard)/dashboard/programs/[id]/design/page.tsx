@@ -2,7 +2,8 @@ import { connection } from "next/server"
 import { notFound, redirect } from "next/navigation"
 import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { db } from "@/lib/db"
-import { PassDesignPreview } from "@/components/dashboard/settings/card-design-preview"
+import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
+import { StudioLayout } from "@/components/studio/studio-layout"
 
 export default async function ProgramDesignPage(props: {
   params: Promise<{ id: string }>
@@ -27,35 +28,91 @@ export default async function ProgramDesignPage(props: {
     notFound()
   }
 
+  const walletPassCount = await db.passInstance.count({
+    where: {
+      passTemplateId: programId,
+      walletProvider: { not: "NONE" },
+    },
+  })
+
+  // Serialize pass design for client
+  const passDesign = program.passDesign
+  const stripFilters = passDesign
+    ? parseStripFilters(passDesign.editorConfig)
+    : {
+        stripOpacity: 1,
+        stripGrayscale: false,
+        useStampGrid: false,
+        stripColor1: null,
+        stripColor2: null,
+        stripFill: "gradient" as const,
+        patternColor: null,
+        stripImagePosition: { x: 0.5, y: 0.5 },
+        stripImageZoom: 1,
+      }
+
+  const isLegacyStampGrid = passDesign?.patternStyle === "STAMP_GRID"
+  const useStampGrid = stripFilters.useStampGrid || isLegacyStampGrid
+  const realPatternStyle = isLegacyStampGrid ? "NONE" : (passDesign?.patternStyle ?? "NONE")
+
+  const walletData = passDesign
+    ? {
+        showStrip: passDesign.showStrip as boolean,
+        primaryColor: passDesign.primaryColor ?? "#1a1a2e",
+        secondaryColor: passDesign.secondaryColor ?? "#ffffff",
+        textColor: passDesign.textColor ?? "#ffffff",
+        patternStyle: realPatternStyle as string,
+        progressStyle: passDesign.progressStyle as string,
+        fontFamily: passDesign.fontFamily as string,
+        labelFormat: passDesign.labelFormat as string,
+        customProgressLabel: passDesign.customProgressLabel ?? "",
+        palettePreset: passDesign.palettePreset ?? null,
+        templateId: passDesign.templateId ?? null,
+        stripImageUrl: passDesign.stripImageUrl ?? null,
+        stripImageApple: passDesign.stripImageApple ?? null,
+        stripImageGoogle: passDesign.stripImageGoogle ?? null,
+        stripOpacity: stripFilters.stripOpacity,
+        stripGrayscale: stripFilters.stripGrayscale,
+        stripColor1: stripFilters.stripColor1,
+        stripColor2: stripFilters.stripColor2,
+        stripFill: stripFilters.stripFill,
+        patternColor: stripFilters.patternColor,
+        stripImagePosition: stripFilters.stripImagePosition,
+        stripImageZoom: stripFilters.stripImageZoom,
+        useStampGrid,
+        generatedStripApple: passDesign.generatedStripApple ?? null,
+        generatedStripGoogle: passDesign.generatedStripGoogle ?? null,
+        businessHours: passDesign.businessHours ?? "",
+        mapAddress: passDesign.mapAddress ?? "",
+        mapLatitude: passDesign.mapLatitude ?? null,
+        mapLongitude: passDesign.mapLongitude ?? null,
+        socialLinks: (passDesign.socialLinks as Record<string, string>) ?? {},
+        customMessage: passDesign.customMessage ?? "",
+        cardType: passDesign.cardType as string,
+        stampGridConfig: parseStampGridConfig(passDesign.editorConfig),
+      }
+    : null
+
+  const programConfig = program.config as Record<string, unknown> | null
+
   return (
-    <PassDesignPreview
+    <StudioLayout
       templateId={programId}
       templateName={program.name}
       passType={program.passType}
       templateConfig={program.config}
+      templateStartsAt={program.startsAt.toISOString()}
+      templateEndsAt={program.endsAt?.toISOString() ?? ""}
       organizationName={organization.name}
       organizationLogo={organization.logo}
       organizationLogoApple={organization.logoApple}
       organizationLogoGoogle={organization.logoGoogle}
-      visitsRequired={((program.config as Record<string, unknown> | null)?.stampsRequired as number) ?? 10}
-      rewardDescription={((program.config as Record<string, unknown> | null)?.rewardDescription as string) ?? "Free reward"}
-      cardDesign={
-        program.passDesign
-          ? {
-              cardType: program.passDesign.cardType as string,
-              showStrip: program.passDesign.showStrip as boolean,
-              primaryColor: program.passDesign.primaryColor,
-              secondaryColor: program.passDesign.secondaryColor,
-              textColor: program.passDesign.textColor,
-              patternStyle: program.passDesign.patternStyle as string,
-              progressStyle: program.passDesign.progressStyle as string,
-              labelFormat: program.passDesign.labelFormat as string,
-              customProgressLabel: program.passDesign.customProgressLabel ?? null,
-              stripImageUrl: program.passDesign.stripImageUrl ?? null,
-              editorConfig: program.passDesign.editorConfig,
-            }
-          : null
-      }
+      organizationId={organization.id}
+      visitsRequired={(programConfig?.stampsRequired as number) ?? 10}
+      rewardDescription={(programConfig?.rewardDescription as string) ?? ""}
+      walletData={walletData}
+      walletPassCount={walletPassCount}
+      embedded
     />
   )
 }

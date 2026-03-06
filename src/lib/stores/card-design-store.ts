@@ -59,6 +59,48 @@ export type WalletState = {
   logoGoogleUrl: string | null
 }
 
+// ─── Program Config Slice (PassTemplate.config JSON) ──────
+
+export type ProgramConfigState = {
+  name: string
+  // STAMP_CARD
+  stampsRequired: number
+  rewardDescription: string
+  rewardExpiryDays: number
+  // COUPON
+  discountType: string
+  discountValue: number
+  couponCode: string
+  couponDescription: string
+  validUntil: string
+  redemptionLimit: string
+  // MEMBERSHIP
+  membershipTier: string
+  benefits: string
+  validDuration: string
+  customDurationDays: number
+  autoRenew: boolean
+  // POINTS
+  pointsPerVisit: number
+  pointsLabel: string
+  // PREPAID
+  totalUses: number
+  useLabel: string
+  rechargeable: boolean
+  rechargeAmount: number
+  // Schedule
+  startsAt: string // ISO date string
+  endsAt: string   // ISO date string (empty = no end)
+  // Minigame (STAMP_CARD / COUPON only)
+  minigameEnabled: boolean
+  minigameType: "scratch" | "slots" | "wheel"
+  minigamePrizes: { name: string; weight: number }[]
+  minigamePrimaryColor: string
+  minigameAccentColor: string
+  // Shared
+  terms: string
+}
+
 // ─── UI Slice ─────────────────────────────────────────────
 
 type UIState = {
@@ -66,6 +108,7 @@ type UIState = {
   previewFormat: PreviewFormat
   deviceFrame: DeviceFrame
   isDirty: boolean
+  isConfigDirty: boolean
   isSaving: boolean
   saveError: string | null
 }
@@ -74,10 +117,14 @@ type UIState = {
 
 type CardDesignStore = {
   wallet: WalletState
+  programConfig: ProgramConfigState
   ui: UIState
 
   // Wallet actions
   setWalletField: <K extends keyof WalletState>(key: K, value: WalletState[K]) => void
+
+  // Program config actions
+  setConfigField: <K extends keyof ProgramConfigState>(key: K, value: ProgramConfigState[K]) => void
 
   // Template actions
   applyTemplate: (template: { wallet: Partial<WalletState> }) => void
@@ -89,9 +136,45 @@ type CardDesignStore = {
   setSaving: (saving: boolean) => void
   setSaveError: (error: string | null) => void
   markClean: () => void
+  markConfigClean: () => void
 
   // Hydration
   hydrate: (wallet: Partial<WalletState>) => void
+  hydrateConfig: (config: Partial<ProgramConfigState>) => void
+}
+
+// ─── Default config state ────────────────────────────────
+
+const DEFAULT_CONFIG: ProgramConfigState = {
+  name: "",
+  stampsRequired: 10,
+  rewardDescription: "",
+  rewardExpiryDays: 0,
+  discountType: "percentage",
+  discountValue: 10,
+  couponCode: "",
+  couponDescription: "",
+  validUntil: "",
+  redemptionLimit: "single",
+  membershipTier: "Member",
+  benefits: "",
+  validDuration: "1_year",
+  customDurationDays: 365,
+  autoRenew: false,
+  pointsPerVisit: 1,
+  pointsLabel: "pts",
+  totalUses: 10,
+  useLabel: "use",
+  rechargeable: false,
+  rechargeAmount: 0,
+  startsAt: "",
+  endsAt: "",
+  minigameEnabled: false,
+  minigameType: "scratch",
+  minigamePrizes: [],
+  minigamePrimaryColor: "",
+  minigameAccentColor: "",
+  terms: "",
 }
 
 // ─── Store Factory ────────────────────────────────────────
@@ -139,11 +222,13 @@ export function createCardDesignStore() {
           logoAppleUrl: null,
           logoGoogleUrl: null,
         },
+        programConfig: { ...DEFAULT_CONFIG },
         ui: {
           activeTool: null,
           previewFormat: "apple",
           deviceFrame: "minimal",
           isDirty: false,
+          isConfigDirty: false,
           isSaving: false,
           saveError: null,
         },
@@ -154,6 +239,14 @@ export function createCardDesignStore() {
           set((state) => {
             ;(state.wallet as Record<string, unknown>)[key] = value
             state.ui.isDirty = true
+          }),
+
+        // ─── Program Config Actions ─────────────────
+
+        setConfigField: (key, value) =>
+          set((state) => {
+            ;(state.programConfig as Record<string, unknown>)[key] = value
+            state.ui.isConfigDirty = true
           }),
 
         // ─── Template Actions ───────────────────────
@@ -198,12 +291,23 @@ export function createCardDesignStore() {
             state.ui.isDirty = false
           }),
 
+        markConfigClean: () =>
+          set((state) => {
+            state.ui.isConfigDirty = false
+          }),
+
         // ─── Hydration ─────────────────────────────
 
         hydrate: (wallet) =>
           set((state) => {
             Object.assign(state.wallet, wallet)
             state.ui.isDirty = false
+          }),
+
+        hydrateConfig: (config) =>
+          set((state) => {
+            Object.assign(state.programConfig, config)
+            state.ui.isConfigDirty = false
           }),
       })),
       {
