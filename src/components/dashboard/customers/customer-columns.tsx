@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns"
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Eye, Pencil, Trash2, Stamp, Ticket, Crown } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Eye, Pencil, Trash2, Stamp, Ticket, Crown, Coins, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -18,12 +18,16 @@ const typeIcons: Record<string, typeof Stamp> = {
   STAMP_CARD: Stamp,
   COUPON: Ticket,
   MEMBERSHIP: Crown,
+  POINTS: Coins,
+  PREPAID: CreditCard,
 }
 
 const typeLabels: Record<string, string> = {
   STAMP_CARD: "Stamp",
   COUPON: "Coupon",
   MEMBERSHIP: "Member",
+  POINTS: "Points",
+  PREPAID: "Prepaid",
 }
 
 // Deterministic avatar color from name
@@ -95,6 +99,35 @@ export function getCustomerColumns(
       },
     },
     {
+      id: "programType",
+      header: () => (
+        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Program
+        </span>
+      ),
+      cell: ({ row }) => {
+        const { primaryEnrollment, enrollmentCount } = row.original
+        if (!primaryEnrollment) {
+          return <span className="text-[12px] text-muted-foreground">—</span>
+        }
+        const TypeIcon = typeIcons[primaryEnrollment.programType] ?? Stamp
+        const typeLabel = typeLabels[primaryEnrollment.programType] ?? "Program"
+        return (
+          <div className="flex items-center gap-1.5">
+            <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1 shrink-0">
+              <TypeIcon className="size-3" />
+              {typeLabel}
+            </Badge>
+            {enrollmentCount > 1 && (
+              <span className="text-[10px] text-muted-foreground">
+                +{enrollmentCount - 1}
+              </span>
+            )}
+          </div>
+        )
+      },
+    },
+    {
       id: "progress",
       header: ({ column }) => (
         <Button
@@ -108,49 +141,51 @@ export function getCustomerColumns(
         </Button>
       ),
       cell: ({ row }) => {
-        const { primaryEnrollment, enrollmentCount, hasAvailableReward } = row.original
+        const { primaryEnrollment, hasAvailableReward } = row.original
 
         if (!primaryEnrollment) {
-          return (
-            <span className="text-[12px] text-muted-foreground">
-              No active programs
-            </span>
-          )
+          return <span className="text-[12px] text-muted-foreground">—</span>
         }
 
-        const { currentCycleVisits, visitsRequired, programName, programType } = primaryEnrollment
-        const TypeIcon = typeIcons[programType] ?? Stamp
-        const typeLabel = typeLabels[programType] ?? "Program"
-        const moreSuffix = enrollmentCount > 1
-          ? `+${enrollmentCount - 1} more`
-          : programName
+        const { currentCycleVisits, visitsRequired, programType } = primaryEnrollment
 
         if (programType === "COUPON") {
           return (
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1 shrink-0">
-                <TypeIcon className="size-3" />
-                {typeLabel}
-              </Badge>
-              <span className="text-[12px] text-muted-foreground">
-                {hasAvailableReward ? "Ready" : "Redeemed"}
-              </span>
-              <span className="text-[11px] text-muted-foreground truncate max-w-[100px] hidden lg:inline">
-                {moreSuffix}
-              </span>
-            </div>
+            <span className="text-[12px] text-muted-foreground">
+              {hasAvailableReward ? "Ready" : "Redeemed"}
+            </span>
           )
         }
 
         if (programType === "MEMBERSHIP") {
           return (
+            <span className="text-[12px] text-muted-foreground">Active</span>
+          )
+        }
+
+        if (programType === "POINTS") {
+          return (
+            <span className="text-[13px] tabular-nums text-muted-foreground">
+              {primaryEnrollment.pointsBalance} pts
+            </span>
+          )
+        }
+
+        if (programType === "PREPAID") {
+          const remaining = primaryEnrollment.remainingUses
+          const total = (primaryEnrollment.programConfig as { totalUses?: number } | null)?.totalUses ?? 0
+          const pct = total > 0 ? Math.min((remaining / total) * 100, 100) : 0
+
+          return (
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1 shrink-0">
-                <TypeIcon className="size-3" />
-                {typeLabel}
-              </Badge>
-              <span className="text-[11px] text-muted-foreground truncate max-w-[100px] hidden lg:inline">
-                {moreSuffix}
+              <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-brand transition-all"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <span className="text-[13px] tabular-nums text-muted-foreground">
+                {remaining}/{total}
               </span>
             </div>
           )
@@ -169,9 +204,6 @@ export function getCustomerColumns(
             </div>
             <span className="text-[13px] tabular-nums text-muted-foreground">
               {currentCycleVisits}/{visitsRequired}
-            </span>
-            <span className="text-[11px] text-muted-foreground truncate max-w-[100px] hidden lg:inline">
-              {moreSuffix}
             </span>
           </div>
         )

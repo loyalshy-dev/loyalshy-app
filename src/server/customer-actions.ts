@@ -27,6 +27,9 @@ export type CustomerRow = {
     programType: string
     currentCycleVisits: number
     visitsRequired: number
+    pointsBalance: number
+    remainingUses: number
+    programConfig: unknown
   } | null
 }
 
@@ -184,11 +187,14 @@ export async function getCustomers(
           select: {
             id: true,
             currentCycleVisits: true,
+            pointsBalance: true,
+            remainingUses: true,
             loyaltyProgram: {
               select: {
                 name: true,
                 programType: true,
                 visitsRequired: true,
+                config: true,
               },
             },
           },
@@ -225,6 +231,9 @@ export async function getCustomers(
             programType: primary.loyaltyProgram.programType,
             currentCycleVisits: primary.currentCycleVisits,
             visitsRequired: primary.loyaltyProgram.visitsRequired,
+            pointsBalance: primary.pointsBalance ?? 0,
+            remainingUses: primary.remainingUses ?? 0,
+            programConfig: primary.loyaltyProgram.config,
           }
         : null,
     }
@@ -324,6 +333,7 @@ export async function getCustomerDetail(
     visitsRequired: e.loyaltyProgram.visitsRequired,
     totalVisits: e.totalVisits,
     pointsBalance: e.pointsBalance,
+    remainingUses: e.remainingUses,
     programConfig: e.loyaltyProgram.config,
     totalRewardsRedeemed: e.totalRewardsRedeemed,
     rewardDescription: e.loyaltyProgram.rewardDescription,
@@ -331,6 +341,8 @@ export async function getCustomerDetail(
     walletPassType: e.walletPassType,
     enrolledAt: e.enrolledAt,
     frozenAt: e.frozenAt,
+    suspendedAt: e.suspendedAt,
+    expiresAt: e.expiresAt,
     cardDesign: e.loyaltyProgram.cardDesign
       ? {
           cardType: e.loyaltyProgram.cardDesign.cardType,

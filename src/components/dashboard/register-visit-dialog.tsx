@@ -20,6 +20,7 @@ import {
   Ticket,
   Crown,
   Coins,
+  Minus,
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -38,17 +39,19 @@ import {
   checkInMember,
   earnPoints,
   redeemPoints,
+  usePrepaid,
   lookupEnrollmentByWalletPassId,
   type VisitSearchResult,
   type RedeemCouponResult,
   type CheckInResult,
   type EarnPointsResult,
   type RedeemPointsResult,
+  type UsePrepaidResult,
 } from "@/server/visit-actions"
 import type { EnrollmentSummary } from "@/types/enrollment"
 import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
-import { parsePointsConfig, getCheapestCatalogItem } from "@/lib/program-config"
+import { parsePointsConfig, parsePrepaidConfig, getCheapestCatalogItem } from "@/lib/program-config"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -113,6 +116,7 @@ export function RegisterVisitDialog({
   const [checkInResult, setCheckInResult] = useState<CheckInResult | null>(null)
   const [earnPointsResult, setEarnPointsResult] = useState<EarnPointsResult | null>(null)
   const [redeemPointsResult, setRedeemPointsResult] = useState<RedeemPointsResult | null>(null)
+  const [usePrepaidResult, setUsePrepaidResult] = useState<UsePrepaidResult | null>(null)
   const [scanMode, setScanMode] = useState(false)
   const [scanError, setScanError] = useState<string | null>(null)
   const [isScanLooking, setIsScanLooking] = useState(false)
@@ -181,6 +185,7 @@ export function RegisterVisitDialog({
         setCheckInResult(null)
         setEarnPointsResult(null)
         setRedeemPointsResult(null)
+        setUsePrepaidResult(null)
         setScanMode(false)
         setScanError(null)
         setIsScanLooking(false)
@@ -406,6 +411,34 @@ export function RegisterVisitDialog({
     })
   }
 
+  // Use one prepaid unit
+  function handleUsePrepaid() {
+    if (!selectedEnrollment) return
+
+    startRegister(async () => {
+      const result = await usePrepaid(selectedEnrollment.enrollmentId)
+
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to use prepaid pass")
+        return
+      }
+
+      setUsePrepaidResult(result)
+
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(10)
+      }
+
+      toast.success(
+        `${result.useLabel} used for ${selectedCustomer?.fullName}`,
+        { description: `${result.remainingUses} remaining` }
+      )
+
+      setStep("success")
+      autoDismiss()
+    })
+  }
+
   // QR scan result handler
   async function handleScanResult(data: string) {
     setScanError(null)
@@ -540,6 +573,7 @@ export function RegisterVisitDialog({
             onConfirmCheckIn={handleConfirmCheckIn}
             onEarnPoints={handleEarnPoints}
             onRedeemPoints={handleRedeemPoints}
+            onUsePrepaid={handleUsePrepaid}
             onBack={handleBack}
             cardDesign={selectedEnrollment?.cardDesign ?? null}
           />
@@ -556,6 +590,7 @@ export function RegisterVisitDialog({
             checkInResult={checkInResult}
             earnPointsResult={earnPointsResult}
             redeemPointsResult={redeemPointsResult}
+            usePrepaidResult={usePrepaidResult}
             onClose={() => onOpenChange(false)}
           />
         )}
@@ -756,19 +791,25 @@ function ProgramPickerStep({
             const isCoupon = enrollment.programType === "COUPON"
             const isMembership = enrollment.programType === "MEMBERSHIP"
             const isPoints = enrollment.programType === "POINTS"
+            const isPrepaid = enrollment.programType === "PREPAID"
             const pointsConfig = isPoints ? parsePointsConfig(enrollment.programConfig) : null
             const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
             const pointsBalance = enrollment.pointsBalance ?? 0
+            const remainingUses = enrollment.remainingUses ?? 0
+            const prepaidConfig = isPrepaid ? parsePrepaidConfig(enrollment.programConfig) : null
+            const totalUses = prepaidConfig?.totalUses ?? 0
             const pct = isCoupon || isMembership
               ? 100
-              : isPoints
-                ? cheapestItem
-                  ? Math.min((pointsBalance / cheapestItem.pointsCost) * 100, 100)
-                  : 0
-                : Math.min(
-                    (enrollment.currentCycleVisits / enrollment.visitsRequired) * 100,
-                    100
-                  )
+              : isPrepaid
+                ? totalUses > 0 ? Math.min((remainingUses / totalUses) * 100, 100) : 0
+                : isPoints
+                  ? cheapestItem
+                    ? Math.min((pointsBalance / cheapestItem.pointsCost) * 100, 100)
+                    : 0
+                  : Math.min(
+                      (enrollment.currentCycleVisits / enrollment.visitsRequired) * 100,
+                      100
+                    )
 
             return (
               <button
@@ -784,8 +825,10 @@ function ProgramPickerStep({
                     <Ticket className="size-5 text-brand" />
                   ) : isPoints ? (
                     <Coins className="size-5 text-brand" />
-                  ) : (
+                  ) : isPrepaid ? (
                     <CreditCard className="size-5 text-brand" />
+                  ) : (
+                    <Stamp className="size-5 text-brand" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -800,7 +843,7 @@ function ProgramPickerStep({
                     )}
                     {isMembership && (
                       <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
-                        Membership
+                        {enrollment.status === "SUSPENDED" ? "Suspended" : "Member"}
                       </span>
                     )}
                     {isPoints && (
@@ -808,15 +851,32 @@ function ProgramPickerStep({
                         {pointsBalance} pts
                       </span>
                     )}
+                    {isPrepaid && (
+                      <span className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${remainingUses <= 0 ? "bg-destructive/10 text-destructive" : "bg-brand/10 text-brand"}`}>
+                        {remainingUses}/{totalUses}
+                      </span>
+                    )}
                   </div>
                   {isMembership ? (
-                    <p className="text-[12px] text-muted-foreground mt-1">
-                      Member
+                    <p className={`text-[12px] mt-1 ${enrollment.status === "SUSPENDED" ? "text-destructive" : "text-muted-foreground"}`}>
+                      {enrollment.status === "SUSPENDED" ? "Suspended" : "Member"}
                     </p>
                   ) : isCoupon ? (
                     <p className="text-[12px] font-medium text-success mt-1">
                       Ready to redeem
                     </p>
+                  ) : isPrepaid ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-30">
+                        <div
+                          className="h-full rounded-full bg-brand transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className={`text-[12px] font-medium tabular-nums ${remainingUses <= 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                        {remainingUses} {prepaidConfig?.useLabel ?? "use"}{remainingUses !== 1 ? "s" : ""} left
+                      </span>
+                    </div>
                   ) : isPoints ? (
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-30">
@@ -878,6 +938,7 @@ function ConfirmStep({
   onConfirmCheckIn,
   onEarnPoints,
   onRedeemPoints,
+  onUsePrepaid,
   onBack,
   cardDesign = null,
 }: {
@@ -889,6 +950,7 @@ function ConfirmStep({
   onConfirmCheckIn: () => void
   onEarnPoints: () => void
   onRedeemPoints: (catalogItemId: string) => void
+  onUsePrepaid: () => void
   onBack: () => void
   /** Card design for the selected enrollment's program. Pass once
    *  EnrollmentSummary includes cardDesign data. */
@@ -922,6 +984,7 @@ function ConfirmStep({
   const isCoupon = enrollment.programType === "COUPON"
   const isMembership = enrollment.programType === "MEMBERSHIP"
   const isPoints = enrollment.programType === "POINTS"
+  const isPrepaid = enrollment.programType === "PREPAID"
   const filled = enrollment.currentCycleVisits
   const nextVisit = filled + 1
   const visitsRequired = enrollment.visitsRequired
@@ -930,11 +993,14 @@ function ConfirmStep({
   const affordableCatalogItems = pointsConfig
     ? pointsConfig.catalog.filter((item) => pointsBalance >= item.pointsCost)
     : []
+  const prepaidConfig = isPrepaid ? parsePrepaidConfig(enrollment.programConfig) : null
+  const remainingUses = enrollment.remainingUses ?? 0
+  const totalUses = prepaidConfig?.totalUses ?? 0
 
   // Build WalletPassDesign from card design data when available
   const visitSf = cardDesign ? parseStripFilters(cardDesign.editorConfig) : { useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
   const visitSg = visitSf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
-  const resolvedCardType = isMembership ? "TIER" : isCoupon ? "COUPON" : isPoints ? "POINTS" : "STAMP"
+  const resolvedCardType = isMembership ? "TIER" : isCoupon ? "COUPON" : isPoints ? "POINTS" : isPrepaid ? "PREPAID" : "STAMP"
   const design: WalletPassDesign | null = cardDesign
     ? {
         cardType: resolvedCardType as WalletPassDesign["cardType"],
@@ -974,7 +1040,7 @@ function ConfirmStep({
           <ArrowLeft className="size-4" />
         </Button>
         <DialogTitle className="text-base">
-          {isMembership ? "Member Check-in" : isCoupon ? "Redeem Coupon" : isPoints ? "Points" : "Confirm Visit"}
+          {isMembership ? "Member Check-in" : isCoupon ? "Redeem Coupon" : isPoints ? "Points" : isPrepaid ? "Use Pass" : "Confirm Visit"}
         </DialogTitle>
       </div>
 
@@ -993,9 +1059,11 @@ function ConfirmStep({
               ? `${enrollment.programName} — Member Check-in`
               : isCoupon
                 ? `${enrollment.programName} — Coupon Redemption`
-                : isPoints
-                  ? `${enrollment.programName} — ${pointsBalance} pts balance`
-                  : `${enrollment.programName} — Visit #${enrollment.totalVisits + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
+                : isPrepaid
+                  ? `${enrollment.programName} — ${remainingUses}/${totalUses} ${prepaidConfig?.useLabel ?? "use"}${remainingUses !== 1 ? "s" : ""} remaining`
+                  : isPoints
+                    ? `${enrollment.programName} — ${pointsBalance} pts balance`
+                    : `${enrollment.programName} — Visit #${enrollment.totalVisits + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
           </p>
         </div>
       </div>
@@ -1009,8 +1077,8 @@ function ConfirmStep({
             programName={enrollment.programName}
             restaurantName=""
             customerName={customer.fullName}
-            currentVisits={isCoupon || isMembership || isPoints ? 1 : nextVisit}
-            totalVisits={isCoupon || isMembership || isPoints ? 1 : visitsRequired}
+            currentVisits={isCoupon || isMembership || isPoints ? 1 : isPrepaid ? remainingUses : nextVisit}
+            totalVisits={isCoupon || isMembership || isPoints ? 1 : isPrepaid ? totalUses : visitsRequired}
             rewardDescription=""
             compact
             width={280}
@@ -1028,6 +1096,18 @@ function ConfirmStep({
           <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-6">
             <Ticket className="size-10 text-brand" />
             <p className="text-[13px] font-medium text-center">Ready to redeem</p>
+          </div>
+        </div>
+      ) : isPrepaid ? (
+        <div className="px-6">
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-4">
+            <CreditCard className="size-8 text-brand" />
+            <p className="text-[22px] font-bold tabular-nums text-brand">
+              {remainingUses} / {totalUses}
+            </p>
+            <p className="text-[12px] text-muted-foreground">
+              {prepaidConfig?.useLabel ?? "use"}{remainingUses !== 1 ? "s" : ""} remaining
+            </p>
           </div>
         </div>
       ) : isPoints ? (
@@ -1110,11 +1190,13 @@ function ConfirmStep({
         <div className="p-4 pt-6">
           <Button
             className="w-full h-11 text-[14px] font-medium gap-2"
-            onClick={isMembership ? onConfirmCheckIn : isCoupon ? onConfirmCoupon : onConfirm}
-            disabled={isRegistering}
+            onClick={isPrepaid ? onUsePrepaid : isMembership ? onConfirmCheckIn : isCoupon ? onConfirmCoupon : onConfirm}
+            disabled={isRegistering || (isPrepaid && remainingUses <= 0)}
           >
             {isRegistering ? (
               <Loader2 className="size-4 animate-spin" />
+            ) : isPrepaid ? (
+              <Minus className="size-4" />
             ) : isMembership ? (
               <Crown className="size-4" />
             ) : isCoupon ? (
@@ -1122,7 +1204,11 @@ function ConfirmStep({
             ) : (
               <Stamp className="size-4" />
             )}
-            {isMembership ? "Check In" : isCoupon ? "Redeem Coupon" : "Register Visit"}
+            {isPrepaid
+              ? remainingUses <= 0
+                ? "Depleted"
+                : `Use 1 ${prepaidConfig?.useLabel ?? "use"}`
+              : isMembership ? "Check In" : isCoupon ? "Redeem Coupon" : "Register Visit"}
           </Button>
         </div>
       )}
@@ -1197,6 +1283,7 @@ function SuccessStep({
   checkInResult,
   earnPointsResult,
   redeemPointsResult,
+  usePrepaidResult,
   onClose,
 }: {
   customer: VisitSearchResult
@@ -1209,6 +1296,7 @@ function SuccessStep({
   checkInResult: CheckInResult | null
   earnPointsResult: EarnPointsResult | null
   redeemPointsResult: RedeemPointsResult | null
+  usePrepaidResult: UsePrepaidResult | null
   onClose: () => void
 }) {
   return (
@@ -1216,7 +1304,22 @@ function SuccessStep({
       className="flex flex-col items-center py-10 px-6 cursor-pointer"
       onClick={onClose}
     >
-      {checkInResult ? (
+      {usePrepaidResult ? (
+        <>
+          <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
+            <AnimatedCheckmark />
+          </div>
+          <p className="text-lg font-semibold mt-6">
+            {usePrepaidResult.isDepleted ? "Pass Depleted!" : "Use Recorded!"}
+          </p>
+          <p className="text-[13px] text-muted-foreground mt-1">
+            {customer.fullName} — {usePrepaidResult.programName}
+          </p>
+          <p className={`text-[12px] mt-0.5 tabular-nums ${usePrepaidResult.isDepleted ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+            {usePrepaidResult.remainingUses}/{usePrepaidResult.totalUses} {usePrepaidResult.useLabel}{usePrepaidResult.remainingUses !== 1 ? "s" : ""} remaining
+          </p>
+        </>
+      ) : checkInResult ? (
         <>
           <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
             <AnimatedCheckmark />

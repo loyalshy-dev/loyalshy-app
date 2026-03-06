@@ -29,6 +29,7 @@ Multi-tenant SaaS for restaurants to create digital loyalty cards with Apple/Goo
 | zustand | ~5.x | State management for card design studio |
 | immer | ~10.x | Immutable state updates (zustand middleware) |
 | zundo | ~2.x | Undo/redo temporal middleware for zustand |
+| next-themes | 0.4.x | Light/dark mode with system preference detection |
 
 ## Critical Architecture Rules
 
@@ -132,6 +133,7 @@ The full plan is in `loyalty-card-plan-v4.md`. Phases:
 - **Phase 4** — Stripe Billing & Onboarding (4.1 Stripe, 4.2 Onboarding Flow)
 - **Phase 5** — Polish & Production (5.1 Errors, 5.2 Mobile, 5.3 Security, 5.4 Testing, 5.5 Perf)
 - **Phase 9** — Card Design Studio (9A Schema+Store, 9B CardRenderer, 9C Studio Layout, 9D Templates, 9E Panels, 9F Propagation+Polish)
+- **Phase 10F** — PREPAID Program Type + Enhanced MEMBERSHIP (10F PREPAID + Membership Lifecycle)
 - **Phase 6** — Deployment (6.1 Production)
 
 ## Current Progress
@@ -170,6 +172,7 @@ The full plan is in `loyalty-card-plan-v4.md`. Phases:
 - [x] Phase 10D — Type-specific Wallet Passes (Apple/Google pass generators type-aware via cardType→getFieldLayout, COUPON fields: discount/validUntil/couponCode, MEMBERSHIP fields: tier/benefits/memberSince, stamp grid guarded to STAMP/POINTS only, programType+config wired through all callers, Google PATCH type-dispatch for all 4 types, coupon prize assigned at enrollment for immediate minigame play, reveal link in initial JWT + PATCH, redeemed state on coupon pass, endsAt/status validation on all actions)
 - [x] Phase 10E — POINTS Program Type (ProgramType.POINTS, pointsBalance on Enrollment, description+pointsCost on Reward, PointsConfig/catalog, earnPoints+redeemPoints actions, wallet pass POINTS dispatch, create form+editor+register-visit dialog+programs list, 177 tests passing)
 - [x] Phase 11 — Admin Showcase Cards (ShowcaseCard model, admin CRUD at /admin/showcase, full-page studio editor reusing existing panels, marketing landing page fetches from DB with hardcoded fallback, max 5 cards, 144 tests passing)
+- [x] Phase 10F — PREPAID Program Type + Enhanced MEMBERSHIP (ProgramType.PREPAID with remainingUses countdown, rechargeable passes, usePrepaid+rechargePrepaid actions; MEMBERSHIP redesigned as Digital ID with suspend/activate/cancel lifecycle, expiresAt/suspendedAt on Enrollment; Apple+Google wallet passes type-aware for PREPAID; all wallet pass callers wired with remainingUses; CardType PREPAID in studio+renderer; create form+editor+programs list+detail page+register-visit dialog; 178 tests passing)
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -203,12 +206,12 @@ Update the "Current Progress" section above to track what's done.
 
 **Application (12):**
 8. Restaurant (tenant)
-9. LoyaltyProgram (programType: STAMP_CARD/COUPON/MEMBERSHIP, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
-10. Enrollment (pivot: Customer × LoyaltyProgram — cycle visits, wallet pass, status)
+9. LoyaltyProgram (programType: STAMP_CARD/COUPON/MEMBERSHIP/POINTS/PREPAID, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
+10. Enrollment (pivot: Customer × LoyaltyProgram — cycle visits, wallet pass, status, remainingUses, pointsBalance, suspendedAt, expiresAt)
 11. Customer (end user — identity + denormalized totalVisits)
 12. Visit (stamp/check-in, linked to Enrollment)
 13. Reward (linked to Enrollment; `revealedAt` nullable — null means prize minigame not yet played by customer)
-14. CardDesign (per LoyaltyProgram; typed columns for wallet passes + `editorConfig` JSON for rich studio editor; `cardType`: STAMP/POINTS/TIER/COUPON)
+14. CardDesign (per LoyaltyProgram; typed columns for wallet passes + `editorConfig` JSON for rich studio editor; `cardType`: STAMP/POINTS/TIER/COUPON/PREPAID)
 15. WalletPassLog (linked to Enrollment)
 16. StaffInvitation (custom invite flow with tokens — NOT Better Auth's Invitation)
 17. DeviceRegistration (Apple Wallet push, linked to Enrollment)
@@ -271,11 +274,15 @@ Update the "Current Progress" section above to track what's done.
 ## Design Direction
 
 - **Linear/Vercel aesthetic** — NOT generic shadcn defaults. Premium, refined, professional.
-- Dark sidebar (`oklch(0.16)`) with light content area
+- Light/dark mode via `next-themes` (`ThemeProvider` in root layout, `attribute="class"`, `defaultTheme="system"`)
+- Theme toggle (sun/moon) in dashboard topbar (`src/components/theme-toggle.tsx`)
+- Sidebar: light in light mode, dark in dark mode (uses `--sidebar-*` CSS tokens)
+- Dashboard sidebar uses **shadcn Sidebar component** (`SidebarProvider`, `collapsible="icon"`, `SidebarRail`, built-in mobile Sheet) — NOT a custom sidebar
+- `mobile-sidebar.tsx` is deprecated (shadcn Sidebar handles mobile automatically)
 - 13px body text, tight spacing, Geist font family
 - `--brand` CSS variable for per-restaurant theming (default: `oklch(0.55 0.2 265)`)
 - OKLCH color space throughout — all tokens in `globals.css` `:root` / `.dark`
-- `TooltipProvider` wraps dashboard shell (NOT root layout)
+- `TooltipProvider` wraps via `SidebarProvider` (NOT root layout)
 
 ## Deployment Infrastructure
 

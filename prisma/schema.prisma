@@ -116,10 +116,11 @@ enum LabelFormat {
 }
 
 enum CardType {
-  STAMP  @map("stamp")
-  POINTS @map("points")
-  TIER   @map("tier")
-  COUPON @map("coupon")
+  STAMP   @map("stamp")
+  POINTS  @map("points")
+  TIER    @map("tier")
+  COUPON  @map("coupon")
+  PREPAID @map("prepaid")
 
   @@map("card_type")
 }
@@ -128,6 +129,8 @@ enum EnrollmentStatus {
   ACTIVE    @map("active")
   COMPLETED @map("completed")
   FROZEN    @map("frozen")
+  SUSPENDED @map("suspended")
+  EXPIRED   @map("expired")
 
   @@map("enrollment_status")
 }
@@ -145,6 +148,7 @@ enum ProgramType {
   COUPON     @map("coupon")
   MEMBERSHIP @map("membership")
   POINTS     @map("points")
+  PREPAID    @map("prepaid")
 
   @@map("program_type")
 }
@@ -347,12 +351,15 @@ model Enrollment {
   totalVisits            Int              @default(0)
   totalRewardsRedeemed   Int              @default(0)
   pointsBalance          Int              @default(0)
+  remainingUses          Int              @default(0)
   walletPassId           String?          @unique
   walletPassSerialNumber String?          @unique
   walletPassType         WalletPassType   @default(NONE)
   status                 EnrollmentStatus @default(ACTIVE)
   enrolledAt             DateTime         @default(now())
   frozenAt               DateTime?
+  suspendedAt            DateTime?
+  expiresAt              DateTime?
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
 

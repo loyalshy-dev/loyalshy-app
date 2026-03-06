@@ -14,7 +14,7 @@ import { PROGRAM_TYPE_META, type ProgramType, type PointsCatalogItem } from "@/t
 // ─── Step 1: Type selector ─────────────────────────────────
 
 function TypeSelector({ onSelect }: { onSelect: (type: ProgramType) => void }) {
-  const types: ProgramType[] = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS"]
+  const types: ProgramType[] = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID"]
 
   return (
     <div className="space-y-3">
@@ -766,6 +766,178 @@ function PointsForm({
   )
 }
 
+type PrepaidFormData = {
+  name: string
+  totalUses: number
+  useLabel: string
+  rechargeable: boolean
+  rechargeAmount: number
+  validUntil: string
+  terms: string
+}
+
+function PrepaidForm({
+  restaurantId,
+  onCreated,
+  onBack,
+}: {
+  restaurantId: string
+  onCreated: () => void
+  onBack: () => void
+}) {
+  const [isPending, startTransition] = useTransition()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    reset,
+  } = useForm<PrepaidFormData>({
+    defaultValues: {
+      name: "",
+      totalUses: 10,
+      useLabel: "use",
+      rechargeable: true,
+      rechargeAmount: 10,
+      validUntil: "",
+      terms: "",
+    },
+  })
+
+  const rechargeable = watch("rechargeable")
+
+  function onSubmit(data: PrepaidFormData) {
+    startTransition(async () => {
+      const config = {
+        totalUses: data.totalUses,
+        useLabel: data.useLabel,
+        rechargeable: data.rechargeable,
+        ...(data.rechargeable ? { rechargeAmount: data.rechargeAmount } : {}),
+        ...(data.validUntil ? { validUntil: data.validUntil } : {}),
+        ...(data.terms ? { terms: data.terms } : {}),
+      }
+
+      const useLabelPlural = data.useLabel + (data.totalUses !== 1 ? "s" : "")
+
+      const result = await createLoyaltyProgram({
+        restaurantId,
+        programType: "PREPAID",
+        name: data.name,
+        visitsRequired: data.totalUses,
+        rewardDescription: `${data.totalUses} ${useLabelPlural}`,
+        rewardExpiryDays: 0,
+        config,
+      })
+      if ("error" in result) {
+        toast.error(String(result.error))
+      } else {
+        toast.success("Prepaid pass created")
+        reset()
+        onCreated()
+      }
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <button
+        type="button"
+        onClick={onBack}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-3 w-3" />
+        Back to type selection
+      </button>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="prepaid-name">Program Name</Label>
+          <Input
+            id="prepaid-name"
+            {...register("name", { required: "Program name is required" })}
+            placeholder="e.g., Bus Pass, Car Wash Card, Class Pack"
+          />
+          {errors.name && (
+            <p className="text-xs text-destructive">{errors.name.message}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="prepaid-total-uses">Total Uses</Label>
+          <Input
+            id="prepaid-total-uses"
+            type="number"
+            min={1}
+            max={1000}
+            {...register("totalUses", { valueAsNumber: true })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="prepaid-use-label">Use Label</Label>
+          <Input
+            id="prepaid-use-label"
+            {...register("useLabel", { required: "Use label is required" })}
+            placeholder="e.g., ride, wash, session, class"
+          />
+          {errors.useLabel && (
+            <p className="text-xs text-destructive">{errors.useLabel.message}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="prepaid-rechargeable">Rechargeable</Label>
+          <select
+            id="prepaid-rechargeable"
+            {...register("rechargeable", { setValueAs: (v) => v === "true" || v === true })}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+        {rechargeable && (
+          <div className="space-y-2">
+            <Label htmlFor="prepaid-recharge-amount">Recharge Amount</Label>
+            <Input
+              id="prepaid-recharge-amount"
+              type="number"
+              min={1}
+              max={1000}
+              {...register("rechargeAmount", { valueAsNumber: true })}
+            />
+          </div>
+        )}
+        <div className="space-y-2">
+          <Label htmlFor="prepaid-valid-until">Valid Until (Optional)</Label>
+          <Input
+            id="prepaid-valid-until"
+            type="date"
+            {...register("validUntil")}
+          />
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="prepaid-terms">Terms & Conditions (Optional)</Label>
+          <Textarea
+            id="prepaid-terms"
+            {...register("terms")}
+            placeholder="Optional terms..."
+            rows={3}
+          />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <Button type="submit" size="sm" disabled={isPending}>
+          {isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+              Creating...
+            </>
+          ) : (
+            "Create Prepaid Pass"
+          )}
+        </Button>
+      </div>
+    </form>
+  )
+}
+
 // ─── Main Component ─────────────────────────────────────────
 
 export function CreateProgramForm({
@@ -796,5 +968,7 @@ export function CreateProgramForm({
       return <MembershipForm {...formProps} />
     case "POINTS":
       return <PointsForm {...formProps} />
+    case "PREPAID":
+      return <PrepaidForm {...formProps} />
   }
 }

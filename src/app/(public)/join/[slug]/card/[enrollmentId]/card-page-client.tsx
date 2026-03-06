@@ -8,7 +8,7 @@ import { computeTextColor } from "@/lib/wallet/card-design"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { MinigameStep } from "@/components/minigames"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig } from "@/lib/program-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePrepaidConfig } from "@/lib/program-config"
 
 type Platform = "apple" | "google"
 
@@ -88,6 +88,14 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }
   const membershipConfig = data.program.programType === "MEMBERSHIP" ? parseMembershipConfig(data.program.config) : null
   const tierName = membershipConfig?.membershipTier ?? undefined
   const benefits = membershipConfig?.benefits ?? undefined
+
+  // Prepaid-specific props
+  const prepaidConfig = data.program.programType === "PREPAID" ? parsePrepaidConfig(data.program.config) : null
+  const remainingUses = data.remainingUses ?? 0
+  const totalUses = prepaidConfig?.totalUses ?? 0
+  const prepaidValidUntil = prepaidConfig?.validUntil
+    ? new Date(prepaidConfig.validUntil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+    : undefined
 
   function handleAddToWallet(chosenPlatform: Platform) {
     setError(null)
@@ -196,6 +204,9 @@ export function CardPageClient({ data, enrollmentId, restaurantSlug, signature }
             validUntil={validUntil}
             tierName={tierName}
             benefits={benefits}
+            remainingUses={remainingUses}
+            totalUses={totalUses}
+            prepaidValidUntil={prepaidValidUntil}
           />
         </div>
 

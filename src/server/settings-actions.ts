@@ -89,7 +89,7 @@ const inviteTeamMemberSchema = z.object({
 
 const saveCardDesignSchema = z.object({
   programId: z.string().min(1),
-  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON"]).optional().default("STAMP"),
+  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON", "PREPAID"]).optional().default("STAMP"),
   showStrip: z.boolean(),
   primaryColor: z.string().max(20).optional().default(""),
   secondaryColor: z.string().max(20).optional().default(""),
@@ -136,7 +136,7 @@ const saveCardDesignSchema = z.object({
 const createLoyaltyProgramSchema = z.object({
   restaurantId: z.string().min(1),
   name: z.string().min(1, "Program name is required").max(100),
-  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS"]).optional().default("STAMP_CARD"),
+  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID"]).optional().default("STAMP_CARD"),
   visitsRequired: z.number().int().min(1).max(30).optional().default(10),
   rewardDescription: z.string().min(1, "Reward description is required").max(200),
   rewardExpiryDays: z.number().int().min(0).max(365).optional().default(90),
@@ -342,7 +342,9 @@ export async function createLoyaltyProgram(input: z.infer<typeof createLoyaltyPr
       ? "TIER" as const
       : parsed.programType === "POINTS"
         ? "POINTS" as const
-        : "STAMP" as const
+        : parsed.programType === "PREPAID"
+          ? "PREPAID" as const
+          : "STAMP" as const
 
   // Create the program with a default card design
   const program = await db.loyaltyProgram.create({

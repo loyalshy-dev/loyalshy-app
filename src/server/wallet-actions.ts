@@ -44,6 +44,7 @@ export async function issueAppleWalletPass(
       currentCycleVisits: true,
       totalVisits: true,
       pointsBalance: true,
+      remainingUses: true,
       walletPassSerialNumber: true,
       walletPassId: true,
       walletPassType: true,
@@ -124,6 +125,7 @@ export async function issueAppleWalletPass(
       programType: enrollment.loyaltyProgram.programType,
       programConfig: enrollment.loyaltyProgram.config,
       pointsBalance: enrollment.pointsBalance,
+      remainingUses: enrollment.remainingUses,
     })
 
     // Update enrollment with wallet pass fields
@@ -185,6 +187,7 @@ export async function issueGoogleWalletPass(
       currentCycleVisits: true,
       totalVisits: true,
       pointsBalance: true,
+      remainingUses: true,
       walletPassId: true,
       walletPassType: true,
       enrolledAt: true,
@@ -270,6 +273,7 @@ export async function issueGoogleWalletPass(
       programType: enrollment.loyaltyProgram.programType,
       programConfig: enrollment.loyaltyProgram.config,
       pointsBalance: enrollment.pointsBalance,
+      remainingUses: enrollment.remainingUses,
       hasUnrevealedPrize,
       restaurantSlug: restaurant.slug,
     })

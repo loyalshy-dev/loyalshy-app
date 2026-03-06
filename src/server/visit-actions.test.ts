@@ -217,25 +217,37 @@ describe("registerVisit", () => {
   })
 
   it("dispatches wallet pass update for enrollments with wallet passes", async () => {
-    const { registerVisit } = await import("./visit-actions")
-    const { tasks } = await import("@trigger.dev/sdk")
+    // Set TRIGGER_SECRET_KEY so the code path that dispatches Trigger.dev is taken
+    const original = process.env.TRIGGER_SECRET_KEY
+    process.env.TRIGGER_SECRET_KEY = "test-secret"
 
-    const enrollment = createMockEnrollment({
-      currentCycleVisits: 2,
-      walletPassType: "APPLE",
-    })
-    mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
-    mockDb.visit.findFirst.mockResolvedValue(null)
+    try {
+      const { registerVisit } = await import("./visit-actions")
+      const { tasks } = await import("@trigger.dev/sdk")
 
-    await registerVisit("enrollment-1")
+      const enrollment = createMockEnrollment({
+        currentCycleVisits: 2,
+        walletPassType: "APPLE",
+      })
+      mockDb.enrollment.findUnique.mockResolvedValue(enrollment)
+      mockDb.visit.findFirst.mockResolvedValue(null)
 
-    // Allow the dynamic import promise to settle
-    await new Promise((r) => setTimeout(r, 10))
+      await registerVisit("enrollment-1")
 
-    expect(tasks.trigger).toHaveBeenCalledWith("update-wallet-pass", {
-      enrollmentId: "enrollment-1",
-      updateType: "VISIT",
-    })
+      // Allow the dynamic import promise to settle
+      await new Promise((r) => setTimeout(r, 10))
+
+      expect(tasks.trigger).toHaveBeenCalledWith("update-wallet-pass", {
+        enrollmentId: "enrollment-1",
+        updateType: "VISIT",
+      })
+    } finally {
+      if (original === undefined) {
+        delete process.env.TRIGGER_SECRET_KEY
+      } else {
+        process.env.TRIGGER_SECRET_KEY = original
+      }
+    }
   })
 })
 

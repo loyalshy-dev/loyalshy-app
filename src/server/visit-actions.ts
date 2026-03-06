@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { assertAuthenticated, getRestaurantForUser, assertRestaurantAccess } from "@/lib/dal"
-import { parseCouponConfig, formatCouponValue, parsePointsConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/program-config"
+import { parseCouponConfig, formatCouponValue, parsePointsConfig, parsePrepaidConfig, parseMembershipConfig, computeMembershipExpiresAt, parseMinigameConfig, weightedRandomPrize } from "@/lib/program-config"
 import type { EnrollmentSummary } from "@/types/enrollment"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -62,6 +62,31 @@ export type RedeemPointsResult = {
   itemName?: string
   pointsSpent?: number
   newBalance?: number
+  programName?: string
+}
+
+export type UsePrepaidResult = {
+  success: boolean
+  error?: string
+  remainingUses?: number
+  totalUses?: number
+  useLabel?: string
+  isDepleted?: boolean
+  programName?: string
+}
+
+export type RechargePrepaidResult = {
+  success: boolean
+  error?: string
+  newRemainingUses?: number
+  usesAdded?: number
+  programName?: string
+}
+
+export type MembershipActionResult = {
+  success: boolean
+  error?: string
+  newStatus?: string
   programName?: string
 }
 
@@ -191,11 +216,20 @@ export async function lookupEnrollmentByWalletPassId(
     }
   }
 
+  // Expired enrollment
+  if (enrollment.status === "EXPIRED") {
+    return {
+      success: false,
+      error: "This membership has expired.",
+      errorType: "COMPLETED",
+    }
+  }
+
   // Fetch all active enrollments for this customer (needed for VisitSearchResult)
   const allEnrollments = await db.enrollment.findMany({
     where: {
       customerId: enrollment.customer.id,
-      status: "ACTIVE",
+      status: { in: ["ACTIVE", "SUSPENDED"] },
       loyaltyProgram: { status: "ACTIVE" },
     },
     select: {
@@ -203,6 +237,7 @@ export async function lookupEnrollmentByWalletPassId(
       currentCycleVisits: true,
       totalVisits: true,
       pointsBalance: true,
+      remainingUses: true,
       walletPassType: true,
       status: true,
       loyaltyProgram: {
@@ -248,6 +283,7 @@ export async function lookupEnrollmentByWalletPassId(
       visitsRequired: e.loyaltyProgram.visitsRequired,
       totalVisits: e.totalVisits,
       pointsBalance: e.pointsBalance,
+      remainingUses: e.remainingUses,
       programConfig: e.loyaltyProgram.config,
       status: e.status,
       walletPassType: e.walletPassType,
@@ -278,6 +314,7 @@ export async function lookupEnrollmentByWalletPassId(
     visitsRequired: enrollment.loyaltyProgram.visitsRequired,
     totalVisits: enrollment.totalVisits,
     pointsBalance: enrollment.pointsBalance,
+    remainingUses: enrollment.remainingUses,
     programConfig: enrollment.loyaltyProgram.config,
     status: enrollment.status,
     walletPassType: enrollment.walletPassType,
@@ -340,7 +377,7 @@ export async function searchCustomersForVisit(
       lastVisitAt: true,
       enrollments: {
         where: {
-          status: "ACTIVE",
+          status: { in: ["ACTIVE", "SUSPENDED"] },
           loyaltyProgram: { status: "ACTIVE" },
         },
         select: {
@@ -348,6 +385,7 @@ export async function searchCustomersForVisit(
           currentCycleVisits: true,
           totalVisits: true,
           pointsBalance: true,
+          remainingUses: true,
           walletPassType: true,
           status: true,
           loyaltyProgram: {
@@ -398,6 +436,7 @@ export async function searchCustomersForVisit(
         visitsRequired: e.loyaltyProgram.visitsRequired,
         totalVisits: e.totalVisits,
         pointsBalance: e.pointsBalance,
+        remainingUses: e.remainingUses,
         programConfig: e.loyaltyProgram.config,
         status: e.status,
         walletPassType: e.walletPassType,
@@ -1310,5 +1349,522 @@ export async function redeemPoints(
     pointsSpent: catalogItem.pointsCost,
     newBalance,
     programName: program.name,
+  }
+}
+
+// ─── Use Prepaid ────────────────────────────────────────────
+
+export async function usePrepaid(
+  enrollmentId: string
+): Promise<UsePrepaidResult> {
+  const session = await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+
+  if (!restaurant) {
+    return { success: false, error: "No restaurant found" }
+  }
+
+  await assertRestaurantAccess(restaurant.id)
+
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          restaurantId: true,
+          deletedAt: true,
+          totalVisits: true,
+          fullName: true,
+        },
+      },
+      loyaltyProgram: {
+        select: {
+          id: true,
+          name: true,
+          programType: true,
+          config: true,
+          status: true,
+          endsAt: true,
+        },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.deletedAt) {
+    return { success: false, error: "Customer has been deleted" }
+  }
+
+  if (enrollment.status !== "ACTIVE") {
+    return {
+      success: false,
+      error: enrollment.status === "COMPLETED"
+        ? "This prepaid pass is depleted"
+        : `This enrollment is ${enrollment.status.toLowerCase()}`,
+    }
+  }
+
+  if (enrollment.loyaltyProgram.status !== "ACTIVE") {
+    return { success: false, error: "This program is no longer active" }
+  }
+
+  if (enrollment.loyaltyProgram.programType !== "PREPAID") {
+    return { success: false, error: "This is not a prepaid program" }
+  }
+
+  // Check program hasn't expired
+  if (enrollment.loyaltyProgram.endsAt && enrollment.loyaltyProgram.endsAt < new Date()) {
+    return { success: false, error: "This prepaid program has expired" }
+  }
+
+  // Check enrollment hasn't expired
+  if (enrollment.expiresAt && enrollment.expiresAt < new Date()) {
+    return { success: false, error: "This prepaid pass has expired" }
+  }
+
+  const program = enrollment.loyaltyProgram
+  const prepaidConfig = parsePrepaidConfig(program.config)
+
+  if (!prepaidConfig) {
+    return { success: false, error: "Invalid prepaid program configuration" }
+  }
+
+  if (enrollment.remainingUses <= 0) {
+    return { success: false, error: "No remaining uses on this prepaid pass" }
+  }
+
+  // Prevent double-use within 1 minute
+  const oneMinuteAgo = new Date(Date.now() - 60_000)
+  const recentVisit = await db.visit.findFirst({
+    where: {
+      enrollmentId: enrollment.id,
+      createdAt: { gte: oneMinuteAgo },
+    },
+    select: { id: true },
+  })
+
+  if (recentVisit) {
+    return {
+      success: false,
+      error: "A use was already recorded less than a minute ago",
+    }
+  }
+
+  const newRemainingUses = enrollment.remainingUses - 1
+  const isDepleted = newRemainingUses <= 0
+  const newTotalVisits = enrollment.totalVisits + 1
+  const newCustomerTotalVisits = enrollment.customer.totalVisits + 1
+
+  await db.$transaction(async (tx) => {
+    await tx.visit.create({
+      data: {
+        customerId: enrollment.customer.id,
+        restaurantId: restaurant.id,
+        loyaltyProgramId: program.id,
+        enrollmentId: enrollment.id,
+        registeredById: session.user.id,
+        visitNumber: newTotalVisits,
+      },
+    })
+
+    await tx.enrollment.update({
+      where: { id: enrollment.id },
+      data: {
+        remainingUses: newRemainingUses,
+        totalVisits: newTotalVisits,
+        ...(isDepleted && !prepaidConfig.rechargeable ? { status: "COMPLETED" } : {}),
+      },
+    })
+
+    await tx.customer.update({
+      where: { id: enrollment.customer.id },
+      data: {
+        totalVisits: newCustomerTotalVisits,
+        lastVisitAt: new Date(),
+      },
+    })
+  })
+
+  // Dispatch wallet pass update
+  if (enrollment.walletPassType !== "NONE") {
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: enrollment.id,
+            updateType: "PREPAID_USE",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollment.id))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/programs")
+
+  return {
+    success: true,
+    remainingUses: newRemainingUses,
+    totalUses: prepaidConfig.totalUses,
+    useLabel: prepaidConfig.useLabel,
+    isDepleted,
+    programName: program.name,
+  }
+}
+
+// ─── Recharge Prepaid ───────────────────────────────────────
+
+export async function rechargePrepaid(
+  enrollmentId: string,
+  amount?: number
+): Promise<RechargePrepaidResult> {
+  await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+
+  if (!restaurant) {
+    return { success: false, error: "No restaurant found" }
+  }
+
+  await assertRestaurantAccess(restaurant.id)
+
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      customer: {
+        select: { id: true, restaurantId: true, deletedAt: true },
+      },
+      loyaltyProgram: {
+        select: {
+          id: true,
+          name: true,
+          programType: true,
+          config: true,
+          status: true,
+        },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.deletedAt) {
+    return { success: false, error: "Customer has been deleted" }
+  }
+
+  if (enrollment.loyaltyProgram.programType !== "PREPAID") {
+    return { success: false, error: "This is not a prepaid program" }
+  }
+
+  if (enrollment.loyaltyProgram.status !== "ACTIVE") {
+    return { success: false, error: "This program is no longer active" }
+  }
+
+  const prepaidConfig = parsePrepaidConfig(enrollment.loyaltyProgram.config)
+  if (!prepaidConfig) {
+    return { success: false, error: "Invalid prepaid program configuration" }
+  }
+
+  if (!prepaidConfig.rechargeable) {
+    return { success: false, error: "This prepaid pass is not rechargeable" }
+  }
+
+  const usesToAdd = amount ?? prepaidConfig.rechargeAmount ?? prepaidConfig.totalUses
+  const newRemaining = enrollment.remainingUses + usesToAdd
+
+  // Compute new expiry if validUntil is set on config
+  const newExpiresAt = prepaidConfig.validUntil ? new Date(prepaidConfig.validUntil) : null
+
+  await db.enrollment.update({
+    where: { id: enrollment.id },
+    data: {
+      remainingUses: newRemaining,
+      status: "ACTIVE",
+      ...(newExpiresAt ? { expiresAt: newExpiresAt } : {}),
+    },
+  })
+
+  // Dispatch wallet pass update
+  if (enrollment.walletPassType !== "NONE") {
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: enrollment.id,
+            updateType: "PREPAID_RECHARGE",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollment.id))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/programs")
+
+  return {
+    success: true,
+    newRemainingUses: newRemaining,
+    usesAdded: usesToAdd,
+    programName: enrollment.loyaltyProgram.name,
+  }
+}
+
+// ─── Membership Lifecycle Actions ───────────────────────────
+
+export async function suspendMembership(
+  enrollmentId: string
+): Promise<MembershipActionResult> {
+  await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+
+  if (!restaurant) {
+    return { success: false, error: "No restaurant found" }
+  }
+
+  await assertRestaurantAccess(restaurant.id)
+
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      customer: {
+        select: { id: true, restaurantId: true, deletedAt: true },
+      },
+      loyaltyProgram: {
+        select: { id: true, name: true, programType: true, status: true },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.loyaltyProgram.programType !== "MEMBERSHIP") {
+    return { success: false, error: "This action is only available for membership programs" }
+  }
+
+  if (enrollment.status !== "ACTIVE") {
+    return { success: false, error: `Cannot suspend — enrollment is ${enrollment.status.toLowerCase()}` }
+  }
+
+  await db.enrollment.update({
+    where: { id: enrollment.id },
+    data: {
+      status: "SUSPENDED",
+      suspendedAt: new Date(),
+    },
+  })
+
+  // Update wallet pass
+  if (enrollment.walletPassType !== "NONE") {
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: enrollment.id,
+            updateType: "MEMBERSHIP_SUSPENDED",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollment.id))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/programs")
+
+  return {
+    success: true,
+    newStatus: "SUSPENDED",
+    programName: enrollment.loyaltyProgram.name,
+  }
+}
+
+export async function activateMembership(
+  enrollmentId: string
+): Promise<MembershipActionResult> {
+  await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+
+  if (!restaurant) {
+    return { success: false, error: "No restaurant found" }
+  }
+
+  await assertRestaurantAccess(restaurant.id)
+
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      customer: {
+        select: { id: true, restaurantId: true, deletedAt: true },
+      },
+      loyaltyProgram: {
+        select: { id: true, name: true, programType: true, config: true, status: true },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.loyaltyProgram.programType !== "MEMBERSHIP") {
+    return { success: false, error: "This action is only available for membership programs" }
+  }
+
+  if (enrollment.status !== "SUSPENDED" && enrollment.status !== "EXPIRED") {
+    return { success: false, error: `Cannot activate — enrollment is ${enrollment.status.toLowerCase()}` }
+  }
+
+  // Recompute expiry from now when reactivating
+  const membershipConfig = parseMembershipConfig(enrollment.loyaltyProgram.config)
+  const newExpiresAt = membershipConfig ? computeMembershipExpiresAt(membershipConfig) : null
+
+  await db.enrollment.update({
+    where: { id: enrollment.id },
+    data: {
+      status: "ACTIVE",
+      suspendedAt: null,
+      ...(newExpiresAt ? { expiresAt: newExpiresAt } : {}),
+    },
+  })
+
+  // Update wallet pass
+  if (enrollment.walletPassType !== "NONE") {
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: enrollment.id,
+            updateType: "MEMBERSHIP_ACTIVATED",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollment.id))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/programs")
+
+  return {
+    success: true,
+    newStatus: "ACTIVE",
+    programName: enrollment.loyaltyProgram.name,
+  }
+}
+
+export async function cancelMembership(
+  enrollmentId: string
+): Promise<MembershipActionResult> {
+  await assertAuthenticated()
+  const restaurant = await getRestaurantForUser()
+
+  if (!restaurant) {
+    return { success: false, error: "No restaurant found" }
+  }
+
+  await assertRestaurantAccess(restaurant.id)
+
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      customer: {
+        select: { id: true, restaurantId: true, deletedAt: true },
+      },
+      loyaltyProgram: {
+        select: { id: true, name: true, programType: true, status: true },
+      },
+    },
+  })
+
+  if (!enrollment) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.customer.restaurantId !== restaurant.id) {
+    return { success: false, error: "Enrollment not found" }
+  }
+
+  if (enrollment.loyaltyProgram.programType !== "MEMBERSHIP") {
+    return { success: false, error: "This action is only available for membership programs" }
+  }
+
+  if (enrollment.status === "COMPLETED") {
+    return { success: false, error: "This membership is already cancelled" }
+  }
+
+  await db.enrollment.update({
+    where: { id: enrollment.id },
+    data: {
+      status: "COMPLETED",
+    },
+  })
+
+  // Update wallet pass
+  if (enrollment.walletPassType !== "NONE") {
+    if (process.env.TRIGGER_SECRET_KEY) {
+      import("@trigger.dev/sdk")
+        .then(({ tasks }) =>
+          tasks.trigger("update-wallet-pass", {
+            enrollmentId: enrollment.id,
+            updateType: "MEMBERSHIP_CANCELLED",
+          })
+        )
+        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (enrollment.walletPassType === "GOOGLE") {
+      import("@/lib/wallet/google/update-pass")
+        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(enrollment.id))
+        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    }
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/programs")
+
+  return {
+    success: true,
+    newStatus: "COMPLETED",
+    programName: enrollment.loyaltyProgram.name,
   }
 }

@@ -68,6 +68,10 @@ type WalletPassRendererProps = {
   // Membership-specific
   tierName?: string          // e.g. "VIP", "Gold"
   benefits?: string          // membership benefits summary
+  // Prepaid-specific
+  remainingUses?: number     // remaining uses on prepaid pass
+  totalUses?: number         // total uses on prepaid pass
+  prepaidValidUntil?: string // expiry date for prepaid
 }
 
 // ─── Constants ──────────────────────────────────────────────
@@ -115,6 +119,9 @@ export function WalletPassRenderer({
   validUntil,
   tierName,
   benefits,
+  remainingUses,
+  totalUses,
+  prepaidValidUntil,
 }: WalletPassRendererProps) {
   const cardType = design.cardType ?? "STAMP"
   const layout = getFieldLayout(cardType)
@@ -178,6 +185,13 @@ export function WalletPassRenderer({
         return { label: lbl("TIER"), value: tierName ?? "Member" }
       case "benefits":
         return { label: lbl("BENEFITS"), value: benefits ?? "—" }
+      // Prepaid fields
+      case "remaining":
+        return { label: lbl("REMAINING"), value: `${remainingUses ?? 0} / ${totalUses ?? 0}` }
+      case "prepaidValidUntil":
+        return { label: lbl("VALID UNTIL"), value: prepaidValidUntil ?? "No expiry" }
+      case "totalUsed":
+        return { label: lbl("TOTAL USED"), value: `${currentVisits}` }
       // Shared fields
       case "customerName":
         return { label: lbl("NAME"), value: customerName }
@@ -356,6 +370,8 @@ export function WalletPassRenderer({
         return discountText || "COUPON"
       case "TIER":
         return tierName || "MEMBER"
+      case "PREPAID":
+        return `${remainingUses ?? 0} / ${totalUses ?? 0} REMAINING`
       default:
         return ""
     }

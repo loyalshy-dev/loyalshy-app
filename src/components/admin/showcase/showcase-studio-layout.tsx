@@ -109,7 +109,7 @@ export function ShowcaseStudioLayout({
     try {
       const result = await saveShowcaseCardDesign({
         id: showcaseCardId,
-        cardType: state.wallet.cardType as "STAMP" | "POINTS" | "TIER" | "COUPON",
+        cardType: state.wallet.cardType as "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID",
         showStrip: state.wallet.showStrip,
         primaryColor: state.wallet.primaryColor,
         secondaryColor: state.wallet.secondaryColor,

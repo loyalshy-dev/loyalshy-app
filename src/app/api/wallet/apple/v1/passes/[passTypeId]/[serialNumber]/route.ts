@@ -29,6 +29,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       currentCycleVisits: true,
       totalVisits: true,
       pointsBalance: true,
+      remainingUses: true,
       walletPassSerialNumber: true,
       walletPassId: true,
       enrolledAt: true,
@@ -119,6 +120,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       programType: program.programType,
       programConfig: program.config,
       pointsBalance: enrollment.pointsBalance,
+      remainingUses: enrollment.remainingUses,
       enrollmentId: enrollment.id,
       restaurantSlug: restaurant.slug,
       hasUnrevealedPrize: enrollment.rewards.some(

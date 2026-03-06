@@ -1,5 +1,5 @@
 import { z } from "zod"
-import type { ProgramType, CouponConfig, MembershipConfig, MinigameConfig, PrizeItem, PointsConfig } from "@/types/program-types"
+import type { ProgramType, CouponConfig, MembershipConfig, MinigameConfig, PrizeItem, PointsConfig, PrepaidConfig } from "@/types/program-types"
 
 // ─── Zod schemas ────────────────────────────────────────────
 
@@ -18,6 +18,7 @@ export const membershipConfigSchema = z.object({
   benefits: z.string().max(2000),
   validDuration: z.enum(["monthly", "yearly", "lifetime", "custom"]),
   customDurationDays: z.number().int().min(1).max(3650).optional(),
+  autoRenew: z.boolean().optional(),
   terms: z.string().max(5000).optional(),
 })
 
@@ -31,6 +32,15 @@ export const pointsCatalogItemSchema = z.object({
 export const pointsConfigSchema = z.object({
   pointsPerVisit: z.number().int().min(1).max(100),
   catalog: z.array(pointsCatalogItemSchema).min(1).max(20),
+})
+
+export const prepaidConfigSchema = z.object({
+  totalUses: z.number().int().min(1).max(1000),
+  useLabel: z.string().min(1).max(30),
+  rechargeable: z.boolean(),
+  rechargeAmount: z.number().int().min(1).max(1000).optional(),
+  validUntil: z.string().optional(), // ISO date string
+  terms: z.string().max(5000).optional(),
 })
 
 export const prizeItemSchema = z.object({
@@ -63,6 +73,12 @@ export function parseMembershipConfig(config: unknown): MembershipConfig | null 
 export function parsePointsConfig(config: unknown): PointsConfig | null {
   if (!config || typeof config !== "object") return null
   const result = pointsConfigSchema.safeParse(config)
+  return result.success ? result.data : null
+}
+
+export function parsePrepaidConfig(config: unknown): PrepaidConfig | null {
+  if (!config || typeof config !== "object") return null
+  const result = prepaidConfigSchema.safeParse(config)
   return result.success ? result.data : null
 }
 
@@ -128,8 +144,37 @@ export function formatPointsValue(config: PointsConfig): string {
   return `${config.pointsPerVisit} pts/visit`
 }
 
+export function formatPrepaidValue(config: PrepaidConfig): string {
+  return `${config.totalUses} ${config.useLabel}${config.totalUses !== 1 ? "s" : ""}`
+}
+
 export function getCheapestCatalogItem(config: PointsConfig) {
   return [...config.catalog].sort((a, b) => a.pointsCost - b.pointsCost)[0] ?? null
+}
+
+// ─── Membership expiry calculator ───────────────────────────
+
+export function computeMembershipExpiresAt(config: MembershipConfig, from: Date = new Date()): Date | null {
+  switch (config.validDuration) {
+    case "monthly": {
+      const d = new Date(from)
+      d.setMonth(d.getMonth() + 1)
+      return d
+    }
+    case "yearly": {
+      const d = new Date(from)
+      d.setFullYear(d.getFullYear() + 1)
+      return d
+    }
+    case "lifetime":
+      return null
+    case "custom": {
+      if (!config.customDurationDays) return null
+      const d = new Date(from)
+      d.setDate(d.getDate() + config.customDurationDays)
+      return d
+    }
+  }
 }
 
 // ─── Type-dispatch validator ────────────────────────────────
@@ -157,6 +202,13 @@ export function validateProgramConfig(
     }
     case "POINTS": {
       const result = pointsConfigSchema.safeParse(config)
+      if (!result.success) {
+        return { success: false, error: result.error.issues.map((i) => i.message).join(", ") }
+      }
+      return { success: true, data: result.data }
+    }
+    case "PREPAID": {
+      const result = prepaidConfigSchema.safeParse(config)
       if (!result.success) {
         return { success: false, error: result.error.issues.map((i) => i.message).join(", ") }
       }

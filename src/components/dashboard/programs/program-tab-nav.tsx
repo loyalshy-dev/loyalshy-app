@@ -34,6 +34,8 @@ function getRewardsTabLabel(programType: string): string {
       return "Members"
     case "POINTS":
       return "Catalog"
+    case "PREPAID":
+      return "Usage"
     default:
       return "Rewards"
   }

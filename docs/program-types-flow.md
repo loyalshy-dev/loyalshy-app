@@ -1,6 +1,6 @@
 # Program Types — Flow & UX Guide
 
-Loyalshy supports four program types. Each has a distinct customer journey, staff workflow, and wallet pass behavior.
+Loyalshy supports six program types. Each has a distinct customer journey, staff workflow, and wallet pass behavior.
 
 ---
 
@@ -85,7 +85,7 @@ A digital coupon — discount, fixed amount off, or free item.
 
 ```
 Enrollment → Prize assigned (hidden) → Customer plays minigame → Prize revealed
-                                                                        ↓
+                                                                        |
                                             Customer brings to restaurant → Staff redeems
 ```
 
@@ -93,34 +93,43 @@ Enrollment → Prize assigned (hidden) → Customer plays minigame → Prize rev
 
 ## 3. Membership (`MEMBERSHIP`)
 
-An ongoing membership card with check-ins — no rewards cycle.
+A digital ID card used to identify clients. Managed entirely by the business — the customer presents the pass, staff checks them in. Think gym pass, library card, student ID, club membership.
 
 ### Configuration
 
 | Field | Description |
 |-------|-------------|
-| Membership Tier | Tier name (e.g., "VIP", "Gold", "Premium") |
-| Benefits | Description of membership benefits |
+| Membership Tier | Tier/plan name (e.g., "Premium", "Gold", "Student") |
+| Benefits | Description of what the membership includes |
 | Duration | `monthly`, `yearly`, `lifetime`, or `custom` (N days) |
+| Auto-Renew | Whether membership auto-renews on expiry or requires manual renewal |
 | Prize Reveal Minigame | Not supported for membership |
 
 ### Customer Journey
 
-1. **Scan QR code** → enrolls as a member
-2. **Add to wallet** — pass shows tier, benefits, member since date
-3. **Check-ins** — staff registers each visit as a "check-in"
-4. **No rewards cycle** — check-ins are tracked for engagement metrics only
-5. **Membership provides access** to tier-based benefits (managed outside the app)
+1. **Scan QR code** → enrolls as a member (or business adds them from dashboard)
+2. **Add to wallet** — pass serves as their **digital ID card**
+3. **Present pass** — customer shows the pass at the business (gym entrance, library desk, etc.)
+4. **Staff checks in** — staff registers each visit as a check-in (for usage statistics)
+5. **Membership is ongoing** — no rewards cycle, no balance to consume. The pass IS the product
+6. **Expiry/renewal** — when membership expires, pass status changes. Business renews or cancels from dashboard
 
 ### Staff Workflow
 
 - **Check In Member** → from register-visit dialog → select membership enrollment → confirm
-- Check-in count increments, no reward logic
+- Check-in is logged for statistics (visit frequency, peak hours, engagement metrics)
+- **Manage membership** → from dashboard: activate, suspend, cancel, renew
+- Customer cannot self-cancel — must contact the business
 
 ### Wallet Pass
 
-- Shows: tier name, check-in count, benefits, member since
-- Updates after each check-in (counter increments)
+- Shows: member name, tier/plan, status (Active/Suspended/Expired), benefits, member since, expiry date
+- Updates when: status changes, tier changes, check-in count increments
+- Visually changes on status: Active (normal), Suspended (dimmed), Expired (grayed out)
+
+### Key Distinction
+
+Membership is an **identity card**, not a consumable. Check-ins don't deplete anything — they generate usage data for the business. The business has full control over the membership lifecycle.
 
 ---
 
@@ -158,7 +167,53 @@ Earn points per visit, redeem from a reward catalog.
 
 ---
 
-## Prize Reveal Minigame
+## 5. Prepaid (`PREPAID`)
+
+A prepaid pass with a fixed number of uses that counts down. Each use consumes one unit. Can be recharged. Think bus pass (15 rides), car wash card (5 washes), class pack (10 yoga sessions).
+
+### Configuration
+
+| Field | Description |
+|-------|-------------|
+| Total Uses | Starting balance (e.g., 15 rides, 5 washes) |
+| Use Label | What each unit is called (e.g., "ride", "wash", "session", "class") |
+| Rechargeable | Whether the card can be topped up after purchase |
+| Recharge Amount | Default top-up amount (e.g., +15 rides) |
+| Valid Until | Optional expiry date for the prepaid pack |
+| Prize Reveal Minigame | Not supported for prepaid |
+
+### Customer Journey
+
+1. **Scan QR code** → enrolls with full starting balance (e.g., 15/15 rides)
+2. **Add to wallet** — pass shows remaining uses prominently
+3. **Each use** — staff registers a use from dashboard, OR customer scans at point of service
+   - Balance decrements: 15 → 14 → 13 → ...
+   - Pass updates immediately with new remaining count
+4. **Low balance** — pass shows warning when running low (e.g., 2 remaining)
+5. **Depleted (0 remaining)** — pass visually changes to "depleted" state
+6. **Recharge** — if rechargeable, business tops up the balance from dashboard (e.g., +15 rides). Pass reactivates
+
+### Staff Workflow
+
+- **Use** → from register-visit dialog → select prepaid enrollment → confirm (-1 use)
+- **Recharge** → from customer detail or enrollment detail → add uses → confirm
+- Dashboard shows: remaining balance, usage history, depletion rate
+
+### Wallet Pass
+
+- Shows: remaining uses (e.g., "12 / 15"), use label, valid until, member since
+- Progress bar/count depletes (opposite of stamp card — counts DOWN)
+- Low balance state: visual warning (e.g., "2 rides remaining")
+- Depleted state: grayed out, "0 remaining — Recharge needed"
+- After recharge: pass reactivates with new balance
+
+### Key Distinction
+
+Prepaid is a **consumable balance** — each use costs one unit. Unlike membership (where check-ins are just statistics), prepaid uses actually **deplete the card**. Unlike stamp cards (which count up toward a reward), prepaid counts **down toward zero**. The card can be recharged to start over.
+
+---
+
+## 6. Prize Reveal Minigame
 
 Available for **Stamp Card** and **Coupon** programs only.
 
@@ -172,7 +227,7 @@ Available for **Stamp Card** and **Coupon** programs only.
 
 ### Configuration
 
-- **Prizes**: 1–8 prizes, each with a name and weight (1–10)
+- **Prizes**: 1-8 prizes, each with a name and weight (1-10)
 - **Weights**: Higher weight = higher probability. Displayed as percentages in the editor
 - **Colors**: Customizable primary and accent colors for the game UI
 
@@ -194,14 +249,17 @@ Available for **Stamp Card** and **Coupon** programs only.
 
 ## Comparison Table
 
-| Feature | Stamp Card | Coupon | Membership | Points |
-|---------|-----------|--------|------------|--------|
-| Visit tracking | Yes (stamps) | No | Yes (check-ins) | Yes (earns points) |
-| Reward cycle | After N visits | Immediate | None | Catalog redemption |
-| Reward reset | Stamps reset to 0 | Single or unlimited | N/A | Points deducted |
-| Minigame support | Yes | Yes | No | No |
-| Wallet pass fields | Progress, total visits, next reward | Discount, valid until, code | Tier, check-ins, benefits | Balance, earn rate, next reward |
-| Staff action | Register Visit | Redeem Coupon | Check In | Earn Points / Redeem Points |
+| Feature | Stamp Card | Coupon | Membership | Points | Prepaid |
+|---------|-----------|--------|------------|--------|---------|
+| Visit tracking | Yes (stamps) | No | Yes (check-ins) | Yes (earns points) | Yes (uses consumed) |
+| Balance/progress | Counts UP to N | N/A | N/A (stats only) | Earns/spends | Counts DOWN from N |
+| Reward cycle | After N visits | Immediate | None | Catalog redemption | None |
+| Reward reset | Stamps reset to 0 | Single or unlimited | N/A | Points deducted | N/A |
+| Rechargeable | N/A (auto-cycles) | N/A | N/A (renew) | N/A (earns more) | Yes (top up uses) |
+| Minigame support | Yes | Yes | No | No | No |
+| Wallet pass fields | Progress, total visits, next reward | Discount, valid until, code | Tier, status, benefits, expiry | Balance, earn rate, next reward | Remaining uses, use label, valid until |
+| Staff action | Register Visit | Redeem Coupon | Check In | Earn/Redeem Points | Use / Recharge |
+| Ends when | Cycles forever | Redeemed or expired | Business cancels | Never | Depleted (reloadable) |
 
 ---
 
@@ -210,9 +268,11 @@ Available for **Stamp Card** and **Coupon** programs only.
 All program types share the same enrollment statuses:
 
 ```
-ACTIVE → COMPLETED (stamp card cycle done / single coupon redeemed)
+ACTIVE → COMPLETED (stamp card cycle done / single coupon redeemed / prepaid depleted)
 ACTIVE → FROZEN (staff or system freeze)
-ACTIVE → (keeps going for unlimited coupons, memberships, and points)
+ACTIVE → SUSPENDED (membership suspended by business)
+ACTIVE → EXPIRED (membership or prepaid expiry reached)
+ACTIVE → (keeps going for unlimited coupons, memberships, points, and recharged prepaid)
 ```
 
 ### Wallet Pass Types
@@ -223,3 +283,15 @@ Each enrollment can have one wallet pass:
 - `GOOGLE` — Google Wallet (Loyalty pass via JWT)
 
 Pass updates are triggered via Trigger.dev background jobs (production) or direct API calls (development fallback).
+
+---
+
+## Program Type Selection Guide
+
+| Use Case | Recommended Type |
+|----------|-----------------|
+| Coffee shop, sandwich bar, bakery | Stamp Card |
+| Promotional campaign, seasonal discount | Coupon |
+| Gym, library, club, campus, coworking | Membership |
+| Restaurant with varied rewards | Points |
+| Bus pass, car wash, class pack, session bundle | Prepaid |

@@ -11,7 +11,7 @@ import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConf
 import type { ProgressStyle, LabelFormat } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { getWalletRewardText, parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem } from "../../program-config"
+import { getWalletRewardText, parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, getCheapestCatalogItem } from "../../program-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -39,6 +39,7 @@ type GooglePassUpdateData = {
   customProgressLabel: string | null
   heroImageUrl?: string | null
   revealLink?: string | null
+  remainingUses?: number
   // Enrollment status (for coupon redeemed display)
   enrollmentStatus?: string
 }
@@ -73,6 +74,7 @@ async function patchGoogleWalletObject(
   const couponConfig = data.programType === "COUPON" ? parseCouponConfig(data.programConfig) : null
   const membershipConfig = data.programType === "MEMBERSHIP" ? parseMembershipConfig(data.programConfig) : null
   const pointsConfig = data.programType === "POINTS" ? parsePointsConfig(data.programConfig) : null
+  const prepaidConfig = data.programType === "PREPAID" ? parsePrepaidConfig(data.programConfig) : null
 
   if (data.programType === "COUPON" && couponConfig) {
     const isRedeemed = data.enrollmentStatus === "COMPLETED"
@@ -98,19 +100,38 @@ async function patchGoogleWalletObject(
       { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
     ]
   } else if (data.programType === "MEMBERSHIP" && membershipConfig) {
+    const isSuspended = data.enrollmentStatus === "SUSPENDED"
+    const isExpired = data.enrollmentStatus === "EXPIRED"
+    const statusText = isSuspended ? "Suspended" : isExpired ? "Expired" : "Active"
     loyaltyPoints = {
       label: formatLabel("TIER", labelFmt),
       balance: { string: membershipConfig.membershipTier },
     }
     secondaryLoyaltyPoints = {
-      label: formatLabel("CHECK-INS", labelFmt),
-      balance: { int: data.totalVisits },
+      label: formatLabel("STATUS", labelFmt),
+      balance: { string: statusText },
     }
     textModulesData = [
       { id: "tier", header: formatLabel("TIER", labelFmt), body: membershipConfig.membershipTier },
-      { id: "checkIns", header: formatLabel("CHECK-INS", labelFmt), body: String(data.totalVisits) },
+      { id: "status", header: formatLabel("STATUS", labelFmt), body: statusText },
       { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
+    ]
+  } else if (data.programType === "PREPAID" && prepaidConfig) {
+    const remaining = data.remainingUses ?? 0
+    loyaltyPoints = {
+      label: formatLabel("REMAINING", labelFmt),
+      balance: { string: `${remaining} / ${prepaidConfig.totalUses}` },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("USED", labelFmt),
+      balance: { int: data.totalVisits },
+    }
+    textModulesData = [
+      { id: "remaining", header: formatLabel(`${prepaidConfig.useLabel.toUpperCase()}S LEFT`, labelFmt), body: `${remaining} / ${prepaidConfig.totalUses}` },
+      { id: "validUntil", header: formatLabel("VALID UNTIL", labelFmt), body: prepaidConfig.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+      { id: "totalUsed", header: formatLabel("TOTAL USED", labelFmt), body: String(data.totalVisits) },
+      { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
     ]
   } else if (data.programType === "POINTS" && pointsConfig) {
     loyaltyPoints = {
@@ -325,6 +346,7 @@ export async function notifyGooglePassUpdate(
       visitsRequired: enrollment.loyaltyProgram.visitsRequired,
       totalVisits: enrollment.totalVisits,
       pointsBalance: enrollment.pointsBalance ?? 0,
+      remainingUses: enrollment.remainingUses ?? 0,
       hasAvailableReward,
       rewardDescription: getWalletRewardText(enrollment.loyaltyProgram.config, enrollment.loyaltyProgram.rewardDescription),
       revealedPrize: revealedReward?.description ?? null,

@@ -11,7 +11,7 @@ import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-desig
 import { statusConfig } from "./program-status"
 import { CreateProgramForm } from "./create-program-form"
 import { PROGRAM_TYPE_META, type ProgramType } from "@/types/program-types"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, formatPointsValue } from "@/lib/program-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, formatPointsValue, parsePrepaidConfig } from "@/lib/program-config"
 import { cn } from "@/lib/utils"
 import type { ProgramListItem } from "@/server/program-actions"
 
@@ -65,6 +65,10 @@ function getTypeSubtitle(program: ProgramListItem): string {
       const subtitle = pConfig ? `${pConfig.pointsPerVisit} pts/visit` : "Points"
       return `${subtitle} | ${program.enrollmentCount} enrolled`
     }
+    case "PREPAID": {
+      const prepConfig = parsePrepaidConfig(program.config)
+      return `${prepConfig?.totalUses ?? 0} ${prepConfig?.useLabel ?? "use"}s | ${program.enrollmentCount} issued`
+    }
     default:
       return `${program.enrollmentCount} enrolled`
   }
@@ -82,6 +86,7 @@ function ProgramCardPreview({
   const type = program.programType as ProgramType
   const couponConfig = type === "COUPON" ? parseCouponConfig(program.config) : null
   const membershipConfig = type === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
+  const prepaidConfig = type === "PREPAID" ? parsePrepaidConfig(program.config) : null
 
   return (
     <WalletPassRenderer
@@ -104,6 +109,12 @@ function ProgramCardPreview({
       // Membership props
       tierName={membershipConfig?.membershipTier}
       benefits={membershipConfig?.benefits}
+      // Prepaid props
+      remainingUses={prepaidConfig?.totalUses}
+      totalUses={prepaidConfig?.totalUses}
+      prepaidValidUntil={prepaidConfig?.validUntil
+        ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+        : type === "PREPAID" ? "No expiry" : undefined}
     />
   )
 }
@@ -134,6 +145,7 @@ export function ProgramsListView({
     COUPON: programs.filter((p) => p.programType === "COUPON").length,
     MEMBERSHIP: programs.filter((p) => p.programType === "MEMBERSHIP").length,
     POINTS: programs.filter((p) => p.programType === "POINTS").length,
+    PREPAID: programs.filter((p) => p.programType === "PREPAID").length,
   }
 
   const filteredPrograms =
@@ -147,6 +159,7 @@ export function ProgramsListView({
     { key: "COUPON", label: "Coupons" },
     { key: "MEMBERSHIP", label: "Memberships" },
     { key: "POINTS", label: "Points" },
+    { key: "PREPAID", label: "Prepaid" },
   ]
 
   // Only show filter tabs if there's more than one type

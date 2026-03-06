@@ -1,9 +1,9 @@
-import { Stamp, Ticket, Crown, Coins } from "lucide-react"
+import { Stamp, Ticket, Crown, Coins, CreditCard } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 // ─── Program Type ────────────────────────────────────────────
 
-export type ProgramType = "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS"
+export type ProgramType = "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "PREPAID"
 
 // ─── Type-specific configs (stored in LoyaltyProgram.config JSON) ───
 
@@ -22,6 +22,7 @@ export type MembershipConfig = {
   benefits: string
   validDuration: "monthly" | "yearly" | "lifetime" | "custom"
   customDurationDays?: number
+  autoRenew?: boolean
   terms?: string
 }
 
@@ -37,6 +38,15 @@ export type PointsConfig = {
   catalog: PointsCatalogItem[]
 }
 
+export type PrepaidConfig = {
+  totalUses: number
+  useLabel: string // "ride", "wash", "session", "class", "visit"
+  rechargeable: boolean
+  rechargeAmount?: number
+  validUntil?: string // ISO date
+  terms?: string
+}
+
 // ─── Program type metadata ──────────────────────────────────
 
 export type ProgramTypeMeta = {
@@ -44,7 +54,7 @@ export type ProgramTypeMeta = {
   shortLabel: string
   icon: LucideIcon
   description: string
-  defaultCardType: "STAMP" | "COUPON" | "POINTS" | "TIER"
+  defaultCardType: "STAMP" | "COUPON" | "POINTS" | "TIER" | "PREPAID"
 }
 
 // ─── Minigame config (stored in LoyaltyProgram.config JSON) ───
@@ -74,7 +84,7 @@ export const PROGRAM_TYPE_META: Record<ProgramType, ProgramTypeMeta> = {
     label: "Membership Card",
     shortLabel: "Membership",
     icon: Crown,
-    description: "Exclusive membership with ongoing perks and benefits",
+    description: "Digital ID card for gyms, clubs, libraries, and more",
     defaultCardType: "TIER",
   },
   POINTS: {
@@ -83,5 +93,12 @@ export const PROGRAM_TYPE_META: Record<ProgramType, ProgramTypeMeta> = {
     icon: Coins,
     description: "Earn points per visit, redeem from a reward catalog",
     defaultCardType: "POINTS",
+  },
+  PREPAID: {
+    label: "Prepaid Pass",
+    shortLabel: "Prepaid",
+    icon: CreditCard,
+    description: "Fixed uses that count down — bus pass, car wash, class pack",
+    defaultCardType: "PREPAID",
   },
 }

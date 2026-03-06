@@ -1,6 +1,6 @@
 "use client"
 
-import { Eye, Gift, Trophy, Crown, Ticket } from "lucide-react"
+import { Eye, Gift, Trophy, Crown, Ticket, CreditCard, Coins } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import type { ActivityItem } from "@/server/analytics"
 
@@ -16,6 +16,24 @@ const ACTIVITY_CONFIG = {
     verb: "checked in",
     color: "text-brand",
     bg: "bg-brand/10",
+  },
+  prepaid_use: {
+    icon: CreditCard,
+    verb: "used a pass",
+    color: "text-brand",
+    bg: "bg-brand/10",
+  },
+  points_earned: {
+    icon: Coins,
+    verb: "earned points",
+    color: "text-brand",
+    bg: "bg-brand/10",
+  },
+  prepaid_recharge: {
+    icon: CreditCard,
+    verb: "recharged a pass",
+    color: "text-success",
+    bg: "bg-success/10",
   },
   reward_earned: {
     icon: Gift,

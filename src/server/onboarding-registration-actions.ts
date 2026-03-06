@@ -13,7 +13,7 @@ const createRestaurantSchema = z.object({
   name: z.string().min(1, "Restaurant name is required").max(100),
   address: z.string().max(200).optional().default(""),
   phone: z.string().max(30).optional().default(""),
-  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS"]).optional().default("STAMP_CARD"),
+  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID"]).optional().default("STAMP_CARD"),
 })
 
 const updateBrandingSchema = z.object({
@@ -36,7 +36,7 @@ const applyCardDesignSchema = z.object({
 
 const setupLoyaltySchema = z.object({
   restaurantId: z.string().min(1),
-  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS"]).optional().default("STAMP_CARD"),
+  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID"]).optional().default("STAMP_CARD"),
   visitsRequired: z.number().int().min(1).max(30).optional().default(10),
   rewardDescription: z.string().min(1, "Reward description is required").max(200),
   rewardExpiryDays: z.number().int().min(0).max(365).optional().default(90),

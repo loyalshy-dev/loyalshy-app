@@ -60,6 +60,7 @@ export async function POST(request: Request) {
         currentCycleVisits: true,
         totalVisits: true,
         pointsBalance: true,
+        remainingUses: true,
         walletPassId: true,
         enrolledAt: true,
         customer: {
@@ -159,6 +160,7 @@ export async function POST(request: Request) {
       programType: program.programType,
       programConfig: program.config,
       pointsBalance: enrollment.pointsBalance ?? 0,
+      remainingUses: enrollment.remainingUses ?? 0,
       hasUnrevealedPrize,
       restaurantSlug: restaurant.slug,
     })

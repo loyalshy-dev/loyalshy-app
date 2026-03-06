@@ -15,6 +15,14 @@ import {
 
 // ─── Types ──────────────────────────────────────────────────
 
+export type EnrollmentsByType = {
+  STAMP_CARD: number
+  COUPON: number
+  MEMBERSHIP: number
+  POINTS: number
+  PREPAID: number
+}
+
 export type OverviewStats = {
   totalCustomers: number
   totalCustomersChange: number
@@ -23,6 +31,8 @@ export type OverviewStats = {
   activeRewards: number
   rewardsRedeemedThisMonth: number
   rewardsRedeemedChange: number
+  activeEnrollments: number
+  enrollmentsByType: EnrollmentsByType
 }
 
 export type VisitsDataPoint = {
@@ -42,7 +52,7 @@ export type RewardDistributionItem = {
 
 export type ActivityItem = {
   id: string
-  type: "visit" | "reward_earned" | "reward_redeemed" | "check_in" | "coupon_redeemed"
+  type: "visit" | "reward_earned" | "reward_redeemed" | "check_in" | "coupon_redeemed" | "prepaid_use" | "prepaid_recharge" | "points_earned"
   customerName: string
   staffName: string | null
   programName: string | null
@@ -55,12 +65,14 @@ export type TopCustomerItem = {
   fullName: string
   totalVisits: number
   lastVisitAt: Date | null
+  primaryProgramType: string | null
+  engagementLabel: string
 }
 
 export type ProgramSummaryItem = {
   id: string
   name: string
-  programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS"
+  programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "PREPAID"
   activeEnrollments: number
   totalVisits: number
   redeemedRewards: number
@@ -97,6 +109,7 @@ export async function getOverviewStats(): Promise<OverviewStats> {
     activeRewards,
     rewardsRedeemedThisMonth,
     rewardsRedeemedLastMonth,
+    enrollmentsByTypeRaw,
   ] = await Promise.all([
     db.customer.count({ where: { restaurantId, deletedAt: null } }),
     db.customer.count({
@@ -157,6 +170,28 @@ export async function getOverviewStats(): Promise<OverviewStats> {
         redeemedAt: { gte: lastMonthStart, lt: lastMonthEnd },
       },
     }),
+    // Active enrollments grouped by program type
+    db.enrollment.groupBy({
+      by: ["loyaltyProgramId"],
+      where: {
+        status: "ACTIVE",
+        loyaltyProgram: { restaurantId },
+      },
+      _count: { id: true },
+    }).then(async (groups) => {
+      // Resolve program types for each group
+      if (groups.length === 0) return [] as { programType: string; count: number }[]
+      const programIds = groups.map((g) => g.loyaltyProgramId)
+      const programs = await db.loyaltyProgram.findMany({
+        where: { id: { in: programIds } },
+        select: { id: true, programType: true },
+      })
+      const typeMap = new Map(programs.map((p) => [p.id, p.programType]))
+      return groups.map((g) => ({
+        programType: typeMap.get(g.loyaltyProgramId) ?? "STAMP_CARD",
+        count: g._count.id,
+      }))
+    }),
   ])
 
   // Activity = visits + coupon redemptions
@@ -193,6 +228,19 @@ export async function getOverviewStats(): Promise<OverviewStats> {
         ? 100
         : 0
 
+  // Aggregate enrollment counts by type
+  const enrollmentsByType: EnrollmentsByType = {
+    STAMP_CARD: 0, COUPON: 0, MEMBERSHIP: 0, POINTS: 0, PREPAID: 0,
+  }
+  let activeEnrollments = 0
+  for (const e of enrollmentsByTypeRaw) {
+    const key = e.programType as keyof EnrollmentsByType
+    if (key in enrollmentsByType) {
+      enrollmentsByType[key] += e.count
+    }
+    activeEnrollments += e.count
+  }
+
   return {
     totalCustomers,
     totalCustomersChange,
@@ -201,6 +249,8 @@ export async function getOverviewStats(): Promise<OverviewStats> {
     activeRewards,
     rewardsRedeemedThisMonth,
     rewardsRedeemedChange,
+    activeEnrollments,
+    enrollmentsByType,
   }
 }
 
@@ -428,7 +478,23 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
 
   for (const v of recentVisits) {
     // Classify visit type based on program type
-    const type = v.loyaltyProgram.programType === "MEMBERSHIP" ? "check_in" as const : "visit" as const
+    const pType = v.loyaltyProgram.programType
+    const type = pType === "MEMBERSHIP"
+      ? "check_in" as const
+      : pType === "PREPAID"
+        ? "prepaid_use" as const
+        : pType === "POINTS"
+          ? "points_earned" as const
+          : "visit" as const
+
+    const detail = pType === "MEMBERSHIP"
+      ? v.loyaltyProgram.name
+      : pType === "PREPAID"
+        ? v.loyaltyProgram.name
+        : pType === "POINTS"
+          ? v.loyaltyProgram.name
+          : `Visit #${v.visitNumber}`
+
     items.push({
       id: v.id,
       type,
@@ -436,7 +502,7 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
       staffName: v.registeredBy?.name ?? null,
       programName: v.loyaltyProgram.name,
       createdAt: v.createdAt,
-      detail: type === "check_in" ? v.loyaltyProgram.name : `Visit #${v.visitNumber}`,
+      detail,
     })
   }
 
@@ -546,8 +612,59 @@ export async function getTopCustomers(): Promise<TopCustomerItem[]> {
       fullName: true,
       totalVisits: true,
       lastVisitAt: true,
+      enrollments: {
+        where: { status: "ACTIVE" },
+        orderBy: { createdAt: "asc" },
+        take: 1,
+        select: {
+          pointsBalance: true,
+          remainingUses: true,
+          currentCycleVisits: true,
+          loyaltyProgram: {
+            select: {
+              programType: true,
+              visitsRequired: true,
+              config: true,
+            },
+          },
+        },
+      },
     },
   })
 
-  return customers
+  return customers.map((c) => {
+    const enrollment = c.enrollments[0]
+    const pType = enrollment?.loyaltyProgram.programType ?? null
+
+    let engagementLabel = `${c.totalVisits} visits`
+    if (enrollment) {
+      switch (pType) {
+        case "POINTS":
+          engagementLabel = `${enrollment.pointsBalance} pts`
+          break
+        case "PREPAID": {
+          const total = (enrollment.loyaltyProgram.config as { totalUses?: number } | null)?.totalUses ?? 0
+          engagementLabel = `${enrollment.remainingUses}/${total} left`
+          break
+        }
+        case "STAMP_CARD":
+          engagementLabel = `${enrollment.currentCycleVisits}/${enrollment.loyaltyProgram.visitsRequired} stamps`
+          break
+        case "MEMBERSHIP":
+          engagementLabel = `${c.totalVisits} check-ins`
+          break
+        default:
+          engagementLabel = `${c.totalVisits} visits`
+      }
+    }
+
+    return {
+      id: c.id,
+      fullName: c.fullName,
+      totalVisits: c.totalVisits,
+      lastVisitAt: c.lastVisitAt,
+      primaryProgramType: pType,
+      engagementLabel,
+    }
+  })
 }

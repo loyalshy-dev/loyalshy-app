@@ -141,26 +141,38 @@ describe("redeemReward", () => {
   })
 
   it("dispatches wallet pass update via Trigger.dev", async () => {
-    const { redeemReward } = await import("./reward-actions")
-    const { tasks } = await import("@trigger.dev/sdk")
+    // Set TRIGGER_SECRET_KEY so the code path that dispatches Trigger.dev is taken
+    const original = process.env.TRIGGER_SECRET_KEY
+    process.env.TRIGGER_SECRET_KEY = "test-secret"
 
-    mockDb.reward.findFirst.mockResolvedValue({
-      id: "reward-1",
-      status: "AVAILABLE",
-      customerId: "customer-1",
-      enrollmentId: "enrollment-1",
-      expiresAt: new Date(Date.now() + 86400_000),
-    })
+    try {
+      const { redeemReward } = await import("./reward-actions")
+      const { tasks } = await import("@trigger.dev/sdk")
 
-    await redeemReward("reward-1")
+      mockDb.reward.findFirst.mockResolvedValue({
+        id: "reward-1",
+        status: "AVAILABLE",
+        customerId: "customer-1",
+        enrollmentId: "enrollment-1",
+        expiresAt: new Date(Date.now() + 86400_000),
+      })
 
-    // Allow the dynamic import promise to settle
-    await new Promise((r) => setTimeout(r, 10))
+      await redeemReward("reward-1")
 
-    expect(tasks.trigger).toHaveBeenCalledWith("update-wallet-pass", {
-      enrollmentId: "enrollment-1",
-      updateType: "REWARD_REDEEMED",
-    })
+      // Allow the dynamic import promise to settle
+      await new Promise((r) => setTimeout(r, 10))
+
+      expect(tasks.trigger).toHaveBeenCalledWith("update-wallet-pass", {
+        enrollmentId: "enrollment-1",
+        updateType: "REWARD_REDEEMED",
+      })
+    } finally {
+      if (original === undefined) {
+        delete process.env.TRIGGER_SECRET_KEY
+      } else {
+        process.env.TRIGGER_SECRET_KEY = original
+      }
+    }
   })
 })
 

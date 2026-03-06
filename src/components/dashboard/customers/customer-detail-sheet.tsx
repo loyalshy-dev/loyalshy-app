@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useTransition } from "react"
+import { useState, useEffect, useTransition, useMemo } from "react"
 import { formatDistanceToNow, format } from "date-fns"
 import {
   Stamp,
@@ -18,6 +18,7 @@ import {
   CalendarDays,
   CheckCircle2,
   CreditCard,
+  Smartphone,
 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -41,7 +42,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ProgressRing } from "./customer-progress-ring"
 import {
   getCustomerDetail,
   updateCustomer,
@@ -52,7 +52,7 @@ import { redeemReward } from "@/server/reward-actions"
 import type { EnrollmentDetail } from "@/types/enrollment"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
-import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText } from "@/lib/program-config"
+import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText, parsePrepaidConfig } from "@/lib/program-config"
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -74,12 +74,6 @@ function getInitials(name: string): string {
     .toUpperCase()
 }
 
-const walletLabels: Record<string, string> = {
-  APPLE: "Apple Wallet",
-  GOOGLE: "Google Wallet",
-  NONE: "No Wallet Pass",
-}
-
 const enrollmentStatusConfig: Record<
   string,
   { label: string; className: string }
@@ -98,6 +92,14 @@ const enrollmentStatusConfig: Record<
   },
   CANCELLED: {
     label: "Cancelled",
+    className: "bg-muted text-muted-foreground border-border",
+  },
+  SUSPENDED: {
+    label: "Suspended",
+    className: "bg-warning/10 text-warning border-warning/20",
+  },
+  EXPIRED: {
+    label: "Expired",
     className: "bg-muted text-muted-foreground border-border",
   },
 }
@@ -125,6 +127,7 @@ const visitTypeIcons: Record<string, typeof Stamp> = {
   COUPON: Ticket,
   MEMBERSHIP: Crown,
   POINTS: Coins,
+  PREPAID: CreditCard,
 }
 
 function buildWalletDesign(enrollment: EnrollmentDetail): WalletPassDesign | null {
@@ -155,13 +158,31 @@ function buildWalletDesign(enrollment: EnrollmentDetail): WalletPassDesign | nul
   }
 }
 
-function getPointsRendererProps(enrollment: EnrollmentDetail) {
-  const config = parsePointsConfig(enrollment.programConfig)
-  const cheapest = config ? getCheapestCatalogItem(config) : null
+function getRendererProps(enrollment: EnrollmentDetail) {
+  if (enrollment.programType === "POINTS") {
+    const config = parsePointsConfig(enrollment.programConfig)
+    const cheapest = config ? getCheapestCatalogItem(config) : null
+    return {
+      currentVisits: enrollment.pointsBalance ?? 0,
+      totalVisits: cheapest?.pointsCost ?? 100,
+      rewardDescription: cheapest?.name ?? enrollment.rewardDescription,
+    }
+  }
+  if (enrollment.programType === "PREPAID") {
+    const config = parsePrepaidConfig(enrollment.programConfig)
+    return {
+      currentVisits: enrollment.totalVisits,
+      totalVisits: config?.totalUses ?? 0,
+      rewardDescription: enrollment.rewardDescription,
+      remainingUses: enrollment.remainingUses ?? 0,
+      totalUses: config?.totalUses ?? 0,
+      prepaidValidUntil: config?.validUntil ?? undefined,
+    }
+  }
   return {
-    currentVisits: enrollment.pointsBalance ?? 0,
-    totalVisits: cheapest?.pointsCost ?? 100,
-    rewardDescription: cheapest?.name ?? enrollment.rewardDescription,
+    currentVisits: enrollment.currentCycleVisits,
+    totalVisits: enrollment.visitsRequired,
+    rewardDescription: getWalletRewardText(enrollment.programConfig, enrollment.rewardDescription),
   }
 }
 
@@ -170,10 +191,16 @@ function getProgressText(enrollment: EnrollmentDetail): string {
     case "COUPON":
       return enrollment.status === "COMPLETED" ? "Coupon redeemed" : "Ready to redeem"
     case "MEMBERSHIP":
-      return "Active member"
+      return enrollment.status === "SUSPENDED" ? "Suspended" : enrollment.status === "EXPIRED" ? "Expired" : "Active member"
     case "POINTS": {
       const balance = enrollment.pointsBalance ?? 0
       return `${balance} pts`
+    }
+    case "PREPAID": {
+      const remaining = enrollment.remainingUses ?? 0
+      const config = parsePrepaidConfig(enrollment.programConfig)
+      const total = config?.totalUses ?? 0
+      return `${remaining} / ${total} ${config?.useLabel ?? "use"}s remaining`
     }
     default: {
       const remaining = enrollment.visitsRequired - enrollment.currentCycleVisits
@@ -182,18 +209,6 @@ function getProgressText(enrollment: EnrollmentDetail): string {
   }
 }
 
-function getCompactProgressText(enrollment: EnrollmentDetail): string {
-  switch (enrollment.programType) {
-    case "COUPON":
-      return enrollment.status === "COMPLETED" ? "Redeemed" : "Coupon"
-    case "MEMBERSHIP":
-      return "Member"
-    case "POINTS":
-      return `${enrollment.pointsBalance ?? 0} pts`
-    default:
-      return `${enrollment.currentCycleVisits}/${enrollment.visitsRequired}`
-  }
-}
 
 type CustomerDetailSheetProps = {
   customerId: string | null
@@ -216,6 +231,8 @@ export function CustomerDetailSheet({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, startDelete] = useTransition()
   const [redeemingRewardId, setRedeemingRewardId] = useState<string | null>(null)
+  const [visitProgramFilter, setVisitProgramFilter] = useState<string | null>(null)
+  const [rewardProgramFilter, setRewardProgramFilter] = useState<string | null>(null)
 
   // Fetch detail when customerId changes
   useEffect(() => {
@@ -276,6 +293,36 @@ export function CustomerDetailSheet({
     0
   ) ?? 0
   const activeRewards = detail?.rewards.filter((r) => r.status === "AVAILABLE").length ?? 0
+
+  // Unique program names for visit filter
+  const visitPrograms = useMemo(() => {
+    if (!detail) return []
+    const names = new Set(detail.visits.map((v) => v.programName))
+    return Array.from(names)
+  }, [detail])
+
+  const filteredVisits = useMemo(() => {
+    if (!detail) return []
+    if (!visitProgramFilter) return detail.visits
+    return detail.visits.filter((v) => v.programName === visitProgramFilter)
+  }, [detail, visitProgramFilter])
+
+  // Unique program names for reward filter
+  const rewardPrograms = useMemo(() => {
+    if (!detail) return []
+    const names = new Set(detail.rewards.map((r) => r.programName))
+    return Array.from(names)
+  }, [detail])
+
+  const filteredRewards = useMemo(() => {
+    if (!detail) return []
+    if (!rewardProgramFilter) return detail.rewards
+    return detail.rewards.filter((r) => r.programName === rewardProgramFilter)
+  }, [detail, rewardProgramFilter])
+
+  // Primary enrollment type for context-aware button
+  const primaryEnrollment = detail?.enrollments.find((e) => e.status === "ACTIVE") ?? detail?.enrollments[0]
+  const primaryType = primaryEnrollment?.programType
 
   return (
     <>
@@ -377,13 +424,46 @@ export function CustomerDetailSheet({
 
                   <TabsContent value="visits" className="mt-0">
                     <div className="px-6 pt-3 pb-4">
+                      {/* Program filter pills */}
+                      {visitPrograms.length > 1 && (
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          <button
+                            onClick={() => setVisitProgramFilter(null)}
+                            className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                              !visitProgramFilter
+                                ? "bg-brand/10 text-brand border-brand/20"
+                                : "bg-transparent text-muted-foreground border-border hover:border-brand/30"
+                            }`}
+                          >
+                            All
+                          </button>
+                          {visitPrograms.map((name) => (
+                            <button
+                              key={name}
+                              onClick={() => setVisitProgramFilter(visitProgramFilter === name ? null : name)}
+                              className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                                visitProgramFilter === name
+                                  ? "bg-brand/10 text-brand border-brand/20"
+                                  : "bg-transparent text-muted-foreground border-border hover:border-brand/30"
+                              }`}
+                            >
+                              {name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
                       {detail.visits.length === 0 ? (
                         <p className="text-[13px] text-muted-foreground text-center py-8">
                           No visits recorded yet.
                         </p>
+                      ) : filteredVisits.length === 0 ? (
+                        <p className="text-[13px] text-muted-foreground text-center py-8">
+                          No visits for this program.
+                        </p>
                       ) : (
                         <div className="space-y-0">
-                          {detail.visits.map((visit) => {
+                          {filteredVisits.map((visit) => {
                             const VisitIcon = visitTypeIcons[visit.programType] ?? Stamp
                             return (
                             <div
@@ -395,10 +475,12 @@ export function CustomerDetailSheet({
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-[13px] font-medium">
-                                  {visit.programType === "MEMBERSHIP" ? "Check-in" : `Visit #${visit.visitNumber}`}
-                                  <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
-                                    {visit.programName}
-                                  </span>
+                                  {visit.programType === "MEMBERSHIP" ? "Check-in" : visit.programType === "PREPAID" ? `Use #${visit.visitNumber}` : `Visit #${visit.visitNumber}`}
+                                  {!visitProgramFilter && visitPrograms.length > 1 && (
+                                    <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
+                                      {visit.programName}
+                                    </span>
+                                  )}
                                 </p>
                                 <p className="text-[11px] text-muted-foreground">
                                   {visit.registeredBy
@@ -421,13 +503,46 @@ export function CustomerDetailSheet({
 
                   <TabsContent value="rewards" className="mt-0">
                     <div className="px-6 pt-3 pb-4">
+                      {/* Program filter pills */}
+                      {rewardPrograms.length > 1 && (
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          <button
+                            onClick={() => setRewardProgramFilter(null)}
+                            className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                              !rewardProgramFilter
+                                ? "bg-brand/10 text-brand border-brand/20"
+                                : "bg-transparent text-muted-foreground border-border hover:border-brand/30"
+                            }`}
+                          >
+                            All
+                          </button>
+                          {rewardPrograms.map((name) => (
+                            <button
+                              key={name}
+                              onClick={() => setRewardProgramFilter(rewardProgramFilter === name ? null : name)}
+                              className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                                rewardProgramFilter === name
+                                  ? "bg-brand/10 text-brand border-brand/20"
+                                  : "bg-transparent text-muted-foreground border-border hover:border-brand/30"
+                              }`}
+                            >
+                              {name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
                       {detail.rewards.length === 0 ? (
                         <p className="text-[13px] text-muted-foreground text-center py-8">
                           No rewards earned yet.
                         </p>
+                      ) : filteredRewards.length === 0 ? (
+                        <p className="text-[13px] text-muted-foreground text-center py-8">
+                          No rewards for this program.
+                        </p>
                       ) : (
                         <div className="space-y-0">
-                          {detail.rewards.map((reward) => {
+                          {filteredRewards.map((reward) => {
                             const config =
                               rewardStatusConfig[reward.status] ??
                               rewardStatusConfig.EXPIRED
@@ -442,9 +557,11 @@ export function CustomerDetailSheet({
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[13px] font-medium">
                                     {reward.description}
-                                    <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
-                                      {reward.programName}
-                                    </span>
+                                    {!rewardProgramFilter && rewardPrograms.length > 1 && (
+                                      <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
+                                        {reward.programName}
+                                      </span>
+                                    )}
                                   </p>
                                   <p className="text-[11px] text-muted-foreground">
                                     Earned {format(new Date(reward.earnedAt), "MMM d, yyyy")}
@@ -487,19 +604,30 @@ export function CustomerDetailSheet({
 
               {/* Actions — pinned at bottom */}
               <div className="shrink-0 p-4 border-t border-border flex flex-wrap items-center gap-2">
-                {onRegisterVisit && (
-                  <Button
-                    size="sm"
-                    className="gap-1.5 text-[13px] h-9 flex-1 min-w-[120px]"
-                    onClick={() => {
-                      onOpenChange(false)
-                      onRegisterVisit(detail.id, detail.fullName)
-                    }}
-                  >
-                    <Stamp className="size-3.5" />
-                    Register Visit
-                  </Button>
-                )}
+                {onRegisterVisit && (() => {
+                  const ActionIcon = primaryType === "PREPAID" ? CreditCard
+                    : primaryType === "MEMBERSHIP" ? Crown
+                    : primaryType === "COUPON" ? Ticket
+                    : primaryType === "POINTS" ? Coins
+                    : Stamp
+                  const actionLabel = primaryType === "PREPAID" ? "Use Pass"
+                    : primaryType === "MEMBERSHIP" ? "Check In"
+                    : primaryType === "COUPON" ? "Redeem Coupon"
+                    : "Register Visit"
+                  return (
+                    <Button
+                      size="sm"
+                      className="gap-1.5 text-[13px] h-9 flex-1 min-w-[120px]"
+                      onClick={() => {
+                        onOpenChange(false)
+                        onRegisterVisit(detail.id, detail.fullName)
+                      }}
+                    >
+                      <ActionIcon className="size-3.5" />
+                      {actionLabel}
+                    </Button>
+                  )
+                })()}
                 <Button
                   variant="outline"
                   size="sm"
@@ -587,16 +715,170 @@ export function CustomerDetailSheet({
   )
 }
 
-// ─── Enrollment Progress Section ─────────────────────────────
+// ─── Enrollment Cards Section ─────────────────────────────
+
+const typeLabels: Record<string, string> = {
+  STAMP_CARD: "Stamp Card",
+  COUPON: "Coupon",
+  MEMBERSHIP: "Membership",
+  POINTS: "Points",
+  PREPAID: "Prepaid Pass",
+}
+
+function EnrollmentCard({ enrollment }: { enrollment: EnrollmentDetail }) {
+  const TypeIcon = visitTypeIcons[enrollment.programType] ?? Stamp
+  const statusCfg = enrollmentStatusConfig[enrollment.status] ?? enrollmentStatusConfig.CANCELLED
+  const isInactive = enrollment.status !== "ACTIVE"
+  const design = buildWalletDesign(enrollment)
+  const walletLabel = enrollment.walletPassType === "APPLE" ? "Apple Wallet"
+    : enrollment.walletPassType === "GOOGLE" ? "Google Wallet"
+    : null
+
+  return (
+    <div className={`rounded-lg border border-border p-3 ${isInactive ? "opacity-60" : ""}`}>
+      <div className="flex gap-3">
+        {/* Mini card preview */}
+        {design && (
+          <div className="shrink-0">
+            <WalletPassRenderer
+              design={design}
+              format="apple"
+              restaurantName=""
+              programName={enrollment.programName}
+              {...getRendererProps(enrollment)}
+              compact
+              width={72}
+              height={96}
+            />
+          </div>
+        )}
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          {/* Header: icon + name + status */}
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <TypeIcon className="size-3 text-brand shrink-0" />
+            <p className="text-[12px] font-medium truncate flex-1">{enrollment.programName}</p>
+            <Badge
+              variant="outline"
+              className={`text-[10px] px-1.5 py-0 shrink-0 ${statusCfg.className}`}
+            >
+              {statusCfg.label}
+            </Badge>
+          </div>
+
+          {/* Type-specific content */}
+          {enrollment.programType === "STAMP_CARD" && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-brand transition-all"
+                    style={{ width: `${Math.min((enrollment.currentCycleVisits / enrollment.visitsRequired) * 100, 100)}%` }}
+                  />
+                </div>
+                <span className="text-[11px] tabular-nums font-medium">
+                  {enrollment.currentCycleVisits}/{enrollment.visitsRequired}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {getProgressText(enrollment)}
+              </p>
+            </div>
+          )}
+
+          {enrollment.programType === "COUPON" && (
+            <p className="text-[11px] text-muted-foreground">
+              {enrollment.status === "COMPLETED" ? "Coupon redeemed" : "Ready to redeem"}
+            </p>
+          )}
+
+          {enrollment.programType === "MEMBERSHIP" && (
+            <div className="space-y-0.5">
+              {enrollment.expiresAt && (
+                <p className="text-[11px] text-muted-foreground">
+                  {enrollment.status === "EXPIRED" ? "Expired" : "Expires"} {format(new Date(enrollment.expiresAt), "MMM d, yyyy")}
+                </p>
+              )}
+              {enrollment.status === "SUSPENDED" && enrollment.suspendedAt && (
+                <p className="text-[11px] text-warning">
+                  Suspended {format(new Date(enrollment.suspendedAt), "MMM d, yyyy")}
+                </p>
+              )}
+              {enrollment.status === "ACTIVE" && (
+                <p className="text-[11px] text-muted-foreground">
+                  {enrollment.totalVisits} check-in{enrollment.totalVisits !== 1 ? "s" : ""}
+                </p>
+              )}
+            </div>
+          )}
+
+          {enrollment.programType === "POINTS" && (() => {
+            const balance = enrollment.pointsBalance ?? 0
+            const config = parsePointsConfig(enrollment.programConfig)
+            const cheapest = config ? getCheapestCatalogItem(config) : null
+            return (
+              <div className="space-y-0.5">
+                <p className="text-base font-semibold tabular-nums leading-tight">{balance} <span className="text-[11px] font-normal text-muted-foreground">pts</span></p>
+                {cheapest && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Next: {cheapest.name} ({cheapest.pointsCost} pts)
+                  </p>
+                )}
+              </div>
+            )
+          })()}
+
+          {enrollment.programType === "PREPAID" && (() => {
+            const remaining = enrollment.remainingUses ?? 0
+            const config = parsePrepaidConfig(enrollment.programConfig)
+            const total = config?.totalUses ?? 0
+            const pct = total > 0 ? Math.min((remaining / total) * 100, 100) : 0
+            const useLabel = config?.useLabel ?? "use"
+            return (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-brand transition-all"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="text-[11px] tabular-nums font-medium">
+                    {remaining}/{total}
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {remaining} {useLabel}{remaining !== 1 ? "s" : ""} remaining
+                  {config?.validUntil && ` · Expires ${format(new Date(config.validUntil), "MMM d, yyyy")}`}
+                </p>
+              </div>
+            )
+          })()}
+
+          {/* Footer: wallet indicator + enrolled date */}
+          <div className="flex items-center gap-2 mt-1.5">
+            {walletLabel && (
+              <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                <Smartphone className="size-2.5" />
+                {walletLabel}
+              </span>
+            )}
+            <span className="text-[10px] text-muted-foreground">
+              {walletLabel && "·"} Enrolled {format(new Date(enrollment.enrolledAt), "MMM d, yyyy")}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function EnrollmentProgressSection({
   enrollments,
 }: {
   enrollments: EnrollmentDetail[]
 }) {
-  const activeEnrollments = enrollments.filter((e) => e.status === "ACTIVE")
-  const otherEnrollments = enrollments.filter((e) => e.status !== "ACTIVE")
-
   if (enrollments.length === 0) {
     return (
       <div className="flex flex-col items-center py-6">
@@ -605,156 +887,18 @@ function EnrollmentProgressSection({
     )
   }
 
-  // Single enrollment — show WalletPassRenderer preview if design data available,
-  // otherwise fall back to full-size ProgressRing
-  if (activeEnrollments.length === 1 && otherEnrollments.length === 0) {
-    const enrollment = activeEnrollments[0]
-    const design = buildWalletDesign(enrollment)
+  // Sort: active first, then by enrolled date
+  const sorted = [...enrollments].sort((a, b) => {
+    if (a.status === "ACTIVE" && b.status !== "ACTIVE") return -1
+    if (a.status !== "ACTIVE" && b.status === "ACTIVE") return 1
+    return new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime()
+  })
 
-    if (design) {
-      return (
-        <div className="flex items-center justify-center py-6">
-          <div className="flex flex-col items-center gap-2">
-            <WalletPassRenderer
-              design={design}
-              format="apple"
-              restaurantName=""
-              programName={enrollment.programName}
-              {...(enrollment.programType === "POINTS"
-                ? getPointsRendererProps(enrollment)
-                : {
-                    currentVisits: enrollment.currentCycleVisits,
-                    totalVisits: enrollment.visitsRequired,
-                    rewardDescription: getWalletRewardText(enrollment.programConfig, enrollment.rewardDescription),
-                  })}
-              compact
-              width={220}
-            />
-            <p className="text-[11px] text-muted-foreground">
-              {getProgressText(enrollment)}
-            </p>
-          </div>
-        </div>
-      )
-    }
-
-    // Fallback: no card design data
-    return (
-      <div className="flex items-center justify-center py-6">
-        <div className="text-center">
-          {enrollment.programType === "STAMP_CARD" ? (
-            <ProgressRing
-              current={enrollment.currentCycleVisits}
-              total={enrollment.visitsRequired}
-            />
-          ) : (
-            <div className="flex size-[120px] items-center justify-center rounded-full bg-brand/10 mx-auto">
-              {(() => {
-                const Icon = visitTypeIcons[enrollment.programType] ?? Stamp
-                return <Icon className="size-10 text-brand" />
-              })()}
-            </div>
-          )}
-          <p className="text-[12px] font-medium mt-2">{enrollment.programName}</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            {getProgressText(enrollment)}
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  // Multiple enrollments — show mini WalletPassRenderer per enrollment when design
-  // data is available, otherwise fall back to compact ProgressRings
   return (
-    <div className="py-4 px-6">
-      <div className="flex flex-wrap items-start justify-center gap-4">
-        {activeEnrollments.map((enrollment) => {
-          const design = buildWalletDesign(enrollment)
-
-          if (design) {
-            return (
-              <div key={enrollment.enrollmentId} className="flex flex-col items-center gap-1.5">
-                <WalletPassRenderer
-                  design={design}
-                  format="apple"
-                  restaurantName=""
-                  programName={enrollment.programName}
-                  {...(enrollment.programType === "POINTS"
-                    ? getPointsRendererProps(enrollment)
-                    : {
-                        currentVisits: enrollment.currentCycleVisits,
-                        totalVisits: enrollment.visitsRequired,
-                        rewardDescription: getWalletRewardText(enrollment.programConfig, enrollment.rewardDescription),
-                      })}
-                  compact
-                  width={120}
-                  height={160}
-                />
-                <p className="text-[10px] text-muted-foreground">
-                  {getCompactProgressText(enrollment)}
-                </p>
-              </div>
-            )
-          }
-
-          // Fallback: no card design data
-          if (enrollment.programType === "STAMP_CARD") {
-            return (
-              <div key={enrollment.enrollmentId} className="text-center">
-                <ProgressRing
-                  current={enrollment.currentCycleVisits}
-                  total={enrollment.visitsRequired}
-                  size={80}
-                  strokeWidth={6}
-                />
-                <p className="text-[11px] font-medium mt-1.5 max-w-[100px] truncate">
-                  {enrollment.programName}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">
-                  {enrollment.visitsRequired - enrollment.currentCycleVisits} to go
-                </p>
-              </div>
-            )
-          }
-
-          // Fallback for non-stamp types: type icon
-          const FallbackIcon = visitTypeIcons[enrollment.programType] ?? Stamp
-          return (
-            <div key={enrollment.enrollmentId} className="text-center">
-              <div className="flex size-[80px] items-center justify-center rounded-full bg-brand/10 mx-auto">
-                <FallbackIcon className="size-7 text-brand" />
-              </div>
-              <p className="text-[11px] font-medium mt-1.5 max-w-[100px] truncate">
-                {enrollment.programName}
-              </p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                {getCompactProgressText(enrollment)}
-              </p>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Inactive enrollments summary */}
-      {otherEnrollments.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-          {otherEnrollments.map((enrollment) => {
-            const config = enrollmentStatusConfig[enrollment.status] ?? enrollmentStatusConfig.CANCELLED
-            const TypeIcon = visitTypeIcons[enrollment.programType] ?? Stamp
-            return (
-              <Badge
-                key={enrollment.enrollmentId}
-                variant="outline"
-                className={`text-[10px] px-1.5 py-0 gap-1 ${config.className}`}
-              >
-                <TypeIcon className="size-3" />
-                {enrollment.programName} — {config.label}
-              </Badge>
-            )
-          })}
-        </div>
-      )}
+    <div className="px-6 py-4 space-y-2">
+      {sorted.map((enrollment) => (
+        <EnrollmentCard key={enrollment.enrollmentId} enrollment={enrollment} />
+      ))}
     </div>
   )
 }

@@ -27,6 +27,7 @@ export type EnrollmentSummary = {
   visitsRequired: number
   totalVisits: number
   pointsBalance?: number
+  remainingUses?: number
   programConfig?: unknown
   status: EnrollmentStatus
   walletPassType: WalletPassType
@@ -41,18 +42,21 @@ export type EnrollmentDetail = {
   programId: string
   programName: string
   programType: string
+  programConfig?: unknown
   programStatus: ProgramStatus
   currentCycleVisits: number
   visitsRequired: number
   totalVisits: number
   pointsBalance?: number
-  programConfig?: unknown
+  remainingUses?: number
   totalRewardsRedeemed: number
   rewardDescription: string
   status: EnrollmentStatus
   walletPassType: WalletPassType
   enrolledAt: Date
   frozenAt: Date | null
+  suspendedAt: Date | null
+  expiresAt: Date | null
   cardDesign: EnrollmentCardDesign
 }
 

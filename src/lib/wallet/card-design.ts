@@ -2,7 +2,7 @@ import crypto from "crypto"
 
 // ─── Types ──────────────────────────────────────────────────
 
-export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON"
+export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID"
 export type PatternStyle = "NONE" | "DOTS" | "WAVES" | "GEOMETRIC" | "CHEVRON" | "CROSSHATCH" | "DIAMONDS" | "CONFETTI" | "SOLID_PRIMARY" | "SOLID_SECONDARY" | "STAMP_GRID"
 export type ProgressStyle = "NUMBERS" | "CIRCLES" | "SQUARES" | "STARS" | "STAMPS" | "PERCENTAGE" | "REMAINING"
 export type FontFamily = "SANS" | "SERIF" | "ROUNDED" | "MONO"
@@ -407,6 +407,7 @@ export type PassFieldLayout = {
  * STAMP/POINTS: header=restaurant+memberNumber, primary=progress, secondary=nextReward+totalVisits+memberSince, auxiliary=customerName
  * COUPON: header=restaurant, primary=discount, secondary=validUntil+couponCode+customerName
  * TIER: header=restaurant, primary=tierName, secondary=benefits+memberSince+customerName
+ * PREPAID: header=restaurant, primary=remaining, secondary=prepaidValidUntil+totalUsed+customerName
  */
 export function getFieldLayout(cardType?: CardType): PassFieldLayout {
   if (cardType === "COUPON") {
@@ -435,6 +436,21 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
       google: {
         rows: 1,
         fields: ["tierName", "benefits", "memberSince", "customerName"],
+      },
+    }
+  }
+
+  if (cardType === "PREPAID") {
+    return {
+      apple: {
+        header: ["restaurant"],
+        primary: ["remaining"],
+        secondary: ["prepaidValidUntil", "totalUsed", "customerName"],
+        auxiliary: [],
+      },
+      google: {
+        rows: 1,
+        fields: ["remaining", "prepaidValidUntil", "totalUsed", "customerName"],
       },
     }
   }

@@ -6,7 +6,7 @@ import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem, getWalletRewardText } from "../../program-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, getCheapestCatalogItem, getWalletRewardText } from "../../program-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -42,6 +42,7 @@ export type GooglePassGenerationInput = {
   programType?: string
   programConfig?: unknown
   pointsBalance?: number
+  remainingUses?: number
   // Prize reveal
   hasUnrevealedPrize?: boolean
   restaurantSlug?: string
@@ -84,6 +85,7 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   const isCoupon = input.programType === "COUPON"
   const isMembership = input.programType === "MEMBERSHIP"
   const isPoints = input.programType === "POINTS"
+  const isPrepaid = input.programType === "PREPAID"
 
   // Build card row template — all types use textModulesData references
   const cardRowTemplateInfos: Record<string, unknown>[] = []
@@ -104,17 +106,32 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
       },
     })
   } else if (isMembership) {
-    // Row 1: Tier + Check-ins
+    // Row 1: Tier + Status
     cardRowTemplateInfos.push({
       twoItems: {
         startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['tier']" }] } },
-        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['checkIns']" }] } },
+        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['status']" }] } },
       },
     })
     // Row 2: Benefits + Member since
     cardRowTemplateInfos.push({
       twoItems: {
         startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['benefits']" }] } },
+        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
+      },
+    })
+  } else if (isPrepaid) {
+    // Row 1: Remaining + Use label
+    cardRowTemplateInfos.push({
+      twoItems: {
+        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['remaining']" }] } },
+        endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['validUntil']" }] } },
+      },
+    })
+    // Row 2: Total uses + Added date
+    cardRowTemplateInfos.push({
+      twoItems: {
+        startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['totalUsed']" }] } },
         endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
       },
     })
@@ -136,6 +153,7 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
     if (isCoupon) return name
     if (isMembership) return `${name} Membership`
     if (isPoints) return `${name} Points`
+    if (isPrepaid) return `${name} Pass`
     return `${name} Loyalty`
   })()
 
@@ -325,6 +343,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
   const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
   const pointsConfig = input.programType === "POINTS" ? parsePointsConfig(input.programConfig) : null
+  const prepaidConfig = input.programType === "PREPAID" ? parsePrepaidConfig(input.programConfig) : null
 
   // Type-specific loyalty points and text modules
   let loyaltyPoints: Record<string, unknown>
@@ -361,9 +380,26 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     }
     textModulesData = [
       { id: "tier", header: formatLabel("TIER", labelFmt), body: membershipConfig.membershipTier },
-      { id: "checkIns", header: formatLabel("CHECK-INS", labelFmt), body: String(input.totalVisits) },
+      { id: "status", header: formatLabel("STATUS", labelFmt), body: "Active" },
       { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
+    ]
+  } else if (input.programType === "PREPAID" && prepaidConfig) {
+    const remaining = input.remainingUses ?? 0
+    const totalUsed = input.totalVisits
+    loyaltyPoints = {
+      label: formatLabel("REMAINING", labelFmt),
+      balance: { string: `${remaining} / ${prepaidConfig.totalUses}` },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("USED", labelFmt),
+      balance: { int: totalUsed },
+    }
+    textModulesData = [
+      { id: "remaining", header: formatLabel(`${prepaidConfig.useLabel.toUpperCase()}S LEFT`, labelFmt), body: `${remaining} / ${prepaidConfig.totalUses}` },
+      { id: "validUntil", header: formatLabel("VALID UNTIL", labelFmt), body: prepaidConfig.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+      { id: "totalUsed", header: formatLabel("TOTAL USED", labelFmt), body: String(totalUsed) },
+      { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
     ]
   } else if (input.programType === "POINTS" && pointsConfig) {
     loyaltyPoints = {
@@ -552,7 +588,8 @@ async function patchLoyaltyClass(loyaltyClass: Record<string, unknown>): Promise
       }
     )
 
-    if (!response.ok) {
+    if (!response.ok && response.status !== 404) {
+      // 404 is expected for new programs — class is created when user saves the JWT
       const errorText = await response.text().catch(() => "")
       console.error(`Loyalty class PATCH failed (${response.status}):`, errorText.slice(0, 200))
     }

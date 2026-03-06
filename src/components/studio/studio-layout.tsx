@@ -28,6 +28,7 @@ function programTypeToCardType(programType: string): CardType {
   switch (programType) {
     case "COUPON": return "COUPON"
     case "MEMBERSHIP": return "TIER"
+    case "PREPAID": return "PREPAID"
     default: return "STAMP"
   }
 }
@@ -140,7 +141,7 @@ export function StudioLayout({
     try {
       const result = await saveCardDesign({
         programId,
-        cardType: state.wallet.cardType as "STAMP" | "POINTS" | "TIER" | "COUPON",
+        cardType: state.wallet.cardType as "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID",
         showStrip: state.wallet.showStrip,
         primaryColor: state.wallet.primaryColor,
         secondaryColor: state.wallet.secondaryColor,

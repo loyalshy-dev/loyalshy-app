@@ -32,7 +32,7 @@ export type ShowcaseMetadata = z.infer<typeof metadataSchema>
 
 const saveDesignSchema = z.object({
   id: z.string().min(1),
-  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON"]).optional().default("STAMP"),
+  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON", "PREPAID"]).optional().default("STAMP"),
   showStrip: z.boolean(),
   primaryColor: z.string().max(20).optional().default(""),
   secondaryColor: z.string().max(20).optional().default(""),

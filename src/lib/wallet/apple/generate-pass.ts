@@ -12,7 +12,7 @@ import {
 } from "./constants"
 import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters } from "../card-design"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, getCheapestCatalogItem } from "../../program-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, getCheapestCatalogItem } from "../../program-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -45,6 +45,8 @@ export type PassGenerationInput = {
   programConfig?: unknown
   // Points balance for POINTS program type
   pointsBalance?: number
+  // Remaining uses for PREPAID program type
+  remainingUses?: number
   // Enrollment + restaurant slug for generating card page links (prize reveal)
   enrollmentId?: string
   restaurantSlug?: string
@@ -153,6 +155,7 @@ export async function generateApplePass(
     if (input.programType === "COUPON") return `${name} Coupon`
     if (input.programType === "MEMBERSHIP") return `${name} Membership`
     if (input.programType === "POINTS") return `${name} Points Card`
+    if (input.programType === "PREPAID") return `${name} Pass`
     return `${name} Loyalty Card`
   })()
 
@@ -210,6 +213,7 @@ export async function generateApplePass(
   const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
   const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
   const pointsConfig = input.programType === "POINTS" ? parsePointsConfig(input.programConfig) : null
+  const prepaidConfig = input.programType === "PREPAID" ? parsePrepaidConfig(input.programConfig) : null
   const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Field data map — all labels go through formatLabel
@@ -232,6 +236,10 @@ export async function generateApplePass(
     pointsBalance: { key: "pointsBalance", label: formatLabel("POINTS", labelFmt), value: String(input.pointsBalance ?? 0) },
     nextRewardPoints: { key: "nextRewardPoints", label: formatLabel("NEXT REWARD", labelFmt), value: cheapestItem ? `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` : "" },
     earnRate: { key: "earnRate", label: formatLabel("EARN RATE", labelFmt), value: pointsConfig ? `${pointsConfig.pointsPerVisit} pts/visit` : "" },
+    // PREPAID fields
+    remaining: { key: "remaining", label: formatLabel("REMAINING", labelFmt), value: `${input.remainingUses ?? 0} / ${prepaidConfig?.totalUses ?? 0}` },
+    prepaidValidUntil: { key: "prepaidValidUntil", label: formatLabel("VALID UNTIL", labelFmt), value: prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+    totalUsed: { key: "totalUsed", label: formatLabel("TOTAL USED", labelFmt), value: String(input.totalVisits) },
   }
 
   // Populate header fields
@@ -323,6 +331,24 @@ export async function generateApplePass(
       label: "REWARD CATALOG",
       value: catalogText,
     })
+  } else if (input.programType === "PREPAID" && prepaidConfig) {
+    pass.backFields.push({
+      key: "prepaidDetails",
+      label: "Pass Details",
+      value: `${input.remainingUses ?? 0} of ${prepaidConfig.totalUses} ${prepaidConfig.useLabel}s remaining.${prepaidConfig.rechargeable ? " This pass can be recharged." : ""}`,
+    })
+    if (prepaidConfig.validUntil) {
+      pass.backFields.push({
+        key: "prepaidExpiry",
+        label: "Valid Until",
+        value: new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+      })
+    }
+    pass.backFields.push({
+      key: "prepaidUsage",
+      label: "How to Use",
+      value: `Show this pass to staff each time you use a ${prepaidConfig.useLabel}. Your remaining balance will be updated automatically.`,
+    })
   } else {
     // STAMP_CARD (default)
     pass.backFields.push(
@@ -340,7 +366,7 @@ export async function generateApplePass(
   }
 
   // T&C from program or type-specific config
-  const termsText = (input.programType === "COUPON" ? couponConfig?.terms : input.programType === "MEMBERSHIP" ? membershipConfig?.terms : null) ?? input.termsAndConditions
+  const termsText = (input.programType === "COUPON" ? couponConfig?.terms : input.programType === "MEMBERSHIP" ? membershipConfig?.terms : input.programType === "PREPAID" ? prepaidConfig?.terms : null) ?? input.termsAndConditions
   if (termsText) {
     pass.backFields.push({
       key: "terms",

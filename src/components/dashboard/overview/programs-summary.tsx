@@ -19,6 +19,8 @@ function getMetricLine(program: ProgramSummaryItem): string {
       return `${program.activeEnrollments} members \u00b7 ${program.totalVisits} check-ins`
     case "POINTS":
       return `${program.activeEnrollments} enrolled \u00b7 ${program.redeemedRewards} redeemed`
+    case "PREPAID":
+      return `${program.activeEnrollments} issued \u00b7 ${program.totalVisits} uses`
   }
 }
 

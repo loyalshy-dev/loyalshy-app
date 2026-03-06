@@ -10,7 +10,7 @@ import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { buildCardUrl } from "@/lib/card-access"
-import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/program-config"
+import { parseCouponConfig, parsePrepaidConfig, parseMembershipConfig, computeMembershipExpiresAt, parseMinigameConfig, weightedRandomPrize } from "@/lib/program-config"
 import { verifyCardSignature } from "@/lib/card-access"
 import type { PublicProgramInfo } from "@/types/enrollment"
 import type { MinigameConfig } from "@/types/program-types"
@@ -169,7 +169,8 @@ export type EnrollmentCardData = {
   currentCycleVisits: number
   totalVisits: number
   hasAvailableReward: boolean
-  enrollmentStatus: "ACTIVE" | "COMPLETED" | "FROZEN"
+  remainingUses: number
+  enrollmentStatus: "ACTIVE" | "COMPLETED" | "FROZEN" | "SUSPENDED" | "EXPIRED"
   restaurant: {
     name: string
     slug: string
@@ -180,7 +181,7 @@ export type EnrollmentCardData = {
     name: string
     visitsRequired: number
     rewardDescription: string
-    programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS"
+    programType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "PREPAID"
     config: unknown
     cardDesign: PublicProgramInfo["cardDesign"]
   }
@@ -199,6 +200,7 @@ export async function getEnrollmentCardData(
       walletPassId: true,
       currentCycleVisits: true,
       totalVisits: true,
+      remainingUses: true,
       status: true,
       rewards: {
         where: { status: { in: ["AVAILABLE", "REDEEMED"] } },
@@ -268,6 +270,7 @@ export async function getEnrollmentCardData(
     customerName: enrollment.customer.fullName,
     currentCycleVisits: enrollment.currentCycleVisits,
     totalVisits: enrollment.totalVisits,
+    remainingUses: enrollment.remainingUses,
     hasAvailableReward: enrollment.rewards.some((r) => r.status === "AVAILABLE"),
     enrollmentStatus: enrollment.status,
     restaurant: enrollment.loyaltyProgram.restaurant,
@@ -456,11 +459,18 @@ export async function joinProgram(
   if (!enrollment) {
     // Generate walletPassId upfront so the browser card page has a scannable QR
     const walletPassId = randomUUID()
+    // Type-specific enrollment data
+    const prepaidConfig = program.programType === "PREPAID" ? parsePrepaidConfig(program.config) : null
+    const membershipConfig = program.programType === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
+
     enrollment = await db.enrollment.create({
       data: {
         customerId: customer.id,
         loyaltyProgramId: program.id,
         walletPassId,
+        ...(prepaidConfig ? { remainingUses: prepaidConfig.totalUses } : {}),
+        ...(prepaidConfig?.validUntil ? { expiresAt: new Date(prepaidConfig.validUntil) } : {}),
+        ...(membershipConfig ? { expiresAt: computeMembershipExpiresAt(membershipConfig) } : {}),
       },
       select: {
         id: true,
@@ -546,6 +556,8 @@ export async function requestWalletPass(
       id: true,
       currentCycleVisits: true,
       totalVisits: true,
+      pointsBalance: true,
+      remainingUses: true,
       walletPassId: true,
       walletPassSerialNumber: true,
       walletPassType: true,
@@ -619,6 +631,8 @@ export async function requestWalletPass(
       customerCreatedAt: customer.createdAt,
       currentCycleVisits: enrollment.currentCycleVisits,
       totalVisits: enrollment.totalVisits,
+      pointsBalance: enrollment.pointsBalance,
+      remainingUses: enrollment.remainingUses,
       walletPassId: enrollment.walletPassId,
       walletPassSerialNumber: enrollment.walletPassSerialNumber,
       walletPassType: enrollment.walletPassType,
@@ -643,6 +657,7 @@ type EnrollmentPassData = {
   currentCycleVisits: number
   totalVisits: number
   pointsBalance?: number
+  remainingUses?: number
   walletPassId: string | null
   walletPassSerialNumber: string | null
   walletPassType: string
@@ -707,6 +722,7 @@ async function issuePassForEnrollment(
         programType: program.programType,
         programConfig: program.config,
         pointsBalance: enrollment.pointsBalance ?? 0,
+        remainingUses: enrollment.remainingUses ?? 0,
       })
 
       // Store wallet fields on Enrollment (not Customer)
@@ -785,6 +801,7 @@ async function issuePassForEnrollment(
       programType: program.programType,
       programConfig: program.config,
       pointsBalance: enrollment.pointsBalance ?? 0,
+      remainingUses: enrollment.remainingUses ?? 0,
       hasUnrevealedPrize,
       restaurantSlug: restaurant.slug,
     })

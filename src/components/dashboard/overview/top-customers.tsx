@@ -1,6 +1,7 @@
 "use client"
 
 import { formatDistanceToNow } from "date-fns"
+import { Stamp, Ticket, Crown, Coins, CreditCard } from "lucide-react"
 import type { TopCustomerItem } from "@/server/analytics"
 
 function getInitials(name: string): string {
@@ -21,6 +22,14 @@ function getAvatarColor(name: string): string {
   }
   const hue = Math.abs(hash) % 360
   return `oklch(0.55 0.12 ${hue})`
+}
+
+const typeIcons: Record<string, typeof Stamp> = {
+  STAMP_CARD: Stamp,
+  COUPON: Ticket,
+  MEMBERSHIP: Crown,
+  POINTS: Coins,
+  PREPAID: CreditCard,
 }
 
 type TopCustomersProps = {
@@ -47,40 +56,46 @@ export function TopCustomers({ customers }: TopCustomersProps) {
         Top Customers
       </h3>
       <div className="space-y-0">
-        {customers.map((customer, i) => (
-          <div
-            key={customer.id}
-            className="flex items-center gap-3 py-2.5 border-b border-border last:border-0"
-          >
+        {customers.map((customer) => {
+          const TypeIcon = customer.primaryProgramType
+            ? typeIcons[customer.primaryProgramType]
+            : null
+
+          return (
             <div
-              className="flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-medium text-white"
-              style={{ backgroundColor: getAvatarColor(customer.fullName) }}
+              key={customer.id}
+              className="flex items-center gap-3 py-2.5 border-b border-border last:border-0"
             >
-              {getInitials(customer.fullName)}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-medium truncate">
-                {customer.fullName}
-              </p>
-              {customer.lastVisitAt && (
-                <p className="text-[11px] text-muted-foreground">
-                  Last visit{" "}
-                  {formatDistanceToNow(new Date(customer.lastVisitAt), {
-                    addSuffix: true,
-                  })}
+              <div
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-medium text-white"
+                style={{ backgroundColor: getAvatarColor(customer.fullName) }}
+              >
+                {getInitials(customer.fullName)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-medium truncate">
+                  {customer.fullName}
                 </p>
-              )}
+                {customer.lastVisitAt && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Last visit{" "}
+                    {formatDistanceToNow(new Date(customer.lastVisitAt), {
+                      addSuffix: true,
+                    })}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {TypeIcon && (
+                  <TypeIcon className="size-3 text-muted-foreground/60" />
+                )}
+                <span className="text-[12px] font-medium tabular-nums text-muted-foreground">
+                  {customer.engagementLabel}
+                </span>
+              </div>
             </div>
-            <div className="text-right shrink-0">
-              <span className="text-sm font-semibold tabular-nums">
-                {customer.totalVisits}
-              </span>
-              <span className="text-[11px] text-muted-foreground ml-1">
-                visits
-              </span>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

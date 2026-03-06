@@ -16,6 +16,8 @@ export async function GET(
       id: true,
       currentCycleVisits: true,
       totalVisits: true,
+      pointsBalance: true,
+      remainingUses: true,
       walletPassSerialNumber: true,
       walletPassId: true,
       enrolledAt: true,
@@ -30,6 +32,8 @@ export async function GET(
         select: {
           id: true,
           name: true,
+          programType: true,
+          config: true,
           visitsRequired: true,
           rewardDescription: true,
           rewardExpiryDays: true,
@@ -91,6 +95,10 @@ export async function GET(
       restaurantWebsite: restaurant.website,
       programName: program.name,
       cardDesign,
+      programType: program.programType,
+      programConfig: program.config,
+      pointsBalance: enrollment.pointsBalance,
+      remainingUses: enrollment.remainingUses,
     })
 
     return new NextResponse(new Uint8Array(passBuffer), {
