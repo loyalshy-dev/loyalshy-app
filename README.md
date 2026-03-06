@@ -1,6 +1,6 @@
-# Loyalshy — Digital Loyalty Card SaaS
+# Loyalshy — Digital Wallet Pass Platform
 
-Multi-tenant SaaS for restaurants to create digital loyalty cards with Apple and Google Wallet passes. Restaurant staff register customer visits; after N visits, customers earn rewards.
+Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple and Google Wallet integration. Supports 10 pass types: stamp cards, coupons, memberships, points programs, prepaid passes, gift cards, event tickets, access passes, transit passes, and business IDs.
 
 ## Tech Stack
 
@@ -31,8 +31,8 @@ docker run -d --name loyalshy-db \
   -p 5433:5432 \
   postgres:18
 
-# Run migrations
-pnpm prisma migrate dev
+# Push the schema
+pnpm prisma db push
 
 # Seed the database (optional)
 pnpm prisma db seed
@@ -40,7 +40,7 @@ pnpm prisma db seed
 
 ### 3. Configure environment variables
 
-Copy `.env.local` and fill in the values. See sections below for service-specific setup.
+Copy `.env.example` to `.env.local` and fill in the values. See sections below for service-specific setup.
 
 ### 4. Run the dev server
 
@@ -52,146 +52,71 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
+## Key Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **Organization** | Tenant — a business using the platform |
+| **PassTemplate** | Blueprint for a type of pass (e.g., "Coffee Stamp Card", "VIP Membership") |
+| **PassInstance** | An issued pass — links a Contact to a PassTemplate |
+| **Contact** | End user who receives passes |
+| **Interaction** | Any event on a pass (stamp, check-in, points earn, ticket scan, etc.) |
+
+## Pass Types
+
+| Type | Description |
+|------|-------------|
+| STAMP_CARD | Collect stamps, earn rewards |
+| COUPON | Single or multi-use discount codes |
+| MEMBERSHIP | Digital ID with tier, benefits, lifecycle |
+| POINTS | Earn and redeem points from a catalog |
+| PREPAID | Fixed-use passes with optional recharge |
+| GIFT_CARD | Monetary balance with partial redemption |
+| TICKET | Event entry with scan tracking |
+| ACCESS | Facility/area access with time restrictions |
+| TRANSIT | Boarding passes with origin/destination |
+| BUSINESS_ID | Employee/member identification |
+
+---
+
 ## Google Wallet Setup (Free)
 
 Google Wallet passes require a Google Cloud service account and an Issuer ID. No paid program is needed.
 
-### Step 1 — Create a Google Cloud project
+See **`docs/google-oauth-setup.md`** for detailed instructions, or follow the quick steps:
 
-1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Click **New Project** (e.g. "Loyalshy Dev")
-3. Note the **Project ID**
-
-### Step 2 — Enable the Google Wallet API
-
-1. In the GCP console, go to **APIs & Services > Library**
-2. Search for **"Google Wallet API"**
-3. Click **Enable**
-
-### Step 3 — Create a service account
-
-1. Go to **IAM & Admin > Service Accounts**
-2. Click **Create Service Account**
-3. Name: `loyalshy-wallet` (or anything you prefer)
-4. Skip the optional role assignment
-5. Click **Done**
-6. Click the service account you just created
-7. Go to **Keys** tab > **Add Key** > **Create new key** > **JSON**
-8. A `.json` file will download — save it securely
-
-### Step 4 — Get a Wallet Issuer ID
-
-1. Go to [pay.google.com/business/console](https://pay.google.com/business/console)
-2. Sign up for the **Google Wallet API** issuer account
-3. Note your **Issuer ID** (a numeric string)
-4. Go to **Manage > API access** and add your service account email (from step 3) with the **Developer** role
-
-### Step 5 — Set environment variables
-
-Add to `.env.local`:
+1. Create a Google Cloud project and enable the **Google Wallet API**
+2. Create a service account and download the JSON key
+3. Get an Issuer ID at [pay.google.com/business/console](https://pay.google.com/business/console)
+4. Add your service account with the **Developer** role
 
 ```env
 GOOGLE_WALLET_ISSUER_ID="your-issuer-id"
-GOOGLE_WALLET_SERVICE_ACCOUNT_KEY='{"type":"service_account","project_id":"...","private_key_id":"...","private_key":"-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----\n","client_email":"...@....iam.gserviceaccount.com","client_id":"...","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token"}'
+GOOGLE_WALLET_SERVICE_ACCOUNT_KEY='{"type":"service_account",...}'
 ```
 
-Paste the **entire downloaded JSON** as a single-line string, or base64-encode it. Both formats are supported.
-
-### Testing Google Wallet
-
-1. Start the dev server (`pnpm dev`)
-2. Log in and create a restaurant with a loyalty program
-3. Add a customer
-4. Issue a Google Wallet pass from the customer detail view
-5. Or test the public flow at `/join/[your-restaurant-slug]`
-
-> **Note:** You need a real Android device or a Google account signed into Chrome to save the pass. On desktop, Google shows a preview only.
+> **Note:** Save URLs only work on Android with the Google Wallet app installed.
 
 ---
 
 ## Apple Wallet Setup ($99/year)
 
-Apple Wallet passes require an Apple Developer Program membership and signing certificates. There is no free tier.
+Apple Wallet passes require an Apple Developer Program membership and signing certificates.
 
-### Step 1 — Enroll in Apple Developer Program
+See **`docs/apple-wallet-setup.md`** for detailed instructions, or follow the quick steps:
 
-1. Go to [developer.apple.com/programs](https://developer.apple.com/programs/)
-2. Enroll ($99/year)
-3. Wait for approval (usually within 48 hours)
-
-### Step 2 — Create a Pass Type ID
-
-1. Go to [developer.apple.com/account](https://developer.apple.com/account)
-2. Navigate to **Certificates, Identifiers & Profiles > Identifiers**
-3. Click **+** and select **Pass Type IDs**
-4. Enter a description (e.g. "Loyalshy Loyalty") and identifier (e.g. `pass.com.yourcompany.loyalshy`)
-5. Click **Register**
-
-### Step 3 — Create a Pass signing certificate
-
-1. Go to **Certificates** and click **+**
-2. Under **Services**, select **Pass Type ID Certificate**
-3. Select your Pass Type ID from step 2
-4. Follow the prompts to create a CSR (Certificate Signing Request) using Keychain Access on macOS:
-   - Open **Keychain Access > Certificate Assistant > Request a Certificate from a Certificate Authority**
-   - Enter your email, set "Common Name" to anything, select "Saved to disk"
-5. Upload the CSR file
-6. Download the generated certificate (`.cer` file)
-7. Double-click to install it in Keychain Access
-
-### Step 4 — Export the certificate and key
-
-1. In **Keychain Access**, find the certificate under **My Certificates** (it will show your Pass Type ID)
-2. Expand it to see the private key
-3. Right-click the **certificate** (not the key) > **Export** > save as `.p12` (set a passphrase)
-4. Convert to PEM format:
-
-```bash
-# Extract the certificate
-openssl pkcs12 -in pass.p12 -clcerts -nokeys -out pass-cert.pem
-
-# Extract the private key
-openssl pkcs12 -in pass.p12 -nocerts -out pass-key.pem
-```
-
-### Step 5 — Download the WWDR certificate
-
-1. Download the **Apple WWDR G4 Certificate** from [apple.com/certificateauthority](https://www.apple.com/certificateauthority/)
-   - Direct link: `Apple Worldwide Developer Relations Certification Authority - G4`
-2. Convert to PEM if needed:
-
-```bash
-openssl x509 -inform der -in AppleWWDRCAG4.cer -out wwdr.pem
-```
-
-### Step 6 — Base64-encode and set environment variables
-
-```bash
-# Encode each file
-base64 -i pass-cert.pem | tr -d '\n'
-base64 -i pass-key.pem | tr -d '\n'
-base64 -i wwdr.pem | tr -d '\n'
-```
-
-Add to `.env.local`:
+1. Enroll in the [Apple Developer Program](https://developer.apple.com/programs/) ($99/year)
+2. Create a Pass Type ID and signing certificate
+3. Export certificate + key as PEM, base64-encode them
 
 ```env
 APPLE_PASS_TYPE_IDENTIFIER="pass.com.yourcompany.loyalshy"
 APPLE_TEAM_IDENTIFIER="YOUR_TEAM_ID"
-APPLE_PASS_CERTIFICATE="base64-encoded-pass-cert.pem"
-APPLE_PASS_KEY="base64-encoded-pass-key.pem"
-APPLE_PASS_KEY_PASSPHRASE="the-passphrase-you-set"
-APPLE_WWDR_CERTIFICATE="base64-encoded-wwdr.pem"
+APPLE_PASS_CERTIFICATE="base64-encoded-cert"
+APPLE_PASS_KEY="base64-encoded-key"
+APPLE_PASS_KEY_PASSPHRASE="your-passphrase"
+APPLE_WWDR_CERTIFICATE="base64-encoded-wwdr"
 ```
-
-Your Team Identifier can be found at [developer.apple.com/account](https://developer.apple.com/account) under **Membership Details**.
-
-### Testing Apple Wallet
-
-1. Start the dev server
-2. Issue an Apple Wallet pass from the dashboard or `/join/[slug]`
-3. On macOS, the `.pkpass` file opens in a Wallet preview
-4. On iOS (real device or Simulator), it prompts to add to Wallet
 
 ---
 
@@ -202,41 +127,17 @@ Your Team Identifier can be found at [developer.apple.com/account](https://devel
 | **Stripe** | For billing | [dashboard.stripe.com](https://dashboard.stripe.com) — use test mode keys |
 | **Resend** | For emails | [resend.com](https://resend.com) — free tier available |
 | **Trigger.dev** | For background jobs | [trigger.dev](https://trigger.dev) — free tier available |
-| **Vercel Blob** | For file uploads | [vercel.com](https://vercel.com) — included with Vercel |
+| **Cloudflare R2** | For file uploads | S3-compatible object storage |
 | **Sentry** | For error tracking | [sentry.io](https://sentry.io) — free tier available |
 | **Plausible** | For analytics | [plausible.io](https://plausible.io) — optional, privacy-first |
 
 ## Admin Panel
 
-Super admins can access the admin panel at `/admin`. Set the `SUPER_ADMIN_EMAIL` environment variable before the user registers — they will be auto-promoted on signup:
+Super admins can access the admin panel at `/admin`. Set `SUPER_ADMIN_EMAIL` before the user registers — they will be auto-promoted on signup:
 
 ```env
 SUPER_ADMIN_EMAIL="you@example.com"
 ```
-
-To promote an existing user, run the seed script:
-
-```bash
-ADMIN_EMAIL=you@example.com npx tsx prisma/seed-admin.ts
-```
-
-### Features
-
-- **Overview** — platform-wide stats (users, restaurants, revenue)
-- **Users** — list, search, ban/unban users
-- **Restaurants** — list, search, view restaurant details
-- **Showcase Cards** — manage the 5 card examples shown on the marketing landing page
-
-### Showcase Cards
-
-The marketing landing page displays up to 5 loyalty card examples in the hero and customer experience sections. By default, these are hardcoded templates. Super admins can customize them from `/admin/showcase`:
-
-1. **Add a card** — set restaurant name, visit counts, reward description, and customer info
-2. **Edit design** — opens the full card design studio (same panels as the program studio: templates, colors, shape, progress, strip, labels)
-3. **Reorder** — move cards up/down to control display order
-4. **Delete** — remove cards from the landing page
-
-When showcase cards exist in the database, they replace the hardcoded defaults on the landing page. If none exist, the hardcoded fallback displays automatically.
 
 ## Project Structure
 
@@ -245,17 +146,18 @@ When showcase cards exist in the database, they replace the hardcoded defaults o
   /app              — App Router pages
     /(auth)         — Login / Register / Forgot password
     /(dashboard)    — Protected dashboard routes
-    /(admin)        — Super admin panel (assertSuperAdmin)
-    /(admin-studio) — Showcase card studio (own layout, no shell)
-    /(studio)       — Program card design studio (own layout)
+    /(admin)        — Super admin panel
+    /(admin-studio) — Showcase card studio (own layout)
+    /(studio)       — Card design studio (own layout)
     /(public)       — Landing, pricing, QR scan pages
-    /api            — API routes
+    /api            — API routes (auth, wallet callbacks, webhooks)
   /components       — Reusable UI components
-  /lib              — Utilities, DB client, auth, DAL
-  /server           — Server actions
+  /lib              — Utilities, DB client, auth, DAL, wallet generation
+  /server           — Server actions (per pass type + shared)
   /trigger          — Trigger.dev job definitions
+  /types            — TypeScript types (pass-types, pass-instance, interaction)
 /e2e                — Playwright E2E tests
-/prisma             — Schema & migrations
+/prisma             — Schema & seed
 ```
 
 ## Scripts
@@ -266,5 +168,13 @@ pnpm build            # Production build
 pnpm test             # Run Vitest unit tests
 pnpm test:e2e         # Run Playwright E2E tests
 pnpm prisma studio    # Open Prisma Studio
-pnpm prisma migrate dev  # Run migrations
+pnpm prisma db push   # Push schema changes
 ```
+
+## Documentation
+
+- `CLAUDE.md` — Architecture rules, conventions, and progress tracking
+- `docs/deployment-stack.md` — Production deployment guide
+- `docs/file-references.md` — Detailed file-by-file reference
+- `docs/apple-wallet-setup.md` — Apple Wallet certificate setup
+- `docs/google-oauth-setup.md` — Google OAuth + Wallet API setup
