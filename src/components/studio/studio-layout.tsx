@@ -19,10 +19,11 @@ import { DetailsPanel } from "./panels/details-panel"
 import { TemplatePanel } from "./panels/template-panel"
 import { LogoPanel } from "./panels/logo-panel"
 import { savePassDesign as saveCardDesign, updatePassTemplate, updateMinigameConfig } from "@/server/org-settings-actions"
-import type { StudioTool } from "@/types/editor"
+import type { StudioTool, PreviewFormat } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 import type { ProgramConfigState } from "@/lib/stores/card-design-store"
+import { Save, Smartphone, Tablet, Palette, BarChart3, ImagePlus, MoreHorizontal, SlidersHorizontal } from "lucide-react"
 
 /** Map PassType → CardType for visual rendering */
 function passTypeToCardType(passType: string): CardType {
@@ -402,28 +403,31 @@ export function StudioLayout({
 
   const isMobile = useIsMobile()
 
+  const isDirty = ui.isDirty || ui.isConfigDirty
+
   return (
     <div style={{
-      height: embedded ? "100%" : "100dvh",
-      minHeight: embedded ? "calc(100dvh - 200px)" : undefined,
+      height: embedded ? "calc(100dvh - 120px)" : "100dvh",
       display: "flex",
       flexDirection: "column",
     }}>
-      {/* Top toolbar */}
-      <StudioToolbar
-        programName={templateName}
-        programId={templateId}
-        embedded={embedded}
-        isDirty={ui.isDirty || ui.isConfigDirty}
-        isSaving={ui.isSaving}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        previewFormat={ui.previewFormat}
-        onSave={handleSave}
-        onUndo={() => temporalStore.getState().undo()}
-        onRedo={() => temporalStore.getState().redo()}
-        onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
-      />
+      {/* Top toolbar — standalone mode only */}
+      {!embedded && (
+        <StudioToolbar
+          programName={templateName}
+          programId={templateId}
+          embedded={false}
+          isDirty={isDirty}
+          isSaving={ui.isSaving}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          previewFormat={ui.previewFormat}
+          onSave={handleSave}
+          onUndo={() => temporalStore.getState().undo()}
+          onRedo={() => temporalStore.getState().redo()}
+          onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
+        />
+      )}
 
       {/* 2-panel layout (desktop) / stacked layout (mobile) */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
@@ -441,18 +445,31 @@ export function StudioLayout({
         )}
 
         {/* Right: Canvas (clean background) */}
-        <CanvasPanel
-          design={design}
-          format={ui.previewFormat}
-          deviceFrame="minimal"
-          organizationName={organizationName}
-          organizationLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
-          templateName={programConfig.name || templateName}
-          passType={passType}
-          templateConfig={buildConfigPayload(passType, programConfig)}
-          visitsRequired={programConfig.stampsRequired}
-          rewardDescription={programConfig.rewardDescription}
-        />
+        <div style={{ flex: 1, position: "relative", display: "flex" }}>
+          <CanvasPanel
+            design={design}
+            format={ui.previewFormat}
+            deviceFrame="minimal"
+            organizationName={organizationName}
+            organizationLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
+            templateName={programConfig.name || templateName}
+            passType={passType}
+            templateConfig={buildConfigPayload(passType, programConfig)}
+            visitsRequired={programConfig.stampsRequired}
+            rewardDescription={programConfig.rewardDescription}
+          />
+
+          {/* Floating controls — bottom right of canvas (embedded mode) */}
+          {embedded && !isMobile && (
+            <CanvasControls
+              previewFormat={ui.previewFormat}
+              onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
+              isDirty={isDirty}
+              isSaving={ui.isSaving}
+              onSave={handleSave}
+            />
+          )}
+        </div>
 
         {/* Mobile: panel overlay (bottom sheet style) */}
         {ui.activeTool && isMobile && (
@@ -508,15 +525,100 @@ function useIsMobile(breakpoint = 768): boolean {
   return isMobile
 }
 
+// ─── Floating Canvas Controls (embedded mode) ───────────────
+
+function CanvasControls({
+  previewFormat,
+  onPreviewFormatChange,
+  isDirty,
+  isSaving,
+  onSave,
+}: {
+  previewFormat: PreviewFormat
+  onPreviewFormatChange: (fmt: PreviewFormat) => void
+  isDirty: boolean
+  isSaving: boolean
+  onSave: () => void
+}) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: 16,
+        right: 16,
+        zIndex: 10,
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+      }}
+    >
+      {/* Apple / Google toggle */}
+      <div
+        style={{
+          display: "flex",
+          gap: 2,
+          padding: 2,
+          borderRadius: 8,
+          backgroundColor: "var(--background)",
+          border: "1px solid var(--border)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        }}
+      >
+        {(["apple", "google"] as PreviewFormat[]).map((fmt) => (
+          <button
+            key={fmt}
+            onClick={() => onPreviewFormatChange(fmt)}
+            style={{
+              padding: "5px 10px",
+              borderRadius: 6,
+              border: "none",
+              background: previewFormat === fmt ? "var(--accent)" : "none",
+              color: previewFormat === fmt ? "var(--foreground)" : "var(--muted-foreground)",
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: previewFormat === fmt ? 600 : 400,
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            {fmt === "apple" && <Smartphone size={13} />}
+            {fmt === "google" && <Tablet size={13} />}
+            {fmt.charAt(0).toUpperCase() + fmt.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* Save button */}
+      <button
+        onClick={onSave}
+        disabled={isSaving || !isDirty}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "6px 14px",
+          borderRadius: 8,
+          border: isDirty ? "none" : "1px solid var(--border)",
+          backgroundColor: isDirty ? "var(--primary)" : "var(--background)",
+          color: isDirty ? "var(--primary-foreground)" : "var(--muted-foreground)",
+          cursor: isDirty && !isSaving ? "pointer" : "default",
+          fontSize: 12,
+          fontWeight: 500,
+          opacity: isSaving ? 0.7 : 1,
+          boxShadow: isDirty ? "0 2px 8px rgba(0,0,0,0.15)" : "0 2px 8px rgba(0,0,0,0.08)",
+        }}
+        aria-label="Save design"
+      >
+        <Save size={13} />
+        {isSaving ? "Saving..." : isDirty ? "Save" : "Saved"}
+      </button>
+    </div>
+  )
+}
+
 // ─── Mobile Tool Bar ──────────────────────────────────────
 
-import {
-  Palette,
-  BarChart3,
-  ImagePlus,
-  MoreHorizontal,
-  SlidersHorizontal,
-} from "lucide-react"
 import { ToolSelector } from "./tools/tool-selector"
 
 const MOBILE_QUICK_TOOLS: { id: StudioTool; label: string; icon: React.ReactNode }[] = [

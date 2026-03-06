@@ -27,33 +27,36 @@ const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://loyalshy.com
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Loyalshy — Digital Loyalty Cards for Restaurants",
+    default: "Loyalshy — Digital Wallet Passes for Any Business",
     template: "%s — Loyalshy",
   },
   description:
-    "Create digital loyalty cards with Apple and Google Wallet passes for your restaurant. Boost repeat visits and reward your best customers.",
+    "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, tickets, prepaid passes, and more — all from one platform.",
   keywords: [
-    "loyalty cards",
-    "digital loyalty",
-    "restaurant loyalty program",
+    "digital wallet passes",
     "Apple Wallet",
     "Google Wallet",
-    "customer rewards",
-    "stamp card",
+    "loyalty cards",
+    "membership cards",
+    "digital coupons",
+    "stamp cards",
+    "event tickets",
+    "prepaid passes",
+    "gift cards",
   ],
   openGraph: {
     type: "website",
     siteName: "Loyalshy",
-    title: "Loyalshy — Digital Loyalty Cards for Restaurants",
+    title: "Loyalshy — Digital Wallet Passes for Any Business",
     description:
-      "Create digital loyalty cards with Apple and Google Wallet passes. Boost repeat visits and reward your best customers.",
+      "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, tickets, prepaid passes, and more.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Loyalshy — Digital Loyalty Cards for Restaurants",
+    title: "Loyalshy — Digital Wallet Passes for Any Business",
     description:
-      "Create digital loyalty cards with Apple and Google Wallet passes. Boost repeat visits and reward your best customers.",
+      "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, tickets, prepaid passes, and more.",
   },
   robots: {
     index: true,

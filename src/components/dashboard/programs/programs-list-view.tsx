@@ -279,7 +279,7 @@ export function TemplatesListView({
               <Link
                 key={program.id}
                 href={`/dashboard/programs/${program.id}`}
-                className="group rounded-lg border border-border bg-card overflow-hidden transition-colors hover:bg-muted/30"
+                className="group rounded-lg border border-border bg-card overflow-hidden transition-all hover:bg-muted/30 hover:shadow-md"
               >
                 {/* Card preview */}
                 <div className="flex justify-center bg-muted/40 py-4 px-4 border-b border-border">
