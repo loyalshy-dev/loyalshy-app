@@ -17,6 +17,11 @@ import {
   formatCouponValue,
   parsePointsConfig,
   parsePrepaidConfig,
+  parseGiftCardConfig,
+  parseTicketConfig,
+  parseAccessConfig,
+  parseTransitConfig,
+  parseBusinessIdConfig,
 } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
@@ -110,6 +115,11 @@ function TemplateCardPreview({
     type === "MEMBERSHIP" ? parseMembershipConfig(template.config) : null
   const prepaidConfig =
     type === "PREPAID" ? parsePrepaidConfig(template.config) : null
+  const giftCardConfig = type === "GIFT_CARD" ? parseGiftCardConfig(template.config) : null
+  const ticketConfig = type === "TICKET" ? parseTicketConfig(template.config) : null
+  const accessConfig = type === "ACCESS" ? parseAccessConfig(template.config) : null
+  const transitConfig = type === "TRANSIT" ? parseTransitConfig(template.config) : null
+  const businessIdConfig = type === "BUSINESS_ID" ? parseBusinessIdConfig(template.config) : null
   const cfg = (template.config as Record<string, unknown>) ?? {}
   const stampsRequired =
     (cfg as { stampsRequired?: number }).stampsRequired ?? 10
@@ -157,6 +167,17 @@ function TemplateCardPreview({
             ? "No expiry"
             : undefined
       }
+      giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
+      giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
+      eventName={ticketConfig?.eventName}
+      eventDate={ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : undefined}
+      eventVenue={ticketConfig?.eventVenue}
+      scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
+      accessLabel={accessConfig?.accessLabel}
+      transitType={transitConfig?.transitType?.toUpperCase()}
+      originName={transitConfig?.originName}
+      destinationName={transitConfig?.destinationName}
+      idLabel={businessIdConfig?.idLabel}
     />
   )
 }

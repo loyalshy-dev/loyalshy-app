@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Pencil, Smartphone, CreditCard } from "lucide-react"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig } from "@/lib/pass-config"
 
 type PassDesignPreviewProps = {
   templateId: string
@@ -96,6 +96,26 @@ export function PassDesignPreview({
     () => passType === "MEMBERSHIP" ? parseMembershipConfig(templateConfig) : null,
     [passType, templateConfig]
   )
+  const giftCardConfig = useMemo(
+    () => passType === "GIFT_CARD" ? parseGiftCardConfig(templateConfig) : null,
+    [passType, templateConfig]
+  )
+  const ticketConfig = useMemo(
+    () => passType === "TICKET" ? parseTicketConfig(templateConfig) : null,
+    [passType, templateConfig]
+  )
+  const accessConfig = useMemo(
+    () => passType === "ACCESS" ? parseAccessConfig(templateConfig) : null,
+    [passType, templateConfig]
+  )
+  const transitConfig = useMemo(
+    () => passType === "TRANSIT" ? parseTransitConfig(templateConfig) : null,
+    [passType, templateConfig]
+  )
+  const businessIdConfig = useMemo(
+    () => passType === "BUSINESS_ID" ? parseBusinessIdConfig(templateConfig) : null,
+    [passType, templateConfig]
+  )
 
   return (
     <div className="space-y-6">
@@ -158,6 +178,22 @@ export function PassDesignPreview({
             // Membership props
             tierName={membershipConfig?.membershipTier}
             benefits={membershipConfig?.benefits}
+            // Gift card props
+            giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
+            giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
+            // Ticket props
+            eventName={ticketConfig?.eventName}
+            eventDate={ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : undefined}
+            eventVenue={ticketConfig?.eventVenue}
+            scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
+            // Access props
+            accessLabel={accessConfig?.accessLabel}
+            // Transit props
+            transitType={transitConfig?.transitType?.toUpperCase()}
+            originName={transitConfig?.originName}
+            destinationName={transitConfig?.destinationName}
+            // Business ID props
+            idLabel={businessIdConfig?.idLabel}
           />
           <p className="text-[11px] text-muted-foreground">
             {format === "apple" && "Apple Wallet pass preview"}

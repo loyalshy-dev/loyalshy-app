@@ -2,7 +2,7 @@ import crypto from "crypto"
 
 // ─── Types ──────────────────────────────────────────────────
 
-export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID" | "GENERIC"
+export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID" | "GIFT_CARD" | "TICKET" | "ACCESS" | "TRANSIT" | "BUSINESS_ID" | "GENERIC"
 export type PatternStyle = "NONE" | "DOTS" | "WAVES" | "GEOMETRIC" | "CHEVRON" | "CROSSHATCH" | "DIAMONDS" | "CONFETTI" | "SOLID_PRIMARY" | "SOLID_SECONDARY" | "STAMP_GRID"
 export type ProgressStyle = "NUMBERS" | "CIRCLES" | "SQUARES" | "STARS" | "STAMPS" | "PERCENTAGE" | "REMAINING"
 export type FontFamily = "SANS" | "SERIF" | "ROUNDED" | "MONO"
@@ -491,6 +491,81 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
       google: {
         rows: 1,
         fields: ["remaining", "prepaidValidUntil", "totalUsed", "customerName"],
+      },
+    }
+  }
+
+  if (cardType === "GIFT_CARD") {
+    return {
+      apple: {
+        header: ["organization"],
+        primary: ["giftBalance"],
+        secondary: ["giftInitial", "customerName"],
+        auxiliary: [],
+      },
+      google: {
+        rows: 1,
+        fields: ["giftBalance", "giftInitial", "customerName"],
+      },
+    }
+  }
+
+  if (cardType === "TICKET") {
+    return {
+      apple: {
+        header: ["scanStatus"],
+        primary: ["eventName"],
+        secondary: ["eventDate", "eventVenue", "customerName"],
+        auxiliary: [],
+      },
+      google: {
+        rows: 1,
+        fields: ["eventName", "eventDate", "eventVenue", "scanStatus", "customerName"],
+      },
+    }
+  }
+
+  if (cardType === "ACCESS") {
+    return {
+      apple: {
+        header: ["accessGranted"],
+        primary: ["accessLabel"],
+        secondary: ["customerName", "memberSince"],
+        auxiliary: [],
+      },
+      google: {
+        rows: 1,
+        fields: ["accessLabel", "accessGranted", "customerName", "memberSince"],
+      },
+    }
+  }
+
+  if (cardType === "TRANSIT") {
+    return {
+      apple: {
+        header: ["boardingStatus"],
+        primary: ["origin"],
+        secondary: ["destination", "transitType"],
+        auxiliary: ["customerName"],
+      },
+      google: {
+        rows: 1,
+        fields: ["origin", "destination", "transitType", "boardingStatus", "customerName"],
+      },
+    }
+  }
+
+  if (cardType === "BUSINESS_ID") {
+    return {
+      apple: {
+        header: ["verifications"],
+        primary: ["idLabel"],
+        secondary: ["organization", "memberSince"],
+        auxiliary: [],
+      },
+      google: {
+        rows: 1,
+        fields: ["idLabel", "verifications", "organization", "memberSince"],
       },
     }
   }

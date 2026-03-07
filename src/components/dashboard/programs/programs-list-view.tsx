@@ -11,7 +11,7 @@ import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-desig
 import { statusConfig } from "./program-status"
 import { CreateProgramForm } from "./create-program-form"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, formatPointsValue, parsePrepaidConfig } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, formatPointsValue, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import type { TemplateListItem } from "@/server/template-actions"
@@ -97,6 +97,11 @@ function TemplateCardPreview({
   const couponConfig = type === "COUPON" ? parseCouponConfig(program.config) : null
   const membershipConfig = type === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
   const prepaidConfig = type === "PREPAID" ? parsePrepaidConfig(program.config) : null
+  const giftCardConfig = type === "GIFT_CARD" ? parseGiftCardConfig(program.config) : null
+  const ticketConfig = type === "TICKET" ? parseTicketConfig(program.config) : null
+  const accessConfig = type === "ACCESS" ? parseAccessConfig(program.config) : null
+  const transitConfig = type === "TRANSIT" ? parseTransitConfig(program.config) : null
+  const businessIdConfig = type === "BUSINESS_ID" ? parseBusinessIdConfig(program.config) : null
   const templateCfg = program.config as Record<string, unknown> | null ?? {}
   const stampsRequired = (templateCfg as { stampsRequired?: number }).stampsRequired ?? 10
   const rewardDescription = (templateCfg as { rewardDescription?: string }).rewardDescription ?? ""
@@ -127,6 +132,25 @@ function TemplateCardPreview({
       prepaidValidUntil={prepaidConfig?.validUntil
         ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
         : type === "PREPAID" ? "No expiry" : undefined}
+      // Gift card props
+      giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
+      giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
+      // Ticket props
+      eventName={ticketConfig?.eventName}
+      eventDate={ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : undefined}
+      eventVenue={ticketConfig?.eventVenue}
+      scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
+      // Access props
+      accessLabel={accessConfig?.accessLabel}
+      accessGranted="0"
+      // Transit props
+      transitType={transitConfig?.transitType?.toUpperCase()}
+      originName={transitConfig?.originName}
+      destinationName={transitConfig?.destinationName}
+      boardingStatus="NOT BOARDED"
+      // Business ID props
+      idLabel={businessIdConfig?.idLabel}
+      verifications="0"
     />
   )
 }

@@ -15,7 +15,7 @@ import {
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { Card } from "@/components/ui/card"
 import { parseStripFilters, parseStampGridConfig } from "@/lib/wallet/card-design"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig } from "@/lib/pass-config"
 
 type SizePreset = {
   id: string
@@ -144,6 +144,11 @@ export function QrCodeDisplay({
   const activeTemplateConfig = activeTemplate?.templateConfig ?? templates[0]?.templateConfig
   const couponConfig = activeTemplateType === "COUPON" ? parseCouponConfig(activeTemplateConfig) : null
   const membershipConfig = activeTemplateType === "MEMBERSHIP" ? parseMembershipConfig(activeTemplateConfig) : null
+  const giftCardConfig = activeTemplateType === "GIFT_CARD" ? parseGiftCardConfig(activeTemplateConfig) : null
+  const ticketConfig = activeTemplateType === "TICKET" ? parseTicketConfig(activeTemplateConfig) : null
+  const accessConfig = activeTemplateType === "ACCESS" ? parseAccessConfig(activeTemplateConfig) : null
+  const transitConfig = activeTemplateType === "TRANSIT" ? parseTransitConfig(activeTemplateConfig) : null
+  const businessIdConfig = activeTemplateType === "BUSINESS_ID" ? parseBusinessIdConfig(activeTemplateConfig) : null
   // Pull resolved primary color for the poster accent bar
   const accentColor =
     activeTemplateDesign?.primaryColor ??
@@ -425,6 +430,22 @@ export function QrCodeDisplay({
                       // Membership props
                       tierName={membershipConfig?.membershipTier}
                       benefits={membershipConfig?.benefits}
+                      // Gift card props
+                      giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
+                      giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
+                      // Ticket props
+                      eventName={ticketConfig?.eventName}
+                      eventDate={ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : undefined}
+                      eventVenue={ticketConfig?.eventVenue}
+                      scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
+                      // Access props
+                      accessLabel={accessConfig?.accessLabel}
+                      // Transit props
+                      transitType={transitConfig?.transitType?.toUpperCase()}
+                      originName={transitConfig?.originName}
+                      destinationName={transitConfig?.destinationName}
+                      // Business ID props
+                      idLabel={businessIdConfig?.idLabel}
                     />
                   </div>
                 )}

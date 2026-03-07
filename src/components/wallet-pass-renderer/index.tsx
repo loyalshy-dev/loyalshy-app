@@ -78,6 +78,25 @@ type WalletPassRendererProps = {
   remainingUses?: number     // remaining uses on prepaid pass
   totalUses?: number         // total uses on prepaid pass
   prepaidValidUntil?: string // expiry date for prepaid
+  // Gift card-specific
+  giftBalance?: string       // e.g. "USD 25.00"
+  giftInitialValue?: string  // e.g. "USD 50.00"
+  // Ticket-specific
+  eventName?: string         // event name
+  eventDate?: string         // formatted date string
+  eventVenue?: string        // venue name
+  scanStatus?: string        // e.g. "0 / 1"
+  // Access-specific
+  accessLabel?: string       // e.g. "VIP Access"
+  accessGranted?: string     // e.g. "12"
+  // Transit-specific
+  transitType?: string       // e.g. "BUS", "TRAIN"
+  originName?: string        // e.g. "Central Station"
+  destinationName?: string   // e.g. "Airport"
+  boardingStatus?: string    // e.g. "NOT BOARDED"
+  // Business ID-specific
+  idLabel?: string           // e.g. "Employee ID"
+  verifications?: string     // e.g. "5"
 }
 
 // ─── Constants ──────────────────────────────────────────────
@@ -129,6 +148,20 @@ export function WalletPassRenderer({
   remainingUses,
   totalUses,
   prepaidValidUntil,
+  giftBalance,
+  giftInitialValue,
+  eventName,
+  eventDate,
+  eventVenue,
+  scanStatus,
+  accessLabel,
+  accessGranted,
+  transitType,
+  originName,
+  destinationName,
+  boardingStatus,
+  idLabel,
+  verifications,
 }: WalletPassRendererProps) {
   const cardType = design.cardType ?? "STAMP"
   const defaultLayout = getFieldLayout(cardType)
@@ -217,6 +250,39 @@ export function WalletPassRenderer({
         return { label: lbl("VALID UNTIL"), value: prepaidValidUntil ?? "No expiry" }
       case "totalUsed":
         return { label: lbl("TOTAL USED"), value: `${currentVisits}` }
+      // Gift card fields
+      case "giftBalance":
+        return { label: lbl("BALANCE"), value: giftBalance ?? "$0.00" }
+      case "giftInitial":
+        return { label: lbl("INITIAL VALUE"), value: giftInitialValue ?? "—" }
+      // Ticket fields
+      case "eventName":
+        return { label: lbl("EVENT"), value: eventName ?? programName }
+      case "eventDate":
+        return { label: lbl("DATE"), value: eventDate ?? "—" }
+      case "eventVenue":
+        return { label: lbl("VENUE"), value: eventVenue ?? "—" }
+      case "scanStatus":
+        return { label: lbl("SCANS"), value: scanStatus ?? "0 / 1" }
+      // Access fields
+      case "accessLabel":
+        return { label: lbl(accessLabel ?? "ACCESS"), value: "Granted" }
+      case "accessGranted":
+        return { label: lbl("TOTAL GRANTED"), value: accessGranted ?? "0" }
+      // Transit fields
+      case "transitType":
+        return { label: lbl("TYPE"), value: transitType ?? "OTHER" }
+      case "origin":
+        return { label: lbl("FROM"), value: originName ?? "—" }
+      case "destination":
+        return { label: lbl("TO"), value: destinationName ?? "—" }
+      case "boardingStatus":
+        return { label: lbl("STATUS"), value: boardingStatus ?? "NOT BOARDED" }
+      // Business ID fields
+      case "idLabel":
+        return { label: lbl(idLabel ?? "ID"), value: customerName }
+      case "verifications":
+        return { label: lbl("VERIFICATIONS"), value: verifications ?? "0" }
       // Shared fields
       case "customerName":
         return { label: lbl("NAME"), value: customerName }

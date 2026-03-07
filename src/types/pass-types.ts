@@ -151,6 +151,11 @@ export type DesignCardType =
   | "TIER"
   | "COUPON"
   | "PREPAID"
+  | "GIFT_CARD"
+  | "TICKET"
+  | "ACCESS"
+  | "TRANSIT"
+  | "BUSINESS_ID"
   | "GENERIC"
 
 export type PassTypeMeta = {
@@ -208,7 +213,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     shortLabel: "Gift Card",
     icon: Gift,
     description: "Stored-value card with balance tracking",
-    defaultCardType: "GENERIC",
+    defaultCardType: "GIFT_CARD",
     category: "commerce",
   },
   TICKET: {
@@ -216,7 +221,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     shortLabel: "Ticket",
     icon: CalendarDays,
     description: "Digital ticket for events, concerts, conferences",
-    defaultCardType: "GENERIC",
+    defaultCardType: "TICKET",
     category: "event",
   },
   ACCESS: {
@@ -224,7 +229,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     shortLabel: "Access",
     icon: ShieldCheck,
     description: "Grant access to facilities, co-working spaces, parking",
-    defaultCardType: "GENERIC",
+    defaultCardType: "ACCESS",
     category: "event",
   },
   TRANSIT: {
@@ -232,7 +237,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     shortLabel: "Transit",
     icon: Bus,
     description: "Boarding passes for buses, trains, ferries, flights",
-    defaultCardType: "GENERIC",
+    defaultCardType: "TRANSIT",
     category: "event",
   },
   BUSINESS_ID: {
@@ -240,7 +245,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     shortLabel: "ID",
     icon: BadgeCheck,
     description: "Employee, student, or contractor identification card",
-    defaultCardType: "GENERIC",
+    defaultCardType: "BUSINESS_ID",
     category: "identity",
   },
 }
