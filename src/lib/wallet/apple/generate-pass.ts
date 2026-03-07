@@ -11,7 +11,7 @@ import {
   WEB_SERVICE_BASE_URL,
 } from "./constants"
 import type { CardDesignData, CardType } from "../card-design"
-import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters } from "../card-design"
+import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters, DEFAULT_HEADER_FIELDS, DEFAULT_SECONDARY_FIELDS } from "../card-design"
 import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -82,7 +82,7 @@ export async function generateApplePass(
   let stripImageUrl: string | null = null
   let stampGridStripBuffer: Buffer | null = null
 
-  const stripFilters = design ? parseStripFilters(design.editorConfig) : { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null }
+  const stripFilters = design ? parseStripFilters(design.editorConfig) : parseStripFilters(null)
   // Stamp grid: check editorConfig flag or legacy patternStyle column
   const isStampGrid = stripFilters.useStampGrid || design?.patternStyle === "STAMP_GRID"
 
@@ -101,8 +101,39 @@ export async function generateApplePass(
       hasReward: input.hasAvailableReward,
       config: stampGridConfig,
       primaryColor: stripPrimary,
-      secondaryColor: stripSecondary,
+      secondaryColor: stripFilters.stampFilledColor ?? stripSecondary,
       textColor: design.textColor,
+      width: APPLE_STRIP_WIDTH,
+      height: APPLE_STRIP_HEIGHT,
+      stripImageUrl: design.stripImageApple,
+      stripOpacity: stripFilters.stripOpacity,
+      stripGrayscale: stripFilters.stripGrayscale,
+    })
+  } else if (showStrip && !isStampGrid && design && isStampType) {
+    // Non-stamp-grid progress: bake progress text into strip image for consistent rendering
+    const progressStyle = (design.progressStyle ?? "NUMBERS") as import("../card-design").ProgressStyle
+    const { generateProgressStripImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
+    const progressLabel = design.customProgressLabel
+      ? design.customProgressLabel
+      : input.hasAvailableReward ? "STATUS" : "PROGRESS"
+    const labelFmt = (design.labelFormat ?? "UPPERCASE") as import("../card-design").LabelFormat
+    const { formatLabel: fmtLabel } = await import("../card-design")
+    const colors = getPassColors(
+      design.primaryColor ?? input.brandColor,
+      design.secondaryColor ?? input.secondaryColor,
+      design.textColor,
+      stripFilters.labelColor
+    )
+    stampGridStripBuffer = await generateProgressStripImage({
+      currentVisits: input.currentCycleVisits,
+      totalVisits: input.visitsRequired,
+      hasReward: input.hasAvailableReward,
+      progressStyle,
+      progressLabel: fmtLabel(progressLabel, labelFmt),
+      primaryColor: stripPrimary,
+      secondaryColor: stripSecondary,
+      textColor: colors.foregroundColor,
+      labelColor: colors.labelColor,
       width: APPLE_STRIP_WIDTH,
       height: APPLE_STRIP_HEIGHT,
       stripImageUrl: design.stripImageApple,
@@ -157,7 +188,8 @@ export async function generateApplePass(
   const colors = getPassColors(
     design?.primaryColor ?? input.brandColor,
     design?.secondaryColor ?? input.secondaryColor,
-    textColor
+    textColor,
+    stripFilters.labelColor
   )
 
   // Type-aware pass description
@@ -189,7 +221,7 @@ export async function generateApplePass(
     backgroundColor: colors.backgroundColor,
     foregroundColor: colors.foregroundColor,
     labelColor: colors.labelColor,
-    logoText: input.organizationName,
+    // logoText omitted — logo icon is sufficient, keeps header clean
     sharingProhibited: true,
   })
 
@@ -234,6 +266,12 @@ export async function generateApplePass(
     year: "numeric",
   })
 
+  // Registration timestamps — short for header, full for back
+  const pad = (n: number) => String(n).padStart(2, "0")
+  const d = input.memberSince
+  const registeredAtShort = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  const registeredAtFull = `${registeredAtShort} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+
   // Parse type-specific config for field data
   const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
   const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
@@ -248,12 +286,13 @@ export async function generateApplePass(
 
   // Field data map — all labels go through formatLabel
   const fieldData: Record<string, { key: string; label: string; value: string }> = {
-    organization: { key: "organization", label: formatLabel("ORGANIZATION", labelFmt), value: input.organizationName },
-    memberNumber: { key: "memberNumber", label: formatLabel("MEMBER", labelFmt), value: `#${input.totalVisits}` },
+    organization: { key: "organization", label: formatLabel("ORG", labelFmt), value: input.organizationName },
+    memberNumber: { key: "memberNumber", label: formatLabel("MEMBER #", labelFmt), value: `${input.totalVisits}` },
     progress: { key: "progress", label: formatLabel(progressLabel, labelFmt), value: progressValue },
     nextReward: { key: "nextReward", label: formatLabel("NEXT REWARD", labelFmt), value: input.rewardDescription },
     totalVisits: { key: "totalVisits", label: formatLabel("TOTAL VISITS", labelFmt), value: `${input.totalVisits}` },
-    memberSince: { key: "memberSince", label: formatLabel("MEMBER SINCE", labelFmt), value: memberSinceFormatted },
+    memberSince: { key: "memberSince", label: formatLabel("SINCE", labelFmt), value: memberSinceFormatted },
+    registeredAt: { key: "registeredAt", label: formatLabel("REGISTERED", labelFmt), value: registeredAtShort },
     customerName: { key: "customerName", label: formatLabel("NAME", labelFmt), value: input.customerName },
     // COUPON fields
     discount: { key: "discount", label: formatLabel("DISCOUNT", labelFmt), value: couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription },
@@ -296,6 +335,10 @@ export async function generateApplePass(
   }
 
   // Type-specific field overrides for new pass types
+  // STAMP/POINTS use user-configurable header + secondary fields from editorConfig.
+  // When stamp grid is active, skip the primary progress field — the grid already
+  // visualises progress and Apple renders primary fields as large text ON TOP of the
+  // strip image, making both unreadable when they overlap.
   const appleLayout = (() => {
     switch (input.programType) {
       case "GIFT_CARD":
@@ -308,8 +351,18 @@ export async function generateApplePass(
         return { header: ["boardingStatus"], primary: ["origin"], secondary: ["destination", "transitType"], auxiliary: ["customerName"] }
       case "BUSINESS_ID":
         return { header: ["verifications"], primary: ["idLabel"], secondary: ["organization", "memberSince"], auxiliary: [] }
-      default:
-        return layout.apple
+      default: {
+        // User-configurable fields for STAMP/POINTS cards
+        const customHeader = stripFilters.headerFields ?? DEFAULT_HEADER_FIELDS
+        const customSecondary = stripFilters.secondaryFields ?? DEFAULT_SECONDARY_FIELDS
+        return {
+          header: customHeader,
+          // Progress is baked into the strip image — no primary text field needed
+          primary: showStrip ? [] : layout.apple.primary,
+          secondary: customSecondary,
+          auxiliary: [],
+        }
+      }
     }
   })()
 
@@ -487,6 +540,21 @@ export async function generateApplePass(
         key: "currentProgress",
         label: "Current Progress",
         value: `${input.currentCycleVisits} of ${input.visitsRequired} visits completed this cycle. ${input.totalVisits} total visits.`,
+      },
+      {
+        key: "memberNumber",
+        label: "Member #",
+        value: `${input.totalVisits}`,
+      },
+      {
+        key: "memberSince",
+        label: "Member Since",
+        value: memberSinceFormatted,
+      },
+      {
+        key: "registeredAt",
+        label: "Registered",
+        value: registeredAtFull,
       }
     )
   }

@@ -2,6 +2,7 @@
 
 import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
+import { STAMP_CARD_AVAILABLE_FIELDS, DEFAULT_HEADER_FIELDS, DEFAULT_SECONDARY_FIELDS } from "@/lib/wallet/card-design"
 
 // ─── Shared field components ─────────────────────────────────
 
@@ -261,9 +262,9 @@ function StampCardFields({ store }: { store: CardDesignStoreApi }) {
       <NumberInput
         label="Stamps required"
         value={stampsRequired}
-        onChange={(v) => set("stampsRequired", Math.max(1, Math.min(50, v)))}
-        min={1}
-        max={50}
+        onChange={(v) => set("stampsRequired", Math.max(3, Math.min(10, v)))}
+        min={3}
+        max={10}
         suffix="stamps"
       />
       <TextInput
@@ -732,6 +733,203 @@ function PrizeRevealFields({ store }: { store: CardDesignStoreApi }) {
   )
 }
 
+// ─── Card Fields (STAMP/POINTS only) ─────────────────────────
+
+function FieldPicker({
+  label,
+  description,
+  maxFields,
+  value,
+  onChange,
+  usedElsewhere,
+}: {
+  label: string
+  description: string
+  maxFields: number
+  value: string[]
+  onChange: (fields: string[]) => void
+  usedElsewhere: string[]
+}) {
+  const available = STAMP_CARD_AVAILABLE_FIELDS.filter(
+    (f) => !value.includes(f.id) && !usedElsewhere.includes(f.id)
+  )
+
+  function removeField(id: string) {
+    onChange(value.filter((f) => f !== id))
+  }
+
+  function addField(id: string) {
+    if (value.length >= maxFields) return
+    onChange([...value, id])
+  }
+
+  function moveField(index: number, direction: -1 | 1) {
+    const newIndex = index + direction
+    if (newIndex < 0 || newIndex >= value.length) return
+    const updated = [...value]
+    const tmp = updated[index]
+    updated[index] = updated[newIndex]
+    updated[newIndex] = tmp
+    onChange(updated)
+  }
+
+  const fieldLabel = (id: string) =>
+    STAMP_CARD_AVAILABLE_FIELDS.find((f) => f.id === id)?.label ?? id
+
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ fontSize: 12, color: "var(--foreground)", marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 6 }}>{description}</div>
+
+      {/* Selected fields */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 6 }}>
+        {value.map((id, i) => (
+          <div
+            key={id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              padding: "4px 8px",
+              borderRadius: 6,
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--accent)",
+              fontSize: 12,
+            }}
+          >
+            <span style={{ flex: 1, color: "var(--foreground)" }}>{fieldLabel(id)}</span>
+            <button
+              onClick={() => moveField(i, -1)}
+              disabled={i === 0}
+              style={{
+                padding: "0 4px",
+                border: "none",
+                background: "none",
+                color: i === 0 ? "var(--muted)" : "var(--muted-foreground)",
+                cursor: i === 0 ? "default" : "pointer",
+                fontSize: 12,
+                lineHeight: 1,
+              }}
+              aria-label={`Move ${fieldLabel(id)} up`}
+            >
+              ↑
+            </button>
+            <button
+              onClick={() => moveField(i, 1)}
+              disabled={i === value.length - 1}
+              style={{
+                padding: "0 4px",
+                border: "none",
+                background: "none",
+                color: i === value.length - 1 ? "var(--muted)" : "var(--muted-foreground)",
+                cursor: i === value.length - 1 ? "default" : "pointer",
+                fontSize: 12,
+                lineHeight: 1,
+              }}
+              aria-label={`Move ${fieldLabel(id)} down`}
+            >
+              ↓
+            </button>
+            <button
+              onClick={() => removeField(id)}
+              style={{
+                padding: "0 4px",
+                border: "none",
+                background: "none",
+                color: "var(--muted-foreground)",
+                cursor: "pointer",
+                fontSize: 14,
+                lineHeight: 1,
+              }}
+              aria-label={`Remove ${fieldLabel(id)}`}
+            >
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Add field dropdown */}
+      {value.length < maxFields && available.length > 0 && (
+        <select
+          value=""
+          onChange={(e) => {
+            if (e.target.value) addField(e.target.value)
+          }}
+          style={{
+            width: "100%",
+            padding: "6px 8px",
+            borderRadius: 6,
+            border: "1px solid var(--border)",
+            backgroundColor: "var(--background)",
+            fontSize: 11,
+            color: "var(--muted-foreground)",
+            cursor: "pointer",
+          }}
+        >
+          <option value="">+ Add field...</option>
+          {available.map((f) => (
+            <option key={f.id} value={f.id}>{f.label}</option>
+          ))}
+        </select>
+      )}
+    </div>
+  )
+}
+
+function CardFieldsSection({ store }: { store: CardDesignStoreApi }) {
+  const rawHeader = useStore(store, (s) => s.wallet.headerFields)
+  const rawSecondary = useStore(store, (s) => s.wallet.secondaryFields)
+  const headerFields = rawHeader ?? [...DEFAULT_HEADER_FIELDS]
+  const secondaryFields = rawSecondary ?? [...DEFAULT_SECONDARY_FIELDS]
+  const setWallet = store.getState().setWalletField
+
+  return (
+    <>
+      <SectionHeader>Card Fields</SectionHeader>
+      <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 8 }}>
+        Choose which fields appear on the wallet pass.
+      </div>
+
+      <FieldPicker
+        label="Header (top right)"
+        description="Max 2 fields. Space is limited."
+        maxFields={2}
+        value={headerFields}
+        onChange={(fields) => setWallet("headerFields", fields)}
+        usedElsewhere={secondaryFields}
+      />
+
+      <FieldPicker
+        label="Details (below strip)"
+        description="Max 4 fields shown in a row."
+        maxFields={4}
+        value={secondaryFields}
+        onChange={(fields) => setWallet("secondaryFields", fields)}
+        usedElsewhere={headerFields}
+      />
+
+      <button
+        onClick={() => {
+          setWallet("headerFields", null)
+          setWallet("secondaryFields", null)
+        }}
+        style={{
+          fontSize: 11,
+          color: "var(--muted-foreground)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          textDecoration: "underline",
+          padding: 0,
+        }}
+      >
+        Reset to defaults
+      </button>
+    </>
+  )
+}
+
 // ─── Main Panel ──────────────────────────────────────────────
 
 type Props = {
@@ -766,6 +964,10 @@ export function ProgramPanel({ store, passType }: Props) {
       {passType === "MEMBERSHIP" && <MembershipFields store={store} />}
       {passType === "POINTS" && <PointsFields store={store} />}
       {passType === "PREPAID" && <PrepaidFields store={store} />}
+
+      {(passType === "STAMP_CARD" || passType === "POINTS") && (
+        <CardFieldsSection store={store} />
+      )}
 
       <ScheduleFields store={store} />
 

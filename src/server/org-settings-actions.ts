@@ -89,6 +89,7 @@ const savePassDesignSchema = z.object({
   primaryColor: z.string().max(20).optional().default(""),
   secondaryColor: z.string().max(20).optional().default(""),
   textColor: z.string().max(20).optional().default(""),
+  labelColor: z.string().max(20).nullable().optional(),
   autoTextColor: z.boolean().optional().default(false),
   patternStyle: z.enum(["NONE", "DOTS", "WAVES", "GEOMETRIC", "CHEVRON", "CROSSHATCH", "DIAMONDS", "CONFETTI", "SOLID_PRIMARY", "SOLID_SECONDARY", "STAMP_GRID"]),
   progressStyle: z.enum(["NUMBERS", "CIRCLES", "SQUARES", "STARS", "STAMPS", "PERCENTAGE", "REMAINING"]).optional().default("NUMBERS"),
@@ -118,10 +119,18 @@ const savePassDesignSchema = z.object({
   }).optional(),
   stripImageZoom: z.number().min(1).max(3).optional(),
   useStampGrid: z.boolean().optional().default(false),
+  stampFilledColor: z.string().max(20).nullable().optional(),
+  headerFields: z.array(z.string().max(30)).max(3).nullable().optional(),
+  secondaryFields: z.array(z.string().max(30)).max(4).nullable().optional(),
   stampGridConfig: z.object({
     stampIcon: z.string().max(50),
     customStampIconUrl: z.string().nullable().optional(),
     rewardIcon: z.string().max(10),
+    customRewardIconUrl: z.string().nullable().optional(),
+    customEmptyIconUrl: z.string().nullable().optional(),
+    useUniformIcon: z.boolean().optional(),
+    emptyNumberColor: z.string().max(20).nullable().optional(),
+    emptyNumberScale: z.number().min(0.2).max(0.6).optional(),
     stampShape: z.enum(["circle", "rounded-square", "square"]),
     filledStyle: z.enum(["icon", "icon-with-border", "solid"]),
     useStripBackground: z.boolean().optional(),
@@ -616,6 +625,10 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     editorConfig.stripImagePosition = parsed.stripImagePosition
   }
   if (parsed.stripImageZoom && parsed.stripImageZoom !== 1) editorConfig.stripImageZoom = parsed.stripImageZoom
+  if (parsed.labelColor) editorConfig.labelColor = parsed.labelColor
+  if (parsed.stampFilledColor) editorConfig.stampFilledColor = parsed.stampFilledColor
+  if (parsed.headerFields != null) editorConfig.headerFields = parsed.headerFields
+  if (parsed.secondaryFields != null) editorConfig.secondaryFields = parsed.secondaryFields
 
   const stripPrimary = parsed.stripColor1 || primaryColor
   const stripSecondary = parsed.patternColor || parsed.stripColor2 || secondaryColor
@@ -989,9 +1002,11 @@ export async function deleteStripImage(templateId: string) {
   return { success: true }
 }
 
-// ─── Upload Custom Stamp Icon ────────────────────────────────
+// ─── Generic Stamp Icon Upload/Delete ─────────────────────────
 
-export async function uploadStampIcon(formData: FormData) {
+type StampIconSlot = "customStampIconUrl" | "customRewardIconUrl" | "customEmptyIconUrl"
+
+async function uploadStampIconGeneric(formData: FormData, slot: StampIconSlot) {
   const templateId = formData.get("templateId") as string
   const file = formData.get("file") as File
 
@@ -1028,19 +1043,20 @@ export async function uploadStampIcon(formData: FormData) {
     } catch { /* use original */ }
   }
 
-  let stampUrl: string
+  const slotLabel = slot.replace("custom", "").replace("Url", "").toLowerCase()
+  let iconUrl: string
   try {
     const { uploadFile, deleteFile } = await import("@/lib/storage")
     if (existing?.editorConfig && typeof existing.editorConfig === "object") {
       const cfg = existing.editorConfig as Record<string, unknown>
       const stampCfg = cfg.stampGridConfig as Record<string, unknown> | undefined
-      const oldUrl = stampCfg?.customStampIconUrl
+      const oldUrl = stampCfg?.[slot]
       if (typeof oldUrl === "string") await deleteFile(oldUrl)
     }
     const ext = processedType === "image/png" ? "png" : (file.name.split(".").pop() ?? "png")
-    stampUrl = await uploadFile(processedBuffer, `stamp-icons/${templateId}/stamp-${Date.now()}.${ext}`, processedType)
+    iconUrl = await uploadFile(processedBuffer, `stamp-icons/${templateId}/${slotLabel}-${Date.now()}.${ext}`, processedType)
   } catch {
-    stampUrl = `data:${processedType};base64,${processedBuffer.toString("base64")}`
+    iconUrl = `data:${processedType};base64,${processedBuffer.toString("base64")}`
   }
 
   const editorCfg = (existing?.editorConfig && typeof existing.editorConfig === "object" ? existing.editorConfig : {}) as Record<string, unknown>
@@ -1048,16 +1064,14 @@ export async function uploadStampIcon(formData: FormData) {
 
   await db.passDesign.update({
     where: { passTemplateId: templateId },
-    data: { editorConfig: { ...editorCfg, stampGridConfig: { ...stampGridConfig, customStampIconUrl: stampUrl } } },
+    data: { editorConfig: { ...editorCfg, stampGridConfig: { ...stampGridConfig, [slot]: iconUrl } } as object },
   })
 
   revalidatePath("/dashboard/programs")
-  return { success: true, url: stampUrl }
+  return { success: true, url: iconUrl }
 }
 
-// ─── Delete Custom Stamp Icon ────────────────────────────────
-
-export async function deleteStampIcon(templateId: string) {
+async function deleteStampIconGeneric(templateId: string, slot: StampIconSlot) {
   const template = await db.passTemplate.findUnique({
     where: { id: templateId },
     select: { organizationId: true },
@@ -1075,19 +1089,38 @@ export async function deleteStampIcon(templateId: string) {
   if (existing?.editorConfig && typeof existing.editorConfig === "object") {
     const editorCfg = existing.editorConfig as Record<string, unknown>
     const stampGridConfig = (editorCfg.stampGridConfig && typeof editorCfg.stampGridConfig === "object" ? editorCfg.stampGridConfig : {}) as Record<string, unknown>
-    const oldUrl = stampGridConfig.customStampIconUrl
+    const oldUrl = stampGridConfig[slot]
     if (typeof oldUrl === "string") {
       const { deleteFile } = await import("@/lib/storage")
       await deleteFile(oldUrl)
     }
     await db.passDesign.update({
       where: { passTemplateId: templateId },
-      data: { editorConfig: { ...editorCfg, stampGridConfig: { ...stampGridConfig, customStampIconUrl: null } } },
+      data: { editorConfig: { ...editorCfg, stampGridConfig: { ...stampGridConfig, [slot]: null } } as object },
     })
   }
 
   revalidatePath("/dashboard/programs")
   return { success: true }
+}
+
+export async function uploadStampIcon(formData: FormData) {
+  return uploadStampIconGeneric(formData, "customStampIconUrl")
+}
+export async function deleteStampIcon(templateId: string) {
+  return deleteStampIconGeneric(templateId, "customStampIconUrl")
+}
+export async function uploadRewardIcon(formData: FormData) {
+  return uploadStampIconGeneric(formData, "customRewardIconUrl")
+}
+export async function deleteRewardIcon(templateId: string) {
+  return deleteStampIconGeneric(templateId, "customRewardIconUrl")
+}
+export async function uploadEmptyIcon(formData: FormData) {
+  return uploadStampIconGeneric(formData, "customEmptyIconUrl")
+}
+export async function deleteEmptyIcon(templateId: string) {
+  return deleteStampIconGeneric(templateId, "customEmptyIconUrl")
 }
 
 // ─── Logo Processing Constants ──────────────────────────────

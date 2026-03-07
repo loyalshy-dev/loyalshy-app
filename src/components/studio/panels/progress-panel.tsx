@@ -5,7 +5,7 @@ import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import { formatProgressValue, type ProgressStyle, type StampGridConfig } from "@/lib/wallet/card-design"
 import { STAMP_ICONS, REWARD_ICONS, getStampIconPaths } from "@/lib/wallet/stamp-icons"
-import { uploadStampIcon, deleteStampIcon } from "@/server/org-settings-actions"
+import { uploadStampIcon, deleteStampIcon, uploadRewardIcon, deleteRewardIcon, uploadEmptyIcon, deleteEmptyIcon } from "@/server/org-settings-actions"
 
 // ─── Shared helpers ───────────────────────────────────────────
 
@@ -57,6 +57,99 @@ function ColorRow({
           style={{ width: 28, height: 28, border: "1px solid var(--border)", borderRadius: 4, cursor: "pointer", padding: 1 }}
         />
       </div>
+    </div>
+  )
+}
+
+function IconUploadWidget({
+  url,
+  label,
+  isUploading,
+  inputRef,
+  programId,
+  onUpload,
+  onDelete,
+  onUrlChange,
+}: {
+  url: string | null
+  label: string
+  isUploading: boolean
+  inputRef: React.RefObject<HTMLInputElement | null>
+  programId: string
+  onUpload: (formData: FormData) => Promise<{ success?: boolean; url?: string; error?: string }>
+  onDelete: (id: string) => Promise<{ success?: boolean; error?: string }>
+  onUrlChange: (url: string | null) => void
+}) {
+  if (url) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={url}
+          alt={label}
+          style={{
+            width: 40,
+            height: 40,
+            objectFit: "contain",
+            borderRadius: 6,
+            border: "1px solid var(--border)",
+            backgroundColor: "var(--muted)",
+          }}
+        />
+        <button
+          onClick={async () => {
+            const result = await onDelete(programId)
+            if (result.success) onUrlChange(null)
+          }}
+          style={{
+            padding: "6px 12px",
+            borderRadius: 6,
+            border: "1px solid var(--border)",
+            backgroundColor: "transparent",
+            cursor: "pointer",
+            fontSize: 11,
+            color: "var(--destructive)",
+          }}
+        >
+          Remove
+        </button>
+      </div>
+    )
+  }
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+        style={{ display: "none" }}
+        onChange={async (e) => {
+          const file = e.target.files?.[0]
+          if (!file) return
+          const formData = new FormData()
+          formData.set("templateId", programId)
+          formData.set("file", file)
+          const result = await onUpload(formData)
+          if (result.success && result.url) onUrlChange(result.url)
+          if (inputRef.current) inputRef.current.value = ""
+        }}
+      />
+      <button
+        onClick={() => inputRef.current?.click()}
+        disabled={isUploading}
+        style={{
+          padding: "6px 12px",
+          borderRadius: 6,
+          border: "1px solid var(--border)",
+          backgroundColor: "var(--muted)",
+          cursor: isUploading ? "wait" : "pointer",
+          fontSize: 11,
+          color: "var(--foreground)",
+          width: "100%",
+        }}
+      >
+        {isUploading ? "Uploading..." : "Upload custom icon"}
+      </button>
     </div>
   )
 }
@@ -174,17 +267,17 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
   const stampGridConfig = wallet.stampGridConfig
   const showStrip = wallet.showStrip
 
-  const stripColor1 = wallet.stripColor1
+  const stampFilledColor = wallet.stampFilledColor
   const stripColor2 = wallet.stripColor2
-  const primaryColor = wallet.primaryColor
   const secondaryColor = wallet.secondaryColor
-  const textColor = wallet.textColor
-
-  const effectiveStripColor1 = stripColor1 ?? primaryColor
-  const effectiveStripColor2 = stripColor2 ?? secondaryColor
+  const effectiveStampColor = stampFilledColor ?? stripColor2 ?? secondaryColor
 
   const [isUploading, setIsUploading] = useState(false)
+  const [isUploadingReward, setIsUploadingReward] = useState(false)
+  const [isUploadingEmpty, setIsUploadingEmpty] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const rewardFileInputRef = useRef<HTMLInputElement>(null)
+  const emptyFileInputRef = useRef<HTMLInputElement>(null)
 
   // Derived: which option is active
   const activeId: "STAMP_GRID" | ProgressStyle = useStampGrid ? "STAMP_GRID" : progressStyle
@@ -306,88 +399,40 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
           <div style={{ height: 1, backgroundColor: "var(--border)", marginBottom: 16 }} />
 
           {/* Custom Stamp Icon Upload */}
-          <SectionHeader>Custom Stamp Icon</SectionHeader>
-          {stampGridConfig.customStampIconUrl ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={stampGridConfig.customStampIconUrl}
-                alt="Custom stamp icon"
-                style={{
-                  width: 48,
-                  height: 48,
-                  objectFit: "contain",
-                  borderRadius: 6,
-                  border: "1px solid var(--border)",
-                  backgroundColor: "var(--muted)",
-                }}
-              />
-              <button
-                onClick={async () => {
-                  const result = await (onDeleteStampIcon ?? deleteStampIcon)(programId)
-                  if (result.success) {
-                    updateStampGridConfig({ customStampIconUrl: null })
-                  }
-                }}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: 6,
-                  border: "1px solid var(--border)",
-                  backgroundColor: "transparent",
-                  cursor: "pointer",
-                  fontSize: 11,
-                  color: "var(--destructive)",
-                }}
-              >
-                Remove
-              </button>
-            </div>
-          ) : (
-            <div style={{ marginBottom: 8 }}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                style={{ display: "none" }}
-                onChange={async (e) => {
-                  const file = e.target.files?.[0]
-                  if (!file) return
-                  setIsUploading(true)
-                  try {
-                    const formData = new FormData()
-                    formData.set("programId", programId)
-                    formData.set("file", file)
-                    const result = await (onUploadStampIcon ?? uploadStampIcon)(formData)
-                    if (result.success && result.url) {
-                      updateStampGridConfig({ customStampIconUrl: result.url })
-                    }
-                  } finally {
-                    setIsUploading(false)
-                    if (fileInputRef.current) fileInputRef.current.value = ""
-                  }
-                }}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: 6,
-                  border: "1px solid var(--border)",
-                  backgroundColor: "var(--muted)",
-                  cursor: isUploading ? "wait" : "pointer",
-                  fontSize: 12,
-                  color: "var(--foreground)",
-                  width: "100%",
-                }}
-              >
-                {isUploading ? "Uploading..." : "Upload custom icon"}
-              </button>
-              <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 4 }}>
-                PNG, JPEG, WebP, or SVG. Max 2MB.
-              </div>
-            </div>
-          )}
+          <SectionHeader>Filled Stamp Icon</SectionHeader>
+          <IconUploadWidget
+            url={stampGridConfig.customStampIconUrl}
+            label="Custom stamp icon"
+            isUploading={isUploading}
+            inputRef={fileInputRef}
+            programId={programId}
+            onUpload={onUploadStampIcon ?? uploadStampIcon}
+            onDelete={onDeleteStampIcon ?? deleteStampIcon}
+            onUrlChange={(url) => updateStampGridConfig({ customStampIconUrl: url })}
+          />
+
+          {/* Uniform icon toggle */}
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              cursor: "pointer",
+              padding: "8px 10px",
+              borderRadius: 6,
+              border: `1.5px solid ${stampGridConfig.useUniformIcon ? "var(--primary)" : "var(--border)"}`,
+              backgroundColor: stampGridConfig.useUniformIcon ? "var(--accent)" : "transparent",
+              marginBottom: 12,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={stampGridConfig.useUniformIcon}
+              onChange={(e) => updateStampGridConfig({ useUniformIcon: e.target.checked })}
+              style={{ accentColor: "var(--primary)", width: 14, height: 14 }}
+            />
+            <span style={{ fontSize: 12, color: "var(--foreground)" }}>Same icon for all slots</span>
+          </label>
 
           {/* Preset Icons */}
           <SectionHeader>Preset Icons</SectionHeader>
@@ -497,87 +542,149 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
             </span>
           </div>
 
-          {/* Reward Icon */}
-          <SectionHeader>Reward Icon</SectionHeader>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 4 }}>
-            {REWARD_ICONS.map((icon) => (
-              <button
-                key={icon.id}
-                onClick={() => updateStampGridConfig({ rewardIcon: icon.id })}
-                aria-pressed={stampGridConfig.rewardIcon === icon.id}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 4,
-                  padding: "6px 4px",
-                  borderRadius: 6,
-                  border: `2px solid ${stampGridConfig.rewardIcon === icon.id ? "var(--primary)" : "var(--border)"}`,
-                  backgroundColor: stampGridConfig.rewardIcon === icon.id ? "var(--accent)" : "transparent",
-                  cursor: "pointer",
-                }}
-              >
-                <svg
-                  width={24}
-                  height={24}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  dangerouslySetInnerHTML={{ __html: icon.paths }}
-                />
-                <span style={{ fontSize: 9, color: "var(--foreground)", lineHeight: 1 }}>{icon.label}</span>
-              </button>
-            ))}
-          </div>
+          {/* Reward & Empty icons — only when not using uniform icon */}
+          {!stampGridConfig.useUniformIcon && (
+            <>
+              {/* Reward Icon */}
+              <SectionHeader>Reward Slot Icon</SectionHeader>
+              <IconUploadWidget
+                url={stampGridConfig.customRewardIconUrl}
+                label="Custom reward icon"
+                isUploading={isUploadingReward}
+                inputRef={rewardFileInputRef}
+                programId={programId}
+                onUpload={uploadRewardIcon}
+                onDelete={deleteRewardIcon}
+                onUrlChange={(url) => updateStampGridConfig({ customRewardIconUrl: url })}
+              />
+              {!stampGridConfig.customRewardIconUrl && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 4 }}>
+                  {REWARD_ICONS.map((icon) => (
+                    <button
+                      key={icon.id}
+                      onClick={() => updateStampGridConfig({ rewardIcon: icon.id })}
+                      aria-pressed={stampGridConfig.rewardIcon === icon.id}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 4,
+                        padding: "6px 4px",
+                        borderRadius: 6,
+                        border: `2px solid ${stampGridConfig.rewardIcon === icon.id ? "var(--primary)" : "var(--border)"}`,
+                        backgroundColor: stampGridConfig.rewardIcon === icon.id ? "var(--accent)" : "transparent",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <svg
+                        width={24}
+                        height={24}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        dangerouslySetInnerHTML={{ __html: icon.paths }}
+                      />
+                      <span style={{ fontSize: 9, color: "var(--foreground)", lineHeight: 1 }}>{icon.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
-          {/* Stamp Grid Colors */}
-          <SectionHeader>Stamp Colors</SectionHeader>
-          <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginBottom: 8 }}>
-            Independent from card background. Also editable in Strip panel.
-          </div>
-          <ColorRow
-            label="Filled Stamp"
-            value={effectiveStripColor2}
-            onChange={(v) => store.getState().setWalletField("stripColor2", v)}
-          />
-          <ColorRow
-            label="Background"
-            value={effectiveStripColor1}
-            onChange={(v) => store.getState().setWalletField("stripColor1", v)}
-          />
-          <ColorRow
-            label="Text / Numbers"
-            value={textColor}
-            onChange={(v) => store.getState().setWalletField("textColor", v)}
-          />
+              {/* Empty Slot Icon */}
+              <SectionHeader>Empty Slot Icon</SectionHeader>
+              <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginBottom: 8 }}>
+                Replaces slot numbers with a custom icon.
+              </div>
+              <IconUploadWidget
+                url={stampGridConfig.customEmptyIconUrl}
+                label="Custom empty slot icon"
+                isUploading={isUploadingEmpty}
+                inputRef={emptyFileInputRef}
+                programId={programId}
+                onUpload={uploadEmptyIcon}
+                onDelete={deleteEmptyIcon}
+                onUrlChange={(url) => updateStampGridConfig({ customEmptyIconUrl: url })}
+              />
 
-          {/* Text Field Format (dropdown, since stamp grid is the main visual) */}
-          <SectionHeader>Text Field Format</SectionHeader>
-          <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginBottom: 6 }}>
-            Shown as the progress field value on the pass.
-          </div>
-          <select
-            value={progressStyle}
-            onChange={(e) => store.getState().setWalletField("progressStyle", e.target.value as ProgressStyle)}
+              {/* Empty slot number customization — only when showing numbers (no custom empty icon) */}
+              {!stampGridConfig.customEmptyIconUrl && (
+                <>
+                  <SectionHeader>Empty Slot Numbers</SectionHeader>
+                  <ColorRow
+                    label="Number Color"
+                    value={stampGridConfig.emptyNumberColor ?? wallet.textColor}
+                    onChange={(v) => updateStampGridConfig({ emptyNumberColor: v })}
+                  />
+                  {stampGridConfig.emptyNumberColor && (
+                    <button
+                      onClick={() => updateStampGridConfig({ emptyNumberColor: null })}
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: 6,
+                        border: "1px solid var(--border)",
+                        backgroundColor: "transparent",
+                        cursor: "pointer",
+                        fontSize: 10,
+                        color: "var(--muted-foreground)",
+                        marginBottom: 8,
+                      }}
+                    >
+                      Reset to text color
+                    </button>
+                  )}
+                  <div style={{ fontSize: 11, color: "var(--foreground)", marginBottom: 4 }}>Number Size</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <input
+                      type="range"
+                      min={0.2}
+                      max={0.6}
+                      step={0.05}
+                      value={stampGridConfig.emptyNumberScale ?? 0.35}
+                      onChange={(e) => updateStampGridConfig({ emptyNumberScale: parseFloat(e.target.value) })}
+                      style={{ flex: 1, accentColor: "var(--primary)" }}
+                    />
+                    <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace", minWidth: 32, textAlign: "right" }}>
+                      {Math.round((stampGridConfig.emptyNumberScale ?? 0.35) * 100)}%
+                    </span>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {/* Stamp Icon Color */}
+          <SectionHeader>Stamp Icon Color</SectionHeader>
+          {stampFilledColor !== "transparent" && (
+            <ColorRow
+              label="Icon Fill"
+              value={effectiveStampColor}
+              onChange={(v) => store.getState().setWalletField("stampFilledColor", v)}
+            />
+          )}
+          <label
             style={{
-              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              cursor: "pointer",
               padding: "8px 10px",
               borderRadius: 6,
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--background)",
-              fontSize: 12,
-              color: "var(--foreground)",
-              outline: "none",
-              cursor: "pointer",
+              border: `1.5px solid ${stampFilledColor === "transparent" ? "var(--primary)" : "var(--border)"}`,
+              backgroundColor: stampFilledColor === "transparent" ? "var(--accent)" : "transparent",
+              marginTop: stampFilledColor === "transparent" ? 0 : 4,
             }}
           >
-            {TEXT_PROGRESS_STYLES.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
+            <input
+              type="checkbox"
+              checked={stampFilledColor === "transparent"}
+              onChange={(e) => store.getState().setWalletField("stampFilledColor", e.target.checked ? "transparent" : null)}
+              style={{ accentColor: "var(--primary)", width: 14, height: 14 }}
+            />
+            <span style={{ fontSize: 12, color: "var(--foreground)" }}>Transparent</span>
+          </label>
         </>
       )}
 
@@ -603,28 +710,32 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
         </>
       )}
 
-      {/* ─── E. Custom Label (always shown) ─── */}
-      <SectionHeader>Custom Label</SectionHeader>
-      <input
-        type="text"
-        value={customProgressLabel}
-        onChange={(e) => store.getState().setWalletField("customProgressLabel", e.target.value)}
-        placeholder="e.g. Coffee Points"
-        maxLength={30}
-        style={{
-          width: "100%",
-          padding: "8px 10px",
-          borderRadius: 6,
-          border: "1px solid var(--border)",
-          backgroundColor: "var(--background)",
-          fontSize: 12,
-          color: "var(--foreground)",
-          outline: "none",
-        }}
-      />
-      <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 4 }}>
-        Used as the progress field label on the pass. Leave empty for &ldquo;Progress&rdquo;.
-      </div>
+      {/* ─── E. Custom Label (non-stamp-grid only) ─── */}
+      {!useStampGrid && (
+        <>
+          <SectionHeader>Custom Label</SectionHeader>
+          <input
+            type="text"
+            value={customProgressLabel}
+            onChange={(e) => store.getState().setWalletField("customProgressLabel", e.target.value)}
+            placeholder="e.g. Coffee Points"
+            maxLength={30}
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              borderRadius: 6,
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--background)",
+              fontSize: 12,
+              color: "var(--foreground)",
+              outline: "none",
+            }}
+          />
+          <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 4 }}>
+            Used as the progress field label on the pass. Leave empty for &ldquo;Progress&rdquo;.
+          </div>
+        </>
+      )}
     </div>
   )
 }

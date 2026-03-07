@@ -6,6 +6,8 @@ import {
   formatProgressValue,
   formatLabel,
   getFieldLayout,
+  DEFAULT_HEADER_FIELDS,
+  DEFAULT_SECONDARY_FIELDS,
   type CardType,
   type PatternStyle,
   type ProgressStyle,
@@ -37,8 +39,12 @@ export type WalletPassDesign = {
   patternStyle: PatternStyle
   useStampGrid?: boolean    // independent stamp grid overlay
   stampGridConfig?: StampGridConfig
+  stampFilledColor?: string | null // stamp icon fill color (null = use stripColor2 ?? secondaryColor)
   stripImagePosition?: { x: number; y: number }
   stripImageZoom?: number
+  labelColor?: string | null
+  headerFields?: string[] | null   // custom header fields (null = default)
+  secondaryFields?: string[] | null // custom secondary fields (null = default)
 }
 
 type WalletPassRendererProps = {
@@ -78,8 +84,9 @@ type WalletPassRendererProps = {
 
 const SYSTEM_FONT = `-apple-system, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif`
 const CARD_WIDTH = 320
-const CARD_HEIGHT = 440
-const BORDER_RADIUS = 16
+const APPLE_CARD_HEIGHT = 450
+const GOOGLE_CARD_HEIGHT = 480
+const BORDER_RADIUS = 12
 
 // ─── Helpers ────────────────────────────────────────────────
 
@@ -124,15 +131,32 @@ export function WalletPassRenderer({
   prepaidValidUntil,
 }: WalletPassRendererProps) {
   const cardType = design.cardType ?? "STAMP"
-  const layout = getFieldLayout(cardType)
+  const defaultLayout = getFieldLayout(cardType)
   const isApple = format === "apple"
+
+  // Custom field layout: user-configurable header + secondary for STAMP/POINTS
+  const isStampGrid = design.useStampGrid && design.showStrip
+  const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
+  const layout = isStampType
+    ? {
+        ...defaultLayout,
+        apple: {
+          header: design.headerFields ?? DEFAULT_HEADER_FIELDS,
+          // Progress is baked into the strip image — no primary text field needed
+          primary: design.showStrip ? [] : defaultLayout.apple.primary,
+          secondary: design.secondaryFields ?? DEFAULT_SECONDARY_FIELDS,
+          auxiliary: [],
+        },
+      }
+    : defaultLayout
   const resolvedLogo = isApple
     ? (logoAppleUrl ?? logoUrl ?? null)
     : (logoGoogleUrl ?? logoUrl ?? null)
   const useStrip = design.showStrip
-  const stripHeight = isApple ? 110 : 76
+  const stripHeight = isApple ? 130 : 100
 
   // Dimensions
+  const CARD_HEIGHT = isApple ? APPLE_CARD_HEIGHT : GOOGLE_CARD_HEIGHT
   const baseW = width ?? CARD_WIDTH
   const baseH = height ?? CARD_HEIGHT
 
@@ -198,6 +222,11 @@ export function WalletPassRenderer({
         return { label: lbl("NAME"), value: customerName }
       case "memberSince":
         return { label: lbl("MEMBER SINCE"), value: memberSince }
+      case "registeredAt": {
+        const now = new Date()
+        const pad = (n: number) => String(n).padStart(2, "0")
+        return { label: lbl("REGISTERED"), value: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}` }
+      }
       default:
         return { label: name, value: "—" }
     }
@@ -208,83 +237,201 @@ export function WalletPassRenderer({
   const secondaryFields = layout.apple.secondary.map(resolveField)
   const auxiliaryFields = layout.apple.auxiliary.map(resolveField)
 
+  // Whether to hide the org name text next to the logo (matches logoText omission in generate-pass.ts)
+  // logoText is omitted from Apple passes (generate-pass.ts doesn't set it)
+  const hideLogoText = true
+
   // ─── Section: Header ───
   const headerSection = (
     <div
       style={{
         display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: "14px 16px 10px",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        padding: "6px 16px 6px",
         flexShrink: 0,
       }}
     >
-      {/* Logo — rectangular for Apple, circular for Google */}
-      <div
-        style={{
-          width: isApple ? 48 : 36,
-          height: isApple ? 15 : 36,
-          borderRadius: isApple ? 3 : "50%",
-          backgroundColor: isApple ? "transparent" : design.secondaryColor,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          flexShrink: 0,
-        }}
-      >
-        {resolvedLogo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={resolvedLogo}
-            alt=""
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: isApple ? "contain" : "cover",
-            }}
-          />
-        ) : (
-          <span
-            style={{
-              fontSize: isApple ? 11 : 14,
-              fontWeight: 700,
-              color: design.textColor,
-            }}
-          >
-            {organizationName.charAt(0).toUpperCase()}
-          </span>
-        )}
-      </div>
-
-      {/* Organization name + optional header fields */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Left side: Logo + optional org name */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+        {/* Logo — rectangular for Apple, circular for Google */}
         <div
           style={{
-            fontSize: 15,
-            fontWeight: 600,
+            width: isApple ? 150 : 36,
+            height: isApple ? 50 : 36,
+            borderRadius: isApple ? 3 : "50%",
+            backgroundColor: "transparent",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            flexShrink: 0,
           }}
         >
-          {organizationName}
+          {resolvedLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={resolvedLogo}
+              alt=""
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: isApple ? "contain" : "cover",
+              }}
+            />
+          ) : isApple ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                height: "100%",
+              }}
+            >
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 6,
+                  background: `color-mix(in srgb, ${design.textColor} 12%, transparent)`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ fontSize: 14, fontWeight: 700, color: design.textColor }}>
+                  {organizationName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: design.textColor,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {organizationName}
+              </span>
+            </div>
+          ) : (
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: `color-mix(in srgb, ${design.textColor} 12%, transparent)`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ fontSize: 16, fontWeight: 700, color: design.textColor }}>
+                {organizationName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
         </div>
-        {headerFields.length > 1 && (
-          <div style={{ fontSize: 10, opacity: 0.6, marginTop: 1 }}>
-            {headerFields[1].label}: {headerFields[1].value}
+        {!hideLogoText && (
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 600,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {organizationName}
           </div>
         )}
       </div>
 
-      {/* Apple Wallet logo indicator */}
-      {isApple && (
+      {/* Right side: Header fields (Apple Wallet style — right-aligned) */}
+      {isApple && headerFields.length > 0 && (
+        <div style={{ textAlign: "right", flexShrink: 0 }}>
+          {headerFields.map((f, i) => (
+            <div key={i}>
+              <div style={{
+                fontSize: 10,
+                fontWeight: 700,
+                lineHeight: 1,
+                color: design.labelColor ?? design.textColor,
+                opacity: design.labelColor ? 1 : 0.6,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+              }}>
+                {f.label}
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 300, lineHeight: 1.1 }}>
+                {f.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Apple Wallet logo indicator (only when no header fields) */}
+      {isApple && headerFields.length === 0 && (
         <div style={{ opacity: 0.4, fontSize: 10, fontWeight: 500 }}>
           ●●●
         </div>
       )}
     </div>
   )
+
+  // ─── Section: Primary Fields ───
+  const primaryPadding = useStrip ? "2px 16px 2px" : "12px 16px 8px"
+  const primaryFontSize = useStrip ? 28 : 22
+
+  // Progress text overlay on strip — for non-stamp-grid STAMP/POINTS cards
+  const showProgressOnStrip = useStrip && isStampType && !isStampGrid
+  const progressOverlay = showProgressOnStrip ? (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+        zIndex: 2,
+        padding: "8px 16px",
+        textShadow: "0 2px 6px rgba(0,0,0,0.4)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          color: design.labelColor ?? design.textColor,
+          opacity: design.labelColor ? 1 : 0.85,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          lineHeight: 1,
+          marginBottom: 2,
+        }}
+      >
+        {lbl(progressLabel)}
+      </div>
+      <div
+        style={{
+          fontSize: primaryFontSize,
+          fontWeight: 700,
+          color: design.textColor,
+          letterSpacing: design.progressStyle === "NUMBERS" ? "0.02em" : "0.08em",
+          lineHeight: 1.1,
+          opacity: 0.95,
+        }}
+      >
+        {progressText}
+      </div>
+    </div>
+  ) : null
 
   // ─── Section: Strip Image ───
   const stripSection = useStrip ? (() => {
@@ -350,79 +497,35 @@ export function WalletPassRenderer({
             hasReward={hasReward}
             config={design.stampGridConfig}
             primaryColor={sc1}
-            secondaryColor={sc2}
+            secondaryColor={design.stampFilledColor ?? sc2}
             textColor={design.textColor}
             stripHeight={stripHeight}
           />
         )}
 
+        {/* Progress text overlay on strip (non-stamp-grid STAMP/POINTS) */}
+        {progressOverlay}
+
       </div>
     )
   })() : null
 
-  // ─── Section: Banner (Google only) ───
-  const getBannerText = (): string => {
-    if (hasReward) return "REWARD EARNED"
-    switch (cardType) {
-      case "STAMP":
-      case "POINTS":
-        return `REWARD ON ${totalVisits}TH VISIT`
-      case "COUPON":
-        return discountText || "COUPON"
-      case "TIER":
-        return tierName || "MEMBER"
-      case "PREPAID":
-        return `${remainingUses ?? 0} / ${totalUses ?? 0} REMAINING`
-      default:
-        return ""
-    }
-  }
+  const bannerSection = null
 
-  const bannerText = !isApple ? getBannerText() : ""
-  const bannerSection = !isApple && bannerText ? (
-    <div
-      style={{
-        height: 28,
-        backgroundColor: design.secondaryColor,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 16px",
-        flexShrink: 0,
-      }}
-    >
-      <span
-        style={{
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: "0.06em",
-          textTransform: "uppercase",
-          color: textColorForBg(design.secondaryColor),
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {bannerText}
-      </span>
-    </div>
-  ) : null
-
-  // ─── Section: Primary Fields ───
-  const primaryPadding = useStrip ? "8px 16px 4px" : "12px 16px 8px"
-  const primaryFontSize = useStrip ? 17 : 22
-  const primarySection = (
+  // Fallback for non-strip: render below header
+  const primarySection = !useStrip ? (
     <div style={{ padding: primaryPadding }}>
       {primaryFields.map((f, i) => (
         <div key={i}>
           <div
             style={{
-              fontSize: useStrip ? 9 : 10,
-              fontWeight: 400,
-              opacity: 0.6,
+              fontSize: 10,
+              fontWeight: 700,
+              color: design.labelColor ?? undefined,
+              opacity: design.labelColor ? 1 : 0.6,
               textTransform: "uppercase",
               letterSpacing: "0.04em",
-              marginBottom: 1,
+              marginBottom: 0,
             }}
           >
             {f.label}
@@ -443,15 +546,17 @@ export function WalletPassRenderer({
         </div>
       ))}
     </div>
-  )
+  ) : null
 
   // ─── Section: Secondary Fields ───
   const secondarySection = (
-    <div style={{ padding: useStrip ? "6px 16px" : "8px 16px" }}>
+    <div style={{ padding: useStrip ? "2px 16px" : "8px 16px" }}>
       <FieldSection
         fields={secondaryFields}
         textColor={design.textColor}
+        labelColor={design.labelColor}
         compact={compact}
+        format={format}
       />
     </div>
   )
@@ -462,7 +567,9 @@ export function WalletPassRenderer({
       <FieldSection
         fields={auxiliaryFields}
         textColor={design.textColor}
+        labelColor={design.labelColor}
         compact={compact}
+        format={format}
       />
     </div>
   )
@@ -482,8 +589,8 @@ export function WalletPassRenderer({
   )
 
   // ─── Section: QR Code ───
-  const qrBoxSize = useStrip ? 80 : 100
-  const qrInnerSize = useStrip ? 66 : 84
+  const qrBoxSize = useStrip ? 135 : 135
+  const qrInnerSize = useStrip ? 120 : 120
   const qrSection = (
     <div
       style={{
@@ -497,7 +604,7 @@ export function WalletPassRenderer({
           width: qrBoxSize,
           height: qrBoxSize,
           backgroundColor: "#ffffff",
-          borderRadius: 8,
+          borderRadius: isApple ? 4 : 12,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -527,7 +634,7 @@ export function WalletPassRenderer({
         style={{
           width: CARD_WIDTH,
           height: CARD_HEIGHT,
-          borderRadius: BORDER_RADIUS,
+          borderRadius: isApple ? BORDER_RADIUS : 20,
           overflow: "hidden",
           backgroundColor: design.primaryColor,
           fontFamily: SYSTEM_FONT,
@@ -549,20 +656,51 @@ export function WalletPassRenderer({
             {auxiliarySection}
             <div style={{ flex: 1 }} />
             {brandingSection}
-            {dividerSection}
             {qrSection}
           </>
         ) : (
           <>
             {headerSection}
             {bannerSection}
+            {/* Google: program name as large heading */}
+            <div style={{ padding: "6px 16px 2px" }}>
+              <div
+                style={{
+                  fontSize: 24,
+                  fontWeight: 400,
+                  color: design.textColor,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {programName}
+              </div>
+            </div>
             {primarySection}
             {secondarySection}
             {auxiliarySection}
             <div style={{ flex: 1 }} />
             {brandingSection}
-            {dividerSection}
             {qrSection}
+            {/* Barcode value label (Google shows this below QR) */}
+            {(
+              <div
+                style={{
+                  textAlign: "center",
+                  fontSize: 11,
+                  fontFamily: "monospace",
+                  color: design.textColor,
+                  opacity: 1,
+                  padding: "0 16px 6px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {qrValue || "fb93c6ef-b186-4a7b-bd20-1d60384a46da"}
+              </div>
+            )}
             {stripSection}
           </>
         )}
@@ -595,6 +733,9 @@ function StampGridOverlay({
   const stampIcon = config?.stampIcon ?? "coffee"
   const customStampIconUrl = config?.customStampIconUrl ?? null
   const rewardIconId = config?.rewardIcon ?? "gift"
+  const useUniformIcon = config?.useUniformIcon ?? false
+  const customRewardIconUrl = useUniformIcon ? (customStampIconUrl) : (config?.customRewardIconUrl ?? null)
+  const customEmptyIconUrl = useUniformIcon ? (customStampIconUrl) : (config?.customEmptyIconUrl ?? null)
   const stampShape = config?.stampShape ?? "circle"
   const filledStyle = config?.filledStyle ?? "icon"
   const iconScale = config?.stampIconScale ?? 0.6
@@ -602,11 +743,12 @@ function StampGridOverlay({
   const cols = totalSlots <= 5 ? totalSlots : Math.ceil(totalSlots / 2)
   const rows = Math.ceil(totalSlots / cols)
 
-  const slotSize = Math.min(
-    Math.floor((320 - (cols + 1) * 4) / cols),
-    Math.floor((stripHeight - (rows + 1) * 4) / rows),
-    44
-  )
+  const gap = 12
+  const pad = 8
+  const slotSize = Math.floor(Math.min(
+    (300 - pad * 2 - (cols - 1) * gap) / cols,
+    (stripHeight - pad * 2 - (rows - 1) * gap) / rows,
+  ))
 
   const borderRadius = stampShape === "circle" ? "50%" : stampShape === "rounded-square" ? "20%" : "0"
 
@@ -618,16 +760,18 @@ function StampGridOverlay({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "4px 8px",
+        padding: `${pad}px`,
         zIndex: 1,
         backgroundColor: "rgba(0,0,0,0.15)",
       }}
     >
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${cols}, ${slotSize}px)`,
-          gap: 4,
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap,
+          maxWidth: cols * slotSize + (cols - 1) * gap,
         }}
       >
         {Array.from({ length: totalSlots }, (_, i) => {
@@ -635,7 +779,7 @@ function StampGridOverlay({
           const isFilled = i < currentVisits
 
           if (isRewardSlot) {
-            const rewardPaths = getRewardIconPaths(rewardIconId)
+            const rewardPaths = useUniformIcon ? getStampIconPaths(stampIcon) : getRewardIconPaths(rewardIconId)
             const rewardFilled = hasReward || isFilled
             return (
               <div
@@ -644,6 +788,7 @@ function StampGridOverlay({
                   width: slotSize,
                   height: slotSize,
                   borderRadius,
+                  overflow: "hidden",
                   border: `2px solid ${hasReward ? "#d4a017" : secondaryColor}${rewardFilled ? "88" : "44"}`,
                   backgroundColor: hasReward ? "#d4a01720" : rewardFilled ? secondaryColor : `${primaryColor}60`,
                   display: "flex",
@@ -651,18 +796,32 @@ function StampGridOverlay({
                   justifyContent: "center",
                 }}
               >
-                <svg
-                  width={slotSize * iconScale}
-                  height={slotSize * iconScale}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={rewardFilled ? primaryColor : textColor}
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ opacity: rewardFilled ? 1 : 0.5 }}
-                  dangerouslySetInnerHTML={{ __html: rewardPaths }}
-                />
+                {customRewardIconUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={customRewardIconUrl}
+                    alt=""
+                    style={{
+                      width: slotSize * iconScale,
+                      height: slotSize * iconScale,
+                      objectFit: "contain",
+                      opacity: rewardFilled ? 1 : 0.5,
+                    }}
+                  />
+                ) : (
+                  <svg
+                    width={slotSize * iconScale}
+                    height={slotSize * iconScale}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke={rewardFilled ? primaryColor : textColor}
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ opacity: rewardFilled ? 1 : 0.5 }}
+                    dangerouslySetInnerHTML={{ __html: rewardPaths }}
+                  />
+                )}
               </div>
             )
           }
@@ -733,6 +892,8 @@ function StampGridOverlay({
           }
 
           // Empty slot — frosted glass effect
+          const emptyNumScale = config?.emptyNumberScale ?? 0.35
+          const emptyNumColor = config?.emptyNumberColor ?? textColor
           return (
             <div
               key={i}
@@ -740,19 +901,45 @@ function StampGridOverlay({
                 width: slotSize,
                 height: slotSize,
                 borderRadius,
+                overflow: "hidden",
                 border: `1.5px dashed ${secondaryColor}40`,
                 backgroundColor: `${primaryColor}25`,
                 backdropFilter: "blur(2px)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: slotSize * 0.3,
+                fontSize: slotSize * emptyNumScale,
                 fontWeight: 500,
-                color: textColor,
+                color: emptyNumColor,
                 opacity: 0.35,
               }}
             >
-              {i + 1}
+              {customEmptyIconUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={customEmptyIconUrl}
+                  alt=""
+                  style={{
+                    width: slotSize * iconScale,
+                    height: slotSize * iconScale,
+                    objectFit: "contain",
+                  }}
+                />
+              ) : useUniformIcon ? (
+                <svg
+                  width={slotSize * iconScale}
+                  height={slotSize * iconScale}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={textColor}
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  dangerouslySetInnerHTML={{ __html: getStampIconPaths(stampIcon) }}
+                />
+              ) : (
+                i + 1
+              )}
             </div>
           )
         })}

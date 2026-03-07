@@ -39,17 +39,7 @@ export default async function ProgramDesignPage(props: {
   const passDesign = program.passDesign
   const stripFilters = passDesign
     ? parseStripFilters(passDesign.editorConfig)
-    : {
-        stripOpacity: 1,
-        stripGrayscale: false,
-        useStampGrid: false,
-        stripColor1: null,
-        stripColor2: null,
-        stripFill: "gradient" as const,
-        patternColor: null,
-        stripImagePosition: { x: 0.5, y: 0.5 },
-        stripImageZoom: 1,
-      }
+    : parseStripFilters(null)
 
   const isLegacyStampGrid = passDesign?.patternStyle === "STAMP_GRID"
   const useStampGrid = stripFilters.useStampGrid || isLegacyStampGrid
@@ -79,6 +69,10 @@ export default async function ProgramDesignPage(props: {
         patternColor: stripFilters.patternColor,
         stripImagePosition: stripFilters.stripImagePosition,
         stripImageZoom: stripFilters.stripImageZoom,
+        labelColor: stripFilters.labelColor,
+        stampFilledColor: stripFilters.stampFilledColor,
+        headerFields: stripFilters.headerFields,
+        secondaryFields: stripFilters.secondaryFields,
         useStampGrid,
         generatedStripApple: passDesign.generatedStripApple ?? null,
         generatedStripGoogle: passDesign.generatedStripGoogle ?? null,

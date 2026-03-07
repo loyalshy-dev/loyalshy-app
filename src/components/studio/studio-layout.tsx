@@ -14,7 +14,6 @@ import { ProgramPanel } from "./panels/program-panel"
 import { ColorsPanel } from "./panels/colors-panel"
 import { ProgressPanel } from "./panels/progress-panel"
 import { StripPanel } from "./panels/strip-panel"
-import { LabelsPanel } from "./panels/labels-panel"
 import { DetailsPanel } from "./panels/details-panel"
 import { TemplatePanel } from "./panels/template-panel"
 import { LogoPanel } from "./panels/logo-panel"
@@ -136,6 +135,10 @@ export function StudioLayout({
     if (walletData) {
       store.getState().hydrate(walletData as Partial<WalletState>)
     }
+    // Strip is mandatory for stamp/points cards (progress baked into strip image)
+    if (cardType === "STAMP" || cardType === "POINTS") {
+      store.getState().setWalletField("showStrip", true)
+    }
     store.getState().setWalletField("logoAppleUrl", organizationLogoApple ?? organizationLogo)
     store.getState().setWalletField("logoGoogleUrl", organizationLogoGoogle ?? organizationLogo)
     // Hydrate program config from templateConfig
@@ -205,8 +208,12 @@ export function StudioLayout({
     patternStyle: wallet.patternStyle,
     useStampGrid: wallet.useStampGrid,
     stampGridConfig: wallet.stampGridConfig,
+    stampFilledColor: wallet.stampFilledColor,
     stripImagePosition: wallet.stripImagePosition,
     stripImageZoom: wallet.stripImageZoom,
+    labelColor: wallet.labelColor,
+    headerFields: wallet.headerFields,
+    secondaryFields: wallet.secondaryFields,
   }
 
   // Temporal (undo/redo)
@@ -273,12 +280,16 @@ export function StudioLayout({
             stampGridConfig: state.wallet.useStampGrid
               ? state.wallet.stampGridConfig
               : undefined,
+            stampFilledColor: state.wallet.stampFilledColor,
             stripImagePosition: (state.wallet.stripImagePosition.x !== 0.5 || state.wallet.stripImagePosition.y !== 0.5)
               ? state.wallet.stripImagePosition
               : undefined,
             stripImageZoom: state.wallet.stripImageZoom !== 1
               ? state.wallet.stripImageZoom
               : undefined,
+            labelColor: state.wallet.labelColor,
+            headerFields: state.wallet.headerFields,
+            secondaryFields: state.wallet.secondaryFields,
           })
         )
       }
@@ -382,16 +393,11 @@ export function StudioLayout({
       case "templates":
         return <TemplatePanel store={store} organizationId={organizationId} organizationLogo={organizationLogo} cardType={cardType} />
       case "colors":
-        return (
-          <>
-            <ColorsPanel store={store} />
-            <div style={{ marginTop: 16 }}><LabelsPanel store={store} /></div>
-          </>
-        )
+        return <ColorsPanel store={store} />
       case "progress":
         return <ProgressPanel store={store} programId={templateId} visitsRequired={programConfig.stampsRequired} />
       case "strip":
-        return <StripPanel store={store} programId={templateId} />
+        return <StripPanel store={store} programId={templateId} forceStrip={cardType === "STAMP" || cardType === "POINTS"} />
       case "logo":
         return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} />
       case "details":

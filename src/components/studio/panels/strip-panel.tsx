@@ -24,6 +24,14 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
   )
 }
 
+const PRESET_STRIP_IMAGES: { id: string; src: string; label: string }[] = [
+  { id: "burger", src: "/strip-images/burger.webp", label: "Burger" },
+  { id: "caffe-beans", src: "/strip-images/caffe-beans.webp", label: "Coffee Beans" },
+  { id: "pizza", src: "/strip-images/pizza.webp", label: "Pizza" },
+  { id: "club", src: "/strip-images/club.webp", label: "Club" },
+  { id: "gym", src: "/strip-images/gym.jpg", label: "Gym" },
+]
+
 const PATTERN_OPTIONS: { id: PatternStyle; label: string }[] = [
   { id: "NONE", label: "None" },
   { id: "DOTS", label: "Dots" },
@@ -72,11 +80,13 @@ function ColorRow({
 type Props = {
   store: CardDesignStoreApi
   programId: string
+  /** When true, strip cannot be toggled off (used for stamp/points cards where progress is baked into strip) */
+  forceStrip?: boolean
   onUploadStrip?: (formData: FormData) => Promise<{ success?: boolean; originalUrl?: string; appleUrl?: string; googleUrl?: string; error?: string }>
   onDeleteStrip?: (id: string) => Promise<{ success?: boolean; error?: string }>
 }
 
-export function StripPanel({ store, programId, onUploadStrip, onDeleteStrip }: Props) {
+export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDeleteStrip }: Props) {
   const showStrip = useStore(store, (s) => s.wallet.showStrip)
   const stripImageUrl = useStore(store, (s) => s.wallet.stripImageUrl)
   const stripOpacity = useStore(store, (s) => s.wallet.stripOpacity)
@@ -106,45 +116,62 @@ export function StripPanel({ store, programId, onUploadStrip, onDeleteStrip }: P
 
   return (
     <div>
-      {/* Show Strip toggle */}
-      <label
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "10px 12px",
-          borderRadius: 8,
-          border: `1.5px solid ${showStrip ? "var(--primary)" : "var(--border)"}`,
-          backgroundColor: showStrip ? "var(--accent)" : "transparent",
-          cursor: "pointer",
-          marginBottom: 12,
-        }}
-      >
-        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>Show Strip</span>
-        <input
-          type="checkbox"
-          checked={showStrip}
-          onChange={(e) => store.getState().setWalletField("showStrip", e.target.checked)}
-          style={{ accentColor: "var(--primary)", width: 16, height: 16 }}
-        />
-      </label>
-
-      {!showStrip && (
+      {/* Show Strip toggle — hidden when strip is mandatory */}
+      {forceStrip ? (
         <div
           style={{
-            padding: "12px",
+            padding: "10px 12px",
             borderRadius: 8,
             backgroundColor: "var(--muted)",
-            textAlign: "center",
+            marginBottom: 12,
             fontSize: 11,
             color: "var(--muted-foreground)",
           }}
         >
-          Enable &ldquo;Show Strip&rdquo; to configure strip image, colors, and patterns.
+          Strip is always on for this card type to ensure consistent rendering across Apple and Google Wallet.
         </div>
+      ) : (
+        <>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "10px 12px",
+              borderRadius: 8,
+              border: `1.5px solid ${showStrip ? "var(--primary)" : "var(--border)"}`,
+              backgroundColor: showStrip ? "var(--accent)" : "transparent",
+              cursor: "pointer",
+              marginBottom: 12,
+            }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>Show Strip</span>
+            <input
+              type="checkbox"
+              checked={showStrip}
+              onChange={(e) => store.getState().setWalletField("showStrip", e.target.checked)}
+              style={{ accentColor: "var(--primary)", width: 16, height: 16 }}
+            />
+          </label>
+
+          {!showStrip && (
+            <div
+              style={{
+                padding: "12px",
+                borderRadius: 8,
+                backgroundColor: "var(--muted)",
+                textAlign: "center",
+                fontSize: 11,
+                color: "var(--muted-foreground)",
+              }}
+            >
+              Enable &ldquo;Show Strip&rdquo; to configure strip image, colors, and patterns.
+            </div>
+          )}
+        </>
       )}
 
-      {showStrip && (
+      {(showStrip || forceStrip) && (
         <>
       {/* Interactive crop preview */}
       {stripImageUrl ? (
@@ -235,7 +262,7 @@ export function StripPanel({ store, programId, onUploadStrip, onDeleteStrip }: P
           setIsUploadingStrip(true)
           try {
             const formData = new FormData()
-            formData.set("programId", programId)
+            formData.set("templateId", programId)
             formData.set("file", file)
             const result = await (onUploadStrip ?? uploadStripImage)(formData)
             if (result.success && result.originalUrl) {
@@ -290,6 +317,86 @@ export function StripPanel({ store, programId, onUploadStrip, onDeleteStrip }: P
       </div>
       <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 4, marginBottom: 2 }}>
         PNG, JPEG, or WebP. Max 5MB. Cropped for Apple &amp; Google Wallet.
+      </div>
+
+      {/* Preset strip images */}
+      <SectionHeader>Presets</SectionHeader>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 6,
+          marginBottom: 8,
+        }}
+      >
+        {PRESET_STRIP_IMAGES.map((preset) => {
+          const isActive = stripImageUrl?.includes(preset.id) ?? false
+          return (
+            <button
+              key={preset.id}
+              disabled={isUploadingStrip}
+              onClick={async () => {
+                setIsUploadingStrip(true)
+                try {
+                  // Fetch the preset image and upload to R2
+                  const res = await fetch(preset.src)
+                  const blob = await res.blob()
+                  const ext = preset.src.endsWith(".jpg") ? "jpg" : "webp"
+                  const file = new File([blob], `${preset.id}.${ext}`, { type: blob.type })
+                  const formData = new FormData()
+                  formData.set("templateId", programId)
+                  formData.set("file", file)
+                  const result = await (onUploadStrip ?? uploadStripImage)(formData)
+                  if (result.success && result.originalUrl) {
+                    store.getState().setWalletField("stripImageUrl", result.originalUrl)
+                    if (result.appleUrl) store.getState().setWalletField("stripImageApple", result.appleUrl)
+                    if (result.googleUrl) store.getState().setWalletField("stripImageGoogle", result.googleUrl)
+                    store.getState().setWalletField("stripImagePosition", { x: 0.5, y: 0.5 })
+                    store.getState().setWalletField("stripImageZoom", 1)
+                  }
+                } finally {
+                  setIsUploadingStrip(false)
+                }
+              }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+                padding: 0,
+                borderRadius: 6,
+                border: `2px solid ${isActive ? "var(--primary)" : "var(--border)"}`,
+                backgroundColor: "transparent",
+                cursor: isUploadingStrip ? "wait" : "pointer",
+                overflow: "hidden",
+                opacity: isUploadingStrip ? 0.6 : 1,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={preset.src}
+                alt={preset.label}
+                style={{
+                  width: "100%",
+                  aspectRatio: "16 / 9",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: isActive ? 600 : 400,
+                  color: "var(--foreground)",
+                  padding: "0 4px 4px",
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
+                {preset.label}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
       {/* Image filters — always available when a strip image is uploaded */}

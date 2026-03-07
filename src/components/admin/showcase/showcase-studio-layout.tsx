@@ -13,7 +13,6 @@ import { PanelShell } from "@/components/studio/panels/panel-shell"
 import { ColorsPanel } from "@/components/studio/panels/colors-panel"
 import { ProgressPanel } from "@/components/studio/panels/progress-panel"
 import { StripPanel } from "@/components/studio/panels/strip-panel"
-import { LabelsPanel } from "@/components/studio/panels/labels-panel"
 import { TemplatePanel } from "@/components/studio/panels/template-panel"
 import {
   saveShowcaseCardDesign,
@@ -208,7 +207,7 @@ export function ShowcaseStudioLayout({
   // ─── Filtered tools (no logo, no details for showcase) ─
 
   const SHOWCASE_TOOLS: StudioTool[] = [
-    "templates", "colors", "progress", "strip", "labels",
+    "templates", "colors", "progress", "strip",
   ]
 
   // ─── Panel routing ────────────────────────────────────
@@ -240,8 +239,6 @@ export function ShowcaseStudioLayout({
             onDeleteStrip={handleDeleteStrip}
           />
         )
-      case "labels":
-        return <LabelsPanel store={store} />
       default:
         return null
     }

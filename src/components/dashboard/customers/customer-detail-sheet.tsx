@@ -146,6 +146,8 @@ function buildWalletDesign(passInstance: PassInstanceDetail): WalletPassDesign |
     labelFormat: (cd.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
     customProgressLabel: cd.customProgressLabel ?? null,
     stripImageUrl: cd.stripImageUrl ?? null,
+    stripOpacity: sf.stripOpacity ?? 1,
+    stripGrayscale: sf.stripGrayscale ?? false,
     patternStyle: (ps === "STAMP_GRID" ? "NONE" : ps ?? "NONE") as WalletPassDesign["patternStyle"],
     useStampGrid: sg,
     stripColor1: sf.stripColor1 ?? null,
@@ -155,6 +157,10 @@ function buildWalletDesign(passInstance: PassInstanceDetail): WalletPassDesign |
     stripImagePosition: sf.stripImagePosition,
     stripImageZoom: sf.stripImageZoom,
     stampGridConfig: sg ? parseStampGridConfig(cd.editorConfig) : undefined,
+    stampFilledColor: sf.stampFilledColor ?? null,
+    labelColor: sf.labelColor ?? null,
+    headerFields: sf.headerFields ?? null,
+    secondaryFields: sf.secondaryFields ?? null,
   }
 }
 

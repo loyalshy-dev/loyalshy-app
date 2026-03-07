@@ -26,6 +26,7 @@ export type WalletState = {
   primaryColor: string
   secondaryColor: string
   textColor: string
+  labelColor: string | null  // label color override (null = auto-dim from textColor)
   autoTextColor: boolean
   patternStyle: PatternStyle
   progressStyle: ProgressStyle
@@ -53,10 +54,13 @@ export type WalletState = {
   customMessage: string
   useStampGrid: boolean
   stampGridConfig: StampGridConfig
+  stampFilledColor: string | null // stamp icon fill color (null = use stripColor2 ?? secondaryColor)
   stripImagePosition: { x: number; y: number }
   stripImageZoom: number
   logoAppleUrl: string | null
   logoGoogleUrl: string | null
+  headerFields: string[] | null   // custom header fields (null = default)
+  secondaryFields: string[] | null // custom secondary fields (null = default)
 }
 
 // ─── Program Config Slice (PassTemplate.config JSON) ──────
@@ -190,6 +194,7 @@ export function createCardDesignStore() {
           primaryColor: "#1a1a2e",
           secondaryColor: "#ffffff",
           textColor: "#ffffff",
+          labelColor: null,
           autoTextColor: true,
           patternStyle: "NONE",
           progressStyle: "NUMBERS",
@@ -217,10 +222,13 @@ export function createCardDesignStore() {
           customMessage: "",
           useStampGrid: false,
           stampGridConfig: { ...DEFAULT_STAMP_GRID_CONFIG },
+          stampFilledColor: null,
           stripImagePosition: { x: 0.5, y: 0.5 },
           stripImageZoom: 1,
           logoAppleUrl: null,
           logoGoogleUrl: null,
+          headerFields: null,
+          secondaryFields: null,
         },
         programConfig: { ...DEFAULT_CONFIG },
         ui: {

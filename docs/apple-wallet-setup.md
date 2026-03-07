@@ -41,11 +41,13 @@
 
 ```bash
 # Extract the signing certificate (public)
-openssl pkcs12 -in pass.p12 -clcerts -nokeys -out signerCert.pem
+openssl pkcs12 -in pass.p12 -clcerts -nokeys -out signerCert.pem -legacy
 
 # Extract the private key
-openssl pkcs12 -in pass.p12 -nocerts -out signerKey.pem
+openssl pkcs12 -in pass.p12 -nocerts -out signerKey.pem -legacy
 ```
+
+> **Note:** The `-legacy` flag is required on OpenSSL 3.x (default on modern macOS via Homebrew). Without it you'll get `unsupported: RC2-40-CBC` errors. If your system `openssl` is LibreSSL and doesn't support `-legacy`, install OpenSSL via `brew install openssl` and use `/opt/homebrew/opt/openssl/bin/openssl` instead.
 
 ### Convert WWDR `.cer` to PEM
 

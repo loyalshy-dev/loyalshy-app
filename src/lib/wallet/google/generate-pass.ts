@@ -663,7 +663,7 @@ async function generateAndUploadStampGrid(
       hasReward: input.hasAvailableReward,
       config,
       primaryColor: stripPrimary,
-      secondaryColor: stripSecondary,
+      secondaryColor: stripFilters.stampFilledColor ?? stripSecondary,
       textColor: design?.textColor ?? "#ffffff",
       width: GOOGLE_HERO_WIDTH,
       height: GOOGLE_HERO_HEIGHT,

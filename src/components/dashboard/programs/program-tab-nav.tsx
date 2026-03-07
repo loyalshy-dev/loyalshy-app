@@ -55,14 +55,8 @@ function getRewardsTabLabel(passType: string): string {
   }
 }
 
-function getDistributionLabel(passType: string): string {
-  switch (passType) {
-    case "TICKET":
-    case "TRANSIT":
-      return "Distribution"
-    default:
-      return "QR Code"
-  }
+function getDistributionLabel(_passType: string): string {
+  return "Distribution"
 }
 
 export function ProgramTabNav({
@@ -106,7 +100,7 @@ export function ProgramTabNav({
     { label: "Card Design", href: `${basePath}/design`, ownerOnly: true },
     {
       label: getDistributionLabel(passType),
-      href: `${basePath}/qr-code`,
+      href: `${basePath}/distribution`,
       ownerOnly: true,
     },
     { label: "Settings", href: `${basePath}/settings`, ownerOnly: true }

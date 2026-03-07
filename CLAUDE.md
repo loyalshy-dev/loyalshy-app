@@ -92,7 +92,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
         /programs/[id]        → Program detail (layout + tab nav)
         /programs/[id]/passes     → Per-program passes with type-aware columns
         /programs/[id]/design     → Embedded card design studio (owner)
-        /programs/[id]/qr-code    → QR code (owner)
+        /programs/[id]/distribution    → Distribution: QR code, shareable link (owner)
         /programs/[id]/settings   → Status management + delete (owner)
         /contacts             → Contact management
         /rewards              → Cross-program rewards (not in sidebar)
@@ -249,7 +249,7 @@ Update the "Current Progress" section above to track what's done.
 - `/dashboard/programs/[id]` — program overview with stat cards (layout provides tab nav)
 - `/dashboard/programs/[id]/passes` — type-aware pass instances with stat cards, progress columns, status filters, row actions
 - `/dashboard/programs/[id]/design` — embedded card design studio with 2-panel layout (owner only)
-- `/dashboard/programs/[id]/qr-code` — QR code for this program (owner only)
+- `/dashboard/programs/[id]/distribution` — Distribution: QR code, shareable link (owner only)
 - `/dashboard/programs/[id]/settings` — status management (activate/archive/reactivate) + delete (owner only)
 
 ### Settings (account-level only)

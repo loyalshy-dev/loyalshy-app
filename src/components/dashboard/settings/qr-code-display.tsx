@@ -124,10 +124,18 @@ export function QrCodeDisplay({
         stripOpacity: qrSf?.stripOpacity ?? 1,
         stripGrayscale: qrSf?.stripGrayscale ?? false,
         patternStyle: (activeTemplateDesign.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
+        stripColor1: qrSf?.stripColor1 ?? null,
+        stripColor2: qrSf?.stripColor2 ?? null,
+        stripFill: qrSf?.stripFill ?? "gradient",
+        patternColor: qrSf?.patternColor ?? null,
         stripImagePosition: qrSf?.stripImagePosition,
         stripImageZoom: qrSf?.stripImageZoom,
         useStampGrid: qrSf?.useStampGrid,
         stampGridConfig: activeTemplateDesign.editorConfig ? parseStampGridConfig(activeTemplateDesign.editorConfig) : undefined,
+        stampFilledColor: qrSf?.stampFilledColor ?? null,
+        labelColor: qrSf?.labelColor ?? null,
+        headerFields: qrSf?.headerFields ?? null,
+        secondaryFields: qrSf?.secondaryFields ?? null,
       }
     : null
 
@@ -142,10 +150,7 @@ export function QrCodeDisplay({
     organization.brandColor ??
     "#1a1a2e"
 
-  const [origin, setOrigin] = useState("")
-  useEffect(() => {
-    setOrigin(window.location.origin)
-  }, [])
+  const origin = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? ""
 
   const templateId = activeTab === "all" ? null : activeTab
   const joinPath = templateId

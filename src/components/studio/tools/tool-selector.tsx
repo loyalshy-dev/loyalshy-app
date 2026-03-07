@@ -6,7 +6,6 @@ import {
   BarChart3,
   ImagePlus,
   CircleUserRound,
-  Tag,
   FileText,
   SlidersHorizontal,
 } from "lucide-react"
@@ -32,7 +31,6 @@ const TOOLS: ToolItem[] = [
   { id: "progress", label: "Progress", icon: <BarChart3 size={18} /> },
   { id: "strip", label: "Strip", icon: <ImagePlus size={18} /> },
   { id: "logo", label: "Logo", icon: <CircleUserRound size={18} /> },
-  { id: "labels", label: "Labels", icon: <Tag size={18} /> },
   { id: "details", label: "Details", icon: <FileText size={18} /> },
 ]
 

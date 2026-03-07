@@ -81,6 +81,10 @@ export function PassDesignPreview({
     stampGridConfig: useStampGrid && cardDesign
       ? parseStampGridConfig(cardDesign.editorConfig)
       : undefined,
+    stampFilledColor: sf?.stampFilledColor ?? null,
+    labelColor: sf?.labelColor ?? null,
+    headerFields: sf?.headerFields ?? null,
+    secondaryFields: sf?.secondaryFields ?? null,
   }
 
   // Type-specific preview props

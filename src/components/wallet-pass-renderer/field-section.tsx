@@ -8,15 +8,18 @@ type FieldPair = {
 type FieldSectionProps = {
   fields: FieldPair[]
   textColor: string
+  labelColor?: string | null
   /** Compact layout reduces font sizes */
   compact?: boolean
+  /** Google uses same color for labels and values */
+  format?: "apple" | "google"
 }
 
-export function FieldSection({ fields, textColor, compact }: FieldSectionProps) {
+export function FieldSection({ fields, textColor, labelColor, compact, format = "apple" }: FieldSectionProps) {
   if (fields.length === 0) return null
 
-  const labelSize = compact ? 8 : 10
-  const valueSize = compact ? 11 : 14
+  const labelSize = compact ? 8 : (format === "google" ? 10 : 10)
+  const valueSize = compact ? 11 : (format === "google" ? 12 : 20)
 
   return (
     <div
@@ -27,16 +30,16 @@ export function FieldSection({ fields, textColor, compact }: FieldSectionProps) 
       }}
     >
       {fields.map((field, i) => (
-        <div key={i} style={{ flex: 1, minWidth: 0 }}>
+        <div key={i} style={{ flex: 1, minWidth: 0, textAlign: i === fields.length - 1 && fields.length > 1 ? "right" : undefined }}>
           <div
             style={{
               fontSize: labelSize,
-              fontWeight: 400,
-              color: textColor,
-              opacity: 0.6,
+              fontWeight: format === "google" ? 500 : 700,
+              color: format === "google" ? textColor : (labelColor ?? textColor),
+              opacity: format === "google" ? 1 : (labelColor ? 1 : 0.6),
               textTransform: "uppercase",
-              letterSpacing: "0.04em",
-              marginBottom: compact ? 1 : 2,
+              letterSpacing: format === "google" ? "0.02em" : "0.04em",
+              marginBottom: 0,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -47,7 +50,7 @@ export function FieldSection({ fields, textColor, compact }: FieldSectionProps) 
           <div
             style={{
               fontSize: valueSize,
-              fontWeight: 500,
+              fontWeight: format === "google" ? 500 : 300,
               color: textColor,
               overflow: "hidden",
               textOverflow: "ellipsis",

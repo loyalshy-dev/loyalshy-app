@@ -2,7 +2,8 @@
 
 import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
-import { PALETTE_PRESETS, computeTextColor } from "@/lib/wallet/card-design"
+import { PALETTE_PRESETS, computeTextColor, formatLabel, type LabelFormat } from "@/lib/wallet/card-design"
+import { blendColors } from "@/lib/wallet/apple/colors"
 
 // ─── WCAG Contrast Helpers ────────────────────────────────
 
@@ -88,11 +89,19 @@ function ColorRow({
 
 type Props = { store: CardDesignStoreApi }
 
+const LABEL_FORMATS: { id: LabelFormat; name: string }[] = [
+  { id: "UPPERCASE", name: "UPPERCASE" },
+  { id: "TITLE_CASE", name: "Title Case" },
+  { id: "LOWERCASE", name: "lowercase" },
+]
+
 export function ColorsPanel({ store }: Props) {
   const primaryColor = useStore(store, (s) => s.wallet.primaryColor)
   const secondaryColor = useStore(store, (s) => s.wallet.secondaryColor)
   const textColor = useStore(store, (s) => s.wallet.textColor)
+  const labelColor = useStore(store, (s) => s.wallet.labelColor)
   const autoTextColor = useStore(store, (s) => s.wallet.autoTextColor)
+  const labelFormat = useStore(store, (s) => s.wallet.labelFormat)
 
   const ratio = contrastRatio(primaryColor, textColor)
   const { label: wcagLabel, color: wcagColor } = wcagLevel(ratio)
@@ -162,7 +171,29 @@ export function ColorsPanel({ store }: Props) {
 
       <ColorRow label="Primary / Background" value={primaryColor} onChange={(v) => setColor("primaryColor", v)} />
       <ColorRow label="Secondary" value={secondaryColor} onChange={(v) => setColor("secondaryColor", v)} />
-      <ColorRow label="Text" value={textColor} onChange={(v) => setColor("textColor", v)} />
+      <ColorRow label="Field Values" value={textColor} onChange={(v) => setColor("textColor", v)} />
+      <ColorRow
+        label="Labels"
+        value={labelColor ?? blendColors(textColor, primaryColor, 0.3)}
+        onChange={(v) => store.getState().setWalletField("labelColor", v)}
+      />
+      {labelColor && (
+        <button
+          onClick={() => store.getState().setWalletField("labelColor", null)}
+          style={{
+            padding: "6px 12px",
+            borderRadius: 6,
+            border: "1px solid var(--border)",
+            backgroundColor: "transparent",
+            cursor: "pointer",
+            fontSize: 11,
+            color: "var(--muted-foreground)",
+            marginBottom: 8,
+          }}
+        >
+          Reset label color to auto
+        </button>
+      )}
 
       {/* Auto text color toggle */}
       <div
@@ -236,6 +267,50 @@ export function ColorsPanel({ store }: Props) {
             style={{ fontSize: 9, textAlign: "center", color: "var(--muted-foreground)", lineHeight: 1.2 }}
           >
             {preset.name}
+          </div>
+        ))}
+      </div>
+
+      <SectionHeader>Label Format</SectionHeader>
+      <div style={{ display: "flex", gap: 4 }}>
+        {LABEL_FORMATS.map((fmt) => (
+          <button
+            key={fmt.id}
+            onClick={() => store.getState().setWalletField("labelFormat", fmt.id)}
+            aria-pressed={labelFormat === fmt.id}
+            style={{
+              flex: 1,
+              padding: "8px 10px",
+              borderRadius: 6,
+              border: `2px solid ${labelFormat === fmt.id ? "var(--primary)" : "var(--border)"}`,
+              backgroundColor: labelFormat === fmt.id ? "var(--accent)" : "transparent",
+              cursor: "pointer",
+              fontSize: 11,
+              fontWeight: labelFormat === fmt.id ? 600 : 400,
+              color: "var(--foreground)",
+              textAlign: "center",
+            }}
+          >
+            {fmt.name}
+          </button>
+        ))}
+      </div>
+      <div
+        style={{
+          marginTop: 8,
+          padding: "8px 12px",
+          borderRadius: 6,
+          backgroundColor: "var(--muted)",
+          display: "flex",
+          gap: 12,
+        }}
+      >
+        {["Next Reward", "Member Since"].map((label) => (
+          <div key={label}>
+            <div style={{ fontSize: 9, color: "var(--muted-foreground)", opacity: 0.6 }}>
+              {formatLabel(label, labelFormat)}
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 500, color: "var(--foreground)" }}>Value</div>
           </div>
         ))}
       </div>

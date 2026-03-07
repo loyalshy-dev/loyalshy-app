@@ -26,7 +26,8 @@ export function blendColors(hex1: string, hex2: string, ratio: number): string {
 export function getPassColors(
   brandColor: string | null,
   secondaryColor: string | null,
-  textColor?: string | null
+  textColor?: string | null,
+  labelColorOverride?: string | null
 ): {
   backgroundColor: string
   foregroundColor: string
@@ -35,12 +36,12 @@ export function getPassColors(
   const bg = brandColor ?? "#1a1a2e"
   const fg = textColor ?? secondaryColor ?? "#ffffff"
 
-  // Dim labels 30% toward background for visual hierarchy (labels vs field values)
-  const dimmedLabel = blendColors(fg, bg, 0.3)
+  // Use explicit label color if provided, otherwise dim 30% toward background
+  const label = labelColorOverride ?? blendColors(fg, bg, 0.3)
 
   return {
     backgroundColor: hexToPasskitRgb(bg),
     foregroundColor: hexToPasskitRgb(fg),
-    labelColor: hexToPasskitRgb(dimmedLabel),
+    labelColor: hexToPasskitRgb(label),
   }
 }

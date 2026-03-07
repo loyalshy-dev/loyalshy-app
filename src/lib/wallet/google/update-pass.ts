@@ -384,7 +384,7 @@ export async function notifyGooglePassUpdate(
             hasReward: hasAvailableReward,
             config,
             primaryColor: stripPrimary,
-            secondaryColor: stripSecondary,
+            secondaryColor: stripFilters.stampFilledColor ?? stripSecondary,
             textColor: passDesign?.textColor ?? "#ffffff",
             width: GOOGLE_HERO_WIDTH,
             height: GOOGLE_HERO_HEIGHT,

@@ -55,6 +55,10 @@ function buildDesign(passDesign: TemplateListItem["passDesign"]): WalletPassDesi
     stampGridConfig: useStampGrid && passDesign
       ? parseStampGridConfig(passDesign.editorConfig)
       : undefined,
+    stampFilledColor: sf?.stampFilledColor ?? null,
+    labelColor: sf?.labelColor ?? null,
+    headerFields: sf?.headerFields ?? null,
+    secondaryFields: sf?.secondaryFields ?? null,
   }
 }
 

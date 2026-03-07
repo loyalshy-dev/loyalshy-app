@@ -19,22 +19,32 @@ export type SocialLinks = {
 
 export type StampGridConfig = {
   stampIcon: string      // Lucide icon ID (e.g. "coffee", "pizza")
-  customStampIconUrl: string | null  // Vercel Blob URL for uploaded custom icon
+  customStampIconUrl: string | null  // uploaded custom icon for filled stamps
   rewardIcon: string     // Lucide icon ID for the reward slot
+  customRewardIconUrl: string | null // uploaded custom icon for the reward slot
+  customEmptyIconUrl: string | null  // uploaded custom icon for empty/unstamped slots
+  useUniformIcon: boolean // use same icon for all slots (filled, empty, reward)
   stampShape: "circle" | "rounded-square" | "square"
   filledStyle: "icon" | "icon-with-border" | "solid"
   stampIconScale: number // 0.4–0.9, controls icon size within stamp slot (default 0.6)
   useStripBackground: boolean  // overlay grid on strip image instead of gradient
+  emptyNumberColor: string | null // color for empty slot numbers (null = use textColor)
+  emptyNumberScale: number // 0.2–0.6, controls number size within empty slot (default 0.35)
 }
 
 export const DEFAULT_STAMP_GRID_CONFIG: StampGridConfig = {
   stampIcon: "coffee",
   customStampIconUrl: null,
   rewardIcon: "gift",
+  customRewardIconUrl: null,
+  customEmptyIconUrl: null,
+  useUniformIcon: false,
   stampShape: "circle",
   filledStyle: "icon",
   stampIconScale: 0.6,
   useStripBackground: false,
+  emptyNumberColor: null,
+  emptyNumberScale: 0.35,
 }
 
 /** Maps legacy raster filenames to Lucide icon IDs for backward compatibility */
@@ -59,10 +69,28 @@ export type StripFilters = {
   patternColor: string | null
   stripImagePosition: { x: number; y: number }
   stripImageZoom: number
+  labelColor: string | null
+  stampFilledColor: string | null  // stamp icon fill color (null = use stripColor2 ?? secondaryColor)
+  headerFields: string[] | null   // custom header fields (null = use default)
+  secondaryFields: string[] | null // custom secondary/detail fields (null = use default)
 }
 
+/** Available fields for STAMP/POINTS card type field customization */
+export const STAMP_CARD_AVAILABLE_FIELDS = [
+  { id: "organization", label: "Organization" },
+  { id: "memberNumber", label: "Member #" },
+  { id: "registeredAt", label: "Registered" },
+  { id: "nextReward", label: "Next Reward" },
+  { id: "totalVisits", label: "Total Visits" },
+  { id: "memberSince", label: "Since" },
+  { id: "customerName", label: "Name" },
+] as const
+
+export const DEFAULT_HEADER_FIELDS = ["memberNumber", "organization"]
+export const DEFAULT_SECONDARY_FIELDS = ["nextReward", "totalVisits", "memberSince", "customerName"]
+
 export function parseStripFilters(editorConfig: unknown): StripFilters {
-  if (!editorConfig || typeof editorConfig !== "object") return { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient", patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
+  if (!editorConfig || typeof editorConfig !== "object") return { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient", patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1, labelColor: null, stampFilledColor: null, headerFields: null, secondaryFields: null }
   const obj = editorConfig as Record<string, unknown>
   const rawPos = obj.stripImagePosition
   let posX = 0.5
@@ -84,6 +112,10 @@ export function parseStripFilters(editorConfig: unknown): StripFilters {
     patternColor: typeof obj.patternColor === "string" ? obj.patternColor : null,
     stripImagePosition: { x: posX, y: posY },
     stripImageZoom: zoom,
+    labelColor: typeof obj.labelColor === "string" ? obj.labelColor : null,
+    stampFilledColor: typeof obj.stampFilledColor === "string" ? obj.stampFilledColor : null,
+    headerFields: Array.isArray(obj.headerFields) ? obj.headerFields.filter((f: unknown) => typeof f === "string") as string[] : null,
+    secondaryFields: Array.isArray(obj.secondaryFields) ? obj.secondaryFields.filter((f: unknown) => typeof f === "string") as string[] : null,
   }
 }
 
@@ -104,6 +136,9 @@ export function parseStampGridConfig(editorConfig: unknown): StampGridConfig {
     stampIcon,
     customStampIconUrl: typeof cfg.customStampIconUrl === "string" ? cfg.customStampIconUrl : null,
     rewardIcon,
+    customRewardIconUrl: typeof cfg.customRewardIconUrl === "string" ? cfg.customRewardIconUrl : null,
+    customEmptyIconUrl: typeof cfg.customEmptyIconUrl === "string" ? cfg.customEmptyIconUrl : null,
+    useUniformIcon: typeof cfg.useUniformIcon === "boolean" ? cfg.useUniformIcon : false,
     stampShape: (cfg.stampShape === "circle" || cfg.stampShape === "rounded-square" || cfg.stampShape === "square")
       ? cfg.stampShape
       : DEFAULT_STAMP_GRID_CONFIG.stampShape,
@@ -114,6 +149,10 @@ export function parseStampGridConfig(editorConfig: unknown): StampGridConfig {
       ? Math.max(0.4, Math.min(0.9, cfg.stampIconScale))
       : DEFAULT_STAMP_GRID_CONFIG.stampIconScale,
     useStripBackground: typeof cfg.useStripBackground === "boolean" ? cfg.useStripBackground : false,
+    emptyNumberColor: typeof cfg.emptyNumberColor === "string" ? cfg.emptyNumberColor : null,
+    emptyNumberScale: typeof cfg.emptyNumberScale === "number"
+      ? Math.max(0.2, Math.min(0.6, cfg.emptyNumberScale))
+      : DEFAULT_STAMP_GRID_CONFIG.emptyNumberScale,
   }
 }
 

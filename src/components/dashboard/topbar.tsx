@@ -28,7 +28,7 @@ const breadcrumbLabels: Record<string, string> = {
   programs: "Programs",
   settings: "Settings",
   design: "Card Design",
-  "qr-code": "QR Code",
+  distribution: "Distribution",
 }
 
 // UUID v7 pattern (8-4-4-4-12 hex)

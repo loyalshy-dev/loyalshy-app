@@ -10,7 +10,6 @@ import { ColorsPanel } from "./panels/colors-panel"
 import { ProgressPanel } from "./panels/progress-panel"
 import { StripPanel } from "./panels/strip-panel"
 import { LogoPanel } from "./panels/logo-panel"
-import { LabelsPanel } from "./panels/labels-panel"
 import { DetailsPanel } from "./panels/details-panel"
 import { TemplatePanel } from "./panels/template-panel"
 
@@ -89,6 +88,7 @@ export function StudioSidebar({
 }: StudioSidebarProps) {
   const stampsRequired = useStore(store, (s) => s.programConfig.stampsRequired)
   const isStampType = cardType === "STAMP"
+  const hasProgress = cardType === "STAMP" || cardType === "POINTS"
 
   // Track which sections are open — Program open by default
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(["program"]))
@@ -133,9 +133,6 @@ export function StudioSidebar({
 
       <Section title="Colors & Typography" isOpen={openSections.has("colors")} onToggle={() => toggle("colors")}>
         <ColorsPanel store={store} />
-        <div style={{ marginTop: 16 }}>
-          <LabelsPanel store={store} />
-        </div>
       </Section>
 
       {isStampType && (
@@ -181,7 +178,7 @@ export function StudioSidebar({
           >
             Strip Image
           </div>
-          <StripPanel store={store} programId={templateId} />
+          <StripPanel store={store} programId={templateId} forceStrip={hasProgress} />
         </div>
       </Section>
 

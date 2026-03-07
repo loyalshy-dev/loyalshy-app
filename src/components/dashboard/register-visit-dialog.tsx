@@ -1152,7 +1152,7 @@ function ConfirmStep({
   const ticketMaxScans = (confirmConfig.maxScans as number) ?? 1
 
   // Build WalletPassDesign from card design data when available
-  const visitSf = cardDesign ? parseStripFilters(cardDesign.editorConfig) : { useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1 }
+  const visitSf = cardDesign ? parseStripFilters(cardDesign.editorConfig) : { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1, stampFilledColor: null, labelColor: null, headerFields: null, secondaryFields: null }
   const visitSg = visitSf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
   const resolvedCardType = isMembership ? "TIER" : isCoupon ? "COUPON" : isPoints ? "POINTS" : isPrepaid ? "PREPAID" : (isGiftCard || isTicket || isAccess || isTransit || isBusinessId) ? "GENERIC" : "STAMP"
   const design: WalletPassDesign | null = cardDesign
@@ -1166,6 +1166,8 @@ function ConfirmStep({
         labelFormat: (cardDesign.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
         customProgressLabel: cardDesign.customProgressLabel ?? null,
         stripImageUrl: cardDesign.stripImageUrl ?? null,
+        stripOpacity: visitSf.stripOpacity ?? 1,
+        stripGrayscale: visitSf.stripGrayscale ?? false,
         patternStyle: (cardDesign.patternStyle === "STAMP_GRID" ? "NONE" : cardDesign.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
         useStampGrid: visitSg,
         stripColor1: visitSf.stripColor1 ?? null,
@@ -1177,6 +1179,10 @@ function ConfirmStep({
         stampGridConfig: visitSg
           ? parseStampGridConfig(cardDesign.editorConfig)
           : undefined,
+        stampFilledColor: visitSf.stampFilledColor ?? null,
+        labelColor: visitSf.labelColor ?? null,
+        headerFields: visitSf.headerFields ?? null,
+        secondaryFields: visitSf.secondaryFields ?? null,
       }
     : null
 

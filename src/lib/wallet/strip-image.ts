@@ -1,7 +1,8 @@
 import "server-only"
 
 import sharp from "sharp"
-import type { PatternStyle, StampGridConfig } from "./card-design"
+import type { PatternStyle, ProgressStyle, StampGridConfig } from "./card-design"
+import { formatProgressValue } from "./card-design"
 import { getStampIconPaths, getRewardIconPaths } from "./stamp-icons"
 
 // ─── Dimensions ─────────────────────────────────────────────
@@ -342,8 +343,14 @@ function buildStampSlotSvg(opts: {
   secondaryColor: string
   textColor: string
   customStampIconDataUri?: string
+  customRewardIconDataUri?: string
+  customEmptyIconDataUri?: string
+  useUniformIcon?: boolean
+  stampIcon?: string
+  emptyNumberColor?: string | null
+  emptyNumberScale?: number
 }): string {
-  const { x, y, size, slotIndex, currentVisits, isRewardSlot, hasReward, iconSvgPaths, rewardIcon, stampShape, filledStyle, stampIconScale, primaryColor, secondaryColor, textColor, customStampIconDataUri } = opts
+  const { x, y, size, slotIndex, currentVisits, isRewardSlot, hasReward, iconSvgPaths, rewardIcon, stampShape, filledStyle, stampIconScale, primaryColor, secondaryColor, textColor, customStampIconDataUri, customRewardIconDataUri, customEmptyIconDataUri, useUniformIcon, stampIcon } = opts
   const isFilled = slotIndex < currentVisits
   const cx = x + size / 2
   const cy = y + size / 2
@@ -395,13 +402,18 @@ function buildStampSlotSvg(opts: {
         break
     }
 
-    const rewardIconPaths = getRewardIconPaths(rewardIcon)
     const iconPad = innerSize * (1 - stampIconScale) / 2
     const iconSize = innerSize * stampIconScale
-    const strokeColor = rewardFilled ? primaryColor : textColor
     const iconOpacity = rewardFilled ? "1" : "0.5"
-    const rewardSvgIcon = `<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="${iconOpacity}">${rewardIconPaths}</svg>`
-    return `<g>${rewardShape}${rewardSvgIcon}</g>`
+    let rewardIconContent: string
+    if (customRewardIconDataUri) {
+      rewardIconContent = `<image href="${customRewardIconDataUri}" x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" opacity="${iconOpacity}" clip-path="url(#${clipId})" />`
+    } else {
+      const rewardIconPaths = useUniformIcon && stampIcon ? getStampIconPaths(stampIcon) : getRewardIconPaths(rewardIcon)
+      const strokeColor = rewardFilled ? primaryColor : textColor
+      rewardIconContent = `<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="${iconOpacity}">${rewardIconPaths}</svg>`
+    }
+    return `<g>${clipPath}${rewardShape}${rewardIconContent}</g>`
   }
 
   // Filled stamp
@@ -454,7 +466,9 @@ function buildStampSlotSvg(opts: {
   }
 
   // Empty stamp — shape outline with visit number
-  const numSize = innerSize * 0.35
+  const emptyNumScale = opts.emptyNumberScale ?? 0.35
+  const emptyNumColor = opts.emptyNumberColor ?? textColor
+  const numSize = innerSize * emptyNumScale
   let emptyShape: string
   switch (stampShape) {
     case "square":
@@ -469,7 +483,18 @@ function buildStampSlotSvg(opts: {
       break
   }
 
-  return `<g>${emptyShape}<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${numSize}" font-family="system-ui, sans-serif" font-weight="500" fill="${textColor}" opacity="0.5">${slotIndex + 1}</text></g>`
+  if (customEmptyIconDataUri) {
+    const iconPad = innerSize * (1 - stampIconScale) / 2
+    const iconSize = innerSize * stampIconScale
+    return `<g>${clipPath}${emptyShape}<image href="${customEmptyIconDataUri}" x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" opacity="0.35" clip-path="url(#${clipId})" /></g>`
+  }
+  if (useUniformIcon && stampIcon) {
+    const iconPad = innerSize * (1 - stampIconScale) / 2
+    const iconSize = innerSize * stampIconScale
+    const uniformPaths = getStampIconPaths(stampIcon)
+    return `<g>${clipPath}${emptyShape}<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${textColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">${uniformPaths}</svg></g>`
+  }
+  return `<g>${emptyShape}<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${numSize}" font-family="system-ui, sans-serif" font-weight="500" fill="${emptyNumColor}" opacity="0.5">${slotIndex + 1}</text></g>`
 }
 
 /** Generate a stamp grid strip/hero image as a PNG buffer */
@@ -496,16 +521,22 @@ export async function generateStampGridImage(opts: {
   // Get the Lucide SVG paths for the stamp icon
   const iconSvgPaths = getStampIconPaths(config.stampIcon)
 
-  // Load custom stamp icon as data URI if provided
+  // Load custom icons as data URIs if provided
   let customStampIconDataUri: string | undefined
-  if (config.customStampIconUrl) {
+  let customRewardIconDataUri: string | undefined
+  let customEmptyIconDataUri: string | undefined
+  const loadIcon = async (url: string | null | undefined) => {
+    if (!url) return undefined
     try {
-      const iconBuffer = await loadRemoteImage(config.customStampIconUrl)
-      customStampIconDataUri = await imageToDataUri(iconBuffer)
-    } catch {
-      // Fall back to Lucide icon if custom icon fetch fails
-    }
+      const buf = await loadRemoteImage(url)
+      return await imageToDataUri(buf)
+    } catch { return undefined }
   }
+  ;[customStampIconDataUri, customRewardIconDataUri, customEmptyIconDataUri] = await Promise.all([
+    loadIcon(config.customStampIconUrl),
+    loadIcon(config.useUniformIcon ? config.customStampIconUrl : config.customRewardIconUrl),
+    loadIcon(config.useUniformIcon ? config.customStampIconUrl : config.customEmptyIconUrl),
+  ])
 
   // Use strip image as background?
   const useStripBg = !!stripImageUrl
@@ -513,11 +544,18 @@ export async function generateStampGridImage(opts: {
   // Build all stamp slot SVGs
   const slots: string[] = []
   for (let row = 0; row < layout.rows; row++) {
-    for (let col = 0; col < layout.cols; col++) {
-      const slotIndex = row * layout.cols + col
-      if (slotIndex >= totalSlots) break
+    // Number of items in this row (last row may have fewer)
+    const rowStart = row * layout.cols
+    const itemsInRow = Math.min(layout.cols, totalSlots - rowStart)
+    // Center partial rows by adding extra horizontal offset
+    const rowWidth = itemsInRow * layout.slotSize + (itemsInRow - 1) * layout.gap
+    const fullRowWidth = layout.cols * layout.slotSize + (layout.cols - 1) * layout.gap
+    const rowOffsetX = layout.offsetX + Math.floor((fullRowWidth - rowWidth) / 2)
 
-      const x = layout.offsetX + col * (layout.slotSize + layout.gap)
+    for (let col = 0; col < itemsInRow; col++) {
+      const slotIndex = rowStart + col
+
+      const x = rowOffsetX + col * (layout.slotSize + layout.gap)
       const y = layout.offsetY + row * (layout.slotSize + layout.gap)
 
       const isRewardSlot = slotIndex === totalVisits - 1
@@ -541,6 +579,12 @@ export async function generateStampGridImage(opts: {
           secondaryColor,
           textColor,
           customStampIconDataUri,
+          customRewardIconDataUri,
+          customEmptyIconDataUri,
+          useUniformIcon: config.useUniformIcon,
+          stampIcon: config.stampIcon,
+          emptyNumberColor: config.emptyNumberColor,
+          emptyNumberScale: config.emptyNumberScale,
         })
       )
     }
@@ -599,6 +643,114 @@ export async function generateStampGridImage(opts: {
   </defs>
   <rect width="${width}" height="${height}" fill="url(#bg)" />
   ${slots.join("\n  ")}
+</svg>`
+
+  return sharp(Buffer.from(svg))
+    .resize(width, height)
+    .png()
+    .toBuffer()
+}
+
+// ─── Progress Text Strip Image Generation ─────────────────────
+
+/** Generate a strip image with progress text (numbers, circles, squares, etc.) baked in */
+export async function generateProgressStripImage(opts: {
+  currentVisits: number
+  totalVisits: number
+  hasReward: boolean
+  progressStyle: ProgressStyle
+  progressLabel: string
+  primaryColor: string
+  secondaryColor: string
+  textColor: string
+  labelColor: string
+  width: number
+  height: number
+  stripImageUrl?: string | null
+  stripOpacity?: number
+  stripGrayscale?: boolean
+}): Promise<Buffer> {
+  const {
+    currentVisits, totalVisits, hasReward, progressStyle, progressLabel,
+    primaryColor, secondaryColor, textColor, labelColor,
+    width, height, stripImageUrl, stripOpacity = 1, stripGrayscale = false,
+  } = opts
+
+  const progressValue = formatProgressValue(currentVisits, totalVisits, progressStyle, hasReward)
+
+  // Font sizes relative to strip dimensions
+  const labelFontSize = Math.round(height * 0.09)
+  const valueFontSize = progressStyle === "NUMBERS" || progressStyle === "PERCENTAGE" || progressStyle === "REMAINING"
+    ? Math.round(height * 0.28)
+    : Math.round(height * 0.22) // Symbol styles need less height
+  const cx = Math.round(width / 2)
+  const cy = Math.round(height / 2)
+
+  // Escape XML entities
+  const escapeXml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+
+  const textSvg = `
+    <text x="${cx}" y="${cy - valueFontSize * 0.15}" text-anchor="middle" dominant-baseline="central"
+      font-family="system-ui, -apple-system, sans-serif" font-size="${valueFontSize}" font-weight="700"
+      fill="${textColor}" opacity="0.95"
+      style="text-shadow: 0 2px 8px rgba(0,0,0,0.4)">${escapeXml(progressValue)}</text>
+    <text x="${cx}" y="${cy - valueFontSize * 0.7 - labelFontSize * 0.4}" text-anchor="middle" dominant-baseline="central"
+      font-family="system-ui, -apple-system, sans-serif" font-size="${labelFontSize}" font-weight="700"
+      fill="${labelColor}" opacity="0.85"
+      letter-spacing="0.06em" text-transform="uppercase">${escapeXml(progressLabel)}</text>`
+
+  const useStripBg = !!stripImageUrl
+
+  if (useStripBg) {
+    const stripBuffer = await loadRemoteImage(stripImageUrl)
+    let stripPipeline = sharp(stripBuffer)
+      .resize(width, height, { fit: "cover", position: "centre" })
+    if (stripGrayscale) {
+      stripPipeline = stripPipeline.greyscale()
+    }
+    const resizedStrip = await stripPipeline.toBuffer()
+
+    const overlaySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <rect width="${width}" height="${height}" fill="rgba(0,0,0,0.3)" />
+  ${textSvg}
+</svg>`
+
+    const overlayBuffer = await sharp(Buffer.from(overlaySvg))
+      .resize(width, height)
+      .png()
+      .toBuffer()
+
+    if (stripOpacity < 1) {
+      const transparentStrip = await reduceAlpha(resizedStrip, stripOpacity, width, height)
+      const baseBg = await sharp({
+        create: { width, height, channels: 4, background: primaryColor },
+      }).png().toBuffer()
+
+      return sharp(baseBg)
+        .composite([
+          { input: transparentStrip },
+          { input: overlayBuffer },
+        ])
+        .png()
+        .toBuffer()
+    }
+
+    return sharp(resizedStrip)
+      .composite([{ input: overlayBuffer }])
+      .png()
+      .toBuffer()
+  }
+
+  // Default: gradient background with text
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${primaryColor}" />
+      <stop offset="100%" stop-color="${shiftColor(primaryColor, 15)}" />
+    </linearGradient>
+  </defs>
+  <rect width="${width}" height="${height}" fill="url(#bg)" />
+  ${textSvg}
 </svg>`
 
   return sharp(Buffer.from(svg))

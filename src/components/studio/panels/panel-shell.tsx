@@ -17,7 +17,6 @@ const PANEL_TITLES: Record<StudioTool, string> = {
   progress: "Progress Style",
   strip: "Strip Image",
   logo: "Logo",
-  labels: "Label Format",
   details: "Back-of-Pass Details",
 }
 
