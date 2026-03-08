@@ -634,6 +634,10 @@ export async function registerStamp(
       import("@/lib/wallet/google/update-pass")
         .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(passInstance.id))
         .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+    } else if (passInstance.walletProvider === "APPLE") {
+      import("@/lib/wallet/apple/update-pass")
+        .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(passInstance.id))
+        .catch((err: unknown) => console.error("Direct Apple pass update failed:", err instanceof Error ? err.message : "Unknown error"))
     }
   }
 

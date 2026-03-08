@@ -416,6 +416,17 @@ export async function archivePassTemplate(organizationId: string, templateId: st
       .catch((err: unknown) =>
         console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error")
       )
+    import("@/lib/wallet/apple/update-pass")
+      .then(async ({ notifyApplePassUpdate }) => {
+        const instances = await db.passInstance.findMany({
+          where: { passTemplateId: templateId, walletProvider: "APPLE" },
+          select: { id: true },
+        })
+        await Promise.allSettled(instances.map((pi) => notifyApplePassUpdate(pi.id)))
+      })
+      .catch((err: unknown) =>
+        console.error("Direct Apple pass update failed:", err instanceof Error ? err.message : "Unknown error")
+      )
   }
 
   revalidatePath("/dashboard/settings")
@@ -519,6 +530,17 @@ export async function reactivateTemplate(organizationId: string, templateId: str
       })
       .catch((err: unknown) =>
         console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error")
+      )
+    import("@/lib/wallet/apple/update-pass")
+      .then(async ({ notifyApplePassUpdate }) => {
+        const instances = await db.passInstance.findMany({
+          where: { passTemplateId: templateId, walletProvider: "APPLE", status: "ACTIVE" },
+          select: { id: true },
+        })
+        await Promise.allSettled(instances.map((pi) => notifyApplePassUpdate(pi.id)))
+      })
+      .catch((err: unknown) =>
+        console.error("Direct Apple pass update failed:", err instanceof Error ? err.message : "Unknown error")
       )
   }
 
@@ -882,6 +904,17 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
         })
         .catch((err: unknown) =>
           console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error")
+        )
+      import("@/lib/wallet/apple/update-pass")
+        .then(async ({ notifyApplePassUpdate }) => {
+          const instances = await db.passInstance.findMany({
+            where: { passTemplateId: parsed.templateId, walletProvider: "APPLE", status: "ACTIVE" },
+            select: { id: true },
+          })
+          await Promise.allSettled(instances.map((pi) => notifyApplePassUpdate(pi.id)))
+        })
+        .catch((err: unknown) =>
+          console.error("Direct Apple pass update failed:", err instanceof Error ? err.message : "Unknown error")
         )
     }
   }

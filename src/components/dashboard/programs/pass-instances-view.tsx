@@ -98,7 +98,7 @@ function getProgressValue(
 
   switch (passType) {
     case "STAMP_CARD": {
-      const current = (d.currentCycleStamps as number) ?? 0
+      const current = (d.currentCycleVisits as number) ?? 0
       const cfg = (templateConfig ?? {}) as Record<string, unknown>
       const required = (cfg.stampsRequired as number) ?? 10
       return {

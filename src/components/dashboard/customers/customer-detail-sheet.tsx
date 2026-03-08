@@ -158,9 +158,9 @@ function getRendererProps(passInstance: PassInstanceDetail) {
       prepaidValidUntil: config?.validUntil ?? undefined,
     }
   }
-  const cycleData = data as { currentCycleStamps?: number }
+  const cycleData = data as { currentCycleVisits?: number }
   const stampConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
-  const currentCycleVisits = cycleData.currentCycleStamps ?? 0
+  const currentCycleVisits = cycleData.currentCycleVisits ?? 0
   const visitsRequired = (stampConfig as { stampsRequired?: number }).stampsRequired ?? 10
   const rewardDescription = (stampConfig as { rewardDescription?: string }).rewardDescription ?? ""
   return {
@@ -189,7 +189,7 @@ function getProgressText(passInstance: PassInstanceDetail): string {
       return `${remaining} / ${total} ${config?.useLabel ?? "use"}s remaining`
     }
     default: {
-      const currentCycleVisits = (data as { currentCycleStamps?: number }).currentCycleStamps ?? 0
+      const currentCycleVisits = (data as { currentCycleVisits?: number }).currentCycleVisits ?? 0
       const visitsRequired = (stampConfig as { stampsRequired?: number }).stampsRequired ?? 10
       const rewardDescription = (stampConfig as { rewardDescription?: string }).rewardDescription ?? ""
       const remaining = visitsRequired - currentCycleVisits
@@ -723,7 +723,7 @@ function PassInstanceCard({ passInstance }: { passInstance: PassInstanceDetail }
   // Extract type-specific data from the data JSON
   const data = passInstance.data as Record<string, unknown> | null ?? {}
   const stampConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
-  const currentCycleVisits = (data as { currentCycleStamps?: number }).currentCycleStamps ?? 0
+  const currentCycleVisits = (data as { currentCycleVisits?: number }).currentCycleVisits ?? 0
   const visitsRequired = (stampConfig as { stampsRequired?: number }).stampsRequired ?? 10
   const pointsBalance = (data as { pointsBalance?: number }).pointsBalance ?? 0
   const remainingUses = (data as { remainingUses?: number }).remainingUses ?? 0

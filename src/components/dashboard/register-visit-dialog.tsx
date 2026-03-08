@@ -785,7 +785,7 @@ function SearchStep({
                   ? (primary.data as Record<string, unknown> | null ?? {})
                   : null
                 const primaryCycleVisits = primaryData
-                  ? ((primaryData.currentCycleStamps as number) ?? 0)
+                  ? ((primaryData.currentCycleVisits as number) ?? 0)
                   : 0
                 const primaryConfig = primary?.templateConfig as Record<string, unknown> | null ?? {}
                 const primaryVisitsRequired = (primaryConfig?.stampsRequired as number) ?? 10
@@ -915,7 +915,7 @@ function ProgramPickerStep({
             const remainingUses = (instanceData.remainingUses as number) ?? 0
             const prepaidConfig = isPrepaid ? parsePrepaidConfig(passInstance.templateConfig) : null
             const totalUses = prepaidConfig?.totalUses ?? 0
-            const currentCycleVisits = (instanceData.currentCycleStamps as number) ?? 0
+            const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
             const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
             const pct = isCoupon || isMembership
               ? 100
@@ -1134,10 +1134,10 @@ function ConfirmStep({
   const isBusinessId = passInstance.passType === "BUSINESS_ID"
   const confirmData = passInstance.data as Record<string, unknown> | null ?? {}
   const confirmConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
-  const filled = (confirmData.currentCycleStamps as number) ?? 0
+  const filled = (confirmData.currentCycleVisits as number) ?? 0
   const nextVisit = filled + 1
   const visitsRequired = (confirmConfig.stampsRequired as number) ?? 10
-  const totalVisitsFromData = (confirmData.totalStamps as number) ?? 0
+  const totalVisitsFromData = (confirmData.totalVisits as number) ?? 0
   const pointsConfig = isPoints ? parsePointsConfig(passInstance.templateConfig) : null
   const pointsBalance = (confirmData.pointsBalance as number) ?? 0
   const affordableCatalogItems = pointsConfig

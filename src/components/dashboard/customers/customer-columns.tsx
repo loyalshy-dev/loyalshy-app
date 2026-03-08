@@ -148,7 +148,7 @@ export function getCustomerColumns(
         }
 
         const piData = (primaryPassInstance.data ?? {}) as Record<string, unknown>
-        const currentCycleVisits = (piData.currentCycleStamps as number) ?? (piData.currentCycleVisits as number) ?? 0
+        const currentCycleVisits = (piData.currentCycleVisits as number) ?? (piData.currentCycleVisits as number) ?? 0
         const piConfig = (primaryPassInstance.templateConfig ?? {}) as Record<string, unknown>
         const visitsRequired = (piConfig.stampsRequired as number) ?? (piConfig.visitsRequired as number) ?? 10
         const programType = primaryPassInstance.passType

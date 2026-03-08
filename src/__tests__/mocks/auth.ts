@@ -105,8 +105,8 @@ export function createMockPassInstance(overrides?: Record<string, unknown>) {
     suspendedAt: null,
     revokedAt: null,
     data: {
-      currentCycleStamps: 3,
-      totalStamps: 13,
+      currentCycleVisits: 3,
+      totalVisits: 13,
       totalRewardsEarned: 0,
     },
     contact: {

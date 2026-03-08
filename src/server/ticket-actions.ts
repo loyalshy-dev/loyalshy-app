@@ -43,6 +43,10 @@ function dispatchWalletUpdate(passInstanceId: string, walletProvider: string, up
     import("@/lib/wallet/google/update-pass")
       .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(passInstanceId))
       .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
+  } else if (walletProvider === "APPLE") {
+    import("@/lib/wallet/apple/update-pass")
+      .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(passInstanceId))
+      .catch((err: unknown) => console.error("Direct Apple pass update failed:", err instanceof Error ? err.message : "Unknown error"))
   }
 }
 

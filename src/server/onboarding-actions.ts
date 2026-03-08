@@ -949,6 +949,12 @@ export async function revealPrize(
         .catch((err: unknown) =>
           console.error("Direct Google pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
         )
+    } else if (passInstance.walletProvider === "APPLE") {
+      import("@/lib/wallet/apple/update-pass")
+        .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(passInstanceId))
+        .catch((err: unknown) =>
+          console.error("Direct Apple pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
+        )
     }
   }
 

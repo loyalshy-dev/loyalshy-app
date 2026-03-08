@@ -4,8 +4,8 @@ import type { DesignCardType } from "./pass-types"
 // ─── Type-specific state (stored in PassInstance.data JSON) ──
 
 export type StampCardData = {
-  currentCycleStamps: number
-  totalStamps: number
+  currentCycleVisits: number
+  totalVisits: number
   totalRewardsEarned: number
 }
 
