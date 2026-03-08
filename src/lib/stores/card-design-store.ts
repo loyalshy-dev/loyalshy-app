@@ -50,6 +50,7 @@ export type WalletState = {
   mapAddress: string
   mapLatitude: number | null
   mapLongitude: number | null
+  locationMessage: string
   socialLinks: SocialLinks
   customMessage: string
   useStampGrid: boolean
@@ -269,6 +270,7 @@ export function createCardDesignStore() {
           mapAddress: "",
           mapLatitude: null,
           mapLongitude: null,
+          locationMessage: "",
           socialLinks: {},
           customMessage: "",
           useStampGrid: false,

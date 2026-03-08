@@ -82,6 +82,7 @@ export default async function ProgramDesignPage(props: {
         mapAddress: passDesign.mapAddress ?? "",
         mapLatitude: passDesign.mapLatitude ?? null,
         mapLongitude: passDesign.mapLongitude ?? null,
+        locationMessage: stripFilters.locationMessage ?? "",
         socialLinks: (passDesign.socialLinks as Record<string, string>) ?? {},
         customMessage: passDesign.customMessage ?? "",
         cardType: passDesign.cardType as string,

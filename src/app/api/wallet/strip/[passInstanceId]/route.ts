@@ -62,7 +62,7 @@ export async function GET(
 
   // Extract config values from PassTemplate.config JSON
   const templateConfig = (passInstance.passTemplate.config ?? {}) as Record<string, unknown>
-  const visitsRequired = (templateConfig.visitsRequired as number) ?? 10
+  const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
 
   const config = parseStampGridConfig(passDesign.editorConfig)
   const hasReward = passInstance.rewards.length > 0

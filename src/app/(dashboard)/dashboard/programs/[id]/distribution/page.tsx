@@ -63,7 +63,7 @@ export default async function ProgramDistributionPage(props: {
           passType: program.passType,
           templateConfig: program.config,
           rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
-          visitsRequired: (program.config as Record<string, unknown> | null)?.visitsRequired as number ?? 10,
+          visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
           cardDesign: program.passDesign ?? null,
         },
       ]}

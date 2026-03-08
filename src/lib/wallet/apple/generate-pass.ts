@@ -649,10 +649,11 @@ export async function generateApplePass(
 
   // Location relevance — shows pass on lock screen when near the organization
   if (design?.mapLatitude != null && design?.mapLongitude != null) {
+    const relevantText = stripFilters.locationMessage || `You're near ${input.organizationName}`
     pass.setLocations({
       latitude: design.mapLatitude,
       longitude: design.mapLongitude,
-      relevantText: `You're near ${input.organizationName}`,
+      relevantText,
     })
   }
 

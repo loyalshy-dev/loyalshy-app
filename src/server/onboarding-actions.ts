@@ -260,7 +260,7 @@ export async function getPassInstanceCardData(
   const remainingUses = (instanceData.remainingUses as number) ?? 0
 
   const templateConfig = (passInstance.passTemplate.config as Record<string, unknown>) ?? {}
-  const visitsRequired = (templateConfig.visitsRequired as number) ?? 10
+  const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
   const rewardDescription = (templateConfig.rewardDescription as string) ?? "Free reward"
 
   const pd = passInstance.passTemplate.passDesign
@@ -670,7 +670,7 @@ export async function requestWalletPass(
       name: template.name,
       passType: template.passType,
       config: template.config,
-      visitsRequired: (templateConfig.visitsRequired as number) ?? 10,
+      visitsRequired: (templateConfig.stampsRequired as number) ?? 10,
       rewardDescription: (templateConfig.rewardDescription as string) ?? "Free reward",
       rewardExpiryDays: (templateConfig.rewardExpiryDays as number) ?? 90,
       termsAndConditions: template.termsAndConditions,

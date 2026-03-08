@@ -11,6 +11,7 @@ export type StudioTool =
   | "progress"
   | "strip"
   | "logo"
+  | "notifications"
   | "details"
 
 export type PreviewFormat = "apple" | "google"

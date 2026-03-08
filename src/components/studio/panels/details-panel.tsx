@@ -62,9 +62,6 @@ type Props = { store: CardDesignStoreApi }
 
 export function DetailsPanel({ store }: Props) {
   const businessHours = useStore(store, (s) => s.wallet.businessHours)
-  const mapAddress = useStore(store, (s) => s.wallet.mapAddress)
-  const mapLatitude = useStore(store, (s) => s.wallet.mapLatitude)
-  const mapLongitude = useStore(store, (s) => s.wallet.mapLongitude)
   const socialLinks = useStore(store, (s) => s.wallet.socialLinks)
   const customMessage = useStore(store, (s) => s.wallet.customMessage)
 
@@ -96,39 +93,6 @@ export function DetailsPanel({ store }: Props) {
           fontFamily: "inherit",
         }}
       />
-
-      <SectionHeader>Location</SectionHeader>
-      <TextInput
-        label="Map address"
-        value={mapAddress}
-        onChange={(v) => set("mapAddress", v)}
-        placeholder="123 Main St, City, State"
-        maxLength={500}
-      />
-      {mapLatitude != null && mapLongitude != null ? (
-        <div
-          style={{
-            fontSize: 11,
-            color: "var(--muted-foreground)",
-            fontFamily: "monospace",
-            marginTop: -4,
-            marginBottom: 8,
-          }}
-        >
-          Location resolved: {mapLatitude.toFixed(5)}, {mapLongitude.toFixed(5)}
-        </div>
-      ) : mapAddress ? (
-        <div
-          style={{
-            fontSize: 11,
-            color: "var(--muted-foreground)",
-            marginTop: -4,
-            marginBottom: 8,
-          }}
-        >
-          Location will be resolved on save
-        </div>
-      ) : null}
 
       <SectionHeader>Social Links</SectionHeader>
       <TextInput

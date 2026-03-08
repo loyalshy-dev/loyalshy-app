@@ -545,7 +545,7 @@ export async function getOnboardingChecklist(organizationId: string): Promise<On
 
   const templateConfig = (template?.config as Record<string, unknown>) ?? {}
   const hasCustomTemplate =
-    (templateConfig.visitsRequired !== 10) ||
+    (templateConfig.stampsRequired !== 10) ||
     (templateConfig.rewardDescription !== "Free reward")
 
   // Check staff count (members on the organization)

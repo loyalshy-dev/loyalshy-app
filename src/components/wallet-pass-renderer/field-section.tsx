@@ -9,23 +9,23 @@ type FieldSectionProps = {
   fields: FieldPair[]
   textColor: string
   labelColor?: string | null
-  /** Compact layout reduces font sizes */
-  compact?: boolean
   /** Google uses same color for labels and values */
   format?: "apple" | "google"
+  /** Smaller text for constrained layouts (e.g. ticket) */
+  small?: boolean
 }
 
-export function FieldSection({ fields, textColor, labelColor, compact, format = "apple", small }: FieldSectionProps & { small?: boolean }) {
+export function FieldSection({ fields, textColor, labelColor, format = "apple", small }: FieldSectionProps) {
   if (fields.length === 0) return null
 
-  const labelSize = compact ? 8 : small ? 9 : (format === "google" ? 10 : 10)
-  const valueSize = compact ? 11 : small ? 14 : (format === "google" ? 12 : 20)
+  const labelSize = small ? 9 : (format === "google" ? 10 : 11)
+  const valueSize = small ? 14 : (format === "google" ? 12 : 22)
 
   return (
     <div
       style={{
         display: "flex",
-        gap: compact ? 12 : 16,
+        gap: 16,
         flexWrap: "wrap",
       }}
     >

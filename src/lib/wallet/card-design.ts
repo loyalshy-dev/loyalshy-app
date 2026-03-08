@@ -75,6 +75,7 @@ export type StripFilters = {
   logoGoogleZoom: number  // 0.5–3, default 1
   headerFields: string[] | null   // custom header fields (null = use default)
   secondaryFields: string[] | null // custom secondary/detail fields (null = use default)
+  locationMessage: string | null  // custom lock screen / notification message (null = default)
 }
 
 /** Available fields for STAMP/POINTS card type field customization */
@@ -92,7 +93,7 @@ export const DEFAULT_HEADER_FIELDS = ["memberNumber", "organization"]
 export const DEFAULT_SECONDARY_FIELDS = ["nextReward", "totalVisits", "memberSince", "customerName"]
 
 export function parseStripFilters(editorConfig: unknown): StripFilters {
-  if (!editorConfig || typeof editorConfig !== "object") return { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient", patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1, labelColor: null, stampFilledColor: null, logoAppleZoom: 1, logoGoogleZoom: 1, headerFields: null, secondaryFields: null }
+  if (!editorConfig || typeof editorConfig !== "object") return { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient", patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1, labelColor: null, stampFilledColor: null, logoAppleZoom: 1, logoGoogleZoom: 1, headerFields: null, secondaryFields: null, locationMessage: null }
   const obj = editorConfig as Record<string, unknown>
   const rawPos = obj.stripImagePosition
   let posX = 0.5
@@ -120,6 +121,7 @@ export function parseStripFilters(editorConfig: unknown): StripFilters {
     logoGoogleZoom: typeof obj.logoGoogleZoom === "number" ? Math.max(0.5, Math.min(3, obj.logoGoogleZoom)) : 1,
     headerFields: Array.isArray(obj.headerFields) ? obj.headerFields.filter((f: unknown) => typeof f === "string") as string[] : null,
     secondaryFields: Array.isArray(obj.secondaryFields) ? obj.secondaryFields.filter((f: unknown) => typeof f === "string") as string[] : null,
+    locationMessage: typeof obj.locationMessage === "string" ? obj.locationMessage : null,
   }
 }
 

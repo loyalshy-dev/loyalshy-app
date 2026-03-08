@@ -92,7 +92,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
 
   // Extract config values from PassTemplate.config JSON
   const templateConfig = (template.config ?? {}) as Record<string, unknown>
-  const visitsRequired = (templateConfig.visitsRequired as number) ?? 10
+  const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
   const rewardDescription = (templateConfig.rewardDescription as string) ?? "Free reward"
   const rewardExpiryDays = (templateConfig.rewardExpiryDays as number) ?? 30
 

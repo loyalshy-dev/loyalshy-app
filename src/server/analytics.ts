@@ -614,7 +614,7 @@ export async function getTopContacts(): Promise<TopContactItem[]> {
           break
         }
         case "STAMP_CARD": {
-          const visitsRequired = (instance.passTemplate.config as { visitsRequired?: number } | null)?.visitsRequired ?? 10
+          const visitsRequired = (instance.passTemplate.config as { stampsRequired?: number } | null)?.stampsRequired ?? 10
           engagementLabel = `${instanceData.currentCycleVisits ?? 0}/${visitsRequired} stamps`
           break
         }

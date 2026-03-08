@@ -189,7 +189,7 @@ export function WalletPassRenderer({
     ? (logoAppleUrl ?? logoUrl ?? null)
     : (logoGoogleUrl ?? logoUrl ?? null)
   const useStrip = design.showStrip
-  const stripHeight = isTicket && isApple ? 100 : isApple ? 130 : 100
+  const stripHeight = isTicket && isApple ? 100 : isApple ? 130 : 125
 
   // Dimensions
   const CARD_HEIGHT = isApple ? APPLE_CARD_HEIGHT : GOOGLE_CARD_HEIGHT
@@ -306,8 +306,24 @@ export function WalletPassRenderer({
   const secondaryFields = layout.apple.secondary.map(resolveField)
   const auxiliaryFields = layout.apple.auxiliary.map(resolveField)
 
-  // Hide org name text next to logo on Apple (matches generate-pass.ts), show on Google
-  const hideLogoText = isApple
+  // Google: flatten header + secondary into rows
+  // Filter out fields that Google handles natively (not as text rows):
+  // - "organization" / "memberNumber": shown in Google header
+  // - "progress" / "totalVisits": shown via Google's native loyaltyPoints widget (stamp/points only)
+  const googleExclude = new Set(["organization", "memberNumber"])
+  if (isStampType) {
+    googleExclude.add("progress")
+    googleExclude.add("totalVisits")
+  }
+  const googleFieldNames = [
+    ...layout.apple.header,
+    ...layout.apple.secondary,
+    ...layout.apple.auxiliary,
+  ].filter((name) => !googleExclude.has(name))
+  const googleFields = googleFieldNames.map(resolveField)
+
+  // Hide org name text next to logo (Apple: no text beside logo; Google: only shows circular logo)
+  const hideLogoText = true
   const logoZoom = isApple ? (design.logoAppleZoom ?? 1) : (design.logoGoogleZoom ?? 1)
 
   // ─── Section: Header ───
@@ -428,7 +444,7 @@ export function WalletPassRenderer({
           {headerFields.map((f, i) => (
             <div key={i}>
               <div style={{
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: 700,
                 lineHeight: 1,
                 color: design.labelColor ?? design.textColor,
@@ -438,7 +454,7 @@ export function WalletPassRenderer({
               }}>
                 {f.label}
               </div>
-              <div style={{ fontSize: isTicket ? 16 : 20, fontWeight: 300, lineHeight: 1.1 }}>
+              <div style={{ fontSize: isTicket ? 18 : 22, fontWeight: 300, lineHeight: 1.1 }}>
                 {f.value}
               </div>
             </div>
@@ -457,7 +473,7 @@ export function WalletPassRenderer({
 
   // ─── Section: Primary Fields ───
   const primaryPadding = useStrip ? "2px 16px 2px" : "12px 16px 8px"
-  const primaryFontSize = useStrip ? 28 : 22
+  const primaryFontSize = useStrip ? 28 : 24
 
   // Progress text overlay on strip — for non-stamp-grid STAMP/POINTS cards
   const showProgressOnStrip = useStrip && isStampType && !isStampGrid
@@ -477,7 +493,7 @@ export function WalletPassRenderer({
     >
       <div
         style={{
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: 700,
           color: design.labelColor ?? design.textColor,
           opacity: design.labelColor ? 1 : 0.85,
@@ -590,7 +606,7 @@ export function WalletPassRenderer({
         <div key={i}>
           <div
             style={{
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 700,
               color: design.labelColor ?? undefined,
               opacity: design.labelColor ? 1 : 0.6,
@@ -626,7 +642,6 @@ export function WalletPassRenderer({
         fields={secondaryFields}
         textColor={design.textColor}
         labelColor={design.labelColor}
-        compact={compact}
         format={format}
         small={isTicket}
       />
@@ -640,7 +655,6 @@ export function WalletPassRenderer({
         fields={auxiliaryFields}
         textColor={design.textColor}
         labelColor={design.labelColor}
-        compact={compact}
         format={format}
         small={isTicket}
       />
@@ -816,11 +830,11 @@ export function WalletPassRenderer({
                 labelColor={design.labelColor}
               />
             ) : (
-              <>
-                {primarySection}
-                {secondarySection}
-                {auxiliarySection}
-              </>
+              <GoogleFieldRows
+                fields={googleFields}
+                textColor={design.textColor}
+                labelColor={design.labelColor}
+              />
             )}
             <div style={{ flex: 1 }} />
             {brandingSection}
@@ -852,6 +866,60 @@ export function WalletPassRenderer({
 }
 
 // ─── Google Ticket Fields (2-column grid) ───
+
+function GoogleFieldRows({
+  fields,
+  textColor,
+  labelColor,
+}: {
+  fields: { label: string; value: string }[]
+  textColor: string
+  labelColor?: string | null
+}) {
+  // Render fields in rows of 2 (matching real Google Wallet layout)
+  const rows: { label: string; value: string }[][] = []
+  for (let i = 0; i < fields.length; i += 2) {
+    rows.push(fields.slice(i, i + 2))
+  }
+
+  return (
+    <div style={{ padding: "4px 16px" }}>
+      {rows.map((row, ri) => (
+        <div key={ri} style={{ display: "flex", gap: 16, marginBottom: ri < rows.length - 1 ? 10 : 0 }}>
+          {row.map((field, fi) => (
+            <div key={fi} style={{ flex: 1, textAlign: fi === 1 ? "right" : undefined }}>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 500,
+                  color: labelColor ?? textColor,
+                  opacity: labelColor ? 1 : 0.7,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.02em",
+                  marginBottom: 1,
+                }}
+              >
+                {field.label}
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: textColor,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {field.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 function GoogleTicketFields({
   fields,

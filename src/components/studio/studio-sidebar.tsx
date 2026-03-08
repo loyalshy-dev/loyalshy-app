@@ -11,6 +11,7 @@ import { ProgressPanel } from "./panels/progress-panel"
 import { StripPanel } from "./panels/strip-panel"
 import { LogoPanel } from "./panels/logo-panel"
 import { DetailsPanel } from "./panels/details-panel"
+import { NotificationsPanel } from "./panels/notifications-panel"
 import { TemplatePanel } from "./panels/template-panel"
 
 // ─── Collapsible Section ─────────────────────────────────
@@ -180,6 +181,10 @@ export function StudioSidebar({
           </div>
           <StripPanel store={store} programId={templateId} forceStrip={hasProgress} />
         </div>
+      </Section>
+
+      <Section title="Notifications" isOpen={openSections.has("notifications")} onToggle={() => toggle("notifications")}>
+        <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
       </Section>
 
       <Section title="Back of Pass" isOpen={openSections.has("details")} onToggle={() => toggle("details")}>

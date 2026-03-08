@@ -15,6 +15,7 @@ import { ColorsPanel } from "./panels/colors-panel"
 import { ProgressPanel } from "./panels/progress-panel"
 import { StripPanel } from "./panels/strip-panel"
 import { DetailsPanel } from "./panels/details-panel"
+import { NotificationsPanel } from "./panels/notifications-panel"
 import { TemplatePanel } from "./panels/template-panel"
 import { LogoPanel } from "./panels/logo-panel"
 import { savePassDesign as saveCardDesign, updatePassTemplate, updateMinigameConfig } from "@/server/org-settings-actions"
@@ -369,6 +370,7 @@ export function StudioLayout({
             logoGoogleZoom: state.wallet.logoGoogleZoom !== 1 ? state.wallet.logoGoogleZoom : undefined,
             headerFields: state.wallet.headerFields,
             secondaryFields: state.wallet.secondaryFields,
+            locationMessage: state.wallet.locationMessage || "",
           })
         )
       }
@@ -479,6 +481,8 @@ export function StudioLayout({
         return <StripPanel store={store} programId={templateId} forceStrip={cardType === "STAMP" || cardType === "POINTS"} />
       case "logo":
         return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} />
+      case "notifications":
+        return <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
       case "details":
         return <DetailsPanel store={store} />
       default:
