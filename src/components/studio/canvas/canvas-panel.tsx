@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import type { PreviewFormat, DeviceFrame } from "@/types/editor"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { DeviceFrameWrapper } from "./device-frame"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig } from "@/lib/pass-config"
 
 type PreviewState = string
 
@@ -53,9 +53,10 @@ export function CanvasPanel({
   const previewStates: PreviewStateOption[] =
     passType === "COUPON" ? COUPON_PREVIEW_STATES
     : passType === "MEMBERSHIP" ? MEMBERSHIP_PREVIEW_STATES
-    : STAMP_PREVIEW_STATES
+    : passType === "STAMP_CARD" || passType === "POINTS" ? STAMP_PREVIEW_STATES
+    : []
 
-  const [previewState, setPreviewState] = useState<PreviewState>(previewStates[0].id)
+  const [previewState, setPreviewState] = useState<PreviewState>(previewStates[0]?.id ?? "default")
 
   // Stamp-specific visit counts
   const currentVisits =
@@ -87,6 +88,19 @@ export function CanvasPanel({
     const benefits = config?.benefits ?? "Exclusive perks"
     return { tierName, benefits }
   }, [passType, templateConfig])
+
+  // Prepaid
+  const prepaidConfig = useMemo(() => passType === "PREPAID" ? parsePrepaidConfig(templateConfig) : null, [passType, templateConfig])
+  // Gift card
+  const giftCardConfig = useMemo(() => passType === "GIFT_CARD" ? parseGiftCardConfig(templateConfig) : null, [passType, templateConfig])
+  // Ticket
+  const ticketConfig = useMemo(() => passType === "TICKET" ? parseTicketConfig(templateConfig) : null, [passType, templateConfig])
+  // Access
+  const accessConfig = useMemo(() => passType === "ACCESS" ? parseAccessConfig(templateConfig) : null, [passType, templateConfig])
+  // Transit
+  const transitConfig = useMemo(() => passType === "TRANSIT" ? parseTransitConfig(templateConfig) : null, [passType, templateConfig])
+  // Business ID
+  const businessIdConfig = useMemo(() => passType === "BUSINESS_ID" ? parseBusinessIdConfig(templateConfig) : null, [passType, templateConfig])
 
   return (
     <div
@@ -137,7 +151,7 @@ export function CanvasPanel({
         </div>
       )}
 
-      <DeviceFrameWrapper frame={deviceFrame}>
+      <DeviceFrameWrapper frame={deviceFrame} squareCorners={passType === "TICKET" && format === "apple"}>
         <WalletPassRenderer
           design={design}
           format={format}
@@ -156,6 +170,28 @@ export function CanvasPanel({
           // Membership props
           tierName={membershipPreview.tierName}
           benefits={membershipPreview.benefits}
+          // Prepaid props
+          remainingUses={prepaidConfig?.totalUses}
+          totalUses={prepaidConfig?.totalUses}
+          prepaidValidUntil={prepaidConfig?.validUntil
+            ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+            : passType === "PREPAID" ? "No expiry" : undefined}
+          // Gift card props
+          giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
+          giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
+          // Ticket props
+          eventName={ticketConfig?.eventName}
+          eventDate={ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : undefined}
+          eventVenue={ticketConfig?.eventVenue}
+          scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
+          // Access props
+          accessLabel={accessConfig?.accessLabel}
+          // Transit props
+          transitType={transitConfig?.transitType?.toUpperCase()}
+          originName={transitConfig?.originName}
+          destinationName={transitConfig?.destinationName}
+          // Business ID props
+          idLabel={businessIdConfig?.idLabel}
         />
       </DeviceFrameWrapper>
     </div>

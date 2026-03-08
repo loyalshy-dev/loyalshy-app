@@ -29,7 +29,13 @@ function passTypeToCardType(passType: string): CardType {
   switch (passType) {
     case "COUPON": return "COUPON"
     case "MEMBERSHIP": return "TIER"
+    case "POINTS": return "POINTS"
     case "PREPAID": return "PREPAID"
+    case "GIFT_CARD": return "GIFT_CARD"
+    case "TICKET": return "TICKET"
+    case "ACCESS": return "ACCESS"
+    case "TRANSIT": return "TRANSIT"
+    case "BUSINESS_ID": return "BUSINESS_ID"
     default: return "STAMP"
   }
 }
@@ -74,6 +80,48 @@ function buildConfigPayload(passType: string, pc: ProgramConfigState): Record<st
         rechargeable: pc.rechargeable,
         rechargeAmount: pc.rechargeable ? pc.rechargeAmount : undefined,
         terms: pc.terms || undefined,
+      }
+    case "GIFT_CARD":
+      return {
+        currency: pc.currency,
+        initialBalanceCents: pc.initialBalanceCents,
+        partialRedemption: pc.partialRedemption,
+        expiryMonths: pc.expiryMonths || undefined,
+      }
+    case "TICKET":
+      return {
+        eventName: pc.eventName,
+        eventDate: pc.eventDate || undefined,
+        eventVenue: pc.eventVenue,
+        barcodeType: pc.barcodeType,
+        maxScans: pc.maxScans,
+      }
+    case "ACCESS":
+      return {
+        accessLabel: pc.accessLabel,
+        validDays: pc.validDays.length > 0 ? pc.validDays : undefined,
+        validTimeStart: pc.validTimeStart || undefined,
+        validTimeEnd: pc.validTimeEnd || undefined,
+        validDuration: pc.validDuration,
+        customDurationDays: pc.validDuration === "custom" ? pc.customDurationDays : undefined,
+        maxDailyUses: pc.maxDailyUses || undefined,
+      }
+    case "TRANSIT":
+      return {
+        transitType: pc.transitType,
+        originName: pc.originName || undefined,
+        destinationName: pc.destinationName || undefined,
+        departureDateTime: pc.departureDateTime || undefined,
+        barcodeType: pc.barcodeType,
+      }
+    case "BUSINESS_ID":
+      return {
+        idLabel: pc.idLabel,
+        showTitle: pc.showTitle,
+        showPhoto: pc.showPhoto,
+        showEmployeeId: pc.showEmployeeId,
+        validDuration: pc.validDuration,
+        customDurationDays: pc.validDuration === "custom" ? pc.customDurationDays : undefined,
       }
     default:
       return {}
@@ -177,6 +225,33 @@ export function StudioLayout({
       minigamePrimaryColor: (minigame.primaryColor as string) ?? "",
       minigameAccentColor: (minigame.accentColor as string) ?? "",
       terms: (cfg.terms as string) ?? "",
+      // Gift card
+      currency: (cfg.currency as string) ?? "USD",
+      initialBalanceCents: (cfg.initialBalanceCents as number) ?? 2500,
+      partialRedemption: (cfg.partialRedemption as boolean) ?? true,
+      expiryMonths: (cfg.expiryMonths as number) ?? 12,
+      // Ticket
+      eventName: (cfg.eventName as string) ?? "",
+      eventDate: (cfg.eventDate as string) ?? "",
+      eventVenue: (cfg.eventVenue as string) ?? "",
+      barcodeType: (cfg.barcodeType as string) ?? "qr",
+      maxScans: (cfg.maxScans as number) ?? 1,
+      // Access
+      accessLabel: (cfg.accessLabel as string) ?? "Access Pass",
+      validDays: (cfg.validDays as string[]) ?? [],
+      validTimeStart: (cfg.validTimeStart as string) ?? "",
+      validTimeEnd: (cfg.validTimeEnd as string) ?? "",
+      maxDailyUses: (cfg.maxDailyUses as number) ?? 0,
+      // Transit
+      transitType: (cfg.transitType as string) ?? "bus",
+      originName: (cfg.originName as string) ?? "",
+      destinationName: (cfg.destinationName as string) ?? "",
+      departureDateTime: (cfg.departureDateTime as string) ?? "",
+      // Business ID
+      idLabel: (cfg.idLabel as string) ?? "Employee ID",
+      showTitle: (cfg.showTitle as boolean) ?? true,
+      showPhoto: (cfg.showPhoto as boolean) ?? false,
+      showEmployeeId: (cfg.showEmployeeId as boolean) ?? true,
     })
     // Mark clean after setting logos and config since it's not a user change
     store.getState().markClean()
@@ -248,7 +323,7 @@ export function StudioLayout({
         promises.push(
           saveCardDesign({
             templateId,
-            cardType: state.wallet.cardType as "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID",
+            cardType: state.wallet.cardType as CardType,
             showStrip: state.wallet.showStrip,
             primaryColor: state.wallet.primaryColor,
             secondaryColor: state.wallet.secondaryColor,

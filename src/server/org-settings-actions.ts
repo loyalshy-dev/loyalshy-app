@@ -84,7 +84,7 @@ const inviteTeamMemberSchema = z.object({
 
 const savePassDesignSchema = z.object({
   templateId: z.string().min(1),
-  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON", "PREPAID", "GENERIC"]).optional().default("STAMP"),
+  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID", "GENERIC"]).optional().default("STAMP"),
   showStrip: z.boolean(),
   primaryColor: z.string().max(20).optional().default(""),
   secondaryColor: z.string().max(20).optional().default(""),
@@ -311,15 +311,13 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
   }
 
   // Map pass type to default card type
-  const defaultCardType = parsed.passType === "COUPON"
-    ? "COUPON" as const
-    : parsed.passType === "MEMBERSHIP"
-      ? "TIER" as const
-      : parsed.passType === "POINTS"
-        ? "POINTS" as const
-        : parsed.passType === "PREPAID"
-          ? "PREPAID" as const
-          : "STAMP" as const
+  const PASS_TO_CARD: Record<string, string> = {
+    STAMP_CARD: "STAMP", COUPON: "COUPON", MEMBERSHIP: "TIER",
+    POINTS: "POINTS", PREPAID: "PREPAID", GIFT_CARD: "GIFT_CARD",
+    TICKET: "TICKET", ACCESS: "ACCESS", TRANSIT: "TRANSIT",
+    BUSINESS_ID: "BUSINESS_ID",
+  }
+  const defaultCardType = (PASS_TO_CARD[parsed.passType] ?? "STAMP") as "STAMP"
 
   const template = await db.passTemplate.create({
     data: {

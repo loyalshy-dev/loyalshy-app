@@ -469,6 +469,190 @@ function PrepaidFields({ store }: { store: CardDesignStoreApi }) {
   )
 }
 
+function GiftCardFields({ store }: { store: CardDesignStoreApi }) {
+  const currency = useStore(store, (s) => s.programConfig.currency)
+  const initialBalanceCents = useStore(store, (s) => s.programConfig.initialBalanceCents)
+  const partialRedemption = useStore(store, (s) => s.programConfig.partialRedemption)
+  const expiryMonths = useStore(store, (s) => s.programConfig.expiryMonths)
+  const set = store.getState().setConfigField
+
+  return (
+    <>
+      <SectionHeader>Gift Card</SectionHeader>
+      <TextInput
+        label="Currency"
+        value={currency}
+        onChange={(v) => set("currency", v)}
+        placeholder="USD"
+        maxLength={5}
+      />
+      <NumberInput
+        label="Initial balance (cents)"
+        value={initialBalanceCents}
+        onChange={(v) => set("initialBalanceCents", Math.max(0, v))}
+        min={0}
+      />
+      <ToggleInput
+        label="Partial redemption"
+        description="Allow spending part of the balance"
+        value={partialRedemption}
+        onChange={(v) => set("partialRedemption", v)}
+      />
+      <NumberInput
+        label="Expiry (months)"
+        value={expiryMonths}
+        onChange={(v) => set("expiryMonths", Math.max(0, v))}
+        min={0}
+      />
+    </>
+  )
+}
+
+function TicketFields({ store }: { store: CardDesignStoreApi }) {
+  const eventName = useStore(store, (s) => s.programConfig.eventName)
+  const eventDate = useStore(store, (s) => s.programConfig.eventDate)
+  const eventVenue = useStore(store, (s) => s.programConfig.eventVenue)
+  const maxScans = useStore(store, (s) => s.programConfig.maxScans)
+  const set = store.getState().setConfigField
+
+  return (
+    <>
+      <SectionHeader>Event Ticket</SectionHeader>
+      <TextInput
+        label="Event name"
+        value={eventName}
+        onChange={(v) => set("eventName", v)}
+        placeholder="Summer Music Festival"
+        maxLength={200}
+      />
+      <TextInput
+        label="Event date"
+        value={eventDate}
+        onChange={(v) => set("eventDate", v)}
+        placeholder=""
+        type="date"
+      />
+      <TextInput
+        label="Venue"
+        value={eventVenue}
+        onChange={(v) => set("eventVenue", v)}
+        placeholder="Madison Square Garden"
+        maxLength={200}
+      />
+      <NumberInput
+        label="Max scans"
+        value={maxScans}
+        onChange={(v) => set("maxScans", Math.max(1, v))}
+        min={1}
+      />
+    </>
+  )
+}
+
+function AccessFields({ store }: { store: CardDesignStoreApi }) {
+  const accessLabel = useStore(store, (s) => s.programConfig.accessLabel)
+  const validDuration = useStore(store, (s) => s.programConfig.validDuration)
+  const maxDailyUses = useStore(store, (s) => s.programConfig.maxDailyUses)
+  const set = store.getState().setConfigField
+
+  return (
+    <>
+      <SectionHeader>Access Pass</SectionHeader>
+      <TextInput
+        label="Access label"
+        value={accessLabel}
+        onChange={(v) => set("accessLabel", v)}
+        placeholder="VIP Access"
+        maxLength={100}
+      />
+      <SelectInput
+        label="Valid duration"
+        value={validDuration}
+        onChange={(v) => set("validDuration", v)}
+        options={[
+          { value: "monthly", label: "Monthly" },
+          { value: "yearly", label: "Yearly" },
+          { value: "lifetime", label: "Lifetime" },
+        ]}
+      />
+      <NumberInput
+        label="Max daily uses"
+        value={maxDailyUses}
+        onChange={(v) => set("maxDailyUses", Math.max(0, v))}
+        min={0}
+      />
+    </>
+  )
+}
+
+function TransitFields({ store }: { store: CardDesignStoreApi }) {
+  const transitType = useStore(store, (s) => s.programConfig.transitType)
+  const originName = useStore(store, (s) => s.programConfig.originName)
+  const destinationName = useStore(store, (s) => s.programConfig.destinationName)
+  const set = store.getState().setConfigField
+
+  return (
+    <>
+      <SectionHeader>Transit Pass</SectionHeader>
+      <SelectInput
+        label="Transit type"
+        value={transitType}
+        onChange={(v) => set("transitType", v)}
+        options={[
+          { value: "bus", label: "Bus" },
+          { value: "train", label: "Train" },
+          { value: "ferry", label: "Ferry" },
+          { value: "flight", label: "Flight" },
+          { value: "other", label: "Other" },
+        ]}
+      />
+      <TextInput
+        label="Origin"
+        value={originName}
+        onChange={(v) => set("originName", v)}
+        placeholder="Central Station"
+        maxLength={200}
+      />
+      <TextInput
+        label="Destination"
+        value={destinationName}
+        onChange={(v) => set("destinationName", v)}
+        placeholder="Airport"
+        maxLength={200}
+      />
+    </>
+  )
+}
+
+function BusinessIdFields({ store }: { store: CardDesignStoreApi }) {
+  const idLabel = useStore(store, (s) => s.programConfig.idLabel)
+  const validDuration = useStore(store, (s) => s.programConfig.validDuration)
+  const set = store.getState().setConfigField
+
+  return (
+    <>
+      <SectionHeader>Business ID</SectionHeader>
+      <TextInput
+        label="ID label"
+        value={idLabel}
+        onChange={(v) => set("idLabel", v)}
+        placeholder="Employee ID"
+        maxLength={100}
+      />
+      <SelectInput
+        label="Valid duration"
+        value={validDuration}
+        onChange={(v) => set("validDuration", v)}
+        options={[
+          { value: "monthly", label: "Monthly" },
+          { value: "yearly", label: "Yearly" },
+          { value: "lifetime", label: "Lifetime" },
+        ]}
+      />
+    </>
+  )
+}
+
 // ─── Schedule Fields ─────────────────────────────────────────
 
 function ScheduleFields({ store }: { store: CardDesignStoreApi }) {
@@ -964,6 +1148,11 @@ export function ProgramPanel({ store, passType }: Props) {
       {passType === "MEMBERSHIP" && <MembershipFields store={store} />}
       {passType === "POINTS" && <PointsFields store={store} />}
       {passType === "PREPAID" && <PrepaidFields store={store} />}
+      {passType === "GIFT_CARD" && <GiftCardFields store={store} />}
+      {passType === "TICKET" && <TicketFields store={store} />}
+      {passType === "ACCESS" && <AccessFields store={store} />}
+      {passType === "TRANSIT" && <TransitFields store={store} />}
+      {passType === "BUSINESS_ID" && <BusinessIdFields store={store} />}
 
       {(passType === "STAMP_CARD" || passType === "POINTS") && (
         <CardFieldsSection store={store} />

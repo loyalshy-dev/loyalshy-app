@@ -184,12 +184,17 @@ enum LabelFormat {
 }
 
 enum DesignCardType {
-  STAMP   @map("stamp")
-  POINTS  @map("points")
-  TIER    @map("tier")
-  COUPON  @map("coupon")
-  PREPAID @map("prepaid")
-  GENERIC @map("generic")
+  STAMP       @map("stamp")
+  POINTS      @map("points")
+  TIER        @map("tier")
+  COUPON      @map("coupon")
+  PREPAID     @map("prepaid")
+  GIFT_CARD   @map("gift_card")
+  TICKET      @map("ticket")
+  ACCESS      @map("access")
+  TRANSIT     @map("transit")
+  BUSINESS_ID @map("business_id")
+  GENERIC     @map("generic")
 
   @@map("design_card_type")
 }

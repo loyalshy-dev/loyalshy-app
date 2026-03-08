@@ -32,7 +32,7 @@ export type ShowcaseMetadata = z.infer<typeof metadataSchema>
 
 const saveDesignSchema = z.object({
   id: z.string().min(1),
-  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON", "PREPAID"]).optional().default("STAMP"),
+  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID", "GENERIC"]).optional().default("STAMP"),
   showStrip: z.boolean(),
   primaryColor: z.string().max(20).optional().default(""),
   secondaryColor: z.string().max(20).optional().default(""),
@@ -89,9 +89,10 @@ export async function getShowcaseCards() {
 // ─── Admin: Create showcase card ─────────────────────────────
 
 const CARD_TYPE_MAP: Record<string, string> = {
-  STAMP_CARD: "STAMP",
-  COUPON: "COUPON",
-  MEMBERSHIP: "TIER",
+  STAMP_CARD: "STAMP", COUPON: "COUPON", MEMBERSHIP: "TIER",
+  POINTS: "POINTS", PREPAID: "PREPAID", GIFT_CARD: "GIFT_CARD",
+  TICKET: "TICKET", ACCESS: "ACCESS", TRANSIT: "TRANSIT",
+  BUSINESS_ID: "BUSINESS_ID",
 }
 
 export async function createShowcaseCard(

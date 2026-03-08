@@ -164,6 +164,7 @@ export function WalletPassRenderer({
   verifications,
 }: WalletPassRendererProps) {
   const cardType = design.cardType ?? "STAMP"
+  const isTicket = cardType === "TICKET"
   const defaultLayout = getFieldLayout(cardType)
   const isApple = format === "apple"
 
@@ -186,7 +187,7 @@ export function WalletPassRenderer({
     ? (logoAppleUrl ?? logoUrl ?? null)
     : (logoGoogleUrl ?? logoUrl ?? null)
   const useStrip = design.showStrip
-  const stripHeight = isApple ? 130 : 100
+  const stripHeight = isTicket && isApple ? 100 : isApple ? 130 : 100
 
   // Dimensions
   const CARD_HEIGHT = isApple ? APPLE_CARD_HEIGHT : GOOGLE_CARD_HEIGHT
@@ -318,8 +319,8 @@ export function WalletPassRenderer({
         flexShrink: 0,
       }}
     >
-      {/* Left side: Logo + optional org name */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+      {/* Left side: Logo + optional org name (hidden for ticket) */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, ...(isTicket && isApple ? { visibility: "hidden" as const } : {}) }}>
         {/* Logo — rectangular for Apple, circular for Google */}
         <div
           style={{
@@ -433,7 +434,7 @@ export function WalletPassRenderer({
               }}>
                 {f.label}
               </div>
-              <div style={{ fontSize: 20, fontWeight: 300, lineHeight: 1.1 }}>
+              <div style={{ fontSize: isTicket ? 16 : 20, fontWeight: 300, lineHeight: 1.1 }}>
                 {f.value}
               </div>
             </div>
@@ -623,6 +624,7 @@ export function WalletPassRenderer({
         labelColor={design.labelColor}
         compact={compact}
         format={format}
+        small={isTicket}
       />
     </div>
   )
@@ -636,6 +638,7 @@ export function WalletPassRenderer({
         labelColor={design.labelColor}
         compact={compact}
         format={format}
+        small={isTicket}
       />
     </div>
   )
@@ -700,10 +703,15 @@ export function WalletPassRenderer({
         style={{
           width: CARD_WIDTH,
           height: CARD_HEIGHT,
-          borderRadius: isApple ? BORDER_RADIUS : 20,
+          borderRadius: isTicket && isApple ? "0px" : isApple ? BORDER_RADIUS : 20,
           overflow: "hidden",
           backgroundColor: design.primaryColor,
           fontFamily: SYSTEM_FONT,
+          // Ticket notch: radial-gradient mask punches a semicircle from the top center
+          ...(isTicket && isApple ? {
+            WebkitMaskImage: "radial-gradient(ellipse 28px 14px at 50% 0, transparent 98%, black 100%)",
+            maskImage: "radial-gradient(ellipse 28px 14px at 50% 0, transparent 98%, black 100%)",
+          } : {}),
           color: design.textColor,
           display: "flex",
           flexDirection: "column",
@@ -715,14 +723,64 @@ export function WalletPassRenderer({
       >
         {isApple ? (
           <>
-            {headerSection}
-            {stripSection}
-            {primarySection}
-            {secondarySection}
-            {auxiliarySection}
-            <div style={{ flex: 1 }} />
-            {brandingSection}
-            {qrSection}
+            {isTicket ? (
+              <>
+                {/* Ticket layout: header fields above strip, event name ON strip */}
+                {headerSection}
+                {/* Strip with event name overlay */}
+                {useStrip ? (
+                  <div style={{ position: "relative" }}>
+                    {stripSection}
+                    {/* Event name overlay on strip */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        padding: "0 16px",
+                        zIndex: 2,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 36,
+                          fontWeight: 300,
+                          color: design.textColor,
+                          textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+                          lineHeight: 1.1,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          width: "100%",
+                          letterSpacing: "-0.01em",
+                        }}
+                      >
+                        {eventName || programName}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  primarySection
+                )}
+                {secondarySection}
+                {auxiliarySection}
+                <div style={{ flex: 1 }} />
+                {qrSection}
+              </>
+            ) : (
+              <>
+                {headerSection}
+                {stripSection}
+                {primarySection}
+                {secondarySection}
+                {auxiliarySection}
+                <div style={{ flex: 1 }} />
+                {brandingSection}
+                {qrSection}
+              </>
+            )}
           </>
         ) : (
           <>
@@ -740,7 +798,7 @@ export function WalletPassRenderer({
                   whiteSpace: "nowrap",
                 }}
               >
-                {programName}
+                {isTicket ? (eventName || programName) : programName}
               </div>
             </div>
             {primarySection}

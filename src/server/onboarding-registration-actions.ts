@@ -13,7 +13,7 @@ const createOrganizationSchema = z.object({
   name: z.string().min(1, "Organization name is required").max(100),
   address: z.string().max(200).optional().default(""),
   phone: z.string().max(30).optional().default(""),
-  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID"]).optional().default("STAMP_CARD"),
+  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID"]).optional().default("STAMP_CARD"),
 })
 
 const updateBrandingSchema = z.object({
@@ -36,7 +36,7 @@ const applyCardDesignSchema = z.object({
 
 const setupPassTemplateSchema = z.object({
   organizationId: z.string().min(1),
-  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID"]).optional().default("STAMP_CARD"),
+  programType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID"]).optional().default("STAMP_CARD"),
   visitsRequired: z.number().int().min(1).max(30).optional().default(10),
   rewardDescription: z.string().min(1, "Reward description is required").max(200),
   rewardExpiryDays: z.number().int().min(0).max(365).optional().default(90),
@@ -123,13 +123,13 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
 
     // 3. Map program type to card type
     const programType = parsed.programType
-    const defaultCardType = programType === "COUPON"
-      ? "COUPON" as const
-      : programType === "MEMBERSHIP"
-        ? "TIER" as const
-        : programType === "POINTS"
-          ? "POINTS" as const
-          : "STAMP" as const
+    const PASS_TO_CARD: Record<string, string> = {
+      STAMP_CARD: "STAMP", COUPON: "COUPON", MEMBERSHIP: "TIER",
+      POINTS: "POINTS", PREPAID: "PREPAID", GIFT_CARD: "GIFT_CARD",
+      TICKET: "TICKET", ACCESS: "ACCESS", TRANSIT: "TRANSIT",
+      BUSINESS_ID: "BUSINESS_ID",
+    }
+    const defaultCardType = (PASS_TO_CARD[programType] ?? "STAMP") as "STAMP"
 
     // 4. Create default pass template
     const passTemplate = await tx.passTemplate.create({

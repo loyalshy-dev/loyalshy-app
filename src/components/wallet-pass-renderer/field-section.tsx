@@ -15,11 +15,11 @@ type FieldSectionProps = {
   format?: "apple" | "google"
 }
 
-export function FieldSection({ fields, textColor, labelColor, compact, format = "apple" }: FieldSectionProps) {
+export function FieldSection({ fields, textColor, labelColor, compact, format = "apple", small }: FieldSectionProps & { small?: boolean }) {
   if (fields.length === 0) return null
 
-  const labelSize = compact ? 8 : (format === "google" ? 10 : 10)
-  const valueSize = compact ? 11 : (format === "google" ? 12 : 20)
+  const labelSize = compact ? 8 : small ? 9 : (format === "google" ? 10 : 10)
+  const valueSize = compact ? 11 : small ? 14 : (format === "google" ? 12 : 20)
 
   return (
     <div

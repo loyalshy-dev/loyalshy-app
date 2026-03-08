@@ -5,9 +5,11 @@ import type { DeviceFrame } from "@/types/editor"
 type DeviceFrameWrapperProps = {
   frame: DeviceFrame
   children: React.ReactNode
+  /** When true, skip frame border-radius (e.g., for event ticket cards) */
+  squareCorners?: boolean
 }
 
-export function DeviceFrameWrapper({ frame, children }: DeviceFrameWrapperProps) {
+export function DeviceFrameWrapper({ frame, children, squareCorners }: DeviceFrameWrapperProps) {
   if (frame === "none") {
     return <>{children}</>
   }
@@ -16,7 +18,7 @@ export function DeviceFrameWrapper({ frame, children }: DeviceFrameWrapperProps)
     return (
       <div
         style={{
-          borderRadius: 8,
+          borderRadius: squareCorners ? 0 : 8,
           boxShadow: "0 4px 24px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08)",
           overflow: "hidden",
         }}
@@ -87,7 +89,7 @@ export function DeviceFrameWrapper({ frame, children }: DeviceFrameWrapperProps)
         />
       )}
 
-      <div style={{ borderRadius: isIphone ? 32 : 20, overflow: "hidden" }}>
+      <div style={{ borderRadius: squareCorners ? 0 : isIphone ? 32 : 20, overflow: "hidden" }}>
         {children}
       </div>
 

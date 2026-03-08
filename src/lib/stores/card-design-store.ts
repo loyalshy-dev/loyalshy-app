@@ -92,6 +92,33 @@ export type ProgramConfigState = {
   useLabel: string
   rechargeable: boolean
   rechargeAmount: number
+  // GIFT_CARD
+  currency: string
+  initialBalanceCents: number
+  partialRedemption: boolean
+  expiryMonths: number
+  // TICKET
+  eventName: string
+  eventDate: string
+  eventVenue: string
+  barcodeType: string
+  maxScans: number
+  // ACCESS
+  accessLabel: string
+  validDays: string[]
+  validTimeStart: string
+  validTimeEnd: string
+  maxDailyUses: number
+  // TRANSIT
+  transitType: string
+  originName: string
+  destinationName: string
+  departureDateTime: string
+  // BUSINESS_ID
+  idLabel: string
+  showTitle: boolean
+  showPhoto: boolean
+  showEmployeeId: boolean
   // Schedule
   startsAt: string // ISO date string
   endsAt: string   // ISO date string (empty = no end)
@@ -171,6 +198,28 @@ const DEFAULT_CONFIG: ProgramConfigState = {
   useLabel: "use",
   rechargeable: false,
   rechargeAmount: 0,
+  currency: "USD",
+  initialBalanceCents: 2500,
+  partialRedemption: true,
+  expiryMonths: 12,
+  eventName: "",
+  eventDate: "",
+  eventVenue: "",
+  barcodeType: "qr",
+  maxScans: 1,
+  accessLabel: "Access Pass",
+  validDays: [],
+  validTimeStart: "",
+  validTimeEnd: "",
+  maxDailyUses: 0,
+  transitType: "bus",
+  originName: "",
+  destinationName: "",
+  departureDateTime: "",
+  idLabel: "Employee ID",
+  showTitle: true,
+  showPhoto: false,
+  showEmployeeId: true,
   startsAt: "",
   endsAt: "",
   minigameEnabled: false,
