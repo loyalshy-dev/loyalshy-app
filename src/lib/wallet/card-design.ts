@@ -520,7 +520,7 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
       },
       google: {
         rows: 1,
-        fields: ["eventName", "eventDate", "eventVenue", "scanStatus", "customerName"],
+        fields: ["eventDate", "eventVenue", "scanStatus", "customerName"],
       },
     }
   }

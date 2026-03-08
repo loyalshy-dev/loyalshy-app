@@ -304,9 +304,8 @@ export function WalletPassRenderer({
   const secondaryFields = layout.apple.secondary.map(resolveField)
   const auxiliaryFields = layout.apple.auxiliary.map(resolveField)
 
-  // Whether to hide the org name text next to the logo (matches logoText omission in generate-pass.ts)
-  // logoText is omitted from Apple passes (generate-pass.ts doesn't set it)
-  const hideLogoText = true
+  // Hide org name text next to logo on Apple (matches generate-pass.ts), show on Google
+  const hideLogoText = isApple
 
   // ─── Section: Header ───
   const headerSection = (
@@ -315,19 +314,19 @@ export function WalletPassRenderer({
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "space-between",
-        padding: "6px 16px 6px",
+        padding: isApple ? "6px 16px 6px" : "8px 12px 6px",
         flexShrink: 0,
       }}
     >
-      {/* Left side: Logo + optional org name (hidden for ticket) */}
+      {/* Left side: Logo + optional org name (hidden for Apple ticket) */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, ...(isTicket && isApple ? { visibility: "hidden" as const } : {}) }}>
-        {/* Logo — rectangular for Apple, circular for Google */}
+        {/* Logo — rectangular for Apple, circular for Google (centered on corner radius) */}
         <div
           style={{
-            width: isApple ? 150 : 36,
-            height: isApple ? 50 : 36,
+            width: isApple ? 150 : 40,
+            height: isApple ? 50 : 40,
             borderRadius: isApple ? 3 : "50%",
-            backgroundColor: "transparent",
+            backgroundColor: !isApple ? "rgba(255,255,255,0.15)" : "transparent",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -388,8 +387,8 @@ export function WalletPassRenderer({
           ) : (
             <div
               style={{
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 borderRadius: "50%",
                 background: `color-mix(in srgb, ${design.textColor} 12%, transparent)`,
                 display: "flex",
@@ -397,7 +396,7 @@ export function WalletPassRenderer({
                 justifyContent: "center",
               }}
             >
-              <span style={{ fontSize: 16, fontWeight: 700, color: design.textColor }}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: design.textColor }}>
                 {organizationName.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -801,9 +800,23 @@ export function WalletPassRenderer({
                 {isTicket ? (eventName || programName) : programName}
               </div>
             </div>
-            {primarySection}
-            {secondarySection}
-            {auxiliarySection}
+            {isTicket ? (
+              /* Ticket Google: 2-column, 2-row grid */
+              <GoogleTicketFields
+                fields={[
+                  resolveField("eventDate"), resolveField("eventVenue"),
+                  resolveField("scanStatus"), resolveField("customerName"),
+                ]}
+                textColor={design.textColor}
+                labelColor={design.labelColor}
+              />
+            ) : (
+              <>
+                {primarySection}
+                {secondarySection}
+                {auxiliarySection}
+              </>
+            )}
             <div style={{ flex: 1 }} />
             {brandingSection}
             {qrSection}
@@ -829,6 +842,62 @@ export function WalletPassRenderer({
           </>
         )}
       </div>
+    </div>
+  )
+}
+
+// ─── Google Ticket Fields (2-column grid) ───
+
+function GoogleTicketFields({
+  fields,
+  textColor,
+  labelColor,
+}: {
+  fields: { label: string; value: string }[]
+  textColor: string
+  labelColor?: string | null
+}) {
+  // Render as 2-column rows
+  const rows: { label: string; value: string }[][] = []
+  for (let i = 0; i < fields.length; i += 2) {
+    rows.push(fields.slice(i, i + 2))
+  }
+
+  return (
+    <div style={{ padding: "4px 16px" }}>
+      {rows.map((row, ri) => (
+        <div key={ri} style={{ display: "flex", gap: 16, marginBottom: ri < rows.length - 1 ? 12 : 0 }}>
+          {row.map((field, fi) => (
+            <div key={fi} style={{ flex: 1, textAlign: fi === 1 ? "right" : undefined }}>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 500,
+                  color: labelColor ?? textColor,
+                  opacity: labelColor ? 1 : 0.7,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.02em",
+                  marginBottom: 1,
+                }}
+              >
+                {field.label}
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: textColor,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {field.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   )
 }
