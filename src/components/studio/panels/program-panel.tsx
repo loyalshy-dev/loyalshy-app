@@ -549,11 +549,34 @@ function TicketFields({ store }: { store: CardDesignStoreApi }) {
   )
 }
 
+const DAYS_OF_WEEK = [
+  { value: "mon", label: "Mon" },
+  { value: "tue", label: "Tue" },
+  { value: "wed", label: "Wed" },
+  { value: "thu", label: "Thu" },
+  { value: "fri", label: "Fri" },
+  { value: "sat", label: "Sat" },
+  { value: "sun", label: "Sun" },
+]
+
 function AccessFields({ store }: { store: CardDesignStoreApi }) {
   const accessLabel = useStore(store, (s) => s.programConfig.accessLabel)
   const validDuration = useStore(store, (s) => s.programConfig.validDuration)
+  const customDurationDays = useStore(store, (s) => s.programConfig.customDurationDays)
   const maxDailyUses = useStore(store, (s) => s.programConfig.maxDailyUses)
+  const validDays = useStore(store, (s) => s.programConfig.validDays)
+  const validTimeStart = useStore(store, (s) => s.programConfig.validTimeStart)
+  const validTimeEnd = useStore(store, (s) => s.programConfig.validTimeEnd)
   const set = store.getState().setConfigField
+
+  function toggleDay(day: string) {
+    const current = validDays ?? []
+    if (current.includes(day)) {
+      set("validDays", current.filter((d) => d !== day))
+    } else {
+      set("validDays", [...current, day])
+    }
+  }
 
   return (
     <>
@@ -573,14 +596,73 @@ function AccessFields({ store }: { store: CardDesignStoreApi }) {
           { value: "monthly", label: "Monthly" },
           { value: "yearly", label: "Yearly" },
           { value: "lifetime", label: "Lifetime" },
+          { value: "custom", label: "Custom" },
         ]}
       />
+      {validDuration === "custom" && (
+        <NumberInput
+          label="Custom duration"
+          value={customDurationDays}
+          onChange={(v) => set("customDurationDays", Math.max(1, v))}
+          min={1}
+          suffix="days"
+        />
+      )}
       <NumberInput
         label="Max daily uses"
         value={maxDailyUses}
         onChange={(v) => set("maxDailyUses", Math.max(0, v))}
         min={0}
+        suffix="0 = unlimited"
       />
+
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 12, color: "var(--foreground)", marginBottom: 4 }}>Valid days</div>
+        <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 6 }}>
+          Select none for all days.
+        </div>
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+          {DAYS_OF_WEEK.map((day) => (
+            <button
+              key={day.value}
+              onClick={() => toggleDay(day.value)}
+              style={{
+                padding: "4px 8px",
+                borderRadius: 6,
+                border: "1px solid var(--border)",
+                backgroundColor: validDays.includes(day.value) ? "var(--primary)" : "var(--background)",
+                color: validDays.includes(day.value) ? "var(--primary-foreground)" : "var(--foreground)",
+                cursor: "pointer",
+                fontSize: 11,
+                fontWeight: validDays.includes(day.value) ? 600 : 400,
+              }}
+            >
+              {day.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ flex: 1 }}>
+          <TextInput
+            label="Valid from"
+            value={validTimeStart}
+            onChange={(v) => set("validTimeStart", v)}
+            placeholder="09:00"
+            type="time"
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <TextInput
+            label="Valid until"
+            value={validTimeEnd}
+            onChange={(v) => set("validTimeEnd", v)}
+            placeholder="18:00"
+            type="time"
+          />
+        </div>
+      </div>
     </>
   )
 }
@@ -589,6 +671,7 @@ function TransitFields({ store }: { store: CardDesignStoreApi }) {
   const transitType = useStore(store, (s) => s.programConfig.transitType)
   const originName = useStore(store, (s) => s.programConfig.originName)
   const destinationName = useStore(store, (s) => s.programConfig.destinationName)
+  const departureDateTime = useStore(store, (s) => s.programConfig.departureDateTime)
   const set = store.getState().setConfigField
 
   return (
@@ -620,6 +703,13 @@ function TransitFields({ store }: { store: CardDesignStoreApi }) {
         placeholder="Airport"
         maxLength={200}
       />
+      <TextInput
+        label="Departure"
+        value={departureDateTime}
+        onChange={(v) => set("departureDateTime", v)}
+        placeholder=""
+        type="datetime-local"
+      />
     </>
   )
 }
@@ -627,6 +717,10 @@ function TransitFields({ store }: { store: CardDesignStoreApi }) {
 function BusinessIdFields({ store }: { store: CardDesignStoreApi }) {
   const idLabel = useStore(store, (s) => s.programConfig.idLabel)
   const validDuration = useStore(store, (s) => s.programConfig.validDuration)
+  const customDurationDays = useStore(store, (s) => s.programConfig.customDurationDays)
+  const showTitle = useStore(store, (s) => s.programConfig.showTitle)
+  const showPhoto = useStore(store, (s) => s.programConfig.showPhoto)
+  const showEmployeeId = useStore(store, (s) => s.programConfig.showEmployeeId)
   const set = store.getState().setConfigField
 
   return (
@@ -647,7 +741,35 @@ function BusinessIdFields({ store }: { store: CardDesignStoreApi }) {
           { value: "monthly", label: "Monthly" },
           { value: "yearly", label: "Yearly" },
           { value: "lifetime", label: "Lifetime" },
+          { value: "custom", label: "Custom" },
         ]}
+      />
+      {validDuration === "custom" && (
+        <NumberInput
+          label="Custom duration"
+          value={customDurationDays}
+          onChange={(v) => set("customDurationDays", Math.max(1, v))}
+          min={1}
+          suffix="days"
+        />
+      )}
+      <ToggleInput
+        label="Show title"
+        description="Display job title on the ID card"
+        value={showTitle}
+        onChange={(v) => set("showTitle", v)}
+      />
+      <ToggleInput
+        label="Show photo"
+        description="Display holder photo on the ID card"
+        value={showPhoto}
+        onChange={(v) => set("showPhoto", v)}
+      />
+      <ToggleInput
+        label="Show employee ID"
+        description="Display a unique employee ID number"
+        value={showEmployeeId}
+        onChange={(v) => set("showEmployeeId", v)}
       />
     </>
   )

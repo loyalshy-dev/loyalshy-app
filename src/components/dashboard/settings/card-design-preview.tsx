@@ -1,11 +1,9 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { Pencil, Smartphone, CreditCard } from "lucide-react"
-import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
-import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig } from "@/lib/pass-config"
+import { TemplateCardPreview } from "@/components/template-card-preview"
 
 type PassDesignPreviewProps = {
   templateId: string
@@ -55,68 +53,6 @@ export function PassDesignPreview({
 }: PassDesignPreviewProps) {
   const [format, setFormat] = useState<PreviewFormat>("apple")
 
-  const sf = cardDesign ? parseStripFilters(cardDesign.editorConfig) : null
-  const useStampGrid = sf ? (sf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID") : false
-
-  const design: WalletPassDesign = {
-    cardType: (cardDesign?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-    showStrip: cardDesign?.showStrip ?? true,
-    primaryColor: cardDesign?.primaryColor ?? "#1a1a2e",
-    secondaryColor: cardDesign?.secondaryColor ?? "#ffffff",
-    textColor: cardDesign?.textColor ?? "#ffffff",
-    progressStyle: (cardDesign?.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
-    labelFormat: (cardDesign?.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
-    customProgressLabel: cardDesign?.customProgressLabel ?? null,
-    stripImageUrl: cardDesign?.stripImageUrl ?? null,
-    stripOpacity: sf?.stripOpacity ?? 1,
-    stripGrayscale: sf?.stripGrayscale ?? false,
-    patternStyle: (cardDesign?.patternStyle === "STAMP_GRID" ? "NONE" : cardDesign?.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
-    useStampGrid,
-    stripColor1: sf?.stripColor1 ?? null,
-    stripColor2: sf?.stripColor2 ?? null,
-    stripFill: sf?.stripFill ?? "gradient",
-    patternColor: sf?.patternColor ?? null,
-    stripImagePosition: sf?.stripImagePosition,
-    stripImageZoom: sf?.stripImageZoom,
-    stampGridConfig: useStampGrid && cardDesign
-      ? parseStampGridConfig(cardDesign.editorConfig)
-      : undefined,
-    stampFilledColor: sf?.stampFilledColor ?? null,
-    labelColor: sf?.labelColor ?? null,
-    headerFields: sf?.headerFields ?? null,
-    secondaryFields: sf?.secondaryFields ?? null,
-  }
-
-  // Type-specific preview props
-  const couponConfig = useMemo(
-    () => passType === "COUPON" ? parseCouponConfig(templateConfig) : null,
-    [passType, templateConfig]
-  )
-  const membershipConfig = useMemo(
-    () => passType === "MEMBERSHIP" ? parseMembershipConfig(templateConfig) : null,
-    [passType, templateConfig]
-  )
-  const giftCardConfig = useMemo(
-    () => passType === "GIFT_CARD" ? parseGiftCardConfig(templateConfig) : null,
-    [passType, templateConfig]
-  )
-  const ticketConfig = useMemo(
-    () => passType === "TICKET" ? parseTicketConfig(templateConfig) : null,
-    [passType, templateConfig]
-  )
-  const accessConfig = useMemo(
-    () => passType === "ACCESS" ? parseAccessConfig(templateConfig) : null,
-    [passType, templateConfig]
-  )
-  const transitConfig = useMemo(
-    () => passType === "TRANSIT" ? parseTransitConfig(templateConfig) : null,
-    [passType, templateConfig]
-  )
-  const businessIdConfig = useMemo(
-    () => passType === "BUSINESS_ID" ? parseBusinessIdConfig(templateConfig) : null,
-    [passType, templateConfig]
-  )
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -157,43 +93,21 @@ export function PassDesignPreview({
       {/* Card preview */}
       <div className="flex justify-center rounded-xl border border-border bg-muted/30 p-8">
         <div className="flex flex-col items-center gap-4">
-          <WalletPassRenderer
-            design={design}
+          <TemplateCardPreview
+            template={{
+              name: templateName,
+              passType,
+              config: templateConfig,
+              passDesign: cardDesign,
+            }}
             format={format}
             organizationName={organizationName}
             logoUrl={organizationLogo}
             logoAppleUrl={organizationLogoApple}
             logoGoogleUrl={organizationLogoGoogle}
-            programName={templateName}
-            currentVisits={passType === "STAMP_CARD" ? 4 : 0}
+            customerName="Jane D."
             totalVisits={visitsRequired}
             rewardDescription={rewardDescription}
-            customerName="Jane D."
-            // Coupon props
-            discountText={couponConfig ? formatCouponValue(couponConfig) : undefined}
-            couponCode={couponConfig?.couponCode}
-            validUntil={couponConfig?.validUntil
-              ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-              : passType === "COUPON" ? "No expiry" : undefined}
-            // Membership props
-            tierName={membershipConfig?.membershipTier}
-            benefits={membershipConfig?.benefits}
-            // Gift card props
-            giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
-            giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
-            // Ticket props
-            eventName={ticketConfig?.eventName}
-            eventDate={ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : undefined}
-            eventVenue={ticketConfig?.eventVenue}
-            scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
-            // Access props
-            accessLabel={accessConfig?.accessLabel}
-            // Transit props
-            transitType={transitConfig?.transitType?.toUpperCase()}
-            originName={transitConfig?.originName}
-            destinationName={transitConfig?.destinationName}
-            // Business ID props
-            idLabel={businessIdConfig?.idLabel}
           />
           <p className="text-[11px] text-muted-foreground">
             {format === "apple" && "Apple Wallet pass preview"}

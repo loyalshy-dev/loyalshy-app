@@ -118,6 +118,8 @@ const savePassDesignSchema = z.object({
     y: z.number().min(0).max(1),
   }).optional(),
   stripImageZoom: z.number().min(1).max(3).optional(),
+  logoAppleZoom: z.number().min(0.5).max(3).optional(),
+  logoGoogleZoom: z.number().min(0.5).max(3).optional(),
   useStampGrid: z.boolean().optional().default(false),
   stampFilledColor: z.string().max(20).nullable().optional(),
   headerFields: z.array(z.string().max(30)).max(3).nullable().optional(),
@@ -623,6 +625,8 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     editorConfig.stripImagePosition = parsed.stripImagePosition
   }
   if (parsed.stripImageZoom && parsed.stripImageZoom !== 1) editorConfig.stripImageZoom = parsed.stripImageZoom
+  if (parsed.logoAppleZoom && parsed.logoAppleZoom !== 1) editorConfig.logoAppleZoom = parsed.logoAppleZoom
+  if (parsed.logoGoogleZoom && parsed.logoGoogleZoom !== 1) editorConfig.logoGoogleZoom = parsed.logoGoogleZoom
   if (parsed.labelColor) editorConfig.labelColor = parsed.labelColor
   if (parsed.stampFilledColor) editorConfig.stampFilledColor = parsed.stampFilledColor
   if (parsed.headerFields != null) editorConfig.headerFields = parsed.headerFields

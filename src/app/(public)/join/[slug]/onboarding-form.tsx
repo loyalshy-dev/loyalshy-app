@@ -16,10 +16,8 @@ import { joinTemplate, requestWalletPass } from "@/server/onboarding-actions"
 import type { OrganizationPublicInfo, OnboardingResult, JoinResult } from "@/server/onboarding-actions"
 import type { PublicTemplateInfo } from "@/types/pass-instance"
 import { computeTextColor } from "@/lib/wallet/card-design"
-import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
-import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
+import { TemplateCardPreview } from "@/components/template-card-preview"
 import { Card } from "@/components/ui/card"
-import { parseCouponConfig, parseMembershipConfig, parseStampCardConfig, formatCouponValue } from "@/lib/pass-config"
 
 // Convenience helpers to extract config fields from PublicTemplateInfo
 function getVisitsRequired(p: PublicTemplateInfo): number {
@@ -175,28 +173,6 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
     setStep("success")
   }
 
-  // Compute type-specific props for a template
-  function getTypeProps(program: PublicTemplateInfo) {
-    if (program.passType === "COUPON") {
-      const config = parseCouponConfig(program.config)
-      return {
-        discountText: config ? formatCouponValue(config) : getRewardDescription(program),
-        validUntil: config?.validUntil
-          ? new Date(config.validUntil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
-          : "No expiry",
-        couponCode: config?.couponCode ?? undefined,
-      }
-    }
-    if (program.passType === "MEMBERSHIP") {
-      const config = parseMembershipConfig(program.config)
-      return {
-        tierName: config?.membershipTier ?? getRewardDescription(program),
-        benefits: config?.benefits ?? "Exclusive perks",
-      }
-    }
-    return {}
-  }
-
   // Use selected program's card design, falling back to first program or organization defaults
   const activeProgram = selectedProgram ?? programs[0]
   const design = activeProgram?.passDesign
@@ -309,10 +285,6 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
 
   // --- Card view screen (post-enrollment, pre-wallet) ---
   if (step === "card-view" && joinResult) {
-    const passDesign = activeProgram?.passDesign
-      ? buildWalletPassDesign(activeProgram.passDesign)
-      : null
-
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center p-4 bg-background" style={{ fontFamily: webFont }}>
         <div className="w-full max-w-md space-y-6">
@@ -329,20 +301,16 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
           </div>
 
           {/* Full-size card preview */}
-          {passDesign && activeProgram && (
+          {activeProgram && (
             <div className="flex justify-center">
-              <WalletPassRenderer
-                design={passDesign}
-                format="apple"
+              <TemplateCardPreview
+                template={activeProgram}
                 organizationName={organization.name}
                 logoUrl={organization.logo}
-                programName={activeProgram.name}
+                logoAppleUrl={organization.logoApple}
                 customerName={joinResult.contactName}
                 currentVisits={joinResult.currentCycleVisits ?? 0}
-                totalVisits={getVisitsRequired(activeProgram)}
-                rewardDescription={getRewardDescription(activeProgram)}
                 hasReward={joinResult.hasAvailableReward}
-                {...getTypeProps(activeProgram)}
               />
             </div>
           )}
@@ -492,8 +460,6 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
           {/* Program cards */}
           <div className="space-y-3">
             {programs.map((program) => {
-              const programDesign = buildWalletPassDesign(program.passDesign)
-
               return (
                 <Card asChild key={program.id}>
                 <button
@@ -503,19 +469,16 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
                   <div className="flex items-center gap-4">
                     {/* Card preview thumbnail */}
                     <div className="shrink-0 rounded-lg overflow-hidden" style={{ width: 56, height: 72 }}>
-                      <WalletPassRenderer
-                        design={programDesign}
-                        format="apple"
+                      <TemplateCardPreview
+                        template={program}
+                        organizationName={organization.name}
+                        logoUrl={organization.logo}
+                logoAppleUrl={organization.logoApple}
                         compact
                         width={56}
                         height={72}
-                        organizationName={organization.name}
-                        logoUrl={organization.logo}
-                        programName={program.name}
                         currentVisits={0}
-                        totalVisits={getVisitsRequired(program)}
                         rewardDescription=""
-                        {...getTypeProps(program)}
                       />
                     </div>
 
@@ -626,24 +589,15 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
         {/* Card preview */}
         {activeProgram && (
           <div className="flex justify-center">
-            {(() => {
-              const formDesign = buildWalletPassDesign(activeProgram.passDesign)
-              return (
-                <WalletPassRenderer
-                  design={formDesign}
-                  format="apple"
-                  compact
-                  organizationName={organization.name}
-                  logoUrl={organization.logo}
-                  programName={activeProgram.name}
-                  customerName={name.trim() || undefined}
-                  currentVisits={0}
-                  totalVisits={getVisitsRequired(activeProgram)}
-                  rewardDescription={getRewardDescription(activeProgram)}
-                  {...getTypeProps(activeProgram)}
-                />
-              )
-            })()}
+            <TemplateCardPreview
+              template={activeProgram}
+              organizationName={organization.name}
+              logoUrl={organization.logo}
+              logoAppleUrl={organization.logoApple}
+              compact
+              customerName={name.trim() || undefined}
+              currentVisits={0}
+            />
           </div>
         )}
 

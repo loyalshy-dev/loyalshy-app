@@ -1,25 +1,37 @@
 import { parseStripFilters, parseStampGridConfig } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
-import type { PublicTemplateInfo } from "@/types/pass-instance"
 
 /**
- * Build a WalletPassDesign from a PublicTemplateInfo's passDesign.
- * Extracts duplicated logic that was previously inline in onboarding-form.tsx.
+ * Minimal pass design shape accepted by this builder.
+ * All dashboard types (TemplateListItem, PublicTemplateInfo, PassInstanceDetail, etc.)
+ * satisfy this interface — no need for per-surface inline design construction.
+ */
+type PassDesignInput = {
+  cardType?: string | null
+  showStrip?: boolean
+  primaryColor?: string | null
+  secondaryColor?: string | null
+  textColor?: string | null
+  patternStyle?: string | null
+  progressStyle?: string | null
+  fontFamily?: string | null
+  labelFormat?: string | null
+  customProgressLabel?: string | null
+  stripImageUrl?: string | null
+  editorConfig?: unknown
+} | null
+
+/**
+ * Build a WalletPassDesign from any pass design record.
+ * Single source of truth — used by studio, dashboard, distribution, and public pages.
  */
 export function buildWalletPassDesign(
-  passDesign: PublicTemplateInfo["passDesign"]
+  passDesign: PassDesignInput
 ): WalletPassDesign {
   const sf = passDesign
     ? parseStripFilters(passDesign.editorConfig)
-    : {
-        useStampGrid: false,
-        stripColor1: null,
-        stripColor2: null,
-        stripFill: "gradient" as const,
-        patternColor: null,
-        stripImagePosition: { x: 0.5, y: 0.5 },
-        stripImageZoom: 1,
-      }
+    : parseStripFilters(null)
+
   const useStampGrid =
     sf.useStampGrid || passDesign?.patternStyle === "STAMP_GRID"
 
@@ -39,14 +51,22 @@ export function buildWalletPassDesign(
       ? "NONE"
       : (passDesign?.patternStyle ?? "NONE")) as WalletPassDesign["patternStyle"],
     useStampGrid,
+    stripOpacity: sf.stripOpacity,
+    stripGrayscale: sf.stripGrayscale,
     stripColor1: sf.stripColor1 ?? null,
     stripColor2: sf.stripColor2 ?? null,
     stripFill: sf.stripFill ?? "gradient",
     patternColor: sf.patternColor ?? null,
     stripImagePosition: sf.stripImagePosition,
     stripImageZoom: sf.stripImageZoom,
-    stampGridConfig: useStampGrid
-      ? parseStampGridConfig(passDesign!.editorConfig)
+    logoAppleZoom: sf.logoAppleZoom,
+    logoGoogleZoom: sf.logoGoogleZoom,
+    stampGridConfig: useStampGrid && passDesign
+      ? parseStampGridConfig(passDesign.editorConfig)
       : undefined,
+    stampFilledColor: sf.stampFilledColor ?? null,
+    labelColor: sf.labelColor ?? null,
+    headerFields: sf.headerFields ?? null,
+    secondaryFields: sf.secondaryFields ?? null,
   }
 }

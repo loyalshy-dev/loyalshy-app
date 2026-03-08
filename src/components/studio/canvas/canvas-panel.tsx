@@ -186,12 +186,15 @@ export function CanvasPanel({
           scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
           // Access props
           accessLabel={accessConfig?.accessLabel}
+          accessGranted={passType === "ACCESS" ? "0" : undefined}
           // Transit props
           transitType={transitConfig?.transitType?.toUpperCase()}
           originName={transitConfig?.originName}
           destinationName={transitConfig?.destinationName}
+          boardingStatus={passType === "TRANSIT" ? "NOT BOARDED" : undefined}
           // Business ID props
           idLabel={businessIdConfig?.idLabel}
+          verifications={passType === "BUSINESS_ID" ? "0" : undefined}
         />
       </DeviceFrameWrapper>
     </div>

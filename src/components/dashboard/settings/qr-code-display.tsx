@@ -12,10 +12,9 @@ import {
   Smartphone,
   LayoutGrid,
 } from "lucide-react"
-import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
+import { TemplateCardPreview } from "@/components/template-card-preview"
 import { Card } from "@/components/ui/card"
-import { parseStripFilters, parseStampGridConfig } from "@/lib/wallet/card-design"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/pass-config"
 
 type SizePreset = {
   id: string
@@ -82,6 +81,7 @@ type QrCodeDisplayProps = {
     name: string
     slug: string
     logo: string | null
+    logoApple: string | null
     brandColor: string | null
   }
   templates: TemplateInfo[]
@@ -109,46 +109,30 @@ export function QrCodeDisplay({
 
   // Derive card design data for the active program (or first program as fallback)
   const activeTemplateDesign = activeTemplate?.cardDesign ?? templates[0]?.cardDesign ?? null
-  const qrSf = activeTemplateDesign ? parseStripFilters(activeTemplateDesign.editorConfig) : null
-  const walletDesign: WalletPassDesign | null = activeTemplateDesign
-    ? {
-        cardType: (activeTemplateDesign.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-        showStrip: activeTemplateDesign.showStrip ?? true,
-        primaryColor: activeTemplateDesign.primaryColor ?? "#1a1a2e",
-        secondaryColor: activeTemplateDesign.secondaryColor ?? "#ffffff",
-        textColor: activeTemplateDesign.textColor ?? "#ffffff",
-        progressStyle: (activeTemplateDesign.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
-        labelFormat: (activeTemplateDesign.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
-        customProgressLabel: activeTemplateDesign.customProgressLabel ?? null,
-        stripImageUrl: activeTemplateDesign.stripImageUrl ?? null,
-        stripOpacity: qrSf?.stripOpacity ?? 1,
-        stripGrayscale: qrSf?.stripGrayscale ?? false,
-        patternStyle: (activeTemplateDesign.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
-        stripColor1: qrSf?.stripColor1 ?? null,
-        stripColor2: qrSf?.stripColor2 ?? null,
-        stripFill: qrSf?.stripFill ?? "gradient",
-        patternColor: qrSf?.patternColor ?? null,
-        stripImagePosition: qrSf?.stripImagePosition,
-        stripImageZoom: qrSf?.stripImageZoom,
-        useStampGrid: qrSf?.useStampGrid,
-        stampGridConfig: activeTemplateDesign.editorConfig ? parseStampGridConfig(activeTemplateDesign.editorConfig) : undefined,
-        stampFilledColor: qrSf?.stampFilledColor ?? null,
-        labelColor: qrSf?.labelColor ?? null,
-        headerFields: qrSf?.headerFields ?? null,
-        secondaryFields: qrSf?.secondaryFields ?? null,
-      }
-    : null
 
-  // Type-specific preview data
+  // Type-specific preview data (for poster text only)
   const activeTemplateType = activeTemplate?.passType ?? templates[0]?.passType
   const activeTemplateConfig = activeTemplate?.templateConfig ?? templates[0]?.templateConfig
   const couponConfig = activeTemplateType === "COUPON" ? parseCouponConfig(activeTemplateConfig) : null
   const membershipConfig = activeTemplateType === "MEMBERSHIP" ? parseMembershipConfig(activeTemplateConfig) : null
-  const giftCardConfig = activeTemplateType === "GIFT_CARD" ? parseGiftCardConfig(activeTemplateConfig) : null
-  const ticketConfig = activeTemplateType === "TICKET" ? parseTicketConfig(activeTemplateConfig) : null
-  const accessConfig = activeTemplateType === "ACCESS" ? parseAccessConfig(activeTemplateConfig) : null
-  const transitConfig = activeTemplateType === "TRANSIT" ? parseTransitConfig(activeTemplateConfig) : null
-  const businessIdConfig = activeTemplateType === "BUSINESS_ID" ? parseBusinessIdConfig(activeTemplateConfig) : null
+
+  // Build a CardPreviewTemplate from the active template
+  const previewTemplate = activeTemplate
+    ? {
+        name: activeTemplate.name,
+        passType: activeTemplate.passType ?? "STAMP_CARD",
+        config: activeTemplate.templateConfig,
+        passDesign: activeTemplate.cardDesign ?? null,
+      }
+    : templates[0]
+      ? {
+          name: templates[0].name,
+          passType: templates[0].passType ?? "STAMP_CARD",
+          config: templates[0].templateConfig,
+          passDesign: templates[0].cardDesign ?? null,
+        }
+      : null
+
   // Pull resolved primary color for the poster accent bar
   const accentColor =
     activeTemplateDesign?.primaryColor ??
@@ -409,43 +393,15 @@ export function QrCodeDisplay({
                 </div>
 
                 {/* Card preview */}
-                {walletDesign && (
+                {previewTemplate && (
                   <div className="w-full flex justify-center">
-                    <WalletPassRenderer
-                      design={walletDesign}
-                      format="apple"
+                    <TemplateCardPreview
+                      template={previewTemplate}
                       organizationName={organization.name}
-                      logoUrl={organization.logo}
-                      programName={activeTemplate?.name ?? templates[0]?.name ?? "Program"}
-                      rewardDescription={rewardDescription}
-                      totalVisits={visitsRequired}
-                      currentVisits={activeTemplateType === "STAMP_CARD" || !activeTemplateType ? 0 : 0}
+                      logoUrl={organization.logoApple ?? organization.logo}
                       compact
-                      // Coupon props
-                      discountText={couponConfig ? formatCouponValue(couponConfig) : undefined}
-                      couponCode={couponConfig?.couponCode}
-                      validUntil={couponConfig?.validUntil
-                        ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                        : activeTemplateType === "COUPON" ? "No expiry" : undefined}
-                      // Membership props
-                      tierName={membershipConfig?.membershipTier}
-                      benefits={membershipConfig?.benefits}
-                      // Gift card props
-                      giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
-                      giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
-                      // Ticket props
-                      eventName={ticketConfig?.eventName}
-                      eventDate={ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : undefined}
-                      eventVenue={ticketConfig?.eventVenue}
-                      scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
-                      // Access props
-                      accessLabel={accessConfig?.accessLabel}
-                      // Transit props
-                      transitType={transitConfig?.transitType?.toUpperCase()}
-                      originName={transitConfig?.originName}
-                      destinationName={transitConfig?.destinationName}
-                      // Business ID props
-                      idLabel={businessIdConfig?.idLabel}
+                      width={180}
+                      height={250}
                     />
                   </div>
                 )}

@@ -63,9 +63,9 @@ import { transitBoard, type TransitBoardResult } from "@/server/transit-actions"
 import { verifyId, type VerifyIdResult } from "@/server/business-id-actions"
 import type { PassInstanceSummary } from "@/types/pass-instance"
 import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
-import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
+import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { parsePointsConfig, parsePrepaidConfig, getCheapestCatalogItem } from "@/lib/pass-config"
-import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
+import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -1152,39 +1152,7 @@ function ConfirmStep({
   const ticketMaxScans = (confirmConfig.maxScans as number) ?? 1
 
   // Build WalletPassDesign from card design data when available
-  const visitSf = cardDesign ? parseStripFilters(cardDesign.editorConfig) : { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient" as const, patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1, stampFilledColor: null, labelColor: null, headerFields: null, secondaryFields: null }
-  const visitSg = visitSf.useStampGrid || cardDesign?.patternStyle === "STAMP_GRID"
-  const resolvedCardType = isMembership ? "TIER" : isCoupon ? "COUPON" : isPoints ? "POINTS" : isPrepaid ? "PREPAID" : isGiftCard ? "GIFT_CARD" : isTicket ? "TICKET" : isAccess ? "ACCESS" : isTransit ? "TRANSIT" : isBusinessId ? "BUSINESS_ID" : "STAMP"
-  const design: WalletPassDesign | null = cardDesign
-    ? {
-        cardType: resolvedCardType as WalletPassDesign["cardType"],
-        showStrip: cardDesign.showStrip ?? true,
-        primaryColor: cardDesign.primaryColor ?? "#1a1a2e",
-        secondaryColor: cardDesign.secondaryColor ?? "#ffffff",
-        textColor: cardDesign.textColor ?? "#ffffff",
-        progressStyle: (cardDesign.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
-        labelFormat: (cardDesign.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
-        customProgressLabel: cardDesign.customProgressLabel ?? null,
-        stripImageUrl: cardDesign.stripImageUrl ?? null,
-        stripOpacity: visitSf.stripOpacity ?? 1,
-        stripGrayscale: visitSf.stripGrayscale ?? false,
-        patternStyle: (cardDesign.patternStyle === "STAMP_GRID" ? "NONE" : cardDesign.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
-        useStampGrid: visitSg,
-        stripColor1: visitSf.stripColor1 ?? null,
-        stripColor2: visitSf.stripColor2 ?? null,
-        stripFill: visitSf.stripFill ?? "gradient",
-        patternColor: visitSf.patternColor ?? null,
-        stripImagePosition: visitSf.stripImagePosition,
-        stripImageZoom: visitSf.stripImageZoom,
-        stampGridConfig: visitSg
-          ? parseStampGridConfig(cardDesign.editorConfig)
-          : undefined,
-        stampFilledColor: visitSf.stampFilledColor ?? null,
-        labelColor: visitSf.labelColor ?? null,
-        headerFields: visitSf.headerFields ?? null,
-        secondaryFields: visitSf.secondaryFields ?? null,
-      }
-    : null
+  const design = cardDesign ? buildWalletPassDesign(cardDesign) : null
 
   return (
     <div className="flex flex-col">

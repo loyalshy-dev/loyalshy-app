@@ -50,8 +50,8 @@ import {
 } from "@/server/contact-actions"
 import { redeemReward } from "@/server/reward-actions"
 import type { PassInstanceDetail } from "@/types/pass-instance"
-import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
-import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
+import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
+import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText, parsePrepaidConfig } from "@/lib/pass-config"
 
 // Deterministic avatar color from name
@@ -130,38 +130,8 @@ const passTypeIcons: Record<string, typeof Stamp> = {
   PREPAID: CreditCard,
 }
 
-function buildWalletDesign(passInstance: PassInstanceDetail): WalletPassDesign | null {
-  if (!passInstance.passDesign) return null
-  const cd = passInstance.passDesign
-  const ps = cd.patternStyle
-  const sf = parseStripFilters(cd.editorConfig)
-  const sg = sf.useStampGrid || ps === "STAMP_GRID"
-  return {
-    cardType: (cd.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-    showStrip: cd.showStrip ?? true,
-    primaryColor: cd.primaryColor ?? "#1a1a2e",
-    secondaryColor: cd.secondaryColor ?? "#ffffff",
-    textColor: cd.textColor ?? "#ffffff",
-    progressStyle: (cd.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
-    labelFormat: (cd.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
-    customProgressLabel: cd.customProgressLabel ?? null,
-    stripImageUrl: cd.stripImageUrl ?? null,
-    stripOpacity: sf.stripOpacity ?? 1,
-    stripGrayscale: sf.stripGrayscale ?? false,
-    patternStyle: (ps === "STAMP_GRID" ? "NONE" : ps ?? "NONE") as WalletPassDesign["patternStyle"],
-    useStampGrid: sg,
-    stripColor1: sf.stripColor1 ?? null,
-    stripColor2: sf.stripColor2 ?? null,
-    stripFill: sf.stripFill ?? "gradient",
-    patternColor: sf.patternColor ?? null,
-    stripImagePosition: sf.stripImagePosition,
-    stripImageZoom: sf.stripImageZoom,
-    stampGridConfig: sg ? parseStampGridConfig(cd.editorConfig) : undefined,
-    stampFilledColor: sf.stampFilledColor ?? null,
-    labelColor: sf.labelColor ?? null,
-    headerFields: sf.headerFields ?? null,
-    secondaryFields: sf.secondaryFields ?? null,
-  }
+function buildWalletDesign(passInstance: PassInstanceDetail) {
+  return passInstance.passDesign ? buildWalletPassDesign(passInstance.passDesign) : null
 }
 
 function getRendererProps(passInstance: PassInstanceDetail) {

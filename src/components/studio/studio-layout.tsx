@@ -287,6 +287,8 @@ export function StudioLayout({
     stripImagePosition: wallet.stripImagePosition,
     stripImageZoom: wallet.stripImageZoom,
     labelColor: wallet.labelColor,
+    logoAppleZoom: wallet.logoAppleZoom,
+    logoGoogleZoom: wallet.logoGoogleZoom,
     headerFields: wallet.headerFields,
     secondaryFields: wallet.secondaryFields,
   }
@@ -363,6 +365,8 @@ export function StudioLayout({
               ? state.wallet.stripImageZoom
               : undefined,
             labelColor: state.wallet.labelColor,
+            logoAppleZoom: state.wallet.logoAppleZoom !== 1 ? state.wallet.logoAppleZoom : undefined,
+            logoGoogleZoom: state.wallet.logoGoogleZoom !== 1 ? state.wallet.logoGoogleZoom : undefined,
             headerFields: state.wallet.headerFields,
             secondaryFields: state.wallet.secondaryFields,
           })

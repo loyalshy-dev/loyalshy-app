@@ -6,49 +6,15 @@ import Link from "next/link"
 import { Plus, Users, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
-import { parseStampGridConfig, parseStripFilters } from "@/lib/wallet/card-design"
+import { TemplateCardPreview } from "@/components/template-card-preview"
 import { statusConfig } from "./program-status"
 import { CreateProgramForm } from "./create-program-form"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, formatPointsValue, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, parsePrepaidConfig } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import type { TemplateListItem } from "@/server/template-actions"
 
-function buildDesign(passDesign: TemplateListItem["passDesign"]): WalletPassDesign {
-  const sf = passDesign ? parseStripFilters(passDesign.editorConfig) : null
-  const useStampGrid = sf ? (sf.useStampGrid || passDesign?.patternStyle === "STAMP_GRID") : false
-
-  return {
-    cardType: (passDesign?.cardType ?? "STAMP") as WalletPassDesign["cardType"],
-    showStrip: passDesign?.showStrip ?? true,
-    primaryColor: passDesign?.primaryColor ?? "#1a1a2e",
-    secondaryColor: passDesign?.secondaryColor ?? "#ffffff",
-    textColor: passDesign?.textColor ?? "#ffffff",
-    progressStyle: (passDesign?.progressStyle ?? "NUMBERS") as WalletPassDesign["progressStyle"],
-    labelFormat: (passDesign?.labelFormat ?? "UPPERCASE") as WalletPassDesign["labelFormat"],
-    customProgressLabel: passDesign?.customProgressLabel ?? null,
-    stripImageUrl: passDesign?.stripImageUrl ?? null,
-    stripOpacity: sf?.stripOpacity ?? 1,
-    stripGrayscale: sf?.stripGrayscale ?? false,
-    patternStyle: (passDesign?.patternStyle === "STAMP_GRID" ? "NONE" : passDesign?.patternStyle ?? "NONE") as WalletPassDesign["patternStyle"],
-    useStampGrid,
-    stripColor1: sf?.stripColor1 ?? null,
-    stripColor2: sf?.stripColor2 ?? null,
-    stripFill: sf?.stripFill ?? "gradient",
-    patternColor: sf?.patternColor ?? null,
-    stripImagePosition: sf?.stripImagePosition,
-    stripImageZoom: sf?.stripImageZoom,
-    stampGridConfig: useStampGrid && passDesign
-      ? parseStampGridConfig(passDesign.editorConfig)
-      : undefined,
-    stampFilledColor: sf?.stampFilledColor ?? null,
-    labelColor: sf?.labelColor ?? null,
-    headerFields: sf?.headerFields ?? null,
-    secondaryFields: sf?.secondaryFields ?? null,
-  }
-}
 
 function getTypeSubtitle(program: TemplateListItem): string {
   const type = program.passType as PassType
@@ -84,83 +50,13 @@ function getTypeSubtitle(program: TemplateListItem): string {
   }
 }
 
-function TemplateCardPreview({
-  design,
-  program,
-  organizationName,
-}: {
-  design: WalletPassDesign
-  program: TemplateListItem
-  organizationName: string
-}) {
-  const type = program.passType as PassType
-  const couponConfig = type === "COUPON" ? parseCouponConfig(program.config) : null
-  const membershipConfig = type === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
-  const prepaidConfig = type === "PREPAID" ? parsePrepaidConfig(program.config) : null
-  const giftCardConfig = type === "GIFT_CARD" ? parseGiftCardConfig(program.config) : null
-  const ticketConfig = type === "TICKET" ? parseTicketConfig(program.config) : null
-  const accessConfig = type === "ACCESS" ? parseAccessConfig(program.config) : null
-  const transitConfig = type === "TRANSIT" ? parseTransitConfig(program.config) : null
-  const businessIdConfig = type === "BUSINESS_ID" ? parseBusinessIdConfig(program.config) : null
-  const templateCfg = program.config as Record<string, unknown> | null ?? {}
-  const stampsRequired = (templateCfg as { stampsRequired?: number }).stampsRequired ?? 10
-  const rewardDescription = (templateCfg as { rewardDescription?: string }).rewardDescription ?? ""
-
-  return (
-    <WalletPassRenderer
-      design={design}
-      format="apple"
-      programName={program.name}
-      currentVisits={4}
-      totalVisits={stampsRequired}
-      rewardDescription={rewardDescription}
-      compact
-      width={180}
-      height={250}
-      // Coupon props
-      discountText={couponConfig ? formatCouponValue(couponConfig) : undefined}
-      couponCode={couponConfig?.couponCode}
-      validUntil={couponConfig?.validUntil
-        ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-        : type === "COUPON" ? "No expiry" : undefined}
-      // Membership props
-      tierName={membershipConfig?.membershipTier}
-      benefits={membershipConfig?.benefits}
-      // Prepaid props
-      remainingUses={prepaidConfig?.totalUses}
-      totalUses={prepaidConfig?.totalUses}
-      prepaidValidUntil={prepaidConfig?.validUntil
-        ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-        : type === "PREPAID" ? "No expiry" : undefined}
-      // Gift card props
-      giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
-      giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
-      // Ticket props
-      eventName={ticketConfig?.eventName}
-      eventDate={ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : undefined}
-      eventVenue={ticketConfig?.eventVenue}
-      scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
-      // Access props
-      accessLabel={accessConfig?.accessLabel}
-      accessGranted="0"
-      // Transit props
-      transitType={transitConfig?.transitType?.toUpperCase()}
-      originName={transitConfig?.originName}
-      destinationName={transitConfig?.destinationName}
-      boardingStatus="NOT BOARDED"
-      // Business ID props
-      idLabel={businessIdConfig?.idLabel}
-      verifications="0"
-    />
-  )
-}
-
 type TypeFilter = "ALL" | "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "PREPAID"
 
 type TemplatesListViewProps = {
   programs: TemplateListItem[]
   organizationId: string
   organizationName: string
+  organizationLogo: string | null
   isOwner: boolean
 }
 
@@ -168,6 +64,7 @@ export function TemplatesListView({
   programs,
   organizationId,
   organizationName,
+  organizationLogo,
   isOwner,
 }: TemplatesListViewProps) {
   const router = useRouter()
@@ -301,7 +198,6 @@ export function TemplatesListView({
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filteredPrograms.map((program) => {
             const cfg = statusConfig[program.status] ?? statusConfig.DRAFT
-            const design = buildDesign(program.passDesign)
             const typeMeta = PASS_TYPE_META[program.passType as PassType]
             const TypeIcon = typeMeta?.icon
             return (
@@ -313,9 +209,11 @@ export function TemplatesListView({
                 {/* Card preview */}
                 <div className="flex justify-center bg-muted/40 py-4 px-4 border-b border-border">
                   <TemplateCardPreview
-                    design={design}
-                    program={program}
-                    organizationName={organizationName ?? ""}
+                    template={program}
+                    logoUrl={organizationLogo}
+                    compact
+                    width={180}
+                    height={250}
                   />
                 </div>
 

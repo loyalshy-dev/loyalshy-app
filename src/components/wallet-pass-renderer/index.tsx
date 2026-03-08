@@ -43,6 +43,8 @@ export type WalletPassDesign = {
   stripImagePosition?: { x: number; y: number }
   stripImageZoom?: number
   labelColor?: string | null
+  logoAppleZoom?: number   // 1–3, default 1
+  logoGoogleZoom?: number  // 1–3, default 1
   headerFields?: string[] | null   // custom header fields (null = default)
   secondaryFields?: string[] | null // custom secondary fields (null = default)
 }
@@ -306,6 +308,7 @@ export function WalletPassRenderer({
 
   // Hide org name text next to logo on Apple (matches generate-pass.ts), show on Google
   const hideLogoText = isApple
+  const logoZoom = isApple ? (design.logoAppleZoom ?? 1) : (design.logoGoogleZoom ?? 1)
 
   // ─── Section: Header ───
   const headerSection = (
@@ -326,7 +329,7 @@ export function WalletPassRenderer({
             width: isApple ? 150 : 40,
             height: isApple ? 50 : 40,
             borderRadius: isApple ? 3 : "50%",
-            backgroundColor: !isApple ? "rgba(255,255,255,0.15)" : "transparent",
+            backgroundColor: "transparent",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -340,9 +343,11 @@ export function WalletPassRenderer({
               src={resolvedLogo}
               alt=""
               style={{
-                width: "100%",
-                height: "100%",
+                width: isApple ? "100%" : 40,
+                height: isApple ? "100%" : 40,
+                borderRadius: isApple ? 0 : "50%",
                 objectFit: isApple ? "contain" : "cover",
+                transform: logoZoom !== 1 ? `scale(${logoZoom})` : undefined,
               }}
             />
           ) : isApple ? (

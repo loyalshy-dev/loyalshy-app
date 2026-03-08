@@ -65,6 +65,7 @@ async function TemplatesGridSection() {
       templates={templates}
       organizationId={organization.id}
       organizationName={organization.name}
+      organizationLogo={organization.logoApple ?? organization.logo ?? null}
       isOwner={isOwner}
     />
   )

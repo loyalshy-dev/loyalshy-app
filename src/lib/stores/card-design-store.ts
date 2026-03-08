@@ -59,6 +59,8 @@ export type WalletState = {
   stripImageZoom: number
   logoAppleUrl: string | null
   logoGoogleUrl: string | null
+  logoAppleZoom: number  // 1 = 100%, range 1–3
+  logoGoogleZoom: number
   headerFields: string[] | null   // custom header fields (null = default)
   secondaryFields: string[] | null // custom secondary fields (null = default)
 }
@@ -276,6 +278,8 @@ export function createCardDesignStore() {
           stripImageZoom: 1,
           logoAppleUrl: null,
           logoGoogleUrl: null,
+          logoAppleZoom: 1,
+          logoGoogleZoom: 1,
           headerFields: null,
           secondaryFields: null,
         },

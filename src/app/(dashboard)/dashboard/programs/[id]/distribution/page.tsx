@@ -4,7 +4,7 @@ import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } f
 import { db } from "@/lib/db"
 import { QrCodeDisplay } from "@/components/dashboard/settings/qr-code-display"
 
-export default async function ProgramQrCodePage(props: {
+export default async function ProgramDistributionPage(props: {
   params: Promise<{ id: string }>
 }) {
   await connection()
@@ -53,6 +53,7 @@ export default async function ProgramQrCodePage(props: {
         name: organization.name,
         slug: organization.slug,
         logo: organization.logo,
+        logoApple: organization.logoApple ?? null,
         brandColor: organization.brandColor,
       }}
       templates={[

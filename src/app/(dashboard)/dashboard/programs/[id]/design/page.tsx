@@ -71,6 +71,8 @@ export default async function ProgramDesignPage(props: {
         stripImageZoom: stripFilters.stripImageZoom,
         labelColor: stripFilters.labelColor,
         stampFilledColor: stripFilters.stampFilledColor,
+        logoAppleZoom: stripFilters.logoAppleZoom,
+        logoGoogleZoom: stripFilters.logoGoogleZoom,
         headerFields: stripFilters.headerFields,
         secondaryFields: stripFilters.secondaryFields,
         useStampGrid,
