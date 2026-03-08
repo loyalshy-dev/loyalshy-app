@@ -30,6 +30,11 @@ export type StampGridConfig = {
   useStripBackground: boolean  // overlay grid on strip image instead of gradient
   emptyNumberColor: string | null // color for empty slot numbers (null = use textColor)
   emptyNumberScale: number // 0.2–0.6, controls number size within empty slot (default 0.35)
+  emptySlotOpacity: number         // opacity for unfilled slots (empty + reward when not filled), 0.1–1.0, default 0.35
+  emptySlotColor: string | null   // stroke color for empty slot icons (null = use textColor)
+  emptySlotBg: string | null      // background color for empty slots (null = primaryColor + transparency)
+  rewardSlotColor: string | null  // stroke color for reward slot icon (null = use primaryColor)
+  rewardSlotBg: string | null     // background color for reward slot (null = primaryColor + transparency)
 }
 
 export const DEFAULT_STAMP_GRID_CONFIG: StampGridConfig = {
@@ -45,6 +50,11 @@ export const DEFAULT_STAMP_GRID_CONFIG: StampGridConfig = {
   useStripBackground: false,
   emptyNumberColor: null,
   emptyNumberScale: 0.35,
+  emptySlotOpacity: 0.35,
+  emptySlotColor: null,
+  emptySlotBg: null,
+  rewardSlotColor: null,
+  rewardSlotBg: null,
 }
 
 /** Maps legacy raster filenames to Lucide icon IDs for backward compatibility */
@@ -159,6 +169,13 @@ export function parseStampGridConfig(editorConfig: unknown): StampGridConfig {
     emptyNumberScale: typeof cfg.emptyNumberScale === "number"
       ? Math.max(0.2, Math.min(0.6, cfg.emptyNumberScale))
       : DEFAULT_STAMP_GRID_CONFIG.emptyNumberScale,
+    emptySlotOpacity: typeof cfg.emptySlotOpacity === "number"
+      ? Math.max(0.1, Math.min(1, cfg.emptySlotOpacity))
+      : DEFAULT_STAMP_GRID_CONFIG.emptySlotOpacity,
+    emptySlotColor: typeof cfg.emptySlotColor === "string" ? cfg.emptySlotColor : null,
+    emptySlotBg: typeof cfg.emptySlotBg === "string" ? cfg.emptySlotBg : null,
+    rewardSlotColor: typeof cfg.rewardSlotColor === "string" ? cfg.rewardSlotColor : null,
+    rewardSlotBg: typeof cfg.rewardSlotBg === "string" ? cfg.rewardSlotBg : null,
   }
 }
 

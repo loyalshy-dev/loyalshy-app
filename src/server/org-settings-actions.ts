@@ -136,7 +136,13 @@ const savePassDesignSchema = z.object({
     emptyNumberScale: z.number().min(0.2).max(0.6).optional(),
     stampShape: z.enum(["circle", "rounded-square", "square"]),
     filledStyle: z.enum(["icon", "icon-with-border", "solid"]),
+    stampIconScale: z.number().min(0.4).max(0.9).optional(),
     useStripBackground: z.boolean().optional(),
+    emptySlotOpacity: z.number().min(0.1).max(1).optional(),
+    emptySlotColor: z.string().max(20).nullable().optional(),
+    emptySlotBg: z.string().max(20).nullable().optional(),
+    rewardSlotColor: z.string().max(20).nullable().optional(),
+    rewardSlotBg: z.string().max(20).nullable().optional(),
   }).optional(),
 })
 

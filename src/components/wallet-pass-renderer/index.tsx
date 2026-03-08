@@ -1047,6 +1047,79 @@ function StampGridOverlay({
           if (isRewardSlot) {
             const rewardPaths = useUniformIcon ? getStampIconPaths(stampIcon) : getRewardIconPaths(rewardIconId)
             const rewardFilled = hasReward || isFilled
+            const rBg = config?.rewardSlotBg === "transparent"
+              ? "transparent"
+              : config?.rewardSlotBg ?? secondaryColor
+            const rStroke = config?.rewardSlotColor ?? primaryColor
+
+            if (rewardFilled) {
+              // Filled reward slot — same styles as filled stamps
+              if (filledStyle === "solid") {
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      width: slotSize,
+                      height: slotSize,
+                      borderRadius,
+                      backgroundColor: rBg,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: slotSize * 0.4,
+                      fontWeight: 700,
+                      color: rStroke,
+                    }}
+                  >
+                    {"\u2713"}
+                  </div>
+                )
+              }
+              return (
+                <div
+                  key={i}
+                  style={{
+                    width: slotSize,
+                    height: slotSize,
+                    borderRadius,
+                    overflow: "hidden",
+                    border: "none",
+                    backgroundColor: rBg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {customRewardIconUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={customRewardIconUrl}
+                      alt=""
+                      style={{
+                        width: slotSize * iconScale,
+                        height: slotSize * iconScale,
+                        objectFit: "contain",
+                      }}
+                    />
+                  ) : (
+                    <svg
+                      width={slotSize * iconScale}
+                      height={slotSize * iconScale}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke={rStroke}
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      dangerouslySetInnerHTML={{ __html: rewardPaths }}
+                    />
+                  )}
+                </div>
+              )
+            }
+
+            // Empty reward slot — same as empty slots but with reward icon
+            const emptyOpacity = config?.emptySlotOpacity ?? 0.35
             return (
               <div
                 key={i}
@@ -1055,11 +1128,13 @@ function StampGridOverlay({
                   height: slotSize,
                   borderRadius,
                   overflow: "hidden",
-                  border: `2px solid ${hasReward ? "#d4a017" : secondaryColor}${rewardFilled ? "88" : "44"}`,
-                  backgroundColor: hasReward ? "#d4a01720" : rewardFilled ? secondaryColor : `${primaryColor}60`,
+                  border: "none",
+                  backgroundColor: config?.rewardSlotBg === "transparent" ? "transparent" : (config?.rewardSlotBg ?? `${primaryColor}25`),
+                  backdropFilter: "blur(2px)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  opacity: emptyOpacity,
                 }}
               >
                 {customRewardIconUrl ? (
@@ -1071,7 +1146,6 @@ function StampGridOverlay({
                       width: slotSize * iconScale,
                       height: slotSize * iconScale,
                       objectFit: "contain",
-                      opacity: rewardFilled ? 1 : 0.5,
                     }}
                   />
                 ) : (
@@ -1080,11 +1154,10 @@ function StampGridOverlay({
                     height={slotSize * iconScale}
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke={rewardFilled ? primaryColor : textColor}
+                    stroke={config?.rewardSlotColor ?? textColor}
                     strokeWidth={2}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    style={{ opacity: rewardFilled ? 1 : 0.5 }}
                     dangerouslySetInnerHTML={{ __html: rewardPaths }}
                   />
                 )}
@@ -1160,6 +1233,7 @@ function StampGridOverlay({
           // Empty slot — frosted glass effect
           const emptyNumScale = config?.emptyNumberScale ?? 0.35
           const emptyNumColor = config?.emptyNumberColor ?? textColor
+          const slotOpacity = config?.emptySlotOpacity ?? 0.35
           return (
             <div
               key={i}
@@ -1169,7 +1243,7 @@ function StampGridOverlay({
                 borderRadius,
                 overflow: "hidden",
                 border: `1.5px dashed ${secondaryColor}40`,
-                backgroundColor: `${primaryColor}25`,
+                backgroundColor: config?.emptySlotBg === "transparent" ? "transparent" : (config?.emptySlotBg ?? `${primaryColor}25`),
                 backdropFilter: "blur(2px)",
                 display: "flex",
                 alignItems: "center",
@@ -1177,7 +1251,7 @@ function StampGridOverlay({
                 fontSize: slotSize * emptyNumScale,
                 fontWeight: 500,
                 color: emptyNumColor,
-                opacity: 0.35,
+                opacity: slotOpacity,
               }}
             >
               {customEmptyIconUrl ? (
@@ -1197,7 +1271,7 @@ function StampGridOverlay({
                   height={slotSize * iconScale}
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke={textColor}
+                  stroke={config?.emptySlotColor ?? textColor}
                   strokeWidth={2}
                   strokeLinecap="round"
                   strokeLinejoin="round"

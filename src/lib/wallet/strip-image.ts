@@ -349,6 +349,11 @@ function buildStampSlotSvg(opts: {
   stampIcon?: string
   emptyNumberColor?: string | null
   emptyNumberScale?: number
+  emptySlotOpacity?: number
+  emptySlotColor?: string | null
+  emptySlotBg?: string | null
+  rewardSlotColor?: string | null
+  rewardSlotBg?: string | null
 }): string {
   const { x, y, size, slotIndex, currentVisits, isRewardSlot, hasReward, iconSvgPaths, rewardIcon, stampShape, filledStyle, stampIconScale, primaryColor, secondaryColor, textColor, customStampIconDataUri, customRewardIconDataUri, customEmptyIconDataUri, useUniformIcon, stampIcon } = opts
   const isFilled = slotIndex < currentVisits
@@ -382,38 +387,80 @@ function buildStampSlotSvg(opts: {
   if (isRewardSlot) {
     const isFilled = slotIndex < currentVisits
     const rewardFilled = hasReward || isFilled
-    const rewardBorderColor = hasReward ? "#d4a017" : secondaryColor
-    const rewardBorderOpacity = rewardFilled ? "0.7" : "0.3"
-    const rewardBorderWidth = hasReward ? "3" : "2"
-    const bgFill = hasReward ? `${rewardBorderColor}20` : rewardFilled ? secondaryColor : `${primaryColor}60`
+    const rBg = opts.rewardSlotBg === "transparent" ? "none" : (opts.rewardSlotBg ?? secondaryColor)
+    const rStroke = opts.rewardSlotColor ?? primaryColor
+    const emptyOpacity = opts.emptySlotOpacity ?? 0.35
+    const iconPad = innerSize * (1 - stampIconScale) / 2
+    const iconSize = innerSize * stampIconScale
 
-    // Determine the shape border for reward
-    let rewardShape: string
+    if (rewardFilled) {
+      // Filled reward slot — same styles as filled stamps
+      if (filledStyle === "solid") {
+        let solidShape: string
+        switch (stampShape) {
+          case "square":
+            solidShape = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" fill="${rBg}" />`
+            break
+          case "rounded-square":
+            solidShape = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" rx="${innerSize * 0.15}" fill="${rBg}" />`
+            break
+          case "circle":
+          default:
+            solidShape = `<circle cx="${cx}" cy="${cy}" r="${innerSize / 2}" fill="${rBg}" />`
+            break
+        }
+        const checkSize = innerSize * 0.35
+        return `<g>${solidShape}<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${checkSize}" fill="${rStroke}" font-weight="bold">\u2713</text></g>`
+      }
+
+      // icon or icon-with-border
+      let shapeBg: string
+      switch (stampShape) {
+        case "square":
+          shapeBg = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" fill="${rBg}" />`
+          break
+        case "rounded-square":
+          shapeBg = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" rx="${innerSize * 0.15}" fill="${rBg}" />`
+          break
+        case "circle":
+        default:
+          shapeBg = `<circle cx="${cx}" cy="${cy}" r="${innerSize / 2}" fill="${rBg}" />`
+          break
+      }
+      let rewardIconContent: string
+      if (customRewardIconDataUri) {
+        rewardIconContent = `<image href="${customRewardIconDataUri}" x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" clip-path="url(#${clipId})" />`
+      } else {
+        const rewardIconPaths = useUniformIcon && stampIcon ? getStampIconPaths(stampIcon) : getRewardIconPaths(rewardIcon)
+        rewardIconContent = `<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${rStroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${rewardIconPaths}</svg>`
+      }
+      let content = `${clipPath}<g clip-path="url(#${clipId})">${shapeBg}${rewardIconContent}</g>`
+      return `<g>${content}</g>`
+    }
+
+    // Empty reward slot — matches empty slot style with reward icon
+    const emptyBg = opts.rewardSlotBg === "transparent" ? "none" : (opts.rewardSlotBg ?? `${primaryColor}25`)
+    let emptyShape: string
     switch (stampShape) {
       case "square":
-        rewardShape = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" fill="${bgFill}" stroke="${rewardBorderColor}" stroke-width="${rewardBorderWidth}" opacity="${rewardBorderOpacity}" />`
+        emptyShape = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" fill="${emptyBg}" opacity="${emptyOpacity}" />`
         break
       case "rounded-square":
-        rewardShape = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" rx="${innerSize * 0.15}" fill="${bgFill}" stroke="${rewardBorderColor}" stroke-width="${rewardBorderWidth}" opacity="${rewardBorderOpacity}" />`
+        emptyShape = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" rx="${innerSize * 0.15}" fill="${emptyBg}" opacity="${emptyOpacity}" />`
         break
       case "circle":
       default:
-        rewardShape = `<circle cx="${cx}" cy="${cy}" r="${innerSize / 2}" fill="${bgFill}" stroke="${rewardBorderColor}" stroke-width="${rewardBorderWidth}" opacity="${rewardBorderOpacity}" />`
+        emptyShape = `<circle cx="${cx}" cy="${cy}" r="${innerSize / 2}" fill="${emptyBg}" opacity="${emptyOpacity}" />`
         break
     }
-
-    const iconPad = innerSize * (1 - stampIconScale) / 2
-    const iconSize = innerSize * stampIconScale
-    const iconOpacity = rewardFilled ? "1" : "0.5"
     let rewardIconContent: string
     if (customRewardIconDataUri) {
-      rewardIconContent = `<image href="${customRewardIconDataUri}" x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" opacity="${iconOpacity}" clip-path="url(#${clipId})" />`
+      rewardIconContent = `<image href="${customRewardIconDataUri}" x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" opacity="${emptyOpacity}" clip-path="url(#${clipId})" />`
     } else {
       const rewardIconPaths = useUniformIcon && stampIcon ? getStampIconPaths(stampIcon) : getRewardIconPaths(rewardIcon)
-      const strokeColor = rewardFilled ? primaryColor : textColor
-      rewardIconContent = `<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="${iconOpacity}">${rewardIconPaths}</svg>`
+      rewardIconContent = `<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${opts.rewardSlotColor ?? textColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="${emptyOpacity}">${rewardIconPaths}</svg>`
     }
-    return `<g>${clipPath}${rewardShape}${rewardIconContent}</g>`
+    return `<g>${clipPath}${emptyShape}${rewardIconContent}</g>`
   }
 
   // Filled stamp
@@ -468,31 +515,34 @@ function buildStampSlotSvg(opts: {
   // Empty stamp — shape outline with visit number
   const emptyNumScale = opts.emptyNumberScale ?? 0.35
   const emptyNumColor = opts.emptyNumberColor ?? textColor
+  const emptyOpacity = opts.emptySlotOpacity ?? 0.35
+  const emptyBg = opts.emptySlotBg === "transparent" ? "none" : (opts.emptySlotBg ?? `${primaryColor}25`)
+  const emptyIconStroke = opts.emptySlotColor ?? textColor
   const numSize = innerSize * emptyNumScale
   let emptyShape: string
   switch (stampShape) {
     case "square":
-      emptyShape = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" fill="${primaryColor}40" stroke="${secondaryColor}" stroke-width="1.5" opacity="0.35" />`
+      emptyShape = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" fill="${emptyBg}" stroke="${secondaryColor}" stroke-width="1.5" stroke-dasharray="4,3" opacity="${emptyOpacity}" />`
       break
     case "rounded-square":
-      emptyShape = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" rx="${innerSize * 0.15}" fill="${primaryColor}40" stroke="${secondaryColor}" stroke-width="1.5" opacity="0.35" />`
+      emptyShape = `<rect x="${x + padding}" y="${y + padding}" width="${innerSize}" height="${innerSize}" rx="${innerSize * 0.15}" fill="${emptyBg}" stroke="${secondaryColor}" stroke-width="1.5" stroke-dasharray="4,3" opacity="${emptyOpacity}" />`
       break
     case "circle":
     default:
-      emptyShape = `<circle cx="${cx}" cy="${cy}" r="${innerSize / 2}" fill="${primaryColor}40" stroke="${secondaryColor}" stroke-width="1.5" opacity="0.35" />`
+      emptyShape = `<circle cx="${cx}" cy="${cy}" r="${innerSize / 2}" fill="${emptyBg}" stroke="${secondaryColor}" stroke-width="1.5" stroke-dasharray="4,3" opacity="${emptyOpacity}" />`
       break
   }
 
   if (customEmptyIconDataUri) {
     const iconPad = innerSize * (1 - stampIconScale) / 2
     const iconSize = innerSize * stampIconScale
-    return `<g>${clipPath}${emptyShape}<image href="${customEmptyIconDataUri}" x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" opacity="0.35" clip-path="url(#${clipId})" /></g>`
+    return `<g>${clipPath}${emptyShape}<image href="${customEmptyIconDataUri}" x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" opacity="${emptyOpacity}" clip-path="url(#${clipId})" /></g>`
   }
   if (useUniformIcon && stampIcon) {
     const iconPad = innerSize * (1 - stampIconScale) / 2
     const iconSize = innerSize * stampIconScale
     const uniformPaths = getStampIconPaths(stampIcon)
-    return `<g>${clipPath}${emptyShape}<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${textColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">${uniformPaths}</svg></g>`
+    return `<g>${clipPath}${emptyShape}<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${emptyIconStroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="${emptyOpacity}">${uniformPaths}</svg></g>`
   }
   return `<g>${emptyShape}<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${numSize}" font-family="system-ui, sans-serif" font-weight="500" fill="${emptyNumColor}" opacity="0.5">${slotIndex + 1}</text></g>`
 }
@@ -585,6 +635,11 @@ export async function generateStampGridImage(opts: {
           stampIcon: config.stampIcon,
           emptyNumberColor: config.emptyNumberColor,
           emptyNumberScale: config.emptyNumberScale,
+          emptySlotOpacity: config.emptySlotOpacity,
+          emptySlotColor: config.emptySlotColor,
+          emptySlotBg: config.emptySlotBg,
+          rewardSlotColor: config.rewardSlotColor,
+          rewardSlotBg: config.rewardSlotBg,
         })
       )
     }

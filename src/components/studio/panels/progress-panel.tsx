@@ -593,6 +593,79 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                 </div>
               )}
 
+              {/* Reward Slot Icon Color */}
+              <SectionHeader>Reward Slot Color</SectionHeader>
+              <ColorRow
+                label="Icon Color"
+                value={stampGridConfig.rewardSlotColor ?? wallet.stripColor1 ?? wallet.primaryColor}
+                onChange={(v) => updateStampGridConfig({ rewardSlotColor: v })}
+              />
+              {stampGridConfig.rewardSlotColor && (
+                <button
+                  onClick={() => updateStampGridConfig({ rewardSlotColor: null })}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: 6,
+                    border: "1px solid var(--border)",
+                    backgroundColor: "transparent",
+                    cursor: "pointer",
+                    fontSize: 10,
+                    color: "var(--muted-foreground)",
+                    marginBottom: 8,
+                  }}
+                >
+                  Reset to default
+                </button>
+              )}
+              {stampGridConfig.rewardSlotBg !== "transparent" && (
+                <ColorRow
+                  label="Icon Fill"
+                  value={stampGridConfig.rewardSlotBg ?? effectiveStampColor}
+                  onChange={(v) => updateStampGridConfig({ rewardSlotBg: v })}
+                />
+              )}
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  cursor: "pointer",
+                  padding: "8px 10px",
+                  borderRadius: 6,
+                  border: `1.5px solid ${stampGridConfig.rewardSlotBg === "transparent" ? "var(--primary)" : "var(--border)"}`,
+                  backgroundColor: stampGridConfig.rewardSlotBg === "transparent" ? "var(--accent)" : "transparent",
+                  marginTop: stampGridConfig.rewardSlotBg === "transparent" ? 0 : 4,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={stampGridConfig.rewardSlotBg === "transparent"}
+                  onChange={(e) => updateStampGridConfig({ rewardSlotBg: e.target.checked ? "transparent" : null })}
+                  style={{ accentColor: "var(--primary)", width: 14, height: 14 }}
+                />
+                <span style={{ fontSize: 12, color: "var(--foreground)" }}>Transparent</span>
+              </label>
+
+              {/* Unfilled Slot Opacity — shared by empty + reward when not filled */}
+              <SectionHeader>Unfilled Opacity</SectionHeader>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input
+                  type="range"
+                  min={0.1}
+                  max={1}
+                  step={0.05}
+                  value={stampGridConfig.emptySlotOpacity ?? 0.35}
+                  onChange={(e) => updateStampGridConfig({ emptySlotOpacity: parseFloat(e.target.value) })}
+                  style={{ flex: 1, accentColor: "var(--primary)" }}
+                />
+                <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace", minWidth: 32, textAlign: "right" }}>
+                  {Math.round((stampGridConfig.emptySlotOpacity ?? 0.35) * 100)}%
+                </span>
+              </div>
+              <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 4, marginBottom: 4 }}>
+                Applies to empty and unfilled reward slots.
+              </div>
+
               {/* Empty Slot Icon */}
               <SectionHeader>Empty Slot Icon</SectionHeader>
               <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginBottom: 8 }}>
@@ -608,6 +681,63 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                 onDelete={deleteEmptyIcon}
                 onUrlChange={(url) => updateStampGridConfig({ customEmptyIconUrl: url })}
               />
+
+              {/* Empty Slot Color */}
+              <SectionHeader>Empty Slot Color</SectionHeader>
+              {(stampGridConfig.customEmptyIconUrl || stampGridConfig.useUniformIcon) && (
+                <>
+                  <ColorRow
+                    label="Icon Color"
+                    value={stampGridConfig.emptySlotColor ?? wallet.textColor}
+                    onChange={(v) => updateStampGridConfig({ emptySlotColor: v })}
+                  />
+                  {stampGridConfig.emptySlotColor && (
+                    <button
+                      onClick={() => updateStampGridConfig({ emptySlotColor: null })}
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: 6,
+                        border: "1px solid var(--border)",
+                        backgroundColor: "transparent",
+                        cursor: "pointer",
+                        fontSize: 10,
+                        color: "var(--muted-foreground)",
+                        marginBottom: 8,
+                      }}
+                    >
+                      Reset to text color
+                    </button>
+                  )}
+                </>
+              )}
+              {stampGridConfig.emptySlotBg !== "transparent" && (
+                <ColorRow
+                  label="Icon Fill"
+                  value={stampGridConfig.emptySlotBg ?? wallet.stripColor1 ?? wallet.primaryColor}
+                  onChange={(v) => updateStampGridConfig({ emptySlotBg: v })}
+                />
+              )}
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  cursor: "pointer",
+                  padding: "8px 10px",
+                  borderRadius: 6,
+                  border: `1.5px solid ${stampGridConfig.emptySlotBg === "transparent" ? "var(--primary)" : "var(--border)"}`,
+                  backgroundColor: stampGridConfig.emptySlotBg === "transparent" ? "var(--accent)" : "transparent",
+                  marginTop: stampGridConfig.emptySlotBg === "transparent" ? 0 : 4,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={stampGridConfig.emptySlotBg === "transparent"}
+                  onChange={(e) => updateStampGridConfig({ emptySlotBg: e.target.checked ? "transparent" : null })}
+                  style={{ accentColor: "var(--primary)", width: 14, height: 14 }}
+                />
+                <span style={{ fontSize: 12, color: "var(--foreground)" }}>Transparent</span>
+              </label>
 
               {/* Empty slot number customization — only when showing numbers (no custom empty icon) */}
               {!stampGridConfig.customEmptyIconUrl && (
