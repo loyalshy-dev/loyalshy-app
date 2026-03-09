@@ -325,71 +325,62 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
             )}
 
             {/* Show platform-specific or both wallet buttons */}
-            {showBothPlatforms ? (
-              <div className="grid grid-cols-2 gap-3">
+            {isRequestingPass ? (
+              <div className="flex items-center justify-center h-12">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" aria-hidden="true" />
+                <span className="ml-2 text-sm text-muted-foreground">Adding to wallet...</span>
+              </div>
+            ) : showBothPlatforms ? (
+              <div className="flex items-center justify-center gap-3">
                 <button
                   onClick={() => handleAddToWallet("apple")}
                   disabled={isRequestingPass}
-                  className="flex items-center justify-center gap-2 h-12 rounded-lg text-[15px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: brandColor,
-                    color: textOnBrand,
-                  }}
+                  className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Add to Apple Wallet"
                 >
-                  {isRequestingPass ? (
-                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <>
-                      <AppleIcon className="w-5 h-5" aria-hidden="true" />
-                      Apple Wallet
-                    </>
-                  )}
+                  <Image
+                    src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg"
+                    alt="Add to Apple Wallet"
+                    width={156}
+                    height={48}
+                    className="h-12 w-auto"
+                  />
                 </button>
                 <button
                   onClick={() => handleAddToWallet("google")}
                   disabled={isRequestingPass}
-                  className="flex items-center justify-center gap-2 h-12 rounded-lg text-[15px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: brandColor,
-                    color: textOnBrand,
-                  }}
+                  className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Add to Google Wallet"
                 >
-                  {isRequestingPass ? (
-                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <>
-                      <GoogleWalletIcon className="w-5 h-5" aria-hidden="true" />
-                      Google Wallet
-                    </>
-                  )}
+                  <Image
+                    src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg"
+                    alt="Add to Google Wallet"
+                    width={176}
+                    height={48}
+                    className="h-12 w-auto"
+                  />
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => handleAddToWallet(platform)}
-                disabled={isRequestingPass}
-                className="flex w-full items-center justify-center gap-2 h-12 rounded-lg text-[15px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: brandColor,
-                  color: textOnBrand,
-                }}
-              >
-                {isRequestingPass ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
-                    Adding to wallet...
-                  </>
-                ) : (
-                  <>
-                    {platform === "apple" ? (
-                      <AppleIcon className="w-5 h-5" aria-hidden="true" />
-                    ) : (
-                      <GoogleWalletIcon className="w-5 h-5" aria-hidden="true" />
-                    )}
-                    Add to {platform === "apple" ? "Apple" : "Google"} Wallet
-                  </>
-                )}
-              </button>
+              <div className="flex justify-center">
+                <button
+                  onClick={() => handleAddToWallet(platform)}
+                  disabled={isRequestingPass}
+                  className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label={`Add to ${platform === "apple" ? "Apple" : "Google"} Wallet`}
+                >
+                  <Image
+                    src={platform === "apple"
+                      ? "/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg"
+                      : "/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg"
+                    }
+                    alt={`Add to ${platform === "apple" ? "Apple" : "Google"} Wallet`}
+                    width={platform === "apple" ? 156 : 176}
+                    height={48}
+                    className="h-12 w-auto"
+                  />
+                </button>
+              </div>
             )}
 
             {/* Continue without wallet */}
@@ -713,30 +704,3 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
   )
 }
 
-// --- SVG Icons -----------------------------------------------
-
-function AppleIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-    </svg>
-  )
-}
-
-function GoogleWalletIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M3 7c0-1.1.9-2 2-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7zm2 0v10h14V7H5zm2 2h10v2H7V9zm0 4h7v2H7v-2z" />
-    </svg>
-  )
-}
