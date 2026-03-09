@@ -60,6 +60,7 @@ type SettingsViewProps = {
   pendingInvitations: PendingInvitation[]
   activeTab: string
   billingData: BillingData | null
+  currentUserId: string
 }
 
 export function SettingsView({
@@ -68,6 +69,7 @@ export function SettingsView({
   pendingInvitations,
   activeTab,
   billingData,
+  currentUserId,
 }: SettingsViewProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -132,6 +134,7 @@ export function SettingsView({
           organization={organization}
           members={members}
           pendingInvitations={pendingInvitations}
+          currentUserId={currentUserId}
         />
       )}
       {currentTab === "billing" && (

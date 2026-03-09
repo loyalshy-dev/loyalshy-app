@@ -38,6 +38,19 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     return { error: "An invitation has already been sent to this email" }
   }
 
+  // Cap pending invitations at 50 per organization
+  const pendingCount = await db.staffInvitation.count({
+    where: {
+      organizationId: parsed.organizationId,
+      accepted: false,
+      expiresAt: { gt: new Date() },
+    },
+  })
+
+  if (pendingCount >= 50) {
+    return { error: "Too many pending invitations. Cancel some before sending new ones." }
+  }
+
   // Check if user is already a member of this organization
   const org = await db.organization.findUnique({
     where: { id: parsed.organizationId },
@@ -68,21 +81,57 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     },
   })
 
-  // Dispatch invitation email via Trigger.dev
+  // Dispatch invitation email
   const inviteUrl = `${process.env.BETTER_AUTH_URL}/invite/${token}`
+  const organizationName = org?.name ?? "An organization"
 
-  import("@trigger.dev/sdk")
-    .then(({ tasks }) =>
-      tasks.trigger("send-invitation-email", {
-        email: parsed.email,
-        organizationName: org?.name ?? "An organization",
-        role: parsed.role,
-        inviteUrl,
-      })
-    )
-    .catch((err: unknown) => console.error("Email dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
+  await sendInvitationEmail({
+    email: parsed.email,
+    organizationName,
+    role: parsed.role,
+    inviteUrl,
+  })
 
   return { success: true, invitationId: invitation.id }
+}
+
+/** Sends the invitation email via Trigger.dev or falls back to direct Resend. */
+export async function sendInvitationEmail(payload: {
+  email: string
+  organizationName: string
+  role: "owner" | "staff"
+  inviteUrl: string
+}) {
+  if (process.env.TRIGGER_SECRET_KEY) {
+    const { tasks } = await import("@trigger.dev/sdk")
+    await tasks.trigger("send-invitation-email", payload)
+  } else {
+    const { Resend } = await import("resend")
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    const { getEmailFrom } = await import("@/lib/email-templates")
+
+    const roleLabel = payload.role === "owner" ? "an owner" : "a staff member"
+
+    await resend.emails.send({
+      from: getEmailFrom(),
+      to: payload.email,
+      subject: `You've been invited to ${payload.organizationName} on Loyalshy`,
+      html: `
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">
+          <h2 style="color:#171717;font-size:24px;margin-bottom:8px;">You've been invited!</h2>
+          <p style="color:#525252;font-size:15px;line-height:1.6;">
+            <strong>${payload.organizationName}</strong> has invited you to join their team as ${roleLabel}.
+          </p>
+          <a href="${payload.inviteUrl}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;margin:16px 0;">
+            Accept Invitation
+          </a>
+          <p style="color:#a3a3a3;font-size:13px;margin-top:24px;">This invitation expires in 7 days.</p>
+          <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
+          <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital Wallet Passes</p>
+        </div>
+      `,
+    })
+  }
 }
 
 // ─── Validate Invitation Token ──────────────────────────────

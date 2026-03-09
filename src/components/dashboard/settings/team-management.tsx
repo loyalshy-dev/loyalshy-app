@@ -14,6 +14,7 @@ import {
   Trash2,
   RefreshCw,
   X,
+  Check,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -47,6 +48,7 @@ import {
 import {
   inviteTeamMember,
   removeTeamMember,
+  changeTeamMemberRole,
   cancelInvitation,
   resendInvitation,
 } from "@/server/org-settings-actions"
@@ -97,10 +99,12 @@ export function TeamManagement({
   organization,
   members,
   pendingInvitations,
+  currentUserId,
 }: {
   organization: Organization
   members: Member[]
   pendingInvitations: PendingInvitation[]
+  currentUserId: string
 }) {
   const [isPending, startTransition] = useTransition()
   const [inviteOpen, setInviteOpen] = useState(false)
@@ -173,6 +177,18 @@ export function TeamManagement({
     })
   }
 
+  function handleChangeRole(member: Member, newRole: "owner" | "member") {
+    startTransition(async () => {
+      const result = await changeTeamMemberRole(organization.id, member.id, newRole)
+      if ("error" in result) {
+        toast.error(String(result.error))
+      } else {
+        const label = newRole === "owner" ? "Owner" : "Staff"
+        toast.success(`${member.user.name} is now ${label}`)
+      }
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Team Members */}
@@ -205,6 +221,9 @@ export function TeamManagement({
                 <div>
                   <p className="text-sm font-medium leading-none">
                     {member.user.name}
+                    {member.user.id === currentUserId && (
+                      <span className="ml-1.5 text-xs text-muted-foreground font-normal">(you)</span>
+                    )}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {member.user.email}
@@ -226,7 +245,7 @@ export function TeamManagement({
                 <p className="text-xs text-muted-foreground hidden sm:block w-28 text-right">
                   Joined {formatDistanceToNow(new Date(member.createdAt), { addSuffix: true })}
                 </p>
-                {member.role !== "owner" && (
+                {member.user.id !== currentUserId && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0" aria-label="Member actions">
@@ -234,6 +253,21 @@ export function TeamManagement({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      {member.role === "owner" ? (
+                        <DropdownMenuItem
+                          onClick={() => handleChangeRole(member, "member")}
+                        >
+                          <Shield className="mr-2 h-3.5 w-3.5" />
+                          Demote to Staff
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={() => handleChangeRole(member, "owner")}
+                        >
+                          <ShieldCheck className="mr-2 h-3.5 w-3.5" />
+                          Promote to Owner
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
                         onClick={() => setRemoveMember(member)}
@@ -312,7 +346,7 @@ export function TeamManagement({
 
       {/* Invite Dialog */}
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="rounded-4xl sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Invite team member</DialogTitle>
             <DialogDescription>
@@ -326,6 +360,7 @@ export function TeamManagement({
                 id="invite-email"
                 type="email"
                 placeholder="colleague@example.com"
+                className="rounded-2xl"
                 aria-invalid={!!errors.email}
                 aria-describedby={errors.email ? "invite-email-error" : undefined}
                 {...register("email", { required: "Email is required" })}
@@ -336,46 +371,72 @@ export function TeamManagement({
             </div>
             <div className="space-y-2">
               <Label>Role</Label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setValue("role", "staff")}
+              <div className="grid gap-2">
+                <Card
+                  asChild
                   className={`
-                    flex flex-col items-center gap-1.5 rounded-lg border p-3 text-center transition-colors
-                    ${selectedRole === "staff" ? "border-foreground bg-accent" : "border-border hover:border-foreground/30"}
+                    cursor-pointer transition-colors
+                    ${selectedRole === "staff" ? "bg-accent" : "hover:bg-accent/50"}
                   `}
                 >
-                  <Shield className="h-5 w-5" />
-                  <span className="text-sm font-medium">Staff</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    Register visits & redeem rewards
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setValue("role", "owner")}
+                  <button
+                    type="button"
+                    onClick={() => setValue("role", "staff")}
+                    className="flex items-start gap-3 px-4 py-3.5 text-left"
+                  >
+                    <Shield className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="flex-1 space-y-1">
+                      <span className="text-sm font-medium">Staff</span>
+                      <ul className="space-y-0.5 text-[11px] text-muted-foreground">
+                        <li>Register contacts & scan passes</li>
+                        <li>Record stamps, check-ins & redemptions</li>
+                        <li>View contact history</li>
+                      </ul>
+                    </div>
+                    {selectedRole === "staff" && (
+                      <Check className="mt-0.5 h-4 w-4 shrink-0" />
+                    )}
+                  </button>
+                </Card>
+                <Card
+                  asChild
                   className={`
-                    flex flex-col items-center gap-1.5 rounded-lg border p-3 text-center transition-colors
-                    ${selectedRole === "owner" ? "border-foreground bg-accent" : "border-border hover:border-foreground/30"}
+                    cursor-pointer transition-colors
+                    ${selectedRole === "owner" ? "bg-accent" : "hover:bg-accent/50"}
                   `}
                 >
-                  <ShieldCheck className="h-5 w-5" />
-                  <span className="text-sm font-medium">Owner</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    Full access including settings
-                  </span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setValue("role", "owner")}
+                    className="flex items-start gap-3 px-4 py-3.5 text-left"
+                  >
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="flex-1 space-y-1">
+                      <span className="text-sm font-medium">Owner</span>
+                      <ul className="space-y-0.5 text-[11px] text-muted-foreground">
+                        <li>Everything Staff can do</li>
+                        <li>Manage programs, design & settings</li>
+                        <li>Invite & remove team members</li>
+                        <li>Manage billing & subscription</li>
+                      </ul>
+                    </div>
+                    {selectedRole === "owner" && (
+                      <Check className="mt-0.5 h-4 w-4 shrink-0" />
+                    )}
+                  </button>
+                </Card>
               </div>
             </div>
             <DialogFooter>
               <Button
                 type="button"
                 variant="ghost"
+                className="rounded-2xl"
                 onClick={() => setInviteOpen(false)}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" className="rounded-2xl" disabled={isPending}>
                 {isPending ? "Sending..." : "Send invitation"}
               </Button>
             </DialogFooter>

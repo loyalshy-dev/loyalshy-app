@@ -30,6 +30,7 @@ export function InviteForm({ token }: { token: string }) {
   const [error, setError] = useState<string | null>(null)
   const [isValidating, setIsValidating] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [mode, setMode] = useState<"signup" | "signin">("signup")
   const [name, setName] = useState("")
   const [password, setPassword] = useState("")
 
@@ -46,7 +47,7 @@ export function InviteForm({ token }: { token: string }) {
     validate()
   }, [token])
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
     if (!invitation) return
     setIsSubmitting(true)
@@ -65,6 +66,38 @@ export function InviteForm({ token }: { token: string }) {
     }
 
     // Accept the invitation (link user to organization)
+    const acceptResult = await acceptStaffInvitation({
+      token,
+      userId: data.user.id,
+    })
+
+    if (acceptResult.error) {
+      toast.error(acceptResult.error)
+      setIsSubmitting(false)
+      return
+    }
+
+    toast.success(`Welcome to ${invitation.organizationName}!`)
+    router.push("/dashboard")
+    router.refresh()
+  }
+
+  async function handleSignIn(e: React.FormEvent) {
+    e.preventDefault()
+    if (!invitation) return
+    setIsSubmitting(true)
+
+    const { data, error: signInError } = await authClient.signIn.email({
+      email: invitation.email,
+      password,
+    })
+
+    if (signInError || !data) {
+      toast.error(signInError?.message || "Invalid credentials")
+      setIsSubmitting(false)
+      return
+    }
+
     const acceptResult = await acceptStaffInvitation({
       token,
       userId: data.user.id,
@@ -117,50 +150,102 @@ export function InviteForm({ token }: { token: string }) {
         <CardDescription>
           You&apos;ve been invited as{" "}
           {invitation.role === "OWNER" ? "an owner" : "a staff member"}.
-          Create your account to get started.
+          {mode === "signup"
+            ? " Create your account to get started."
+            : " Sign in to accept the invitation."}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={invitation.email}
-              disabled
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="name">Full name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Jane Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              autoComplete="name"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="At least 8 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting && <LoadingSpinner />}
-            Create account & join
-          </Button>
-        </form>
+        {mode === "signup" ? (
+          <form onSubmit={handleSignUp} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={invitation.email}
+                disabled
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">Full name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Jane Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete="name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="At least 8 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                autoComplete="new-password"
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting && <LoadingSpinner />}
+              Create account & join
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              Already have an account?{" "}
+              <button
+                type="button"
+                className="text-foreground underline underline-offset-2 hover:no-underline"
+                onClick={() => { setPassword(""); setMode("signin") }}
+              >
+                Sign in instead
+              </button>
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={handleSignIn} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={invitation.email}
+                disabled
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting && <LoadingSpinner />}
+              Sign in & join
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <button
+                type="button"
+                className="text-foreground underline underline-offset-2 hover:no-underline"
+                onClick={() => { setPassword(""); setMode("signup") }}
+              >
+                Create one
+              </button>
+            </p>
+          </form>
+        )}
       </CardContent>
     </Card>
   )

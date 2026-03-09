@@ -1452,18 +1452,77 @@ export async function inviteTeamMember(input: {
 }
 
 export async function removeTeamMember(organizationId: string, memberId: string) {
-  await assertOrganizationRole(organizationId, "owner")
+  const { session } = await assertOrganizationRole(organizationId, "owner")
 
   const member = await db.member.findUnique({
     where: { id: memberId },
-    select: { organizationId: true, userId: true },
+    select: { organizationId: true, userId: true, role: true },
   })
 
   if (!member || member.organizationId !== organizationId) {
     return { error: "Member not found" }
   }
 
+  // Prevent self-removal
+  if (member.userId === session.user.id) {
+    return { error: "You cannot remove yourself from the organization" }
+  }
+
+  // Prevent removing the last owner
+  if (member.role === "owner") {
+    const ownerCount = await db.member.count({
+      where: { organizationId, role: "owner" },
+    })
+    if (ownerCount <= 1) {
+      return { error: "Cannot remove the last owner. Transfer ownership first." }
+    }
+  }
+
   await db.member.delete({ where: { id: memberId } })
+
+  revalidatePath("/dashboard/settings")
+  return { success: true }
+}
+
+export async function changeTeamMemberRole(
+  organizationId: string,
+  memberId: string,
+  newRole: "owner" | "member"
+) {
+  const { session } = await assertOrganizationRole(organizationId, "owner")
+
+  const member = await db.member.findUnique({
+    where: { id: memberId },
+    select: { organizationId: true, userId: true, role: true },
+  })
+
+  if (!member || member.organizationId !== organizationId) {
+    return { error: "Member not found" }
+  }
+
+  if (member.role === newRole) {
+    return { error: "Member already has this role" }
+  }
+
+  // Prevent demoting yourself
+  if (member.userId === session.user.id) {
+    return { error: "You cannot change your own role" }
+  }
+
+  // Prevent demoting the last owner
+  if (member.role === "owner" && newRole === "member") {
+    const ownerCount = await db.member.count({
+      where: { organizationId, role: "owner" },
+    })
+    if (ownerCount <= 1) {
+      return { error: "Cannot demote the last owner. Promote another member first." }
+    }
+  }
+
+  await db.member.update({
+    where: { id: memberId },
+    data: { role: newRole },
+  })
 
   revalidatePath("/dashboard/settings")
   return { success: true }
@@ -1492,7 +1551,13 @@ export async function resendInvitation(organizationId: string, invitationId: str
 
   const invitation = await db.staffInvitation.findUnique({
     where: { id: invitationId },
-    select: { organizationId: true, email: true, role: true },
+    select: {
+      organizationId: true,
+      email: true,
+      role: true,
+      token: true,
+      organization: { select: { name: true } },
+    },
   })
 
   if (!invitation || invitation.organizationId !== organizationId) {
@@ -1503,6 +1568,17 @@ export async function resendInvitation(organizationId: string, invitationId: str
   await db.staffInvitation.update({
     where: { id: invitationId },
     data: { expiresAt: addDays(new Date(), 7) },
+  })
+
+  // Re-send the email
+  const { sendInvitationEmail } = await import("@/server/auth-actions")
+  const inviteUrl = `${process.env.BETTER_AUTH_URL}/invite/${invitation.token}`
+
+  await sendInvitationEmail({
+    email: invitation.email,
+    organizationName: invitation.organization.name,
+    role: invitation.role === "OWNER" ? "owner" : "staff",
+    inviteUrl,
   })
 
   revalidatePath("/dashboard/settings")

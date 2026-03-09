@@ -10,7 +10,7 @@ export default async function SettingsPage(props: {
 }) {
   await connection()
   const searchParams = await props.searchParams
-  await assertAuthenticated()
+  const session = await assertAuthenticated()
 
   const organization = await getOrganizationForUser()
   if (!organization) {
@@ -48,6 +48,7 @@ export default async function SettingsPage(props: {
         pendingInvitations={data.pendingInvitations}
         activeTab={activeTab}
         billingData={billingData}
+        currentUserId={session.user.id}
       />
     </div>
   )
