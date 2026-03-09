@@ -7,7 +7,7 @@ import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 
 export type MarketingCard = {
   templateId: string
-  restaurantName: string
+  businessName: string
   currentVisits: number
   totalVisits: number
   rewardDescription: string
@@ -37,7 +37,7 @@ function templateToDesign(template: CardTemplate): WalletPassDesign {
 export const MARKETING_CARDS: MarketingCard[] = [
   {
     templateId: "fine-gold",
-    restaurantName: "Aurum Kitchen",
+    businessName: "Aurum Kitchen",
     currentVisits: 7,
     totalVisits: 10,
     rewardDescription: "Free tasting menu",
@@ -46,7 +46,7 @@ export const MARKETING_CARDS: MarketingCard[] = [
   },
   {
     templateId: "stamp-grid-coffee",
-    restaurantName: "Morning Grounds",
+    businessName: "Morning Grounds",
     currentVisits: 5,
     totalVisits: 8,
     rewardDescription: "Free latte",
@@ -55,7 +55,7 @@ export const MARKETING_CARDS: MarketingCard[] = [
   },
   {
     templateId: "casual-bright",
-    restaurantName: "Sunny Taco",
+    businessName: "Sunny Taco",
     currentVisits: 3,
     totalVisits: 10,
     rewardDescription: "BOGO burrito",
@@ -64,7 +64,7 @@ export const MARKETING_CARDS: MarketingCard[] = [
   },
   {
     templateId: "bar-neon",
-    restaurantName: "Neon Lounge",
+    businessName: "Neon Lounge",
     currentVisits: 9,
     totalVisits: 12,
     rewardDescription: "Free cocktail",
@@ -73,7 +73,7 @@ export const MARKETING_CARDS: MarketingCard[] = [
   },
   {
     templateId: "bakery-sweet",
-    restaurantName: "Miel Bakery",
+    businessName: "Miel Bakery",
     currentVisits: 4,
     totalVisits: 6,
     rewardDescription: "Free croissant",

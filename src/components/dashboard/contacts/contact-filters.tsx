@@ -15,19 +15,19 @@ const programTypeFilters = [
   { value: "MEMBERSHIP", label: "Member", icon: Crown },
 ] as const
 
-type CustomerFiltersProps = {
+type ContactFiltersProps = {
   search: string
   hasReward: string
   programType: string
   totalResults: number
 }
 
-export function CustomerFilters({
+export function ContactFilters({
   search,
   hasReward,
   programType,
   totalResults,
-}: CustomerFiltersProps) {
+}: ContactFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()

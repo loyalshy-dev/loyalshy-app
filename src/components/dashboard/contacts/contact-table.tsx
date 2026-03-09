@@ -18,22 +18,22 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { getCustomerColumns } from "./customer-columns"
-import type { ContactRow as CustomerRow } from "@/server/contact-actions"
+import { getContactColumns } from "./contact-columns"
+import type { ContactRow } from "@/server/contact-actions"
 
-type CustomerTableProps = {
-  customers: CustomerRow[]
+type ContactTableProps = {
+  customers: ContactRow[]
   pageCount: number
   currentPage: number
   total: number
   sort: string
   order: "asc" | "desc"
-  onViewDetail: (customer: CustomerRow) => void
-  onEdit: (customer: CustomerRow) => void
-  onDelete: (customer: CustomerRow) => void
+  onViewDetail: (customer: ContactRow) => void
+  onEdit: (customer: ContactRow) => void
+  onDelete: (customer: ContactRow) => void
 }
 
-export function CustomerTable({
+export function ContactTable({
   customers,
   pageCount,
   currentPage,
@@ -43,7 +43,7 @@ export function CustomerTable({
   onViewDetail,
   onEdit,
   onDelete,
-}: CustomerTableProps) {
+}: ContactTableProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -72,7 +72,7 @@ export function CustomerTable({
     updateParams({ page: page > 1 ? page.toString() : null })
   }
 
-  const columns = getCustomerColumns(
+  const columns = getContactColumns(
     { onViewDetail, onEdit, onDelete }
   )
 

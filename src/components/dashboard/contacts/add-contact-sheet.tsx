@@ -25,12 +25,12 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-type AddCustomerSheetProps = {
+type AddContactSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function AddCustomerSheet({ open, onOpenChange }: AddCustomerSheetProps) {
+export function AddContactSheet({ open, onOpenChange }: AddContactSheetProps) {
   const [isPending, startTransition] = useTransition()
   const formRef = useRef<HTMLFormElement>(null)
 

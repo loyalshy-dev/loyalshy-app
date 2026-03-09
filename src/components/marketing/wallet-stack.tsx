@@ -74,7 +74,7 @@ function LoyaltyCard({
   return (
     <div
       role="img"
-      aria-label={`${card.restaurantName} loyalty card`}
+      aria-label={`${card.businessName} loyalty card`}
       className="absolute left-0 top-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       style={{
         ...style,
@@ -102,7 +102,7 @@ function LoyaltyCard({
         width={cardW}
         height={cardH}
         format="apple"
-        organizationName={card.restaurantName}
+        organizationName={card.businessName}
         currentVisits={card.currentVisits}
         totalVisits={card.totalVisits}
         rewardDescription={card.rewardDescription}
@@ -203,7 +203,7 @@ export function WalletStack({ cards: propCards, designs: propDesigns }: WalletSt
       >
         <div
           role="group"
-          aria-label={`Interactive stack of ${cards.length} example loyalty cards from different restaurants. Click a card to bring it to front.`}
+          aria-label={`Interactive stack of ${cards.length} example loyalty cards from different businesses. Click a card to bring it to front.`}
           className="relative h-full w-full"
         >
           {/* Render back-to-front: cards further back first so front card paints last */}

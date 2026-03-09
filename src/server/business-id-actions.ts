@@ -124,7 +124,7 @@ export async function verifyId(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "ID_VERIFY")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,

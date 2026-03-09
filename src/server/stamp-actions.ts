@@ -642,7 +642,7 @@ export async function registerStamp(
   }
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,

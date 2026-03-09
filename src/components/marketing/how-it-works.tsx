@@ -4,7 +4,7 @@ const steps = [
   {
     number: "01",
     icon: Building2,
-    title: "Set up your restaurant",
+    title: "Set up your business",
     description:
       "Create your account, customize your brand and loyalty program in minutes.",
   },

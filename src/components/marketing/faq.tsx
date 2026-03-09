@@ -12,7 +12,7 @@ const FAQ_ITEMS = [
     id: "how-it-works",
     question: "How does Loyalshy work?",
     answer:
-      "Loyalshy replaces paper punch cards with digital loyalty cards that live in your customers' Apple or Google Wallet. You set up your restaurant, print a QR code, and customers scan it to get their digital pass. Staff register visits from the dashboard, and customers automatically earn rewards.",
+      "Loyalshy replaces paper punch cards with digital loyalty cards that live in your customers' Apple or Google Wallet. You set up your business, print a QR code, and customers scan it to get their digital pass. Staff register visits from the dashboard, and customers automatically earn rewards.",
   },
   {
     id: "devices-supported",
@@ -24,7 +24,7 @@ const FAQ_ITEMS = [
     id: "setup-time",
     question: "How long does setup take?",
     answer:
-      "Most restaurants are up and running in under 5 minutes. Create your account, customize your loyalty program, print your QR code, and you're ready to go.",
+      "Most businesses are up and running in under 5 minutes. Create your account, customize your loyalty program, print your QR code, and you're ready to go.",
   },
   {
     id: "free-trial",
@@ -48,7 +48,7 @@ const FAQ_ITEMS = [
     id: "customization",
     question: "Can I customize the loyalty card design?",
     answer:
-      "Yes! You can upload your logo, set your brand colors, and customize the reward description. Your wallet passes will match your restaurant's identity.",
+      "Yes! You can upload your logo, set your brand colors, and customize the reward description. Your wallet passes will match your business's identity.",
   },
   {
     id: "payment-methods",

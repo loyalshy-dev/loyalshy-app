@@ -1,6 +1,6 @@
 import { Building2 } from "lucide-react"
 
-const RESTAURANTS = [
+const BUSINESSES = [
   { name: "Trattoria Bella", hue: 265 },
   { name: "Sushi Express", hue: 15 },
   { name: "Cafe Lumiere", hue: 145 },
@@ -9,7 +9,7 @@ const RESTAURANTS = [
   { name: "Fern & Root", hue: 160 },
 ] as const
 
-const DOUBLE_RESTAURANTS = [...RESTAURANTS, ...RESTAURANTS]
+const DOUBLE_BUSINESSES = [...BUSINESSES, ...BUSINESSES]
 
 export function SocialProof() {
   return (
@@ -26,7 +26,7 @@ export function SocialProof() {
           className="text-center text-[12px] font-medium uppercase tracking-[0.12em] mb-8"
           style={{ color: "var(--mk-text-dimmed)" }}
         >
-          Trusted by 200+ restaurants worldwide
+          Trusted by 200+ businesses worldwide
         </p>
 
         {/* Marquee container */}
@@ -47,7 +47,7 @@ export function SocialProof() {
             data-mk-marquee
             style={{ animation: "mk-marquee 30s linear infinite" }}
           >
-            {DOUBLE_RESTAURANTS.map((r, i) => (
+            {DOUBLE_BUSINESSES.map((r, i) => (
               <div
                 key={`${r.name}-${i}`}
                 className="flex items-center gap-2 opacity-50"

@@ -3,11 +3,11 @@
 import { useState } from "react"
 import { UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { CustomerTable as ContactTable } from "./customer-table"
-import { CustomerFilters as ContactFilters } from "./customer-filters"
-import { AddCustomerSheet as AddContactSheet } from "./add-customer-sheet"
-import { ContactDetailSheet } from "./customer-detail-sheet"
-import { CustomerEmptyState as ContactEmptyState } from "./customer-empty-state"
+import { ContactTable } from "./contact-table"
+import { ContactFilters } from "./contact-filters"
+import { AddContactSheet } from "./add-contact-sheet"
+import { ContactDetailSheet } from "./contact-detail-sheet"
+import { ContactEmptyState } from "./contact-empty-state"
 import { RegisterVisitDialog as RegisterInteractionDialog } from "@/components/dashboard/register-visit-dialog"
 import type { ContactRow, ContactListResult } from "@/server/contact-actions"
 
@@ -77,7 +77,7 @@ export function ContactsView({
       </div>
 
       {isEmpty ? (
-        <ContactEmptyState onAddCustomer={() => setAddSheetOpen(true)} />
+        <ContactEmptyState onAddContact={() => setAddSheetOpen(true)} />
       ) : (
         <>
           {/* Filters */}

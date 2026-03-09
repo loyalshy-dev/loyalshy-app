@@ -138,7 +138,7 @@ export async function chargeGiftCard(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "GIFT_CHARGE")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,
@@ -224,7 +224,7 @@ export async function refundGiftCard(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "GIFT_REFUND")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,

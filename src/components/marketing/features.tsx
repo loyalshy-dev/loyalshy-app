@@ -29,7 +29,7 @@ const features = [
     icon: Palette,
     title: "Custom Branding",
     description:
-      "Your logo, your colors. Every pass and page matches your restaurant's identity.",
+      "Your logo, your colors. Every pass and page matches your business's identity.",
   },
   {
     icon: QrCode,
@@ -114,7 +114,7 @@ export function Features() {
             className="mt-4 text-[15px] leading-relaxed"
             style={{ color: "var(--mk-text-muted)" }}
           >
-            Built for restaurants that take customer loyalty seriously
+            Built for businesses that take customer loyalty seriously
           </p>
         </div>
 

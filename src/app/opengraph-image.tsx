@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og"
 
 export const runtime = undefined
-export const alt = "Loyalshy — Digital Loyalty Cards for Restaurants"
+export const alt = "Loyalshy — Digital Loyalty Cards for Businesses"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
@@ -60,7 +60,7 @@ export default function OGImage() {
             lineHeight: 1.4,
           }}
         >
-          Digital loyalty cards with Apple &amp; Google Wallet passes for restaurants
+          Digital loyalty cards with Apple &amp; Google Wallet passes for businesses
         </p>
 
         {/* Feature pills */}

@@ -354,7 +354,7 @@ export async function redeemReward(
 
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/rewards")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return { success: true }
 }

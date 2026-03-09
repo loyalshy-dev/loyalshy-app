@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 
 type Filter = "all" | "ACTIVE" | "TRIALING" | "PAST_DUE" | "CANCELED"
 
-type AdminRestaurantFiltersProps = {
+type AdminOrganizationFiltersProps = {
   search: string
   filter: Filter
   total: number
@@ -22,11 +22,11 @@ const filterOptions: { value: Filter; label: string }[] = [
   { value: "CANCELED", label: "Canceled" },
 ]
 
-export function AdminRestaurantFilters({
+export function AdminOrganizationFilters({
   search,
   filter,
   total,
-}: AdminRestaurantFiltersProps) {
+}: AdminOrganizationFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -75,7 +75,7 @@ export function AdminRestaurantFilters({
       <div className="relative w-full sm:w-64">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
         <Input
-          placeholder="Search restaurants..."
+          placeholder="Search organizations..."
           defaultValue={search}
           onChange={(e) => handleSearch(e.target.value)}
           className="pl-8 h-8 text-[13px]"
@@ -111,7 +111,7 @@ export function AdminRestaurantFilters({
       )}
 
       <span className="ml-auto text-xs text-muted-foreground tabular-nums">
-        {total} restaurant{total !== 1 ? "s" : ""}
+        {total} organization{total !== 1 ? "s" : ""}
       </span>
     </div>
   )

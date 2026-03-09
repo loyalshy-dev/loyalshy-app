@@ -5,13 +5,13 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react"
 
 const CAROUSEL_ITEMS = [
-  { id: "1", alt: "Restaurant loyalty program example" },
+  { id: "1", alt: "Business loyalty program example" },
   { id: "2", alt: "Digital wallet pass design" },
   { id: "3", alt: "QR code onboarding flow" },
   { id: "4", alt: "Customer rewards dashboard" },
   { id: "5", alt: "Apple Wallet loyalty card" },
   { id: "6", alt: "Google Wallet pass example" },
-  { id: "7", alt: "Restaurant analytics overview" },
+  { id: "7", alt: "Business analytics overview" },
   { id: "8", alt: "Team management interface" },
 ]
 

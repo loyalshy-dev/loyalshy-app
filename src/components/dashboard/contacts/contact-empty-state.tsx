@@ -4,11 +4,11 @@ import { Users, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 
-type CustomerEmptyStateProps = {
-  onAddCustomer: () => void
+type ContactEmptyStateProps = {
+  onAddContact: () => void
 }
 
-export function CustomerEmptyState({ onAddCustomer }: CustomerEmptyStateProps) {
+export function ContactEmptyState({ onAddContact }: ContactEmptyStateProps) {
   return (
     <Card>
       <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
@@ -20,7 +20,7 @@ export function CustomerEmptyState({ onAddCustomer }: CustomerEmptyStateProps) {
           Add your first customer to start tracking visits and building loyalty.
           They&apos;ll appear here once added.
         </p>
-        <Button size="sm" className="gap-1.5" onClick={onAddCustomer}>
+        <Button size="sm" className="gap-1.5" onClick={onAddContact}>
           <UserPlus className="size-3.5" />
           Add Customer
         </Button>

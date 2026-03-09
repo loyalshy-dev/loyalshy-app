@@ -1,9 +1,9 @@
 import { connection } from "next/server"
 import { assertSuperAdmin } from "@/lib/dal"
 import { getAdminOrganizations } from "@/server/admin-actions"
-import { AdminOrganizationsView } from "@/components/admin/restaurants/admin-restaurants-view"
+import { AdminOrganizationsView } from "@/components/admin/organizations/admin-organizations-view"
 
-export default async function AdminRestaurantsPage({
+export default async function AdminOrganizationsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | undefined>>

@@ -41,7 +41,7 @@ type AdminSidebarProps = {
 const navItems = [
   { label: "Overview", href: "/admin", icon: BarChart3 },
   { label: "Users", href: "/admin/users", icon: Users },
-  { label: "Organizations", href: "/admin/restaurants", icon: Building2 },
+  { label: "Organizations", href: "/admin/organizations", icon: Building2 },
   { label: "Showcase", href: "/admin/showcase", icon: Image },
 ]
 

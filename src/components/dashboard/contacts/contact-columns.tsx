@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import type { ContactRow as CustomerRow } from "@/server/contact-actions"
+import type { ContactRow as ContactRow } from "@/server/contact-actions"
 
 const typeIcons: Record<string, typeof Stamp> = {
   STAMP_CARD: Stamp,
@@ -51,14 +51,14 @@ function getInitials(name: string): string {
 }
 
 type ColumnActions = {
-  onViewDetail: (customer: CustomerRow) => void
-  onEdit: (customer: CustomerRow) => void
-  onDelete: (customer: CustomerRow) => void
+  onViewDetail: (customer: ContactRow) => void
+  onEdit: (customer: ContactRow) => void
+  onDelete: (customer: ContactRow) => void
 }
 
-export function getCustomerColumns(
+export function getContactColumns(
   actions: ColumnActions
-): ColumnDef<CustomerRow>[] {
+): ColumnDef<ContactRow>[] {
   return [
     {
       accessorKey: "fullName",

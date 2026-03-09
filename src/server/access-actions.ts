@@ -154,7 +154,7 @@ export async function grantAccess(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "ACCESS_GRANT")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,
@@ -222,7 +222,7 @@ export async function denyAccess(
   })
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,

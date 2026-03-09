@@ -30,7 +30,7 @@ function JsonLd() {
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
-      "Digital loyalty card SaaS for restaurants. Create Apple and Google Wallet passes, track visits, and reward your best customers.",
+      "Digital loyalty card SaaS for businesses. Create Apple and Google Wallet passes, track visits, and reward your best customers.",
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "EUR",
@@ -73,7 +73,7 @@ function showcaseToMarketing(dbCards: { designData: unknown; metadata: unknown }
 
     cards.push({
       templateId: (d.templateId as string) ?? "",
-      restaurantName: (m.organizationName as string) ?? (m.restaurantName as string) ?? "Organization",
+      businessName: (m.organizationName as string) ?? (m.restaurantName as string) ?? "Organization",
       currentVisits: (m.currentVisits as number) ?? 5,
       totalVisits: (m.totalVisits as number) ?? 10,
       rewardDescription: (m.rewardDescription as string) ?? "Free reward",

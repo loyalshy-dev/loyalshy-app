@@ -167,13 +167,13 @@ export function Testimonials() {
             className="text-3xl sm:text-4xl font-semibold"
             style={{ color: "var(--mk-text)", letterSpacing: "-0.025em" }}
           >
-            Loved by restaurant owners
+            Loved by business owners
           </h2>
           <p
             className="mt-4 text-[15px] leading-relaxed"
             style={{ color: "var(--mk-text-muted)" }}
           >
-            See how restaurants are growing repeat business with Loyalshy
+            See how businesses are growing repeat customers with Loyalshy
           </p>
         </div>
 

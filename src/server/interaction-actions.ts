@@ -176,7 +176,7 @@ export async function redeemCoupon(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "COUPON_REDEEM")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,
@@ -249,7 +249,7 @@ export async function checkInMember(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "CHECK_IN")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,
@@ -326,7 +326,7 @@ export async function earnPoints(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "POINTS_EARN")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,
@@ -429,7 +429,7 @@ export async function redeemPoints(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "POINTS_REDEEM")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,
@@ -519,7 +519,7 @@ export async function usePrepaid(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "PREPAID_USE")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,

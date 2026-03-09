@@ -1,10 +1,10 @@
 import { connection } from "next/server"
 import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
 import { getContacts } from "@/server/contact-actions"
-import { ContactsView as CustomersView } from "@/components/dashboard/customers/customers-view"
+import { ContactsView } from "@/components/dashboard/contacts/contacts-view"
 import { db } from "@/lib/db"
 
-export default async function CustomersPage({
+export default async function ContactsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -46,7 +46,7 @@ export default async function CustomersPage({
   })
 
   return (
-    <CustomersView
+    <ContactsView
       result={result}
       search={search}
       sort={sort}

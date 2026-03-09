@@ -509,7 +509,7 @@ export async function addContact(
     }
   }
 
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
   revalidatePath("/dashboard")
 
   return { success: true, contactId: contact.id }
@@ -592,7 +592,7 @@ export async function updateContact(
     data: { fullName, email: cleanEmail, phone: cleanPhone },
   })
 
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
   revalidatePath("/dashboard")
 
   return { success: true }
@@ -620,7 +620,7 @@ export async function deleteContact(
     data: { deletedAt: new Date() },
   })
 
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
   revalidatePath("/dashboard")
 
   return { success: true }

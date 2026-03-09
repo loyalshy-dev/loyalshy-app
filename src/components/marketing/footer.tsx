@@ -62,7 +62,7 @@ export function MarketingFooter() {
               className="mt-3 text-sm leading-relaxed"
               style={{ color: "oklch(0.45 0.008 285)" }}
             >
-              Digital loyalty cards for modern restaurants.
+              Digital loyalty cards for modern businesses.
             </p>
           </div>
 
@@ -104,7 +104,7 @@ export function MarketingFooter() {
             &copy; 2026 Loyalshy. All rights reserved.
           </p>
           <p className="text-sm" style={{ color: "oklch(0.40 0.008 285)" }}>
-            Built with care for restaurant owners.
+            Built with care for business owners.
           </p>
         </div>
       </div>

@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import type { AdminOrganizationRow } from "@/server/admin-actions"
-import { AdminRestaurantFilters as AdminOrganizationFilters } from "./admin-restaurant-filters"
-import { AdminOrganizationTable } from "./admin-restaurant-table"
-import { AdminOrganizationDetailSheet } from "./admin-restaurant-detail-sheet"
+import { AdminOrganizationFilters } from "./admin-organization-filters"
+import { AdminOrganizationTable } from "./admin-organization-table"
+import { AdminOrganizationDetailSheet } from "./admin-organization-detail-sheet"
 
 type AdminOrganizationsViewProps = {
   organizations: AdminOrganizationRow[]

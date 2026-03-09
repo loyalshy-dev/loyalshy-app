@@ -30,7 +30,7 @@ export function ClosingCTA() {
           className="mt-4 text-[15px] leading-relaxed"
           style={{ color: "var(--mk-text-muted)" }}
         >
-          Join 200+ restaurants using Loyalshy to turn first-time visitors into loyal regulars.
+          Join 200+ businesses using Loyalshy to turn first-time visitors into loyal regulars.
           Set up in 5 minutes, no credit card required.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">

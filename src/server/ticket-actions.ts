@@ -133,7 +133,7 @@ export async function scanTicket(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "TICKET_SCAN")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,
@@ -202,7 +202,7 @@ export async function voidTicket(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "TICKET_VOID")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,

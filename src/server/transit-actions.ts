@@ -125,7 +125,7 @@ export async function transitBoard(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "TRANSIT_BOARD")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,
@@ -201,7 +201,7 @@ export async function transitExit(
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "TRANSIT_EXIT")
 
   revalidatePath("/dashboard")
-  revalidatePath("/dashboard/customers")
+  revalidatePath("/dashboard/contacts")
 
   return {
     success: true,

@@ -99,28 +99,28 @@ export function DetailsPanel({ store }: Props) {
         label="Instagram"
         value={socialLinks.instagram ?? ""}
         onChange={(v) => set("socialLinks", { ...socialLinks, instagram: v || undefined })}
-        placeholder="@yourrestaurant"
+        placeholder="@yourbusiness"
         maxLength={200}
       />
       <TextInput
         label="Facebook"
         value={socialLinks.facebook ?? ""}
         onChange={(v) => set("socialLinks", { ...socialLinks, facebook: v || undefined })}
-        placeholder="facebook.com/yourrestaurant"
+        placeholder="facebook.com/yourbusiness"
         maxLength={200}
       />
       <TextInput
         label="TikTok"
         value={socialLinks.tiktok ?? ""}
         onChange={(v) => set("socialLinks", { ...socialLinks, tiktok: v || undefined })}
-        placeholder="@yourrestaurant"
+        placeholder="@yourbusiness"
         maxLength={200}
       />
       <TextInput
         label="X (Twitter)"
         value={socialLinks.x ?? ""}
         onChange={(v) => set("socialLinks", { ...socialLinks, x: v || undefined })}
-        placeholder="@yourrestaurant"
+        placeholder="@yourbusiness"
         maxLength={200}
       />
 

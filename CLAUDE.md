@@ -168,9 +168,9 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase P3 — Server Actions for new types (gift card, ticket, access, transit, business ID actions)
 - [x] Phase P4 — Wallet Pass Generators (Apple pass: storeCard/eventTicket/boardingPass/generic; Google pass: Loyalty/GiftCard/EventTicket/Transit/Generic classes)
 - [x] Phase P5 — Dashboard UI entity renames (Restaurant→Organization, Customer→Contact, Program→Template, Enrollment→PassInstance throughout all dashboard components, settings, register dialog, wallet renderer, Trigger.dev emails)
-- [ ] Phase P6 — Public Pages & Onboarding (marketing copy still references "restaurant" in hero, FAQ, features, etc.)
-- [ ] Phase P7 — Studio & Card Renderer (new type panels for ticket, gift card, access, transit, ID)
-- [ ] Phase P8 — Admin, Jobs & Polish (admin panel file renames, tests update)
+- [x] Phase P6 — Public Pages & Onboarding (marketing copy restaurant→business, restaurantName→businessName type rename)
+- [x] Phase P7 — Studio & Card Renderer (all 10 type panels, field configs, Apple/Google generators, renderer support)
+- [x] Phase P8 — Admin, Jobs & Polish (admin /restaurants/→/organizations/, dashboard /customers/→/contacts/, file + component renames, revalidatePath updates)
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -205,7 +205,7 @@ Update the "Current Progress" section above to track what's done.
 **Application (11):**
 8. PassTemplate (passType: 10 types, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
 9. PassInstance (pivot: Contact × PassTemplate — wallet pass, status, data JSON for type-specific state)
-10. Contact (end user — identity + denormalized totalInteractions)
+10. Contact (end user — identity + denormalized totalInteractions + sequential memberNumber per org)
 11. Interaction (type discriminator, metadata JSON, linked to PassInstance)
 12. Reward (linked to PassInstance; `revealedAt` nullable — null means prize minigame not yet played)
 13. PassDesign (per PassTemplate; typed columns for wallet passes + `editorConfig` JSON for rich studio editor; `cardType`: STAMP/POINTS/TIER/COUPON/PREPAID/GIFT_CARD/TICKET/ACCESS/TRANSIT/BUSINESS_ID/GENERIC)
@@ -247,9 +247,9 @@ Update the "Current Progress" section above to track what's done.
 ### Programs (top-level entity)
 - `/dashboard/programs` — list of all programs (grid cards, status badges, pass instance counts)
 - `/dashboard/programs/[id]` — program overview with stat cards (layout provides tab nav)
-- `/dashboard/programs/[id]/passes` — type-aware pass instances with stat cards, progress columns, status filters, row actions
+- `/dashboard/programs/[id]/passes` — type-aware pass instances with stat cards, progress columns, status filters, row actions, issue pass sheet, edit contact, send pass email
 - `/dashboard/programs/[id]/design` — embedded card design studio with 2-panel layout (owner only)
-- `/dashboard/programs/[id]/distribution` — Distribution: QR code, shareable link (owner only)
+- `/dashboard/programs/[id]/distribution` — Distribution: QR/NFC self-service link, direct issue to contacts, bulk CSV import (owner only)
 - `/dashboard/programs/[id]/settings` — status management (activate/archive/reactivate) + delete (owner only)
 
 ### Settings (account-level only)
@@ -263,7 +263,7 @@ Update the "Current Progress" section above to track what's done.
 ### Admin Panel (super_admin only)
 - `/admin` — overview stats
 - `/admin/users` — user management
-- `/admin/restaurants` — organization management (file rename pending P8)
+- `/admin/organizations` — organization management
 - `/admin/showcase` — marketing showcase card management (up to 5 cards)
 - `/admin/showcase/[id]/studio` — full-page card design editor for showcase cards (own layout, `(admin-studio)` route group)
 
@@ -288,7 +288,7 @@ Update the "Current Progress" section above to track what's done.
 | Database | Neon PostgreSQL | Serverless, connection pooling, DB branching |
 | Cache / Rate Limiting | Upstash Redis | HTTP-based, serverless-safe, @upstash/ratelimit |
 | File Storage | Cloudflare R2 | Already configured (S3-compatible) |
-| Background Jobs | Trigger.dev | Already configured (8 tasks, 5 queues) |
+| Background Jobs | Trigger.dev | Already configured (9 tasks, 5 queues) |
 | Email | Resend | Already configured (via Trigger.dev) |
 | Payments | Stripe | Already configured (subscriptions, webhooks) |
 | Error Tracking | Sentry | Already configured (source maps) |

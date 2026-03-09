@@ -67,7 +67,7 @@ export function OnboardingChecklist({
       label: "Register your first contact",
       description: "Add a contact or have them scan your QR code",
       completed: data.hasContact,
-      href: "/dashboard/customers",
+      href: "/dashboard/contacts",
       icon: UserPlus,
     },
     {
