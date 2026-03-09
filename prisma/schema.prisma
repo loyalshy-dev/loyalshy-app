@@ -413,6 +413,7 @@ model Contact {
   fullName          String
   email             String?
   phone             String?
+  memberNumber      Int
   totalInteractions Int       @default(0)
   lastInteractionAt DateTime?
   metadata          Json      @default("{}")
@@ -427,6 +428,7 @@ model Contact {
 
   @@unique([organizationId, email])
   @@unique([organizationId, phone])
+  @@unique([organizationId, memberNumber])
   @@index([organizationId, deletedAt])
   @@index([organizationId, totalInteractions])
   @@index([email])

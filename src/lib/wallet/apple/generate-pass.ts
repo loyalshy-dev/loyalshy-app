@@ -36,6 +36,8 @@ export type PassGenerationInput = {
   termsAndConditions: string | null
   organizationPhone: string | null
   organizationWebsite: string | null
+  // Sequential member number (per organization)
+  memberNumber?: number
   // Program name for multi-program display
   programName?: string
   // Card design fields
@@ -294,7 +296,7 @@ export async function generateApplePass(
   // Field data map — all labels go through formatLabel with custom label overrides
   const fieldData: Record<string, { key: string; label: string; value: string }> = {
     organization: { key: "organization", label: lbl("organization", "ORG"), value: input.organizationName },
-    memberNumber: { key: "memberNumber", label: lbl("memberNumber", "MEMBER #"), value: `${input.totalVisits}` },
+    memberNumber: { key: "memberNumber", label: lbl("memberNumber", "MEMBER #"), value: `${input.memberNumber ?? "—"}` },
     progress: { key: "progress", label: lbl("progress", progressLabel), value: progressValue },
     nextReward: { key: "nextReward", label: lbl("nextReward", "NEXT REWARD"), value: input.rewardDescription },
     totalVisits: { key: "totalVisits", label: lbl("totalVisits", "TOTAL VISITS"), value: `${input.totalVisits}` },
@@ -537,7 +539,7 @@ export async function generateApplePass(
       {
         key: "memberNumber",
         label: "Member #",
-        value: `${input.totalVisits}`,
+        value: `${input.memberNumber ?? "—"}`,
       },
       {
         key: "memberSince",

@@ -65,6 +65,7 @@ export async function POST(request: Request) {
             id: true,
             fullName: true,
             email: true,
+            memberNumber: true,
           },
         },
         passTemplate: {
@@ -143,6 +144,7 @@ export async function POST(request: Request) {
       contactId: passInstance.contact.id,
       organizationId: organization.id,
       walletPassId,
+      memberNumber: passInstance.contact.memberNumber,
       contactName: passInstance.contact.fullName,
       contactEmail: passInstance.contact.email,
       currentCycleVisits,

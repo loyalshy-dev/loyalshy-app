@@ -36,6 +36,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
           id: true,
           fullName: true,
           email: true,
+          memberNumber: true,
         },
       },
       passTemplate: {
@@ -105,6 +106,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
     const passBuffer = await generateApplePass({
       serialNumber: passInstance.walletPassSerialNumber,
       authenticationToken: passInstance.walletPassId,
+      memberNumber: passInstance.contact.memberNumber,
       customerName: passInstance.contact.fullName,
       customerEmail: passInstance.contact.email,
       currentCycleVisits,

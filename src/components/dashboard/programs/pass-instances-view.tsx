@@ -1077,6 +1077,9 @@ export function PassInstancesView({
                     <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
                       Contact
                     </th>
+                    <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground hidden sm:table-cell w-16">
+                      #
+                    </th>
                     <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
                       Status
                     </th>
@@ -1109,6 +1112,9 @@ export function PassInstancesView({
                               {pi.contact.email ?? pi.contact.phone ?? "—"}
                             </p>
                           </div>
+                        </td>
+                        <td className="px-4 py-3 text-right text-xs text-muted-foreground tabular-nums hidden sm:table-cell">
+                          {pi.contact.memberNumber}
                         </td>
                         <td className="px-4 py-3">
                           <Badge

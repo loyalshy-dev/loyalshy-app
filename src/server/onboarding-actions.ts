@@ -3,7 +3,7 @@
 import { randomUUID } from "crypto"
 import { z } from "zod"
 import { headers } from "next/headers"
-import { db } from "@/lib/db"
+import { db, getNextMemberNumber } from "@/lib/db"
 import { sanitizeText } from "@/lib/sanitize"
 import { publicFormLimiter } from "@/lib/rate-limit"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
@@ -172,6 +172,7 @@ export type PassInstanceCardData = {
   passInstanceId: string
   walletPassId: string | null
   contactName: string
+  memberNumber: number | null
   currentCycleVisits: number
   totalInteractions: number
   hasAvailableReward: boolean
@@ -211,7 +212,7 @@ export async function getPassInstanceCardData(
         select: { id: true, status: true, revealedAt: true, description: true },
       },
       contact: {
-        select: { fullName: true },
+        select: { fullName: true, memberNumber: true },
       },
       passTemplate: {
         select: {
@@ -279,6 +280,7 @@ export async function getPassInstanceCardData(
     passInstanceId: passInstance.id,
     walletPassId: passInstance.walletPassId,
     contactName: passInstance.contact.fullName,
+    memberNumber: passInstance.contact.memberNumber,
     currentCycleVisits,
     totalInteractions,
     remainingUses,
@@ -420,12 +422,14 @@ export async function joinTemplate(
 
   // Create new contact if not found
   if (!contact) {
+    const memberNumber = await getNextMemberNumber(organization.id)
     contact = await db.contact.create({
       data: {
         organizationId: organization.id,
         fullName,
         email: cleanEmail,
         phone: cleanPhone,
+        memberNumber,
       },
       select: {
         id: true,
@@ -602,6 +606,7 @@ export async function requestWalletPass(
           id: true,
           fullName: true,
           email: true,
+          memberNumber: true,
           createdAt: true,
         },
       },
@@ -657,6 +662,7 @@ export async function requestWalletPass(
       contactId: contact.id,
       contactName: contact.fullName,
       contactEmail: contact.email,
+      memberNumber: contact.memberNumber,
       contactCreatedAt: contact.createdAt,
       currentCycleVisits: (instanceData.currentCycleVisits as number) ?? 0,
       totalInteractions: (instanceData.totalInteractions as number) ?? 0,
@@ -693,6 +699,7 @@ type InstancePassData = {
   contactName: string
   contactEmail: string | null
   contactCreatedAt: Date
+  memberNumber: number
   currentCycleVisits: number
   totalInteractions: number
   pointsBalance?: number
@@ -740,6 +747,7 @@ async function issuePassForInstance(
       const passBuffer = await generateApplePass({
         serialNumber,
         authenticationToken: walletPassId,
+        memberNumber: instance.memberNumber,
         customerName: instance.contactName,
         customerEmail: instance.contactEmail,
         currentCycleVisits: instance.currentCycleVisits,
@@ -816,6 +824,7 @@ async function issuePassForInstance(
       contactId: instance.contactId,
       organizationId: organization.id,
       walletPassId,
+      memberNumber: instance.memberNumber,
       contactName: instance.contactName,
       contactEmail: instance.contactEmail,
       currentCycleVisits: instance.currentCycleVisits,

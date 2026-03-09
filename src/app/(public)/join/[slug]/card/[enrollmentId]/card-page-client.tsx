@@ -189,7 +189,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
         <div className="flex justify-center">
           <WalletPassRenderer
             design={passDesign}
-            format="apple"
+            format={platform}
             organizationName={data.organization.name}
             logoUrl={data.organization.logo}
             programName={data.template.name}
@@ -207,6 +207,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
             remainingUses={remainingUses}
             totalUses={totalUses}
             prepaidValidUntil={prepaidValidUntil}
+            memberNumber={data.memberNumber != null ? `${data.memberNumber}` : "—"}
           />
         </div>
 

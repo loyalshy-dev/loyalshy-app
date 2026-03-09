@@ -11,6 +11,17 @@ function getPrismaClient(): PrismaClient {
   return globalForPrisma.prisma
 }
 
+/**
+ * Get the next sequential member number for an organization.
+ * Uses a raw query with row-level locking to avoid race conditions.
+ */
+export async function getNextMemberNumber(organizationId: string): Promise<number> {
+  const result = await db.$queryRaw<[{ max: number | null }]>`
+    SELECT MAX("memberNumber") as max FROM contact WHERE "organizationId" = ${organizationId}
+  `
+  return (result[0]?.max ?? 0) + 1
+}
+
 // Lazy-initialized proxy so PrismaClient isn't constructed at import time
 // (avoids errors during Next.js build when DATABASE_URL is unavailable)
 export const db: PrismaClient = new Proxy({} as PrismaClient, {

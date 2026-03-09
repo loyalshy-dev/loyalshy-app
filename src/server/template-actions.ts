@@ -187,6 +187,7 @@ export type PassInstanceListItem = {
     fullName: string
     email: string | null
     phone: string | null
+    memberNumber: number
   }
   interactionCount: number
   rewardCount: number
@@ -234,7 +235,7 @@ export async function getTemplatePassInstances(
       where,
       include: {
         contact: {
-          select: { id: true, fullName: true, email: true, phone: true },
+          select: { id: true, fullName: true, email: true, phone: true, memberNumber: true },
         },
         _count: {
           select: { interactions: true, rewards: true },

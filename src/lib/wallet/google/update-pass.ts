@@ -17,6 +17,7 @@ import { getWalletRewardText, parseCouponConfig, formatCouponValue, parseMembers
 
 type GooglePassUpdateData = {
   passInstanceId: string
+  memberNumber?: number
   contactName: string
   currentCycleVisits: number
   visitsRequired: number
@@ -113,7 +114,7 @@ async function patchGoogleWalletObject(
   // All field data — IDs match field IDs from getFieldConfig
   const allFieldData: Record<string, { id: string; header: string; body: string }> = {
     organization: { id: "organization", header: lbl("organization", "ORG"), body: data.organizationName },
-    memberNumber: { id: "memberNumber", header: lbl("memberNumber", "MEMBER #"), body: `${data.totalVisits}` },
+    memberNumber: { id: "memberNumber", header: lbl("memberNumber", "MEMBER #"), body: `${data.memberNumber ?? "—"}` },
     nextReward: { id: "nextReward", header: lbl("nextReward", data.revealedPrize ? "YOUR PRIZE" : "NEXT REWARD"), body: data.revealedPrize ?? data.rewardDescription },
     totalVisits: { id: "totalVisits", header: lbl("totalVisits", "TOTAL VISITS"), body: `${data.totalVisits}` },
     memberSince: { id: "memberSince", header: lbl("memberSince", "SINCE"), body: memberSinceFormatted },
@@ -280,6 +281,7 @@ export async function notifyGooglePassUpdate(
         select: {
           id: true,
           fullName: true,
+          memberNumber: true,
           createdAt: true,
           organization: {
             select: {
@@ -395,6 +397,7 @@ export async function notifyGooglePassUpdate(
 
     await patchGoogleWalletObject({
       passInstanceId: passInstance.id,
+      memberNumber: passInstance.contact.memberNumber,
       contactName: passInstance.contact.fullName,
       currentCycleVisits,
       visitsRequired,

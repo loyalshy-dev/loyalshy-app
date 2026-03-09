@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
-import { db } from "@/lib/db"
+import { db, getNextMemberNumber } from "@/lib/db"
 import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
 import { parseCouponConfig } from "@/lib/pass-config"
@@ -444,12 +444,14 @@ export async function addContact(
   }
 
   // Create contact and auto-issue passes for all active templates
+  const memberNumber = await getNextMemberNumber(organizationId)
   const contact = await db.contact.create({
     data: {
       organizationId,
       fullName,
       email: cleanEmail,
       phone: cleanPhone,
+      memberNumber,
     },
     select: { id: true },
   })

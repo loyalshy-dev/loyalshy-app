@@ -27,6 +27,7 @@ export async function generateApplePassForEmail(
           id: true,
           fullName: true,
           email: true,
+          memberNumber: true,
           createdAt: true,
         },
       },
@@ -89,6 +90,7 @@ export async function generateApplePassForEmail(
     const passBuffer = await generateApplePass({
       serialNumber,
       authenticationToken: walletPassId,
+      memberNumber: contact.memberNumber,
       customerName: contact.fullName,
       customerEmail: contact.email,
       currentCycleVisits,

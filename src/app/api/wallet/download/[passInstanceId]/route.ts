@@ -40,6 +40,7 @@ export async function GET(
           id: true,
           fullName: true,
           email: true,
+          memberNumber: true,
           createdAt: true,
         },
       },
@@ -106,6 +107,7 @@ export async function GET(
       const passBuffer = await generateApplePass({
         serialNumber,
         authenticationToken: walletPassId,
+        memberNumber: contact.memberNumber,
         customerName: contact.fullName,
         customerEmail: contact.email,
         currentCycleVisits,
@@ -174,6 +176,7 @@ export async function GET(
       contactId: contact.id,
       organizationId: organization.id,
       walletPassId,
+      memberNumber: contact.memberNumber,
       contactName: contact.fullName,
       contactEmail: contact.email,
       currentCycleVisits,

@@ -3,7 +3,7 @@
 import { randomUUID } from "crypto"
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
-import { db } from "@/lib/db"
+import { db, getNextMemberNumber } from "@/lib/db"
 import {
   assertAuthenticated,
   getOrganizationForUser,
@@ -442,37 +442,52 @@ export async function createContactAndIssuePass(
     return { success: false, error: "Program not found or not active" }
   }
 
-  // Duplicate contact check
+  // Find existing contact by email or phone, or create a new one
+  let existingContact: { id: string; fullName: string; email: string | null } | null = null
+
   if (cleanEmail) {
-    const existing = await db.contact.findFirst({
+    existingContact = await db.contact.findFirst({
       where: { organizationId: organization.id, email: cleanEmail, deletedAt: null },
-      select: { id: true },
+      select: { id: true, fullName: true, email: true },
     })
-    if (existing) {
-      return { success: false, error: `A contact with this email already exists.`, duplicateField: "email" }
-    }
   }
 
-  if (cleanPhone) {
-    const existing = await db.contact.findFirst({
+  if (!existingContact && cleanPhone) {
+    existingContact = await db.contact.findFirst({
       where: { organizationId: organization.id, phone: cleanPhone, deletedAt: null },
+      select: { id: true, fullName: true, email: true },
+    })
+  }
+
+  // If existing contact found, check if they already have a pass for this program
+  if (existingContact) {
+    const existingPass = await db.passInstance.findUnique({
+      where: {
+        contactId_passTemplateId: {
+          contactId: existingContact.id,
+          passTemplateId: template.id,
+        },
+      },
       select: { id: true },
     })
-    if (existing) {
-      return { success: false, error: `A contact with this phone already exists.`, duplicateField: "phone" }
+    if (existingPass) {
+      return { success: false, error: "This contact already has a pass for this program." }
     }
   }
 
-  // Create contact
-  const contact = await db.contact.create({
-    data: {
-      organizationId: organization.id,
-      fullName: cleanName,
-      email: cleanEmail,
-      phone: cleanPhone,
-    },
-    select: { id: true, fullName: true, email: true },
-  })
+  const contact = existingContact ?? await (async () => {
+    const memberNumber = await getNextMemberNumber(organization.id)
+    return db.contact.create({
+      data: {
+        organizationId: organization.id,
+        fullName: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
+        memberNumber,
+      },
+      select: { id: true, fullName: true, email: true },
+    })
+  })()
 
   // Issue pass via existing action
   const issueResult = await issuePassToContacts(templateId, [contact.id])
@@ -591,12 +606,14 @@ export async function bulkImportAndIssue(
 
       // Create contact if not found
       if (!contact) {
+        const memberNumber = await getNextMemberNumber(organization.id)
         contact = await db.contact.create({
           data: {
             organizationId: organization.id,
             fullName,
             email: cleanEmail,
             phone: cleanPhone,
+            memberNumber,
           },
           select: { id: true, fullName: true, email: true },
         })

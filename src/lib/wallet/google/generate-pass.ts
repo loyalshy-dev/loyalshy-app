@@ -30,6 +30,8 @@ export type GooglePassGenerationInput = {
   termsAndConditions: string | null
   organizationPhone: string | null
   organizationWebsite: string | null
+  // Sequential member number (per organization)
+  memberNumber?: number
   // Multi-template fields
   templateName?: string
   templateId?: string
@@ -367,7 +369,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   // All field data as textModulesData entries — IDs match field IDs from getFieldConfig
   const allFieldData: Record<string, { id: string; header: string; body: string }> = {
     organization: { id: "organization", header: lbl("organization", "ORG"), body: input.organizationName },
-    memberNumber: { id: "memberNumber", header: lbl("memberNumber", "MEMBER #"), body: `${input.totalVisits}` },
+    memberNumber: { id: "memberNumber", header: lbl("memberNumber", "MEMBER #"), body: `${input.memberNumber ?? "—"}` },
     nextReward: { id: "nextReward", header: lbl("nextReward", "NEXT REWARD"), body: getWalletRewardText(input.templateConfig, input.rewardDescription) },
     totalVisits: { id: "totalVisits", header: lbl("totalVisits", "TOTAL VISITS"), body: `${input.totalVisits}` },
     memberSince: { id: "memberSince", header: lbl("memberSince", "SINCE"), body: memberSinceFormatted },
