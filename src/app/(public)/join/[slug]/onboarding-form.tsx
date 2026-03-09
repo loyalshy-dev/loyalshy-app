@@ -611,7 +611,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               placeholder="John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
+              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
             />
           </div>
 
@@ -632,7 +632,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               type="email"
               autoComplete="email"
               placeholder="john@example.com"
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
+              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
             />
           </div>
 
@@ -653,7 +653,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               type="tel"
               autoComplete="tel"
               placeholder="+1 (555) 123-4567"
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
+              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
             />
           </div>
 
