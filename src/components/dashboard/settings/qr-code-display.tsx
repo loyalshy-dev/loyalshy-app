@@ -82,6 +82,7 @@ type QrCodeDisplayProps = {
     slug: string
     logo: string | null
     logoApple: string | null
+    logoGoogle: string | null
     brandColor: string | null
   }
   templates: TemplateInfo[]
@@ -356,11 +357,11 @@ export function QrCodeDisplay({
                     dangerouslySetInnerHTML={{ __html: qrSvg }}
                   />
                   {/* Organization logo overlay in center */}
-                  {organization.logo && (
+                  {(organization.logoGoogle ?? organization.logo) && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-10 h-10 rounded-lg overflow-hidden bg-background border-2 border-background shadow-sm">
                         <Image
-                          src={organization.logo}
+                          src={(organization.logoGoogle ?? organization.logo)!}
                           alt=""
                           width={40}
                           height={40}
@@ -398,7 +399,9 @@ export function QrCodeDisplay({
                     <TemplateCardPreview
                       template={previewTemplate}
                       organizationName={organization.name}
-                      logoUrl={organization.logoApple ?? organization.logo}
+                      logoUrl={organization.logo}
+                      logoAppleUrl={organization.logoApple}
+                      logoGoogleUrl={organization.logoGoogle}
                       compact
                       width={180}
                       height={250}

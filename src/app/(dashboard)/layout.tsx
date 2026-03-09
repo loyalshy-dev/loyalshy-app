@@ -38,6 +38,7 @@ async function DashboardLayoutInner({
       name: true,
       slug: true,
       logo: true,
+      logoGoogle: true,
       plan: true,
       subscriptionStatus: true,
       trialEndsAt: true,
@@ -71,6 +72,7 @@ async function DashboardLayoutInner({
           ? {
               name: organization.name,
               logo: organization.logo,
+              logoGoogle: organization.logoGoogle,
               subscriptionStatus: organization.subscriptionStatus,
               trialEndsAt: organization.trialEndsAt?.toISOString() ?? null,
             }

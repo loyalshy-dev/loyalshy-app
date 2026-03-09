@@ -23,6 +23,7 @@ export type OrganizationPublicInfo = {
   slug: string
   logo: string | null
   logoApple: string | null
+  logoGoogle: string | null
   brandColor: string | null
   secondaryColor: string | null
   templates: PublicTemplateInfo[]
@@ -88,6 +89,7 @@ export async function getOrganizationBySlug(
       slug: true,
       logo: true,
       logoApple: true,
+      logoGoogle: true,
       brandColor: true,
       secondaryColor: true,
       passTemplates: {
@@ -132,6 +134,7 @@ export async function getOrganizationBySlug(
     slug: organization.slug,
     logo: organization.logo,
     logoApple: organization.logoApple ?? null,
+    logoGoogle: organization.logoGoogle ?? null,
     brandColor: organization.brandColor,
     secondaryColor: organization.secondaryColor,
     templates: organization.passTemplates.map((t) => {

@@ -308,6 +308,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
                 organizationName={organization.name}
                 logoUrl={organization.logo}
                 logoAppleUrl={organization.logoApple}
+                logoGoogleUrl={organization.logoGoogle}
                 customerName={joinResult.contactName}
                 currentVisits={joinResult.currentCycleVisits ?? 0}
                 hasReward={joinResult.hasAvailableReward}
@@ -426,10 +427,10 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
         <div className="w-full max-w-md space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
-            {organization.logo && (
+            {(organization.logoGoogle ?? organization.logo) && (
               <div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden bg-muted">
                 <Image
-                  src={organization.logo}
+                  src={(organization.logoGoogle ?? organization.logo)!}
                   alt={organization.name}
                   width={80}
                   height={80}
@@ -465,6 +466,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
                         organizationName={organization.name}
                         logoUrl={organization.logo}
                 logoAppleUrl={organization.logoApple}
+                logoGoogleUrl={organization.logoGoogle}
                         compact
                         width={56}
                         height={72}
@@ -531,10 +533,10 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
 
         {/* Header */}
         <div className="text-center space-y-4">
-          {organization.logo && (
+          {(organization.logoGoogle ?? organization.logo) && (
             <div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden bg-muted">
               <Image
-                src={organization.logo}
+                src={(organization.logoGoogle ?? organization.logo)!}
                 alt={organization.name}
                 width={80}
                 height={80}
@@ -585,6 +587,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               organizationName={organization.name}
               logoUrl={organization.logo}
               logoAppleUrl={organization.logoApple}
+              logoGoogleUrl={organization.logoGoogle}
               compact
               customerName={name.trim() || undefined}
               currentVisits={0}

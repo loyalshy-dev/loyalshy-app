@@ -20,6 +20,7 @@ type DashboardShellProps = {
   organization: {
     name: string
     logo: string | null
+    logoGoogle: string | null
     subscriptionStatus: string
     trialEndsAt: string | null
   } | null

@@ -41,6 +41,7 @@ type AppSidebarProps = {
   organization: {
     name: string
     logo: string | null
+    logoGoogle: string | null
   } | null
   orgRole: string | null
 }
@@ -91,9 +92,9 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="cursor-default hover:bg-transparent active:bg-transparent">
-              {organization?.logo ? (
+              {(organization?.logoGoogle ?? organization?.logo) ? (
                 <img
-                  src={organization.logo}
+                  src={(organization.logoGoogle ?? organization.logo)!}
                   alt={organization.name}
                   className="size-7 rounded-md shrink-0 object-cover"
                 />

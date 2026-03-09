@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation"
 import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { QrCodeDisplay } from "@/components/dashboard/settings/qr-code-display"
+import { DirectIssueSection } from "@/components/dashboard/programs/direct-issue-section"
+import { CsvImportSection } from "@/components/dashboard/programs/csv-import-section"
 
 export default async function ProgramDistributionPage(props: {
   params: Promise<{ id: string }>
@@ -48,25 +50,37 @@ export default async function ProgramDistributionPage(props: {
   }
 
   return (
-    <QrCodeDisplay
-      organization={{
-        name: organization.name,
-        slug: organization.slug,
-        logo: organization.logo,
-        logoApple: organization.logoApple ?? null,
-        brandColor: organization.brandColor,
-      }}
-      templates={[
-        {
-          id: program.id,
-          name: program.name,
-          passType: program.passType,
-          templateConfig: program.config,
-          rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
-          visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
-          cardDesign: program.passDesign ?? null,
-        },
-      ]}
-    />
+    <div className="space-y-6">
+      <QrCodeDisplay
+        organization={{
+          name: organization.name,
+          slug: organization.slug,
+          logo: organization.logo,
+          logoApple: organization.logoApple ?? null,
+          logoGoogle: organization.logoGoogle ?? null,
+          brandColor: organization.brandColor,
+        }}
+        templates={[
+          {
+            id: program.id,
+            name: program.name,
+            passType: program.passType,
+            templateConfig: program.config,
+            rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
+            visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
+            cardDesign: program.passDesign ?? null,
+          },
+        ]}
+      />
+      <DirectIssueSection
+        templateId={program.id}
+        templateName={program.name}
+        passType={program.passType}
+      />
+      <CsvImportSection
+        templateId={program.id}
+        templateName={program.name}
+      />
+    </div>
   )
 }
