@@ -101,6 +101,7 @@ type WalletPassRendererProps = {
   // Business ID-specific
   idLabel?: string           // e.g. "Employee ID"
   verifications?: string     // e.g. "5"
+  memberNumber?: string      // unique member identifier (derived from pass instance ID)
 }
 
 // ─── Constants ──────────────────────────────────────────────
@@ -166,6 +167,7 @@ export function WalletPassRenderer({
   boardingStatus,
   idLabel,
   verifications,
+  memberNumber,
 }: WalletPassRendererProps) {
   const cardType = design.cardType ?? "STAMP"
   const isTicket = cardType === "TICKET"
@@ -246,7 +248,7 @@ export function WalletPassRenderer({
         resolved = { label: lbl("TOTAL VISITS"), value: `${totalVisits}` }
         break
       case "memberNumber":
-        resolved = { label: lbl("MEMBER"), value: `#${totalVisits}` }
+        resolved = { label: lbl("MEMBER #"), value: memberNumber ?? "—" }
         break
       // Coupon fields
       case "discount":
