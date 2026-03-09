@@ -68,5 +68,7 @@ export function buildWalletPassDesign(
     labelColor: sf.labelColor ?? null,
     headerFields: sf.headerFields ?? null,
     secondaryFields: sf.secondaryFields ?? null,
+    fields: sf.fields ?? null,
+    fieldLabels: sf.fieldLabels ?? null,
   }
 }

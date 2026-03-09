@@ -62,8 +62,10 @@ export type WalletState = {
   logoGoogleUrl: string | null
   logoAppleZoom: number  // 1 = 100%, range 1–3
   logoGoogleZoom: number
-  headerFields: string[] | null   // custom header fields (null = default)
-  secondaryFields: string[] | null // custom secondary fields (null = default)
+  headerFields: string[] | null   // legacy — kept for backward compat
+  secondaryFields: string[] | null // legacy — kept for backward compat
+  fields: string[] | null  // unified ordered field list (null = default)
+  fieldLabels: Record<string, string> | null // custom label overrides per field ID (null = use defaults)
 }
 
 // ─── Program Config Slice (PassTemplate.config JSON) ──────
@@ -284,6 +286,8 @@ export function createCardDesignStore() {
           logoGoogleZoom: 1,
           headerFields: null,
           secondaryFields: null,
+          fields: null,
+          fieldLabels: null,
         },
         programConfig: { ...DEFAULT_CONFIG },
         ui: {

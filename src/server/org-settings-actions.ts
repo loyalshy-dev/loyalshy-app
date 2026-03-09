@@ -124,6 +124,8 @@ const savePassDesignSchema = z.object({
   stampFilledColor: z.string().max(20).nullable().optional(),
   headerFields: z.array(z.string().max(30)).max(3).nullable().optional(),
   secondaryFields: z.array(z.string().max(30)).max(4).nullable().optional(),
+  fields: z.array(z.string().max(30)).max(6).nullable().optional(),
+  fieldLabels: z.record(z.string().max(30), z.string().max(50)).nullable().optional(),
   locationMessage: z.string().max(200).optional().default(""),
   stampGridConfig: z.object({
     stampIcon: z.string().max(50),
@@ -660,6 +662,8 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
   if (parsed.stampFilledColor) editorConfig.stampFilledColor = parsed.stampFilledColor
   if (parsed.headerFields != null) editorConfig.headerFields = parsed.headerFields
   if (parsed.secondaryFields != null) editorConfig.secondaryFields = parsed.secondaryFields
+  if (parsed.fields != null) editorConfig.fields = parsed.fields
+  if (parsed.fieldLabels != null) editorConfig.fieldLabels = parsed.fieldLabels
   if (parsed.locationMessage) editorConfig.locationMessage = parsed.locationMessage
 
   const stripPrimary = parsed.stripColor1 || primaryColor

@@ -3,7 +3,7 @@ import "server-only"
 import { buildClassId, buildObjectId, buildProgramClassId, buildEnrollmentObjectId } from "./constants"
 import { buildSaveUrl } from "./jwt-utils"
 import type { CardDesignData, CardType } from "../card-design"
-import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig } from "../card-design"
+import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
 import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem, getWalletRewardText } from "../../pass-config"
@@ -91,117 +91,45 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
   const layout = getFieldLayout(cardType)
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
+  const stripFilters = parseStripFilters(design?.editorConfig)
 
-  // Type-specific row field paths
-  // Build card row template — all types use textModulesData references
+  // Build card row template from user-configurable fields
+  // Unified fields list, falling back to legacy header+secondary, then per-type defaults
+  const fieldConfig = getFieldConfig(input.passType ?? "STAMP_CARD")
+  const allConfiguredFields = stripFilters.fields
+    ?? (stripFilters.headerFields || stripFilters.secondaryFields
+      ? [...(stripFilters.headerFields ?? fieldConfig.defaultHeader), ...(stripFilters.secondaryFields ?? fieldConfig.defaultSecondary)]
+      : null)
+    ?? fieldConfig.defaultFields
+
+  // Only exclude "progress" for stamp/points — it's the native loyaltyPoints widget
+  const isStampType = !input.passType || input.passType === "STAMP_CARD" || input.passType === "POINTS"
+  const googleExclude = new Set<string>()
+  if (isStampType) {
+    googleExclude.add("progress")
+  }
+  const visibleFields = allConfiguredFields.filter((id) => !googleExclude.has(id))
+
+  // Google Wallet card layout: program name is row 1 (native programName field).
+  // Text module fields fill rows as 3-then-3 pattern (max 3 per row).
   const cardRowTemplateInfos: Record<string, unknown>[] = []
+  const fp = (id: string) => ({ firstValue: { fields: [{ fieldPath: `object.textModulesData['${id}']` }] } })
 
-  switch (input.passType) {
-    case "COUPON":
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['discount']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['validUntil']" }] } },
-        },
-      })
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['couponCode']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
-        },
-      })
-      break
-    case "MEMBERSHIP":
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['tier']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['status']" }] } },
-        },
-      })
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['benefits']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
-        },
-      })
-      break
-    case "PREPAID":
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['remaining']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['validUntil']" }] } },
-        },
-      })
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['totalUsed']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
-        },
-      })
-      break
-    case "GIFT_CARD":
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['balance']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['initialValue']" }] } },
-        },
-      })
-      break
-    case "TICKET":
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['eventDate']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['venue']" }] } },
-        },
-      })
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['scans']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['holder']" }] } },
-        },
-      })
-      break
-    case "ACCESS":
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['accessLabel']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['totalGranted']" }] } },
-        },
-      })
-      break
-    case "TRANSIT":
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['origin']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['destination']" }] } },
-        },
-      })
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['transitType']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['boardingStatus']" }] } },
-        },
-      })
-      break
-    case "BUSINESS_ID":
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['idLabel']" }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['verifications']" }] } },
-        },
-      })
-      break
-    default: {
-      // Stamp/Points
-      const textRow1Start = input.passType === "POINTS" ? "earnRate" : "nextReward"
-      cardRowTemplateInfos.push({
-        twoItems: {
-          startItem: { firstValue: { fields: [{ fieldPath: `object.textModulesData['${textRow1Start}']` }] } },
-          endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['memberSince']" }] } },
-        },
-      })
-      break
-    }
+  if (visibleFields.length === 1) {
+    cardRowTemplateInfos.push({ oneItem: { item: fp(visibleFields[0]) } })
+  } else if (visibleFields.length === 2) {
+    cardRowTemplateInfos.push({ twoItems: { startItem: fp(visibleFields[0]), endItem: fp(visibleFields[1]) } })
+  } else if (visibleFields.length === 3) {
+    cardRowTemplateInfos.push({ threeItems: { startItem: fp(visibleFields[0]), middleItem: fp(visibleFields[1]), endItem: fp(visibleFields[2]) } })
+  } else if (visibleFields.length === 4) {
+    cardRowTemplateInfos.push({ threeItems: { startItem: fp(visibleFields[0]), middleItem: fp(visibleFields[1]), endItem: fp(visibleFields[2]) } })
+    cardRowTemplateInfos.push({ oneItem: { item: fp(visibleFields[3]) } })
+  } else if (visibleFields.length === 5) {
+    cardRowTemplateInfos.push({ threeItems: { startItem: fp(visibleFields[0]), middleItem: fp(visibleFields[1]), endItem: fp(visibleFields[2]) } })
+    cardRowTemplateInfos.push({ twoItems: { startItem: fp(visibleFields[3]), endItem: fp(visibleFields[4]) } })
+  } else if (visibleFields.length >= 6) {
+    cardRowTemplateInfos.push({ threeItems: { startItem: fp(visibleFields[0]), middleItem: fp(visibleFields[1]), endItem: fp(visibleFields[2]) } })
+    cardRowTemplateInfos.push({ threeItems: { startItem: fp(visibleFields[3]), middleItem: fp(visibleFields[4]), endItem: fp(visibleFields[5]) } })
   }
 
   // Type-aware program display name
@@ -426,148 +354,164 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   const accessConfig = input.passType === "ACCESS" ? parseAccessConfig(input.templateConfig) : null
   const transitConfig = input.passType === "TRANSIT" ? parseTransitConfig(input.templateConfig) : null
   const businessIdConfig = input.passType === "BUSINESS_ID" ? parseBusinessIdConfig(input.templateConfig) : null
+  const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
-  // Type-specific loyalty points and text modules
+  // Custom field labels from editorConfig
+  const objStripFilters = parseStripFilters(design?.editorConfig)
+  const customLabels = objStripFilters.fieldLabels ?? {}
+  const lbl = (fieldId: string, defaultLabel: string) => {
+    const custom = customLabels[fieldId]
+    return formatLabel(custom ?? defaultLabel, labelFmt)
+  }
+
+  // All field data as textModulesData entries — IDs match field IDs from getFieldConfig
+  const allFieldData: Record<string, { id: string; header: string; body: string }> = {
+    organization: { id: "organization", header: lbl("organization", "ORG"), body: input.organizationName },
+    memberNumber: { id: "memberNumber", header: lbl("memberNumber", "MEMBER #"), body: `${input.totalVisits}` },
+    nextReward: { id: "nextReward", header: lbl("nextReward", "NEXT REWARD"), body: getWalletRewardText(input.templateConfig, input.rewardDescription) },
+    totalVisits: { id: "totalVisits", header: lbl("totalVisits", "TOTAL VISITS"), body: `${input.totalVisits}` },
+    memberSince: { id: "memberSince", header: lbl("memberSince", "SINCE"), body: memberSinceFormatted },
+    registeredAt: { id: "registeredAt", header: lbl("registeredAt", "REGISTERED"), body: memberSinceFormatted },
+    customerName: { id: "customerName", header: lbl("customerName", "NAME"), body: input.contactName },
+    // COUPON
+    discount: { id: "discount", header: lbl("discount", couponConfig ? (getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) !== formatCouponValue(couponConfig) ? "PRIZES" : "DISCOUNT") : "DISCOUNT"), body: couponConfig ? getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) : "" },
+    validUntil: { id: "validUntil", header: lbl("validUntil", "VALID UNTIL"), body: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : (prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry") },
+    couponCode: { id: "couponCode", header: lbl("couponCode", "CODE"), body: couponConfig?.couponCode ?? "" },
+    // MEMBERSHIP
+    tierName: { id: "tierName", header: lbl("tierName", "TIER"), body: membershipConfig?.membershipTier ?? "" },
+    benefits: { id: "benefits", header: lbl("benefits", "BENEFITS"), body: membershipConfig?.benefits ?? "" },
+    // POINTS
+    earnRate: { id: "earnRate", header: lbl("earnRate", "EARN RATE"), body: pointsConfig ? `${pointsConfig.pointsPerVisit} points per visit` : "" },
+    // PREPAID
+    remaining: { id: "remaining", header: lbl("remaining", "REMAINING"), body: `${input.remainingUses ?? 0} / ${prepaidConfig?.totalUses ?? 0}` },
+    prepaidValidUntil: { id: "prepaidValidUntil", header: lbl("prepaidValidUntil", "VALID UNTIL"), body: prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+    totalUsed: { id: "totalUsed", header: lbl("totalUsed", "TOTAL USED"), body: String(input.totalVisits) },
+    // GIFT_CARD
+    giftBalance: { id: "giftBalance", header: lbl("giftBalance", "BALANCE"), body: giftCardConfig ? `${giftCardConfig.currency} ${((input.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
+    giftInitial: { id: "giftInitial", header: lbl("giftInitial", "INITIAL VALUE"), body: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
+    // TICKET
+    eventName: { id: "eventName", header: lbl("eventName", "EVENT"), body: ticketConfig?.eventName ?? "" },
+    eventDate: { id: "eventDate", header: lbl("eventDate", "DATE"), body: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
+    eventVenue: { id: "eventVenue", header: lbl("eventVenue", "VENUE"), body: ticketConfig?.eventVenue ?? "" },
+    scanStatus: { id: "scanStatus", header: lbl("scanStatus", "SCANS"), body: `${input.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
+    // ACCESS
+    accessLabel: { id: "accessLabel", header: lbl("accessLabel", accessConfig?.accessLabel ?? "ACCESS"), body: "Active" },
+    accessGranted: { id: "accessGranted", header: lbl("accessGranted", "TOTAL GRANTED"), body: String(input.accessTotalGranted ?? 0) },
+    // TRANSIT
+    transitType: { id: "transitType", header: lbl("transitType", "TYPE"), body: (transitConfig?.transitType ?? "other").toUpperCase() },
+    origin: { id: "origin", header: lbl("origin", "FROM"), body: transitConfig?.originName ?? "—" },
+    destination: { id: "destination", header: lbl("destination", "TO"), body: transitConfig?.destinationName ?? "—" },
+    boardingStatus: { id: "boardingStatus", header: lbl("boardingStatus", "STATUS"), body: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
+    // BUSINESS_ID
+    idLabel: { id: "idLabel", header: lbl("idLabel", businessIdConfig?.idLabel ?? "ID"), body: input.contactName },
+    verifications: { id: "verifications", header: lbl("verifications", "VERIFICATIONS"), body: String(input.businessIdVerifications ?? 0) },
+  }
+
+  // Build textModulesData from user-configured unified fields
+  const googleFieldConfig = getFieldConfig(input.passType ?? "STAMP_CARD")
+  const allObjFields = objStripFilters.fields
+    ?? (objStripFilters.headerFields || objStripFilters.secondaryFields
+      ? [...(objStripFilters.headerFields ?? googleFieldConfig.defaultHeader), ...(objStripFilters.secondaryFields ?? googleFieldConfig.defaultSecondary)]
+      : null)
+    ?? googleFieldConfig.defaultFields
+  // Only exclude "progress" for stamp/points — it's the native loyaltyPoints widget
+  const googleExcludeObj = new Set<string>()
+  const isStampTypeObj = !input.passType || input.passType === "STAMP_CARD" || input.passType === "POINTS"
+  if (isStampTypeObj) {
+    googleExcludeObj.add("progress")
+  }
+  const textModulesFieldIds = allObjFields.filter((id) => !googleExcludeObj.has(id))
+  const textModulesData = textModulesFieldIds
+    .map((id) => allFieldData[id])
+    .filter((f): f is { id: string; header: string; body: string } => f != null && f.body !== "")
+
+  // Type-specific loyalty points (native Google Wallet points widget — not affected by field config)
   let loyaltyPoints: Record<string, unknown>
   let secondaryLoyaltyPoints: Record<string, unknown>
-  let textModulesData: Record<string, unknown>[]
 
   if (input.passType === "COUPON" && couponConfig) {
-    // When minigame is enabled with prizes, show prizes instead of generic discount
     const prizeText = getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig))
     const hasPrizes = prizeText !== formatCouponValue(couponConfig)
-    const discountLabel = hasPrizes ? "PRIZES" : "DISCOUNT"
     loyaltyPoints = {
-      label: formatLabel(discountLabel, labelFmt),
+      label: lbl("discount", hasPrizes ? "PRIZES" : "DISCOUNT"),
       balance: { string: prizeText },
     }
     secondaryLoyaltyPoints = {
-      label: formatLabel("VALID UNTIL", labelFmt),
+      label: lbl("validUntil", "VALID UNTIL"),
       balance: { string: couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
     }
-    textModulesData = [
-      { id: "discount", header: formatLabel(discountLabel, labelFmt), body: prizeText },
-      { id: "validUntil", header: formatLabel("VALID UNTIL", labelFmt), body: couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
-      ...(couponConfig.couponCode ? [{ id: "couponCode", header: formatLabel("CODE", labelFmt), body: couponConfig.couponCode }] : []),
-      { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
-    ]
   } else if (input.passType === "MEMBERSHIP" && membershipConfig) {
     loyaltyPoints = {
-      label: formatLabel("TIER", labelFmt),
+      label: lbl("tierName", "TIER"),
       balance: { string: membershipConfig.membershipTier },
     }
     secondaryLoyaltyPoints = {
       label: formatLabel("CHECK-INS", labelFmt),
       balance: { int: input.totalVisits },
     }
-    textModulesData = [
-      { id: "tier", header: formatLabel("TIER", labelFmt), body: membershipConfig.membershipTier },
-      { id: "status", header: formatLabel("STATUS", labelFmt), body: "Active" },
-      { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
-      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
-    ]
   } else if (input.passType === "PREPAID" && prepaidConfig) {
-    const remaining = input.remainingUses ?? 0
-    const totalUsed = input.totalVisits
     loyaltyPoints = {
-      label: formatLabel("REMAINING", labelFmt),
-      balance: { string: `${remaining} / ${prepaidConfig.totalUses}` },
+      label: lbl("remaining", "REMAINING"),
+      balance: { string: `${input.remainingUses ?? 0} / ${prepaidConfig.totalUses}` },
     }
     secondaryLoyaltyPoints = {
       label: formatLabel("USED", labelFmt),
-      balance: { int: totalUsed },
+      balance: { int: input.totalVisits },
     }
-    textModulesData = [
-      { id: "remaining", header: formatLabel(`${prepaidConfig.useLabel.toUpperCase()}S LEFT`, labelFmt), body: `${remaining} / ${prepaidConfig.totalUses}` },
-      { id: "validUntil", header: formatLabel("VALID UNTIL", labelFmt), body: prepaidConfig.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
-      { id: "totalUsed", header: formatLabel("TOTAL USED", labelFmt), body: String(totalUsed) },
-      { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
-    ]
   } else if (input.passType === "POINTS" && pointsConfig) {
     loyaltyPoints = {
       label: formatLabel("POINTS", labelFmt),
       balance: { int: input.pointsBalance ?? 0 },
     }
-    const cheapestItem = getCheapestCatalogItem(pointsConfig)
     secondaryLoyaltyPoints = cheapestItem
-      ? { label: formatLabel("NEXT REWARD", labelFmt), balance: { string: `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` } }
-      : { label: formatLabel("TOTAL VISITS", labelFmt), balance: { int: input.totalVisits } }
-    textModulesData = [
-      { id: "earnRate", header: formatLabel("EARN RATE", labelFmt), body: `${pointsConfig.pointsPerVisit} points per visit` },
-      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
-    ]
+      ? { label: lbl("nextReward", "NEXT REWARD"), balance: { string: `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` } }
+      : { label: lbl("totalVisits", "TOTAL VISITS"), balance: { int: input.totalVisits } }
   } else if (input.passType === "GIFT_CARD" && giftCardConfig) {
     const balanceCents = input.giftBalanceCents ?? giftCardConfig.initialBalanceCents
-    const balanceStr = `${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}`
-    const initialStr = `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}`
     loyaltyPoints = {
-      label: formatLabel("BALANCE", labelFmt),
-      balance: { string: balanceStr },
+      label: lbl("giftBalance", "BALANCE"),
+      balance: { string: `${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}` },
     }
     secondaryLoyaltyPoints = {
-      label: formatLabel("INITIAL VALUE", labelFmt),
-      balance: { string: initialStr },
+      label: lbl("giftInitial", "INITIAL VALUE"),
+      balance: { string: `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` },
     }
-    textModulesData = [
-      { id: "balance", header: formatLabel("BALANCE", labelFmt), body: balanceStr },
-      { id: "initialValue", header: formatLabel("INITIAL VALUE", labelFmt), body: initialStr },
-    ]
   } else if (input.passType === "TICKET" && ticketConfig) {
     loyaltyPoints = {
-      label: formatLabel("EVENT", labelFmt),
+      label: lbl("eventName", "EVENT"),
       balance: { string: ticketConfig.eventName },
     }
     secondaryLoyaltyPoints = {
-      label: formatLabel("SCANS", labelFmt),
+      label: lbl("scanStatus", "SCANS"),
       balance: { string: `${input.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` },
     }
-    textModulesData = [
-      { id: "eventDate", header: formatLabel("DATE", labelFmt), body: new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) },
-      { id: "venue", header: formatLabel("VENUE", labelFmt), body: ticketConfig.eventVenue },
-      { id: "scans", header: formatLabel("SCANS", labelFmt), body: `${input.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` },
-      { id: "holder", header: formatLabel("HOLDER", labelFmt), body: input.contactName },
-    ]
   } else if (input.passType === "ACCESS" && accessConfig) {
     loyaltyPoints = {
-      label: formatLabel(accessConfig.accessLabel, labelFmt),
+      label: lbl("accessLabel", accessConfig.accessLabel),
       balance: { string: "Active" },
     }
     secondaryLoyaltyPoints = {
-      label: formatLabel("TOTAL GRANTED", labelFmt),
+      label: lbl("accessGranted", "TOTAL GRANTED"),
       balance: { int: input.accessTotalGranted ?? 0 },
     }
-    textModulesData = [
-      { id: "accessLabel", header: formatLabel(accessConfig.accessLabel, labelFmt), body: "Active" },
-      { id: "totalGranted", header: formatLabel("TOTAL GRANTED", labelFmt), body: String(input.accessTotalGranted ?? 0) },
-    ]
   } else if (input.passType === "TRANSIT" && transitConfig) {
     loyaltyPoints = {
-      label: formatLabel("STATUS", labelFmt),
+      label: lbl("boardingStatus", "STATUS"),
       balance: { string: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
     }
     secondaryLoyaltyPoints = {
-      label: formatLabel("TYPE", labelFmt),
+      label: lbl("transitType", "TYPE"),
       balance: { string: transitConfig.transitType.toUpperCase() },
     }
-    textModulesData = [
-      { id: "origin", header: formatLabel("FROM", labelFmt), body: transitConfig.originName ?? "—" },
-      { id: "destination", header: formatLabel("TO", labelFmt), body: transitConfig.destinationName ?? "—" },
-      { id: "transitType", header: formatLabel("TYPE", labelFmt), body: transitConfig.transitType.toUpperCase() },
-      { id: "boardingStatus", header: formatLabel("STATUS", labelFmt), body: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
-    ]
   } else if (input.passType === "BUSINESS_ID" && businessIdConfig) {
     loyaltyPoints = {
-      label: formatLabel(businessIdConfig.idLabel, labelFmt),
+      label: lbl("idLabel", businessIdConfig.idLabel),
       balance: { string: input.contactName },
     }
     secondaryLoyaltyPoints = {
-      label: formatLabel("VERIFICATIONS", labelFmt),
+      label: lbl("verifications", "VERIFICATIONS"),
       balance: { int: input.businessIdVerifications ?? 0 },
     }
-    textModulesData = [
-      { id: "idLabel", header: formatLabel(businessIdConfig.idLabel, labelFmt), body: input.contactName },
-      { id: "verifications", header: formatLabel("VERIFICATIONS", labelFmt), body: String(input.businessIdVerifications ?? 0) },
-    ]
   } else {
     // STAMP_CARD (default)
     loyaltyPoints = {
@@ -575,13 +519,9 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       balance: { string: progressValue },
     }
     secondaryLoyaltyPoints = {
-      label: formatLabel("TOTAL VISITS", labelFmt),
+      label: lbl("totalVisits", "TOTAL VISITS"),
       balance: { int: input.totalVisits },
     }
-    textModulesData = [
-      { id: "nextReward", header: formatLabel("NEXT REWARD", labelFmt), body: getWalletRewardText(input.templateConfig, input.rewardDescription) },
-      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
-    ]
   }
 
   const loyaltyObject: Record<string, unknown> = {

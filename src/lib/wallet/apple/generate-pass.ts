@@ -11,7 +11,7 @@ import {
   WEB_SERVICE_BASE_URL,
 } from "./constants"
 import type { CardDesignData, CardType } from "../card-design"
-import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters, DEFAULT_HEADER_FIELDS, DEFAULT_SECONDARY_FIELDS } from "../card-design"
+import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters, getFieldConfig, splitFieldsForApple } from "../card-design"
 import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -284,87 +284,80 @@ export async function generateApplePass(
   const businessIdConfig = input.programType === "BUSINESS_ID" ? parseBusinessIdConfig(input.programConfig) : null
   const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
-  // Field data map — all labels go through formatLabel
-  const fieldData: Record<string, { key: string; label: string; value: string }> = {
-    organization: { key: "organization", label: formatLabel("ORG", labelFmt), value: input.organizationName },
-    memberNumber: { key: "memberNumber", label: formatLabel("MEMBER #", labelFmt), value: `${input.totalVisits}` },
-    progress: { key: "progress", label: formatLabel(progressLabel, labelFmt), value: progressValue },
-    nextReward: { key: "nextReward", label: formatLabel("NEXT REWARD", labelFmt), value: input.rewardDescription },
-    totalVisits: { key: "totalVisits", label: formatLabel("TOTAL VISITS", labelFmt), value: `${input.totalVisits}` },
-    memberSince: { key: "memberSince", label: formatLabel("SINCE", labelFmt), value: memberSinceFormatted },
-    registeredAt: { key: "registeredAt", label: formatLabel("REGISTERED", labelFmt), value: registeredAtShort },
-    customerName: { key: "customerName", label: formatLabel("NAME", labelFmt), value: input.customerName },
-    // COUPON fields
-    discount: { key: "discount", label: formatLabel("DISCOUNT", labelFmt), value: couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription },
-    validUntil: { key: "validUntil", label: formatLabel("VALID UNTIL", labelFmt), value: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
-    couponCode: { key: "couponCode", label: formatLabel("CODE", labelFmt), value: couponConfig?.couponCode ?? "" },
-    // TIER/MEMBERSHIP fields
-    tierName: { key: "tierName", label: formatLabel("TIER", labelFmt), value: membershipConfig?.membershipTier ?? "" },
-    benefits: { key: "benefits", label: formatLabel("BENEFITS", labelFmt), value: membershipConfig?.benefits ?? "" },
-    // POINTS fields
-    pointsBalance: { key: "pointsBalance", label: formatLabel("POINTS", labelFmt), value: String(input.pointsBalance ?? 0) },
-    nextRewardPoints: { key: "nextRewardPoints", label: formatLabel("NEXT REWARD", labelFmt), value: cheapestItem ? `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` : "" },
-    earnRate: { key: "earnRate", label: formatLabel("EARN RATE", labelFmt), value: pointsConfig ? `${pointsConfig.pointsPerVisit} pts/visit` : "" },
-    // PREPAID fields
-    remaining: { key: "remaining", label: formatLabel("REMAINING", labelFmt), value: `${input.remainingUses ?? 0} / ${prepaidConfig?.totalUses ?? 0}` },
-    prepaidValidUntil: { key: "prepaidValidUntil", label: formatLabel("VALID UNTIL", labelFmt), value: prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
-    totalUsed: { key: "totalUsed", label: formatLabel("TOTAL USED", labelFmt), value: String(input.totalVisits) },
-    // GIFT_CARD fields
-    giftBalance: { key: "giftBalance", label: formatLabel("BALANCE", labelFmt), value: giftCardConfig ? `${giftCardConfig.currency} ${((input.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
-    giftInitial: { key: "giftInitial", label: formatLabel("INITIAL VALUE", labelFmt), value: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
-    // TICKET fields
-    eventName: { key: "eventName", label: formatLabel("EVENT", labelFmt), value: ticketConfig?.eventName ?? "" },
-    eventDate: { key: "eventDate", label: formatLabel("DATE", labelFmt), value: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
-    eventVenue: { key: "eventVenue", label: formatLabel("VENUE", labelFmt), value: ticketConfig?.eventVenue ?? "" },
-    scanStatus: { key: "scanStatus", label: formatLabel("SCANS", labelFmt), value: `${input.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
-    // ACCESS fields
-    accessLabel: { key: "accessLabel", label: formatLabel(accessConfig?.accessLabel ?? "ACCESS", labelFmt), value: "Granted" },
-    accessGranted: { key: "accessGranted", label: formatLabel("TOTAL GRANTED", labelFmt), value: String(input.accessTotalGranted ?? 0) },
-    // TRANSIT fields
-    transitType: { key: "transitType", label: formatLabel("TYPE", labelFmt), value: (transitConfig?.transitType ?? "other").toUpperCase() },
-    origin: { key: "origin", label: formatLabel("FROM", labelFmt), value: transitConfig?.originName ?? "" },
-    destination: { key: "destination", label: formatLabel("TO", labelFmt), value: transitConfig?.destinationName ?? "" },
-    boardingStatus: { key: "boardingStatus", label: formatLabel("STATUS", labelFmt), value: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
-    // BUSINESS_ID fields
-    idLabel: { key: "idLabel", label: formatLabel(businessIdConfig?.idLabel ?? "ID", labelFmt), value: input.customerName },
-    verifications: { key: "verifications", label: formatLabel("VERIFICATIONS", labelFmt), value: String(input.businessIdVerifications ?? 0) },
-    // Generic fields
-    title: { key: "title", label: formatLabel("TITLE", labelFmt), value: input.programName ?? "" },
-    description: { key: "description", label: formatLabel("DESCRIPTION", labelFmt), value: input.rewardDescription },
-    contactName: { key: "contactName", label: formatLabel("NAME", labelFmt), value: input.customerName },
+  // Custom field labels from editorConfig
+  const customLabels = stripFilters.fieldLabels ?? {}
+  const lbl = (fieldId: string, defaultLabel: string) => {
+    const custom = customLabels[fieldId]
+    return formatLabel(custom ?? defaultLabel, labelFmt)
   }
 
-  // Type-specific field overrides for new pass types
-  // STAMP/POINTS use user-configurable header + secondary fields from editorConfig.
-  // When stamp grid is active, skip the primary progress field — the grid already
-  // visualises progress and Apple renders primary fields as large text ON TOP of the
-  // strip image, making both unreadable when they overlap.
-  const appleLayout = (() => {
-    switch (input.programType) {
-      case "GIFT_CARD":
-        return { header: ["organization"], primary: ["giftBalance"], secondary: ["giftInitial", "customerName"], auxiliary: [] }
-      case "TICKET":
-        return { header: ["scanStatus"], primary: ["eventName"], secondary: ["eventDate", "eventVenue", "customerName"], auxiliary: [] }
-      case "ACCESS":
-        return { header: ["accessGranted"], primary: ["accessLabel"], secondary: ["customerName", "memberSince"], auxiliary: [] }
-      case "TRANSIT":
-        return { header: ["boardingStatus"], primary: ["origin"], secondary: ["destination", "transitType"], auxiliary: ["customerName"] }
-      case "BUSINESS_ID":
-        return { header: ["verifications"], primary: ["idLabel"], secondary: ["organization", "memberSince"], auxiliary: [] }
-      default: {
-        // User-configurable fields for STAMP/POINTS cards
-        const customHeader = stripFilters.headerFields ?? DEFAULT_HEADER_FIELDS
-        const customSecondary = stripFilters.secondaryFields ?? DEFAULT_SECONDARY_FIELDS
-        return {
-          header: customHeader,
-          // Progress is baked into the strip image — no primary text field needed
-          primary: showStrip ? [] : layout.apple.primary,
-          secondary: customSecondary,
-          auxiliary: [],
-        }
-      }
-    }
-  })()
+  // Field data map — all labels go through formatLabel with custom label overrides
+  const fieldData: Record<string, { key: string; label: string; value: string }> = {
+    organization: { key: "organization", label: lbl("organization", "ORG"), value: input.organizationName },
+    memberNumber: { key: "memberNumber", label: lbl("memberNumber", "MEMBER #"), value: `${input.totalVisits}` },
+    progress: { key: "progress", label: lbl("progress", progressLabel), value: progressValue },
+    nextReward: { key: "nextReward", label: lbl("nextReward", "NEXT REWARD"), value: input.rewardDescription },
+    totalVisits: { key: "totalVisits", label: lbl("totalVisits", "TOTAL VISITS"), value: `${input.totalVisits}` },
+    memberSince: { key: "memberSince", label: lbl("memberSince", "SINCE"), value: memberSinceFormatted },
+    registeredAt: { key: "registeredAt", label: lbl("registeredAt", "REGISTERED"), value: registeredAtShort },
+    customerName: { key: "customerName", label: lbl("customerName", "NAME"), value: input.customerName },
+    // COUPON fields
+    discount: { key: "discount", label: lbl("discount", "DISCOUNT"), value: couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription },
+    validUntil: { key: "validUntil", label: lbl("validUntil", "VALID UNTIL"), value: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+    couponCode: { key: "couponCode", label: lbl("couponCode", "CODE"), value: couponConfig?.couponCode ?? "" },
+    // TIER/MEMBERSHIP fields
+    tierName: { key: "tierName", label: lbl("tierName", "TIER"), value: membershipConfig?.membershipTier ?? "" },
+    benefits: { key: "benefits", label: lbl("benefits", "BENEFITS"), value: membershipConfig?.benefits ?? "" },
+    // POINTS fields
+    pointsBalance: { key: "pointsBalance", label: lbl("pointsBalance", "POINTS"), value: String(input.pointsBalance ?? 0) },
+    nextRewardPoints: { key: "nextRewardPoints", label: lbl("nextRewardPoints", "NEXT REWARD"), value: cheapestItem ? `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` : "" },
+    earnRate: { key: "earnRate", label: lbl("earnRate", "EARN RATE"), value: pointsConfig ? `${pointsConfig.pointsPerVisit} pts/visit` : "" },
+    // PREPAID fields
+    remaining: { key: "remaining", label: lbl("remaining", "REMAINING"), value: `${input.remainingUses ?? 0} / ${prepaidConfig?.totalUses ?? 0}` },
+    prepaidValidUntil: { key: "prepaidValidUntil", label: lbl("prepaidValidUntil", "VALID UNTIL"), value: prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+    totalUsed: { key: "totalUsed", label: lbl("totalUsed", "TOTAL USED"), value: String(input.totalVisits) },
+    // GIFT_CARD fields
+    giftBalance: { key: "giftBalance", label: lbl("giftBalance", "BALANCE"), value: giftCardConfig ? `${giftCardConfig.currency} ${((input.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
+    giftInitial: { key: "giftInitial", label: lbl("giftInitial", "INITIAL VALUE"), value: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
+    // TICKET fields
+    eventName: { key: "eventName", label: lbl("eventName", "EVENT"), value: ticketConfig?.eventName ?? "" },
+    eventDate: { key: "eventDate", label: lbl("eventDate", "DATE"), value: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
+    eventVenue: { key: "eventVenue", label: lbl("eventVenue", "VENUE"), value: ticketConfig?.eventVenue ?? "" },
+    scanStatus: { key: "scanStatus", label: lbl("scanStatus", "SCANS"), value: `${input.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
+    // ACCESS fields
+    accessLabel: { key: "accessLabel", label: lbl("accessLabel", accessConfig?.accessLabel ?? "ACCESS"), value: "Granted" },
+    accessGranted: { key: "accessGranted", label: lbl("accessGranted", "TOTAL GRANTED"), value: String(input.accessTotalGranted ?? 0) },
+    // TRANSIT fields
+    transitType: { key: "transitType", label: lbl("transitType", "TYPE"), value: (transitConfig?.transitType ?? "other").toUpperCase() },
+    origin: { key: "origin", label: lbl("origin", "FROM"), value: transitConfig?.originName ?? "" },
+    destination: { key: "destination", label: lbl("destination", "TO"), value: transitConfig?.destinationName ?? "" },
+    boardingStatus: { key: "boardingStatus", label: lbl("boardingStatus", "STATUS"), value: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
+    // BUSINESS_ID fields
+    idLabel: { key: "idLabel", label: lbl("idLabel", businessIdConfig?.idLabel ?? "ID"), value: input.customerName },
+    verifications: { key: "verifications", label: lbl("verifications", "VERIFICATIONS"), value: String(input.businessIdVerifications ?? 0) },
+    // Generic fields
+    title: { key: "title", label: lbl("title", "TITLE"), value: input.programName ?? "" },
+    description: { key: "description", label: lbl("description", "DESCRIPTION"), value: input.rewardDescription },
+    contactName: { key: "contactName", label: lbl("contactName", "NAME"), value: input.customerName },
+  }
+
+  // User-configurable field layout for all pass types
+  // Unified fields list auto-distributes: first 2 → header, rest → secondary
+  // Falls back to legacy headerFields/secondaryFields, then per-type defaults
+  const fieldConfig = getFieldConfig(input.programType ?? "STAMP_CARD")
+  const unifiedFields = stripFilters.fields
+    ?? (stripFilters.headerFields || stripFilters.secondaryFields
+      ? [...(stripFilters.headerFields ?? fieldConfig.defaultHeader), ...(stripFilters.secondaryFields ?? fieldConfig.defaultSecondary)]
+      : null)
+    ?? fieldConfig.defaultFields
+  const appleSplit = splitFieldsForApple(unifiedFields)
+  const appleLayout = {
+    header: appleSplit.header,
+    // For stamp types, progress is baked into the strip image — no primary text field
+    primary: (isStampType && showStrip) ? [] : layout.apple.primary,
+    secondary: appleSplit.secondary,
+    auxiliary: appleSplit.auxiliary,
+  }
 
   // Populate header fields
   for (const fieldId of appleLayout.header) {

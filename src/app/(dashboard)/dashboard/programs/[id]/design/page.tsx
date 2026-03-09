@@ -75,6 +75,8 @@ export default async function ProgramDesignPage(props: {
         logoGoogleZoom: stripFilters.logoGoogleZoom,
         headerFields: stripFilters.headerFields,
         secondaryFields: stripFilters.secondaryFields,
+        fields: stripFilters.fields,
+        fieldLabels: stripFilters.fieldLabels,
         useStampGrid,
         generatedStripApple: passDesign.generatedStripApple ?? null,
         generatedStripGoogle: passDesign.generatedStripGoogle ?? null,

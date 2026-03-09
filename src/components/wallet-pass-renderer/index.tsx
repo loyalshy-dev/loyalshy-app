@@ -6,8 +6,8 @@ import {
   formatProgressValue,
   formatLabel,
   getFieldLayout,
-  DEFAULT_HEADER_FIELDS,
-  DEFAULT_SECONDARY_FIELDS,
+  getFieldConfig,
+  splitFieldsForApple,
   type CardType,
   type PatternStyle,
   type ProgressStyle,
@@ -45,8 +45,10 @@ export type WalletPassDesign = {
   labelColor?: string | null
   logoAppleZoom?: number   // 1–3, default 1
   logoGoogleZoom?: number  // 1–3, default 1
-  headerFields?: string[] | null   // custom header fields (null = default)
-  secondaryFields?: string[] | null // custom secondary fields (null = default)
+  headerFields?: string[] | null   // legacy — use `fields` instead
+  secondaryFields?: string[] | null // legacy — use `fields` instead
+  fields?: string[] | null  // unified ordered field list (null = default). Apple: first 2 → header, rest → secondary. Google: auto 1-3-2.
+  fieldLabels?: Record<string, string> | null // custom label overrides per field ID
 }
 
 type WalletPassRendererProps = {
@@ -170,28 +172,34 @@ export function WalletPassRenderer({
   const defaultLayout = getFieldLayout(cardType)
   const isApple = format === "apple"
 
-  // Custom field layout: user-configurable header + secondary for STAMP/POINTS
+  // Unified field list → auto-split for Apple (first 2 = header, rest = secondary)
   const isStampGrid = design.useStampGrid && design.showStrip
   const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
-  const layout = isStampType
-    ? {
-        ...defaultLayout,
-        apple: {
-          header: design.headerFields ?? DEFAULT_HEADER_FIELDS,
-          // Progress is baked into the strip image — no primary text field needed
-          primary: design.showStrip ? [] : defaultLayout.apple.primary,
-          secondary: design.secondaryFields ?? DEFAULT_SECONDARY_FIELDS,
-          auxiliary: [],
-        },
-      }
-    : defaultLayout
+  const fieldConfig = getFieldConfig(cardType)
+  // Resolve unified field list: prefer `fields`, fall back to legacy header+secondary, then defaults
+  const unifiedFields = design.fields
+    ?? (design.headerFields || design.secondaryFields
+      ? [...(design.headerFields ?? fieldConfig.defaultHeader), ...(design.secondaryFields ?? fieldConfig.defaultSecondary)]
+      : null)
+    ?? fieldConfig.defaultFields
+  const appleSplit = splitFieldsForApple(unifiedFields)
+  const layout = {
+    ...defaultLayout,
+    apple: {
+      header: appleSplit.header,
+      // For stamp types with strip image, progress is baked in — no primary text field needed
+      primary: (isStampType && design.showStrip) ? [] : defaultLayout.apple.primary,
+      secondary: appleSplit.secondary,
+      auxiliary: appleSplit.auxiliary,
+    },
+  }
   const resolvedLogo = isApple
     ? (logoAppleUrl ?? logoUrl ?? null)
     : (logoGoogleUrl ?? logoUrl ?? null)
   const useStrip = design.showStrip
   const stripHeight = isTicket && isApple ? 100 : isApple ? 130 : 125
 
-  // Dimensions
+  // Dimensions — Google cards grow in height with content (no fixed height)
   const CARD_HEIGHT = isApple ? APPLE_CARD_HEIGHT : GOOGLE_CARD_HEIGHT
   const baseW = width ?? CARD_WIDTH
   const baseH = height ?? CARD_HEIGHT
@@ -199,7 +207,7 @@ export function WalletPassRenderer({
   // Scale for compact mode
   const scale = compact ? Math.min(baseW / CARD_WIDTH, baseH / CARD_HEIGHT, 1) : 1
   const outerW = compact ? baseW : CARD_WIDTH
-  const outerH = compact ? baseH : CARD_HEIGHT
+  const outerH = compact ? baseH : (isApple ? CARD_HEIGHT : undefined)
 
   // Build field values — stamp/points only
   const progressText = cardType === "STAMP" || cardType === "POINTS"
@@ -221,84 +229,121 @@ export function WalletPassRenderer({
     : hasReward ? "STATUS" : "PROGRESS"
 
   function resolveField(name: string) {
+    let resolved: { label: string; value: string }
     switch (name) {
       case "restaurant":
       case "organization":
-        return { label: lbl("ORGANIZATION"), value: organizationName }
+        resolved = { label: lbl("ORGANIZATION"), value: organizationName }
+        break
       // Stamp/Points fields
       case "progress":
-        return { label: lbl(progressLabel), value: progressText }
+        resolved = { label: lbl(progressLabel), value: progressText }
+        break
       case "nextReward":
-        return { label: lbl("NEXT REWARD"), value: rewardDescription }
+        resolved = { label: lbl("NEXT REWARD"), value: rewardDescription }
+        break
       case "totalVisits":
-        return { label: lbl("TOTAL VISITS"), value: `${totalVisits}` }
+        resolved = { label: lbl("TOTAL VISITS"), value: `${totalVisits}` }
+        break
       case "memberNumber":
-        return { label: lbl("MEMBER"), value: `#${totalVisits}` }
+        resolved = { label: lbl("MEMBER"), value: `#${totalVisits}` }
+        break
       // Coupon fields
       case "discount":
-        return { label: lbl("DISCOUNT"), value: discountText ?? rewardDescription }
+        resolved = { label: lbl("DISCOUNT"), value: discountText ?? rewardDescription }
+        break
       case "validUntil":
-        return { label: lbl("VALID UNTIL"), value: validUntil ?? "—" }
+        resolved = { label: lbl("VALID UNTIL"), value: validUntil ?? "—" }
+        break
       case "couponCode":
-        return { label: lbl("CODE"), value: couponCode ?? "—" }
+        resolved = { label: lbl("CODE"), value: couponCode ?? "—" }
+        break
       // Membership fields
       case "tierName":
-        return { label: lbl("TIER"), value: tierName ?? "Member" }
+        resolved = { label: lbl("TIER"), value: tierName ?? "Member" }
+        break
       case "benefits":
-        return { label: lbl("BENEFITS"), value: benefits ?? "—" }
+        resolved = { label: lbl("BENEFITS"), value: benefits ?? "—" }
+        break
       // Prepaid fields
       case "remaining":
-        return { label: lbl("REMAINING"), value: `${remainingUses ?? 0} / ${totalUses ?? 0}` }
+        resolved = { label: lbl("REMAINING"), value: `${remainingUses ?? 0} / ${totalUses ?? 0}` }
+        break
       case "prepaidValidUntil":
-        return { label: lbl("VALID UNTIL"), value: prepaidValidUntil ?? "No expiry" }
+        resolved = { label: lbl("VALID UNTIL"), value: prepaidValidUntil ?? "No expiry" }
+        break
       case "totalUsed":
-        return { label: lbl("TOTAL USED"), value: `${currentVisits}` }
+        resolved = { label: lbl("TOTAL USED"), value: `${currentVisits}` }
+        break
       // Gift card fields
       case "giftBalance":
-        return { label: lbl("BALANCE"), value: giftBalance ?? "$0.00" }
+        resolved = { label: lbl("BALANCE"), value: giftBalance ?? "$0.00" }
+        break
       case "giftInitial":
-        return { label: lbl("INITIAL VALUE"), value: giftInitialValue ?? "—" }
+        resolved = { label: lbl("INITIAL VALUE"), value: giftInitialValue ?? "—" }
+        break
       // Ticket fields
       case "eventName":
-        return { label: lbl("EVENT"), value: eventName ?? programName }
+        resolved = { label: lbl("EVENT"), value: eventName ?? programName }
+        break
       case "eventDate":
-        return { label: lbl("DATE"), value: eventDate ?? "—" }
+        resolved = { label: lbl("DATE"), value: eventDate ?? "—" }
+        break
       case "eventVenue":
-        return { label: lbl("VENUE"), value: eventVenue ?? "—" }
+        resolved = { label: lbl("VENUE"), value: eventVenue ?? "—" }
+        break
       case "scanStatus":
-        return { label: lbl("SCANS"), value: scanStatus ?? "0 / 1" }
+        resolved = { label: lbl("SCANS"), value: scanStatus ?? "0 / 1" }
+        break
       // Access fields
       case "accessLabel":
-        return { label: lbl(accessLabel ?? "ACCESS"), value: "Granted" }
+        resolved = { label: lbl(accessLabel ?? "ACCESS"), value: "Granted" }
+        break
       case "accessGranted":
-        return { label: lbl("TOTAL GRANTED"), value: accessGranted ?? "0" }
+        resolved = { label: lbl("TOTAL GRANTED"), value: accessGranted ?? "0" }
+        break
       // Transit fields
       case "transitType":
-        return { label: lbl("TYPE"), value: transitType ?? "OTHER" }
+        resolved = { label: lbl("TYPE"), value: transitType ?? "OTHER" }
+        break
       case "origin":
-        return { label: lbl("FROM"), value: originName ?? "—" }
+        resolved = { label: lbl("FROM"), value: originName ?? "—" }
+        break
       case "destination":
-        return { label: lbl("TO"), value: destinationName ?? "—" }
+        resolved = { label: lbl("TO"), value: destinationName ?? "—" }
+        break
       case "boardingStatus":
-        return { label: lbl("STATUS"), value: boardingStatus ?? "NOT BOARDED" }
+        resolved = { label: lbl("STATUS"), value: boardingStatus ?? "NOT BOARDED" }
+        break
       // Business ID fields
       case "idLabel":
-        return { label: lbl(idLabel ?? "ID"), value: customerName }
+        resolved = { label: lbl(idLabel ?? "ID"), value: customerName }
+        break
       case "verifications":
-        return { label: lbl("VERIFICATIONS"), value: verifications ?? "0" }
+        resolved = { label: lbl("VERIFICATIONS"), value: verifications ?? "0" }
+        break
       // Shared fields
       case "customerName":
-        return { label: lbl("NAME"), value: customerName }
+        resolved = { label: lbl("NAME"), value: customerName }
+        break
       case "memberSince":
-        return { label: lbl("MEMBER SINCE"), value: memberSince }
+        resolved = { label: lbl("MEMBER SINCE"), value: memberSince }
+        break
       case "registeredAt": {
         const now = new Date()
         const pad = (n: number) => String(n).padStart(2, "0")
-        return { label: lbl("REGISTERED"), value: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}` }
+        resolved = { label: lbl("REGISTERED"), value: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}` }
+        break
       }
       default:
-        return { label: name, value: "—" }
+        resolved = { label: name, value: "—" }
     }
+    // Apply custom label override if provided
+    const customLabel = design.fieldLabels?.[name]
+    if (customLabel) {
+      resolved = { ...resolved, label: lbl(customLabel) }
+    }
+    return resolved
   }
 
   const headerFields = layout.apple.header.map(resolveField)
@@ -306,20 +351,13 @@ export function WalletPassRenderer({
   const secondaryFields = layout.apple.secondary.map(resolveField)
   const auxiliaryFields = layout.apple.auxiliary.map(resolveField)
 
-  // Google: flatten header + secondary into rows
-  // Filter out fields that Google handles natively (not as text rows):
-  // - "organization" / "memberNumber": shown in Google header
-  // - "progress" / "totalVisits": shown via Google's native loyaltyPoints widget (stamp/points only)
-  const googleExclude = new Set(["organization", "memberNumber"])
+  // Google: use full unified field list (not Apple-truncated layout)
+  // Only exclude "progress" for stamp/points — it's the native loyaltyPoints widget
+  const googleExclude = new Set<string>()
   if (isStampType) {
     googleExclude.add("progress")
-    googleExclude.add("totalVisits")
   }
-  const googleFieldNames = [
-    ...layout.apple.header,
-    ...layout.apple.secondary,
-    ...layout.apple.auxiliary,
-  ].filter((name) => !googleExclude.has(name))
+  const googleFieldNames = unifiedFields.filter((name) => !googleExclude.has(name))
   const googleFields = googleFieldNames.map(resolveField)
 
   // Hide org name text next to logo (Apple: no text beside logo; Google: only shows circular logo)
@@ -720,7 +758,8 @@ export function WalletPassRenderer({
       <div
         style={{
           width: CARD_WIDTH,
-          height: CARD_HEIGHT,
+          // Apple: fixed height; Google: auto height (grows with rows)
+          ...(isApple ? { height: CARD_HEIGHT } : { minHeight: 0 }),
           borderRadius: isTicket && isApple ? "0px" : isApple ? BORDER_RADIUS : 20,
           overflow: "hidden",
           backgroundColor: design.primaryColor,
@@ -876,10 +915,25 @@ function GoogleFieldRows({
   textColor: string
   labelColor?: string | null
 }) {
-  // Render fields in rows of 2 (matching real Google Wallet layout)
+  // Google Wallet layout: program name is row 1 (rendered separately above).
+  // Text module fields fill rows as 3-then-3 pattern (max 3 per row).
   const rows: { label: string; value: string }[][] = []
-  for (let i = 0; i < fields.length; i += 2) {
-    rows.push(fields.slice(i, i + 2))
+  const n = fields.length
+  if (n === 1) {
+    rows.push(fields.slice(0, 1))
+  } else if (n === 2) {
+    rows.push(fields.slice(0, 2))
+  } else if (n === 3) {
+    rows.push(fields.slice(0, 3))
+  } else if (n === 4) {
+    rows.push(fields.slice(0, 3))
+    rows.push(fields.slice(3, 4))
+  } else if (n === 5) {
+    rows.push(fields.slice(0, 3))
+    rows.push(fields.slice(3, 5))
+  } else if (n >= 6) {
+    rows.push(fields.slice(0, 3))
+    rows.push(fields.slice(3, 6))
   }
 
   return (
@@ -887,7 +941,7 @@ function GoogleFieldRows({
       {rows.map((row, ri) => (
         <div key={ri} style={{ display: "flex", gap: 16, marginBottom: ri < rows.length - 1 ? 10 : 0 }}>
           {row.map((field, fi) => (
-            <div key={fi} style={{ flex: 1, textAlign: fi === 1 ? "right" : undefined }}>
+            <div key={fi} style={{ flex: 1, textAlign: row.length === 2 && fi === 1 ? "right" : row.length === 3 && fi === 2 ? "right" : row.length === 3 && fi === 1 ? "center" : undefined }}>
               <div
                 style={{
                   fontSize: 10,

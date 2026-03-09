@@ -18,8 +18,12 @@ type FieldSectionProps = {
 export function FieldSection({ fields, textColor, labelColor, format = "apple", small }: FieldSectionProps) {
   if (fields.length === 0) return null
 
-  const labelSize = small ? 9 : (format === "google" ? 10 : 11)
-  const valueSize = small ? 14 : (format === "google" ? 12 : 22)
+  // Apple: scale text down as more fields are added to prevent overflow
+  const n = fields.length
+  const appleValueSize = n <= 2 ? 22 : n === 3 ? 18 : 14
+  const appleLabelSize = n <= 2 ? 11 : n === 3 ? 10 : 9
+  const labelSize = small ? 9 : (format === "google" ? 10 : appleLabelSize)
+  const valueSize = small ? 14 : (format === "google" ? 12 : appleValueSize)
 
   return (
     <div

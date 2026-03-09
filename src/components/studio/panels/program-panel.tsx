@@ -1,8 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
-import { STAMP_CARD_AVAILABLE_FIELDS, DEFAULT_HEADER_FIELDS, DEFAULT_SECONDARY_FIELDS } from "@/lib/wallet/card-design"
+import { getFieldConfig } from "@/lib/wallet/card-design"
 
 // ─── Shared field components ─────────────────────────────────
 
@@ -1039,7 +1040,7 @@ function PrizeRevealFields({ store }: { store: CardDesignStoreApi }) {
   )
 }
 
-// ─── Card Fields (STAMP/POINTS only) ─────────────────────────
+// ─── Card Fields (all pass types) ────────────────────────────
 
 function FieldPicker({
   label,
@@ -1048,6 +1049,9 @@ function FieldPicker({
   value,
   onChange,
   usedElsewhere,
+  availableFields,
+  fieldLabels,
+  onLabelChange,
 }: {
   label: string
   description: string
@@ -1055,8 +1059,14 @@ function FieldPicker({
   value: string[]
   onChange: (fields: string[]) => void
   usedElsewhere: string[]
+  availableFields: readonly { id: string; label: string }[]
+  fieldLabels: Record<string, string>
+  onLabelChange: (fieldId: string, label: string) => void
 }) {
-  const available = STAMP_CARD_AVAILABLE_FIELDS.filter(
+  const [editingLabel, setEditingLabel] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState("")
+
+  const available = availableFields.filter(
     (f) => !value.includes(f.id) && !usedElsewhere.includes(f.id)
   )
 
@@ -1079,8 +1089,29 @@ function FieldPicker({
     onChange(updated)
   }
 
-  const fieldLabel = (id: string) =>
-    STAMP_CARD_AVAILABLE_FIELDS.find((f) => f.id === id)?.label ?? id
+  function getFieldDefaultLabel(id: string) {
+    return availableFields.find((f) => f.id === id)?.label ?? id
+  }
+
+  function getDisplayLabel(id: string) {
+    return fieldLabels[id] ?? getFieldDefaultLabel(id)
+  }
+
+  function startEditLabel(id: string) {
+    setEditingLabel(id)
+    setEditValue(fieldLabels[id] ?? getFieldDefaultLabel(id))
+  }
+
+  function commitLabelEdit(id: string) {
+    const trimmed = editValue.trim()
+    if (trimmed && trimmed !== getFieldDefaultLabel(id)) {
+      onLabelChange(id, trimmed)
+    } else if (!trimmed || trimmed === getFieldDefaultLabel(id)) {
+      // Reset to default by removing the override
+      onLabelChange(id, "")
+    }
+    setEditingLabel(null)
+  }
 
   return (
     <div style={{ marginBottom: 12 }}>
@@ -1103,7 +1134,42 @@ function FieldPicker({
               fontSize: 12,
             }}
           >
-            <span style={{ flex: 1, color: "var(--foreground)" }}>{fieldLabel(id)}</span>
+            {editingLabel === id ? (
+              <input
+                autoFocus
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={() => commitLabelEdit(id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") commitLabelEdit(id)
+                  if (e.key === "Escape") setEditingLabel(null)
+                }}
+                maxLength={50}
+                style={{
+                  flex: 1,
+                  padding: "2px 4px",
+                  borderRadius: 4,
+                  border: "1px solid var(--primary)",
+                  backgroundColor: "var(--background)",
+                  fontSize: 12,
+                  color: "var(--foreground)",
+                  outline: "none",
+                }}
+              />
+            ) : (
+              <span
+                style={{ flex: 1, color: "var(--foreground)", cursor: "text" }}
+                title="Click to rename label"
+                onClick={() => startEditLabel(id)}
+              >
+                {getDisplayLabel(id)}
+                {fieldLabels[id] && (
+                  <span style={{ fontSize: 10, color: "var(--muted-foreground)", marginLeft: 4 }}>
+                    (custom)
+                  </span>
+                )}
+              </span>
+            )}
             <button
               onClick={() => moveField(i, -1)}
               disabled={i === 0}
@@ -1116,7 +1182,7 @@ function FieldPicker({
                 fontSize: 12,
                 lineHeight: 1,
               }}
-              aria-label={`Move ${fieldLabel(id)} up`}
+              aria-label={`Move ${getDisplayLabel(id)} up`}
             >
               ↑
             </button>
@@ -1132,7 +1198,7 @@ function FieldPicker({
                 fontSize: 12,
                 lineHeight: 1,
               }}
-              aria-label={`Move ${fieldLabel(id)} down`}
+              aria-label={`Move ${getDisplayLabel(id)} down`}
             >
               ↓
             </button>
@@ -1147,7 +1213,7 @@ function FieldPicker({
                 fontSize: 14,
                 lineHeight: 1,
               }}
-              aria-label={`Remove ${fieldLabel(id)}`}
+              aria-label={`Remove ${getDisplayLabel(id)}`}
             >
               ×
             </button>
@@ -1175,7 +1241,7 @@ function FieldPicker({
         >
           <option value="">+ Add field...</option>
           {available.map((f) => (
-            <option key={f.id} value={f.id}>{f.label}</option>
+            <option key={f.id} value={f.id}>{fieldLabels[f.id] ?? f.label}</option>
           ))}
         </select>
       )}
@@ -1183,42 +1249,68 @@ function FieldPicker({
   )
 }
 
-function CardFieldsSection({ store }: { store: CardDesignStoreApi }) {
+function CardFieldsSection({ store, passType }: { store: CardDesignStoreApi; passType: string }) {
+  const rawFields = useStore(store, (s) => s.wallet.fields)
+  const rawFieldLabels = useStore(store, (s) => s.wallet.fieldLabels)
+  // Legacy fallback: merge old headerFields + secondaryFields if `fields` is null
   const rawHeader = useStore(store, (s) => s.wallet.headerFields)
   const rawSecondary = useStore(store, (s) => s.wallet.secondaryFields)
-  const headerFields = rawHeader ?? [...DEFAULT_HEADER_FIELDS]
-  const secondaryFields = rawSecondary ?? [...DEFAULT_SECONDARY_FIELDS]
   const setWallet = store.getState().setWalletField
+
+  const fieldConfig = getFieldConfig(passType)
+  const fields = rawFields
+    ?? (rawHeader || rawSecondary
+      ? [...(rawHeader ?? fieldConfig.defaultHeader), ...(rawSecondary ?? fieldConfig.defaultSecondary)]
+      : null)
+    ?? [...fieldConfig.defaultFields]
+  const fieldLabels = rawFieldLabels ?? {}
+
+  function handleFieldsChange(updated: string[]) {
+    setWallet("fields", updated)
+    // Clear legacy fields so unified `fields` takes precedence
+    setWallet("headerFields", null)
+    setWallet("secondaryFields", null)
+  }
+
+  function handleLabelChange(fieldId: string, newLabel: string) {
+    const updated = { ...fieldLabels }
+    if (!newLabel) {
+      delete updated[fieldId]
+    } else {
+      updated[fieldId] = newLabel
+    }
+    setWallet("fieldLabels", Object.keys(updated).length > 0 ? updated : null)
+  }
 
   return (
     <>
       <SectionHeader>Card Fields</SectionHeader>
       <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 8 }}>
-        Choose which fields appear on the wallet pass.
+        Choose which fields appear on the wallet pass. Click a label to rename it.
+      </div>
+      <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginBottom: 8, lineHeight: 1.4 }}>
+        Apple: first 2 fields → header, rest → details row.
+        Google: auto-distributed in 1-3-2 row layout.
       </div>
 
       <FieldPicker
-        label="Header (top right)"
-        description="Max 2 fields. Space is limited."
-        maxFields={2}
-        value={headerFields}
-        onChange={(fields) => setWallet("headerFields", fields)}
-        usedElsewhere={secondaryFields}
-      />
-
-      <FieldPicker
-        label="Details (below strip)"
-        description="Max 4 fields shown in a row."
-        maxFields={4}
-        value={secondaryFields}
-        onChange={(fields) => setWallet("secondaryFields", fields)}
-        usedElsewhere={headerFields}
+        label="Visible Fields"
+        description="Up to 6 fields. Drag to reorder."
+        maxFields={6}
+        value={fields}
+        onChange={handleFieldsChange}
+        usedElsewhere={[]}
+        availableFields={fieldConfig.availableFields}
+        fieldLabels={fieldLabels}
+        onLabelChange={handleLabelChange}
       />
 
       <button
         onClick={() => {
+          setWallet("fields", null)
           setWallet("headerFields", null)
           setWallet("secondaryFields", null)
+          setWallet("fieldLabels", null)
         }}
         style={{
           fontSize: 11,
@@ -1276,9 +1368,7 @@ export function ProgramPanel({ store, passType }: Props) {
       {passType === "TRANSIT" && <TransitFields store={store} />}
       {passType === "BUSINESS_ID" && <BusinessIdFields store={store} />}
 
-      {(passType === "STAMP_CARD" || passType === "POINTS") && (
-        <CardFieldsSection store={store} />
-      )}
+      <CardFieldsSection store={store} passType={passType} />
 
       <ScheduleFields store={store} />
 

@@ -7,7 +7,7 @@ import {
   GOOGLE_WALLET_ISSUER_ID,
   buildPassInstanceObjectId,
 } from "./constants"
-import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig } from "../card-design"
+import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig } from "../card-design"
 import type { ProgressStyle, LabelFormat } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
@@ -53,6 +53,8 @@ type GooglePassUpdateData = {
   businessIdVerifications?: number
   // Pass instance status (for coupon redeemed display)
   passInstanceStatus?: string
+  // Editor config for custom field labels
+  editorConfig?: unknown
 }
 
 // ─── Update Google Wallet Pass ──────────────────────────────
@@ -77,11 +79,7 @@ async function patchGoogleWalletObject(
     year: "numeric",
   })
 
-  // Type-dispatch: build type-specific loyalty points and text modules
-  let loyaltyPoints: Record<string, unknown>
-  let secondaryLoyaltyPoints: Record<string, unknown>
-  let textModulesData: Record<string, unknown>[]
-
+  // Parse type-specific config
   const couponConfig = data.passType === "COUPON" ? parseCouponConfig(data.templateConfig) : null
   const membershipConfig = data.passType === "MEMBERSHIP" ? parseMembershipConfig(data.templateConfig) : null
   const pointsConfig = data.passType === "POINTS" ? parsePointsConfig(data.templateConfig) : null
@@ -91,146 +89,128 @@ async function patchGoogleWalletObject(
   const accessConfig = data.passType === "ACCESS" ? parseAccessConfig(data.templateConfig) : null
   const transitConfig = data.passType === "TRANSIT" ? parseTransitConfig(data.templateConfig) : null
   const businessIdConfig = data.passType === "BUSINESS_ID" ? parseBusinessIdConfig(data.templateConfig) : null
+  const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
+
+  // Custom field labels from editorConfig
+  const stripFiltersUpd = parseStripFilters(data.editorConfig)
+  const customLabels = stripFiltersUpd.fieldLabels ?? {}
+  const lbl = (fieldId: string, defaultLabel: string) => {
+    const custom = customLabels[fieldId]
+    return formatLabel(custom ?? defaultLabel, labelFmt)
+  }
+
+  // Coupon status-aware values
+  const isRedeemed = data.passInstanceStatus === "COMPLETED"
+  const couponPrizeText = couponConfig ? getWalletRewardText(data.templateConfig, formatCouponValue(couponConfig)) : ""
+  const couponHasPrizes = couponConfig ? couponPrizeText !== formatCouponValue(couponConfig) : false
+  const couponDiscountLabel = isRedeemed ? "REDEEMED" : (data.revealedPrize ? "YOUR PRIZE" : (couponHasPrizes ? "PRIZES" : "DISCOUNT"))
+  const couponDiscountValue = isRedeemed ? `${data.revealedPrize ?? couponPrizeText} (Used)` : (data.revealedPrize ?? couponPrizeText)
+  const couponValidUntilText = couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"
+
+  // Membership status
+  const membershipStatusText = data.passInstanceStatus === "SUSPENDED" ? "Suspended" : data.passInstanceStatus === "EXPIRED" ? "Expired" : "Active"
+
+  // All field data — IDs match field IDs from getFieldConfig
+  const allFieldData: Record<string, { id: string; header: string; body: string }> = {
+    organization: { id: "organization", header: lbl("organization", "ORG"), body: data.organizationName },
+    memberNumber: { id: "memberNumber", header: lbl("memberNumber", "MEMBER #"), body: `${data.totalVisits}` },
+    nextReward: { id: "nextReward", header: lbl("nextReward", data.revealedPrize ? "YOUR PRIZE" : "NEXT REWARD"), body: data.revealedPrize ?? data.rewardDescription },
+    totalVisits: { id: "totalVisits", header: lbl("totalVisits", "TOTAL VISITS"), body: `${data.totalVisits}` },
+    memberSince: { id: "memberSince", header: lbl("memberSince", "SINCE"), body: memberSinceFormatted },
+    registeredAt: { id: "registeredAt", header: lbl("registeredAt", "REGISTERED"), body: memberSinceFormatted },
+    customerName: { id: "customerName", header: lbl("customerName", "NAME"), body: data.contactName },
+    // COUPON
+    discount: { id: "discount", header: lbl("discount", couponDiscountLabel), body: couponDiscountValue },
+    validUntil: { id: "validUntil", header: lbl("validUntil", isRedeemed ? "STATUS" : "VALID UNTIL"), body: isRedeemed ? "Redeemed" : couponValidUntilText },
+    couponCode: { id: "couponCode", header: lbl("couponCode", "CODE"), body: couponConfig?.couponCode ?? "" },
+    // MEMBERSHIP
+    tierName: { id: "tierName", header: lbl("tierName", "TIER"), body: membershipConfig?.membershipTier ?? "" },
+    benefits: { id: "benefits", header: lbl("benefits", "BENEFITS"), body: membershipConfig?.benefits ?? "" },
+    // POINTS
+    earnRate: { id: "earnRate", header: lbl("earnRate", "EARN RATE"), body: pointsConfig ? `${pointsConfig.pointsPerVisit} points per visit` : "" },
+    // PREPAID
+    remaining: { id: "remaining", header: lbl("remaining", "REMAINING"), body: `${data.remainingUses ?? 0} / ${prepaidConfig?.totalUses ?? 0}` },
+    prepaidValidUntil: { id: "prepaidValidUntil", header: lbl("prepaidValidUntil", "VALID UNTIL"), body: prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+    totalUsed: { id: "totalUsed", header: lbl("totalUsed", "TOTAL USED"), body: String(data.totalVisits) },
+    // GIFT_CARD
+    giftBalance: { id: "giftBalance", header: lbl("giftBalance", "BALANCE"), body: giftCardConfig ? `${giftCardConfig.currency} ${((data.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
+    giftInitial: { id: "giftInitial", header: lbl("giftInitial", "INITIAL VALUE"), body: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
+    // TICKET
+    eventName: { id: "eventName", header: lbl("eventName", "EVENT"), body: ticketConfig?.eventName ?? "" },
+    eventDate: { id: "eventDate", header: lbl("eventDate", "DATE"), body: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
+    eventVenue: { id: "eventVenue", header: lbl("eventVenue", "VENUE"), body: ticketConfig?.eventVenue ?? "" },
+    scanStatus: { id: "scanStatus", header: lbl("scanStatus", "SCANS"), body: `${data.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
+    // ACCESS
+    accessLabel: { id: "accessLabel", header: lbl("accessLabel", accessConfig?.accessLabel ?? "ACCESS"), body: "Active" },
+    accessGranted: { id: "accessGranted", header: lbl("accessGranted", "TOTAL GRANTED"), body: String(data.accessTotalGranted ?? 0) },
+    // TRANSIT
+    transitType: { id: "transitType", header: lbl("transitType", "TYPE"), body: (transitConfig?.transitType ?? "other").toUpperCase() },
+    origin: { id: "origin", header: lbl("origin", "FROM"), body: transitConfig?.originName ?? "—" },
+    destination: { id: "destination", header: lbl("destination", "TO"), body: transitConfig?.destinationName ?? "—" },
+    boardingStatus: { id: "boardingStatus", header: lbl("boardingStatus", "STATUS"), body: data.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
+    // BUSINESS_ID
+    idLabel: { id: "idLabel", header: lbl("idLabel", businessIdConfig?.idLabel ?? "ID"), body: data.contactName },
+    verifications: { id: "verifications", header: lbl("verifications", "VERIFICATIONS"), body: String(data.businessIdVerifications ?? 0) },
+  }
+
+  // Build textModulesData from user-configured unified fields
+  const fieldConfig = getFieldConfig(data.passType ?? "STAMP_CARD")
+  const allUpdFields = stripFiltersUpd.fields
+    ?? (stripFiltersUpd.headerFields || stripFiltersUpd.secondaryFields
+      ? [...(stripFiltersUpd.headerFields ?? fieldConfig.defaultHeader), ...(stripFiltersUpd.secondaryFields ?? fieldConfig.defaultSecondary)]
+      : null)
+    ?? fieldConfig.defaultFields
+  // Only exclude "progress" for stamp/points — it's the native loyaltyPoints widget
+  const isStampTypeUpd = !data.passType || data.passType === "STAMP_CARD" || data.passType === "POINTS"
+  const googleExcludeUpd = new Set<string>()
+  if (isStampTypeUpd) {
+    googleExcludeUpd.add("progress")
+  }
+  const textModulesFieldIds = allUpdFields.filter((id) => !googleExcludeUpd.has(id))
+  const textModulesData = textModulesFieldIds
+    .map((id) => allFieldData[id])
+    .filter((f): f is { id: string; header: string; body: string } => f != null && f.body !== "")
+
+  // Type-specific loyalty points (native Google Wallet widget — not affected by field config)
+  let loyaltyPoints: Record<string, unknown>
+  let secondaryLoyaltyPoints: Record<string, unknown>
 
   if (data.passType === "COUPON" && couponConfig) {
-    const isRedeemed = data.passInstanceStatus === "COMPLETED"
-    const prizeText = getWalletRewardText(data.templateConfig, formatCouponValue(couponConfig))
-    const hasPrizes = prizeText !== formatCouponValue(couponConfig)
-    const discountLabel = isRedeemed ? "REDEEMED" : (data.revealedPrize ? "YOUR PRIZE" : (hasPrizes ? "PRIZES" : "DISCOUNT"))
-    const discountValue = isRedeemed
-      ? `${data.revealedPrize ?? prizeText} (Used)`
-      : (data.revealedPrize ?? prizeText)
-    loyaltyPoints = {
-      label: formatLabel(discountLabel, labelFmt),
-      balance: { string: discountValue },
-    }
-    const validUntilText = couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"
-    secondaryLoyaltyPoints = {
-      label: formatLabel(isRedeemed ? "STATUS" : "VALID UNTIL", labelFmt),
-      balance: { string: isRedeemed ? "Redeemed" : validUntilText },
-    }
-    textModulesData = [
-      { id: "discount", header: formatLabel(discountLabel, labelFmt), body: discountValue },
-      { id: "validUntil", header: formatLabel(isRedeemed ? "STATUS" : "VALID UNTIL", labelFmt), body: isRedeemed ? "Redeemed" : validUntilText },
-      ...(couponConfig.couponCode ? [{ id: "couponCode", header: formatLabel("CODE", labelFmt), body: couponConfig.couponCode }] : []),
-      { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
-    ]
+    loyaltyPoints = { label: lbl("discount", couponDiscountLabel), balance: { string: couponDiscountValue } }
+    secondaryLoyaltyPoints = { label: lbl("validUntil", isRedeemed ? "STATUS" : "VALID UNTIL"), balance: { string: isRedeemed ? "Redeemed" : couponValidUntilText } }
   } else if (data.passType === "MEMBERSHIP" && membershipConfig) {
-    const isSuspended = data.passInstanceStatus === "SUSPENDED"
-    const isExpired = data.passInstanceStatus === "EXPIRED"
-    const statusText = isSuspended ? "Suspended" : isExpired ? "Expired" : "Active"
-    loyaltyPoints = {
-      label: formatLabel("TIER", labelFmt),
-      balance: { string: membershipConfig.membershipTier },
-    }
-    secondaryLoyaltyPoints = {
-      label: formatLabel("STATUS", labelFmt),
-      balance: { string: statusText },
-    }
-    textModulesData = [
-      { id: "tier", header: formatLabel("TIER", labelFmt), body: membershipConfig.membershipTier },
-      { id: "status", header: formatLabel("STATUS", labelFmt), body: statusText },
-      { id: "benefits", header: formatLabel("BENEFITS", labelFmt), body: membershipConfig.benefits },
-      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
-    ]
+    loyaltyPoints = { label: lbl("tierName", "TIER"), balance: { string: membershipConfig.membershipTier } }
+    secondaryLoyaltyPoints = { label: formatLabel("STATUS", labelFmt), balance: { string: membershipStatusText } }
   } else if (data.passType === "PREPAID" && prepaidConfig) {
-    const remaining = data.remainingUses ?? 0
-    loyaltyPoints = {
-      label: formatLabel("REMAINING", labelFmt),
-      balance: { string: `${remaining} / ${prepaidConfig.totalUses}` },
-    }
-    secondaryLoyaltyPoints = {
-      label: formatLabel("USED", labelFmt),
-      balance: { int: data.totalVisits },
-    }
-    textModulesData = [
-      { id: "remaining", header: formatLabel(`${prepaidConfig.useLabel.toUpperCase()}S LEFT`, labelFmt), body: `${remaining} / ${prepaidConfig.totalUses}` },
-      { id: "validUntil", header: formatLabel("VALID UNTIL", labelFmt), body: prepaidConfig.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
-      { id: "totalUsed", header: formatLabel("TOTAL USED", labelFmt), body: String(data.totalVisits) },
-      { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
-    ]
+    loyaltyPoints = { label: lbl("remaining", "REMAINING"), balance: { string: `${data.remainingUses ?? 0} / ${prepaidConfig.totalUses}` } }
+    secondaryLoyaltyPoints = { label: formatLabel("USED", labelFmt), balance: { int: data.totalVisits } }
   } else if (data.passType === "POINTS" && pointsConfig) {
-    loyaltyPoints = {
-      label: formatLabel("POINTS", labelFmt),
-      balance: { int: data.pointsBalance ?? 0 },
-    }
-    const cheapestItem = getCheapestCatalogItem(pointsConfig)
+    loyaltyPoints = { label: formatLabel("POINTS", labelFmt), balance: { int: data.pointsBalance ?? 0 } }
     secondaryLoyaltyPoints = cheapestItem
-      ? { label: formatLabel("NEXT REWARD", labelFmt), balance: { string: `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` } }
-      : { label: formatLabel("TOTAL VISITS", labelFmt), balance: { int: data.totalVisits } }
-    textModulesData = [
-      { id: "earnRate", header: formatLabel("EARN RATE", labelFmt), body: `${pointsConfig.pointsPerVisit} points per visit` },
-      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
-    ]
+      ? { label: lbl("nextReward", "NEXT REWARD"), balance: { string: `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` } }
+      : { label: lbl("totalVisits", "TOTAL VISITS"), balance: { int: data.totalVisits } }
   } else if (data.passType === "GIFT_CARD" && giftCardConfig) {
     const balanceCents = data.giftBalanceCents ?? giftCardConfig.initialBalanceCents
-    const balanceStr = `${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}`
-    const initialStr = `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}`
-    loyaltyPoints = { label: formatLabel("BALANCE", labelFmt), balance: { string: balanceStr } }
-    secondaryLoyaltyPoints = { label: formatLabel("INITIAL VALUE", labelFmt), balance: { string: initialStr } }
-    textModulesData = [
-      { id: "balance", header: formatLabel("BALANCE", labelFmt), body: balanceStr },
-      { id: "initialValue", header: formatLabel("INITIAL VALUE", labelFmt), body: initialStr },
-    ]
+    loyaltyPoints = { label: lbl("giftBalance", "BALANCE"), balance: { string: `${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}` } }
+    secondaryLoyaltyPoints = { label: lbl("giftInitial", "INITIAL VALUE"), balance: { string: `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` } }
   } else if (data.passType === "TICKET" && ticketConfig) {
-    loyaltyPoints = { label: formatLabel("EVENT", labelFmt), balance: { string: ticketConfig.eventName } }
-    secondaryLoyaltyPoints = { label: formatLabel("SCANS", labelFmt), balance: { string: `${data.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` } }
-    textModulesData = [
-      { id: "eventDate", header: formatLabel("DATE", labelFmt), body: new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) },
-      { id: "venue", header: formatLabel("VENUE", labelFmt), body: ticketConfig.eventVenue },
-      { id: "scans", header: formatLabel("SCANS", labelFmt), body: `${data.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` },
-      { id: "holder", header: formatLabel("HOLDER", labelFmt), body: data.contactName },
-    ]
+    loyaltyPoints = { label: lbl("eventName", "EVENT"), balance: { string: ticketConfig.eventName } }
+    secondaryLoyaltyPoints = { label: lbl("scanStatus", "SCANS"), balance: { string: `${data.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` } }
   } else if (data.passType === "ACCESS" && accessConfig) {
-    loyaltyPoints = { label: formatLabel(accessConfig.accessLabel, labelFmt), balance: { string: "Active" } }
-    secondaryLoyaltyPoints = { label: formatLabel("TOTAL GRANTED", labelFmt), balance: { int: data.accessTotalGranted ?? 0 } }
-    textModulesData = [
-      { id: "accessLabel", header: formatLabel(accessConfig.accessLabel, labelFmt), body: "Active" },
-      { id: "totalGranted", header: formatLabel("TOTAL GRANTED", labelFmt), body: String(data.accessTotalGranted ?? 0) },
-    ]
+    loyaltyPoints = { label: lbl("accessLabel", accessConfig.accessLabel), balance: { string: "Active" } }
+    secondaryLoyaltyPoints = { label: lbl("accessGranted", "TOTAL GRANTED"), balance: { int: data.accessTotalGranted ?? 0 } }
   } else if (data.passType === "TRANSIT" && transitConfig) {
-    loyaltyPoints = { label: formatLabel("STATUS", labelFmt), balance: { string: data.transitIsBoarded ? "BOARDED" : "NOT BOARDED" } }
-    secondaryLoyaltyPoints = { label: formatLabel("TYPE", labelFmt), balance: { string: transitConfig.transitType.toUpperCase() } }
-    textModulesData = [
-      { id: "origin", header: formatLabel("FROM", labelFmt), body: transitConfig.originName ?? "—" },
-      { id: "destination", header: formatLabel("TO", labelFmt), body: transitConfig.destinationName ?? "—" },
-      { id: "transitType", header: formatLabel("TYPE", labelFmt), body: transitConfig.transitType.toUpperCase() },
-      { id: "boardingStatus", header: formatLabel("STATUS", labelFmt), body: data.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
-    ]
+    loyaltyPoints = { label: lbl("boardingStatus", "STATUS"), balance: { string: data.transitIsBoarded ? "BOARDED" : "NOT BOARDED" } }
+    secondaryLoyaltyPoints = { label: lbl("transitType", "TYPE"), balance: { string: transitConfig.transitType.toUpperCase() } }
   } else if (data.passType === "BUSINESS_ID" && businessIdConfig) {
-    loyaltyPoints = { label: formatLabel(businessIdConfig.idLabel, labelFmt), balance: { string: data.contactName } }
-    secondaryLoyaltyPoints = { label: formatLabel("VERIFICATIONS", labelFmt), balance: { int: data.businessIdVerifications ?? 0 } }
-    textModulesData = [
-      { id: "idLabel", header: formatLabel(businessIdConfig.idLabel, labelFmt), body: data.contactName },
-      { id: "verifications", header: formatLabel("VERIFICATIONS", labelFmt), body: String(data.businessIdVerifications ?? 0) },
-    ]
+    loyaltyPoints = { label: lbl("idLabel", businessIdConfig.idLabel), balance: { string: data.contactName } }
+    secondaryLoyaltyPoints = { label: lbl("verifications", "VERIFICATIONS"), balance: { int: data.businessIdVerifications ?? 0 } }
   } else {
     // STAMP_CARD (default)
-    const progressValue = formatProgressValue(
-      data.currentCycleVisits,
-      data.visitsRequired,
-      data.progressStyle,
-      data.hasAvailableReward
-    )
-    const progressLabel = data.customProgressLabel
-      ? data.customProgressLabel
-      : data.hasAvailableReward ? "STATUS" : "PROGRESS"
-    loyaltyPoints = {
-      label: formatLabel(progressLabel, labelFmt),
-      balance: { string: progressValue },
-    }
-    secondaryLoyaltyPoints = {
-      label: formatLabel("TOTAL VISITS", labelFmt),
-      balance: { int: data.totalVisits },
-    }
-    textModulesData = [
-      {
-        id: "nextReward",
-        header: formatLabel(data.revealedPrize ? "YOUR PRIZE" : "NEXT REWARD", labelFmt),
-        body: data.revealedPrize ?? data.rewardDescription,
-      },
-      { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
-    ]
+    const progressValue = formatProgressValue(data.currentCycleVisits, data.visitsRequired, data.progressStyle, data.hasAvailableReward)
+    const progressLabel = data.customProgressLabel ? data.customProgressLabel : data.hasAvailableReward ? "STATUS" : "PROGRESS"
+    loyaltyPoints = { label: formatLabel(progressLabel, labelFmt), balance: { string: progressValue } }
+    secondaryLoyaltyPoints = { label: lbl("totalVisits", "TOTAL VISITS"), balance: { int: data.totalVisits } }
   }
 
   const patchBody: Record<string, unknown> = {
@@ -443,6 +423,7 @@ export async function notifyGooglePassUpdate(
       heroImageUrl,
       revealLink,
       passInstanceStatus: passInstance.status,
+      editorConfig: passDesign?.editorConfig,
     })
   } catch (error) {
     console.error("Failed to update Google Wallet pass:", error instanceof Error ? error.message : "Unknown error")

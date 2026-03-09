@@ -83,27 +83,177 @@ export type StripFilters = {
   stampFilledColor: string | null  // stamp icon fill color (null = use stripColor2 ?? secondaryColor)
   logoAppleZoom: number   // 0.5–3, default 1
   logoGoogleZoom: number  // 0.5–3, default 1
-  headerFields: string[] | null   // custom header fields (null = use default)
-  secondaryFields: string[] | null // custom secondary/detail fields (null = use default)
+  headerFields: string[] | null   // legacy — use `fields` instead
+  secondaryFields: string[] | null // legacy — use `fields` instead
+  fields: string[] | null  // unified ordered field list (null = use default)
   locationMessage: string | null  // custom lock screen / notification message (null = default)
+  fieldLabels: Record<string, string> | null  // custom label overrides (null = use defaults)
 }
 
-/** Available fields for STAMP/POINTS card type field customization */
-export const STAMP_CARD_AVAILABLE_FIELDS = [
-  { id: "organization", label: "Organization" },
-  { id: "memberNumber", label: "Member #" },
-  { id: "registeredAt", label: "Registered" },
-  { id: "nextReward", label: "Next Reward" },
-  { id: "totalVisits", label: "Total Visits" },
-  { id: "memberSince", label: "Since" },
-  { id: "customerName", label: "Name" },
-] as const
+// ─── Per-type Field Config ─────────────────────────────────
 
-export const DEFAULT_HEADER_FIELDS = ["memberNumber", "organization"]
-export const DEFAULT_SECONDARY_FIELDS = ["nextReward", "totalVisits", "memberSince", "customerName"]
+type FieldConfigEntry = {
+  availableFields: readonly { id: string; label: string }[]
+  defaultHeader: string[]
+  defaultSecondary: string[]
+  /** Unified ordered default: header + secondary combined */
+  defaultFields: string[]
+}
+
+const FIELD_CONFIG_MAP: Record<string, FieldConfigEntry> = {
+  STAMP_CARD: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "memberNumber", label: "Member #" },
+      { id: "registeredAt", label: "Registered" },
+      { id: "nextReward", label: "Next Reward" },
+      { id: "totalVisits", label: "Total Visits" },
+      { id: "memberSince", label: "Since" },
+      { id: "customerName", label: "Name" },
+    ] as const,
+    defaultHeader: ["organization", "memberNumber"],
+    defaultSecondary: ["nextReward", "totalVisits", "memberSince", "customerName"],
+    defaultFields: ["organization", "memberNumber", "nextReward", "totalVisits", "memberSince", "customerName"],
+  },
+  POINTS: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "memberNumber", label: "Member #" },
+      { id: "registeredAt", label: "Registered" },
+      { id: "nextReward", label: "Next Reward" },
+      { id: "totalVisits", label: "Total Visits" },
+      { id: "memberSince", label: "Since" },
+      { id: "customerName", label: "Name" },
+    ] as const,
+    defaultHeader: ["organization", "memberNumber"],
+    defaultSecondary: ["nextReward", "totalVisits", "memberSince", "customerName"],
+    defaultFields: ["organization", "memberNumber", "nextReward", "totalVisits", "memberSince", "customerName"],
+  },
+  COUPON: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "discount", label: "Discount" },
+      { id: "validUntil", label: "Valid Until" },
+      { id: "couponCode", label: "Code" },
+      { id: "customerName", label: "Name" },
+      { id: "memberSince", label: "Since" },
+    ] as const,
+    defaultHeader: ["organization"],
+    defaultSecondary: ["validUntil", "couponCode", "customerName"],
+    defaultFields: ["organization", "validUntil", "couponCode", "customerName"],
+  },
+  MEMBERSHIP: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "tierName", label: "Tier" },
+      { id: "benefits", label: "Benefits" },
+      { id: "memberSince", label: "Since" },
+      { id: "customerName", label: "Name" },
+      { id: "registeredAt", label: "Registered" },
+    ] as const,
+    defaultHeader: ["organization"],
+    defaultSecondary: ["benefits", "memberSince", "customerName"],
+    defaultFields: ["organization", "benefits", "memberSince", "customerName"],
+  },
+  PREPAID: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "remaining", label: "Remaining" },
+      { id: "prepaidValidUntil", label: "Valid Until" },
+      { id: "totalUsed", label: "Total Used" },
+      { id: "customerName", label: "Name" },
+      { id: "memberSince", label: "Since" },
+    ] as const,
+    defaultHeader: ["organization"],
+    defaultSecondary: ["prepaidValidUntil", "totalUsed", "customerName"],
+    defaultFields: ["organization", "prepaidValidUntil", "totalUsed", "customerName"],
+  },
+  GIFT_CARD: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "giftBalance", label: "Balance" },
+      { id: "giftInitial", label: "Initial" },
+      { id: "customerName", label: "Name" },
+      { id: "memberSince", label: "Since" },
+    ] as const,
+    defaultHeader: ["organization"],
+    defaultSecondary: ["giftInitial", "customerName"],
+    defaultFields: ["organization", "giftInitial", "customerName"],
+  },
+  TICKET: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "eventName", label: "Event" },
+      { id: "eventDate", label: "Date" },
+      { id: "eventVenue", label: "Venue" },
+      { id: "scanStatus", label: "Status" },
+      { id: "customerName", label: "Name" },
+    ] as const,
+    defaultHeader: ["scanStatus"],
+    defaultSecondary: ["eventDate", "eventVenue", "customerName"],
+    defaultFields: ["scanStatus", "eventDate", "eventVenue", "customerName"],
+  },
+  ACCESS: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "accessLabel", label: "Access" },
+      { id: "accessGranted", label: "Granted" },
+      { id: "customerName", label: "Name" },
+      { id: "memberSince", label: "Since" },
+    ] as const,
+    defaultHeader: ["accessGranted"],
+    defaultSecondary: ["customerName", "memberSince"],
+    defaultFields: ["accessGranted", "customerName", "memberSince"],
+  },
+  TRANSIT: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "origin", label: "Origin" },
+      { id: "destination", label: "Destination" },
+      { id: "transitType", label: "Type" },
+      { id: "boardingStatus", label: "Status" },
+      { id: "customerName", label: "Name" },
+    ] as const,
+    defaultHeader: ["boardingStatus"],
+    defaultSecondary: ["destination", "transitType"],
+    defaultFields: ["boardingStatus", "destination", "transitType"],
+  },
+  BUSINESS_ID: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "idLabel", label: "ID Label" },
+      { id: "verifications", label: "Verifications" },
+      { id: "memberSince", label: "Since" },
+      { id: "customerName", label: "Name" },
+    ] as const,
+    defaultHeader: ["verifications"],
+    defaultSecondary: ["organization", "memberSince"],
+    defaultFields: ["verifications", "organization", "memberSince"],
+  },
+}
+
+/** Get available fields and defaults for a pass type */
+export function getFieldConfig(passType: string): FieldConfigEntry {
+  return FIELD_CONFIG_MAP[passType] ?? FIELD_CONFIG_MAP.STAMP_CARD
+}
+
+/** Split a unified field list into Apple zones: 1 header (top-right), up to 4 secondary (row below strip) */
+export function splitFieldsForApple(fields: string[]): { header: string[]; secondary: string[]; auxiliary: string[] } {
+  return {
+    header: fields.slice(0, 1),
+    secondary: fields.slice(1, 5),
+    auxiliary: [],
+  }
+}
+
+/** Available fields for STAMP/POINTS card type field customization (backward compat alias) */
+export const STAMP_CARD_AVAILABLE_FIELDS = FIELD_CONFIG_MAP.STAMP_CARD.availableFields
+
+export const DEFAULT_HEADER_FIELDS = FIELD_CONFIG_MAP.STAMP_CARD.defaultHeader
+export const DEFAULT_SECONDARY_FIELDS = FIELD_CONFIG_MAP.STAMP_CARD.defaultSecondary
 
 export function parseStripFilters(editorConfig: unknown): StripFilters {
-  if (!editorConfig || typeof editorConfig !== "object") return { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient", patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1, labelColor: null, stampFilledColor: null, logoAppleZoom: 1, logoGoogleZoom: 1, headerFields: null, secondaryFields: null, locationMessage: null }
+  if (!editorConfig || typeof editorConfig !== "object") return { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient", patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1, labelColor: null, stampFilledColor: null, logoAppleZoom: 1, logoGoogleZoom: 1, headerFields: null, secondaryFields: null, fields: null, locationMessage: null, fieldLabels: null }
   const obj = editorConfig as Record<string, unknown>
   const rawPos = obj.stripImagePosition
   let posX = 0.5
@@ -131,7 +281,11 @@ export function parseStripFilters(editorConfig: unknown): StripFilters {
     logoGoogleZoom: typeof obj.logoGoogleZoom === "number" ? Math.max(0.5, Math.min(3, obj.logoGoogleZoom)) : 1,
     headerFields: Array.isArray(obj.headerFields) ? obj.headerFields.filter((f: unknown) => typeof f === "string") as string[] : null,
     secondaryFields: Array.isArray(obj.secondaryFields) ? obj.secondaryFields.filter((f: unknown) => typeof f === "string") as string[] : null,
+    fields: Array.isArray(obj.fields) ? obj.fields.filter((f: unknown) => typeof f === "string") as string[] : null,
     locationMessage: typeof obj.locationMessage === "string" ? obj.locationMessage : null,
+    fieldLabels: obj.fieldLabels && typeof obj.fieldLabels === "object" && !Array.isArray(obj.fieldLabels)
+      ? obj.fieldLabels as Record<string, string>
+      : null,
   }
 }
 
@@ -466,11 +620,11 @@ export type PassFieldLayout = {
  * One fixed layout per card type (INFO_RICH base — shows all data).
  * Strip visibility is controlled separately via `showStrip` on CardDesign.
  *
- * STAMP/POINTS: header=organization+memberNumber, primary=progress, secondary=nextReward+totalVisits+memberSince, auxiliary=contactName
- * COUPON: header=organization, primary=discount, secondary=validUntil+couponCode+contactName
- * TIER: header=organization, primary=tierName, secondary=benefits+memberSince+contactName
- * PREPAID: header=organization, primary=remaining, secondary=prepaidValidUntil+totalUsed+contactName
- * GENERIC: header=organization, primary=title, secondary=description+contactName
+ * STAMP/POINTS: header=organization+memberNumber, primary=progress, secondary=nextReward+totalVisits+memberSince, auxiliary=customerName
+ * COUPON: header=organization, primary=discount, secondary=validUntil+couponCode+customerName
+ * TIER: header=organization, primary=tierName, secondary=benefits+memberSince+customerName
+ * PREPAID: header=organization, primary=remaining, secondary=prepaidValidUntil+totalUsed+customerName
+ * GENERIC: header=organization, primary=title, secondary=description+customerName
  */
 export function getFieldLayout(cardType?: CardType): PassFieldLayout {
   if (cardType === "COUPON") {
@@ -598,12 +752,12 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
       apple: {
         header: ["organization"],
         primary: ["title"],
-        secondary: ["description", "contactName"],
+        secondary: ["description", "customerName"],
         auxiliary: [],
       },
       google: {
         rows: 1,
-        fields: ["title", "description", "contactName"],
+        fields: ["title", "description", "customerName"],
       },
     }
   }
@@ -614,11 +768,11 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
       header: ["organization", "memberNumber"],
       primary: ["progress"],
       secondary: ["nextReward", "totalVisits", "memberSince"],
-      auxiliary: ["contactName"],
+      auxiliary: ["customerName"],
     },
     google: {
       rows: 1,
-      fields: ["progress", "totalVisits", "nextReward", "memberSince", "contactName"],
+      fields: ["progress", "totalVisits", "nextReward", "memberSince", "customerName"],
     },
   }
 }

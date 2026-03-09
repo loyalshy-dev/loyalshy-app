@@ -292,6 +292,8 @@ export function StudioLayout({
     logoGoogleZoom: wallet.logoGoogleZoom,
     headerFields: wallet.headerFields,
     secondaryFields: wallet.secondaryFields,
+    fields: wallet.fields,
+    fieldLabels: wallet.fieldLabels,
   }
 
   // Temporal (undo/redo)
@@ -370,6 +372,8 @@ export function StudioLayout({
             logoGoogleZoom: state.wallet.logoGoogleZoom !== 1 ? state.wallet.logoGoogleZoom : undefined,
             headerFields: state.wallet.headerFields,
             secondaryFields: state.wallet.secondaryFields,
+            fields: state.wallet.fields,
+            fieldLabels: state.wallet.fieldLabels,
             locationMessage: state.wallet.locationMessage || "",
           })
         )
