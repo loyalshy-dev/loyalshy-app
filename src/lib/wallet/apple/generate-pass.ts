@@ -110,6 +110,8 @@ export async function generateApplePass(
       stripImageUrl: design.stripImageApple,
       stripOpacity: stripFilters.stripOpacity,
       stripGrayscale: stripFilters.stripGrayscale,
+      stripImagePosition: stripFilters.stripImagePosition,
+      stripImageZoom: stripFilters.stripImageZoom,
     })
   } else if (showStrip && !isStampGrid && design && isStampType) {
     // Non-stamp-grid progress: bake progress text into strip image for consistent rendering
@@ -141,21 +143,26 @@ export async function generateApplePass(
       stripImageUrl: design.stripImageApple,
       stripOpacity: stripFilters.stripOpacity,
       stripGrayscale: stripFilters.stripGrayscale,
+      stripImagePosition: stripFilters.stripImagePosition,
+      stripImageZoom: stripFilters.stripImageZoom,
     })
   } else if (showStrip) {
     const rawUrl = design?.stripImageApple ?? design?.generatedStripApple ?? null
-    // Apply filters to static strip images if needed
-    if (rawUrl && (stripFilters.stripOpacity < 1 || stripFilters.stripGrayscale)) {
+    const hasPositionZoom = stripFilters.stripImageZoom !== 1 || stripFilters.stripImagePosition.x !== 0.5 || stripFilters.stripImagePosition.y !== 0.5
+    // Apply filters/position/zoom to static strip images if needed
+    if (rawUrl && (stripFilters.stripOpacity < 1 || stripFilters.stripGrayscale || hasPositionZoom)) {
       const { default: sharp } = await import("sharp")
-      const { APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
+      const { APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, resizeStripImage } = await import("../strip-image")
       const res = await fetch(rawUrl)
       if (res.ok) {
-        let pipeline = sharp(Buffer.from(await res.arrayBuffer()))
-          .resize(APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, { fit: "cover", position: "centre" })
-        if (stripFilters.stripGrayscale) pipeline = pipeline.greyscale()
+        const rawBuffer = Buffer.from(await res.arrayBuffer())
+        let resized = await resizeStripImage(rawBuffer, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, stripFilters.stripImagePosition, stripFilters.stripImageZoom)
+        if (stripFilters.stripGrayscale) {
+          resized = await sharp(resized).greyscale().png().toBuffer()
+        }
         if (stripFilters.stripOpacity < 1) {
           // Reduce alpha then flatten onto primary color background
-          const { data, info } = await pipeline.ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+          const { data, info } = await sharp(resized).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
           for (let i = 3; i < data.length; i += 4) {
             data[i] = Math.round(data[i] * stripFilters.stripOpacity)
           }
@@ -169,7 +176,7 @@ export async function generateApplePass(
             .png()
             .toBuffer()
         } else {
-          stampGridStripBuffer = await pipeline.png().toBuffer()
+          stampGridStripBuffer = resized
         }
       } else {
         stripImageUrl = rawUrl
@@ -179,7 +186,7 @@ export async function generateApplePass(
     }
   }
 
-  const icons = await getIconBuffers(input.organizationLogoApple ?? input.organizationLogo, stripImageUrl)
+  const icons = await getIconBuffers(input.organizationLogoApple ?? input.organizationLogo, stripImageUrl, stripFilters.logoAppleZoom)
 
   // If we have a dynamically generated stamp grid buffer, inject it directly
   if (stampGridStripBuffer) {

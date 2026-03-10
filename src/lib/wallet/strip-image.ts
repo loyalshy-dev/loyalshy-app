@@ -267,6 +267,64 @@ async function loadRemoteImage(url: string): Promise<Buffer> {
   return Buffer.from(await res.arrayBuffer())
 }
 
+/**
+ * Resize a strip image to target dimensions, applying position and zoom.
+ * Position (0–1, 0–1) controls the focal point for cover-cropping.
+ * Zoom (>1) scales the image up before cropping, making the subject larger.
+ */
+export async function resizeStripImage(
+  buffer: Buffer,
+  width: number,
+  height: number,
+  position?: { x: number; y: number },
+  zoom?: number
+): Promise<Buffer> {
+  const pos = position ?? { x: 0.5, y: 0.5 }
+  const z = Math.max(0.5, Math.min(3, zoom ?? 1))
+
+  // Get source dimensions to compute proper extract region
+  const meta = await sharp(buffer).metadata()
+  const srcW = meta.width ?? width
+  const srcH = meta.height ?? height
+
+  // Target aspect ratio
+  const targetAspect = width / height
+
+  // Calculate the crop region on the source image
+  // First determine the "cover" region, then apply zoom (zoom > 1 = tighter crop)
+  let cropW: number
+  let cropH: number
+  const srcAspect = srcW / srcH
+  if (srcAspect > targetAspect) {
+    // Source is wider — crop width
+    cropH = srcH
+    cropW = Math.round(srcH * targetAspect)
+  } else {
+    // Source is taller — crop height
+    cropW = srcW
+    cropH = Math.round(srcW / targetAspect)
+  }
+
+  // Apply zoom: shrink the crop region (zooms in)
+  cropW = Math.round(cropW / z)
+  cropH = Math.round(cropH / z)
+  // Clamp to source bounds
+  cropW = Math.min(cropW, srcW)
+  cropH = Math.min(cropH, srcH)
+
+  // Position the crop region using the focal point
+  const maxLeft = srcW - cropW
+  const maxTop = srcH - cropH
+  const left = Math.round(maxLeft * pos.x)
+  const top = Math.round(maxTop * pos.y)
+
+  return sharp(buffer)
+    .extract({ left, top, width: cropW, height: cropH })
+    .resize(width, height)
+    .png()
+    .toBuffer()
+}
+
 /** Reduce the alpha channel of an image by a factor (0–1) to simulate opacity */
 async function reduceAlpha(buffer: Buffer, opacity: number, w: number, h: number): Promise<Buffer> {
   const { data, info } = await sharp(buffer)
@@ -354,6 +412,7 @@ function buildStampSlotSvg(opts: {
   emptySlotBg?: string | null
   rewardSlotColor?: string | null
   rewardSlotBg?: string | null
+  rewardFilledStyle?: StampGridConfig["filledStyle"]
 }): string {
   const { x, y, size, slotIndex, currentVisits, isRewardSlot, hasReward, iconSvgPaths, rewardIcon, stampShape, filledStyle, stampIconScale, primaryColor, secondaryColor, textColor, customStampIconDataUri, customRewardIconDataUri, customEmptyIconDataUri, useUniformIcon, stampIcon } = opts
   const isFilled = slotIndex < currentVisits
@@ -394,8 +453,9 @@ function buildStampSlotSvg(opts: {
     const iconSize = innerSize * stampIconScale
 
     if (rewardFilled) {
-      // Filled reward slot — same styles as filled stamps
-      if (filledStyle === "solid") {
+      // Filled reward slot — uses its own filledStyle (falls back to stamp filledStyle)
+      const rStyle = opts.rewardFilledStyle ?? filledStyle
+      if (rStyle === "solid") {
         let solidShape: string
         switch (stampShape) {
           case "square":
@@ -435,6 +495,9 @@ function buildStampSlotSvg(opts: {
         rewardIconContent = `<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${rStroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${rewardIconPaths}</svg>`
       }
       let content = `${clipPath}<g clip-path="url(#${clipId})">${shapeBg}${rewardIconContent}</g>`
+      if (rStyle === "icon-with-border") {
+        content += shapeBorder.replace('opacity="0.4"', 'opacity="0.7"')
+      }
       return `<g>${content}</g>`
     }
 
@@ -561,8 +624,10 @@ export async function generateStampGridImage(opts: {
   stripImageUrl?: string | null
   stripOpacity?: number
   stripGrayscale?: boolean
+  stripImagePosition?: { x: number; y: number }
+  stripImageZoom?: number
 }): Promise<Buffer> {
-  const { currentVisits, totalVisits, hasReward, config, primaryColor, secondaryColor, textColor, width, height, stripImageUrl, stripOpacity = 1, stripGrayscale = false } = opts
+  const { currentVisits, totalVisits, hasReward, config, primaryColor, secondaryColor, textColor, width, height, stripImageUrl, stripOpacity = 1, stripGrayscale = false, stripImagePosition, stripImageZoom } = opts
 
   // Total slots = totalVisits (last slot is the reward slot)
   const totalSlots = totalVisits
@@ -640,6 +705,7 @@ export async function generateStampGridImage(opts: {
           emptySlotBg: config.emptySlotBg,
           rewardSlotColor: config.rewardSlotColor,
           rewardSlotBg: config.rewardSlotBg,
+          rewardFilledStyle: config.rewardFilledStyle,
         })
       )
     }
@@ -648,12 +714,10 @@ export async function generateStampGridImage(opts: {
   if (useStripBg) {
     // Composite: strip image background + semi-transparent overlay + stamp grid
     const stripBuffer = await loadRemoteImage(stripImageUrl)
-    let stripPipeline = sharp(stripBuffer)
-      .resize(width, height, { fit: "cover", position: "centre" })
+    let resizedStrip = await resizeStripImage(stripBuffer, width, height, stripImagePosition, stripImageZoom)
     if (stripGrayscale) {
-      stripPipeline = stripPipeline.greyscale()
+      resizedStrip = await sharp(resizedStrip).greyscale().png().toBuffer()
     }
-    const resizedStrip = await stripPipeline.toBuffer()
 
     // Build stamp grid SVG with transparent background + dark overlay
     const overlaySvg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
@@ -724,11 +788,14 @@ export async function generateProgressStripImage(opts: {
   stripImageUrl?: string | null
   stripOpacity?: number
   stripGrayscale?: boolean
+  stripImagePosition?: { x: number; y: number }
+  stripImageZoom?: number
 }): Promise<Buffer> {
   const {
     currentVisits, totalVisits, hasReward, progressStyle, progressLabel,
     primaryColor, secondaryColor, textColor, labelColor,
     width, height, stripImageUrl, stripOpacity = 1, stripGrayscale = false,
+    stripImagePosition, stripImageZoom,
   } = opts
 
   const progressValue = formatProgressValue(currentVisits, totalVisits, progressStyle, hasReward)
@@ -758,12 +825,10 @@ export async function generateProgressStripImage(opts: {
 
   if (useStripBg) {
     const stripBuffer = await loadRemoteImage(stripImageUrl)
-    let stripPipeline = sharp(stripBuffer)
-      .resize(width, height, { fit: "cover", position: "centre" })
+    let resizedStrip = await resizeStripImage(stripBuffer, width, height, stripImagePosition, stripImageZoom)
     if (stripGrayscale) {
-      stripPipeline = stripPipeline.greyscale()
+      resizedStrip = await sharp(resizedStrip).greyscale().png().toBuffer()
     }
-    const resizedStrip = await stripPipeline.toBuffer()
 
     const overlaySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <rect width="${width}" height="${height}" fill="rgba(0,0,0,0.3)" />

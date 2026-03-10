@@ -35,6 +35,7 @@ export type StampGridConfig = {
   emptySlotBg: string | null      // background color for empty slots (null = primaryColor + transparency)
   rewardSlotColor: string | null  // stroke color for reward slot icon (null = use primaryColor)
   rewardSlotBg: string | null     // background color for reward slot (null = primaryColor + transparency)
+  rewardFilledStyle: "icon" | "icon-with-border" | "solid" // filled style for reward slot (independent from stamps)
 }
 
 export const DEFAULT_STAMP_GRID_CONFIG: StampGridConfig = {
@@ -55,6 +56,7 @@ export const DEFAULT_STAMP_GRID_CONFIG: StampGridConfig = {
   emptySlotBg: null,
   rewardSlotColor: null,
   rewardSlotBg: null,
+  rewardFilledStyle: "icon",
 }
 
 /** Maps legacy raster filenames to Lucide icon IDs for backward compatibility */
@@ -330,6 +332,9 @@ export function parseStampGridConfig(editorConfig: unknown): StampGridConfig {
     emptySlotBg: typeof cfg.emptySlotBg === "string" ? cfg.emptySlotBg : null,
     rewardSlotColor: typeof cfg.rewardSlotColor === "string" ? cfg.rewardSlotColor : null,
     rewardSlotBg: typeof cfg.rewardSlotBg === "string" ? cfg.rewardSlotBg : null,
+    rewardFilledStyle: (cfg.rewardFilledStyle === "icon" || cfg.rewardFilledStyle === "icon-with-border" || cfg.rewardFilledStyle === "solid")
+      ? cfg.rewardFilledStyle
+      : DEFAULT_STAMP_GRID_CONFIG.rewardFilledStyle,
   }
 }
 

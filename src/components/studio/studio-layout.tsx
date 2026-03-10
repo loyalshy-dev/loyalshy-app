@@ -572,6 +572,9 @@ export function StudioLayout({
               templateConfig={buildConfigPayload(passType, programConfig)}
               visitsRequired={programConfig.stampsRequired}
               rewardDescription={programConfig.rewardDescription}
+              businessHours={wallet.businessHours || undefined}
+              socialLinks={wallet.socialLinks}
+              customMessage={wallet.customMessage || undefined}
             />
 
             {/* Floating controls — bottom right of canvas (embedded mode) */}

@@ -245,7 +245,7 @@ export function WalletPassRenderer({
         resolved = { label: lbl("NEXT REWARD"), value: rewardDescription }
         break
       case "totalVisits":
-        resolved = { label: lbl("TOTAL VISITS"), value: `${totalVisits}` }
+        resolved = { label: lbl("TOTAL VISITS"), value: `${currentVisits}` }
         break
       case "memberNumber":
         resolved = { label: lbl("MEMBER #"), value: memberNumber ?? "—" }
@@ -364,7 +364,8 @@ export function WalletPassRenderer({
 
   // Hide org name text next to logo (Apple: no text beside logo; Google: only shows circular logo)
   const hideLogoText = true
-  const logoZoom = isApple ? (design.logoAppleZoom ?? 1) : (design.logoGoogleZoom ?? 1)
+  // Google Wallet renders logos at fixed size via URL — zoom only applies to Apple
+  const logoZoom = isApple ? (design.logoAppleZoom ?? 1) : 1
 
   // ─── Section: Header ───
   const headerSection = (
@@ -868,13 +869,11 @@ export function WalletPassRenderer({
                   resolveField("scanStatus"), resolveField("customerName"),
                 ]}
                 textColor={design.textColor}
-                labelColor={design.labelColor}
               />
             ) : (
               <GoogleFieldRows
                 fields={googleFields}
                 textColor={design.textColor}
-                labelColor={design.labelColor}
               />
             )}
             <div style={{ flex: 1 }} />
@@ -1109,8 +1108,8 @@ function StampGridOverlay({
             const rStroke = config?.rewardSlotColor ?? primaryColor
 
             if (rewardFilled) {
-              // Filled reward slot — same styles as filled stamps
-              if (filledStyle === "solid") {
+              const rStyle = config?.rewardFilledStyle ?? filledStyle
+              if (rStyle === "solid") {
                 return (
                   <div
                     key={i}
@@ -1139,7 +1138,7 @@ function StampGridOverlay({
                     height: slotSize,
                     borderRadius,
                     overflow: "hidden",
-                    border: "none",
+                    border: rStyle === "icon-with-border" ? `2px solid ${rBg}88` : "none",
                     backgroundColor: rBg,
                     display: "flex",
                     alignItems: "center",

@@ -1,26 +1,30 @@
 "use client"
 
 import type { DeviceFrame } from "@/types/editor"
+import type { PreviewFormat } from "@/types/editor"
 
 type DeviceFrameWrapperProps = {
   frame: DeviceFrame
   children: React.ReactNode
   /** When true, skip frame border-radius (e.g., for event ticket cards) */
   squareCorners?: boolean
+  /** Pass format to match border radius (Apple: 12px, Google: 20px) */
+  format?: PreviewFormat
 }
 
-export function DeviceFrameWrapper({ frame, children, squareCorners }: DeviceFrameWrapperProps) {
+export function DeviceFrameWrapper({ frame, children, squareCorners, format }: DeviceFrameWrapperProps) {
   if (frame === "none") {
     return <>{children}</>
   }
 
   if (frame === "minimal") {
+    const radius = squareCorners ? 0 : format === "google" ? 20 : 12
     return (
       <div
         style={{
-          borderRadius: squareCorners ? 0 : 8,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08)",
+          borderRadius: radius,
           overflow: "hidden",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08)",
         }}
       >
         {children}

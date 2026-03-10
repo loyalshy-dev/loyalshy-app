@@ -21,8 +21,10 @@ type IconBuffers = Record<string, Buffer>
  */
 export async function getIconBuffers(
   logoUrl: string | null,
-  stripImageUrl?: string | null
+  stripImageUrl?: string | null,
+  logoZoom?: number
 ): Promise<IconBuffers> {
+  const zoom = Math.max(0.5, Math.min(3, logoZoom ?? 1))
   let rawLogoBuffer = PLACEHOLDER_PNG
 
   if (logoUrl) {
@@ -53,11 +55,33 @@ export async function getIconBuffers(
     ])
     iconBuffers = { icon1x, icon2x, icon3x }
 
-    // Logo: landscape contain (pad to fit)
+    // Logo: landscape contain (pad to fit), then apply zoom by scaling up and center-cropping
+    const transparent = { r: 0, g: 0, b: 0, alpha: 0 }
+    const resizeLogo = async (w: number, h: number) => {
+      if (zoom === 1) {
+        return sharp(rawLogoBuffer).resize(w, h, { fit: "contain", background: transparent }).png().toBuffer()
+      }
+      // Scale up the logo within a larger canvas, then crop to target size
+      const scaledW = Math.round(w * zoom)
+      const scaledH = Math.round(h * zoom)
+      const scaled = await sharp(rawLogoBuffer)
+        .resize(scaledW, scaledH, { fit: "contain", background: transparent })
+        .png()
+        .toBuffer()
+      return sharp(scaled)
+        .extract({
+          left: Math.round((scaledW - w) / 2),
+          top: Math.round((scaledH - h) / 2),
+          width: w,
+          height: h,
+        })
+        .png()
+        .toBuffer()
+    }
     const [logo1x, logo2x, logo3x] = await Promise.all([
-      sharp(rawLogoBuffer).resize(160, 50, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
-      sharp(rawLogoBuffer).resize(320, 100, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
-      sharp(rawLogoBuffer).resize(480, 150, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
+      resizeLogo(160, 50),
+      resizeLogo(320, 100),
+      resizeLogo(480, 150),
     ])
     logoBuffers = { logo1x, logo2x, logo3x }
   } catch {

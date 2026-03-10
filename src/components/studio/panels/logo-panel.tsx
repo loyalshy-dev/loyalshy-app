@@ -54,7 +54,6 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
   const logoAppleUrl = useStore(store, (s) => s.wallet.logoAppleUrl)
   const logoGoogleUrl = useStore(store, (s) => s.wallet.logoGoogleUrl)
   const logoAppleZoom = useStore(store, (s) => s.wallet.logoAppleZoom)
-  const logoGoogleZoom = useStore(store, (s) => s.wallet.logoGoogleZoom)
 
   const [uploading, setUploading] = useState(false)
   const [overrideOpen, setOverrideOpen] = useState<"apple" | "google" | null>(null)
@@ -261,7 +260,6 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
                       width: "100%",
                       height: "100%",
                       objectFit: "cover",
-                      transform: logoGoogleZoom !== 1 ? `scale(${logoGoogleZoom})` : undefined,
                     }}
                   />
                 ) : (
@@ -274,47 +272,26 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
             </div>
           </div>
 
-          {/* Zoom sliders */}
-          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-            {logoAppleUrl && (
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                  <span style={{ fontSize: 11, color: "var(--foreground)" }}>Apple zoom</span>
-                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace" }}>
-                    {logoAppleZoom.toFixed(1)}x
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={50}
-                  max={300}
-                  step={5}
-                  value={Math.round(logoAppleZoom * 100)}
-                  onChange={(e) => store.getState().setWalletField("logoAppleZoom", Number(e.target.value) / 100)}
-                  style={{ width: "100%", accentColor: "var(--primary)" }}
-                />
+          {/* Apple logo zoom — Google Wallet renders logos at a fixed size via URL, zoom not supported */}
+          {logoAppleUrl && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <span style={{ fontSize: 11, color: "var(--foreground)" }}>Apple logo zoom</span>
+                <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace" }}>
+                  {logoAppleZoom.toFixed(1)}x
+                </span>
               </div>
-            )}
-            {logoGoogleUrl && (
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                  <span style={{ fontSize: 11, color: "var(--foreground)" }}>Google zoom</span>
-                  <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace" }}>
-                    {logoGoogleZoom.toFixed(1)}x
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={50}
-                  max={300}
-                  step={5}
-                  value={Math.round(logoGoogleZoom * 100)}
-                  onChange={(e) => store.getState().setWalletField("logoGoogleZoom", Number(e.target.value) / 100)}
-                  style={{ width: "100%", accentColor: "var(--primary)" }}
-                />
-              </div>
-            )}
-          </div>
+              <input
+                type="range"
+                min={50}
+                max={300}
+                step={5}
+                value={Math.round(logoAppleZoom * 100)}
+                onChange={(e) => store.getState().setWalletField("logoAppleZoom", Number(e.target.value) / 100)}
+                style={{ width: "100%", accentColor: "var(--primary)" }}
+              />
+            </div>
+          )}
         </>
       )}
 
