@@ -130,7 +130,7 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
                       onMouseEnter={handlePrefetch(item.href)}
                     >
                       <item.icon strokeWidth={1.75} />
-                      <span>{item.label}</span>
+                      <span translate="no">{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -157,7 +157,7 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
                           onMouseEnter={handlePrefetch(item.href)}
                         >
                           <item.icon strokeWidth={1.75} />
-                          <span>{item.label}</span>
+                          <span translate="no">{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
