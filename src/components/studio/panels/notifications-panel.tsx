@@ -43,7 +43,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
           style={{
             width: "100%",
             padding: "8px 10px",
-            borderRadius: 6,
+            borderRadius: 12,
             border: "1px solid var(--border)",
             backgroundColor: "var(--background)",
             fontSize: 12,
@@ -61,7 +61,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
             alignItems: "center",
             gap: 6,
             padding: "8px 10px",
-            borderRadius: 6,
+            borderRadius: 12,
             backgroundColor: "color-mix(in srgb, var(--primary) 8%, transparent)",
             border: "1px solid color-mix(in srgb, var(--primary) 20%, transparent)",
             marginBottom: 12,
@@ -82,7 +82,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
             alignItems: "center",
             gap: 6,
             padding: "8px 10px",
-            borderRadius: 6,
+            borderRadius: 12,
             backgroundColor: "color-mix(in srgb, var(--muted-foreground) 8%, transparent)",
             border: "1px solid var(--border)",
             marginBottom: 12,
@@ -108,7 +108,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
             style={{
               width: "100%",
               padding: "8px 10px",
-              borderRadius: 6,
+              borderRadius: 12,
               border: "1px solid var(--border)",
               backgroundColor: "var(--background)",
               fontSize: 12,
@@ -128,7 +128,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
           <div style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)", marginBottom: 8 }}>Preview</div>
 
           {/* Platform toggle */}
-          <div style={{ display: "flex", gap: 4, marginBottom: 10, backgroundColor: "var(--muted)", borderRadius: 6, padding: 3 }}>
+          <div style={{ display: "flex", gap: 4, marginBottom: 10, backgroundColor: "var(--muted)", borderRadius: 9999, padding: 3 }}>
             {(["apple", "google"] as const).map((p) => (
               <button
                 key={p}
@@ -136,7 +136,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
                 style={{
                   flex: 1,
                   padding: "4px 8px",
-                  borderRadius: 4,
+                  borderRadius: 9999,
                   border: "none",
                   fontSize: 11,
                   fontWeight: previewPlatform === p ? 600 : 400,
@@ -176,7 +176,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
             color: "var(--muted-foreground)",
             lineHeight: 1.5,
             padding: "10px 12px",
-            borderRadius: 6,
+            borderRadius: 12,
             backgroundColor: "var(--muted)",
           }}
         >

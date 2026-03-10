@@ -4,8 +4,10 @@ import { useState, useMemo } from "react"
 import type { PreviewFormat, DeviceFrame } from "@/types/editor"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { DeviceFrameWrapper } from "./device-frame"
+import { InteractiveCardWrapper } from "./interactive-card-overlay"
 import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig } from "@/lib/pass-config"
 import type { SocialLinks } from "@/lib/wallet/card-design"
+import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 
 type PreviewState = string
 
@@ -32,6 +34,8 @@ type CanvasPanelProps = {
   deviceFrame: DeviceFrame
   organizationName: string
   organizationLogo: string | null
+  organizationId?: string
+  templateId?: string
   templateName: string
   passType: string
   templateConfig: unknown
@@ -41,6 +45,8 @@ type CanvasPanelProps = {
   businessHours?: string
   socialLinks?: SocialLinks
   customMessage?: string
+  // Store for interactive color overlay
+  store?: CardDesignStoreApi
 }
 
 export function CanvasPanel({
@@ -49,6 +55,8 @@ export function CanvasPanel({
   deviceFrame,
   organizationName,
   organizationLogo,
+  organizationId,
+  templateId,
   templateName,
   passType,
   templateConfig,
@@ -57,6 +65,7 @@ export function CanvasPanel({
   businessHours,
   socialLinks,
   customMessage,
+  store,
 }: CanvasPanelProps) {
   const previewStates: PreviewStateOption[] =
     passType === "COUPON" ? COUPON_PREVIEW_STATES
@@ -123,10 +132,11 @@ export function CanvasPanel({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "var(--muted)",
+        backgroundColor: "var(--background)",
         overflow: "auto",
-        padding: 32,
+        padding: "32px",
         gap: 16,
+        position: "relative",
       }}
     >
       {/* Preview state toggle */}
@@ -136,7 +146,7 @@ export function CanvasPanel({
             display: "flex",
             gap: 4,
             backgroundColor: "var(--background)",
-            borderRadius: 8,
+            borderRadius: 9999,
             padding: 3,
             border: "1px solid var(--border)",
           }}
@@ -148,7 +158,7 @@ export function CanvasPanel({
               aria-pressed={previewState === state.id}
               style={{
                 padding: "4px 10px",
-                borderRadius: 6,
+                borderRadius: 9999,
                 border: "none",
                 backgroundColor: previewState === state.id ? "var(--primary)" : "transparent",
                 color: previewState === state.id ? "var(--primary-foreground)" : "var(--muted-foreground)",
@@ -177,6 +187,14 @@ export function CanvasPanel({
           {/* Front — wallet pass */}
           <div style={{ backfaceVisibility: "hidden" }}>
             <DeviceFrameWrapper frame={deviceFrame} squareCorners={passType === "TICKET" && format === "apple"} format={format}>
+              <InteractiveCardWrapper
+                store={store}
+                format={format}
+                showStrip={design.showStrip}
+                cardType={passType}
+                cardHeight={format === "apple" ? 450 : 480}
+                isFlipped={isFlipped}
+              >
               <WalletPassRenderer
                 design={design}
                 format={format}
@@ -222,6 +240,7 @@ export function CanvasPanel({
                 idLabel={businessIdConfig?.idLabel}
                 verifications={passType === "BUSINESS_ID" ? "0" : undefined}
               />
+              </InteractiveCardWrapper>
             </DeviceFrameWrapper>
           </div>
 
@@ -260,7 +279,7 @@ export function CanvasPanel({
           alignItems: "center",
           gap: 6,
           padding: "6px 14px",
-          borderRadius: 8,
+          borderRadius: 9999,
           border: "1px solid var(--border)",
           backgroundColor: "var(--background)",
           color: "var(--muted-foreground)",

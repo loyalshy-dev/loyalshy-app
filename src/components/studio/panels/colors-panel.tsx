@@ -2,8 +2,9 @@
 
 import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
-import { PALETTE_PRESETS, computeTextColor, formatLabel, type LabelFormat } from "@/lib/wallet/card-design"
+import { PALETTE_PRESETS, computeTextColor } from "@/lib/wallet/card-design"
 import { blendColors } from "@/lib/wallet/apple/colors"
+import type { ColorZone } from "@/types/editor"
 
 // ─── WCAG Contrast Helpers ────────────────────────────────
 
@@ -31,69 +32,18 @@ function wcagLevel(ratio: number): { label: string; color: string } {
   return { label: "Fail", color: "#ef4444" }
 }
 
-// ─── Helpers ────────────────────────────────────────────────
+// ─── Zone → Color mapping ──────────────────────────────────
 
-function SectionHeader({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        fontSize: 12,
-        fontWeight: 700,
-        color: "var(--muted-foreground)",
-        textTransform: "uppercase",
-        letterSpacing: "0.06em",
-        marginTop: 20,
-        marginBottom: 8,
-      }}
-    >
-      {children}
-    </div>
-  )
-}
-
-function ColorRow({
-  label,
-  value,
-  onChange,
-}: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 8,
-      }}
-    >
-      <span style={{ fontSize: 12, color: "var(--foreground)" }}>{label}</span>
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace" }}>
-          {value.toUpperCase()}
-        </span>
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ width: 28, height: 28, border: "1px solid var(--border)", borderRadius: 4, cursor: "pointer", padding: 1 }}
-        />
-      </div>
-    </div>
-  )
-}
+const ZONE_CONFIG: { zone: ColorZone; label: string; description: string }[] = [
+  { zone: "background", label: "Background", description: "Card background color" },
+  { zone: "strip", label: "Strip / Accent", description: "Strip area and accents" },
+  { zone: "text", label: "Field Values", description: "Text on the card" },
+  { zone: "labels", label: "Labels", description: "Field label text (Apple only)" },
+]
 
 // ─── Component ────────────────────────────────────────────
 
 type Props = { store: CardDesignStoreApi }
-
-const LABEL_FORMATS: { id: LabelFormat; name: string }[] = [
-  { id: "UPPERCASE", name: "UPPERCASE" },
-  { id: "TITLE_CASE", name: "Title Case" },
-  { id: "LOWERCASE", name: "lowercase" },
-]
 
 export function ColorsPanel({ store }: Props) {
   const primaryColor = useStore(store, (s) => s.wallet.primaryColor)
@@ -101,22 +51,52 @@ export function ColorsPanel({ store }: Props) {
   const textColor = useStore(store, (s) => s.wallet.textColor)
   const labelColor = useStore(store, (s) => s.wallet.labelColor)
   const autoTextColor = useStore(store, (s) => s.wallet.autoTextColor)
-  const labelFormat = useStore(store, (s) => s.wallet.labelFormat)
+  const selectedZone = useStore(store, (s) => s.ui.selectedColorZone)
+  const previewFormat = useStore(store, (s) => s.ui.previewFormat)
 
   const ratio = contrastRatio(primaryColor, textColor)
   const { label: wcagLabel, color: wcagColor } = wcagLevel(ratio)
 
-  function setColor(key: "primaryColor" | "secondaryColor" | "textColor", value: string) {
+  const isGoogle = previewFormat === "google"
+
+  function getZoneColor(zone: ColorZone): string {
+    switch (zone) {
+      case "background": return primaryColor
+      case "strip": return secondaryColor
+      case "text": return textColor
+      case "labels": return labelColor ?? blendColors(textColor, primaryColor, 0.3)
+      case "logo": return primaryColor
+      case "progress": return textColor
+    }
+  }
+
+  function setZoneColor(zone: ColorZone, value: string) {
     const state = store.getState()
-    state.setWalletField(key, value)
-    // When the user manually picks a text color, disable auto-computation
-    if (key === "textColor") {
-      state.setWalletField("autoTextColor", false)
+    switch (zone) {
+      case "background":
+        state.setWalletField("primaryColor", value)
+        if (autoTextColor) {
+          state.setWalletField("textColor", computeTextColor(value))
+        }
+        break
+      case "strip":
+        state.setWalletField("secondaryColor", value)
+        break
+      case "text":
+        state.setWalletField("textColor", value)
+        state.setWalletField("autoTextColor", false)
+        break
+      case "labels":
+        state.setWalletField("labelColor", value)
+        break
+      case "logo":
+      case "progress":
+        break
     }
-    // When primary changes and auto is on, recompute text color
-    if (key === "primaryColor" && autoTextColor) {
-      state.setWalletField("textColor", computeTextColor(value))
-    }
+  }
+
+  function selectZone(zone: ColorZone) {
+    store.getState().setSelectedColorZone(selectedZone === zone ? null : zone)
   }
 
   function applyPreset(preset: (typeof PALETTE_PRESETS)[0]) {
@@ -138,28 +118,152 @@ export function ColorsPanel({ store }: Props) {
 
   return (
     <div>
-      {/* WCAG badge */}
+      {/* Hint */}
+      <div
+        style={{
+          fontSize: 11,
+          color: "var(--muted-foreground)",
+          marginBottom: 12,
+        }}
+      >
+        Click a color below or tap an area on the card preview to edit.
+      </div>
+
+      {/* Color zone rows */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 12 }}>
+        {ZONE_CONFIG.map(({ zone, label, description }) => {
+          const isSelected = selectedZone === zone
+          const color = getZoneColor(zone)
+          const isDisabled = zone === "labels" && isGoogle
+
+          return (
+            <div
+              key={zone}
+              role="button"
+              tabIndex={isDisabled ? -1 : 0}
+              onClick={() => !isDisabled && selectZone(zone)}
+              onKeyDown={(e) => {
+                if ((e.key === "Enter" || e.key === " ") && !isDisabled) {
+                  e.preventDefault()
+                  selectZone(zone)
+                }
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "8px 10px",
+                borderRadius: 12,
+                border: "none",
+                borderLeft: isSelected
+                  ? "3px solid var(--primary)"
+                  : "3px solid transparent",
+                backgroundColor: isSelected ? "var(--accent)" : "transparent",
+                cursor: isDisabled ? "default" : "pointer",
+                opacity: isDisabled ? 0.4 : 1,
+                transition: "all 0.12s ease",
+                width: "100%",
+                textAlign: "left",
+              }}
+              title={isDisabled ? "Google Wallet doesn't support custom label colors" : description}
+            >
+              {/* Color swatch */}
+              <div style={{ position: "relative", flexShrink: 0 }}>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    backgroundColor: color,
+                    border: "1px solid var(--border)",
+                  }}
+                />
+                {/* Inline color input — overlaid on the swatch */}
+                {!isDisabled && (
+                  <input
+                    type="color"
+                    value={color}
+                    onChange={(e) => {
+                      setZoneColor(zone, e.target.value)
+                      if (!isSelected) store.getState().setSelectedColorZone(zone)
+                    }}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      opacity: 0,
+                      cursor: "pointer",
+                      border: "none",
+                    }}
+                    aria-label={`Pick ${label} color`}
+                  />
+                )}
+              </div>
+
+              {/* Label + hex */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: isSelected ? 600 : 500, color: "var(--foreground)" }}>
+                  {label}
+                  {zone === "labels" && isGoogle && (
+                    <span style={{ fontSize: 10, color: "var(--muted-foreground)", marginLeft: 4 }}>
+                      (Google: same as text)
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace" }}>
+                  {color.toUpperCase()}
+                </div>
+              </div>
+
+              {/* Reset button for labels */}
+              {zone === "labels" && labelColor && !isDisabled && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    store.getState().setWalletField("labelColor", null)
+                  }}
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: 9999,
+                    border: "1px solid var(--border)",
+                    backgroundColor: "transparent",
+                    cursor: "pointer",
+                    fontSize: 11,
+                    color: "var(--muted-foreground)",
+                    flexShrink: 0,
+                  }}
+                >
+                  Auto
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* WCAG contrast */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "8px 10px",
-          borderRadius: 6,
+          padding: "6px 10px",
+          borderRadius: 12,
           backgroundColor: "var(--muted)",
-          marginBottom: 4,
+          marginBottom: 12,
         }}
       >
         <span style={{ fontSize: 11, color: "var(--muted-foreground)" }}>
-          Text contrast vs background
+          Text contrast
         </span>
         <span
           style={{
             fontSize: 11,
             fontWeight: 700,
             color: wcagColor,
-            padding: "2px 6px",
-            borderRadius: 4,
+            padding: "4px 8px",
+            borderRadius: 9999,
             border: `1px solid ${wcagColor}`,
           }}
         >
@@ -167,44 +271,16 @@ export function ColorsPanel({ store }: Props) {
         </span>
       </div>
 
-      <SectionHeader>Colors</SectionHeader>
-
-      <ColorRow label="Primary / Background" value={primaryColor} onChange={(v) => setColor("primaryColor", v)} />
-      <ColorRow label="Secondary" value={secondaryColor} onChange={(v) => setColor("secondaryColor", v)} />
-      <ColorRow label="Field Values" value={textColor} onChange={(v) => setColor("textColor", v)} />
-      <ColorRow
-        label="Labels"
-        value={labelColor ?? blendColors(textColor, primaryColor, 0.3)}
-        onChange={(v) => store.getState().setWalletField("labelColor", v)}
-      />
-      {labelColor && (
-        <button
-          onClick={() => store.getState().setWalletField("labelColor", null)}
-          style={{
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: "1px solid var(--border)",
-            backgroundColor: "transparent",
-            cursor: "pointer",
-            fontSize: 11,
-            color: "var(--muted-foreground)",
-            marginBottom: 8,
-          }}
-        >
-          Reset label color to auto
-        </button>
-      )}
-
       {/* Auto text color toggle */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginTop: 10,
           padding: "8px 10px",
-          borderRadius: 6,
+          borderRadius: 12,
           backgroundColor: "var(--muted)",
+          marginBottom: 16,
         }}
       >
         <div>
@@ -240,7 +316,10 @@ export function ColorsPanel({ store }: Props) {
         </button>
       </div>
 
-      <SectionHeader>Palette Presets</SectionHeader>
+      {/* Palette presets */}
+      <div style={{ fontSize: 12, fontWeight: 700, color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+        Presets
+      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
         {PALETTE_PRESETS.map((preset) => (
@@ -250,7 +329,7 @@ export function ColorsPanel({ store }: Props) {
             title={preset.name}
             style={{
               height: 32,
-              borderRadius: 6,
+              borderRadius: 10,
               border: "2px solid transparent",
               cursor: "pointer",
               background: `linear-gradient(135deg, ${preset.primary} 50%, ${preset.secondary} 100%)`,
@@ -267,50 +346,6 @@ export function ColorsPanel({ store }: Props) {
             style={{ fontSize: 9, textAlign: "center", color: "var(--muted-foreground)", lineHeight: 1.2 }}
           >
             {preset.name}
-          </div>
-        ))}
-      </div>
-
-      <SectionHeader>Label Format</SectionHeader>
-      <div style={{ display: "flex", gap: 4 }}>
-        {LABEL_FORMATS.map((fmt) => (
-          <button
-            key={fmt.id}
-            onClick={() => store.getState().setWalletField("labelFormat", fmt.id)}
-            aria-pressed={labelFormat === fmt.id}
-            style={{
-              flex: 1,
-              padding: "8px 10px",
-              borderRadius: 6,
-              border: `2px solid ${labelFormat === fmt.id ? "var(--primary)" : "var(--border)"}`,
-              backgroundColor: labelFormat === fmt.id ? "var(--accent)" : "transparent",
-              cursor: "pointer",
-              fontSize: 11,
-              fontWeight: labelFormat === fmt.id ? 600 : 400,
-              color: "var(--foreground)",
-              textAlign: "center",
-            }}
-          >
-            {fmt.name}
-          </button>
-        ))}
-      </div>
-      <div
-        style={{
-          marginTop: 8,
-          padding: "8px 12px",
-          borderRadius: 6,
-          backgroundColor: "var(--muted)",
-          display: "flex",
-          gap: 12,
-        }}
-      >
-        {["Next Reward", "Member Since"].map((label) => (
-          <div key={label}>
-            <div style={{ fontSize: 9, color: "var(--muted-foreground)", opacity: 0.6 }}>
-              {formatLabel(label, labelFormat)}
-            </div>
-            <div style={{ fontSize: 11, fontWeight: 500, color: "var(--foreground)" }}>Value</div>
           </div>
         ))}
       </div>

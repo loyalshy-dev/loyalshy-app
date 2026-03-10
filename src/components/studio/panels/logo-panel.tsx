@@ -2,19 +2,23 @@
 
 import { useState, useRef } from "react"
 import { useStore } from "zustand"
-import { ChevronDown, RotateCcw } from "lucide-react"
+import { ChevronDown, RotateCcw, Wand2, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
+import type { ExtractedPalette } from "@/lib/color-extraction"
 import {
   uploadOrganizationLogo,
   deleteOrganizationLogo,
   uploadPlatformLogo,
   resetPlatformLogo,
+  extractPaletteFromLogoUrl,
 } from "@/server/org-settings-actions"
 
 type Props = {
   store: CardDesignStoreApi
   organizationId: string
   organizationName: string
+  organizationLogo: string | null
 }
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -50,7 +54,7 @@ function Placeholder({ initial, fontSize }: { initial: string; fontSize: number 
   )
 }
 
-export function LogoPanel({ store, organizationId, organizationName }: Props) {
+export function LogoPanel({ store, organizationId, organizationName, organizationLogo }: Props) {
   const logoAppleUrl = useStore(store, (s) => s.wallet.logoAppleUrl)
   const logoGoogleUrl = useStore(store, (s) => s.wallet.logoGoogleUrl)
   const logoAppleZoom = useStore(store, (s) => s.wallet.logoAppleZoom)
@@ -58,6 +62,11 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
   const [uploading, setUploading] = useState(false)
   const [overrideOpen, setOverrideOpen] = useState<"apple" | "google" | null>(null)
   const [overridePlatformUploading, setOverridePlatformUploading] = useState<"apple" | "google" | null>(null)
+
+  // Brand match state
+  const [isMatching, setIsMatching] = useState(false)
+  const [matchPalette, setMatchPalette] = useState<ExtractedPalette | null>(null)
+  const paletteCacheRef = useRef<{ url: string; palette: ExtractedPalette } | null>(null)
 
   const mainInputRef = useRef<HTMLInputElement>(null)
   const overrideInputRef = useRef<HTMLInputElement>(null)
@@ -78,6 +87,10 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
         store.getState().setWalletField("logoAppleUrl", result.appleUrl)
         store.getState().setWalletField("logoGoogleUrl", result.googleUrl)
       }
+      // Reset brand match results when logo changes
+      setMatchPalette(null)
+
+      paletteCacheRef.current = null
     } finally {
       setUploading(false)
     }
@@ -87,6 +100,8 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
     await deleteOrganizationLogo(organizationId)
     store.getState().setWalletField("logoAppleUrl", null)
     store.getState().setWalletField("logoGoogleUrl", null)
+    setMatchPalette(null)
+    paletteCacheRef.current = null
   }
 
   // ─── Platform override ──────────────────────────────────
@@ -121,6 +136,41 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
     }
   }
 
+  // ─── Brand Match ────────────────────────────────────────
+
+  async function handleBrandMatch() {
+    if (!organizationLogo) return
+    setIsMatching(true)
+    try {
+      let palette: ExtractedPalette | null = null
+
+      if (paletteCacheRef.current?.url === organizationLogo) {
+        palette = paletteCacheRef.current.palette
+      } else {
+        const result = await extractPaletteFromLogoUrl(organizationId)
+        if ("palette" in result && result.palette) {
+          palette = result.palette
+          paletteCacheRef.current = { url: organizationLogo, palette }
+        }
+      }
+
+      if (palette) {
+        setMatchPalette(palette)
+        const s = store.getState()
+        s.setWalletField("primaryColor", palette.primarySuggestion)
+        s.setWalletField("secondaryColor", palette.secondarySuggestion)
+        s.setWalletField("textColor", palette.textColor)
+        toast.success("Card colors matched to your brand!")
+      } else {
+        toast.error("Could not extract colors from your logo.")
+      }
+    } catch {
+      toast.error("Failed to extract brand colors. Please try again.")
+    } finally {
+      setIsMatching(false)
+    }
+  }
+
   return (
     <div>
       {/* ─── Main upload ─────────────────────────────────── */}
@@ -146,7 +196,7 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
           style={{
             flex: 1,
             padding: "7px 14px",
-            borderRadius: 6,
+            borderRadius: 9999,
             border: "1px solid var(--border)",
             backgroundColor: "var(--muted)",
             cursor: uploading ? "wait" : "pointer",
@@ -161,7 +211,7 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
             onClick={handleMainDelete}
             style={{
               padding: "7px 12px",
-              borderRadius: 6,
+              borderRadius: 9999,
               border: "1px solid var(--border)",
               backgroundColor: "transparent",
               cursor: "pointer",
@@ -177,7 +227,7 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
       <div
         style={{
           padding: "6px 10px",
-          borderRadius: 6,
+          borderRadius: 12,
           backgroundColor: "var(--muted)",
           marginTop: 8,
           fontSize: 11,
@@ -206,7 +256,7 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
                 style={{
                   width: 160,
                   height: 50,
-                  borderRadius: 6,
+                  borderRadius: 12,
                   border: "1px solid var(--border)",
                   overflow: "hidden",
                   display: "flex",
@@ -292,6 +342,86 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
               />
             </div>
           )}
+
+          {/* ─── Brand Match ─────────────────────────────── */}
+          <SectionHeader>Brand Match</SectionHeader>
+          <div
+            style={{
+              padding: 10,
+              borderRadius: 14,
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--accent)",
+            }}
+          >
+            <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 8 }}>
+              Extract colors from your logo and apply them to your card design.
+            </div>
+
+            {/* Extracted palette dots */}
+            {matchPalette && matchPalette.colors.length > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  marginBottom: 8,
+                  padding: "4px 8px",
+                  borderRadius: 12,
+                  backgroundColor: "var(--background)",
+                }}
+              >
+                {matchPalette.colors.slice(0, 5).map((c, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: "50%",
+                      backgroundColor: c.hex,
+                      border: "1px solid var(--border)",
+                    }}
+                    title={`${c.hex} (${c.percentage}%)`}
+                  />
+                ))}
+                <span style={{ fontSize: 10, color: "var(--muted-foreground)", marginLeft: 4 }}>
+                  {matchPalette.isMonochrome ? "Monochrome" : `${matchPalette.colors.length} colors`}
+                </span>
+              </div>
+            )}
+
+            <button
+              onClick={handleBrandMatch}
+              disabled={isMatching}
+              style={{
+                width: "100%",
+                padding: "7px 14px",
+                borderRadius: 9999,
+                border: "none",
+                backgroundColor: "var(--primary)",
+                color: "var(--primary-foreground)",
+                cursor: isMatching ? "not-allowed" : "pointer",
+                fontSize: 12,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                opacity: isMatching ? 0.5 : 1,
+              }}
+            >
+              {isMatching ? (
+                <>
+                  <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
+                  Extracting...
+                </>
+              ) : (
+                <>
+                  <Wand2 size={13} />
+                  {matchPalette ? "Re-extract colors" : "Match to my brand"}
+                </>
+              )}
+            </button>
+          </div>
         </>
       )}
 
@@ -327,7 +457,7 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
                     alignItems: "center",
                     width: "100%",
                     padding: "6px 8px",
-                    borderRadius: 6,
+                    borderRadius: 9999,
                     border: "none",
                     backgroundColor: isOpen ? "var(--accent)" : "transparent",
                     cursor: "pointer",
@@ -356,7 +486,7 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
                         style={{
                           flex: 1,
                           padding: "6px 12px",
-                          borderRadius: 6,
+                          borderRadius: 9999,
                           border: "1px solid var(--border)",
                           backgroundColor: "var(--muted)",
                           cursor: isUploading ? "wait" : "pointer",
@@ -373,7 +503,7 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
                         title="Regenerate from source"
                         style={{
                           padding: "6px 8px",
-                          borderRadius: 6,
+                          borderRadius: 9999,
                           border: "1px solid var(--border)",
                           backgroundColor: "transparent",
                           cursor: isUploading ? "wait" : "pointer",
@@ -408,7 +538,7 @@ export function LogoPanel({ store, organizationId, organizationName }: Props) {
       <div
         style={{
           padding: "10px 12px",
-          borderRadius: 8,
+          borderRadius: 12,
           backgroundColor: "var(--muted)",
           marginTop: 16,
         }}

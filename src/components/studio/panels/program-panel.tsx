@@ -52,7 +52,7 @@ function TextInput({
         style={{
           width: "100%",
           padding: "8px 10px",
-          borderRadius: 6,
+          borderRadius: 9999,
           border: "1px solid var(--border)",
           backgroundColor: "var(--background)",
           fontSize: 12,
@@ -92,7 +92,7 @@ function NumberInput({
           style={{
             width: suffix ? "70%" : "100%",
             padding: "8px 10px",
-            borderRadius: 6,
+            borderRadius: 9999,
             border: "1px solid var(--border)",
             backgroundColor: "var(--background)",
             fontSize: 12,
@@ -128,7 +128,7 @@ function SelectInput({
         style={{
           width: "100%",
           padding: "8px 10px",
-          borderRadius: 6,
+          borderRadius: 12,
           border: "1px solid var(--border)",
           backgroundColor: "var(--background)",
           fontSize: 12,
@@ -235,7 +235,7 @@ function TextArea({
         style={{
           width: "100%",
           padding: "8px 10px",
-          borderRadius: 6,
+          borderRadius: 12,
           border: "1px solid var(--border)",
           backgroundColor: "var(--background)",
           fontSize: 12,
@@ -629,7 +629,7 @@ function AccessFields({ store }: { store: CardDesignStoreApi }) {
               onClick={() => toggleDay(day.value)}
               style={{
                 padding: "4px 8px",
-                borderRadius: 6,
+                borderRadius: 9999,
                 border: "1px solid var(--border)",
                 backgroundColor: validDays.includes(day.value) ? "var(--primary)" : "var(--background)",
                 color: validDays.includes(day.value) ? "var(--primary-foreground)" : "var(--foreground)",
@@ -883,7 +883,7 @@ function PrizeRevealFields({ store }: { store: CardDesignStoreApi }) {
                   style={{
                     flex: 1,
                     padding: "6px 8px",
-                    borderRadius: 6,
+                    borderRadius: 9999,
                     border: "1px solid var(--border)",
                     backgroundColor: "var(--background)",
                     fontSize: 12,
@@ -900,7 +900,7 @@ function PrizeRevealFields({ store }: { store: CardDesignStoreApi }) {
                   style={{
                     width: 44,
                     padding: "6px 4px",
-                    borderRadius: 6,
+                    borderRadius: 9999,
                     border: "1px solid var(--border)",
                     backgroundColor: "var(--background)",
                     fontSize: 12,
@@ -916,7 +916,7 @@ function PrizeRevealFields({ store }: { store: CardDesignStoreApi }) {
                   onClick={() => removePrize(i)}
                   style={{
                     padding: 4,
-                    borderRadius: 4,
+                    borderRadius: 9999,
                     border: "none",
                     background: "none",
                     color: "var(--muted-foreground)",
@@ -936,7 +936,7 @@ function PrizeRevealFields({ store }: { store: CardDesignStoreApi }) {
                 onClick={addPrize}
                 style={{
                   padding: "4px 10px",
-                  borderRadius: 6,
+                  borderRadius: 9999,
                   border: "1px solid var(--border)",
                   backgroundColor: "var(--background)",
                   fontSize: 11,
@@ -976,7 +976,7 @@ function PrizeRevealFields({ store }: { store: CardDesignStoreApi }) {
                     style={{
                       flex: 1,
                       padding: "6px 8px",
-                      borderRadius: 6,
+                      borderRadius: 9999,
                       border: "1px solid var(--border)",
                       backgroundColor: "var(--background)",
                       fontSize: 11,
@@ -1004,7 +1004,7 @@ function PrizeRevealFields({ store }: { store: CardDesignStoreApi }) {
                     style={{
                       flex: 1,
                       padding: "6px 8px",
-                      borderRadius: 6,
+                      borderRadius: 9999,
                       border: "1px solid var(--border)",
                       backgroundColor: "var(--background)",
                       fontSize: 11,
@@ -1128,7 +1128,7 @@ function FieldPicker({
               alignItems: "center",
               gap: 4,
               padding: "4px 8px",
-              borderRadius: 6,
+              borderRadius: 12,
               border: "1px solid var(--border)",
               backgroundColor: "var(--accent)",
               fontSize: 12,
@@ -1148,7 +1148,7 @@ function FieldPicker({
                 style={{
                   flex: 1,
                   padding: "2px 4px",
-                  borderRadius: 4,
+                  borderRadius: 9999,
                   border: "1px solid var(--primary)",
                   backgroundColor: "var(--background)",
                   fontSize: 12,
@@ -1231,7 +1231,7 @@ function FieldPicker({
           style={{
             width: "100%",
             padding: "6px 8px",
-            borderRadius: 6,
+            borderRadius: 12,
             border: "1px solid var(--border)",
             backgroundColor: "var(--background)",
             fontSize: 11,

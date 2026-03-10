@@ -41,7 +41,7 @@ function GroupBox({
     <div
       style={{
         border: "1px solid var(--border)",
-        borderRadius: 8,
+        borderRadius: 14,
         marginTop: 12,
         overflow: "hidden",
       }}
@@ -119,7 +119,7 @@ function ColorRow({
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          style={{ width: 28, height: 28, border: "1px solid var(--border)", borderRadius: 4, cursor: "pointer", padding: 1 }}
+          style={{ width: 28, height: 28, border: "1px solid var(--border)", borderRadius: 8, cursor: "pointer", padding: 1 }}
         />
       </div>
     </div>
@@ -162,7 +162,7 @@ function TransparentCheckbox({
         gap: 10,
         cursor: "pointer",
         padding: "8px 10px",
-        borderRadius: 6,
+        borderRadius: 12,
         border: `1.5px solid ${checked ? "var(--primary)" : "var(--border)"}`,
         backgroundColor: checked ? "var(--accent)" : "transparent",
         marginTop: 4,
@@ -209,7 +209,7 @@ function IconUploadWidget({
             width: 40,
             height: 40,
             objectFit: "contain",
-            borderRadius: 6,
+            borderRadius: 10,
             border: "1px solid var(--border)",
             backgroundColor: "var(--muted)",
           }}
@@ -221,7 +221,7 @@ function IconUploadWidget({
           }}
           style={{
             padding: "6px 12px",
-            borderRadius: 6,
+            borderRadius: 9999,
             border: "1px solid var(--border)",
             backgroundColor: "transparent",
             cursor: "pointer",
@@ -259,7 +259,7 @@ function IconUploadWidget({
         disabled={isUploading}
         style={{
           padding: "6px 12px",
-          borderRadius: 6,
+          borderRadius: 9999,
           border: "1px solid var(--border)",
           backgroundColor: "var(--muted)",
           cursor: isUploading ? "wait" : "pointer",
@@ -341,7 +341,7 @@ function FilledStylePicker({
             alignItems: "center",
             gap: 4,
             padding: "8px 6px",
-            borderRadius: 6,
+            borderRadius: 12,
             border: `2px solid ${value === s.id ? "var(--primary)" : "var(--border)"}`,
             backgroundColor: value === s.id ? "var(--accent)" : "transparent",
             cursor: "pointer",
@@ -383,7 +383,7 @@ function IconPresetGrid({
             alignItems: "center",
             gap: 4,
             padding: "6px 4px",
-            borderRadius: 6,
+            borderRadius: 9999,
             border: `2px solid ${activeId === icon.id ? "var(--primary)" : "var(--border)"}`,
             backgroundColor: activeId === icon.id ? "var(--accent)" : "transparent",
             cursor: "pointer",
@@ -544,7 +544,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                 justifyContent: "center",
                 gap: 4,
                 padding: "10px 6px",
-                borderRadius: 8,
+                borderRadius: 12,
                 border: `2px solid ${isActive ? "var(--primary)" : "var(--border)"}`,
                 backgroundColor: isActive ? "var(--accent)" : "transparent",
                 cursor: "pointer",
@@ -554,7 +554,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
               }}
             >
               {opt.badge && (
-                <span style={{ position: "absolute", top: 3, right: 3, fontSize: 8, fontWeight: 700, color: "var(--primary)", backgroundColor: "var(--accent)", padding: "1px 4px", borderRadius: 3, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <span style={{ position: "absolute", top: 3, right: 3, fontSize: 8, fontWeight: 700, color: "var(--primary)", backgroundColor: "var(--accent)", padding: "1px 4px", borderRadius: 9999, textTransform: "uppercase", letterSpacing: "0.04em" }}>
                   {opt.badge}
                 </span>
               )}
@@ -587,7 +587,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                   aria-pressed={stampGridConfig.stampShape === s.id}
                   style={{
                     padding: "8px 10px",
-                    borderRadius: 6,
+                    borderRadius: 9999,
                     border: `2px solid ${stampGridConfig.stampShape === s.id ? "var(--primary)" : "var(--border)"}`,
                     backgroundColor: stampGridConfig.stampShape === s.id ? "var(--accent)" : "transparent",
                     cursor: "pointer",
@@ -626,7 +626,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                 gap: 10,
                 cursor: "pointer",
                 padding: "8px 10px",
-                borderRadius: 6,
+                borderRadius: 12,
                 border: `1.5px solid ${stampGridConfig.useUniformIcon ? "var(--primary)" : "var(--border)"}`,
                 backgroundColor: stampGridConfig.useUniformIcon ? "var(--accent)" : "transparent",
                 marginTop: 10,
@@ -686,7 +686,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
             <SubLabel>Colors</SubLabel>
             {stampFilledColor === null ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 20, height: 20, borderRadius: 4, backgroundColor: effectiveStampColor, border: "1px solid var(--border)", flexShrink: 0 }} />
+                <div style={{ width: 20, height: 20, borderRadius: 8, backgroundColor: effectiveStampColor, border: "1px solid var(--border)", flexShrink: 0 }} />
                 <span style={{ fontSize: 11, color: "var(--muted-foreground)", flex: 1 }}>Using secondary color</span>
                 <button
                   onClick={() => store.getState().setWalletField("stampFilledColor", effectiveStampColor)}
@@ -697,7 +697,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
               </div>
             ) : stampFilledColor === "transparent" ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 20, height: 20, borderRadius: 4, border: "1px dashed var(--border)", flexShrink: 0, background: "repeating-conic-gradient(var(--muted) 0% 25%, transparent 0% 50%) 50% / 8px 8px" }} />
+                <div style={{ width: 20, height: 20, borderRadius: 8, border: "1px dashed var(--border)", flexShrink: 0, background: "repeating-conic-gradient(var(--muted) 0% 25%, transparent 0% 50%) 50% / 8px 8px" }} />
                 <span style={{ fontSize: 11, color: "var(--muted-foreground)", flex: 1 }}>Transparent</span>
                 <ResetLink label="Reset" onClick={() => store.getState().setWalletField("stampFilledColor", null)} />
               </div>
@@ -879,7 +879,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
         <div
           style={{
             padding: "12px 14px",
-            borderRadius: 8,
+            borderRadius: 14,
             backgroundColor: "var(--muted)",
             marginTop: 12,
             marginBottom: 4,
@@ -908,7 +908,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
             style={{
               width: "100%",
               padding: "8px 10px",
-              borderRadius: 6,
+              borderRadius: 12,
               border: "1px solid var(--border)",
               backgroundColor: "var(--background)",
               fontSize: 12,

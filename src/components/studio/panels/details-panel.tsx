@@ -83,7 +83,7 @@ export function DetailsPanel({ store }: Props) {
         style={{
           width: "100%",
           padding: "8px 10px",
-          borderRadius: 6,
+          borderRadius: 12,
           border: "1px solid var(--border)",
           backgroundColor: "var(--background)",
           fontSize: 12,
@@ -134,7 +134,7 @@ export function DetailsPanel({ store }: Props) {
         style={{
           width: "100%",
           padding: "8px 10px",
-          borderRadius: 6,
+          borderRadius: 12,
           border: "1px solid var(--border)",
           backgroundColor: "var(--background)",
           fontSize: 12,

@@ -6,7 +6,6 @@ export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID" | "GIF
 
 export type StudioTool =
   | "program"
-  | "templates"
   | "colors"
   | "progress"
   | "strip"
@@ -17,3 +16,5 @@ export type StudioTool =
 export type PreviewFormat = "apple" | "google"
 
 export type DeviceFrame = "iphone" | "pixel" | "minimal" | "none"
+
+export type ColorZone = "background" | "strip" | "text" | "labels" | "logo" | "progress"

@@ -382,6 +382,7 @@ export function WalletPassRenderer({
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, ...(isTicket && isApple ? { visibility: "hidden" as const } : {}) }}>
         {/* Logo — rectangular for Apple, circular for Google (centered on corner radius) */}
         <div
+          data-color-zone="logo"
           style={{
             width: isApple ? 150 : 40,
             height: isApple ? 50 : 40,
@@ -484,18 +485,21 @@ export function WalletPassRenderer({
         <div style={{ textAlign: "right", flexShrink: 0 }}>
           {headerFields.map((f, i) => (
             <div key={i}>
-              <div style={{
-                fontSize: 11,
-                fontWeight: 700,
-                lineHeight: 1,
-                color: design.labelColor ?? design.textColor,
-                opacity: design.labelColor ? 1 : 0.6,
-                textTransform: "uppercase",
-                letterSpacing: "0.04em",
-              }}>
+              <div
+                data-color-zone="labels"
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  color: design.labelColor ?? design.textColor,
+                  opacity: design.labelColor ? 1 : 0.6,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
+                }}
+              >
                 {f.label}
               </div>
-              <div style={{ fontSize: isTicket ? 18 : 22, fontWeight: 300, lineHeight: 1.1 }}>
+              <div data-color-zone="text" style={{ fontSize: isTicket ? 18 : 22, fontWeight: 300, lineHeight: 1.1 }}>
                 {f.value}
               </div>
             </div>
@@ -530,33 +534,46 @@ export function WalletPassRenderer({
         zIndex: 2,
         padding: "8px 16px",
         textShadow: "0 2px 6px rgba(0,0,0,0.4)",
+        pointerEvents: "none",
       }}
     >
       <div
+        data-color-zone="progress"
         style={{
-          fontSize: 11,
-          fontWeight: 700,
-          color: design.labelColor ?? design.textColor,
-          opacity: design.labelColor ? 1 : 0.85,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          lineHeight: 1,
-          marginBottom: 2,
+          pointerEvents: "auto",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        {lbl(progressLabel)}
-      </div>
-      <div
-        style={{
-          fontSize: primaryFontSize,
-          fontWeight: 700,
-          color: design.textColor,
-          letterSpacing: design.progressStyle === "NUMBERS" ? "0.02em" : "0.08em",
-          lineHeight: 1.1,
-          opacity: 0.95,
-        }}
-      >
-        {progressText}
+        <div
+          data-color-zone="labels"
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: design.labelColor ?? design.textColor,
+            opacity: design.labelColor ? 1 : 0.85,
+            textTransform: "uppercase",
+            letterSpacing: "0.06em",
+            lineHeight: 1,
+            marginBottom: 2,
+          }}
+        >
+          {lbl(progressLabel)}
+        </div>
+        <div
+          data-color-zone="text"
+          style={{
+            fontSize: primaryFontSize,
+            fontWeight: 700,
+            color: design.textColor,
+            letterSpacing: design.progressStyle === "NUMBERS" ? "0.02em" : "0.08em",
+            lineHeight: 1.1,
+            opacity: 0.95,
+          }}
+        >
+          {progressText}
+        </div>
       </div>
     </div>
   ) : null
@@ -646,6 +663,7 @@ export function WalletPassRenderer({
       {primaryFields.map((f, i) => (
         <div key={i}>
           <div
+            data-color-zone="labels"
             style={{
               fontSize: 11,
               fontWeight: 700,
@@ -659,6 +677,7 @@ export function WalletPassRenderer({
             {f.label}
           </div>
           <div
+            data-color-zone="text"
             style={{
               fontSize: primaryFontSize,
               fontWeight: 700,
@@ -804,6 +823,7 @@ export function WalletPassRenderer({
                       }}
                     >
                       <div
+                        data-color-zone="text"
                         style={{
                           fontSize: 36,
                           fontWeight: 300,
@@ -849,6 +869,7 @@ export function WalletPassRenderer({
             {/* Google: program name as large heading */}
             <div style={{ padding: "6px 16px 2px" }}>
               <div
+                data-color-zone="text"
                 style={{
                   fontSize: 24,
                   fontWeight: 400,
@@ -944,6 +965,7 @@ function GoogleFieldRows({
           {row.map((field, fi) => (
             <div key={fi} style={{ flex: 1, textAlign: row.length === 2 && fi === 1 ? "right" : row.length === 3 && fi === 2 ? "right" : row.length === 3 && fi === 1 ? "center" : undefined }}>
               <div
+                data-color-zone="labels"
                 style={{
                   fontSize: 10,
                   fontWeight: 500,
@@ -957,6 +979,7 @@ function GoogleFieldRows({
                 {field.label}
               </div>
               <div
+                data-color-zone="text"
                 style={{
                   fontSize: 12,
                   fontWeight: 500,
@@ -998,6 +1021,7 @@ function GoogleTicketFields({
           {row.map((field, fi) => (
             <div key={fi} style={{ flex: 1, textAlign: fi === 1 ? "right" : undefined }}>
               <div
+                data-color-zone="labels"
                 style={{
                   fontSize: 10,
                   fontWeight: 500,
@@ -1011,6 +1035,7 @@ function GoogleTicketFields({
                 {field.label}
               </div>
               <div
+                data-color-zone="text"
                 style={{
                   fontSize: 13,
                   fontWeight: 500,
@@ -1084,15 +1109,18 @@ function StampGridOverlay({
         padding: `${pad}px`,
         zIndex: 1,
         backgroundColor: "rgba(0,0,0,0.15)",
+        pointerEvents: "none",
       }}
     >
       <div
+        data-color-zone="progress"
         style={{
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "center",
           gap,
           maxWidth: cols * slotSize + (cols - 1) * gap,
+          pointerEvents: "auto",
         }}
       >
         {Array.from({ length: totalSlots }, (_, i) => {

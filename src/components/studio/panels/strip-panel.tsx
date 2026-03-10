@@ -70,7 +70,7 @@ function ColorRow({
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          style={{ width: 28, height: 28, border: "1px solid var(--border)", borderRadius: 4, cursor: "pointer", padding: 1 }}
+          style={{ width: 28, height: 28, border: "1px solid var(--border)", borderRadius: 8, cursor: "pointer", padding: 1 }}
         />
       </div>
     </div>
@@ -121,7 +121,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
         <div
           style={{
             padding: "10px 12px",
-            borderRadius: 8,
+            borderRadius: 14,
             backgroundColor: "var(--muted)",
             marginBottom: 12,
             fontSize: 11,
@@ -138,7 +138,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
               alignItems: "center",
               justifyContent: "space-between",
               padding: "10px 12px",
-              borderRadius: 8,
+              borderRadius: 14,
               border: `1.5px solid ${showStrip ? "var(--primary)" : "var(--border)"}`,
               backgroundColor: showStrip ? "var(--accent)" : "transparent",
               cursor: "pointer",
@@ -158,7 +158,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
             <div
               style={{
                 padding: "12px",
-                borderRadius: 8,
+                borderRadius: 14,
                 backgroundColor: "var(--muted)",
                 textAlign: "center",
                 fontSize: 11,
@@ -188,7 +188,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
         <div
           style={{
             aspectRatio: "1125 / 432",
-            borderRadius: 8,
+            borderRadius: 14,
             border: "1px solid var(--border)",
             backgroundColor: "var(--muted)",
             display: "flex",
@@ -234,7 +234,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
               }}
               style={{
                 padding: "6px 12px",
-                borderRadius: 6,
+                borderRadius: 9999,
                 border: "1px solid var(--border)",
                 backgroundColor: "transparent",
                 cursor: "pointer",
@@ -283,7 +283,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
           style={{
             flex: 1,
             padding: "8px 14px",
-            borderRadius: 6,
+            borderRadius: 9999,
             border: "1px solid var(--border)",
             backgroundColor: "var(--muted)",
             cursor: isUploadingStrip ? "wait" : "pointer",
@@ -303,7 +303,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
             }}
             style={{
               padding: "8px 12px",
-              borderRadius: 6,
+              borderRadius: 9999,
               border: "1px solid var(--border)",
               backgroundColor: "transparent",
               cursor: "pointer",
@@ -363,7 +363,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
                 flexDirection: "column",
                 gap: 4,
                 padding: 0,
-                borderRadius: 6,
+                borderRadius: 10,
                 border: `2px solid ${isActive ? "var(--primary)" : "var(--border)"}`,
                 backgroundColor: "transparent",
                 cursor: isUploadingStrip ? "wait" : "pointer",
@@ -436,7 +436,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
               gap: 10,
               cursor: "pointer",
               padding: "8px 10px",
-              borderRadius: 6,
+              borderRadius: 12,
               border: `1.5px solid ${stripGrayscale ? "var(--primary)" : "var(--border)"}`,
               backgroundColor: stripGrayscale ? "var(--accent)" : "transparent",
             }}
@@ -462,7 +462,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
             aria-pressed={stripFill === mode}
             style={{
               padding: "8px 10px",
-              borderRadius: 6,
+              borderRadius: 9999,
               border: `2px solid ${stripFill === mode ? "var(--primary)" : "var(--border)"}`,
               backgroundColor: stripFill === mode ? "var(--accent)" : "transparent",
               cursor: "pointer",
@@ -500,7 +500,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
           }}
           style={{
             padding: "6px 12px",
-            borderRadius: 6,
+            borderRadius: 9999,
             border: "1px solid var(--border)",
             backgroundColor: "transparent",
             cursor: "pointer",
@@ -525,7 +525,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
                 aria-pressed={patternStyle === opt.id}
                 style={{
                   padding: "8px 10px",
-                  borderRadius: 6,
+                  borderRadius: 12,
                   border: `2px solid ${patternStyle === opt.id ? "var(--primary)" : "var(--border)"}`,
                   backgroundColor: patternStyle === opt.id ? "var(--accent)" : "transparent",
                   cursor: "pointer",
@@ -554,7 +554,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
                   onClick={() => store.getState().setWalletField("patternColor", null)}
                   style={{
                     padding: "6px 12px",
-                    borderRadius: 6,
+                    borderRadius: 9999,
                     border: "1px solid var(--border)",
                     backgroundColor: "transparent",
                     cursor: "pointer",
@@ -576,7 +576,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
         <div
           style={{
             padding: "12px 14px",
-            borderRadius: 8,
+            borderRadius: 14,
             backgroundColor: "var(--muted)",
             marginTop: 16,
           }}
@@ -675,7 +675,7 @@ function StripCropWidget({
       style={{
         aspectRatio: "1125 / 432",
         width: "100%",
-        borderRadius: 8,
+        borderRadius: 14,
         border: "1px solid var(--border)",
         backgroundColor: "var(--muted)",
         overflow: "hidden",

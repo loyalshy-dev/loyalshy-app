@@ -7,8 +7,8 @@ import type { CardDesignStoreApi, WalletState } from "@/lib/stores/card-design-s
 import { useStore } from "zustand"
 import { useStoreWithEqualityFn } from "zustand/traditional"
 import { StudioToolbar } from "./studio-toolbar"
-import { StudioSidebar } from "./studio-sidebar"
 import { CanvasPanel } from "./canvas/canvas-panel"
+import { ContextPanel, FloatingToolMenu } from "./canvas/context-notch"
 import { PanelShell } from "./panels/panel-shell"
 import { ProgramPanel } from "./panels/program-panel"
 import { ColorsPanel } from "./panels/colors-panel"
@@ -16,7 +16,7 @@ import { ProgressPanel } from "./panels/progress-panel"
 import { StripPanel } from "./panels/strip-panel"
 import { DetailsPanel } from "./panels/details-panel"
 import { NotificationsPanel } from "./panels/notifications-panel"
-import { TemplatePanel } from "./panels/template-panel"
+
 import { LogoPanel } from "./panels/logo-panel"
 import { savePassDesign as saveCardDesign, updatePassTemplate, updateMinigameConfig } from "@/server/org-settings-actions"
 import type { StudioTool, PreviewFormat } from "@/types/editor"
@@ -336,7 +336,6 @@ export function StudioLayout({
             autoTextColor: state.wallet.autoTextColor,
             patternStyle: state.wallet.patternStyle,
             progressStyle: state.wallet.progressStyle,
-            fontFamily: state.wallet.fontFamily,
             labelFormat: state.wallet.labelFormat,
             customProgressLabel: state.wallet.customProgressLabel,
             palettePreset: state.wallet.palettePreset,
@@ -463,10 +462,15 @@ export function StudioLayout({
         e.preventDefault()
         handleSave()
       }
+      if (e.key === "Escape") {
+        const s = store.getState()
+        if (s.ui.selectedColorZone) s.setSelectedColorZone(null)
+        else if (s.ui.activeTool) s.setActiveTool(null)
+      }
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [handleSave, temporalStore])
+  }, [handleSave, temporalStore, store])
 
   // ─── Mobile panel routing ──────────────────────────────
 
@@ -475,8 +479,6 @@ export function StudioLayout({
     switch (ui.activeTool) {
       case "program":
         return <ProgramPanel store={store} passType={passType} />
-      case "templates":
-        return <TemplatePanel store={store} organizationId={organizationId} organizationLogo={organizationLogo} cardType={cardType} />
       case "colors":
         return <ColorsPanel store={store} />
       case "progress":
@@ -484,7 +486,7 @@ export function StudioLayout({
       case "strip":
         return <StripPanel store={store} programId={templateId} forceStrip={cardType === "STAMP" || cardType === "POINTS"} />
       case "logo":
-        return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} />
+        return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} />
       case "notifications":
         return <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
       case "details":
@@ -546,27 +548,34 @@ export function StudioLayout({
       <>
         {/* 2-panel layout (desktop) / stacked layout (mobile) */}
         <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
-          {/* Left: Scrollable sidebar with accordion sections */}
-          {!isMobile && (
-            <StudioSidebar
-              store={store}
-              passType={passType}
-              cardType={cardType}
-              templateId={templateId}
-              organizationId={organizationId}
-              organizationName={organizationName}
-              organizationLogo={organizationLogo}
-            />
-          )}
-
-          {/* Right: Canvas (clean background) */}
+          {/* Full-width canvas with floating UI */}
           <div style={{ flex: 1, position: "relative", display: "flex" }}>
+            {/* Floating tool menu (left icon bar) */}
+            {!isMobile && (
+              <FloatingToolMenu store={store} cardType={cardType} />
+            )}
+
+            {/* Floating context panel card */}
+            {!isMobile && (
+              <ContextPanel
+                store={store}
+                passType={passType}
+                organizationId={organizationId}
+                organizationName={organizationName}
+                organizationLogo={organizationLogo}
+                templateId={templateId}
+                cardType={cardType}
+              />
+            )}
+
             <CanvasPanel
               design={design}
               format={ui.previewFormat}
               deviceFrame="minimal"
               organizationName={organizationName}
               organizationLogo={ui.previewFormat === "apple" ? wallet.logoAppleUrl : wallet.logoGoogleUrl}
+              organizationId={organizationId}
+              templateId={templateId}
               templateName={programConfig.name || templateName}
               passType={passType}
               templateConfig={buildConfigPayload(passType, programConfig)}
@@ -575,6 +584,7 @@ export function StudioLayout({
               businessHours={wallet.businessHours || undefined}
               socialLinks={wallet.socialLinks}
               customMessage={wallet.customMessage || undefined}
+              store={store}
             />
 
             {/* Floating controls — bottom right of canvas (embedded mode) */}
@@ -716,7 +726,7 @@ function CanvasControls({
           display: "flex",
           gap: 2,
           padding: 2,
-          borderRadius: 8,
+          borderRadius: 9999,
           backgroundColor: "var(--background)",
           border: "1px solid var(--border)",
           boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
@@ -727,7 +737,7 @@ function CanvasControls({
           disabled={!canUndo}
           style={{
             padding: "5px 8px",
-            borderRadius: 6,
+            borderRadius: 9999,
             border: "none",
             background: "none",
             color: canUndo ? "var(--foreground)" : "var(--muted-foreground)",
@@ -745,7 +755,7 @@ function CanvasControls({
           disabled={!canRedo}
           style={{
             padding: "5px 8px",
-            borderRadius: 6,
+            borderRadius: 9999,
             border: "none",
             background: "none",
             color: canRedo ? "var(--foreground)" : "var(--muted-foreground)",
@@ -766,7 +776,7 @@ function CanvasControls({
           display: "flex",
           gap: 2,
           padding: 2,
-          borderRadius: 8,
+          borderRadius: 9999,
           backgroundColor: "var(--background)",
           border: "1px solid var(--border)",
           boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
@@ -778,7 +788,7 @@ function CanvasControls({
             onClick={() => onPreviewFormatChange(fmt)}
             style={{
               padding: "5px 10px",
-              borderRadius: 6,
+              borderRadius: 9999,
               border: "none",
               background: previewFormat === fmt ? "var(--accent)" : "none",
               color: previewFormat === fmt ? "var(--foreground)" : "var(--muted-foreground)",
@@ -806,7 +816,7 @@ function CanvasControls({
           alignItems: "center",
           gap: 6,
           padding: "6px 14px",
-          borderRadius: 8,
+          borderRadius: 9999,
           border: isDirty ? "none" : "1px solid var(--border)",
           backgroundColor: isDirty ? "var(--primary)" : "var(--background)",
           color: isDirty ? "var(--primary-foreground)" : "var(--muted-foreground)",
