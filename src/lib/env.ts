@@ -61,6 +61,10 @@ const envSchema = z.object({
   // Analytics (Plausible)
   NEXT_PUBLIC_PLAUSIBLE_DOMAIN: z.string().optional(),
   NEXT_PUBLIC_PLAUSIBLE_HOST: z.string().optional(),
+
+  // Upstash Redis (Rate Limiting)
+  UPSTASH_REDIS_REST_URL: z.string().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 })
 
 // ─── Lazy Validation ─────────────────────────────────────────

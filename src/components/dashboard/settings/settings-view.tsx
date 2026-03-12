@@ -2,16 +2,20 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Building2, Users, CreditCard, Activity } from "lucide-react"
+import { Building2, Users, CreditCard, Activity, Key } from "lucide-react"
 import { GeneralSettingsForm } from "./general-settings-form"
 import { TeamManagement } from "./team-management"
 import { BillingSettings } from "./billing-settings"
+import { ApiKeysSection } from "./api-keys-section"
+import { WebhookSection } from "./webhook-section"
 import type { BillingData } from "@/server/billing-actions"
+import { PLANS } from "@/lib/plans"
+import type { PlanId } from "@/lib/plans"
 import { Card } from "@/components/ui/card"
 
-type Tab = "general" | "team" | "billing"
+type Tab = "general" | "team" | "billing" | "api"
 
-const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const baseTabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "general", label: "General", icon: Building2 },
   { id: "team", label: "Team", icon: Users },
   { id: "billing", label: "Billing", icon: CreditCard },
@@ -73,6 +77,12 @@ export function SettingsView({
 }: SettingsViewProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  // Build tabs list — include API tab only for Growth+ plans
+  const plan = PLANS[organization.plan as PlanId]
+  const tabs = plan?.apiAccess
+    ? [...baseTabs, { id: "api" as Tab, label: "API", icon: Key }]
+    : baseTabs
 
   // Support legacy tabs by falling back to "general"
   const resolvedTab = activeTab === "loyalty" || activeTab === "card-design" || activeTab === "programs" ? "general" : activeTab
@@ -149,6 +159,13 @@ export function SettingsView({
             </p>
           </Card>
         )
+      )}
+      {currentTab === "api" && (
+        <div className="space-y-8">
+          <ApiKeysSection />
+          <hr className="border-border" />
+          <WebhookSection />
+        </div>
       )}
     </div>
   )

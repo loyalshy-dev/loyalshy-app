@@ -27,3 +27,8 @@ export const emailsQueue = queue({
   name: "emails",
   concurrencyLimit: 5,
 })
+
+export const webhooksQueue = queue({
+  name: "webhooks",
+  concurrencyLimit: 10,
+})

@@ -8,6 +8,11 @@ function getPrismaClient(): PrismaClient {
     const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
     globalForPrisma.prisma = new PrismaClient({ adapter })
   }
+  // Verify the client has expected models (invalidate stale HMR cache)
+  if (!("apiKey" in globalForPrisma.prisma)) {
+    const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+    globalForPrisma.prisma = new PrismaClient({ adapter })
+  }
   return globalForPrisma.prisma
 }
 
