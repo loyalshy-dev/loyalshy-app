@@ -92,8 +92,17 @@ export const templateListParamsSchema = paginationSchema.extend({
 
 export const issuePassBodySchema = z.object({
   templateId: z.string().min(1, "templateId is required"),
-  contactId: z.string().min(1, "contactId is required"),
-})
+  contactId: z.string().min(1).optional(),
+  contact: z.object({
+    fullName: z.string().min(1, "Name is required").max(100),
+    email: z.string().email("Invalid email address").max(255).optional(),
+    phone: z.string().max(30).optional(),
+  }).optional(),
+  sendEmail: z.boolean().default(false),
+}).refine(
+  (d) => d.contactId || d.contact,
+  { message: "Either contactId or contact is required", path: ["contactId"] }
+)
 
 export const passListParamsSchema = paginationSchema.extend({
   contact_id: z.string().optional(),

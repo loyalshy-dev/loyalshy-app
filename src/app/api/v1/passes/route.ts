@@ -2,7 +2,14 @@ import { type NextRequest } from "next/server"
 import { apiHandler } from "@/lib/api-handler"
 import { handlePreflight } from "@/lib/api-cors"
 import { passListParamsSchema, issuePassBodySchema } from "@/lib/api-schemas"
-import { queryPassInstances, issuePass, queryPassInstanceDetail } from "@/lib/api-data"
+import {
+  queryPassInstances,
+  issuePass,
+  queryPassInstanceDetail,
+  findOrCreateContact,
+  buildWalletUrls,
+  sendPassIssuedEmail,
+} from "@/lib/api-data"
 import { serializePassInstance, serializePassInstanceDetail } from "@/lib/api-serializers"
 import { apiPaginated, apiCreated } from "@/lib/api-response"
 import { ValidationError, ConflictError, UnprocessableError } from "@/lib/api-errors"
@@ -56,11 +63,21 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     )
   }
 
-  const result = await issuePass(
-    ctx.organizationId,
-    parsed.data.templateId,
-    parsed.data.contactId
-  )
+  const { templateId, sendEmail } = parsed.data
+  let contactId = parsed.data.contactId
+  let contactCreated = false
+
+  // Resolve contact: inline creation or existing contactId
+  if (!contactId && parsed.data.contact) {
+    const contactResult = await findOrCreateContact(
+      ctx.organizationId,
+      parsed.data.contact
+    )
+    contactId = contactResult.contactId
+    contactCreated = contactResult.created
+  }
+
+  const result = await issuePass(ctx.organizationId, templateId, contactId!)
 
   if (!result.success) {
     if (result.error.includes("already issued")) {
@@ -75,9 +92,38 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
 
   const serialized = serializePassInstanceDetail(detail)
 
-  import("@/lib/api-events").then(({ dispatchWebhookEvent }) =>
-    dispatchWebhookEvent(ctx.organizationId, "pass.issued", { pass: serialized })
-  ).catch(() => {})
+  // Always build wallet URLs
+  const walletUrls = await buildWalletUrls(result.passInstanceId, ctx.organizationId)
+  serialized.walletUrls = walletUrls
+
+  // Send email if requested (fire-and-forget — don't fail the request)
+  let emailSent = false
+  if (sendEmail && detail.contact.email) {
+    const emailResult = await sendPassIssuedEmail(
+      result.passInstanceId,
+      ctx.organizationId
+    )
+    emailSent = emailResult.emailSent
+
+    // Refresh Apple wallet URL if pass was just generated
+    if (emailSent) {
+      const refreshedUrls = await buildWalletUrls(result.passInstanceId, ctx.organizationId)
+      serialized.walletUrls = refreshedUrls
+    }
+  }
+  serialized.emailSent = emailSent
+
+  // Dispatch webhooks asynchronously
+  import("@/lib/api-events").then(({ dispatchWebhookEvent }) => {
+    if (contactCreated) {
+      dispatchWebhookEvent(ctx.organizationId, "contact.created", {
+        contact: serialized.contact,
+      }).catch(() => {})
+    }
+    dispatchWebhookEvent(ctx.organizationId, "pass.issued", {
+      pass: serialized,
+    }).catch(() => {})
+  }).catch(() => {})
 
   return apiCreated(serialized)
 })

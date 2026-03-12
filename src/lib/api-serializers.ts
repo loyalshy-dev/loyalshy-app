@@ -289,9 +289,17 @@ export function serializePassInstance(instance: {
 
 // ─── Pass Instance Detail ──────────────────────────────────
 
+export type ApiWalletUrls = {
+  cardUrl: string
+  appleWalletUrl: string | null
+  googleWalletUrl: string
+}
+
 export type ApiPassInstanceDetail = ApiPassInstance & {
   contact: { id: string; fullName: string; email: string | null }
   recentInteractions: ApiInteractionSummary[]
+  walletUrls?: ApiWalletUrls
+  emailSent?: boolean
 }
 
 export function serializePassInstanceDetail(instance: {

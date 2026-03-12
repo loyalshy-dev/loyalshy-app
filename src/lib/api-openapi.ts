@@ -198,7 +198,318 @@ The response shows the updated state and the interaction that was created:
 }
 \`\`\`
 
-Each pass type has its own actions — see the **Passes > Perform a type-specific action** endpoint for the full action-to-type mapping.`,
+Each pass type has its own actions — see the **Passes > Perform a type-specific action** endpoint for the full action-to-type mapping.
+
+---
+
+## Use Cases
+
+Real-world integration examples showing the full API flow for common scenarios.
+
+---
+
+### Venue Ticketing — Issue tickets from your booking system
+
+**Scenario:** A music venue sells tickets through their own website and wants each ticket to appear as a wallet pass with a scannable QR code at the door.
+
+**Setup (once):**
+1. Create a **Ticket** template in your Loyalshy dashboard (e.g., "Jazz Night VIP")
+2. Design the pass in the card studio — add event name, date, venue address, and a strip image
+3. Activate the template
+4. Go to **Settings → API**, create an API key, and copy it
+5. Note the template ID from **Programs → your ticket → URL** (the UUID in the URL)
+
+**Integration flow (per booking):**
+
+**Step 1: Issue the ticket when the customer completes checkout**
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: booking-12345" \\
+  -d '{
+    "templateId": "YOUR_TICKET_TEMPLATE_ID",
+    "contact": {
+      "fullName": "Maria Garcia",
+      "email": "maria@example.com",
+      "phone": "+34612345678"
+    },
+    "sendEmail": true
+  }'
+\`\`\`
+
+This single call: creates the contact (or finds existing by email/phone), issues the ticket pass, sends a confirmation email with Apple Wallet and Google Wallet download buttons, and returns wallet URLs you can embed in your own confirmation page.
+
+The \`Idempotency-Key\` ensures retries from network failures won't create duplicate tickets.
+
+**Step 2: Use the wallet URLs in your own confirmation page**
+
+The response includes \`walletUrls\` you can embed directly:
+
+\`\`\`json
+{
+  "data": {
+    "id": "pass_xyz",
+    "walletUrls": {
+      "cardUrl": "https://loyalshy.com/join/venue-slug/card/pass_xyz?sig=...",
+      "appleWalletUrl": "https://r2.dev/passes/pass_xyz.pkpass",
+      "googleWalletUrl": "https://loyalshy.com/api/wallet/download/pass_xyz?sig=...&platform=google"
+    },
+    "emailSent": true
+  }
+}
+\`\`\`
+
+- \`cardUrl\` — link to the browser-viewable card (works on any device)
+- \`appleWalletUrl\` — direct \`.pkpass\` download (iOS Safari opens the native "Add to Wallet" dialog)
+- \`googleWalletUrl\` — download link for Google Wallet on Android
+
+**Step 3: Scan tickets at the door**
+
+When your staff scans a ticket QR code, call the scan action:
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"action": "scan"}'
+\`\`\`
+
+The response includes the updated scan count. Calling scan twice on the same ticket is idempotent — use the \`scanCount\` in the response to detect re-entry.
+
+**Step 4 (optional): Listen for events via webhooks**
+
+Set up a webhook to receive \`pass.issued\` and \`interaction.created\` events. This lets you track ticket issuance and door scans in real-time without polling.
+
+---
+
+### Coffee Shop Loyalty — Stamp cards with rewards
+
+**Scenario:** A coffee chain issues digital stamp cards. Customers earn a stamp per purchase and get a free drink after 10 stamps.
+
+**Setup (once):**
+1. Create a **Stamp Card** template in the dashboard — set stamps required to 10, reward description to "Free drink of your choice"
+2. Activate the template and create an API key
+
+**Integration flow:**
+
+**Step 1: Register a new customer at the POS**
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "templateId": "YOUR_STAMP_TEMPLATE_ID",
+    "contact": {
+      "fullName": "Alex Chen",
+      "email": "alex@example.com"
+    },
+    "sendEmail": true
+  }'
+\`\`\`
+
+The customer receives an email with buttons to add the stamp card to Apple Wallet or Google Wallet.
+
+**Step 2: Add a stamp on each purchase**
+
+When the customer pays, stamp their card:
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"action": "stamp"}'
+\`\`\`
+
+Response:
+
+\`\`\`json
+{
+  "data": {
+    "action": "stamp",
+    "result": {
+      "stampsCollected": 7,
+      "stampsRequired": 10,
+      "completed": false
+    }
+  }
+}
+\`\`\`
+
+When the card completes (10/10 stamps), the response includes \`"completed": true\` and a reward is automatically created.
+
+**Step 3: Check a customer's passes**
+
+Look up a customer by email to find their pass:
+
+\`\`\`bash
+curl "https://your-domain.com/api/v1/contacts?search=alex@example.com" \\
+  -H "Authorization: Bearer lsk_live_..."
+\`\`\`
+
+Then fetch their pass detail:
+
+\`\`\`bash
+curl "https://your-domain.com/api/v1/passes?contact_id=CONTACT_ID&template_id=TEMPLATE_ID" \\
+  -H "Authorization: Bearer lsk_live_..."
+\`\`\`
+
+---
+
+### Gym Membership — Access passes with check-ins
+
+**Scenario:** A gym chain issues digital membership cards. Members check in by scanning their pass at the entrance.
+
+**Setup (once):**
+1. Create a **Membership** template — set duration (e.g., 12 months) and membership tiers if needed
+2. Activate the template and create an API key
+
+**Integration flow:**
+
+**Step 1: Issue membership when a member signs up**
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "templateId": "YOUR_MEMBERSHIP_TEMPLATE_ID",
+    "contact": {
+      "fullName": "Sarah Johnson",
+      "email": "sarah@example.com",
+      "phone": "+44 7911 123456"
+    },
+    "sendEmail": true
+  }'
+\`\`\`
+
+The member receives their digital membership card via email with wallet download links.
+
+**Step 2: Record check-ins at the door**
+
+When the member scans their pass at the gym entrance:
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"action": "check_in"}'
+\`\`\`
+
+**Step 3: Monitor activity via stats**
+
+Track daily check-in trends:
+
+\`\`\`bash
+curl "https://your-domain.com/api/v1/stats/daily?from=2026-03-01&to=2026-03-12" \\
+  -H "Authorization: Bearer lsk_live_..."
+\`\`\`
+
+---
+
+### Bulk Import — Migrate existing customers
+
+**Scenario:** You have an existing customer database and want to import them into Loyalshy with passes.
+
+**Step 1: Bulk create contacts with pass issuance**
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/contacts/bulk \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "contacts": [
+      {"fullName": "Alice Brown", "email": "alice@example.com"},
+      {"fullName": "Bob Wilson", "email": "bob@example.com", "phone": "+1555123456"},
+      {"fullName": "Carol Davis", "email": "carol@example.com"}
+    ],
+    "issueTemplateId": "YOUR_TEMPLATE_ID"
+  }'
+\`\`\`
+
+This creates up to 200 contacts per call and optionally issues a pass from the specified template to each one.
+
+**Step 2: Repeat for remaining contacts**
+
+Page through your customer database in batches of 200. The API is idempotent on email — contacts with duplicate emails are skipped (reported in the response).
+
+---
+
+### Real-Time Sync — Webhooks for external systems
+
+**Scenario:** You want to keep your CRM, analytics, or POS in sync with Loyalshy events.
+
+**Step 1: Register a webhook endpoint**
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/webhooks \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "url": "https://your-app.com/webhooks/loyalshy",
+    "events": [
+      "contact.created",
+      "pass.issued",
+      "pass.completed",
+      "interaction.created",
+      "reward.earned",
+      "reward.redeemed"
+    ]
+  }'
+\`\`\`
+
+Save the \`secret\` from the response — you need it to verify webhook signatures.
+
+**Step 2: Verify webhook signatures in your handler**
+
+Every webhook delivery includes \`X-Loyalshy-Signature\` and \`X-Loyalshy-Timestamp\` headers. Verify the HMAC-SHA256 signature to ensure authenticity:
+
+\`\`\`javascript
+import crypto from "crypto";
+
+function verifyWebhook(body, signature, timestamp, secret) {
+  const payload = timestamp + "." + body;
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex");
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expected)
+  );
+}
+\`\`\`
+
+**Step 3: Handle events**
+
+\`\`\`javascript
+app.post("/webhooks/loyalshy", (req, res) => {
+  // Verify signature first (see above)
+
+  const { event, data } = req.body;
+
+  switch (event) {
+    case "pass.issued":
+      // Sync new pass to your CRM
+      crm.addNote(data.pass.contact.email, "Loyalshy pass issued");
+      break;
+    case "pass.completed":
+      // Stamp card completed — trigger promotion in your system
+      analytics.track("loyalty_reward_earned", data);
+      break;
+    case "interaction.created":
+      // Log visit in your POS
+      pos.logVisit(data.interaction);
+      break;
+  }
+
+  res.sendStatus(200); // Acknowledge receipt
+});
+\`\`\`
+
+Webhooks are retried up to 5 times with exponential backoff. Endpoints that fail 10 times consecutively are automatically disabled — you can re-enable them in the dashboard or via the API.`,
     },
     servers: [
       {
@@ -611,6 +922,20 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
                   type: "array" as const,
                   description: "Most recent interactions on this pass",
                   items: { $ref: "#/components/schemas/InteractionSummary" },
+                },
+                walletUrls: {
+                  type: "object" as const,
+                  nullable: true,
+                  description: "Signed URLs for wallet pass download and card view. Included in POST /passes responses.",
+                  properties: {
+                    cardUrl: { type: "string" as const, description: "Browser-viewable card URL with HMAC signature" },
+                    appleWalletUrl: { type: "string" as const, nullable: true, description: "Direct .pkpass download URL (R2-hosted). Null if Apple pass not yet generated." },
+                    googleWalletUrl: { type: "string" as const, description: "Signed Google Wallet download URL" },
+                  },
+                },
+                emailSent: {
+                  type: "boolean" as const,
+                  description: "Whether the pass-issued email was sent. Only present in POST /passes responses when sendEmail was true.",
                 },
               },
             },
@@ -1492,33 +1817,80 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
           tags: ["Passes"],
           summary: "Issue a pass",
           operationId: "issuePass",
-          description: "Issue a pass from an active template to a contact. Each contact can only have one active pass per template.",
+          description: "Issue a pass from an active template to a contact. You can provide an existing `contactId` or create a contact inline via the `contact` object (at least one is required). Set `sendEmail: true` to send the pass-issued email with wallet download links. The response always includes `walletUrls` with signed URLs for embedding in your own emails.",
           requestBody: {
             required: true,
             content: {
               "application/json": {
                 schema: {
                   type: "object",
-                  required: ["templateId", "contactId"],
+                  required: ["templateId"],
                   properties: {
                     templateId: { type: "string", description: "ID of an active pass template" },
-                    contactId: { type: "string", description: "ID of the contact to receive the pass" },
+                    contactId: { type: "string", description: "ID of an existing contact. Required if `contact` is not provided." },
+                    contact: {
+                      type: "object",
+                      description: "Inline contact creation. If a contact with the same email or phone already exists, the existing contact is used. Required if `contactId` is not provided.",
+                      required: ["fullName"],
+                      properties: {
+                        fullName: { type: "string", description: "Contact's full name", maxLength: 100 },
+                        email: { type: "string", format: "email", description: "Contact's email address", maxLength: 255 },
+                        phone: { type: "string", description: "Contact's phone number", maxLength: 30 },
+                      },
+                    },
+                    sendEmail: { type: "boolean", default: false, description: "Send the pass-issued email with wallet download links to the contact's email address." },
                   },
                 },
-                example: { templateId: "0190a1b2-template", contactId: "0190a1b2-contact" },
+                examples: {
+                  "with-contact-id": {
+                    summary: "Issue to existing contact",
+                    value: { templateId: "0190a1b2-template", contactId: "0190a1b2-contact" },
+                  },
+                  "with-inline-contact": {
+                    summary: "Create contact + issue pass + send email",
+                    value: {
+                      templateId: "0190a1b2-template",
+                      contact: { fullName: "Jane Doe", email: "jane@example.com", phone: "+1234567890" },
+                      sendEmail: true,
+                    },
+                  },
+                  "venue-ticketing": {
+                    summary: "Venue ticketing — issue ticket on booking confirmation",
+                    description: "Typical integration for venues: when a customer completes a booking, call this endpoint to create the contact, issue the event ticket, and send the confirmation email with Apple/Google Wallet links — all in a single API call. Use the returned `walletUrls` to embed download buttons in your own confirmation page or email.",
+                    value: {
+                      templateId: "0190a1b2-event-ticket-template",
+                      contact: {
+                        fullName: "Maria Garcia",
+                        email: "maria.garcia@example.com",
+                        phone: "+34612345678",
+                      },
+                      sendEmail: true,
+                    },
+                  },
+                },
               },
             },
           },
           "x-codeSamples": [
             {
               lang: "curl",
-              label: "cURL",
+              label: "cURL — existing contact",
               source: "curl -X POST https://api.loyalshy.com/api/v1/passes \\\n  -H \"Authorization: Bearer lsk_live_...\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"templateId\":\"0190a1b2-template\",\"contactId\":\"0190a1b2-contact\"}'",
+            },
+            {
+              lang: "curl",
+              label: "cURL — inline contact + email",
+              source: "curl -X POST https://api.loyalshy.com/api/v1/passes \\\n  -H \"Authorization: Bearer lsk_live_...\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"templateId\":\"0190a1b2-template\",\"contact\":{\"fullName\":\"Jane Doe\",\"email\":\"jane@example.com\"},\"sendEmail\":true}'",
             },
             {
               lang: "javascript",
               label: "Node.js",
-              source: "const res = await fetch(\"https://api.loyalshy.com/api/v1/passes\", {\n  method: \"POST\",\n  headers: { Authorization: \"Bearer lsk_live_...\", \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ templateId: \"0190a1b2-template\", contactId: \"0190a1b2-contact\" }),\n});\nconst { data } = await res.json();",
+              source: "const res = await fetch(\"https://api.loyalshy.com/api/v1/passes\", {\n  method: \"POST\",\n  headers: { Authorization: \"Bearer lsk_live_...\", \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({\n    templateId: \"0190a1b2-template\",\n    contact: { fullName: \"Jane Doe\", email: \"jane@example.com\" },\n    sendEmail: true,\n  }),\n});\nconst { data } = await res.json();\nconsole.log(data.walletUrls);",
+            },
+            {
+              lang: "javascript",
+              label: "Venue ticketing integration",
+              source: "// After a customer completes a booking, issue the ticket\n// and embed wallet links in your confirmation page\nasync function onBookingConfirmed(booking) {\n  const res = await fetch(\"https://api.loyalshy.com/api/v1/passes\", {\n    method: \"POST\",\n    headers: {\n      Authorization: `Bearer ${process.env.LOYALSHY_API_KEY}`,\n      \"Content-Type\": \"application/json\",\n      \"Idempotency-Key\": `booking-${booking.id}`,\n    },\n    body: JSON.stringify({\n      templateId: TICKET_TEMPLATE_ID,\n      contact: {\n        fullName: booking.customerName,\n        email: booking.customerEmail,\n        phone: booking.customerPhone,\n      },\n      // Loyalshy sends the pass email with wallet buttons\n      sendEmail: true,\n    }),\n  });\n\n  const { data: pass } = await res.json();\n\n  // Also embed wallet links in your own confirmation page\n  return {\n    passId: pass.id,\n    cardUrl: pass.walletUrls.cardUrl,\n    appleWalletUrl: pass.walletUrls.appleWalletUrl,\n    googleWalletUrl: pass.walletUrls.googleWalletUrl,\n  };\n}",
             },
           ],
           responses: {
@@ -1526,20 +1898,28 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
               description: "Pass issued",
               content: {
                 "application/json": {
-                  schema: { type: "object", properties: { data: { $ref: "#/components/schemas/PassInstance" }, meta: { type: "object", properties: { requestId: { type: "string" } } } } },
+                  schema: { type: "object", properties: { data: { $ref: "#/components/schemas/PassInstanceDetail" }, meta: { type: "object", properties: { requestId: { type: "string" } } } } },
                   example: {
                     data: {
                       id: "0190a1b2-d4e5-7f6a-9b0c-1d2e3f4a5b6c",
                       contactId: "0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
                       templateId: "0190a1b2-e5f6-7a8b-0c1d-2e3f4a5b6c7d",
-                      templateName: "Coffee Stamp Card",
-                      passType: "STAMP_CARD",
+                      templateName: "Jazz Night VIP",
+                      passType: "TICKET",
                       status: "ACTIVE",
-                      data: { stampsCollected: 0 },
+                      data: { scanCount: 0 },
                       walletProvider: "NONE",
-                      issuedAt: "2026-03-10T14:30:00.000Z",
+                      issuedAt: "2026-03-12T14:30:00.000Z",
                       expiresAt: null,
-                      createdAt: "2026-03-10T14:30:00.000Z",
+                      createdAt: "2026-03-12T14:30:00.000Z",
+                      contact: { id: "0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b", fullName: "Jane Doe", email: "jane@example.com" },
+                      recentInteractions: [],
+                      walletUrls: {
+                        cardUrl: "https://loyalshy.com/join/venue-slug/card/0190a1b2-d4e5?sig=...",
+                        appleWalletUrl: null,
+                        googleWalletUrl: "https://loyalshy.com/api/wallet/download/0190a1b2-d4e5?sig=...&platform=google",
+                      },
+                      emailSent: true,
                     },
                     meta: { requestId: "req_01HZ3KFGP4NXJ" },
                   },
@@ -1548,7 +1928,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             },
             "404": { description: "Contact or template not found", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
             "409": { description: "Contact already has a pass for this template", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" }, example: { status: 409, title: "Conflict", detail: "Contact already has an active pass for this template." } } } },
-            "422": { description: "Template not active", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" }, example: { status: 422, title: "Validation Error", detail: "Template is not active." } } } },
+            "422": { description: "Validation error or template not active", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" }, example: { status: 422, title: "Validation Error", detail: "Either contactId or contact is required." } } } },
           },
         },
       },

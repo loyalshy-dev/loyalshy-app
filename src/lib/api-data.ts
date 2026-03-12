@@ -3,6 +3,12 @@ import "server-only"
 import { randomUUID } from "crypto"
 import { db, getNextMemberNumber } from "@/lib/db"
 import { sanitizeText } from "@/lib/sanitize"
+import { buildCardUrl } from "@/lib/card-access"
+import {
+  buildWalletDownloadUrl,
+  buildPassIssuedEmailHtml,
+  getEmailFrom,
+} from "@/lib/email-templates"
 import {
   parseCouponConfig,
   parsePrepaidConfig,
@@ -268,6 +274,183 @@ export async function createContact(
   }
 
   return { success: true, contactId: contact.id }
+}
+
+// ─── Contacts: Find or Create (for API inline contact) ────
+
+export type FindOrCreateContactResult = {
+  contactId: string
+  created: boolean
+}
+
+export async function findOrCreateContact(
+  organizationId: string,
+  data: { fullName: string; email?: string; phone?: string }
+): Promise<FindOrCreateContactResult> {
+  const fullName = sanitizeText(data.fullName, 100)
+  const cleanEmail = data.email ? sanitizeText(data.email, 255) || null : null
+  const cleanPhone = data.phone ? sanitizeText(data.phone, 30) || null : null
+
+  // Look up existing contact by email first, then phone
+  if (cleanEmail) {
+    const existing = await db.contact.findFirst({
+      where: { organizationId, email: cleanEmail, deletedAt: null },
+      select: { id: true },
+    })
+    if (existing) return { contactId: existing.id, created: false }
+  }
+
+  if (cleanPhone) {
+    const existing = await db.contact.findFirst({
+      where: { organizationId, phone: cleanPhone, deletedAt: null },
+      select: { id: true },
+    })
+    if (existing) return { contactId: existing.id, created: false }
+  }
+
+  // Create new contact (no auto-issue for all templates — only the specific pass will be issued)
+  const memberNumber = await getNextMemberNumber(organizationId)
+  const contact = await db.contact.create({
+    data: {
+      organizationId,
+      fullName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      memberNumber,
+    },
+    select: { id: true },
+  })
+
+  return { contactId: contact.id, created: true }
+}
+
+// ─── Pass Email Sending (for API) ─────────────────────────
+
+const PASS_TYPE_LABELS: Record<string, string> = {
+  STAMP_CARD: "Stamp Card",
+  COUPON: "Coupon",
+  MEMBERSHIP: "Membership Card",
+  POINTS: "Points Card",
+  PREPAID: "Prepaid Card",
+  GIFT_CARD: "Gift Card",
+  TICKET: "Ticket",
+  ACCESS: "Access Pass",
+  TRANSIT: "Transit Pass",
+  BUSINESS_ID: "Business ID",
+}
+
+export type WalletUrls = {
+  cardUrl: string
+  appleWalletUrl: string | null
+  googleWalletUrl: string
+}
+
+export async function buildWalletUrls(
+  passInstanceId: string,
+  organizationId: string
+): Promise<WalletUrls> {
+  const org = await db.organization.findUnique({
+    where: { id: organizationId },
+    select: { slug: true },
+  })
+  const slug = org?.slug ?? ""
+  const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
+
+  const cardUrl = `${baseUrl}${buildCardUrl(slug, passInstanceId)}`
+  const googleWalletUrl = `${baseUrl}${buildWalletDownloadUrl(passInstanceId, "google")}`
+
+  // Check if Apple pass already exists on R2
+  const passInstance = await db.passInstance.findUnique({
+    where: { id: passInstanceId },
+    select: { walletProvider: true, walletPassId: true },
+  })
+
+  let appleWalletUrl: string | null = null
+  if (passInstance?.walletProvider === "APPLE" || passInstance?.walletPassId) {
+    // Apple pass was generated — use R2 URL
+    const r2Url = process.env.R2_PUBLIC_URL ?? "https://pub-7c8a43a8edf44acb9ce148cb7547aa00.r2.dev"
+    appleWalletUrl = `${r2Url.replace(/\/$/, "")}/passes/${passInstanceId}.pkpass`
+  }
+
+  return { cardUrl, appleWalletUrl, googleWalletUrl }
+}
+
+export async function sendPassIssuedEmail(
+  passInstanceId: string,
+  organizationId: string
+): Promise<{ emailSent: boolean }> {
+  try {
+    const passInstance = await db.passInstance.findFirst({
+      where: { id: passInstanceId, passTemplate: { organizationId } },
+      select: {
+        id: true,
+        contact: { select: { fullName: true, email: true } },
+        passTemplate: {
+          select: {
+            name: true,
+            passType: true,
+            organization: { select: { name: true, slug: true } },
+          },
+        },
+      },
+    })
+
+    if (!passInstance?.contact.email) return { emailSent: false }
+
+    const { contact, passTemplate: template } = passInstance
+    const org = template.organization
+    const passTypeLabel = PASS_TYPE_LABELS[template.passType] ?? "Pass"
+    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
+
+    const cardUrl = buildCardUrl(org.slug, passInstanceId)
+    const googleWalletUrl = buildWalletDownloadUrl(passInstanceId, "google")
+
+    // Generate Apple pass and upload to R2
+    const { generateApplePassForEmail } = await import(
+      "@/lib/wallet/generate-pass-for-email"
+    )
+    const applePass = await generateApplePassForEmail(passInstanceId)
+
+    if (process.env.TRIGGER_SECRET_KEY) {
+      const { tasks } = await import("@trigger.dev/sdk")
+      await tasks.trigger("send-pass-issued-email", {
+        email: contact.email,
+        contactName: contact.fullName,
+        organizationName: org.name,
+        templateName: template.name,
+        passTypeLabel,
+        cardUrl,
+        appleWalletUrl: applePass?.url,
+        googleWalletUrl,
+      })
+    } else {
+      const { Resend } = await import("resend")
+      const resend = new Resend(process.env.RESEND_API_KEY)
+
+      await resend.emails.send({
+        from: getEmailFrom(),
+        to: contact.email!,
+        subject: `Your ${passTypeLabel} from ${org.name}`,
+        html: buildPassIssuedEmailHtml({
+          contactName: contact.fullName,
+          organizationName: org.name,
+          templateName: template.name,
+          passTypeLabel,
+          cardUrl: `${baseUrl}${cardUrl}`,
+          appleWalletUrl: applePass?.url,
+          googleWalletUrl: `${baseUrl}${googleWalletUrl}`,
+        }),
+      })
+    }
+
+    return { emailSent: true }
+  } catch (err) {
+    console.error(
+      "API: Failed to send pass issued email:",
+      err instanceof Error ? err.message : "Unknown error"
+    )
+    return { emailSent: false }
+  }
 }
 
 // ─── Contacts: Update ──────────────────────────────────────
