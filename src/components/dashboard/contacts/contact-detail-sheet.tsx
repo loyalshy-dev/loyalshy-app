@@ -52,7 +52,7 @@ import { redeemReward } from "@/server/reward-actions"
 import type { PassInstanceDetail } from "@/types/pass-instance"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
-import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText, parsePrepaidConfig } from "@/lib/pass-config"
+import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText, parsePrepaidConfig, parseBusinessIdConfig, parseMembershipConfig, parseAccessConfig } from "@/lib/pass-config"
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -156,6 +156,46 @@ function getRendererProps(passInstance: PassInstanceDetail) {
       remainingUses: remaining,
       totalUses: config?.totalUses ?? 0,
       prepaidValidUntil: config?.validUntil ?? undefined,
+    }
+  }
+  if (passInstance.passType === "BUSINESS_ID") {
+    const config = parseBusinessIdConfig(passInstance.templateConfig)
+    const ec = passInstance.passDesign?.editorConfig as Record<string, unknown> | undefined
+    return {
+      currentVisits: 0,
+      totalVisits: 0,
+      rewardDescription: "",
+      idLabel: config?.idLabel,
+      showHolderPhoto: config?.showHolderPhoto ?? true,
+      holderPhotoPosition: config?.holderPhotoPosition ?? "center",
+      holderPhotoUrl: typeof ec?.holderPhotoUrl === "string" ? ec.holderPhotoUrl : undefined,
+    }
+  }
+  if (passInstance.passType === "MEMBERSHIP") {
+    const config = parseMembershipConfig(passInstance.templateConfig)
+    const ec = passInstance.passDesign?.editorConfig as Record<string, unknown> | undefined
+    return {
+      currentVisits: 0,
+      totalVisits: 0,
+      rewardDescription: "",
+      tierName: config?.membershipTier,
+      benefits: config?.benefits,
+      showHolderPhoto: config?.showHolderPhoto,
+      holderPhotoPosition: config?.holderPhotoPosition,
+      holderPhotoUrl: typeof ec?.holderPhotoUrl === "string" ? ec.holderPhotoUrl : undefined,
+    }
+  }
+  if (passInstance.passType === "ACCESS") {
+    const config = parseAccessConfig(passInstance.templateConfig)
+    const ec = passInstance.passDesign?.editorConfig as Record<string, unknown> | undefined
+    return {
+      currentVisits: 0,
+      totalVisits: 0,
+      rewardDescription: "",
+      accessLabel: config?.accessLabel,
+      showHolderPhoto: config?.showHolderPhoto,
+      holderPhotoPosition: config?.holderPhotoPosition,
+      holderPhotoUrl: typeof ec?.holderPhotoUrl === "string" ? ec.holderPhotoUrl : undefined,
     }
   }
   const cycleData = data as { currentCycleVisits?: number }

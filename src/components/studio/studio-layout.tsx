@@ -68,6 +68,8 @@ function buildConfigPayload(passType: string, pc: ProgramConfigState): Record<st
         validDuration: pc.validDuration,
         customDurationDays: pc.validDuration === "custom" ? pc.customDurationDays : undefined,
         autoRenew: pc.autoRenew,
+        showHolderPhoto: pc.showHolderPhoto,
+        holderPhotoPosition: pc.holderPhotoPosition,
         terms: pc.terms || undefined,
       }
     case "POINTS":
@@ -107,6 +109,8 @@ function buildConfigPayload(passType: string, pc: ProgramConfigState): Record<st
         validDuration: pc.validDuration,
         customDurationDays: pc.validDuration === "custom" ? pc.customDurationDays : undefined,
         maxDailyUses: pc.maxDailyUses || undefined,
+        showHolderPhoto: pc.showHolderPhoto,
+        holderPhotoPosition: pc.holderPhotoPosition,
       }
     case "TRANSIT":
       return {
@@ -119,9 +123,8 @@ function buildConfigPayload(passType: string, pc: ProgramConfigState): Record<st
     case "BUSINESS_ID":
       return {
         idLabel: pc.idLabel,
-        showTitle: pc.showTitle,
-        showPhoto: pc.showPhoto,
-        showEmployeeId: pc.showEmployeeId,
+        showHolderPhoto: pc.showHolderPhoto,
+        holderPhotoPosition: pc.holderPhotoPosition,
         validDuration: pc.validDuration,
         customDurationDays: pc.validDuration === "custom" ? pc.customDurationDays : undefined,
       }
@@ -251,9 +254,8 @@ export function StudioLayout({
       departureDateTime: (cfg.departureDateTime as string) ?? "",
       // Business ID
       idLabel: (cfg.idLabel as string) ?? "Employee ID",
-      showTitle: (cfg.showTitle as boolean) ?? true,
-      showPhoto: (cfg.showPhoto as boolean) ?? false,
-      showEmployeeId: (cfg.showEmployeeId as boolean) ?? true,
+      showHolderPhoto: (cfg.showHolderPhoto as boolean) ?? true,
+      holderPhotoPosition: (cfg.holderPhotoPosition as "left" | "center" | "right") ?? "center",
     })
     // Mark clean after setting logos and config since it's not a user change
     store.getState().markClean()
@@ -589,6 +591,7 @@ export function StudioLayout({
               businessHours={wallet.businessHours || undefined}
               socialLinks={wallet.socialLinks}
               customMessage={wallet.customMessage || undefined}
+              holderPhotoUrl={wallet.holderPhotoUrl}
               store={store}
             />
 

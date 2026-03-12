@@ -5,7 +5,7 @@ import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import type { ColorZone, StudioTool } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
-import { Wand2, Loader2, SlidersHorizontal, Palette, BarChart3, ImagePlus, Image, Bell, FileText, Gift } from "lucide-react"
+import { Wand2, Loader2, SlidersHorizontal, Palette, BarChart3, ImagePlus, Image, Bell, FileText, Gift, UserCircle } from "lucide-react"
 import { toast } from "sonner"
 import { computeTextColor, getFieldConfig, type ProgressStyle, type StampGridConfig } from "@/lib/wallet/card-design"
 import { STAMP_ICONS, REWARD_ICONS } from "@/lib/wallet/stamp-icons"
@@ -27,6 +27,7 @@ import { LogoPanel } from "../panels/logo-panel"
 import { DetailsPanel } from "../panels/details-panel"
 import { NotificationsPanel } from "../panels/notifications-panel"
 import { PrizeRevealPanel } from "../panels/prize-reveal-panel"
+import { AvatarPanel } from "../panels/avatar-panel"
 
 // ─── Resolved zone: merge labels + text into "fields" ───────
 
@@ -367,6 +368,7 @@ const TOOL_MENU_ITEMS: ToolMenuItem[] = [
   { id: "strip", label: "Strip", icon: <ImagePlus size={18} /> },
   { id: "logo", label: "Logo", icon: <Image size={18} /> },
   { id: "prize", label: "Prize", icon: <Gift size={18} /> },
+  { id: "avatar", label: "Avatar", icon: <UserCircle size={18} /> },
   { id: "notifications", label: "Alerts", icon: <Bell size={18} /> },
   { id: "details", label: "Back", icon: <FileText size={18} /> },
 ]
@@ -377,9 +379,11 @@ export function FloatingToolMenu({ store, cardType }: { store: CardDesignStoreAp
 
   const hasProgress = cardType === "STAMP" || cardType === "POINTS"
   const hasPrize = cardType === "STAMP" || cardType === "COUPON"
+  const hasAvatar = cardType === "BUSINESS_ID" || cardType === "TIER" || cardType === "ACCESS"
   const items = TOOL_MENU_ITEMS.filter((t) => {
     if (t.id === "progress" && !hasProgress) return false
     if (t.id === "prize" && !hasPrize) return false
+    if (t.id === "avatar" && !hasAvatar) return false
     return true
   })
 
@@ -452,6 +456,7 @@ const TOOL_LABELS: Record<StudioTool, string> = {
   strip: "Strip Image",
   logo: "Logo",
   prize: "Prize Reveal",
+  avatar: "Holder Photo",
   notifications: "Notifications",
   details: "Back of Pass",
 }
@@ -648,13 +653,16 @@ export function ContextPanel({ store, passType, organizationId, organizationName
           <ProgressPanel store={store} programId={templateId} visitsRequired={stampsRequired} />
         )}
         {mode === "tool" && activeTool === "strip" && (
-          <StripPanel store={store} programId={templateId} forceStrip={hasProgress} />
+          <StripPanel store={store} programId={templateId} forceStrip={hasProgress} cardType={cardType} />
         )}
         {mode === "tool" && activeTool === "logo" && (
           <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} />
         )}
         {mode === "tool" && activeTool === "prize" && (
           <PrizeRevealPanel store={store} />
+        )}
+        {mode === "tool" && activeTool === "avatar" && (
+          <AvatarPanel store={store} programId={templateId} />
         )}
         {mode === "tool" && activeTool === "notifications" && (
           <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />

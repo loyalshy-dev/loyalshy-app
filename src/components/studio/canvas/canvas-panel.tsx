@@ -45,6 +45,8 @@ type CanvasPanelProps = {
   businessHours?: string
   socialLinks?: SocialLinks
   customMessage?: string
+  // Business ID holder photo
+  holderPhotoUrl?: string | null
   // Store for interactive color overlay
   store?: CardDesignStoreApi
 }
@@ -65,6 +67,7 @@ export function CanvasPanel({
   businessHours,
   socialLinks,
   customMessage,
+  holderPhotoUrl,
   store,
 }: CanvasPanelProps) {
   const previewStates: PreviewStateOption[] =
@@ -99,13 +102,11 @@ export function CanvasPanel({
   }, [passType, templateConfig, rewardDescription])
 
   // Membership-specific preview data
+  const membershipConfig = useMemo(() => passType === "MEMBERSHIP" ? parseMembershipConfig(templateConfig) : null, [passType, templateConfig])
   const membershipPreview = useMemo(() => {
-    if (passType !== "MEMBERSHIP") return {}
-    const config = parseMembershipConfig(templateConfig)
-    const tierName = config?.membershipTier ?? "Member"
-    const benefits = config?.benefits ?? "Exclusive perks"
-    return { tierName, benefits }
-  }, [passType, templateConfig])
+    if (!membershipConfig) return {}
+    return { tierName: membershipConfig.membershipTier ?? "Member", benefits: membershipConfig.benefits ?? "Exclusive perks" }
+  }, [membershipConfig])
 
   // Prepaid
   const prepaidConfig = useMemo(() => passType === "PREPAID" ? parsePrepaidConfig(templateConfig) : null, [passType, templateConfig])
@@ -239,6 +240,9 @@ export function CanvasPanel({
                 // Business ID props
                 idLabel={businessIdConfig?.idLabel}
                 verifications={passType === "BUSINESS_ID" ? "0" : undefined}
+                showHolderPhoto={businessIdConfig?.showHolderPhoto ?? membershipConfig?.showHolderPhoto ?? accessConfig?.showHolderPhoto}
+                holderPhotoPosition={businessIdConfig?.holderPhotoPosition ?? membershipConfig?.holderPhotoPosition ?? accessConfig?.holderPhotoPosition}
+                holderPhotoUrl={holderPhotoUrl}
               />
               </InteractiveCardWrapper>
             </DeviceFrameWrapper>

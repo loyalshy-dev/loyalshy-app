@@ -7,11 +7,12 @@ import type {
   StudioTool,
   PreviewFormat,
   DeviceFrame,
+  ColorZone,
 } from "@/types/editor"
 import type {
   PatternStyle,
   ProgressStyle,
-  FontFamily,
+
   LabelFormat,
   SocialLinks,
   StampGridConfig,
@@ -30,7 +31,6 @@ export type WalletState = {
   autoTextColor: boolean
   patternStyle: PatternStyle
   progressStyle: ProgressStyle
-  fontFamily: FontFamily
   labelFormat: LabelFormat
   customProgressLabel: string
   palettePreset: string | null
@@ -64,6 +64,7 @@ export type WalletState = {
   logoGoogleZoom: number
   headerFields: string[] | null   // legacy — kept for backward compat
   secondaryFields: string[] | null // legacy — kept for backward compat
+  holderPhotoUrl: string | null // uploaded holder avatar image URL
   fields: string[] | null  // unified ordered field list (null = default)
   fieldLabels: Record<string, string> | null // custom label overrides per field ID (null = use defaults)
 }
@@ -121,9 +122,8 @@ export type ProgramConfigState = {
   departureDateTime: string
   // BUSINESS_ID
   idLabel: string
-  showTitle: boolean
-  showPhoto: boolean
-  showEmployeeId: boolean
+  showHolderPhoto: boolean
+  holderPhotoPosition: "left" | "center" | "right"
   // Schedule
   startsAt: string // ISO date string
   endsAt: string   // ISO date string (empty = no end)
@@ -143,6 +143,7 @@ type UIState = {
   activeTool: StudioTool | null
   previewFormat: PreviewFormat
   deviceFrame: DeviceFrame
+  selectedColorZone: ColorZone | null
   isDirty: boolean
   isConfigDirty: boolean
   isSaving: boolean
@@ -169,6 +170,7 @@ type CardDesignStore = {
   setActiveTool: (tool: StudioTool | null) => void
   setPreviewFormat: (format: PreviewFormat) => void
   setDeviceFrame: (frame: DeviceFrame) => void
+  setSelectedColorZone: (zone: ColorZone | null) => void
   setSaving: (saving: boolean) => void
   setSaveError: (error: string | null) => void
   markClean: () => void
@@ -222,9 +224,8 @@ const DEFAULT_CONFIG: ProgramConfigState = {
   destinationName: "",
   departureDateTime: "",
   idLabel: "Employee ID",
-  showTitle: true,
-  showPhoto: false,
-  showEmployeeId: true,
+  showHolderPhoto: true,
+  holderPhotoPosition: "center",
   startsAt: "",
   endsAt: "",
   minigameEnabled: false,
@@ -252,7 +253,6 @@ export function createCardDesignStore() {
           autoTextColor: true,
           patternStyle: "NONE",
           progressStyle: "NUMBERS",
-          fontFamily: "SANS",
           labelFormat: "UPPERCASE",
           customProgressLabel: "",
           palettePreset: null,
@@ -284,6 +284,7 @@ export function createCardDesignStore() {
           logoGoogleUrl: null,
           logoAppleZoom: 1,
           logoGoogleZoom: 1,
+          holderPhotoUrl: null,
           headerFields: null,
           secondaryFields: null,
           fields: null,
@@ -294,6 +295,7 @@ export function createCardDesignStore() {
           activeTool: null,
           previewFormat: "apple",
           deviceFrame: "minimal",
+          selectedColorZone: null,
           isDirty: false,
           isConfigDirty: false,
           isSaving: false,
@@ -341,6 +343,11 @@ export function createCardDesignStore() {
         setDeviceFrame: (frame) =>
           set((state) => {
             state.ui.deviceFrame = frame
+          }),
+
+        setSelectedColorZone: (zone) =>
+          set((state) => {
+            state.ui.selectedColorZone = zone
           }),
 
         setSaving: (saving) =>

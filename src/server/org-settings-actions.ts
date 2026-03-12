@@ -9,7 +9,7 @@ import { assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
 import { checkTemplateLimit } from "@/server/billing-actions"
 import { computeDesignHash, computeTextColor } from "@/lib/wallet/card-design"
-import type { PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
+import type { PatternStyle, ProgressStyle, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
 import type { DesignCardType } from "@/types/pass-types"
 
 // ─── Types ─────────────────────────────────────────────────
@@ -36,7 +36,6 @@ export type TemplateWithDesign = {
     stripImageGoogle: string | null
     patternStyle: PatternStyle
     progressStyle: ProgressStyle
-    fontFamily: FontFamily
     labelFormat: LabelFormat
     customProgressLabel: string | null
     generatedStripApple: string | null
@@ -93,7 +92,6 @@ const savePassDesignSchema = z.object({
   autoTextColor: z.boolean().optional().default(false),
   patternStyle: z.enum(["NONE", "DOTS", "WAVES", "GEOMETRIC", "CHEVRON", "CROSSHATCH", "DIAMONDS", "CONFETTI", "SOLID_PRIMARY", "SOLID_SECONDARY", "STAMP_GRID"]),
   progressStyle: z.enum(["NUMBERS", "CIRCLES", "SQUARES", "STARS", "STAMPS", "PERCENTAGE", "REMAINING"]).optional().default("NUMBERS"),
-  fontFamily: z.enum(["SANS", "SERIF", "ROUNDED", "MONO"]).optional().default("SANS"),
   labelFormat: z.enum(["UPPERCASE", "TITLE_CASE", "LOWERCASE"]).optional().default("UPPERCASE"),
   customProgressLabel: z.string().max(30).optional().default(""),
   palettePreset: z.string().max(30).nullable().optional(),
@@ -200,7 +198,6 @@ export async function getSettingsData() {
           stripImageGoogle: t.passDesign.stripImageGoogle,
           patternStyle: t.passDesign.patternStyle as PatternStyle,
           progressStyle: t.passDesign.progressStyle as ProgressStyle,
-          fontFamily: t.passDesign.fontFamily as FontFamily,
           labelFormat: t.passDesign.labelFormat as LabelFormat,
           customProgressLabel: t.passDesign.customProgressLabel,
           generatedStripApple: t.passDesign.generatedStripApple,
@@ -343,7 +340,6 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
           showStrip: true,
           patternStyle: "NONE",
           progressStyle: "NUMBERS",
-          fontFamily: "SANS",
           labelFormat: "UPPERCASE",
           designHash: "",
         },
@@ -766,6 +762,14 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     }
   }
 
+  // Preserve holderPhotoUrl from existing editorConfig (uploaded separately via uploadHolderPhoto)
+  if (existingDesign?.editorConfig && typeof existingDesign.editorConfig === "object") {
+    const existingCfg = existingDesign.editorConfig as Record<string, unknown>
+    if (typeof existingCfg.holderPhotoUrl === "string") {
+      editorConfig.holderPhotoUrl = existingCfg.holderPhotoUrl
+    }
+  }
+
   const newHash = computeDesignHash({
     showStrip: parsed.showStrip,
     primaryColor,
@@ -775,7 +779,6 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     stripImageGoogle: reCroppedGoogle ?? existingDesign?.stripImageGoogle ?? null,
     patternStyle: parsed.patternStyle,
     progressStyle: parsed.progressStyle,
-    fontFamily: parsed.fontFamily,
     labelFormat: parsed.labelFormat,
     customProgressLabel: parsed.customProgressLabel || null,
     generatedStripApple,
@@ -805,7 +808,6 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
       textColor,
       patternStyle: parsed.patternStyle,
       progressStyle: parsed.progressStyle,
-      fontFamily: parsed.fontFamily,
       labelFormat: parsed.labelFormat,
       customProgressLabel: parsed.customProgressLabel || null,
       generatedStripApple: isStampGrid ? null : generatedStripApple,
@@ -827,7 +829,6 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
       textColor,
       patternStyle: parsed.patternStyle,
       progressStyle: parsed.progressStyle,
-      fontFamily: parsed.fontFamily,
       labelFormat: parsed.labelFormat,
       customProgressLabel: parsed.customProgressLabel || null,
       ...(isStampGrid
@@ -1170,6 +1171,98 @@ export async function deleteEmptyIcon(templateId: string) {
   return deleteStampIconGeneric(templateId, "customEmptyIconUrl")
 }
 
+// ─── Holder Photo Upload (Business ID) ──────────────────────
+
+export async function uploadHolderPhoto(formData: FormData) {
+  const templateId = formData.get("templateId") as string
+  const file = formData.get("file") as File
+
+  if (!templateId || !file) return { error: "Missing template ID or file" }
+
+  const template = await db.passTemplate.findUnique({
+    where: { id: templateId },
+    select: { organizationId: true },
+  })
+  if (!template) return { error: "Pass template not found" }
+  await assertOrganizationRole(template.organizationId, "owner")
+
+  const maxSize = 2 * 1024 * 1024
+  if (file.size > maxSize) return { error: "File must be under 2MB" }
+
+  const validTypes = ["image/png", "image/jpeg", "image/webp"]
+  if (!validTypes.includes(file.type)) return { error: "File must be PNG, JPEG, or WebP" }
+
+  const rawBuffer = Buffer.from(await file.arrayBuffer())
+  let processedBuffer: Buffer = rawBuffer
+  try {
+    const { default: sharp } = await import("sharp")
+    processedBuffer = await sharp(rawBuffer)
+      .resize(256, 256, { fit: "cover" })
+      .png()
+      .toBuffer()
+  } catch { /* use original */ }
+
+  let url: string
+  try {
+    const { uploadFile, deleteFile } = await import("@/lib/storage")
+    // Delete old photo if exists
+    const existing = await db.passDesign.findUnique({
+      where: { passTemplateId: templateId },
+      select: { editorConfig: true },
+    })
+    if (existing?.editorConfig && typeof existing.editorConfig === "object") {
+      const cfg = existing.editorConfig as Record<string, unknown>
+      if (typeof cfg.holderPhotoUrl === "string") await deleteFile(cfg.holderPhotoUrl)
+    }
+    url = await uploadFile(processedBuffer, `holder-photos/${templateId}/${Date.now()}.png`, "image/png")
+  } catch {
+    url = `data:image/png;base64,${processedBuffer.toString("base64")}`
+  }
+
+  // Store in editorConfig
+  const existing = await db.passDesign.findUnique({
+    where: { passTemplateId: templateId },
+    select: { editorConfig: true },
+  })
+  const editorCfg = (existing?.editorConfig && typeof existing.editorConfig === "object" ? existing.editorConfig : {}) as Record<string, unknown>
+  await db.passDesign.update({
+    where: { passTemplateId: templateId },
+    data: { editorConfig: { ...editorCfg, holderPhotoUrl: url } as object },
+  })
+
+  revalidatePath("/dashboard/programs")
+  return { success: true, url }
+}
+
+export async function deleteHolderPhoto(templateId: string) {
+  const template = await db.passTemplate.findUnique({
+    where: { id: templateId },
+    select: { organizationId: true },
+  })
+  if (!template) return { error: "Pass template not found" }
+  await assertOrganizationRole(template.organizationId, "owner")
+
+  const existing = await db.passDesign.findUnique({
+    where: { passTemplateId: templateId },
+    select: { editorConfig: true },
+  })
+
+  if (existing?.editorConfig && typeof existing.editorConfig === "object") {
+    const editorCfg = existing.editorConfig as Record<string, unknown>
+    if (typeof editorCfg.holderPhotoUrl === "string") {
+      const { deleteFile } = await import("@/lib/storage")
+      await deleteFile(editorCfg.holderPhotoUrl)
+    }
+    await db.passDesign.update({
+      where: { passTemplateId: templateId },
+      data: { editorConfig: { ...editorCfg, holderPhotoUrl: null } as object },
+    })
+  }
+
+  revalidatePath("/dashboard/programs")
+  return { success: true }
+}
+
 // ─── Logo Processing Constants ──────────────────────────────
 
 const APPLE_LOGO_WIDTH = 320
@@ -1438,6 +1531,26 @@ export async function resetPlatformLogo(organizationId: string, platform: "apple
 
   revalidatePath("/dashboard/settings")
   return { success: true, url: sourceUrl }
+}
+
+export async function deletePlatformLogo(organizationId: string, platform: "apple" | "google") {
+  await assertOrganizationRole(organizationId, "owner")
+
+  const org = await db.organization.findUnique({
+    where: { id: organizationId },
+    select: { logoApple: true, logoGoogle: true },
+  })
+
+  const url = platform === "apple" ? org?.logoApple : org?.logoGoogle
+  if (url) await deleteBlob(url)
+
+  const field = platform === "apple" ? "logoApple" : "logoGoogle"
+  await db.organization.update({ where: { id: organizationId }, data: { [field]: null } })
+
+  revalidatePath("/dashboard/settings")
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/programs")
+  return { success: true }
 }
 
 // ─── Team Management ─────────────────────────────────────────

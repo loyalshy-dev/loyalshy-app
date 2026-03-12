@@ -17,6 +17,7 @@ const PANEL_TITLES: Record<StudioTool, string> = {
   strip: "Strip Image",
   logo: "Logo",
   prize: "Prize Reveal",
+  avatar: "Holder Photo",
   notifications: "Notifications",
   details: "Back-of-Pass Details",
 }

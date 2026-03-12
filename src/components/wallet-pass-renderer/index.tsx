@@ -101,6 +101,9 @@ type WalletPassRendererProps = {
   // Business ID-specific
   idLabel?: string           // e.g. "Employee ID"
   verifications?: string     // e.g. "5"
+  showHolderPhoto?: boolean  // overlay holder avatar on strip
+  holderPhotoPosition?: "left" | "center" | "right" // avatar placement on strip
+  holderPhotoUrl?: string | null  // uploaded holder avatar image URL
   memberNumber?: string      // unique member identifier (derived from pass instance ID)
 }
 
@@ -167,6 +170,9 @@ export function WalletPassRenderer({
   boardingStatus,
   idLabel,
   verifications,
+  showHolderPhoto,
+  holderPhotoPosition = "center",
+  holderPhotoUrl,
   memberNumber,
 }: WalletPassRendererProps) {
   const cardType = design.cardType ?? "STAMP"
@@ -382,7 +388,7 @@ export function WalletPassRenderer({
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, ...(isTicket && isApple ? { visibility: "hidden" as const } : {}) }}>
         {/* Logo — rectangular for Apple, circular for Google (centered on corner radius) */}
         <div
-          data-color-zone="logo"
+          data-logo-zone
           style={{
             width: isApple ? 150 : 40,
             height: isApple ? 50 : 40,
@@ -393,6 +399,7 @@ export function WalletPassRenderer({
             justifyContent: "center",
             overflow: "hidden",
             flexShrink: 0,
+            cursor: "pointer",
           }}
         >
           {resolvedLogo ? (
@@ -650,6 +657,49 @@ export function WalletPassRenderer({
 
         {/* Progress text overlay on strip (non-stamp-grid STAMP/POINTS) */}
         {progressOverlay}
+
+        {/* Holder photo overlay (Business ID, Membership, Access) */}
+        {showHolderPhoto && (cardType === "BUSINESS_ID" || cardType === "TIER" || cardType === "ACCESS") && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: holderPhotoPosition === "left" ? "flex-start" : holderPhotoPosition === "right" ? "flex-end" : "center",
+              padding: holderPhotoPosition === "center" ? 0 : "0 24px",
+              pointerEvents: "none",
+            }}
+          >
+            <div
+              data-avatar-zone
+              style={{
+                width: isApple ? 72 : 64,
+                height: isApple ? 72 : 64,
+                borderRadius: 9999,
+                backgroundColor: "rgba(255,255,255,0.15)",
+                border: "2.5px solid rgba(255,255,255,0.5)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+                overflow: "hidden",
+                backdropFilter: "blur(4px)",
+                pointerEvents: "auto",
+                cursor: "pointer",
+              }}
+            >
+              {holderPhotoUrl ? (
+                <img src={holderPhotoUrl} alt="Holder" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <svg width={isApple ? 32 : 28} height={isApple ? 32 : 28} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M20 21a8 8 0 1 0-16 0" />
+                </svg>
+              )}
+            </div>
+          </div>
+        )}
 
       </div>
     )

@@ -82,11 +82,13 @@ type Props = {
   programId: string
   /** When true, strip cannot be toggled off (used for stamp/points cards where progress is baked into strip) */
   forceStrip?: boolean
+  /** Card type for type-specific options (e.g., holder photo for BUSINESS_ID) */
+  cardType?: string
   onUploadStrip?: (formData: FormData) => Promise<{ success?: boolean; originalUrl?: string; appleUrl?: string; googleUrl?: string; error?: string }>
   onDeleteStrip?: (id: string) => Promise<{ success?: boolean; error?: string }>
 }
 
-export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDeleteStrip }: Props) {
+export function StripPanel({ store, programId, forceStrip, cardType, onUploadStrip, onDeleteStrip }: Props) {
   const showStrip = useStore(store, (s) => s.wallet.showStrip)
   const stripImageUrl = useStore(store, (s) => s.wallet.stripImageUrl)
   const stripOpacity = useStore(store, (s) => s.wallet.stripOpacity)
@@ -101,7 +103,6 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
   const patternColor = useStore(store, (s) => s.wallet.patternColor)
   const stripImagePosition = useStore(store, (s) => s.wallet.stripImagePosition)
   const stripImageZoom = useStore(store, (s) => s.wallet.stripImageZoom)
-
   // Effective strip colors: dedicated strip color or fallback to card colors
   const effectiveStripColor1 = stripColor1 ?? primaryColor
   const effectiveStripColor2 = stripColor2 ?? secondaryColor
@@ -588,6 +589,7 @@ export function StripPanel({ store, programId, forceStrip, onUploadStrip, onDele
       )}
         </>
       )}
+
     </div>
   )
 }

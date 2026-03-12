@@ -64,7 +64,7 @@ import { verifyId, type VerifyIdResult } from "@/server/business-id-actions"
 import type { PassInstanceSummary } from "@/types/pass-instance"
 import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
-import { parsePointsConfig, parsePrepaidConfig, getCheapestCatalogItem } from "@/lib/pass-config"
+import { parsePointsConfig, parsePrepaidConfig, parseBusinessIdConfig, parseMembershipConfig, parseAccessConfig, getCheapestCatalogItem } from "@/lib/pass-config"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -1153,6 +1153,12 @@ function ConfirmStep({
 
   // Build WalletPassDesign from card design data when available
   const design = cardDesign ? buildWalletPassDesign(cardDesign) : null
+  const businessIdCfg = isBusinessId ? parseBusinessIdConfig(passInstance.templateConfig) : null
+  const membershipCfg = isMembership ? parseMembershipConfig(passInstance.templateConfig) : null
+  const accessCfg = isAccess ? parseAccessConfig(passInstance.templateConfig) : null
+  const holderPhotoUrl = (isBusinessId || isMembership || isAccess) && cardDesign?.editorConfig
+    ? ((cardDesign.editorConfig as Record<string, unknown>).holderPhotoUrl as string | undefined)
+    : undefined
 
   return (
     <div className="flex flex-col">
@@ -1219,6 +1225,10 @@ function ConfirmStep({
             rewardDescription=""
             compact
             width={280}
+            showHolderPhoto={businessIdCfg?.showHolderPhoto ?? membershipCfg?.showHolderPhoto ?? accessCfg?.showHolderPhoto ?? (isBusinessId ? true : undefined)}
+            holderPhotoPosition={businessIdCfg?.holderPhotoPosition ?? membershipCfg?.holderPhotoPosition ?? accessCfg?.holderPhotoPosition}
+            holderPhotoUrl={holderPhotoUrl}
+            idLabel={businessIdCfg?.idLabel}
           />
         </div>
       ) : isMembership ? (

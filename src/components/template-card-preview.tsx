@@ -104,6 +104,8 @@ function buildTypeProps(passType: string, config: unknown) {
       if (c) {
         props.tierName = c.membershipTier
         props.benefits = c.benefits
+        props.showHolderPhoto = c.showHolderPhoto
+        props.holderPhotoPosition = c.holderPhotoPosition
       }
       break
     }
@@ -141,7 +143,11 @@ function buildTypeProps(passType: string, config: unknown) {
     }
     case "ACCESS": {
       const c = parseAccessConfig(config)
-      if (c) props.accessLabel = c.accessLabel
+      if (c) {
+        props.accessLabel = c.accessLabel
+        props.showHolderPhoto = c.showHolderPhoto
+        props.holderPhotoPosition = c.holderPhotoPosition
+      }
       props.accessGranted = "0"
       break
     }
@@ -157,7 +163,11 @@ function buildTypeProps(passType: string, config: unknown) {
     }
     case "BUSINESS_ID": {
       const c = parseBusinessIdConfig(config)
-      if (c) props.idLabel = c.idLabel
+      if (c) {
+        props.idLabel = c.idLabel
+        props.showHolderPhoto = c.showHolderPhoto ?? true
+        props.holderPhotoPosition = c.holderPhotoPosition ?? "center"
+      }
       props.verifications = "0"
       break
     }
@@ -191,6 +201,14 @@ export function TemplateCardPreview({
 }: TemplateCardPreviewProps) {
   const design = buildWalletPassDesign(template.passDesign)
   const typeProps = buildTypeProps(template.passType, template.config)
+
+  // Extract holderPhotoUrl from editorConfig for types with holder photo
+  if ((template.passType === "BUSINESS_ID" || template.passType === "MEMBERSHIP" || template.passType === "ACCESS") && template.passDesign?.editorConfig) {
+    const ec = template.passDesign.editorConfig as Record<string, unknown>
+    if (typeof ec.holderPhotoUrl === "string") {
+      typeProps.holderPhotoUrl = ec.holderPhotoUrl
+    }
+  }
 
   // Derive defaults from stamp card config
   const cfg = (template.config as Record<string, unknown> | null) ?? {}

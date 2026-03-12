@@ -11,6 +11,7 @@ export type StudioTool =
   | "strip"
   | "logo"
   | "prize"
+  | "avatar"
   | "notifications"
   | "details"
 

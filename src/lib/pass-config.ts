@@ -65,6 +65,8 @@ export const membershipConfigSchema = z.object({
   validDuration: z.enum(["monthly", "yearly", "lifetime", "custom"]),
   customDurationDays: z.number().int().min(1).max(3650).optional(),
   autoRenew: z.boolean().optional(),
+  showHolderPhoto: z.boolean().optional(),
+  holderPhotoPosition: z.enum(["left", "center", "right"]).optional(),
   terms: z.string().max(5000).optional(),
 })
 
@@ -113,6 +115,8 @@ export const accessConfigSchema = z.object({
   validDuration: z.enum(["monthly", "yearly", "lifetime", "custom"]),
   customDurationDays: z.number().int().min(1).max(3650).optional(),
   maxDailyUses: z.number().int().min(1).max(100).optional(),
+  showHolderPhoto: z.boolean().optional(),
+  holderPhotoPosition: z.enum(["left", "center", "right"]).optional(),
 })
 
 export const transitConfigSchema = z.object({
@@ -125,11 +129,10 @@ export const transitConfigSchema = z.object({
 
 export const businessIdConfigSchema = z.object({
   idLabel: z.string().min(1).max(100),
-  showTitle: z.boolean().optional(),
-  showPhoto: z.boolean().optional(),
-  showEmployeeId: z.boolean().optional(),
   validDuration: z.enum(["monthly", "yearly", "lifetime", "custom"]),
   customDurationDays: z.number().int().min(1).max(3650).optional(),
+  showHolderPhoto: z.boolean().optional(),
+  holderPhotoPosition: z.enum(["left", "center", "right"]).optional(),
 })
 
 export const prizeItemSchema = z.object({

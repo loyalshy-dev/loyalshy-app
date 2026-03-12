@@ -89,6 +89,7 @@ export default async function ProgramDesignPage(props: {
         customMessage: passDesign.customMessage ?? "",
         cardType: passDesign.cardType as string,
         stampGridConfig: parseStampGridConfig(passDesign.editorConfig),
+        holderPhotoUrl: ((passDesign.editorConfig as Record<string, unknown> | null)?.holderPhotoUrl as string) ?? null,
       }
     : null
 

@@ -115,6 +115,22 @@ function InteractiveLayer({
       // Clear menu tool when clicking card zones directly
       if (state.ui.activeTool) state.setActiveTool(null)
 
+      // Check if avatar was clicked — open avatar tool
+      const avatarEl = target.closest<HTMLElement>("[data-avatar-zone]")
+      if (avatarEl) {
+        state.setSelectedColorZone(null)
+        state.setActiveTool(state.ui.activeTool === "avatar" ? null : "avatar")
+        return
+      }
+
+      // Check if logo was clicked — open logo tool
+      const logoEl = target.closest<HTMLElement>("[data-logo-zone]")
+      if (logoEl) {
+        state.setSelectedColorZone(null)
+        state.setActiveTool(state.ui.activeTool === "logo" ? null : "logo")
+        return
+      }
+
       // Check if a [data-color-zone] element was clicked
       const zoneEl = target.closest<HTMLElement>("[data-color-zone]")
       if (zoneEl) {
@@ -140,7 +156,7 @@ function InteractiveLayer({
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       const target = e.target as HTMLElement
-      if (target.closest("[data-color-zone]")) {
+      if (target.closest("[data-color-zone]") || target.closest("[data-avatar-zone]") || target.closest("[data-logo-zone]")) {
         setHoveredOverlay(null)
         return
       }
@@ -187,6 +203,15 @@ function InteractiveLayer({
         [data-color-zone].zone-active {
           outline: 1.5px solid rgba(99, 102, 241, 0.7);
           background-color: rgba(99, 102, 241, 0.08);
+        }
+        [data-avatar-zone],
+        [data-logo-zone] {
+          transition: box-shadow 0.15s ease, transform 0.15s ease;
+        }
+        [data-avatar-zone]:hover,
+        [data-logo-zone]:hover {
+          box-shadow: 0 2px 12px rgba(0,0,0,0.2), 0 0 0 2px rgba(99, 102, 241, 0.6) !important;
+          transform: scale(1.05);
         }
       `}</style>
 

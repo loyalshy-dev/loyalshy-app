@@ -8,7 +8,7 @@ import { computeTextColor } from "@/lib/wallet/card-design"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { MinigameStep } from "@/components/minigames"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePrepaidConfig } from "@/lib/pass-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePrepaidConfig, parseBusinessIdConfig, parseAccessConfig } from "@/lib/pass-config"
 
 type Platform = "apple" | "google"
 
@@ -95,6 +95,17 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
   const totalUses = prepaidConfig?.totalUses ?? 0
   const prepaidValidUntil = prepaidConfig?.validUntil
     ? new Date(prepaidConfig.validUntil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+    : undefined
+
+  // Business ID-specific props
+  const businessIdConfig = data.template.passType === "BUSINESS_ID" ? parseBusinessIdConfig(data.template.config) : null
+
+  // Access-specific props
+  const accessConfig = data.template.passType === "ACCESS" ? parseAccessConfig(data.template.config) : null
+
+  // Holder photo — supported by BUSINESS_ID, MEMBERSHIP, ACCESS
+  const holderPhotoUrl = (data.template.passType === "BUSINESS_ID" || data.template.passType === "MEMBERSHIP" || data.template.passType === "ACCESS") && data.template.passDesign?.editorConfig
+    ? ((data.template.passDesign.editorConfig as Record<string, unknown>).holderPhotoUrl as string | undefined) ?? undefined
     : undefined
 
   function handleAddToWallet(chosenPlatform: Platform) {
@@ -208,6 +219,11 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
             totalUses={totalUses}
             prepaidValidUntil={prepaidValidUntil}
             memberNumber={data.memberNumber != null ? `${data.memberNumber}` : "—"}
+            idLabel={businessIdConfig?.idLabel}
+            showHolderPhoto={businessIdConfig?.showHolderPhoto ?? membershipConfig?.showHolderPhoto ?? accessConfig?.showHolderPhoto ?? (data.template.passType === "BUSINESS_ID" ? true : undefined)}
+            holderPhotoPosition={businessIdConfig?.holderPhotoPosition ?? membershipConfig?.holderPhotoPosition ?? accessConfig?.holderPhotoPosition}
+            holderPhotoUrl={holderPhotoUrl}
+            verifications={data.template.passType === "BUSINESS_ID" ? `${data.totalInteractions}` : undefined}
           />
         </div>
 

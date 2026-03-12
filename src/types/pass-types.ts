@@ -52,6 +52,8 @@ export type MembershipConfig = {
   validDuration: "monthly" | "yearly" | "lifetime" | "custom"
   customDurationDays?: number
   autoRenew?: boolean
+  showHolderPhoto?: boolean
+  holderPhotoPosition?: "left" | "center" | "right"
   terms?: string
 }
 
@@ -100,6 +102,8 @@ export type AccessConfig = {
   validDuration: "monthly" | "yearly" | "lifetime" | "custom"
   customDurationDays?: number
   maxDailyUses?: number
+  showHolderPhoto?: boolean
+  holderPhotoPosition?: "left" | "center" | "right"
 }
 
 export type TransitConfig = {
@@ -112,11 +116,10 @@ export type TransitConfig = {
 
 export type BusinessIdConfig = {
   idLabel: string // e.g. "Employee ID", "Student ID"
-  showTitle?: boolean
-  showPhoto?: boolean
-  showEmployeeId?: boolean
   validDuration: "monthly" | "yearly" | "lifetime" | "custom"
   customDurationDays?: number
+  showHolderPhoto?: boolean // overlay holder avatar on strip image
+  holderPhotoPosition?: "left" | "center" | "right" // avatar placement on strip
 }
 
 export type PassTemplateConfig =

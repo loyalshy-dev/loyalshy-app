@@ -13,6 +13,7 @@ import { LogoPanel } from "./panels/logo-panel"
 import { DetailsPanel } from "./panels/details-panel"
 import { NotificationsPanel } from "./panels/notifications-panel"
 import { PrizeRevealPanel } from "./panels/prize-reveal-panel"
+import { AvatarPanel } from "./panels/avatar-panel"
 
 // ─── Collapsible Section ─────────────────────────────────
 
@@ -197,6 +198,12 @@ export function StudioSidebar({
       {(passType === "STAMP_CARD" || passType === "COUPON") && (
         <Section title="Prize Reveal" isOpen={openSections.has("prize")} onToggle={() => toggle("prize")}>
           <PrizeRevealPanel store={store} />
+        </Section>
+      )}
+
+      {(passType === "BUSINESS_ID" || passType === "MEMBERSHIP" || passType === "ACCESS") && (
+        <Section title="Holder Photo" isOpen={openSections.has("avatar")} onToggle={() => toggle("avatar")}>
+          <AvatarPanel store={store} programId={templateId} />
         </Section>
       )}
 
