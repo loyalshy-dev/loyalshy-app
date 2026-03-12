@@ -779,6 +779,9 @@ function PassInstanceCard({ passInstance }: { passInstance: PassInstanceDetail }
               design={design}
               format="apple"
               programName={passInstance.templateName}
+              logoUrl={passInstance.passDesign?.logoUrl}
+              logoAppleUrl={passInstance.passDesign?.logoAppleUrl}
+              logoGoogleUrl={passInstance.passDesign?.logoGoogleUrl}
               {...getRendererProps(passInstance)}
               compact
               width={72}

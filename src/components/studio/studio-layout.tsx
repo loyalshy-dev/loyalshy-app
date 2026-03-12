@@ -192,8 +192,13 @@ export function StudioLayout({
     if (cardType === "STAMP" || cardType === "POINTS") {
       store.getState().setWalletField("showStrip", true)
     }
-    store.getState().setWalletField("logoAppleUrl", organizationLogoApple ?? organizationLogo)
-    store.getState().setWalletField("logoGoogleUrl", organizationLogoGoogle ?? organizationLogo)
+    // Prefer program-level logos, fall back to organization logos
+    const wd = walletData as Record<string, unknown> | null
+    const progApple = wd?.programLogoAppleUrl as string | null
+    const progGoogle = wd?.programLogoGoogleUrl as string | null
+    store.getState().setWalletField("logoAppleUrl", progApple ?? organizationLogoApple ?? organizationLogo)
+    store.getState().setWalletField("logoGoogleUrl", progGoogle ?? organizationLogoGoogle ?? organizationLogo)
+    store.getState().setWalletField("programLogoUrl", (wd?.programLogoUrl as string | null) ?? null)
     // Hydrate program config from templateConfig
     const cfg = (templateConfig ?? {}) as Record<string, unknown>
     const minigame = (cfg.minigame as Record<string, unknown>) ?? {}
@@ -489,7 +494,7 @@ export function StudioLayout({
       case "strip":
         return <StripPanel store={store} programId={templateId} forceStrip={cardType === "STAMP" || cardType === "POINTS"} />
       case "logo":
-        return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} />
+        return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} organizationLogoApple={organizationLogoApple} organizationLogoGoogle={organizationLogoGoogle} templateId={templateId} />
       case "notifications":
         return <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
       case "details":
@@ -566,6 +571,8 @@ export function StudioLayout({
                 organizationId={organizationId}
                 organizationName={organizationName}
                 organizationLogo={organizationLogo}
+                organizationLogoApple={organizationLogoApple}
+                organizationLogoGoogle={organizationLogoGoogle}
                 templateId={templateId}
                 cardType={cardType}
               />

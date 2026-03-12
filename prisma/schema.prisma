@@ -222,6 +222,7 @@ model User {
   invitations           Invitation[]
   performedInteractions Interaction[] @relation("PerformedBy")
   redeemedRewards       Reward[]      @relation("RedeemedBy")
+  createdApiKeys        ApiKey[]      @relation("CreatedApiKeys")
 
   @@map("user")
 }
@@ -311,6 +312,9 @@ model Organization {
   rewards            Reward[]
   staffInvitations   StaffInvitation[]
   analyticsSnapshots AnalyticsSnapshot[]
+  apiKeys            ApiKey[]
+  webhookEndpoints   WebhookEndpoint[]
+  apiRequestLogs     ApiRequestLog[]
 
   @@map("organization")
 }
@@ -514,6 +518,9 @@ model PassDesign {
   mapLongitude         Float?
   socialLinks          Json           @default("{}")
   customMessage        String?        @db.Text
+  logoUrl              String?        @map("logo_url")
+  logoAppleUrl         String?        @map("logo_apple_url")
+  logoGoogleUrl        String?        @map("logo_google_url")
   designHash           String         @default("")
   editorConfig         Json           @default("{}")
   createdAt            DateTime       @default(now())
@@ -606,4 +613,83 @@ model ShowcaseCard {
   updatedAt  DateTime @updatedAt
 
   @@map("showcase_card")
+}
+
+// ─── API & Webhooks ─────────────────────────────────────────
+
+model ApiKey {
+  id             String    @id @default(dbgenerated("uuidv7()::text"))
+  organizationId String
+  name           String
+  keyPrefix      String
+  keyHash        String    @unique
+  scopes         String[]  @default([])
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  createdById    String
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("CreatedApiKeys", fields: [createdById], references: [id])
+
+  @@index([organizationId])
+  @@index([keyHash])
+  @@map("api_key")
+}
+
+model WebhookEndpoint {
+  id             String    @id @default(dbgenerated("uuidv7()::text"))
+  organizationId String
+  url            String
+  secret         String
+  events         String[]  @default([])
+  enabled        Boolean   @default(true)
+  failureCount   Int       @default(0)
+  lastDeliveryAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deliveries   WebhookDelivery[]
+
+  @@index([organizationId])
+  @@map("webhook_endpoint")
+}
+
+model WebhookDelivery {
+  id                String    @id @default(dbgenerated("uuidv7()::text"))
+  webhookEndpointId String
+  eventType         String
+  payload           Json
+  statusCode        Int?
+  responseBody      String?   @db.Text
+  attempts          Int       @default(0)
+  deliveredAt       DateTime?
+  createdAt         DateTime  @default(now())
+
+  webhookEndpoint WebhookEndpoint @relation(fields: [webhookEndpointId], references: [id], onDelete: Cascade)
+
+  @@index([webhookEndpointId, createdAt])
+  @@map("webhook_delivery")
+}
+
+model ApiRequestLog {
+  id             String   @id @default(dbgenerated("uuidv7()::text"))
+  organizationId String
+  apiKeyId       String
+  requestId      String
+  method         String
+  path           String
+  statusCode     Int
+  latencyMs      Int
+  userAgent      String?
+  ipAddress      String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([apiKeyId, createdAt])
+  @@map("api_request_log")
 }

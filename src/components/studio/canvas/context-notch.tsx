@@ -90,11 +90,13 @@ type Props = {
   organizationId: string
   organizationName: string
   organizationLogo: string | null
+  organizationLogoApple: string | null
+  organizationLogoGoogle: string | null
   templateId: string
   cardType?: CardType
 }
 
-export function ContextNotch({ store, passType, organizationId, organizationName, organizationLogo, templateId }: Props) {
+export function ContextNotch({ store, passType, organizationId, organizationName, organizationLogo, organizationLogoApple, organizationLogoGoogle, templateId }: Props) {
   const selectedZone = useStore(store, (s) => s.ui.selectedColorZone)
   const previewFormat = useStore(store, (s) => s.ui.previewFormat)
   const primaryColor = useStore(store, (s) => s.wallet.primaryColor)
@@ -461,7 +463,7 @@ const TOOL_LABELS: Record<StudioTool, string> = {
   details: "Back of Pass",
 }
 
-export function ContextPanel({ store, passType, organizationId, organizationName, organizationLogo, templateId, cardType }: Props) {
+export function ContextPanel({ store, passType, organizationId, organizationName, organizationLogo, organizationLogoApple, organizationLogoGoogle, templateId, cardType }: Props) {
   const selectedZone = useStore(store, (s) => s.ui.selectedColorZone)
   const activeTool = useStore(store, (s) => s.ui.activeTool)
   const previewFormat = useStore(store, (s) => s.ui.previewFormat)
@@ -656,7 +658,7 @@ export function ContextPanel({ store, passType, organizationId, organizationName
           <StripPanel store={store} programId={templateId} forceStrip={hasProgress} cardType={cardType} />
         )}
         {mode === "tool" && activeTool === "logo" && (
-          <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} />
+          <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} organizationLogoApple={organizationLogoApple} organizationLogoGoogle={organizationLogoGoogle} templateId={templateId} />
         )}
         {mode === "tool" && activeTool === "prize" && (
           <PrizeRevealPanel store={store} />

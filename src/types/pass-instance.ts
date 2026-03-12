@@ -97,6 +97,9 @@ export type PassInstanceDesign = {
   customProgressLabel: string | null
   stripImageUrl: string | null
   editorConfig?: unknown
+  logoUrl?: string | null
+  logoAppleUrl?: string | null
+  logoGoogleUrl?: string | null
 } | null
 
 // ─── Summary (used in lists and search results) ─────────────
@@ -191,5 +194,8 @@ export type PublicTemplateInfo = {
     customProgressLabel: string | null
     customMessage: string | null
     editorConfig?: unknown
+    logoUrl?: string | null
+    logoAppleUrl?: string | null
+    logoGoogleUrl?: string | null
   } | null
 }

@@ -7,10 +7,11 @@ import { toast } from "sonner"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import type { ExtractedPalette } from "@/lib/color-extraction"
 import {
-  uploadOrganizationLogo,
-  deleteOrganizationLogo,
-  uploadPlatformLogo,
-  resetPlatformLogo,
+  uploadProgramLogo,
+  deleteProgramLogo,
+  uploadProgramPlatformLogo,
+  resetProgramPlatformLogo,
+  useOrgLogoForProgram,
   extractPaletteFromLogoUrl,
 } from "@/server/org-settings-actions"
 
@@ -19,6 +20,9 @@ type Props = {
   organizationId: string
   organizationName: string
   organizationLogo: string | null
+  organizationLogoApple: string | null
+  organizationLogoGoogle: string | null
+  templateId: string
 }
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -54,10 +58,11 @@ function Placeholder({ initial, fontSize }: { initial: string; fontSize: number 
   )
 }
 
-export function LogoPanel({ store, organizationId, organizationName, organizationLogo }: Props) {
+export function LogoPanel({ store, organizationId, organizationName, organizationLogo, organizationLogoApple, organizationLogoGoogle, templateId }: Props) {
   const logoAppleUrl = useStore(store, (s) => s.wallet.logoAppleUrl)
   const logoGoogleUrl = useStore(store, (s) => s.wallet.logoGoogleUrl)
   const logoAppleZoom = useStore(store, (s) => s.wallet.logoAppleZoom)
+  const programLogoUrl = useStore(store, (s) => s.wallet.programLogoUrl)
 
   const [uploading, setUploading] = useState(false)
   const [overrideOpen, setOverrideOpen] = useState<"apple" | "google" | null>(null)
@@ -73,23 +78,27 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
 
   const initial = organizationName.charAt(0).toUpperCase()
   const hasLogo = !!(logoAppleUrl || logoGoogleUrl)
+  const hasProgramLogo = !!programLogoUrl
+  const effectiveOrgApple = organizationLogoApple ?? organizationLogo
+  const effectiveOrgGoogle = organizationLogoGoogle ?? organizationLogo
 
-  // ─── Main upload (auto-generates both platforms) ────────
+  // ─── Main upload (program-level, auto-generates both platforms) ────
 
   async function handleMainUpload(file: File) {
     setUploading(true)
     try {
       const formData = new FormData()
       formData.set("organizationId", organizationId)
+      formData.set("templateId", templateId)
       formData.set("file", file)
-      const result = await uploadOrganizationLogo(formData)
+      const result = await uploadProgramLogo(formData)
       if ("appleUrl" in result && result.appleUrl && "googleUrl" in result && result.googleUrl) {
         store.getState().setWalletField("logoAppleUrl", result.appleUrl)
         store.getState().setWalletField("logoGoogleUrl", result.googleUrl)
+        store.getState().setWalletField("programLogoUrl", result.url ?? null)
       }
       // Reset brand match results when logo changes
       setMatchPalette(null)
-
       paletteCacheRef.current = null
     } finally {
       setUploading(false)
@@ -97,11 +106,23 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
   }
 
   async function handleMainDelete() {
-    await deleteOrganizationLogo(organizationId)
-    store.getState().setWalletField("logoAppleUrl", null)
-    store.getState().setWalletField("logoGoogleUrl", null)
+    await deleteProgramLogo(organizationId, templateId)
+    // Fall back to organization logos
+    store.getState().setWalletField("logoAppleUrl", effectiveOrgApple)
+    store.getState().setWalletField("logoGoogleUrl", effectiveOrgGoogle)
+    store.getState().setWalletField("programLogoUrl", null)
     setMatchPalette(null)
     paletteCacheRef.current = null
+  }
+
+  async function handleUseOrgLogo() {
+    await useOrgLogoForProgram(organizationId, templateId)
+    store.getState().setWalletField("logoAppleUrl", effectiveOrgApple)
+    store.getState().setWalletField("logoGoogleUrl", effectiveOrgGoogle)
+    store.getState().setWalletField("programLogoUrl", null)
+    setMatchPalette(null)
+    paletteCacheRef.current = null
+    toast.success("Using organization logo")
   }
 
   // ─── Platform override ──────────────────────────────────
@@ -111,9 +132,10 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
     try {
       const formData = new FormData()
       formData.set("organizationId", organizationId)
+      formData.set("templateId", templateId)
       formData.set("platform", platform)
       formData.set("file", file)
-      const result = await uploadPlatformLogo(formData)
+      const result = await uploadProgramPlatformLogo(formData)
       if ("url" in result && result.url) {
         const field = platform === "apple" ? "logoAppleUrl" : "logoGoogleUrl"
         store.getState().setWalletField(field, result.url)
@@ -126,7 +148,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
   async function handleReset(platform: "apple" | "google") {
     setOverridePlatformUploading(platform)
     try {
-      const result = await resetPlatformLogo(organizationId, platform)
+      const result = await resetProgramPlatformLogo(organizationId, templateId, platform)
       if ("url" in result && result.url) {
         const field = platform === "apple" ? "logoAppleUrl" : "logoGoogleUrl"
         store.getState().setWalletField(field, result.url)
@@ -139,18 +161,19 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
   // ─── Brand Match ────────────────────────────────────────
 
   async function handleBrandMatch() {
-    if (!organizationLogo) return
+    const sourceUrl = programLogoUrl ?? organizationLogo
+    if (!sourceUrl) return
     setIsMatching(true)
     try {
       let palette: ExtractedPalette | null = null
 
-      if (paletteCacheRef.current?.url === organizationLogo) {
+      if (paletteCacheRef.current?.url === sourceUrl) {
         palette = paletteCacheRef.current.palette
       } else {
         const result = await extractPaletteFromLogoUrl(organizationId)
         if ("palette" in result && result.palette) {
           palette = result.palette
-          paletteCacheRef.current = { url: organizationLogo, palette }
+          paletteCacheRef.current = { url: sourceUrl, palette }
         }
       }
 
@@ -174,7 +197,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
   return (
     <div>
       {/* ─── Main upload ─────────────────────────────────── */}
-      <SectionHeader>Organization Logo</SectionHeader>
+      <SectionHeader>Program Logo</SectionHeader>
 
       <input
         ref={mainInputRef}
@@ -204,9 +227,9 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
             color: "var(--foreground)",
           }}
         >
-          {uploading ? "Processing..." : hasLogo ? "Replace Logo" : "Upload Logo"}
+          {uploading ? "Processing..." : hasProgramLogo ? "Replace Logo" : "Upload Logo"}
         </button>
-        {hasLogo && (
+        {hasProgramLogo && (
           <button
             onClick={handleMainDelete}
             style={{
@@ -224,6 +247,26 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
         )}
       </div>
 
+      {/* Use org logo button — show when program has its own logo */}
+      {hasProgramLogo && effectiveOrgApple && (
+        <button
+          onClick={handleUseOrgLogo}
+          style={{
+            width: "100%",
+            marginTop: 6,
+            padding: "6px 14px",
+            borderRadius: 9999,
+            border: "1px solid var(--border)",
+            backgroundColor: "transparent",
+            cursor: "pointer",
+            fontSize: 11,
+            color: "var(--muted-foreground)",
+          }}
+        >
+          Use organization logo instead
+        </button>
+      )}
+
       <div
         style={{
           padding: "6px 10px",
@@ -234,8 +277,9 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
           color: "var(--muted-foreground)",
         }}
       >
-        Upload once — we&apos;ll auto-optimize for Apple and Google Wallet.
-        PNG, JPEG, WebP, or SVG. Max 2MB.
+        {hasProgramLogo
+          ? "This program has its own logo."
+          : "Using your organization logo. Upload a different one for this program."}
       </div>
 
       {/* ─── Platform previews + zoom ────────────────────── */}
@@ -426,7 +470,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
       )}
 
       {/* ─── Platform override (collapsed) ───────────────── */}
-      {hasLogo && (
+      {hasLogo && hasProgramLogo && (
         <>
           <SectionHeader>Advanced</SectionHeader>
 
@@ -533,20 +577,6 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
           })}
         </>
       )}
-
-      {/* ─── Shared info ─────────────────────────────────── */}
-      <div
-        style={{
-          padding: "10px 12px",
-          borderRadius: 12,
-          backgroundColor: "var(--muted)",
-          marginTop: 16,
-        }}
-      >
-        <div style={{ fontSize: 11, color: "var(--muted-foreground)" }}>
-          Your logo is shared across all programs.
-        </div>
-      </div>
     </div>
   )
 }

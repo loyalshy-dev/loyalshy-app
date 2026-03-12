@@ -3,7 +3,7 @@
 import { db } from "@/lib/db"
 import { assertOrganizationAccess, assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
 import type { TemplateWithDesign } from "@/server/org-settings-actions"
-import type { PatternStyle, ProgressStyle, FontFamily, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
+import type { PatternStyle, ProgressStyle, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
 import type { DesignCardType } from "@/types/pass-types"
 
 // ─── Types ─────────────────────────────────────────────────
@@ -30,6 +30,9 @@ export type TemplateListItem = {
     customProgressLabel: string | null
     stripImageUrl: string | null
     editorConfig: unknown
+    logoUrl: string | null
+    logoAppleUrl: string | null
+    logoGoogleUrl: string | null
   } | null
 }
 
@@ -81,6 +84,9 @@ export async function getTemplatesList(): Promise<TemplateListItem[]> {
           customProgressLabel: true,
           stripImageUrl: true,
           editorConfig: true,
+          logoUrl: true,
+          logoAppleUrl: true,
+          logoGoogleUrl: true,
         },
       },
     },
@@ -380,7 +386,6 @@ export async function getTemplateForSettings(templateId: string): Promise<Templa
           stripImageGoogle: template.passDesign.stripImageGoogle,
           patternStyle: template.passDesign.patternStyle as PatternStyle,
           progressStyle: template.passDesign.progressStyle as ProgressStyle,
-          fontFamily: template.passDesign.fontFamily as FontFamily,
           labelFormat: template.passDesign.labelFormat as LabelFormat,
           customProgressLabel: template.passDesign.customProgressLabel,
           generatedStripApple: template.passDesign.generatedStripApple,

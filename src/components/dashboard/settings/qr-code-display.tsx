@@ -64,6 +64,9 @@ type PartialCardDesign = {
   customProgressLabel?: string | null
   stripImageUrl?: string | null
   editorConfig?: unknown
+  logoUrl?: string | null
+  logoAppleUrl?: string | null
+  logoGoogleUrl?: string | null
 }
 
 type TemplateInfo = {

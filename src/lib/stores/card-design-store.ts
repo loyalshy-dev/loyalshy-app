@@ -64,6 +64,7 @@ export type WalletState = {
   logoGoogleZoom: number
   headerFields: string[] | null   // legacy — kept for backward compat
   secondaryFields: string[] | null // legacy — kept for backward compat
+  programLogoUrl: string | null // program-level source logo (null = using org logo)
   holderPhotoUrl: string | null // uploaded holder avatar image URL
   fields: string[] | null  // unified ordered field list (null = default)
   fieldLabels: Record<string, string> | null // custom label overrides per field ID (null = use defaults)
@@ -284,6 +285,7 @@ export function createCardDesignStore() {
           logoGoogleUrl: null,
           logoAppleZoom: 1,
           logoGoogleZoom: 1,
+          programLogoUrl: null,
           holderPhotoUrl: null,
           headerFields: null,
           secondaryFields: null,

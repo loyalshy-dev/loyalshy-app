@@ -277,6 +277,9 @@ export async function getContactDetail(
                   customProgressLabel: true,
                   stripImageUrl: true,
                   editorConfig: true,
+                  logoUrl: true,
+                  logoAppleUrl: true,
+                  logoGoogleUrl: true,
                 },
               },
             },
@@ -339,6 +342,9 @@ export async function getContactDetail(
           customProgressLabel: pi.passTemplate.passDesign.customProgressLabel,
           stripImageUrl: pi.passTemplate.passDesign.stripImageUrl,
           editorConfig: pi.passTemplate.passDesign.editorConfig,
+          logoUrl: pi.passTemplate.passDesign.logoUrl,
+          logoAppleUrl: pi.passTemplate.passDesign.logoAppleUrl,
+          logoGoogleUrl: pi.passTemplate.passDesign.logoGoogleUrl,
         }
       : null,
   }))

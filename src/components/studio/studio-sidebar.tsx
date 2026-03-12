@@ -77,6 +77,8 @@ type StudioSidebarProps = {
   organizationId: string
   organizationName: string
   organizationLogo: string | null
+  organizationLogoApple: string | null
+  organizationLogoGoogle: string | null
 }
 
 export function StudioSidebar({
@@ -87,6 +89,8 @@ export function StudioSidebar({
   organizationId,
   organizationName,
   organizationLogo,
+  organizationLogoApple,
+  organizationLogoGoogle,
 }: StudioSidebarProps) {
   const stampsRequired = useStore(store, (s) => s.programConfig.stampsRequired)
   const selectedColorZone = useStore(store, (s) => s.ui.selectedColorZone)
@@ -176,6 +180,9 @@ export function StudioSidebar({
             organizationId={organizationId}
             organizationName={organizationName}
             organizationLogo={organizationLogo}
+            organizationLogoApple={organizationLogoApple}
+            organizationLogoGoogle={organizationLogoGoogle}
+            templateId={templateId}
           />
         </div>
         <div>

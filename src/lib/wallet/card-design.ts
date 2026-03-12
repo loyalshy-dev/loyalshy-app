@@ -5,7 +5,6 @@ import crypto from "crypto"
 export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID" | "GIFT_CARD" | "TICKET" | "ACCESS" | "TRANSIT" | "BUSINESS_ID" | "GENERIC"
 export type PatternStyle = "NONE" | "DOTS" | "WAVES" | "GEOMETRIC" | "CHEVRON" | "CROSSHATCH" | "DIAMONDS" | "CONFETTI" | "SOLID_PRIMARY" | "SOLID_SECONDARY" | "STAMP_GRID"
 export type ProgressStyle = "NUMBERS" | "CIRCLES" | "SQUARES" | "STARS" | "STAMPS" | "PERCENTAGE" | "REMAINING"
-export type FontFamily = "SANS" | "SERIF" | "ROUNDED" | "MONO"
 export type LabelFormat = "UPPERCASE" | "TITLE_CASE" | "LOWERCASE"
 
 export type SocialLinks = {
@@ -351,7 +350,6 @@ export type CardDesignData = {
   stripImageGoogle: string | null
   patternStyle: PatternStyle
   progressStyle: ProgressStyle
-  fontFamily: FontFamily
   labelFormat: LabelFormat
   customProgressLabel: string | null
   generatedStripApple: string | null
@@ -366,6 +364,10 @@ export type CardDesignData = {
   customMessage: string | null
   designHash: string
   editorConfig: unknown
+  // Per-program logo (null = use org logo)
+  logoUrl: string | null
+  logoAppleUrl: string | null
+  logoGoogleUrl: string | null
 }
 
 export type CardDesignRow = {
@@ -379,7 +381,6 @@ export type CardDesignRow = {
   stripImageGoogle: string | null
   patternStyle: string
   progressStyle: string
-  fontFamily: string
   labelFormat: string
   customProgressLabel: string | null
   generatedStripApple: string | null
@@ -394,6 +395,10 @@ export type CardDesignRow = {
   customMessage: string | null
   designHash: string
   editorConfig: unknown
+  // Per-program logo (null = use org logo)
+  logoUrl?: string | null
+  logoAppleUrl?: string | null
+  logoGoogleUrl?: string | null
 }
 
 // ─── Palette Presets ────────────────────────────────────────
@@ -512,7 +517,6 @@ export function computeDesignHash(design: {
   stripImageGoogle: string | null
   patternStyle: string
   progressStyle?: string
-  fontFamily?: string
   labelFormat?: string
   customProgressLabel?: string | null
   generatedStripApple: string | null
@@ -535,7 +539,6 @@ export function computeDesignHash(design: {
     sig: design.stripImageGoogle,
     ps: design.patternStyle,
     prs: design.progressStyle ?? "NUMBERS",
-    ff: design.fontFamily ?? "SANS",
     lf: design.labelFormat ?? "UPPERCASE",
     cpl: design.customProgressLabel ?? null,
     ga: design.generatedStripApple,
@@ -576,7 +579,6 @@ export function resolveCardDesign(
     stripImageGoogle: cardDesign?.stripImageGoogle ?? null,
     patternStyle: (cardDesign?.patternStyle as PatternStyle) ?? "NONE",
     progressStyle: (cardDesign?.progressStyle as ProgressStyle) ?? "NUMBERS",
-    fontFamily: (cardDesign?.fontFamily as FontFamily) ?? "SANS",
     labelFormat: (cardDesign?.labelFormat as LabelFormat) ?? "UPPERCASE",
     customProgressLabel: cardDesign?.customProgressLabel ?? null,
     generatedStripApple: cardDesign?.generatedStripApple ?? null,
@@ -591,6 +593,9 @@ export function resolveCardDesign(
     customMessage: cardDesign?.customMessage ?? null,
     designHash: cardDesign?.designHash ?? "",
     editorConfig: cardDesign?.editorConfig ?? {},
+    logoUrl: cardDesign?.logoUrl ?? null,
+    logoAppleUrl: cardDesign?.logoAppleUrl ?? null,
+    logoGoogleUrl: cardDesign?.logoGoogleUrl ?? null,
   }
 }
 

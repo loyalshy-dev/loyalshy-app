@@ -1378,6 +1378,148 @@ export async function deleteOrganizationLogo(organizationId: string) {
   return { success: true }
 }
 
+// ─── Upload Program Logo ──────────────────────────────────────
+
+export async function uploadProgramLogo(formData: FormData) {
+  const organizationId = formData.get("organizationId") as string
+  const templateId = formData.get("templateId") as string
+  const file = formData.get("file") as File
+
+  if (!organizationId || !templateId || !file) return { error: "Missing required fields" }
+
+  await assertOrganizationRole(organizationId, "owner")
+
+  const maxSize = 2 * 1024 * 1024
+  if (file.size > maxSize) return { error: "File must be under 2MB" }
+
+  const validTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"]
+  if (!validTypes.includes(file.type)) return { error: "File must be PNG, JPEG, WebP, or SVG" }
+
+  // Delete old program logos
+  const old = await db.passDesign.findUnique({
+    where: { passTemplateId: templateId },
+    select: { logoUrl: true, logoAppleUrl: true, logoGoogleUrl: true },
+  })
+  await Promise.all([deleteBlob(old?.logoUrl), deleteBlob(old?.logoAppleUrl), deleteBlob(old?.logoGoogleUrl)])
+
+  const sourceBuffer = Buffer.from(await file.arrayBuffer())
+  const logoUrl = await uploadBuffer(sourceBuffer, `logos/${organizationId}/${templateId}/source/${file.name}`, file.type)
+
+  let appleUrl: string
+  let googleUrl: string
+
+  if (file.type === "image/svg+xml") {
+    appleUrl = logoUrl
+    googleUrl = logoUrl
+  } else {
+    const [appleBuf, googleBuf] = await Promise.all([processLogoForApple(sourceBuffer), processLogoForGoogle(sourceBuffer)])
+    const [aUrl, gUrl] = await Promise.all([
+      uploadBuffer(appleBuf, `logos/${organizationId}/${templateId}/apple/logo.png`, "image/png"),
+      uploadBuffer(googleBuf, `logos/${organizationId}/${templateId}/google/logo.png`, "image/png"),
+    ])
+    appleUrl = aUrl
+    googleUrl = gUrl
+  }
+
+  await db.passDesign.upsert({
+    where: { passTemplateId: templateId },
+    create: { passTemplateId: templateId, logoUrl, logoAppleUrl: appleUrl, logoGoogleUrl: googleUrl },
+    update: { logoUrl, logoAppleUrl: appleUrl, logoGoogleUrl: googleUrl },
+  })
+
+  revalidatePath(`/dashboard/programs/${templateId}`)
+  return { success: true, url: logoUrl, appleUrl, googleUrl }
+}
+
+// ─── Delete Program Logo ──────────────────────────────────────
+
+export async function deleteProgramLogo(organizationId: string, templateId: string) {
+  await assertOrganizationRole(organizationId, "owner")
+
+  const old = await db.passDesign.findUnique({
+    where: { passTemplateId: templateId },
+    select: { logoUrl: true, logoAppleUrl: true, logoGoogleUrl: true },
+  })
+
+  await Promise.all([deleteBlob(old?.logoUrl), deleteBlob(old?.logoAppleUrl), deleteBlob(old?.logoGoogleUrl)])
+
+  await db.passDesign.update({
+    where: { passTemplateId: templateId },
+    data: { logoUrl: null, logoAppleUrl: null, logoGoogleUrl: null },
+  })
+
+  revalidatePath(`/dashboard/programs/${templateId}`)
+  return { success: true }
+}
+
+// ─── Upload Program Platform Logo ─────────────────────────────
+
+export async function uploadProgramPlatformLogo(formData: FormData) {
+  const organizationId = formData.get("organizationId") as string
+  const templateId = formData.get("templateId") as string
+  const platform = formData.get("platform") as "apple" | "google" | null
+  const file = formData.get("file") as File
+
+  if (!organizationId || !templateId || !file || !platform) return { error: "Missing required fields" }
+  await assertOrganizationRole(organizationId, "owner")
+
+  const maxSize = 2 * 1024 * 1024
+  if (file.size > maxSize) return { error: "File must be under 2MB" }
+
+  const sourceBuffer = Buffer.from(await file.arrayBuffer())
+  const field = platform === "apple" ? "logoAppleUrl" : "logoGoogleUrl"
+
+  const url = await uploadBuffer(
+    sourceBuffer,
+    `logos/${organizationId}/${templateId}/${platform}/logo-override.png`,
+    file.type
+  )
+
+  await db.passDesign.update({ where: { passTemplateId: templateId }, data: { [field]: url } })
+  revalidatePath(`/dashboard/programs/${templateId}`)
+  return { success: true, url }
+}
+
+// ─── Reset Program Platform Logo ──────────────────────────────
+
+export async function resetProgramPlatformLogo(organizationId: string, templateId: string, platform: "apple" | "google") {
+  await assertOrganizationRole(organizationId, "owner")
+
+  const design = await db.passDesign.findUnique({
+    where: { passTemplateId: templateId },
+    select: { logoUrl: true },
+  })
+
+  // Re-derive platform logo from source
+  const sourceUrl = design?.logoUrl ?? null
+  const field = platform === "apple" ? "logoAppleUrl" : "logoGoogleUrl"
+  await db.passDesign.update({ where: { passTemplateId: templateId }, data: { [field]: sourceUrl } })
+
+  revalidatePath(`/dashboard/programs/${templateId}`)
+  return { success: true, url: sourceUrl }
+}
+
+// ─── Use Organization Logo for Program ────────────────────────
+
+export async function useOrgLogoForProgram(organizationId: string, templateId: string) {
+  await assertOrganizationRole(organizationId, "owner")
+
+  // Clear program-level logos so it falls back to org
+  const old = await db.passDesign.findUnique({
+    where: { passTemplateId: templateId },
+    select: { logoUrl: true, logoAppleUrl: true, logoGoogleUrl: true },
+  })
+  await Promise.all([deleteBlob(old?.logoUrl), deleteBlob(old?.logoAppleUrl), deleteBlob(old?.logoGoogleUrl)])
+
+  await db.passDesign.update({
+    where: { passTemplateId: templateId },
+    data: { logoUrl: null, logoAppleUrl: null, logoGoogleUrl: null },
+  })
+
+  revalidatePath(`/dashboard/programs/${templateId}`)
+  return { success: true }
+}
+
 // ─── Update Minigame Config ───────────────────────────────────
 
 const updateMinigameConfigSchema = z.object({

@@ -32,6 +32,9 @@ export type CardPreviewTemplate = {
     customProgressLabel?: string | null
     stripImageUrl?: string | null
     editorConfig?: unknown
+    logoUrl?: string | null
+    logoAppleUrl?: string | null
+    logoGoogleUrl?: string | null
   } | null
 }
 
@@ -224,9 +227,9 @@ export function TemplateCardPreview({
     <WalletPassRenderer
       design={design}
       format={format}
-      logoUrl={logoUrl}
-      logoAppleUrl={logoAppleUrl}
-      logoGoogleUrl={logoGoogleUrl}
+      logoUrl={template.passDesign?.logoUrl ?? logoUrl}
+      logoAppleUrl={template.passDesign?.logoAppleUrl ?? logoAppleUrl}
+      logoGoogleUrl={template.passDesign?.logoGoogleUrl ?? logoGoogleUrl}
       organizationName={organizationName}
       programName={template.name}
       currentVisits={currentVisits ?? 4}

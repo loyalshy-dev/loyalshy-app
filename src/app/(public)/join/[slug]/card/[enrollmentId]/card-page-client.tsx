@@ -202,7 +202,9 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
             design={passDesign}
             format={platform}
             organizationName={data.organization.name}
-            logoUrl={data.organization.logo}
+            logoUrl={data.template.passDesign?.logoUrl ?? data.organization.logo}
+            logoAppleUrl={data.template.passDesign?.logoAppleUrl}
+            logoGoogleUrl={data.template.passDesign?.logoGoogleUrl}
             programName={data.template.name}
             customerName={data.contactName}
             currentVisits={data.currentCycleVisits}

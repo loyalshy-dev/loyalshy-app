@@ -236,7 +236,7 @@ Update the "Current Progress" section above to track what's done.
 10. Contact (end user — identity + denormalized totalInteractions + sequential memberNumber per org)
 11. Interaction (type discriminator, metadata JSON, linked to PassInstance)
 12. Reward (linked to PassInstance; `revealedAt` nullable — null means prize minigame not yet played)
-13. PassDesign (per PassTemplate; typed columns for wallet passes + `editorConfig` JSON for rich studio editor; `cardType`: STAMP/POINTS/TIER/COUPON/PREPAID/GIFT_CARD/TICKET/ACCESS/TRANSIT/BUSINESS_ID/GENERIC)
+13. PassDesign (per PassTemplate; typed columns for wallet passes + `editorConfig` JSON for rich studio editor; `cardType`: STAMP/POINTS/TIER/COUPON/PREPAID/GIFT_CARD/TICKET/ACCESS/TRANSIT/BUSINESS_ID/GENERIC; per-program logos: `logoUrl`/`logoAppleUrl`/`logoGoogleUrl` with fallback to Organization logos)
 14. WalletPassLog (linked to PassInstance)
 15. StaffInvitation (custom invite flow with tokens — NOT Better Auth's Invitation)
 16. DeviceRegistration (Apple Wallet push, linked to PassInstance)

@@ -1220,6 +1220,9 @@ function ConfirmStep({
             format="apple"
             programName={passInstance.templateName}
             customerName={customer.fullName}
+            logoUrl={passInstance.passDesign?.logoUrl}
+            logoAppleUrl={passInstance.passDesign?.logoAppleUrl}
+            logoGoogleUrl={passInstance.passDesign?.logoGoogleUrl}
             currentVisits={isCoupon || isMembership || isPoints ? 1 : isPrepaid ? remainingUses : nextVisit}
             totalVisits={isCoupon || isMembership || isPoints ? 1 : isPrepaid ? totalUses : visitsRequired}
             rewardDescription=""
