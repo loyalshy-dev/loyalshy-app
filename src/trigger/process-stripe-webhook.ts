@@ -81,7 +81,7 @@ export const processStripeWebhookTask = task({
             where: { id: organization.id },
             data: {
               subscriptionStatus: "CANCELED" as never,
-              plan: "STARTER" as never,
+              plan: "FREE" as never,
               stripeSubscriptionId: null,
               trialEndsAt: null,
             },

@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Clock,
   Loader2,
+  Layers,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -23,6 +24,7 @@ import { isUpgrade, type PlanId } from "@/lib/plans"
 // ─── Plan Card Colors ──────────────────────────────────────
 
 const planAccents: Record<string, string> = {
+  FREE: "bg-muted text-muted-foreground",
   STARTER: "bg-brand/10 text-brand",
   GROWTH: "bg-chart-1/10 text-chart-1",
   SCALE: "bg-chart-2/10 text-chart-2",
@@ -208,7 +210,9 @@ export function BillingSettings({ data }: { data: BillingData }) {
                     ? `Trial ends in ${trialDaysRemaining} day${trialDaysRemaining !== 1 ? "s" : ""}`
                     : organization.subscriptionStatus === "CANCELED"
                       ? "Subscribe to continue using Loyalshy"
-                      : "Your subscription renews monthly"}
+                      : currentPlan === "FREE"
+                        ? "Free forever — upgrade anytime"
+                        : "Your subscription renews monthly"}
                 </p>
               </div>
             </div>
@@ -240,7 +244,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
           </p>
         </div>
         <div className="p-6">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             {/* Contacts */}
             <div className="rounded-lg border border-border p-4">
               <div className="flex items-center gap-3">
@@ -310,6 +314,41 @@ export function BillingSettings({ data }: { data: BillingData }) {
                 </div>
               )}
             </div>
+
+            {/* Programs */}
+            <div className="rounded-lg border border-border p-4">
+              <div className="flex items-center gap-3">
+                <Layers className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Programs</p>
+                  <p className="text-sm font-semibold">
+                    {usage.programs} / {usage.programLimit === Infinity ? "Unlimited" : usage.programLimit}
+                  </p>
+                </div>
+              </div>
+              {usage.programLimit !== Infinity && (
+                <div className="mt-3">
+                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        usage.programPercent >= 100
+                          ? "bg-red-500"
+                          : usage.programPercent >= 80
+                            ? "bg-amber-500"
+                            : "bg-brand"
+                      }`}
+                      style={{ width: `${Math.min(usage.programPercent, 100)}%` }}
+                    />
+                  </div>
+                  {usage.programPercent >= 80 && usage.programPercent < 100 && (
+                    <p className="text-[10px] text-amber-600 mt-1">Approaching limit</p>
+                  )}
+                  {usage.programPercent >= 100 && (
+                    <p className="text-[10px] text-red-600 mt-1">Limit reached — upgrade to add more</p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </Card>
@@ -351,7 +390,45 @@ export function BillingSettings({ data }: { data: BillingData }) {
           </div>
         </div>
         <div className="p-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {/* Free plan card */}
+            <div
+              className={`rounded-lg border p-5 flex flex-col ${
+                currentPlan === "FREE"
+                  ? "border-muted-foreground/30 ring-1 ring-muted-foreground/20"
+                  : "border-border"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-muted text-muted-foreground">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+                {currentPlan === "FREE" && (
+                  <Badge variant="secondary" className="text-[10px]">Current</Badge>
+                )}
+              </div>
+
+              <h3 className="text-sm font-semibold">{plans.FREE.name}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{plans.FREE.description}</p>
+
+              <div className="mt-3 mb-4">
+                <p className="text-2xl font-bold tracking-tight">0€<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+              </div>
+
+              <ul className="space-y-2 mb-5 flex-1">
+                {plans.FREE.features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <Button variant="outline" size="sm" disabled className="w-full">
+                Free Forever
+              </Button>
+            </div>
+
             {(["STARTER", "GROWTH", "SCALE", "ENTERPRISE"] as const).map((planId) => {
               const plan = plans[planId]
               const isCurrent = currentPlan === planId

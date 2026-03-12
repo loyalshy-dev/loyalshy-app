@@ -23,6 +23,9 @@ export type BillingData = {
     staff: number
     staffLimit: number
     staffPercent: number
+    programs: number
+    programLimit: number
+    programPercent: number
   }
   plans: typeof PLANS
 }
@@ -50,6 +53,11 @@ export async function getBillingData(): Promise<BillingData | { error: string }>
     })
     const staffCount = memberCount ?? 1
 
+    // Count current programs (active pass templates)
+    const programCount = await db.passTemplate.count({
+      where: { organizationId: organization.id, status: "ACTIVE" },
+    })
+
     const contactPercent = limits.customerLimit === Infinity
       ? 0
       : Math.round((contactCount / limits.customerLimit) * 100)
@@ -57,6 +65,10 @@ export async function getBillingData(): Promise<BillingData | { error: string }>
     const staffPercent = limits.staffLimit === Infinity
       ? 0
       : Math.round((staffCount / limits.staffLimit) * 100)
+
+    const programPercent = limits.programLimit === Infinity
+      ? 0
+      : Math.round((programCount / limits.programLimit) * 100)
 
     return {
       organization: {
@@ -75,6 +87,9 @@ export async function getBillingData(): Promise<BillingData | { error: string }>
         staff: staffCount,
         staffLimit: limits.staffLimit,
         staffPercent,
+        programs: programCount,
+        programLimit: limits.programLimit,
+        programPercent,
       },
       plans: PLANS,
     }

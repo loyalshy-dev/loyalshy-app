@@ -202,7 +202,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase API-4 — Webhooks (HMAC-SHA256 signed delivery via Trigger.dev, endpoint CRUD API, test ping, secret rotation, auto-disable, event dispatch on mutations)
 - [x] Phase API-5 — API Dashboard UI (API keys section, webhook management section, server actions for CRUD, settings tab with plan gating)
 - [x] Phase PRICING — New pricing model (Free tier on landing page, Pro €29, Business €49, Scale €99, no 14-day trial)
-- [ ] Phase ONBOARDING — Simplify registration (2 steps: signup + org name → dashboard, remove trial setup)
+- [x] Phase ONBOARDING — Simplified registration (2 steps: signup + org name → dashboard), FREE plan in Prisma enum + plans.ts, no trial/Stripe at signup, programs usage tracking in billing
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -278,17 +278,15 @@ Update the "Current Progress" section above to track what's done.
 
 ## Pricing & Plans
 
-**Free tier** is marketing-only (landing page) — not a PlanId in the billing system. Free users simply don't have a Stripe subscription.
-
 | Display Name | PlanId (DB) | Monthly | Annual | Contacts | Staff | Programs |
 |---|---|---|---|---|---|---|
-| Free | — | €0 | €0 | 50 | 1 | 1 (stamp only) |
+| Free | FREE | €0 | €0 | 50 | 1 | 1 (stamp only) |
 | Pro | STARTER | €29 | €24 | 500 | 2 | 2 |
 | Business | GROWTH | €49 | €39 | 2,500 | 5 | 5 |
 | Scale | SCALE | €99 | €79 | Unlimited | 25 | Unlimited |
 | Enterprise | ENTERPRISE | Custom | Custom | Unlimited | Unlimited | Unlimited |
 
-**Important:** PlanId values (`STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, API rate limiting, and throughout the codebase. Display names ("Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc.
+**Important:** PlanId values (`FREE`, `STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, API rate limiting, and throughout the codebase. Display names ("Free", "Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc. Free users have no Stripe customer — Stripe customer is created on-demand at first paid checkout. Subscription cancellation downgrades to FREE.
 
 ## Dashboard Navigation
 

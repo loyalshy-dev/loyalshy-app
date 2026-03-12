@@ -1,6 +1,6 @@
 // ─── Plan Definitions (shared between client and server) ──
 
-export type PlanId = "STARTER" | "GROWTH" | "SCALE" | "ENTERPRISE"
+export type PlanId = "FREE" | "STARTER" | "GROWTH" | "SCALE" | "ENTERPRISE"
 
 export type PlanDefinition = {
   id: PlanId
@@ -20,6 +20,28 @@ export type PlanDefinition = {
 }
 
 export const PLANS: Record<PlanId, PlanDefinition> = {
+  FREE: {
+    id: "FREE",
+    name: "Free",
+    description: "Try Loyalshy with your first customers",
+    price: 0,
+    annualPrice: 0,
+    customerLimit: 50,
+    staffLimit: 1,
+    programLimit: 1,
+    features: [
+      "Up to 50 contacts",
+      "1 stamp card program",
+      "1 staff member",
+      "Apple & Google Wallet",
+      "Card design studio",
+    ],
+    apiAccess: false,
+    apiRateLimit: 0,
+    apiDailyLimit: 0,
+    apiKeyLimit: 0,
+    webhookEndpointLimit: 0,
+  },
   STARTER: {
     id: "STARTER",
     name: "Pro",
@@ -123,7 +145,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
 
 // ─── Plan Helpers ─────────────────────────────────────────
 
-const PLAN_ORDER: PlanId[] = ["STARTER", "GROWTH", "SCALE", "ENTERPRISE"]
+const PLAN_ORDER: PlanId[] = ["FREE", "STARTER", "GROWTH", "SCALE", "ENTERPRISE"]
 
 export function isUpgrade(currentPlan: PlanId, newPlan: PlanId): boolean {
   return PLAN_ORDER.indexOf(newPlan) > PLAN_ORDER.indexOf(currentPlan)

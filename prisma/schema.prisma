@@ -30,6 +30,7 @@ enum SubscriptionStatus {
 }
 
 enum Plan {
+  FREE       @map("free")
   STARTER    @map("starter")
   GROWTH     @map("growth")
   SCALE      @map("scale")
