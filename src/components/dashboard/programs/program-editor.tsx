@@ -977,6 +977,8 @@ export function ProgramEditor({
                   rewardDescription: programRewardDescription,
                   status: program.status,
                   organizationId: organization.id,
+                  primaryColor: program.passDesign?.primaryColor ?? undefined,
+                  secondaryColor: program.passDesign?.secondaryColor ?? undefined,
                 }}
               />
             </section>

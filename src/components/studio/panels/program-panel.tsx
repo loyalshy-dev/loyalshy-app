@@ -253,7 +253,6 @@ function TextArea({
 
 function StampCardFields({ store }: { store: CardDesignStoreApi }) {
   const stampsRequired = useStore(store, (s) => s.programConfig.stampsRequired)
-  const rewardDescription = useStore(store, (s) => s.programConfig.rewardDescription)
   const rewardExpiryDays = useStore(store, (s) => s.programConfig.rewardExpiryDays)
   const set = store.getState().setConfigField
 
@@ -267,13 +266,6 @@ function StampCardFields({ store }: { store: CardDesignStoreApi }) {
         min={3}
         max={10}
         suffix="stamps"
-      />
-      <TextInput
-        label="Reward description"
-        value={rewardDescription}
-        onChange={(v) => set("rewardDescription", v)}
-        placeholder="Free coffee"
-        maxLength={200}
       />
       <NumberInput
         label="Reward expiry"
@@ -809,237 +801,6 @@ function ScheduleFields({ store }: { store: CardDesignStoreApi }) {
   )
 }
 
-// ─── Prize Reveal (Minigame) Fields ─────────────────────────
-
-function PrizeRevealFields({ store }: { store: CardDesignStoreApi }) {
-  const enabled = useStore(store, (s) => s.programConfig.minigameEnabled)
-  const gameType = useStore(store, (s) => s.programConfig.minigameType)
-  const prizes = useStore(store, (s) => s.programConfig.minigamePrizes)
-  const primaryColor = useStore(store, (s) => s.programConfig.minigamePrimaryColor)
-  const accentColor = useStore(store, (s) => s.programConfig.minigameAccentColor)
-  const set = store.getState().setConfigField
-
-  const totalWeight = prizes.reduce((sum, p) => sum + p.weight, 0)
-
-  function addPrize() {
-    if (prizes.length >= 8) return
-    set("minigamePrizes", [...prizes, { name: "", weight: 1 }])
-  }
-
-  function updatePrize(index: number, field: "name" | "weight", value: string | number) {
-    const updated = [...prizes]
-    if (field === "name") {
-      updated[index] = { ...updated[index], name: value as string }
-    } else {
-      updated[index] = { ...updated[index], weight: Math.max(1, Math.min(10, value as number)) }
-    }
-    set("minigamePrizes", updated)
-  }
-
-  function removePrize(index: number) {
-    set("minigamePrizes", prizes.filter((_, i) => i !== index))
-  }
-
-  return (
-    <>
-      <SectionHeader>Prize Reveal</SectionHeader>
-      <ToggleInput
-        label="Reward reveal game"
-        description="Show a fun minigame when customers earn a reward"
-        value={enabled}
-        onChange={(v) => set("minigameEnabled", v)}
-      />
-
-      {enabled && (
-        <>
-          <SelectInput
-            label="Game type"
-            value={gameType}
-            onChange={(v) => set("minigameType", v as "scratch" | "slots" | "wheel")}
-            options={[
-              { value: "scratch", label: "Scratch Card" },
-              { value: "slots", label: "Slot Machine" },
-              { value: "wheel", label: "Wheel of Fortune" },
-            ]}
-          />
-
-          {/* Prizes */}
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 12, color: "var(--foreground)", marginBottom: 4 }}>
-              Prizes
-            </div>
-            <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 8 }}>
-              Add prizes with weights (1–10) to control probability.
-              {prizes.length === 0 && " Falls back to the reward description."}
-            </div>
-
-            {prizes.map((prize, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                <input
-                  value={prize.name}
-                  onChange={(e) => updatePrize(i, "name", e.target.value)}
-                  placeholder="e.g. Free Drink"
-                  maxLength={100}
-                  style={{
-                    flex: 1,
-                    padding: "6px 8px",
-                    borderRadius: 9999,
-                    border: "1px solid var(--border)",
-                    backgroundColor: "var(--background)",
-                    fontSize: 12,
-                    color: "var(--foreground)",
-                    outline: "none",
-                  }}
-                />
-                <input
-                  type="number"
-                  value={prize.weight}
-                  onChange={(e) => updatePrize(i, "weight", parseInt(e.target.value) || 1)}
-                  min={1}
-                  max={10}
-                  style={{
-                    width: 44,
-                    padding: "6px 4px",
-                    borderRadius: 9999,
-                    border: "1px solid var(--border)",
-                    backgroundColor: "var(--background)",
-                    fontSize: 12,
-                    color: "var(--foreground)",
-                    outline: "none",
-                    textAlign: "center",
-                  }}
-                />
-                <span style={{ fontSize: 11, color: "var(--muted-foreground)", width: 32, textAlign: "right", flexShrink: 0 }}>
-                  {totalWeight > 0 ? Math.round((prize.weight / totalWeight) * 100) : 0}%
-                </span>
-                <button
-                  onClick={() => removePrize(i)}
-                  style={{
-                    padding: 4,
-                    borderRadius: 9999,
-                    border: "none",
-                    background: "none",
-                    color: "var(--muted-foreground)",
-                    cursor: "pointer",
-                    fontSize: 14,
-                    lineHeight: 1,
-                  }}
-                  aria-label={`Remove prize ${i + 1}`}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-
-            {prizes.length < 8 && (
-              <button
-                onClick={addPrize}
-                style={{
-                  padding: "4px 10px",
-                  borderRadius: 9999,
-                  border: "1px solid var(--border)",
-                  backgroundColor: "var(--background)",
-                  fontSize: 11,
-                  color: "var(--muted-foreground)",
-                  cursor: "pointer",
-                  marginTop: 4,
-                }}
-              >
-                + Add prize
-              </button>
-            )}
-          </div>
-
-          {/* Game Colors */}
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 12, color: "var(--foreground)", marginBottom: 4 }}>
-              Game colors
-            </div>
-            <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 8 }}>
-              Leave empty to use your brand color.
-            </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 4 }}>Primary</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <input
-                    type="color"
-                    value={primaryColor || "#6366f1"}
-                    onChange={(e) => set("minigamePrimaryColor", e.target.value)}
-                    style={{ width: 28, height: 28, borderRadius: 4, border: "1px solid var(--border)", cursor: "pointer", padding: 2 }}
-                  />
-                  <input
-                    value={primaryColor}
-                    onChange={(e) => set("minigamePrimaryColor", e.target.value)}
-                    placeholder="Auto"
-                    maxLength={20}
-                    style={{
-                      flex: 1,
-                      padding: "6px 8px",
-                      borderRadius: 9999,
-                      border: "1px solid var(--border)",
-                      backgroundColor: "var(--background)",
-                      fontSize: 11,
-                      color: "var(--foreground)",
-                      outline: "none",
-                      fontFamily: "monospace",
-                    }}
-                  />
-                </div>
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 4 }}>Accent</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <input
-                    type="color"
-                    value={accentColor || "#c4b5fd"}
-                    onChange={(e) => set("minigameAccentColor", e.target.value)}
-                    style={{ width: 28, height: 28, borderRadius: 4, border: "1px solid var(--border)", cursor: "pointer", padding: 2 }}
-                  />
-                  <input
-                    value={accentColor}
-                    onChange={(e) => set("minigameAccentColor", e.target.value)}
-                    placeholder="Auto"
-                    maxLength={20}
-                    style={{
-                      flex: 1,
-                      padding: "6px 8px",
-                      borderRadius: 9999,
-                      border: "1px solid var(--border)",
-                      backgroundColor: "var(--background)",
-                      fontSize: 11,
-                      color: "var(--foreground)",
-                      outline: "none",
-                      fontFamily: "monospace",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-            {(primaryColor || accentColor) && (
-              <button
-                onClick={() => { set("minigamePrimaryColor", ""); set("minigameAccentColor", "") }}
-                style={{
-                  fontSize: 11,
-                  color: "var(--muted-foreground)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  marginTop: 6,
-                  padding: 0,
-                }}
-              >
-                Reset to default
-              </button>
-            )}
-          </div>
-        </>
-      )}
-    </>
-  )
-}
-
 // ─── Card Fields (all pass types) ────────────────────────────
 
 function FieldPicker({
@@ -1340,8 +1101,6 @@ export function ProgramPanel({ store, passType }: Props) {
   const terms = useStore(store, (s) => s.programConfig.terms)
   const set = store.getState().setConfigField
 
-  const supportsMinigame = passType === "STAMP_CARD" || passType === "COUPON"
-
   return (
     <div>
       <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 12 }}>
@@ -1382,7 +1141,6 @@ export function ProgramPanel({ store, passType }: Props) {
         maxLength={5000}
       />
 
-      {supportsMinigame && <PrizeRevealFields store={store} />}
     </div>
   )
 }

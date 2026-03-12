@@ -5,7 +5,7 @@ import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import type { ColorZone, StudioTool } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
-import { Wand2, Loader2, SlidersHorizontal, Palette, BarChart3, ImagePlus, Image, Bell, FileText } from "lucide-react"
+import { Wand2, Loader2, SlidersHorizontal, Palette, BarChart3, ImagePlus, Image, Bell, FileText, Gift } from "lucide-react"
 import { toast } from "sonner"
 import { computeTextColor, getFieldConfig, type ProgressStyle, type StampGridConfig } from "@/lib/wallet/card-design"
 import { STAMP_ICONS, REWARD_ICONS } from "@/lib/wallet/stamp-icons"
@@ -26,6 +26,7 @@ import { StripPanel } from "../panels/strip-panel"
 import { LogoPanel } from "../panels/logo-panel"
 import { DetailsPanel } from "../panels/details-panel"
 import { NotificationsPanel } from "../panels/notifications-panel"
+import { PrizeRevealPanel } from "../panels/prize-reveal-panel"
 
 // ─── Resolved zone: merge labels + text into "fields" ───────
 
@@ -365,6 +366,7 @@ const TOOL_MENU_ITEMS: ToolMenuItem[] = [
   { id: "progress", label: "Progress", icon: <BarChart3 size={18} /> },
   { id: "strip", label: "Strip", icon: <ImagePlus size={18} /> },
   { id: "logo", label: "Logo", icon: <Image size={18} /> },
+  { id: "prize", label: "Prize", icon: <Gift size={18} /> },
   { id: "notifications", label: "Alerts", icon: <Bell size={18} /> },
   { id: "details", label: "Back", icon: <FileText size={18} /> },
 ]
@@ -374,7 +376,12 @@ export function FloatingToolMenu({ store, cardType }: { store: CardDesignStoreAp
   const selectedZone = useStore(store, (s) => s.ui.selectedColorZone)
 
   const hasProgress = cardType === "STAMP" || cardType === "POINTS"
-  const items = hasProgress ? TOOL_MENU_ITEMS : TOOL_MENU_ITEMS.filter((t) => t.id !== "progress")
+  const hasPrize = cardType === "STAMP" || cardType === "COUPON"
+  const items = TOOL_MENU_ITEMS.filter((t) => {
+    if (t.id === "progress" && !hasProgress) return false
+    if (t.id === "prize" && !hasPrize) return false
+    return true
+  })
 
   function handleClick(id: StudioTool) {
     const state = store.getState()
@@ -444,6 +451,7 @@ const TOOL_LABELS: Record<StudioTool, string> = {
   progress: "Progress",
   strip: "Strip Image",
   logo: "Logo",
+  prize: "Prize Reveal",
   notifications: "Notifications",
   details: "Back of Pass",
 }
@@ -644,6 +652,9 @@ export function ContextPanel({ store, passType, organizationId, organizationName
         )}
         {mode === "tool" && activeTool === "logo" && (
           <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} />
+        )}
+        {mode === "tool" && activeTool === "prize" && (
+          <PrizeRevealPanel store={store} />
         )}
         {mode === "tool" && activeTool === "notifications" && (
           <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />

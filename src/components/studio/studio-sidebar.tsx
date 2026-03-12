@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronRight } from "lucide-react"
 import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
@@ -12,7 +12,7 @@ import { StripPanel } from "./panels/strip-panel"
 import { LogoPanel } from "./panels/logo-panel"
 import { DetailsPanel } from "./panels/details-panel"
 import { NotificationsPanel } from "./panels/notifications-panel"
-import { TemplatePanel } from "./panels/template-panel"
+import { PrizeRevealPanel } from "./panels/prize-reveal-panel"
 
 // ─── Collapsible Section ─────────────────────────────────
 
@@ -88,11 +88,30 @@ export function StudioSidebar({
   organizationLogo,
 }: StudioSidebarProps) {
   const stampsRequired = useStore(store, (s) => s.programConfig.stampsRequired)
+  const selectedColorZone = useStore(store, (s) => s.ui.selectedColorZone)
   const isStampType = cardType === "STAMP"
   const hasProgress = cardType === "STAMP" || cardType === "POINTS"
 
   // Track which sections are open — Program open by default
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(["program"]))
+
+  // Auto-open Colors section when a color zone is selected on the card
+  useEffect(() => {
+    if (selectedColorZone && !openSections.has("colors")) {
+      setOpenSections((prev) => new Set(prev).add("colors"))
+    }
+  }, [selectedColorZone]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Escape key clears zone selection
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && selectedColorZone) {
+        store.getState().setSelectedColorZone(null)
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [selectedColorZone, store])
 
   function toggle(id: string) {
     setOpenSections((prev) => {
@@ -123,16 +142,7 @@ export function StudioSidebar({
         <ProgramPanel store={store} passType={passType} />
       </Section>
 
-      <Section title="Templates" isOpen={openSections.has("templates")} onToggle={() => toggle("templates")}>
-        <TemplatePanel
-          store={store}
-          organizationId={organizationId}
-          organizationLogo={organizationLogo}
-          cardType={cardType}
-        />
-      </Section>
-
-      <Section title="Colors & Typography" isOpen={openSections.has("colors")} onToggle={() => toggle("colors")}>
+      <Section title="Colors" isOpen={openSections.has("colors")} onToggle={() => toggle("colors")}>
         <ColorsPanel store={store} />
       </Section>
 
@@ -164,6 +174,7 @@ export function StudioSidebar({
             store={store}
             organizationId={organizationId}
             organizationName={organizationName}
+            organizationLogo={organizationLogo}
           />
         </div>
         <div>
@@ -182,6 +193,12 @@ export function StudioSidebar({
           <StripPanel store={store} programId={templateId} forceStrip={hasProgress} />
         </div>
       </Section>
+
+      {(passType === "STAMP_CARD" || passType === "COUPON") && (
+        <Section title="Prize Reveal" isOpen={openSections.has("prize")} onToggle={() => toggle("prize")}>
+          <PrizeRevealPanel store={store} />
+        </Section>
+      )}
 
       <Section title="Notifications" isOpen={openSections.has("notifications")} onToggle={() => toggle("notifications")}>
         <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />

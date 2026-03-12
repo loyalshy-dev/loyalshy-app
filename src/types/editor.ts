@@ -10,6 +10,7 @@ export type StudioTool =
   | "progress"
   | "strip"
   | "logo"
+  | "prize"
   | "notifications"
   | "details"
 

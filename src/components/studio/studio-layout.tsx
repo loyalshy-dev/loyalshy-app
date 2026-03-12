@@ -18,6 +18,7 @@ import { DetailsPanel } from "./panels/details-panel"
 import { NotificationsPanel } from "./panels/notifications-panel"
 
 import { LogoPanel } from "./panels/logo-panel"
+import { ScratchCard, SlotMachine, WheelOfFortune } from "@/components/minigames"
 import { savePassDesign as saveCardDesign, updatePassTemplate, updateMinigameConfig } from "@/server/org-settings-actions"
 import type { StudioTool, PreviewFormat } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
@@ -406,8 +407,8 @@ export function StudioLayout({
               enabled: pc.minigameEnabled,
               gameType: pc.minigameType,
               ...(filteredPrizes.length > 0 ? { prizes: filteredPrizes } : {}),
-              ...(pc.minigamePrimaryColor ? { primaryColor: pc.minigamePrimaryColor } : {}),
-              ...(pc.minigameAccentColor ? { accentColor: pc.minigameAccentColor } : {}),
+              primaryColor: state.wallet.primaryColor,
+              accentColor: state.wallet.secondaryColor,
             })
           )
         }
@@ -580,12 +581,28 @@ export function StudioLayout({
               passType={passType}
               templateConfig={buildConfigPayload(passType, programConfig)}
               visitsRequired={programConfig.stampsRequired}
-              rewardDescription={programConfig.rewardDescription}
+              rewardDescription={
+                programConfig.minigameEnabled && programConfig.minigamePrizes.filter((p) => p.name.trim()).length >= 2
+                  ? programConfig.minigamePrizes.filter((p) => p.name.trim()).map((p) => p.name).join(", ")
+                  : programConfig.rewardDescription
+              }
               businessHours={wallet.businessHours || undefined}
               socialLinks={wallet.socialLinks}
               customMessage={wallet.customMessage || undefined}
               store={store}
             />
+
+            {/* Floating minigame preview — right side of canvas */}
+            {!isMobile && ui.activeTool === "prize" && programConfig.minigameEnabled && (
+              <MinigamePreview
+                gameType={programConfig.minigameType}
+                prizes={programConfig.minigamePrizes}
+                rewardDescription={programConfig.rewardDescription}
+                primaryColor={wallet.primaryColor}
+                accentColor={wallet.secondaryColor}
+                templateId={templateId}
+              />
+            )}
 
             {/* Floating controls — bottom right of canvas (embedded mode) */}
             {embedded && !isMobile && (
@@ -954,6 +971,152 @@ function MobileToolBar({
           </div>
         </>
       )}
+    </div>
+  )
+}
+
+// ─── Floating Minigame Preview ──────────────────────────────
+
+function MinigamePreview({
+  gameType,
+  prizes,
+  rewardDescription,
+  primaryColor,
+  accentColor,
+  templateId,
+}: {
+  gameType: "scratch" | "slots" | "wheel"
+  prizes: { name: string; weight: number }[]
+  rewardDescription: string
+  primaryColor: string
+  accentColor: string
+  templateId: string
+}) {
+  const [previewKey, setPreviewKey] = useState(0)
+  const filledPrizes = prizes.filter((p) => p.name.trim())
+  const rewardText = filledPrizes.length > 0 ? filledPrizes[0].name : (rewardDescription || "Free reward!")
+  const prizeNames = filledPrizes.length > 0 ? filledPrizes.map((p) => p.name) : undefined
+
+  const gameLabel =
+    gameType === "scratch" ? "Scratch Card"
+    : gameType === "slots" ? "Slot Machine"
+    : "Wheel of Fortune"
+
+  return (
+    <div
+      key={previewKey}
+      style={{
+        position: "absolute",
+        top: 12,
+        right: 12,
+        bottom: 12,
+        width: 320,
+        zIndex: 15,
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "var(--background)",
+        borderRadius: 24,
+        border: "1px solid var(--border)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
+        overflow: "hidden",
+        animation: "minigamePreviewIn 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "16px 20px 14px",
+          borderBottom: "1px solid var(--border)",
+          flexShrink: 0,
+        }}
+      >
+        <span style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)", flex: 1 }}>
+          {gameLabel} Preview
+        </span>
+        <button
+          onClick={() => setPreviewKey((k) => k + 1)}
+          aria-label="Replay animation"
+          style={{
+            padding: "4px 12px",
+            borderRadius: 9999,
+            border: "1px solid var(--border)",
+            backgroundColor: "var(--background)",
+            color: "var(--muted-foreground)",
+            cursor: "pointer",
+            fontSize: 11,
+            fontWeight: 500,
+          }}
+        >
+          Replay
+        </button>
+      </div>
+
+      {/* Game preview */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 20,
+          overflow: "auto",
+        }}
+      >
+        {gameType === "scratch" && (
+          <ScratchCard
+            rewardText={rewardText}
+            onReveal={() => {}}
+            primaryColor={primaryColor}
+            accentColor={accentColor}
+          />
+        )}
+        {gameType === "slots" && (
+          <SlotMachine
+            rewardText={rewardText}
+            passInstanceId={`preview-${templateId}-${previewKey}`}
+            onReveal={() => {}}
+            autoStart
+            primaryColor={primaryColor}
+          />
+        )}
+        {gameType === "wheel" && (
+          <WheelOfFortune
+            rewardText={rewardText}
+            passInstanceId={`preview-${templateId}-${previewKey}`}
+            onReveal={() => {}}
+            prizes={prizeNames}
+            primaryColor={primaryColor}
+            accentColor={accentColor}
+          />
+        )}
+      </div>
+
+      {/* Footer hint */}
+      <div
+        style={{
+          padding: "12px 20px",
+          borderTop: "1px solid var(--border)",
+          fontSize: 12,
+          color: "var(--muted-foreground)",
+          textAlign: "center",
+          lineHeight: 1.4,
+        }}
+      >
+        {filledPrizes.length >= 2
+          ? `${filledPrizes.length} prizes · Showing "${rewardText}"`
+          : "Add at least 2 prizes to see the full experience"}
+      </div>
+
+      <style>{`
+        @keyframes minigamePreviewIn {
+          from { opacity: 0; transform: translateX(8px) scale(0.98); }
+          to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+      `}</style>
     </div>
   )
 }

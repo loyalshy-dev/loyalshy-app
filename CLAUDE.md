@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple/Google Wallet integration. Supports 10 pass types: stamp cards, coupons, memberships, points, prepaid, gift cards, tickets, access passes, transit passes, and business IDs. Contacts receive wallet passes via QR code scan.
+Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple/Google Wallet integration. Supports 10 pass types: stamp cards, coupons, memberships, points, prepaid, gift cards, tickets, access passes, transit passes, and business IDs. Contacts receive wallet passes via QR code scan, shareable link, direct issue, bulk CSV import, email, or REST API.
 
 ## Stack (Verified Mar 2026)
 
@@ -56,6 +56,20 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - Organization-level roles (`OWNER`, `STAFF`) = Better Auth **organization membership** roles
 - NEVER put OWNER/STAFF in User.role
 
+### Public REST API
+- **Auth**: Bearer token (`lsk_live_` prefix), SHA-256 hashed storage, org-scoped
+- **Rate limiting**: Upstash Redis sliding window (per-org per-minute + per-day), in-memory fallback
+- **Errors**: RFC 7807 Problem Details format
+- **Response envelope**: `{ data, meta: { requestId, pagination? } }`
+- **CORS**: `Access-Control-Allow-Origin: *` (safe with Bearer token auth)
+- **Idempotency**: Redis-backed for POST/PATCH via `Idempotency-Key` header (24h TTL)
+- **Webhooks**: HMAC-SHA256 signed payloads with timestamp replay protection, delivered via Trigger.dev with 5 retries + exponential backoff, auto-disable after 10 consecutive failures
+- **Composable handler**: `apiHandler()` wraps auth → rate limit → idempotency → handler → CORS → logging
+- **Key files**: `api-auth.ts`, `api-handler.ts`, `api-rate-limit.ts`, `api-errors.ts`, `api-response.ts`, `api-cors.ts`, `api-data.ts` (shared data layer), `api-schemas.ts` (Zod), `api-serializers.ts`, `api-events.ts` (webhook dispatch), `api-openapi.ts` (OpenAPI spec), `api-keys.ts` (key generation/validation), `api-logger.ts` (batched request logging)
+- **Server actions**: `api-key-actions.ts` (dashboard key + webhook CRUD)
+- **Docs**: `/api/v1/docs` (Scalar interactive reference), `/api/v1/openapi.json` (spec)
+- **Plan limits**: Starter: 20 req/min, 1k/day, 2 keys, 1 webhook | Growth: 60/min, 10k/day, 10 keys, 3 webhooks | Scale: 300/min, 100k/day, 25 keys, 10 webhooks | Enterprise: 600/min, unlimited, 50 keys, 25 webhooks
+
 ### Next.js 16 Rules
 - Use `proxy.ts` NOT `middleware.ts`
 - All `params` and `searchParams` are async — must be awaited
@@ -96,17 +110,26 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
         /programs/[id]/settings   → Status management + delete (owner)
         /contacts             → Contact management
         /rewards              → Cross-program rewards (not in sidebar)
-        /settings             → General, Team, Billing, Jobs (owner)
+        /settings             → General, Team, Billing, API (owner, all plans), Jobs (owner)
     /(studio)       → Redirects to /programs/[id]/design (studio now embedded)
     /(admin-studio) → Full-page showcase card studio (own layout, super_admin only)
       /admin/showcase/[id]/studio → Showcase card editor
     /(public)       → Landing, pricing, QR scan, card view pages
     /api            → API routes
+      /api/v1       → Public REST API (Bearer token auth)
+        /contacts, /contacts/[id], /contacts/bulk
+        /templates, /templates/[id], /templates/[id]/stats
+        /passes, /passes/[id], /passes/[id]/actions, /passes/[id]/interactions, /passes/bulk
+        /interactions, /interactions/[id]
+        /stats, /stats/daily
+        /webhooks, /webhooks/[id], /webhooks/[id]/test, /webhooks/[id]/rotate-secret
+        /openapi.json → OpenAPI 3.1 spec
+        /docs         → Interactive API reference (Scalar)
   /components       → Reusable UI components
     /ui             → Shadcn components
     /card-renderer  → Shared CardRenderer used across all surfaces
     /minigames      → Prize reveal minigames (scratch card, slots, wheel) — shared by dashboard + public card page
-    /studio         → Studio editor components (layout, toolbar, sidebar, canvas, panels)
+    /studio         → Studio editor components (layout, toolbar, floating menu, canvas, panels)
     /dashboard      → Dashboard-specific components
       /programs     → Program list view, tab nav, pass instances, settings
     /admin/showcase → Showcase card management + studio adapter
@@ -171,6 +194,11 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase P6 — Public Pages & Onboarding (marketing copy restaurant→business, restaurantName→businessName type rename)
 - [x] Phase P7 — Studio & Card Renderer (all 10 type panels, field configs, Apple/Google generators, renderer support)
 - [x] Phase P8 — Admin, Jobs & Polish (admin /restaurants/→/organizations/, dashboard /customers/→/contacts/, file + component renames, revalidatePath updates)
+- [x] Phase API-1 — API Foundation (ApiKey/WebhookEndpoint/WebhookDelivery/ApiRequestLog models, auth, rate limiting, CORS, error handling, idempotency, request logging)
+- [x] Phase API-2 — Core CRUD Endpoints (contacts, templates, passes, interactions — list/detail/create/update/delete routes, shared data layer, serializers)
+- [x] Phase API-3 — Domain-Specific Operations (16 type-specific actions, bulk contacts/passes, org/daily/template stats)
+- [x] Phase API-4 — Webhooks (HMAC-SHA256 signed delivery via Trigger.dev, endpoint CRUD API, test ping, secret rotation, auto-disable, event dispatch on mutations)
+- [x] Phase API-5 — API Dashboard UI (API keys section, webhook management section, server actions for CRUD, settings tab with plan gating)
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -202,7 +230,7 @@ Update the "Current Progress" section above to track what's done.
 6. Member (userId + organizationId + role)
 7. Invitation (Better Auth's org invite — separate from StaffInvitation)
 
-**Application (11):**
+**Application (15):**
 8. PassTemplate (passType: 10 types, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
 9. PassInstance (pivot: Contact × PassTemplate — wallet pass, status, data JSON for type-specific state)
 10. Contact (end user — identity + denormalized totalInteractions + sequential memberNumber per org)
@@ -214,6 +242,10 @@ Update the "Current Progress" section above to track what's done.
 16. DeviceRegistration (Apple Wallet push, linked to PassInstance)
 17. AnalyticsSnapshot (pre-computed daily metrics)
 18. ShowcaseCard (marketing landing page card examples; `designData` JSON + `metadata` JSON + `sortOrder`)
+19. ApiKey (org-scoped, SHA-256 hashed key, prefix for display, scopes, expiry, revocation)
+20. WebhookEndpoint (org-scoped, HMAC secret, event subscriptions, auto-disable on failures)
+21. WebhookDelivery (delivery log per endpoint, status code, response body, attempts)
+22. ApiRequestLog (batched request logging — method, path, status, latency, API key)
 
 ## Quality Checklist (Verify After Each Phase)
 
@@ -237,6 +269,8 @@ Update the "Current Progress" section above to track what's done.
 - `src/lib/dal.ts` — Data Access Layer (REAL security boundary)
 - `proxy.ts` — Optimistic cookie redirect (UX only)
 - `src/server/auth-actions.ts` — Staff invitation server actions (email via Trigger.dev, email-verified acceptance, rate-limited token validation)
+- `src/lib/api-auth.ts` — API key authentication (Bearer token → ApiContext with orgId, plan check)
+- `src/lib/api-keys.ts` — API key generation (`lsk_live_` prefix) and SHA-256 validation
 
 ## Dashboard Navigation
 
@@ -248,7 +282,7 @@ Update the "Current Progress" section above to track what's done.
 - `/dashboard/programs` — list of all programs (grid cards, status badges, pass instance counts)
 - `/dashboard/programs/[id]` — program overview with stat cards (layout provides tab nav)
 - `/dashboard/programs/[id]/passes` — type-aware pass instances with stat cards, progress columns, status filters, row actions, issue pass sheet, edit contact, send pass email
-- `/dashboard/programs/[id]/design` — embedded card design studio with 2-panel layout (owner only)
+- `/dashboard/programs/[id]/design` — canvas-first card design studio with floating icon toolbar + floating context panel (owner only)
 - `/dashboard/programs/[id]/distribution` — Distribution: QR/NFC self-service link, direct issue to contacts, bulk CSV import (owner only)
 - `/dashboard/programs/[id]/settings` — status management (activate/archive/reactivate) + delete (owner only)
 
@@ -256,6 +290,7 @@ Update the "Current Progress" section above to track what's done.
 - General (organization profile)
 - Team (members, invitations)
 - Billing (Stripe subscription)
+- API (API keys + webhook endpoints — all plans, owner only)
 - Jobs (background jobs — separate page)
 
 **Note:** `/dashboard/rewards` still works (command palette, direct URL) but is not in sidebar. `/dashboard/programs/[id]/studio` redirects to `/dashboard/programs/[id]/design`.
@@ -279,6 +314,7 @@ Update the "Current Progress" section above to track what's done.
 - `--brand` CSS variable for per-organization theming (default: `oklch(0.55 0.2 265)`)
 - OKLCH color space throughout — all tokens in `globals.css` `:root` / `.dark`
 - `TooltipProvider` wraps via `SidebarProvider` (NOT root layout)
+- **Studio editor** — Figma/Canva-inspired canvas-first layout: floating vertical icon toolbar (left edge), floating rounded context panel (slides in from left), full-width canvas with card preview. Sidebar panels are only used on mobile. Desktop uses `FloatingToolMenu` + `ContextPanel` from `context-notch.tsx`. Full-rounded (pill) styling on all interactive controls.
 
 ## Deployment Infrastructure
 
@@ -293,6 +329,7 @@ Update the "Current Progress" section above to track what's done.
 | Payments | Stripe | Already configured (subscriptions, webhooks) |
 | Error Tracking | Sentry | Already configured (source maps) |
 | Analytics | Plausible | Already configured (privacy-first) |
+| API Docs | Scalar | Interactive API reference at `/api/v1/docs` |
 | DNS / CDN | Cloudflare | Free tier, pairs with R2 |
 
 For full deployment guide, checklist, and cost estimate, see **`docs/deployment-stack.md`**.

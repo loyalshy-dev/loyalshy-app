@@ -25,6 +25,8 @@ type PrizeRevealTemplate = {
   rewardDescription: string
   status: string
   organizationId: string
+  primaryColor?: string
+  secondaryColor?: string
 }
 
 export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate }) {
@@ -35,10 +37,9 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
   const [previewKey, setPreviewKey] = useState(0)
   const handlePreviewReveal = useCallback(() => {}, [])
 
-  // Game colors
-  const [primaryColor, setPrimaryColor] = useState(minigameConfig?.primaryColor ?? "")
-  const [accentColor, setAccentColor] = useState(minigameConfig?.accentColor ?? "")
-  const [colorsChanged, setColorsChanged] = useState(false)
+  // Card design colors (used as game colors)
+  const cardPrimary = program.primaryColor ?? "#6366f1"
+  const cardSecondary = program.secondaryColor ?? "#c4b5fd"
 
   // Prizes state (managed outside react-hook-form since it's a dynamic array)
   const [prizes, setPrizes] = useState<PrizeItem[]>(
@@ -47,6 +48,7 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
   const [prizesChanged, setPrizesChanged] = useState(false)
 
   const totalWeight = useMemo(() => prizes.reduce((sum, p) => sum + p.weight, 0), [prizes])
+  const filledPrizes = useMemo(() => prizes.filter((p) => p.name.trim()), [prizes])
 
   const {
     register,
@@ -64,6 +66,7 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
 
   const minigameEnabled = watch("minigameEnabled")
   const minigameType = watch("minigameType")
+  const needsMorePrizes = minigameEnabled && filledPrizes.length < 2
 
   // Preview text: first prize name or fallback to rewardDescription
   const prizeNames = prizes.map((p) => p.name).filter(Boolean)
@@ -83,15 +86,14 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
           enabled: data.minigameEnabled,
           gameType: data.minigameType,
           ...(filteredPrizes.length > 0 ? { prizes: filteredPrizes } : {}),
-          ...(primaryColor ? { primaryColor } : {}),
-          ...(accentColor ? { accentColor } : {}),
+          primaryColor: cardPrimary,
+          accentColor: cardSecondary,
         })
         if ("error" in result) {
           toast.error(String(result.error))
         } else {
           reset(data)
           setPrizesChanged(false)
-          setColorsChanged(false)
           toast.success("Prize reveal settings saved")
         }
       })
@@ -128,7 +130,9 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
       <div>
         <h2 className="text-lg font-semibold tracking-tight">Prize Reveal</h2>
         <p className="text-[13px] text-muted-foreground mt-1">
-          Configure a fun minigame that plays when customers earn a reward.
+          {minigameEnabled && filledPrizes.length >= 2
+            ? `${filledPrizes.length} prizes configured — ${filledPrizes.map((p) => p.name).join(", ")}`
+            : "Configure a fun minigame that plays when customers earn a reward."}
         </p>
       </div>
 
@@ -159,10 +163,20 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
             <div>
               <Label className="text-sm font-medium">Prizes</Label>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Add prizes with weights (1–10) to control probability.
-                {prizes.length === 0 && ` Falls back to "${program.rewardDescription}".`}
+                Add at least 2 prizes so the game feels rewarding. Weights (1–10) control probability.
               </p>
             </div>
+
+            {needsMorePrizes && (
+              <div className="flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs leading-relaxed">
+                <span className="shrink-0 text-sm leading-tight">!</span>
+                <span>
+                  {filledPrizes.length === 0
+                    ? `Add at least 2 prizes. Currently falls back to "${program.rewardDescription || "reward"}".`
+                    : "Add one more prize — a single option doesn\u2019t make the game exciting."}
+                </span>
+              </div>
+            )}
 
             {prizes.map((prize, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -218,65 +232,22 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
             )}
           </div>
 
-          {/* Game Colors */}
+          {/* Game Colors (from card design) */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-sm font-medium">Game Colors</Label>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Customize colors for the minigame. Leave empty to use your brand color.
-                </p>
-              </div>
-              {(primaryColor || accentColor) && (
-                <button
-                  type="button"
-                  className="text-[11px] text-muted-foreground hover:text-foreground underline"
-                  onClick={() => { setPrimaryColor(""); setAccentColor(""); setColorsChanged(true) }}
-                >
-                  Reset to default
-                </button>
-              )}
+            <div>
+              <Label className="text-sm font-medium">Game Colors</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Uses your card&apos;s primary and accent colors. Change them in the card design studio.
+              </p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Primary</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={primaryColor || "#6366f1"}
-                    onChange={(e) => { setPrimaryColor(e.target.value); setColorsChanged(true) }}
-                    disabled={isArchived}
-                    className="size-8 rounded border border-border cursor-pointer p-0.5"
-                  />
-                  <Input
-                    value={primaryColor}
-                    onChange={(e) => { setPrimaryColor(e.target.value); setColorsChanged(true) }}
-                    placeholder="var(--brand)"
-                    maxLength={50}
-                    disabled={isArchived}
-                    className="text-[13px] font-mono flex-1"
-                  />
-                </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="size-7 rounded-md border border-border" style={{ backgroundColor: cardPrimary }} />
+                <span className="text-xs text-muted-foreground">Primary</span>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Accent</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={accentColor || "#c4b5fd"}
-                    onChange={(e) => { setAccentColor(e.target.value); setColorsChanged(true) }}
-                    disabled={isArchived}
-                    className="size-8 rounded border border-border cursor-pointer p-0.5"
-                  />
-                  <Input
-                    value={accentColor}
-                    onChange={(e) => { setAccentColor(e.target.value); setColorsChanged(true) }}
-                    placeholder="Default"
-                    maxLength={50}
-                    disabled={isArchived}
-                    className="text-[13px] font-mono flex-1"
-                  />
-                </div>
+              <div className="flex items-center gap-2">
+                <div className="size-7 rounded-md border border-border" style={{ backgroundColor: cardSecondary }} />
+                <span className="text-xs text-muted-foreground">Accent</span>
               </div>
             </div>
           </div>
@@ -345,8 +316,8 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
                         <ScratchCard
                           rewardText={previewRewardText}
                           onReveal={handlePreviewReveal}
-                          primaryColor={primaryColor || undefined}
-                          accentColor={accentColor || undefined}
+                          primaryColor={cardPrimary}
+                          accentColor={cardSecondary}
                         />
                       )}
                       {type === "slots" && (
@@ -355,7 +326,7 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
                           passInstanceId={`preview-${type}-${program.id}`}
                           onReveal={handlePreviewReveal}
                           autoStart={false}
-                          primaryColor={primaryColor || undefined}
+                          primaryColor={cardPrimary}
                         />
                       )}
                       {type === "wheel" && (
@@ -364,8 +335,8 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
                           passInstanceId={`preview-${type}-${program.id}`}
                           onReveal={handlePreviewReveal}
                           prizes={prizeNames.length > 0 ? prizeNames : undefined}
-                          primaryColor={primaryColor || undefined}
-                          accentColor={accentColor || undefined}
+                          primaryColor={cardPrimary}
+                          accentColor={cardSecondary}
                         />
                       )}
                     </div>
@@ -378,7 +349,7 @@ export function PrizeRevealEditor({ program }: { program: PrizeRevealTemplate })
       )}
 
       {/* Save button */}
-      {(isDirty || prizesChanged || colorsChanged) && (
+      {(isDirty || prizesChanged) && (
         <div className="flex items-center justify-end gap-3 rounded-lg border border-border bg-muted/50 px-4 py-3">
           <p className="text-xs text-muted-foreground">Unsaved prize reveal changes</p>
           <Button
