@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { ChevronRight, Plus } from "lucide-react"
-import { PASS_TYPE_META } from "@/types/pass-types"
+import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import type { TemplateSummaryItem } from "@/server/analytics"
 import { Card } from "@/components/ui/card"
 
@@ -22,6 +22,16 @@ function getMetricLine(program: TemplateSummaryItem): string {
       return `${program.activePassInstances} enrolled \u00b7 ${program.redeemedRewards} redeemed`
     case "PREPAID":
       return `${program.activePassInstances} issued \u00b7 ${program.totalInteractions} uses`
+    case "GIFT_CARD":
+      return `${program.activePassInstances} cards \u00b7 ${program.totalInteractions} transactions`
+    case "TICKET":
+      return `${program.activePassInstances} tickets \u00b7 ${program.totalInteractions} scans`
+    case "ACCESS":
+      return `${program.activePassInstances} passes \u00b7 ${program.totalInteractions} access logs`
+    case "TRANSIT":
+      return `${program.activePassInstances} passes \u00b7 ${program.totalInteractions} trips`
+    case "BUSINESS_ID":
+      return `${program.activePassInstances} IDs \u00b7 ${program.totalInteractions} verifications`
     default:
       return `${program.activePassInstances} enrolled`
   }
@@ -57,7 +67,7 @@ export function ProgramsSummary({ programs }: ProgramsSummaryProps) {
       </h3>
       <div className="space-y-0">
         {programs.map((program) => {
-          const meta = PASS_TYPE_META[program.passType]
+          const meta = PASS_TYPE_META[program.passType as PassType]
           const Icon = meta.icon
 
           return (

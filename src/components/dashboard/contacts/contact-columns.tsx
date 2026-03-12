@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns"
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Eye, Pencil, Trash2, Stamp, Ticket, Crown, Coins, CreditCard } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,23 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
+import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import type { ContactRow as ContactRow } from "@/server/contact-actions"
-
-const typeIcons: Record<string, typeof Stamp> = {
-  STAMP_CARD: Stamp,
-  COUPON: Ticket,
-  MEMBERSHIP: Crown,
-  POINTS: Coins,
-  PREPAID: CreditCard,
-}
-
-const typeLabels: Record<string, string> = {
-  STAMP_CARD: "Stamp",
-  COUPON: "Coupon",
-  MEMBERSHIP: "Member",
-  POINTS: "Points",
-  PREPAID: "Prepaid",
-}
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -110,8 +95,9 @@ export function getContactColumns(
         if (!primaryPassInstance) {
           return <span className="text-[12px] text-muted-foreground">—</span>
         }
-        const TypeIcon = typeIcons[primaryPassInstance.passType] ?? Stamp
-        const typeLabel = typeLabels[primaryPassInstance.passType] ?? "Program"
+        const meta = PASS_TYPE_META[primaryPassInstance.passType as PassType]
+        const TypeIcon = meta?.icon
+        const typeLabel = meta?.shortLabel ?? "Program"
         return (
           <div className="flex items-center gap-1.5">
             <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1 shrink-0">
@@ -192,6 +178,31 @@ export function getContactColumns(
                 {remaining}/{total}
               </span>
             </div>
+          )
+        }
+
+        if (programType === "GIFT_CARD") {
+          const balanceCents = (piData.balanceCents as number) ?? 0
+          return (
+            <span className="text-[13px] tabular-nums text-muted-foreground">
+              {(balanceCents / 100).toFixed(2)} balance
+            </span>
+          )
+        }
+
+        if (programType === "TICKET") {
+          const scansUsed = (piData.scansUsed as number) ?? 0
+          const maxScans = (piConfig.maxScans as number) ?? 1
+          return (
+            <span className="text-[13px] tabular-nums text-muted-foreground">
+              {scansUsed}/{maxScans} scans
+            </span>
+          )
+        }
+
+        if (programType === "ACCESS" || programType === "BUSINESS_ID" || programType === "TRANSIT") {
+          return (
+            <span className="text-[12px] text-muted-foreground">Active</span>
           )
         }
 

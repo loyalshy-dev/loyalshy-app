@@ -140,7 +140,10 @@ export function DashboardShell({
         </main>
 
         {/* Mobile bottom nav */}
-        <MobileNav onOpenRegisterVisit={handleRegisterVisit} />
+        <MobileNav
+          onOpenRegisterVisit={handleRegisterVisit}
+          onOpenMore={() => setCommandOpen(true)}
+        />
 
         {/* Command palette */}
         <CommandPalette

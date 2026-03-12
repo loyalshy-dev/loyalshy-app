@@ -1,19 +1,28 @@
 "use client"
 
-import { Eye, Gift, Trophy, Crown, Ticket, CreditCard, Coins } from "lucide-react"
+import {
+  Stamp,
+  Gift,
+  Trophy,
+  Crown,
+  Ticket,
+  CreditCard,
+  Coins,
+  CalendarDays,
+  ShieldCheck,
+  Bus,
+  BadgeCheck,
+} from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import type { ActivityItem } from "@/server/analytics"
 import { Card } from "@/components/ui/card"
 
-const ACTIVITY_CONFIG = {
-  interaction: {
-    icon: Eye,
-    verb: "registered an interaction",
-    color: "text-brand",
-    bg: "bg-brand/10",
-  },
+const ACTIVITY_CONFIG: Record<
+  ActivityItem["type"],
+  { icon: typeof Stamp; verb: string; color: string; bg: string }
+> = {
   stamp: {
-    icon: Eye,
+    icon: Stamp,
     verb: "registered a visit",
     color: "text-brand",
     bg: "bg-brand/10",
@@ -42,6 +51,36 @@ const ACTIVITY_CONFIG = {
     color: "text-success",
     bg: "bg-success/10",
   },
+  gift_charge: {
+    icon: Gift,
+    verb: "used gift card",
+    color: "text-brand",
+    bg: "bg-brand/10",
+  },
+  ticket_scan: {
+    icon: CalendarDays,
+    verb: "scanned ticket",
+    color: "text-brand",
+    bg: "bg-brand/10",
+  },
+  access_grant: {
+    icon: ShieldCheck,
+    verb: "accessed facility",
+    color: "text-brand",
+    bg: "bg-brand/10",
+  },
+  transit_board: {
+    icon: Bus,
+    verb: "boarded",
+    color: "text-brand",
+    bg: "bg-brand/10",
+  },
+  id_verify: {
+    icon: BadgeCheck,
+    verb: "verified ID",
+    color: "text-brand",
+    bg: "bg-brand/10",
+  },
   reward_earned: {
     icon: Gift,
     verb: "earned a reward",
@@ -60,7 +99,7 @@ const ACTIVITY_CONFIG = {
     color: "text-warning",
     bg: "bg-warning/10",
   },
-} as const
+}
 
 type RecentActivityProps = {
   items: ActivityItem[]

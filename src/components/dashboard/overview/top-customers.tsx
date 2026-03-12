@@ -1,8 +1,8 @@
 "use client"
 
 import { formatDistanceToNow } from "date-fns"
-import { Stamp, Ticket, Crown, Coins, CreditCard } from "lucide-react"
 import type { TopContactItem } from "@/server/analytics"
+import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { Card } from "@/components/ui/card"
 
 function getInitials(name: string): string {
@@ -25,13 +25,6 @@ function getAvatarColor(name: string): string {
   return `oklch(0.55 0.12 ${hue})`
 }
 
-const typeIcons: Record<string, typeof Stamp> = {
-  STAMP_CARD: Stamp,
-  COUPON: Ticket,
-  MEMBERSHIP: Crown,
-  POINTS: Coins,
-  PREPAID: CreditCard,
-}
 
 type TopContactsProps = {
   contacts: TopContactItem[]
@@ -58,9 +51,10 @@ export function TopContacts({ contacts }: TopContactsProps) {
       </h3>
       <div className="space-y-0">
         {contacts.map((contact) => {
-          const TypeIcon = contact.primaryPassType
-            ? typeIcons[contact.primaryPassType]
+          const meta = contact.primaryPassType
+            ? PASS_TYPE_META[contact.primaryPassType as PassType]
             : null
+          const TypeIcon = meta?.icon ?? null
 
           return (
             <div

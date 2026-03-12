@@ -102,8 +102,8 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
   /app              → App Router pages
     /(auth)         → Login/Register/Forgot password
     /(dashboard)    → Protected dashboard routes
-      /dashboard
-        /programs             → Programs list
+      /dashboard              → Overview (stat cards, charts, activity feed, top contacts, programs summary)
+        /programs             → Programs list (grid cards)
         /programs/[id]        → Program detail (layout + tab nav)
         /programs/[id]/passes     → Per-program passes with type-aware columns
         /programs/[id]/design     → Embedded card design studio (owner)
@@ -132,6 +132,8 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
     /minigames      → Prize reveal minigames (scratch card, slots, wheel) — shared by dashboard + public card page
     /studio         → Studio editor components (layout, toolbar, floating menu, canvas, panels)
     /dashboard      → Dashboard-specific components
+      /overview     → Analytics: stat cards, activity chart, busiest days, recent activity, top contacts, programs summary, skeletons
+      /contacts     → Contact table, columns, filters, detail sheet, empty state
       /programs     → Program list view, tab nav, pass instances, settings
     /admin/showcase → Showcase card management + studio adapter
     /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, motion animations)

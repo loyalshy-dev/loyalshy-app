@@ -1,8 +1,9 @@
 "use client"
 
-import { Users, Activity, Gift, Trophy, TrendingUp, TrendingDown, Stamp, Ticket, Crown, Coins, CreditCard } from "lucide-react"
+import { Users, Activity, Gift, Trophy, TrendingUp, TrendingDown } from "lucide-react"
 import { useAnimatedCounter } from "@/hooks/use-animated-counter"
 import type { PassInstancesByType } from "@/server/analytics"
+import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { Card } from "@/components/ui/card"
 
 type StatCardProps = {
@@ -51,16 +52,10 @@ function StatCard({ label, value, change, icon, suffix }: StatCardProps) {
   )
 }
 
-const TYPE_PILLS: { key: keyof PassInstancesByType; icon: typeof Stamp; label: string }[] = [
-  { key: "STAMP_CARD", icon: Stamp, label: "Stamp" },
-  { key: "COUPON", icon: Ticket, label: "Coupon" },
-  { key: "MEMBERSHIP", icon: Crown, label: "Member" },
-  { key: "POINTS", icon: Coins, label: "Points" },
-  { key: "PREPAID", icon: CreditCard, label: "Prepaid" },
-]
+const ALL_PASS_TYPES = Object.keys(PASS_TYPE_META) as PassType[]
 
-function PassInstanceBreakdown({ passInstancesByType, total }: { passInstancesByType: PassInstancesByType; total: number }) {
-  const activeTypes = TYPE_PILLS.filter((t) => passInstancesByType[t.key] > 0)
+function PassInstanceBreakdown({ passInstancesByType }: { passInstancesByType: PassInstancesByType }) {
+  const activeTypes = ALL_PASS_TYPES.filter((key) => passInstancesByType[key] > 0)
 
   if (activeTypes.length === 0) {
     return null
@@ -68,16 +63,17 @@ function PassInstanceBreakdown({ passInstancesByType, total }: { passInstancesBy
 
   return (
     <div className="flex flex-wrap gap-1.5 mt-1.5">
-      {activeTypes.map((t) => {
-        const Icon = t.icon
-        const count = passInstancesByType[t.key]
+      {activeTypes.map((key) => {
+        const meta = PASS_TYPE_META[key]
+        const Icon = meta.icon
+        const count = passInstancesByType[key]
         return (
           <span
-            key={t.key}
+            key={key}
             className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
           >
             <Icon className="size-2.5" />
-            {count} {t.label}
+            {count} {meta.shortLabel}
           </span>
         )
       })}
@@ -129,7 +125,7 @@ export function StatCards({
           <span className="text-2xl font-semibold tracking-tight tabular-nums">
             {activePassInstances.toLocaleString()}
           </span>
-          <PassInstanceBreakdown passInstancesByType={passInstancesByType} total={activePassInstances} />
+          <PassInstanceBreakdown passInstancesByType={passInstancesByType} />
         </div>
       </Card>
       <StatCard

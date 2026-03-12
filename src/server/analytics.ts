@@ -21,6 +21,11 @@ export type PassInstancesByType = {
   MEMBERSHIP: number
   POINTS: number
   PREPAID: number
+  GIFT_CARD: number
+  TICKET: number
+  ACCESS: number
+  TRANSIT: number
+  BUSINESS_ID: number
 }
 
 export type OverviewStats = {
@@ -52,7 +57,7 @@ export type RewardDistributionItem = {
 
 export type ActivityItem = {
   id: string
-  type: "stamp" | "reward_earned" | "reward_redeemed" | "check_in" | "coupon_redeemed" | "prepaid_use" | "prepaid_recharge" | "points_earned"
+  type: "stamp" | "reward_earned" | "reward_redeemed" | "check_in" | "coupon_redeemed" | "prepaid_use" | "prepaid_recharge" | "points_earned" | "gift_charge" | "ticket_scan" | "access_grant" | "transit_board" | "id_verify"
   contactName: string
   staffName: string | null
   templateName: string | null
@@ -72,7 +77,7 @@ export type TopContactItem = {
 export type TemplateSummaryItem = {
   id: string
   name: string
-  passType: "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "PREPAID"
+  passType: string
   activePassInstances: number
   totalInteractions: number
   redeemedRewards: number
@@ -211,6 +216,7 @@ export async function getOverviewStats(): Promise<OverviewStats> {
 
   const passInstancesByType: PassInstancesByType = {
     STAMP_CARD: 0, COUPON: 0, MEMBERSHIP: 0, POINTS: 0, PREPAID: 0,
+    GIFT_CARD: 0, TICKET: 0, ACCESS: 0, TRANSIT: 0, BUSINESS_ID: 0,
   }
   let activePassInstances = 0
   for (const e of passInstancesByTypeRaw) {
@@ -451,22 +457,24 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
 
   for (const i of recentInteractions) {
     const pType = i.passTemplate.passType
-    const type = pType === "MEMBERSHIP"
-      ? "check_in" as const
-      : pType === "PREPAID"
-        ? "prepaid_use" as const
-        : pType === "POINTS"
-          ? "points_earned" as const
-          : "stamp" as const
+    const typeMap: Record<string, ActivityItem["type"]> = {
+      STAMP_CARD: "stamp",
+      COUPON: "stamp",
+      MEMBERSHIP: "check_in",
+      POINTS: "points_earned",
+      PREPAID: "prepaid_use",
+      GIFT_CARD: "gift_charge",
+      TICKET: "ticket_scan",
+      ACCESS: "access_grant",
+      TRANSIT: "transit_board",
+      BUSINESS_ID: "id_verify",
+    }
+    const type = typeMap[pType] ?? "stamp"
 
     const interactionMetadata = (i.metadata as Record<string, unknown>) ?? {}
-    const detail = pType === "MEMBERSHIP"
-      ? i.passTemplate.name
-      : pType === "PREPAID"
-        ? i.passTemplate.name
-        : pType === "POINTS"
-          ? i.passTemplate.name
-          : `Stamp #${interactionMetadata.visitNumber ?? ""}`
+    const detail = pType === "STAMP_CARD"
+      ? `Stamp #${interactionMetadata.visitNumber ?? ""}`
+      : i.passTemplate.name
 
     items.push({
       id: i.id,
@@ -620,6 +628,23 @@ export async function getTopContacts(): Promise<TopContactItem[]> {
         }
         case "MEMBERSHIP":
           engagementLabel = `${c.totalInteractions} check-ins`
+          break
+        case "GIFT_CARD": {
+          const balanceCents = (instanceData.balanceCents as number) ?? 0
+          engagementLabel = `${(balanceCents / 100).toFixed(2)} balance`
+          break
+        }
+        case "TICKET":
+          engagementLabel = `${(instanceData.scansUsed as number) ?? 0} scans`
+          break
+        case "ACCESS":
+          engagementLabel = `${c.totalInteractions} access`
+          break
+        case "TRANSIT":
+          engagementLabel = `${c.totalInteractions} trips`
+          break
+        case "BUSINESS_ID":
+          engagementLabel = `${c.totalInteractions} verifications`
           break
         default:
           engagementLabel = `${c.totalInteractions} interactions`

@@ -2,19 +2,27 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutGrid, Plus, Settings } from "lucide-react"
+import { LayoutGrid, Plus, Users, Layers, MoreHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type MobileNavProps = {
   onOpenRegisterVisit: () => void
+  onOpenMore: () => void
 }
 
-export function MobileNav({ onOpenRegisterVisit }: MobileNavProps) {
+export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
   const pathname = usePathname()
 
-  function isActive(href: string) {
-    if (href === "/dashboard") return pathname === "/dashboard"
-    return pathname.startsWith(href)
+  function isOverviewActive() {
+    return pathname === "/dashboard"
+  }
+
+  function isContactsActive() {
+    return pathname.startsWith("/dashboard/contacts")
+  }
+
+  function isProgramsActive() {
+    return pathname.startsWith("/dashboard/programs")
   }
 
   return (
@@ -27,19 +35,28 @@ export function MobileNav({ onOpenRegisterVisit }: MobileNavProps) {
           href="/dashboard"
           className={cn(
             "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] rounded-md transition-colors",
-            isActive("/dashboard") && !pathname.startsWith("/dashboard/settings")
-              ? "text-foreground"
-              : "text-muted-foreground"
+            isOverviewActive() ? "text-foreground" : "text-muted-foreground"
           )}
         >
           <LayoutGrid
-            className={cn(
-              "size-5",
-              isActive("/dashboard") && !pathname.startsWith("/dashboard/settings") && "text-brand"
-            )}
-            strokeWidth={isActive("/dashboard") && !pathname.startsWith("/dashboard/settings") ? 2 : 1.5}
+            className={cn("size-5", isOverviewActive() && "text-brand")}
+            strokeWidth={isOverviewActive() ? 2 : 1.5}
           />
           <span className="text-[10px] font-medium">Overview</span>
+        </Link>
+
+        <Link
+          href="/dashboard/contacts"
+          className={cn(
+            "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] rounded-md transition-colors",
+            isContactsActive() ? "text-foreground" : "text-muted-foreground"
+          )}
+        >
+          <Users
+            className={cn("size-5", isContactsActive() && "text-brand")}
+            strokeWidth={isContactsActive() ? 2 : 1.5}
+          />
+          <span className="text-[10px] font-medium">Contacts</span>
         </Link>
 
         {/* Center FAB — Register Interaction */}
@@ -58,18 +75,27 @@ export function MobileNav({ onOpenRegisterVisit }: MobileNavProps) {
         </div>
 
         <Link
-          href="/dashboard/settings"
+          href="/dashboard/programs"
           className={cn(
             "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] rounded-md transition-colors",
-            isActive("/dashboard/settings") ? "text-foreground" : "text-muted-foreground"
+            isProgramsActive() ? "text-foreground" : "text-muted-foreground"
           )}
         >
-          <Settings
-            className={cn("size-5", isActive("/dashboard/settings") && "text-brand")}
-            strokeWidth={isActive("/dashboard/settings") ? 2 : 1.5}
+          <Layers
+            className={cn("size-5", isProgramsActive() && "text-brand")}
+            strokeWidth={isProgramsActive() ? 2 : 1.5}
           />
-          <span className="text-[10px] font-medium">Settings</span>
+          <span className="text-[10px] font-medium">Programs</span>
         </Link>
+
+        <button
+          type="button"
+          onClick={onOpenMore}
+          className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] rounded-md transition-colors text-muted-foreground"
+        >
+          <MoreHorizontal className="size-5" strokeWidth={1.5} />
+          <span className="text-[10px] font-medium">More</span>
+        </button>
       </div>
     </nav>
   )

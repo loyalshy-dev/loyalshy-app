@@ -8,6 +8,10 @@ import {
   Crown,
   Coins,
   Gift,
+  CalendarDays,
+  ShieldCheck,
+  Bus,
+  BadgeCheck,
   Pencil,
   Trash2,
   Loader2,
@@ -15,7 +19,6 @@ import {
   Mail,
   Phone,
   Clock,
-  CalendarDays,
   CheckCircle2,
   CreditCard,
   Smartphone,
@@ -128,6 +131,11 @@ const passTypeIcons: Record<string, typeof Stamp> = {
   MEMBERSHIP: Crown,
   POINTS: Coins,
   PREPAID: CreditCard,
+  GIFT_CARD: Gift,
+  TICKET: CalendarDays,
+  ACCESS: ShieldCheck,
+  TRANSIT: Bus,
+  BUSINESS_ID: BadgeCheck,
 }
 
 function buildWalletDesign(passInstance: PassInstanceDetail) {

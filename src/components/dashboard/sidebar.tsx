@@ -8,6 +8,8 @@ import {
   LayoutGrid,
   LogOut,
   Settings,
+  Users,
+  Layers,
 } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -48,6 +50,8 @@ type AppSidebarProps = {
 
 const navItems = [
   { label: "Overview", href: "/dashboard", icon: LayoutGrid },
+  { label: "Contacts", href: "/dashboard/contacts", icon: Users },
+  { label: "Programs", href: "/dashboard/programs", icon: Layers },
 ]
 
 const ownerItems = [
