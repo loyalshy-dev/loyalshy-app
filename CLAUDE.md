@@ -133,7 +133,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
     /studio         → Studio editor components (layout, toolbar, floating menu, canvas, panels)
     /dashboard      → Dashboard-specific components
       /overview     → Analytics: stat cards, activity chart, busiest days, recent activity, top contacts, programs summary, skeletons
-      /contacts     → Contact table, columns, filters, detail sheet, empty state
+      /contacts     → Contact table, columns (stacked type icons), filters, detail sheet (passes/visits/rewards tabs, issue pass), empty state
       /programs     → Program list view, tab nav, pass instances, settings
     /admin/showcase → Showcase card management + studio adapter
     /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, motion animations)

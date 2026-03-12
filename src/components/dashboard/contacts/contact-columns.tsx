@@ -12,6 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import type { ContactRow as ContactRow } from "@/server/contact-actions"
 
@@ -91,24 +96,31 @@ export function getContactColumns(
         </span>
       ),
       cell: ({ row }) => {
-        const { primaryPassInstance, passInstanceCount } = row.original
-        if (!primaryPassInstance) {
+        const { allPassTypes } = row.original
+        if (allPassTypes.length === 0) {
           return <span className="text-[12px] text-muted-foreground">—</span>
         }
-        const meta = PASS_TYPE_META[primaryPassInstance.passType as PassType]
-        const TypeIcon = meta?.icon
-        const typeLabel = meta?.shortLabel ?? "Program"
+        // Dedupe types for display (a contact could have 2 stamp cards, show icon once)
+        const uniqueTypes = [...new Set(allPassTypes)] as PassType[]
         return (
-          <div className="flex items-center gap-1.5">
-            <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-1 shrink-0">
-              <TypeIcon className="size-3" />
-              {typeLabel}
-            </Badge>
-            {passInstanceCount > 1 && (
-              <span className="text-[10px] text-muted-foreground">
-                +{passInstanceCount - 1}
-              </span>
-            )}
+          <div className="flex items-center gap-1">
+            {uniqueTypes.map((passType) => {
+              const meta = PASS_TYPE_META[passType]
+              if (!meta) return null
+              const Icon = meta.icon
+              return (
+                <Tooltip key={passType}>
+                  <TooltipTrigger asChild>
+                    <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted">
+                      <Icon className="size-3 text-muted-foreground" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    {meta.shortLabel}
+                  </TooltipContent>
+                </Tooltip>
+              )
+            })}
           </div>
         )
       },

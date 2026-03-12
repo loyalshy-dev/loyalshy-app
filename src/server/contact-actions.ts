@@ -22,6 +22,7 @@ export type ContactRow = {
   createdAt: Date
   hasAvailableReward: boolean
   passInstanceCount: number
+  allPassTypes: string[]
   primaryPassInstance: {
     templateName: string
     passType: string
@@ -219,6 +220,7 @@ export async function getContacts(
       createdAt: c.createdAt,
       hasAvailableReward: c.rewards.length > 0,
       passInstanceCount: activeInstances.length,
+      allPassTypes: activeInstances.map((pi) => pi.passTemplate.passType),
       primaryPassInstance: primary
         ? {
             templateName: primary.passTemplate.name,

@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   CreditCard,
   Smartphone,
+  Plus,
 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -46,12 +47,20 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
   getContactDetail,
   updateContact,
   deleteContact,
   type ContactDetail,
 } from "@/server/contact-actions"
 import { redeemReward } from "@/server/reward-actions"
+import { issuePassToContacts } from "@/server/distribution-actions"
+import { getTemplatesList } from "@/server/template-actions"
+import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import type { PassInstanceDetail } from "@/types/pass-instance"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
@@ -270,6 +279,10 @@ export function ContactDetailSheet({
   const [redeemingRewardId, setRedeemingRewardId] = useState<string | null>(null)
   const [visitTemplateFilter, setVisitProgramFilter] = useState<string | null>(null)
   const [rewardTemplateFilter, setRewardProgramFilter] = useState<string | null>(null)
+  const [issuePassOpen, setIssuePassOpen] = useState(false)
+  const [availableTemplates, setAvailableTemplates] = useState<{ id: string; name: string; passType: string }[]>([])
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
+  const [isIssuingPass, startIssuePass] = useTransition()
 
   // Fetch detail when contactId changes
   useEffect(() => {
@@ -322,6 +335,44 @@ export function ContactDetailSheet({
         if (updated) setDetail(updated)
       }
     })()
+  }
+
+  async function handleOpenIssuePass() {
+    if (!detail) return
+    setIsLoadingTemplates(true)
+    setIssuePassOpen(true)
+    try {
+      const templates = await getTemplatesList()
+      const existingTemplateIds = new Set(detail.passInstances.map((pi) => pi.templateId))
+      const available = templates
+        .filter((t) => t.status === "ACTIVE" && !existingTemplateIds.has(t.id))
+        .map((t) => ({ id: t.id, name: t.name, passType: t.passType }))
+      setAvailableTemplates(available)
+    } catch {
+      toast.error("Failed to load programs")
+      setIssuePassOpen(false)
+    } finally {
+      setIsLoadingTemplates(false)
+    }
+  }
+
+  function handleIssuePass(templateId: string) {
+    if (!contactId) return
+    startIssuePass(async () => {
+      const result = await issuePassToContacts(templateId, [contactId])
+      if (result.success && result.issuedCount > 0) {
+        toast.success("Pass issued successfully")
+        setIssuePassOpen(false)
+        // Refresh detail
+        const updated = await getContactDetail(contactId)
+        if (updated) setDetail(updated)
+      } else if (result.success && result.skippedCount > 0) {
+        toast.info("Contact already has this pass")
+        setIssuePassOpen(false)
+      } else {
+        toast.error(result.error ?? "Failed to issue pass")
+      }
+    })
   }
 
   // Compute aggregate stats from pass instances
@@ -421,6 +472,55 @@ export function ContactDetailSheet({
                         })}
                       </Badge>
                     )}
+                    {/* Issue Pass button */}
+                    <Popover open={issuePassOpen} onOpenChange={setIssuePassOpen}>
+                      <PopoverTrigger asChild>
+                        <button
+                          onClick={handleOpenIssuePass}
+                          className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0 rounded-full border border-dashed border-brand/40 text-brand hover:bg-brand/5 transition-colors"
+                        >
+                          <Plus className="size-3" />
+                          Issue Pass
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-64 p-0">
+                        {isLoadingTemplates ? (
+                          <div className="flex items-center justify-center py-6">
+                            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : availableTemplates.length === 0 ? (
+                          <p className="text-[13px] text-muted-foreground text-center py-6 px-4">
+                            No additional programs available
+                          </p>
+                        ) : (
+                          <div className="py-1">
+                            <p className="text-[11px] font-medium text-muted-foreground px-3 py-1.5">
+                              Select a program
+                            </p>
+                            {availableTemplates.map((t) => {
+                              const meta = PASS_TYPE_META[t.passType as PassType]
+                              const Icon = meta?.icon ?? CreditCard
+                              return (
+                                <button
+                                  key={t.id}
+                                  onClick={() => handleIssuePass(t.id)}
+                                  disabled={isIssuingPass}
+                                  className="flex items-center gap-2.5 w-full px-3 py-2 text-left hover:bg-muted/50 transition-colors disabled:opacity-50"
+                                >
+                                  <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand/10">
+                                    <Icon className="size-3 text-brand" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-[13px] font-medium truncate">{t.name}</p>
+                                    <p className="text-[11px] text-muted-foreground">{meta?.shortLabel ?? t.passType}</p>
+                                  </div>
+                                </button>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </SheetHeader>
 
@@ -446,8 +546,11 @@ export function ContactDetailSheet({
                 <Separator />
 
                 {/* Tabs: Visits / Rewards */}
-                <Tabs defaultValue="visits">
+                <Tabs defaultValue="passes">
                   <TabsList className="mx-6 mt-4 mb-0 h-8 bg-muted/50">
+                    <TabsTrigger value="passes" className="text-[12px] h-6 px-3">
+                      Passes ({detail.passInstances.length})
+                    </TabsTrigger>
                     <TabsTrigger value="visits" className="text-[12px] h-6 px-3">
                       Visits ({detail.interactions.length})
                     </TabsTrigger>
@@ -455,6 +558,56 @@ export function ContactDetailSheet({
                       Rewards ({detail.rewards.length})
                     </TabsTrigger>
                   </TabsList>
+
+                  <TabsContent value="passes" className="mt-0">
+                    <div className="px-6 pt-3 pb-4">
+                      {detail.passInstances.length === 0 ? (
+                        <p className="text-[13px] text-muted-foreground text-center py-8">
+                          No passes issued yet.
+                        </p>
+                      ) : (
+                        <div className="space-y-0">
+                          {detail.passInstances.map((pi) => {
+                            const meta = PASS_TYPE_META[pi.passType as PassType]
+                            const Icon = meta?.icon ?? CreditCard
+                            const statusCfg = passInstanceStatusConfig[pi.status] ?? passInstanceStatusConfig.ACTIVE
+                            return (
+                              <a
+                                key={pi.passInstanceId}
+                                href={`/dashboard/programs/${pi.templateId}`}
+                                className="flex items-center gap-3 py-2.5 border-b border-border last:border-0 group hover:bg-muted/50 -mx-2 px-2 rounded transition-colors"
+                              >
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand/10">
+                                  <Icon className="size-3.5 text-brand" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[13px] font-medium truncate group-hover:text-brand transition-colors">
+                                    {pi.templateName}
+                                  </p>
+                                  <p className="text-[11px] text-muted-foreground">
+                                    {meta?.shortLabel ?? pi.passType}
+                                    {" · "}
+                                    {getProgressText(pi)}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {pi.walletProvider !== "NONE" && (
+                                    <Smartphone className="size-3 text-muted-foreground/50" />
+                                  )}
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-[10px] px-1.5 py-0 ${statusCfg.className}`}
+                                  >
+                                    {statusCfg.label}
+                                  </Badge>
+                                </div>
+                              </a>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
 
                   <TabsContent value="visits" className="mt-0">
                     <div className="px-6 pt-3 pb-4">
