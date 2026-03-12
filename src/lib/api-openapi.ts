@@ -509,7 +509,278 @@ app.post("/webhooks/loyalshy", (req, res) => {
 });
 \`\`\`
 
-Webhooks are retried up to 5 times with exponential backoff. Endpoints that fail 10 times consecutively are automatically disabled — you can re-enable them in the dashboard or via the API.`,
+Webhooks are retried up to 5 times with exponential backoff. Endpoints that fail 10 times consecutively are automatically disabled — you can re-enable them in the dashboard or via the API.
+
+---
+
+### University Student ID — Digital campus identity cards
+
+**Scenario:** A university issues digital student IDs that work as campus building access, library cards, and exam verification — replacing plastic cards.
+
+**Setup (once):**
+1. Create a **Business ID** template in the dashboard — add fields for student name, student number, faculty, and expiry date
+2. Design the pass in the card studio — add the university logo, student photo placeholder, and campus branding
+3. Set validity duration (e.g., 1 academic year)
+4. Activate the template and create an API key
+
+**Integration flow:**
+
+**Step 1: Issue student ID when enrollment is confirmed**
+
+Connect your student information system (SIS) to issue IDs automatically after enrollment:
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: enrollment-2026-STU-48291" \\
+  -d '{
+    "templateId": "YOUR_STUDENT_ID_TEMPLATE_ID",
+    "contact": {
+      "fullName": "Emma Rodriguez",
+      "email": "e.rodriguez@university.edu",
+      "phone": "+34655123456"
+    },
+    "sendEmail": true
+  }'
+\`\`\`
+
+The student receives their digital ID via email with Apple Wallet and Google Wallet buttons. The \`Idempotency-Key\` tied to the enrollment ID prevents duplicates if your SIS retries.
+
+**Step 2: Verify identity at campus checkpoints**
+
+When a student scans their pass at the library, lab, or exam hall:
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"action": "verify"}'
+\`\`\`
+
+Each verification is logged as an \`ID_VERIFY\` interaction with a timestamp — useful for attendance tracking and building access audits.
+
+**Step 3: Embed wallet links in the student portal**
+
+Use the \`walletUrls\` from the response to add "Add to Wallet" buttons on your student portal:
+
+\`\`\`javascript
+// After issuing the ID
+const { data: pass } = await res.json();
+
+// Render on your student portal
+const walletLinks = {
+  viewOnline: pass.walletUrls.cardUrl,
+  addToiPhone: pass.walletUrls.appleWalletUrl,
+  addToAndroid: pass.walletUrls.googleWalletUrl,
+};
+\`\`\`
+
+**Step 4: Monitor usage and revoke on graduation/withdrawal**
+
+Track verification activity across campus:
+
+\`\`\`bash
+curl "https://your-domain.com/api/v1/interactions?type=ID_VERIFY&since=2026-09-01T00:00:00Z" \\
+  -H "Authorization: Bearer lsk_live_..."
+\`\`\`
+
+When a student graduates or withdraws, revoke their ID by updating the pass status:
+
+\`\`\`bash
+curl -X PATCH https://your-domain.com/api/v1/passes/PASS_ID \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"status": "REVOKED"}'
+\`\`\`
+
+---
+
+### Public Transit / Bus Pass — Digital monthly passes
+
+**Scenario:** A city transit agency issues monthly bus passes as wallet passes. Passengers board by scanning their pass, and the system tracks boardings and exits per route.
+
+**Setup (once):**
+1. Create a **Transit** template — set the validity period (e.g., 30 days), zone coverage, and route info
+2. Design the pass with the transit authority logo, route map strip image, and zone indicator
+3. Activate the template and create an API key
+
+**Integration flow:**
+
+**Step 1: Issue a monthly pass when the passenger purchases online**
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: order-TRN-20260312-7841" \\
+  -d '{
+    "templateId": "YOUR_TRANSIT_TEMPLATE_ID",
+    "contact": {
+      "fullName": "Lucas Fernandez",
+      "email": "lucas.f@email.com"
+    },
+    "sendEmail": true
+  }'
+\`\`\`
+
+The passenger gets an email with wallet download links. The pass shows on their lock screen when they're near a bus stop (Apple Wallet location-triggered).
+
+**Step 2: Record boarding when the passenger taps at the door scanner**
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"action": "board"}'
+\`\`\`
+
+Response:
+
+\`\`\`json
+{
+  "data": {
+    "action": "board",
+    "passInstanceId": "...",
+    "result": { "boardingCount": 47 },
+    "interaction": { "id": "...", "type": "TRANSIT_BOARD", "createdAt": "..." }
+  }
+}
+\`\`\`
+
+**Step 3: Record exit (optional, for zone-based billing)**
+
+If your system tracks exits for zone validation:
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"action": "exit"}'
+\`\`\`
+
+**Step 4: Analyze ridership with daily stats**
+
+Track boarding trends to optimize routes and schedules:
+
+\`\`\`bash
+curl "https://your-domain.com/api/v1/stats/daily?from=2026-03-01&to=2026-03-12" \\
+  -H "Authorization: Bearer lsk_live_..."
+\`\`\`
+
+**Step 5: Auto-expire and renew**
+
+Transit passes have a built-in expiry date. When a pass expires, the status changes automatically. Set up a webhook on \`pass.expired\` to trigger a renewal reminder in your billing system:
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/webhooks \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "url": "https://transit-billing.example.com/webhooks/loyalshy",
+    "events": ["pass.expired"]
+  }'
+\`\`\`
+
+---
+
+### Gift Card — Digital store credit and gifting
+
+**Scenario:** A retail chain sells digital gift cards online. Buyers purchase a gift card for someone, the recipient gets an email with wallet links, and staff charge the balance at the register.
+
+**Setup (once):**
+1. Create a **Gift Card** template — set the initial balance (e.g., €50), currency, and optional expiry (e.g., 12 months)
+2. Design the pass with your brand — gift cards look great with a strip image and bold balance display
+3. Activate the template and create an API key
+
+**Integration flow:**
+
+**Step 1: Issue a gift card when the buyer completes purchase**
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: order-GC-20260312-5523" \\
+  -d '{
+    "templateId": "YOUR_GIFT_CARD_TEMPLATE_ID",
+    "contact": {
+      "fullName": "Sophie Martin",
+      "email": "sophie.m@email.com"
+    },
+    "sendEmail": true
+  }'
+\`\`\`
+
+Sophie receives a beautifully branded email with her gift card and wallet download buttons. The gift card starts with the configured initial balance (e.g., €50.00).
+
+**Step 2: Charge the balance at the register**
+
+When Sophie pays with her gift card in-store, charge the amount:
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"action": "charge", "amountCents": 1850}'
+\`\`\`
+
+Response:
+
+\`\`\`json
+{
+  "data": {
+    "action": "charge",
+    "passInstanceId": "...",
+    "result": {
+      "balanceCents": 3150,
+      "currency": "EUR",
+      "charged": 1850
+    },
+    "interaction": { "id": "...", "type": "GIFT_CHARGE", "createdAt": "..." }
+  }
+}
+\`\`\`
+
+The wallet pass updates automatically to show the new balance (€31.50).
+
+**Step 3: Process refunds back to the gift card**
+
+If Sophie returns an item, refund back to the gift card:
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"action": "refund", "amountCents": 1850}'
+\`\`\`
+
+**Step 4: Check balance from your POS**
+
+Look up the gift card to display the balance before charging:
+
+\`\`\`bash
+curl https://your-domain.com/api/v1/passes/PASS_ID \\
+  -H "Authorization: Bearer lsk_live_..."
+\`\`\`
+
+The \`data.data.balanceCents\` field shows the current balance. Your POS can display this to the cashier before processing the transaction.
+
+**Step 5: Track gift card revenue**
+
+Use webhooks to sync gift card activity with your accounting system:
+
+\`\`\`bash
+curl -X POST https://your-domain.com/api/v1/webhooks \\
+  -H "Authorization: Bearer lsk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "url": "https://your-pos.example.com/webhooks/loyalshy",
+    "events": ["pass.issued", "interaction.created"]
+  }'
+\`\`\`
+
+Filter \`interaction.created\` events by type — \`GIFT_CHARGE\` for sales, \`GIFT_REFUND\` for returns — to keep your ledger in sync.`,
     },
     servers: [
       {
