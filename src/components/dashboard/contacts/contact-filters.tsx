@@ -2,18 +2,15 @@
 
 import { useTransition, useRef, useCallback } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import { Search, X, Download, Stamp, Ticket, Crown } from "lucide-react"
+import { Search, X, Download } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { exportContactsCSV } from "@/server/contact-actions"
 import { toast } from "sonner"
 
-const programTypeFilters = [
-  { value: "STAMP_CARD", label: "Stamp", icon: Stamp },
-  { value: "COUPON", label: "Coupon", icon: Ticket },
-  { value: "MEMBERSHIP", label: "Member", icon: Crown },
-] as const
+const ALL_PASS_TYPES = Object.keys(PASS_TYPE_META) as PassType[]
 
 type ContactFiltersProps = {
   search: string
@@ -149,12 +146,14 @@ export function ContactFilters({
         </button>
 
         {/* Program type chips */}
-        {programTypeFilters.map((pt) => {
-          const isActive = programType === pt.value
+        {ALL_PASS_TYPES.map((passType) => {
+          const meta = PASS_TYPE_META[passType]
+          const Icon = meta.icon
+          const isActive = programType === passType
           return (
             <button
-              key={pt.value}
-              onClick={() => handleTypeFilter(pt.value)}
+              key={passType}
+              onClick={() => handleTypeFilter(passType)}
               className="focus:outline-none"
             >
               <Badge
@@ -163,8 +162,8 @@ export function ContactFilters({
                   isActive ? "" : "hover:bg-accent"
                 }`}
               >
-                <pt.icon className="size-3" />
-                {pt.label}
+                <Icon className="size-3" />
+                {meta.shortLabel}
               </Badge>
             </button>
           )
