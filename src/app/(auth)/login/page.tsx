@@ -56,7 +56,7 @@ export default function LoginPage() {
   }
 
   return (
-    <Card>
+    <Card className="max-w-md mx-auto">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
         <CardDescription>Sign in to your Loyalshy account</CardDescription>

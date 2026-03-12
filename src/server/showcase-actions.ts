@@ -40,7 +40,6 @@ const saveDesignSchema = z.object({
   autoTextColor: z.boolean().optional().default(false),
   patternStyle: z.enum(["NONE", "DOTS", "WAVES", "GEOMETRIC", "CHEVRON", "CROSSHATCH", "DIAMONDS", "CONFETTI", "SOLID_PRIMARY", "SOLID_SECONDARY", "STAMP_GRID"]),
   progressStyle: z.enum(["NUMBERS", "CIRCLES", "SQUARES", "STARS", "STAMPS", "PERCENTAGE", "REMAINING"]).optional().default("NUMBERS"),
-  fontFamily: z.enum(["SANS", "SERIF", "ROUNDED", "MONO"]).optional().default("SANS"),
   labelFormat: z.enum(["UPPERCASE", "TITLE_CASE", "LOWERCASE"]).optional().default("UPPERCASE"),
   customProgressLabel: z.string().max(30).optional().default(""),
   palettePreset: z.string().max(30).nullable().optional(),
@@ -118,7 +117,6 @@ export async function createShowcaseCard(
     textColor: "#ffffff",
     patternStyle: "NONE",
     progressStyle: "NUMBERS",
-    fontFamily: "SANS",
     labelFormat: "UPPERCASE",
   }
 
@@ -354,7 +352,6 @@ export async function saveShowcaseCardDesign(input: z.infer<typeof saveDesignSch
     textColor,
     patternStyle: parsed.patternStyle,
     progressStyle: parsed.progressStyle,
-    fontFamily: parsed.fontFamily,
     labelFormat: parsed.labelFormat,
     customProgressLabel: parsed.customProgressLabel || null,
     palettePreset: parsed.palettePreset ?? null,

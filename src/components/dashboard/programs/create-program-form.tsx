@@ -1571,9 +1571,6 @@ type BusinessIdFormData = {
   idLabel: string
   validDuration: "monthly" | "yearly" | "lifetime" | "custom"
   customDurationDays: number
-  showTitle: boolean
-  showPhoto: boolean
-  showEmployeeId: boolean
 }
 
 function BusinessIdForm({
@@ -1598,9 +1595,6 @@ function BusinessIdForm({
       idLabel: "Employee ID",
       validDuration: "yearly",
       customDurationDays: 365,
-      showTitle: true,
-      showPhoto: true,
-      showEmployeeId: true,
     },
   })
 
@@ -1616,9 +1610,6 @@ function BusinessIdForm({
           idLabel: data.idLabel,
           validDuration: data.validDuration,
           ...(data.validDuration === "custom" ? { customDurationDays: data.customDurationDays } : {}),
-          showTitle: data.showTitle,
-          showPhoto: data.showPhoto,
-          showEmployeeId: data.showEmployeeId,
         },
       })
       if ("error" in result) {
@@ -1689,35 +1680,6 @@ function BusinessIdForm({
             />
           </div>
         )}
-        <div className="space-y-2 sm:col-span-2">
-          <Label>Display Options</Label>
-          <div className="flex flex-wrap gap-4">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                {...register("showTitle")}
-                className="rounded border-input"
-              />
-              Show Title/Role
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                {...register("showPhoto")}
-                className="rounded border-input"
-              />
-              Show Photo
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                {...register("showEmployeeId")}
-                className="rounded border-input"
-              />
-              Show ID Number
-            </label>
-          </div>
-        </div>
       </div>
       <div className="flex justify-end">
         <Button type="submit" size="sm" disabled={isPending}>

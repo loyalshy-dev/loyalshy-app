@@ -711,9 +711,6 @@ function BusinessIdFields({ store }: { store: CardDesignStoreApi }) {
   const idLabel = useStore(store, (s) => s.programConfig.idLabel)
   const validDuration = useStore(store, (s) => s.programConfig.validDuration)
   const customDurationDays = useStore(store, (s) => s.programConfig.customDurationDays)
-  const showTitle = useStore(store, (s) => s.programConfig.showTitle)
-  const showPhoto = useStore(store, (s) => s.programConfig.showPhoto)
-  const showEmployeeId = useStore(store, (s) => s.programConfig.showEmployeeId)
   const set = store.getState().setConfigField
 
   return (
@@ -746,24 +743,6 @@ function BusinessIdFields({ store }: { store: CardDesignStoreApi }) {
           suffix="days"
         />
       )}
-      <ToggleInput
-        label="Show title"
-        description="Display job title on the ID card"
-        value={showTitle}
-        onChange={(v) => set("showTitle", v)}
-      />
-      <ToggleInput
-        label="Show photo"
-        description="Display holder photo on the ID card"
-        value={showPhoto}
-        onChange={(v) => set("showPhoto", v)}
-      />
-      <ToggleInput
-        label="Show employee ID"
-        description="Display a unique employee ID number"
-        value={showEmployeeId}
-        onChange={(v) => set("showEmployeeId", v)}
-      />
     </>
   )
 }

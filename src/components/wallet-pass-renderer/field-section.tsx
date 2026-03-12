@@ -36,6 +36,7 @@ export function FieldSection({ fields, textColor, labelColor, format = "apple", 
       {fields.map((field, i) => (
         <div key={i} style={{ flex: 1, minWidth: 0, textAlign: i === fields.length - 1 && fields.length > 1 ? "right" : undefined }}>
           <div
+            data-color-zone="labels"
             style={{
               fontSize: labelSize,
               fontWeight: format === "google" ? 500 : 700,
@@ -52,6 +53,7 @@ export function FieldSection({ fields, textColor, labelColor, format = "apple", 
             {field.label}
           </div>
           <div
+            data-color-zone="text"
             style={{
               fontSize: valueSize,
               fontWeight: format === "google" ? 500 : 300,

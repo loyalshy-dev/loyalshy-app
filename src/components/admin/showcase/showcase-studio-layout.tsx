@@ -13,7 +13,6 @@ import { PanelShell } from "@/components/studio/panels/panel-shell"
 import { ColorsPanel } from "@/components/studio/panels/colors-panel"
 import { ProgressPanel } from "@/components/studio/panels/progress-panel"
 import { StripPanel } from "@/components/studio/panels/strip-panel"
-import { TemplatePanel } from "@/components/studio/panels/template-panel"
 import {
   saveShowcaseCardDesign,
   uploadShowcaseStripImage,
@@ -116,7 +115,6 @@ export function ShowcaseStudioLayout({
         autoTextColor: state.wallet.autoTextColor,
         patternStyle: state.wallet.patternStyle,
         progressStyle: state.wallet.progressStyle,
-        fontFamily: state.wallet.fontFamily,
         labelFormat: state.wallet.labelFormat,
         customProgressLabel: state.wallet.customProgressLabel,
         palettePreset: state.wallet.palettePreset,
@@ -207,7 +205,7 @@ export function ShowcaseStudioLayout({
   // ─── Filtered tools (no logo, no details for showcase) ─
 
   const SHOWCASE_TOOLS: StudioTool[] = [
-    "templates", "colors", "progress", "strip",
+    "colors", "progress", "strip",
   ]
 
   // ─── Panel routing ────────────────────────────────────
@@ -216,8 +214,6 @@ export function ShowcaseStudioLayout({
     if (!ui.activeTool) return null
 
     switch (ui.activeTool) {
-      case "templates":
-        return <TemplatePanel store={store} organizationId="" organizationLogo={null} cardType={cardType} />
       case "colors":
         return <ColorsPanel store={store} />
       case "progress":
@@ -354,7 +350,7 @@ function useIsMobile(breakpoint = 768): boolean {
 // ─── Mobile Tool Bar ──────────────────────────────────────
 
 import {
-  LayoutGrid,
+
   Palette,
   BarChart3,
   ImagePlus,
@@ -362,7 +358,6 @@ import {
 } from "lucide-react"
 
 const MOBILE_QUICK_TOOLS: { id: StudioTool; label: string; icon: React.ReactNode }[] = [
-  { id: "templates", label: "Templates", icon: <LayoutGrid size={18} /> },
   { id: "colors", label: "Colors", icon: <Palette size={18} /> },
   { id: "progress", label: "Progress", icon: <BarChart3 size={18} /> },
   { id: "strip", label: "Strip", icon: <ImagePlus size={18} /> },

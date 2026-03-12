@@ -116,14 +116,14 @@ export function StudioToolbar({
       <div style={{ width: 1, height: 24, backgroundColor: "var(--border)" }} />
 
       {/* Format selector — Apple / Google */}
-      <div style={{ display: "flex", gap: 2, padding: "2px", borderRadius: 8, backgroundColor: "var(--muted)" }}>
+      <div style={{ display: "flex", gap: 2, padding: "2px", borderRadius: 9999, backgroundColor: "var(--muted)" }}>
         {(["apple", "google"] as PreviewFormat[]).map((fmt) => (
           <button
             key={fmt}
             onClick={() => onPreviewFormatChange(fmt)}
             style={{
               padding: "4px 10px",
-              borderRadius: 6,
+              borderRadius: 9999,
               border: "none",
               background: previewFormat === fmt ? "var(--background)" : "none",
               color: previewFormat === fmt ? "var(--foreground)" : "var(--muted-foreground)",
@@ -155,7 +155,7 @@ export function StudioToolbar({
           alignItems: "center",
           gap: 6,
           padding: "6px 16px",
-          borderRadius: 6,
+          borderRadius: 9999,
           border: "none",
           backgroundColor: isDirty ? "var(--primary)" : "var(--muted)",
           color: isDirty ? "var(--primary-foreground)" : "var(--muted-foreground)",

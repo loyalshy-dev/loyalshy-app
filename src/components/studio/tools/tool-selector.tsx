@@ -1,7 +1,7 @@
 "use client"
 
 import {
-  LayoutGrid,
+
   Palette,
   BarChart3,
   ImagePlus,
@@ -26,7 +26,6 @@ type ToolItem = {
 
 const TOOLS: ToolItem[] = [
   { id: "program", label: "Program", icon: <SlidersHorizontal size={18} /> },
-  { id: "templates", label: "Templates", icon: <LayoutGrid size={18} /> },
   { id: "colors", label: "Colors", icon: <Palette size={18} /> },
   { id: "progress", label: "Progress", icon: <BarChart3 size={18} /> },
   { id: "strip", label: "Strip", icon: <ImagePlus size={18} /> },
