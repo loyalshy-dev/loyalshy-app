@@ -10,6 +10,7 @@ import { Testimonials } from "@/components/marketing/testimonials"
 import { Pricing } from "@/components/marketing/pricing"
 import { FAQ } from "@/components/marketing/faq"
 import { ClosingCTA } from "@/components/marketing/closing-cta"
+import { SocialProof } from "@/components/marketing/social-proof"
 import { MarketingFooter } from "@/components/marketing/footer"
 import { connection } from "next/server"
 import { getPublicShowcaseCards } from "@/server/showcase-actions"
@@ -133,6 +134,7 @@ async function ShowcaseContent() {
   return (
     <>
       <Hero />
+      <SocialProof />
       <FeatureShowcase />
       <HowItWorks />
       <WalletPreview showcaseCards={showcaseCards} showcaseDesigns={showcaseDesigns} />
@@ -154,6 +156,7 @@ export default function LandingPage() {
         <Suspense fallback={
           <>
             <Hero />
+            <SocialProof />
             <FeatureShowcase />
             <HowItWorks />
             <WalletPreview />

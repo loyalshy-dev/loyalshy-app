@@ -49,7 +49,7 @@ export function MarketingNavbar() {
           : "border-b border-transparent bg-transparent"
       )}
     >
-      <div className="mx-auto flex h-24 w-full items-center justify-between px-6 sm:px-8 lg:px-10">
+      <div className="mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-8 lg:px-10">
         {/* Logo */}
         <Link
           href="/"
@@ -61,7 +61,7 @@ export function MarketingNavbar() {
             alt="Loyalshy"
             width={160}
             height={44}
-            className="h-14 w-auto dark:invert"
+            className="h-8 w-auto dark:invert"
             priority
           />
         </Link>

@@ -30,6 +30,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 | immer | ~10.x | Immutable state updates (zustand middleware) |
 | zundo | ~2.x | Undo/redo temporal middleware for zustand |
 | next-themes | 0.4.x | Light/dark mode with system preference detection |
+| motion | 12.x | Scroll-triggered animations for marketing landing page (FadeIn, Stagger, ScaleIn) |
 
 ## Critical Architecture Rules
 
@@ -133,7 +134,8 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
     /dashboard      → Dashboard-specific components
       /programs     → Program list view, tab nav, pass instances, settings
     /admin/showcase → Showcase card management + studio adapter
-    /marketing      → Landing page components
+    /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, motion animations)
+      motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn)
     /wallet         → Wallet pass components
   /lib              → Utilities, db client, auth config, DAL
     /stores         → Zustand stores (card-design-store.ts)

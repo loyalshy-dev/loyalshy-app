@@ -6,6 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { FadeIn } from "./motion"
 
 const FAQ_ITEMS = [
   {
@@ -27,10 +28,16 @@ const FAQ_ITEMS = [
       "Most businesses are up and running in under 5 minutes. Create your account, customize your loyalty program, print your QR code, and you're ready to go.",
   },
   {
+    id: "pass-types",
+    question: "What types of passes can I create?",
+    answer:
+      "Loyalshy supports 10 pass types: stamp cards, coupons, memberships, points programs, prepaid cards, gift cards, tickets, access passes, transit passes, and business IDs. Each type has its own set of features and interactions.",
+  },
+  {
     id: "free-trial",
     question: "Can I try it for free?",
     answer:
-      "Absolutely! The Starter plan comes with a 14-day free trial. No credit card required to start.",
+      "Absolutely! Every plan comes with a 14-day free trial. No credit card required to start.",
   },
   {
     id: "cancel",
@@ -48,13 +55,7 @@ const FAQ_ITEMS = [
     id: "customization",
     question: "Can I customize the loyalty card design?",
     answer:
-      "Yes! You can upload your logo, set your brand colors, and customize the reward description. Your wallet passes will match your business's identity.",
-  },
-  {
-    id: "payment-methods",
-    question: "What payment methods do you accept?",
-    answer:
-      "We accept all major credit cards through Stripe. Enterprise customers can arrange custom payment terms.",
+      "Yes! Our visual studio lets you upload your logo, set brand colors, choose patterns, and fully customize how your wallet passes look. Every pass matches your business's identity.",
   },
 ] as const
 
@@ -62,73 +63,90 @@ export function FAQ() {
   return (
     <section
       id="faq"
-      className="py-24 px-4 sm:px-6"
-      style={{ background: "var(--mk-bg)" }}
+      className="py-24 sm:py-32 px-4 sm:px-6"
+      style={{ background: "var(--mk-surface)" }}
     >
       <div className="mx-auto max-w-3xl">
-        <div className="text-center mb-12">
+        <FadeIn>
+          <div className="text-center mb-14">
+            <p
+              className="mb-3 inline-flex items-center rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.08em] uppercase"
+              style={{
+                border: "1px solid var(--mk-border)",
+                background: "var(--mk-card)",
+                color: "var(--mk-text-dimmed)",
+              }}
+            >
+              FAQ
+            </p>
+            <h2
+              className="text-3xl sm:text-[2.5rem] font-bold mb-4"
+              style={{
+                color: "var(--mk-text)",
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Frequently asked questions
+            </h2>
+            <p
+              className="text-[16px]"
+              style={{ color: "var(--mk-text-muted)" }}
+            >
+              Everything you need to know about Loyalshy
+            </p>
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.1}>
+          <div className="mk-card-glass overflow-hidden">
+            <Accordion type="single" collapsible className="w-full">
+              {FAQ_ITEMS.map((item, i) => (
+                <AccordionItem
+                  key={item.id}
+                  value={item.id}
+                  className="border-b-0 px-6"
+                  style={
+                    i < FAQ_ITEMS.length - 1
+                      ? {
+                          borderBottom: "1px solid var(--mk-border)",
+                        }
+                      : undefined
+                  }
+                >
+                  <AccordionTrigger
+                    className="text-[15px] font-medium hover:no-underline py-5 gap-6"
+                    style={{ color: "var(--mk-text)" }}
+                  >
+                    {item.question}
+                  </AccordionTrigger>
+                  <AccordionContent
+                    className="text-[14px] leading-relaxed pb-5 pt-0"
+                    style={{ color: "var(--mk-text-muted)" }}
+                  >
+                    {item.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.2}>
           <p
-            className="mb-3 inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-[0.08em] uppercase"
-            style={{
-              border: "1px solid var(--mk-border)",
-              background: "var(--mk-surface)",
-              color: "var(--mk-text-dimmed)",
-            }}
+            className="mt-8 text-center text-[14px]"
+            style={{ color: "var(--mk-text-muted)" }}
           >
-            FAQ
+            Still have questions?{" "}
+            <a
+              href="mailto:hello@loyalshy.com"
+              className="font-medium underline underline-offset-4 transition-opacity hover:opacity-70"
+              style={{ color: "var(--mk-text)" }}
+            >
+              Email us
+            </a>{" "}
+            — we typically reply within a few hours.
           </p>
-          <h2
-            className="text-3xl sm:text-4xl font-bold mb-4"
-            style={{ color: "var(--mk-text)", letterSpacing: "-0.025em" }}
-          >
-            Frequently asked questions
-          </h2>
-          <p className="text-[15px]" style={{ color: "var(--mk-text-muted)" }}>
-            Everything you need to know about Loyalshy.
-          </p>
-        </div>
-
-        <div className="mk-card-glass overflow-hidden">
-          <Accordion type="single" collapsible className="w-full">
-            {FAQ_ITEMS.map((item, i) => (
-              <AccordionItem
-                key={item.id}
-                value={item.id}
-                className="border-b-0 px-6"
-                style={
-                  i < FAQ_ITEMS.length - 1
-                    ? { borderBottom: "1px solid var(--mk-border)" }
-                    : undefined
-                }
-              >
-                <AccordionTrigger
-                  className="text-[13px] font-medium hover:no-underline py-5 gap-6"
-                  style={{ color: "var(--mk-text)" }}
-                >
-                  {item.question}
-                </AccordionTrigger>
-                <AccordionContent
-                  className="text-[13px] leading-relaxed pb-5 pt-0"
-                  style={{ color: "var(--mk-text-muted)" }}
-                >
-                  {item.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-
-        <p className="mt-8 text-center text-[13px]" style={{ color: "var(--mk-text-muted)" }}>
-          Still have questions?{" "}
-          <a
-            href="mailto:hello@loyalshy.com"
-            className="font-medium underline underline-offset-4 transition-opacity hover:opacity-70"
-            style={{ color: "var(--mk-text)" }}
-          >
-            Email us
-          </a>{" "}
-          — we typically reply within a few hours.
-        </p>
+        </FadeIn>
       </div>
     </section>
   )
