@@ -5,9 +5,9 @@
  *   STRIPE_SECRET_KEY=sk_test_... npx tsx scripts/seed-stripe.ts
  *
  * This creates (or updates) three Stripe Products with monthly + annual prices:
- *   - Loyalshy Starter (€19/month, €15/month annual, lookup_keys: starter_monthly, starter_annual)
- *   - Loyalshy Growth  (€39/month, €31/month annual, lookup_keys: growth_monthly, growth_annual)
- *   - Loyalshy Scale   (€79/month, €63/month annual, lookup_keys: scale_monthly, scale_annual)
+ *   - Loyalshy Pro      (€29/month, €24/month annual, lookup_keys: starter_monthly, starter_annual)
+ *   - Loyalshy Business (€49/month, €39/month annual, lookup_keys: growth_monthly, growth_annual)
+ *   - Loyalshy Scale    (€99/month, €79/month annual, lookup_keys: scale_monthly, scale_annual)
  *
  * Idempotent: uses metadata.loyalshy_plan to skip existing products.
  */
@@ -21,29 +21,29 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const plans = [
   {
     loyalshyPlan: "STARTER",
-    name: "Loyalshy Starter",
-    description: "Up to 200 customers, 2 staff, full analytics, custom branding.",
+    name: "Loyalshy Pro",
+    description: "Up to 500 contacts, 2 staff, all 10 pass types, card design studio.",
     prices: [
-      { amount: 1900, interval: "month" as const, lookupKey: "starter_monthly" },
-      { amount: 1500, interval: "month" as const, lookupKey: "starter_annual", intervalCount: 12 },
+      { amount: 2900, interval: "month" as const, lookupKey: "starter_monthly" },
+      { amount: 2400, interval: "month" as const, lookupKey: "starter_annual", intervalCount: 12 },
     ],
   },
   {
     loyalshyPlan: "GROWTH",
-    name: "Loyalshy Growth",
-    description: "Up to 1,000 customers, 5 staff, email support.",
+    name: "Loyalshy Business",
+    description: "Up to 2,500 contacts, 5 staff, custom brand colors, bulk CSV import.",
     prices: [
-      { amount: 3900, interval: "month" as const, lookupKey: "growth_monthly" },
-      { amount: 3100, interval: "month" as const, lookupKey: "growth_annual", intervalCount: 12 },
+      { amount: 4900, interval: "month" as const, lookupKey: "growth_monthly" },
+      { amount: 3900, interval: "month" as const, lookupKey: "growth_annual", intervalCount: 12 },
     ],
   },
   {
     loyalshyPlan: "SCALE",
     name: "Loyalshy Scale",
-    description: "Unlimited customers, 15 staff, priority support.",
+    description: "Unlimited contacts, 25 staff, unlimited programs, webhook events.",
     prices: [
-      { amount: 7900, interval: "month" as const, lookupKey: "scale_monthly" },
-      { amount: 6300, interval: "month" as const, lookupKey: "scale_annual", intervalCount: 12 },
+      { amount: 9900, interval: "month" as const, lookupKey: "scale_monthly" },
+      { amount: 7900, interval: "month" as const, lookupKey: "scale_annual", intervalCount: 12 },
     ],
   },
 ]

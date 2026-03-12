@@ -69,7 +69,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Key files**: `api-auth.ts`, `api-handler.ts`, `api-rate-limit.ts`, `api-errors.ts`, `api-response.ts`, `api-cors.ts`, `api-data.ts` (shared data layer), `api-schemas.ts` (Zod), `api-serializers.ts`, `api-events.ts` (webhook dispatch), `api-openapi.ts` (OpenAPI spec), `api-keys.ts` (key generation/validation), `api-logger.ts` (batched request logging)
 - **Server actions**: `api-key-actions.ts` (dashboard key + webhook CRUD)
 - **Docs**: `/api/v1/docs` (Scalar interactive reference), `/api/v1/openapi.json` (spec)
-- **Plan limits**: Starter: 20 req/min, 1k/day, 2 keys, 1 webhook | Growth: 60/min, 10k/day, 10 keys, 3 webhooks | Scale: 300/min, 100k/day, 25 keys, 10 webhooks | Enterprise: 600/min, unlimited, 50 keys, 25 webhooks
+- **Plan limits**: Pro (STARTER): 20 req/min, 1k/day, 2 keys, 1 webhook | Business (GROWTH): 60/min, 10k/day, 10 keys, 5 webhooks | Scale: 300/min, 100k/day, 25 keys, 10 webhooks | Enterprise: 600/min, unlimited, 50 keys, 25 webhooks
 
 ### Next.js 16 Rules
 - Use `proxy.ts` NOT `middleware.ts`
@@ -201,6 +201,8 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase API-3 — Domain-Specific Operations (16 type-specific actions, bulk contacts/passes, org/daily/template stats)
 - [x] Phase API-4 — Webhooks (HMAC-SHA256 signed delivery via Trigger.dev, endpoint CRUD API, test ping, secret rotation, auto-disable, event dispatch on mutations)
 - [x] Phase API-5 — API Dashboard UI (API keys section, webhook management section, server actions for CRUD, settings tab with plan gating)
+- [x] Phase PRICING — New pricing model (Free tier on landing page, Pro €29, Business €49, Scale €99, no 14-day trial)
+- [ ] Phase ONBOARDING — Simplify registration (2 steps: signup + org name → dashboard, remove trial setup)
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -273,6 +275,20 @@ Update the "Current Progress" section above to track what's done.
 - `src/server/auth-actions.ts` — Staff invitation server actions (email via Trigger.dev, email-verified acceptance, rate-limited token validation)
 - `src/lib/api-auth.ts` — API key authentication (Bearer token → ApiContext with orgId, plan check)
 - `src/lib/api-keys.ts` — API key generation (`lsk_live_` prefix) and SHA-256 validation
+
+## Pricing & Plans
+
+**Free tier** is marketing-only (landing page) — not a PlanId in the billing system. Free users simply don't have a Stripe subscription.
+
+| Display Name | PlanId (DB) | Monthly | Annual | Contacts | Staff | Programs |
+|---|---|---|---|---|---|---|
+| Free | — | €0 | €0 | 50 | 1 | 1 (stamp only) |
+| Pro | STARTER | €29 | €24 | 500 | 2 | 2 |
+| Business | GROWTH | €49 | €39 | 2,500 | 5 | 5 |
+| Scale | SCALE | €99 | €79 | Unlimited | 25 | Unlimited |
+| Enterprise | ENTERPRISE | Custom | Custom | Unlimited | Unlimited | Unlimited |
+
+**Important:** PlanId values (`STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, API rate limiting, and throughout the codebase. Display names ("Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc.
 
 ## Dashboard Navigation
 

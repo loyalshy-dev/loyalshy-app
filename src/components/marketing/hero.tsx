@@ -127,7 +127,7 @@ export function Hero() {
         <FadeIn delay={0.3} duration={0.5}>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link href="/register" className="mk-btn-primary !py-3.5 !px-8 !text-[15px] gap-2">
-              Start Free Trial
+              Get Started Free
               <ArrowRight className="size-4" />
             </Link>
             <Link href="#features" className="mk-btn-ghost !py-3.5 !px-8 !text-[15px]">
@@ -138,7 +138,7 @@ export function Hero() {
             className="mt-4 text-center text-[13px]"
             style={{ color: "var(--mk-text-dimmed)" }}
           >
-            14-day free trial &middot; No credit card required
+            Free forever &middot; No credit card required
           </p>
         </FadeIn>
 

@@ -100,7 +100,7 @@ export function MarketingNavbar() {
             href="/register"
             className="mk-btn-primary !py-3 !px-8 !text-base"
           >
-            Start Free Trial
+            Get Started
           </Link>
         </div>
 
@@ -199,7 +199,7 @@ export function MarketingNavbar() {
                 onClick={() => setMobileOpen(false)}
                 className="mk-btn-primary w-full text-center !text-[13px]"
               >
-                Start Free Trial
+                Get Started
               </Link>
             </div>
           </SheetContent>

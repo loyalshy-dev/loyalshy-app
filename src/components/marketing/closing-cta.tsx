@@ -51,7 +51,7 @@ export function ClosingCTA() {
               href="/register"
               className="mk-btn-primary !py-3.5 !px-8 !text-[15px] gap-2"
             >
-              Start Free Trial
+              Get Started Free
               <ArrowRight className="size-4" />
             </Link>
             <Link href="#pricing" className="mk-btn-ghost !py-3.5 !px-8 !text-[15px]">

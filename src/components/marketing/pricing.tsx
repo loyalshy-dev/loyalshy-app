@@ -75,6 +75,104 @@ function BillingToggle({
   )
 }
 
+/* ─── Free tier card (marketing-only, not in billing system) ─────── */
+
+function FreePlanCard() {
+  return (
+    <div
+      className="relative flex flex-col rounded-2xl p-7 transition-all duration-300"
+      style={{
+        background: "var(--mk-card)",
+        border: "1px solid var(--mk-border)",
+        boxShadow: "0 1px 3px oklch(0 0 0 / 0.04)",
+      }}
+    >
+      <div className="mb-5">
+        <p
+          className="text-[13px] font-semibold uppercase tracking-widest mb-1"
+          style={{ color: "var(--mk-text-dimmed)" }}
+        >
+          Free
+        </p>
+        <p
+          className="text-[14px]"
+          style={{ color: "var(--mk-text-muted)" }}
+        >
+          Try Loyalshy with your first customers
+        </p>
+      </div>
+
+      <div className="mb-2 flex items-baseline gap-1">
+        <span
+          className="text-5xl font-bold tracking-tight"
+          style={{ color: "var(--mk-text)" }}
+        >
+          0
+        </span>
+        <span
+          className="text-[15px] font-medium"
+          style={{ color: "var(--mk-text-dimmed)" }}
+        >
+          &euro;/mo
+        </span>
+      </div>
+
+      <div className="mb-5" />
+
+      <Button
+        asChild
+        variant="outline"
+        size="lg"
+        className="w-full mb-6 text-[14px] font-medium"
+      >
+        <Link href="/register">Get Started</Link>
+      </Button>
+
+      <div
+        className="mb-5"
+        style={{ borderTop: "1px solid var(--mk-border)" }}
+      />
+
+      <ul className="flex flex-col gap-3">
+        {[
+          "Up to 50 contacts",
+          "1 stamp card program",
+          "1 staff member",
+          "Apple & Google Wallet passes",
+          "Card design studio",
+          "Dashboard analytics",
+        ].map((feature) => (
+          <li key={feature} className="flex items-start gap-3">
+            <div
+              className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"
+              style={{ background: "oklch(0.55 0.17 155 / 0.1)" }}
+            >
+              <Check
+                className="size-3"
+                strokeWidth={2.5}
+                style={{ color: "oklch(0.50 0.16 145)" }}
+              />
+            </div>
+            <span
+              className="text-[14px]"
+              style={{ color: "var(--mk-text)" }}
+            >
+              {feature}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <p
+        className="mt-6 text-[13px]"
+        style={{ color: "var(--mk-text-dimmed)" }}
+      >
+        Includes &ldquo;Powered by Loyalshy&rdquo; on passes
+      </p>
+    </div>
+  )
+}
+
 /* ─── Plan card ───────────────────────────────────────────────────── */
 
 type PlanCardProps = {
@@ -167,7 +265,7 @@ function PlanCard({
           href="/register"
           className="mk-btn-primary w-full text-center mb-6 gap-2"
         >
-          Start Free Trial
+          Get Started
           <ArrowRight className="size-4" />
         </Link>
       ) : (
@@ -177,7 +275,7 @@ function PlanCard({
           size="lg"
           className="w-full mb-6 text-[14px] font-medium"
         >
-          <Link href="/register">Start Free Trial</Link>
+          <Link href="/register">Get Started</Link>
         </Button>
       )}
 
@@ -221,7 +319,7 @@ function PlanCard({
         className="mt-6 text-[13px]"
         style={{ color: "var(--mk-text-dimmed)" }}
       >
-        Up to {formatLimit(plan.customerLimit)} customers &middot;{" "}
+        Up to {formatLimit(plan.customerLimit)} contacts &middot;{" "}
         {formatLimit(plan.staffLimit)} staff
         {plan.staffLimit === 1 ? " member" : " members"}
       </p>
@@ -250,7 +348,7 @@ export function Pricing() {
         }}
       />
 
-      <div className="relative mx-auto max-w-5xl">
+      <div className="relative mx-auto max-w-6xl">
         <FadeIn>
           <div className="text-center mb-10">
             <p
@@ -270,13 +368,13 @@ export function Pricing() {
                 letterSpacing: "-0.03em",
               }}
             >
-              Simple, transparent pricing
+              Start free, scale as you grow
             </h2>
             <p
               className="text-[16px] max-w-md mx-auto"
               style={{ color: "var(--mk-text-muted)" }}
             >
-              Start with a 14-day free trial. No credit card required.
+              No credit card required. Upgrade when you need more.
             </p>
           </div>
         </FadeIn>
@@ -288,9 +386,12 @@ export function Pricing() {
         </FadeIn>
 
         <Stagger
-          className="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6 items-start"
-          stagger={0.1}
+          className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 items-start"
+          stagger={0.08}
         >
+          <StaggerItem>
+            <FreePlanCard />
+          </StaggerItem>
           <StaggerItem>
             <PlanCard planKey="STARTER" period={period} />
           </StaggerItem>
@@ -318,8 +419,8 @@ export function Pricing() {
                 className="text-[14px]"
                 style={{ color: "var(--mk-text-muted)" }}
               >
-                {ENTERPRISE.description}. Unlimited staff, dedicated support,
-                SLA guarantees.
+                {ENTERPRISE.description}. Unlimited everything, white-label
+                branding, dedicated support & SLA.
               </p>
             </div>
             <Button

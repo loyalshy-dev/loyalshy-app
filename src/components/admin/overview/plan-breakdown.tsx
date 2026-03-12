@@ -1,7 +1,7 @@
 const planConfig: Record<string, { label: string; color: string }> = {
-  STARTER: { label: "Starter", color: "bg-muted-foreground/60" },
-  GROWTH: { label: "Growth", color: "bg-blue-500" },
-  SCALE: { label: "Scale", color: "bg-violet-500" },
+  STARTER: { label: "Pro", color: "bg-blue-500" },
+  GROWTH: { label: "Business", color: "bg-violet-500" },
+  SCALE: { label: "Scale", color: "bg-indigo-500" },
   ENTERPRISE: { label: "Enterprise", color: "bg-amber-500" },
 }
 

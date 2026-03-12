@@ -34,10 +34,10 @@ const FAQ_ITEMS = [
       "Loyalshy supports 10 pass types: stamp cards, coupons, memberships, points programs, prepaid cards, gift cards, tickets, access passes, transit passes, and business IDs. Each type has its own set of features and interactions.",
   },
   {
-    id: "free-trial",
-    question: "Can I try it for free?",
+    id: "free-plan",
+    question: "Is there a free plan?",
     answer:
-      "Absolutely! Every plan comes with a 14-day free trial. No credit card required to start.",
+      "Yes! Our Free plan lets you get started with up to 50 contacts and 1 stamp card program. No credit card required, free forever. Upgrade anytime when you need more.",
   },
   {
     id: "cancel",

@@ -122,9 +122,9 @@ const revokeSessionsSchema = z.object({
 // ─── Plan Pricing (for MRR estimate) ───────────────────────
 
 const PLAN_MONTHLY_PRICE: Record<string, number> = {
-  STARTER: 0,
-  PRO: 29,
-  BUSINESS: 79,
+  STARTER: 29,
+  GROWTH: 49,
+  SCALE: 99,
   ENTERPRISE: 199,
 }
 

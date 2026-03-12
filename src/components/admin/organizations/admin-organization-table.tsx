@@ -18,6 +18,7 @@ import {
   MoreHorizontal,
 } from "lucide-react"
 import type { AdminOrganizationRow } from "@/server/admin-actions"
+import { PLANS, type PlanId } from "@/lib/plans"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -50,9 +51,9 @@ const statusLabels: Record<string, string> = {
 }
 
 const planStyles: Record<string, string> = {
-  STARTER: "bg-muted text-muted-foreground",
-  PRO: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  BUSINESS: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+  STARTER: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  GROWTH: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+  SCALE: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
   ENTERPRISE: "bg-amber-500/10 text-amber-600 border-amber-500/20",
 }
 
@@ -133,7 +134,7 @@ export function AdminOrganizationTable({
           variant="outline"
           className={`text-[11px] ${planStyles[row.original.plan] ?? ""}`}
         >
-          {row.original.plan}
+          {PLANS[row.original.plan as PlanId]?.name ?? row.original.plan}
         </Badge>
       ),
     },
