@@ -1,9 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
 import { useStore } from "zustand"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
-import { uploadHolderPhoto, deleteHolderPhoto } from "@/server/org-settings-actions"
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
@@ -28,12 +26,9 @@ type Props = {
   programId: string
 }
 
-export function AvatarPanel({ store, programId }: Props) {
+export function AvatarPanel({ store }: Props) {
   const showHolderPhoto = useStore(store, (s) => s.programConfig.showHolderPhoto)
   const holderPhotoPosition = useStore(store, (s) => s.programConfig.holderPhotoPosition)
-  const holderPhotoUrl = useStore(store, (s) => s.wallet.holderPhotoUrl)
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   return (
     <div>
@@ -92,105 +87,19 @@ export function AvatarPanel({ store, programId }: Props) {
 
       {showHolderPhoto && (
         <>
-          {/* Photo upload */}
-          <SectionHeader>Photo</SectionHeader>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            style={{ display: "none" }}
-            onChange={async (e) => {
-              const file = e.target.files?.[0]
-              if (!file) return
-              setIsUploading(true)
-              try {
-                const fd = new FormData()
-                fd.append("templateId", programId)
-                fd.append("file", file)
-                const result = await uploadHolderPhoto(fd)
-                if (result.url) {
-                  store.getState().setWalletField("holderPhotoUrl", result.url)
-                }
-              } finally {
-                setIsUploading(false)
-                if (fileInputRef.current) fileInputRef.current.value = ""
-              }
-            }}
-          />
-
+          {/* Info note */}
           <div
-            onClick={() => !isUploading && fileInputRef.current?.click()}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: 10,
-              borderRadius: 14,
-              border: "1.5px dashed var(--border)",
-              cursor: isUploading ? "wait" : "pointer",
-              transition: "all 0.15s ease",
-              marginBottom: 8,
+              marginTop: 12,
+              padding: "8px 10px",
+              borderRadius: 10,
+              backgroundColor: "var(--muted)",
+              fontSize: 11,
+              color: "var(--muted-foreground)",
+              lineHeight: 1.4,
             }}
           >
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 9999,
-                backgroundColor: "var(--muted)",
-                border: "2px solid var(--border)",
-                overflow: "hidden",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              {holderPhotoUrl ? (
-                <img src={holderPhotoUrl} alt="Holder" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="var(--muted-foreground)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="8" r="4" />
-                  <path d="M20 21a8 8 0 1 0-16 0" />
-                </svg>
-              )}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: "var(--foreground)" }}>
-                {isUploading ? "Uploading..." : holderPhotoUrl ? "Change photo" : "Upload photo"}
-              </div>
-              <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>
-                {holderPhotoUrl ? "Click to replace" : "PNG, JPEG, or WebP · 2MB max"}
-              </div>
-            </div>
-            {holderPhotoUrl && (
-              <button
-                onClick={async (e) => {
-                  e.stopPropagation()
-                  setIsUploading(true)
-                  try {
-                    await deleteHolderPhoto(programId)
-                    store.getState().setWalletField("holderPhotoUrl", null)
-                  } finally {
-                    setIsUploading(false)
-                  }
-                }}
-                style={{
-                  padding: 4,
-                  borderRadius: 8,
-                  border: "none",
-                  backgroundColor: "transparent",
-                  color: "var(--muted-foreground)",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                }}
-                aria-label="Remove holder photo"
-              >
-                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                </svg>
-              </button>
-            )}
+            The holder photo is set per contact when a pass is issued. You can upload it from the passes list or contact detail.
           </div>
 
           {/* Position picker */}

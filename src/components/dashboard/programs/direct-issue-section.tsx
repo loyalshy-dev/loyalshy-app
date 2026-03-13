@@ -11,6 +11,7 @@ import {
   Mail,
   MailX,
   SkipForward,
+  Users,
 } from "lucide-react"
 import { toast } from "sonner"
 import { Card } from "@/components/ui/card"
@@ -30,8 +31,20 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
   searchContactsForIssue,
   issuePassToContacts,
+  issuePassToAllEligible,
   type DirectIssueContact,
   type IssueContactResult,
 } from "@/server/distribution-actions"
@@ -42,6 +55,7 @@ type DirectIssueSectionProps = {
   templateId: string
   templateName: string
   passType: string
+  eligibleCount: number
 }
 
 // ─── Component ──────────────────────────────────────────────
@@ -50,6 +64,7 @@ export function DirectIssueSection({
   templateId,
   templateName,
   passType,
+  eligibleCount: initialEligibleCount,
 }: DirectIssueSectionProps) {
   const [selectedContacts, setSelectedContacts] = useState<DirectIssueContact[]>([])
   const [searchResults, setSearchResults] = useState<DirectIssueContact[]>([])
@@ -57,7 +72,9 @@ export function DirectIssueSection({
   const [isSearching, setIsSearching] = useState(false)
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [isBulkPending, startBulkTransition] = useTransition()
   const [results, setResults] = useState<IssueContactResult[] | null>(null)
+  const [eligibleCount, setEligibleCount] = useState(initialEligibleCount)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Debounced search
@@ -75,7 +92,6 @@ export function DirectIssueSection({
       setIsSearching(true)
       debounceRef.current = setTimeout(async () => {
         const contacts = await searchContactsForIssue(value, templateId)
-        // Filter out already-selected contacts
         const filtered = contacts.filter(
           (c) => !selectedContacts.some((s) => s.id === c.id)
         )
@@ -86,7 +102,6 @@ export function DirectIssueSection({
     [templateId, selectedContacts]
   )
 
-  // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -119,6 +134,7 @@ export function DirectIssueSection({
 
       setResults(result.results)
       setSelectedContacts([])
+      setEligibleCount((prev) => Math.max(0, prev - result.issuedCount))
 
       if (result.issuedCount > 0) {
         toast.success(
@@ -130,6 +146,28 @@ export function DirectIssueSection({
         )
       } else if (result.skippedCount > 0) {
         toast.info("All selected contacts already have a pass for this program")
+      }
+    })
+  }
+
+  function handleBulkIssue() {
+    startBulkTransition(async () => {
+      const result = await issuePassToAllEligible(templateId)
+
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to issue passes")
+        return
+      }
+
+      setResults(result.results)
+      setEligibleCount((prev) => Math.max(0, prev - result.issuedCount))
+
+      if (result.issuedCount > 0) {
+        toast.success(
+          `Issued ${result.issuedCount} pass${result.issuedCount !== 1 ? "es" : ""} to all eligible contacts`
+        )
+      } else {
+        toast.info("No eligible contacts found")
       }
     })
   }
@@ -244,21 +282,68 @@ export function DirectIssueSection({
         )}
       </div>
 
-      {/* Issue button */}
-      <Button
-        size="sm"
-        disabled={selectedContacts.length === 0 || isPending}
-        onClick={handleIssue}
-        className="gap-1.5 text-[13px]"
-      >
-        {isPending ? (
-          <Loader2 className="size-3.5 animate-spin" />
-        ) : (
-          <Send className="size-3.5" />
+      {/* Action buttons */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <Button
+          size="sm"
+          disabled={selectedContacts.length === 0 || isPending}
+          onClick={handleIssue}
+          className="gap-1.5 text-[13px]"
+        >
+          {isPending ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <Send className="size-3.5" />
+          )}
+          Issue pass to {selectedContacts.length || ""}{" "}
+          contact{selectedContacts.length !== 1 ? "s" : ""}
+        </Button>
+
+        {/* Bulk issue all eligible */}
+        {eligibleCount > 0 && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isBulkPending}
+                className="gap-1.5 text-[13px]"
+              >
+                {isBulkPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Users className="size-3.5" />
+                )}
+                Issue to all eligible ({eligibleCount > 100 ? "100+" : eligibleCount})
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Issue passes to all eligible contacts?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will create and deliver a pass for <strong>{templateName}</strong> to
+                  {eligibleCount > 100
+                    ? " the first 100 eligible contacts (out of " + eligibleCount + " total)."
+                    : ` ${eligibleCount} contact${eligibleCount !== 1 ? "s" : ""}.`
+                  }
+                  {" "}Contacts with an email address will receive a notification.
+                  {eligibleCount > 100 && (
+                    <span className="block mt-2 text-[13px]">
+                      Run this action again to issue passes to the next batch.
+                    </span>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleBulkIssue}>
+                  Issue passes
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
-        Issue pass to {selectedContacts.length || ""}{" "}
-        contact{selectedContacts.length !== 1 ? "s" : ""}
-      </Button>
+      </div>
 
       {/* Results feedback */}
       {results && results.length > 0 && (
@@ -266,10 +351,10 @@ export function DirectIssueSection({
           <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider">
             Results
           </p>
-          <ul className="space-y-1">
-            {results.map((r) => (
+          <ul className="space-y-1 max-h-48 overflow-y-auto">
+            {results.map((r, i) => (
               <li
-                key={r.contactId}
+                key={`${r.contactId}-${i}`}
                 className="flex items-center gap-2 text-[13px]"
               >
                 {r.status === "issued" && (

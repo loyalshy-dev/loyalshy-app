@@ -103,10 +103,8 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
   // Access-specific props
   const accessConfig = data.template.passType === "ACCESS" ? parseAccessConfig(data.template.config) : null
 
-  // Holder photo — supported by BUSINESS_ID, MEMBERSHIP, ACCESS
-  const holderPhotoUrl = (data.template.passType === "BUSINESS_ID" || data.template.passType === "MEMBERSHIP" || data.template.passType === "ACCESS") && data.template.passDesign?.editorConfig
-    ? ((data.template.passDesign.editorConfig as Record<string, unknown>).holderPhotoUrl as string | undefined) ?? undefined
-    : undefined
+  // Holder photo — per-instance, supported by BUSINESS_ID, MEMBERSHIP, ACCESS
+  const holderPhotoUrl = data.holderPhotoUrl ?? undefined
 
   function handleAddToWallet(chosenPlatform: Platform) {
     setError(null)

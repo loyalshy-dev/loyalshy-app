@@ -177,7 +177,8 @@ function getRendererProps(passInstance: PassInstanceDetail) {
   }
   if (passInstance.passType === "BUSINESS_ID") {
     const config = parseBusinessIdConfig(passInstance.templateConfig)
-    const ec = passInstance.passDesign?.editorConfig as Record<string, unknown> | undefined
+    const instanceHolderPhoto = typeof (data as Record<string, unknown>).holderPhotoUrl === "string"
+      ? (data as Record<string, unknown>).holderPhotoUrl as string : undefined
     return {
       currentVisits: 0,
       totalVisits: 0,
@@ -185,12 +186,13 @@ function getRendererProps(passInstance: PassInstanceDetail) {
       idLabel: config?.idLabel,
       showHolderPhoto: config?.showHolderPhoto ?? true,
       holderPhotoPosition: config?.holderPhotoPosition ?? "center",
-      holderPhotoUrl: typeof ec?.holderPhotoUrl === "string" ? ec.holderPhotoUrl : undefined,
+      holderPhotoUrl: instanceHolderPhoto,
     }
   }
   if (passInstance.passType === "MEMBERSHIP") {
     const config = parseMembershipConfig(passInstance.templateConfig)
-    const ec = passInstance.passDesign?.editorConfig as Record<string, unknown> | undefined
+    const instanceHolderPhoto = typeof (data as Record<string, unknown>).holderPhotoUrl === "string"
+      ? (data as Record<string, unknown>).holderPhotoUrl as string : undefined
     return {
       currentVisits: 0,
       totalVisits: 0,
@@ -199,12 +201,13 @@ function getRendererProps(passInstance: PassInstanceDetail) {
       benefits: config?.benefits,
       showHolderPhoto: config?.showHolderPhoto,
       holderPhotoPosition: config?.holderPhotoPosition,
-      holderPhotoUrl: typeof ec?.holderPhotoUrl === "string" ? ec.holderPhotoUrl : undefined,
+      holderPhotoUrl: instanceHolderPhoto,
     }
   }
   if (passInstance.passType === "ACCESS") {
     const config = parseAccessConfig(passInstance.templateConfig)
-    const ec = passInstance.passDesign?.editorConfig as Record<string, unknown> | undefined
+    const instanceHolderPhoto = typeof (data as Record<string, unknown>).holderPhotoUrl === "string"
+      ? (data as Record<string, unknown>).holderPhotoUrl as string : undefined
     return {
       currentVisits: 0,
       totalVisits: 0,
@@ -212,7 +215,7 @@ function getRendererProps(passInstance: PassInstanceDetail) {
       accessLabel: config?.accessLabel,
       showHolderPhoto: config?.showHolderPhoto,
       holderPhotoPosition: config?.holderPhotoPosition,
-      holderPhotoUrl: typeof ec?.holderPhotoUrl === "string" ? ec.holderPhotoUrl : undefined,
+      holderPhotoUrl: instanceHolderPhoto,
     }
   }
   const cycleData = data as { currentCycleVisits?: number }

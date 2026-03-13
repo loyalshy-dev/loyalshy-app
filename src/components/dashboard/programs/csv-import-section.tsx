@@ -9,8 +9,8 @@ import {
   AlertCircle,
   X,
   Mail,
-  MailX,
   SkipForward,
+  Download,
 } from "lucide-react"
 import { toast } from "sonner"
 import { Card } from "@/components/ui/card"
@@ -21,6 +21,11 @@ import {
   type BulkImportRow,
   type IssueContactResult,
 } from "@/server/distribution-actions"
+
+// ─── Constants ──────────────────────────────────────────────
+
+const MAX_ROWS = 500
+const MAX_FILE_SIZE = 1_000_000 // 1 MB
 
 // ─── Props ──────────────────────────────────────────────────
 
@@ -35,7 +40,6 @@ function parseCsvText(text: string): { rows: BulkImportRow[]; errors: string[] }
   const lines = text.split(/\r?\n/).filter((l) => l.trim())
   if (lines.length === 0) return { rows: [], errors: ["File is empty"] }
 
-  // Detect header row
   const headerLine = lines[0].toLowerCase()
   const hasHeader =
     headerLine.includes("name") ||
@@ -44,7 +48,6 @@ function parseCsvText(text: string): { rows: BulkImportRow[]; errors: string[] }
 
   const dataLines = hasHeader ? lines.slice(1) : lines
 
-  // Determine column indices from header
   let nameIdx = 0
   let emailIdx = 1
   let phoneIdx = 2
@@ -67,8 +70,14 @@ function parseCsvText(text: string): { rows: BulkImportRow[]; errors: string[] }
   const rows: BulkImportRow[] = []
   const errors: string[] = []
 
-  for (let i = 0; i < dataLines.length; i++) {
-    const cols = parseCSVLine(dataLines[i])
+  const linesToProcess = dataLines.slice(0, MAX_ROWS)
+
+  if (dataLines.length > MAX_ROWS) {
+    errors.push(`File has ${dataLines.length} rows — only the first ${MAX_ROWS} will be imported`)
+  }
+
+  for (let i = 0; i < linesToProcess.length; i++) {
+    const cols = parseCSVLine(linesToProcess[i])
     const fullName = cols[nameIdx]?.trim() ?? ""
 
     if (!fullName) {
@@ -85,7 +94,6 @@ function parseCsvText(text: string): { rows: BulkImportRow[]; errors: string[] }
   return { rows, errors }
 }
 
-/** Parse a single CSV line handling quoted fields */
 function parseCSVLine(line: string): string[] {
   const result: string[] = []
   let current = ""
@@ -130,6 +138,19 @@ export function CsvImportSection({
   } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  function downloadTemplate() {
+    const csv = "name,email,phone\n"
+    const blob = new Blob([csv], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.download = "contacts-template.csv"
+    link.href = url
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -142,7 +163,7 @@ export function CsvImportSection({
       return
     }
 
-    if (file.size > 1_000_000) {
+    if (file.size > MAX_FILE_SIZE) {
       toast.error("File too large (max 1 MB)")
       return
     }
@@ -209,14 +230,27 @@ export function CsvImportSection({
         <p className="text-[13px] text-muted-foreground ml-9">
           Upload a CSV file to create contacts and issue passes for{" "}
           <span className="font-medium text-foreground">{templateName}</span>.
-          Expected columns: <code className="text-[12px] bg-muted px-1 rounded">name</code>,{" "}
-          <code className="text-[12px] bg-muted px-1 rounded">email</code>,{" "}
-          <code className="text-[12px] bg-muted px-1 rounded">phone</code>.
+          Maximum {MAX_ROWS} rows per import.
         </p>
       </div>
 
-      {/* File input */}
+      {/* Template download + file input */}
       <div className="space-y-2">
+        <div className="flex items-center gap-2 ml-9">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-[12px] h-7"
+            onClick={downloadTemplate}
+          >
+            <Download className="size-3" />
+            Download CSV template
+          </Button>
+          <span className="text-[11px] text-muted-foreground">
+            Columns: name, email, phone
+          </span>
+        </div>
+
         <input
           ref={fileInputRef}
           type="file"

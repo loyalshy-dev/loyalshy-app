@@ -264,6 +264,7 @@ export async function getSettingsData() {
       timezone: organization.timezone,
       plan: organization.plan,
       subscriptionStatus: organization.subscriptionStatus,
+      settings: (organization.settings as Record<string, unknown>) ?? {},
     },
     templates,
     members: members.map((m) => ({
@@ -303,6 +304,38 @@ export async function updateOrganizationProfile(input: z.infer<typeof updateProf
 
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
+  return { success: true }
+}
+
+// ─── Update Join Requirement Setting ─────────────────────────
+
+const joinRequirementSchema = z.object({
+  organizationId: z.string().min(1),
+  joinRequirement: z.enum(["email_or_phone", "email_only"]),
+})
+
+export async function updateJoinRequirement(
+  input: z.infer<typeof joinRequirementSchema>
+): Promise<{ success: boolean; error?: string }> {
+  const parsed = joinRequirementSchema.parse(input)
+  await assertOrganizationRole(parsed.organizationId, "owner")
+
+  const org = await db.organization.findUnique({
+    where: { id: parsed.organizationId },
+    select: { settings: true },
+  })
+
+  const currentSettings = (org?.settings as Record<string, unknown>) ?? {}
+
+  await db.organization.update({
+    where: { id: parsed.organizationId },
+    data: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      settings: { ...currentSettings, joinRequirement: parsed.joinRequirement } as any,
+    },
+  })
+
+  revalidatePath("/dashboard/settings")
   return { success: true }
 }
 
@@ -762,13 +795,7 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     }
   }
 
-  // Preserve holderPhotoUrl from existing editorConfig (uploaded separately via uploadHolderPhoto)
-  if (existingDesign?.editorConfig && typeof existingDesign.editorConfig === "object") {
-    const existingCfg = existingDesign.editorConfig as Record<string, unknown>
-    if (typeof existingCfg.holderPhotoUrl === "string") {
-      editorConfig.holderPhotoUrl = existingCfg.holderPhotoUrl
-    }
-  }
+  // holderPhotoUrl is now per-instance (stored in PassInstance.data), not template-level
 
   const newHash = computeDesignHash({
     showStrip: parsed.showStrip,

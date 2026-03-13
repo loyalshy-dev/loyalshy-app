@@ -34,6 +34,7 @@ type Organization = {
   timezone: string
   plan: string
   subscriptionStatus: string
+  settings: Record<string, unknown>
 }
 
 type Member = {

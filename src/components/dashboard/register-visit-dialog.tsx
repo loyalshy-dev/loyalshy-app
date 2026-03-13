@@ -1156,8 +1156,8 @@ function ConfirmStep({
   const businessIdCfg = isBusinessId ? parseBusinessIdConfig(passInstance.templateConfig) : null
   const membershipCfg = isMembership ? parseMembershipConfig(passInstance.templateConfig) : null
   const accessCfg = isAccess ? parseAccessConfig(passInstance.templateConfig) : null
-  const holderPhotoUrl = (isBusinessId || isMembership || isAccess) && cardDesign?.editorConfig
-    ? ((cardDesign.editorConfig as Record<string, unknown>).holderPhotoUrl as string | undefined)
+  const holderPhotoUrl = (isBusinessId || isMembership || isAccess)
+    ? (typeof confirmData.holderPhotoUrl === "string" ? confirmData.holderPhotoUrl : undefined)
     : undefined
 
   return (

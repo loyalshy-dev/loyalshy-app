@@ -68,5 +68,8 @@ export function rateLimit({ interval, limit }: RateLimitOptions) {
 /** 10 requests per minute — for public form submissions */
 export const publicFormLimiter = rateLimit({ interval: 60_000, limit: 10 })
 
+/** 3 joins per hour per IP — prevents bulk pass creation abuse */
+export const joinPassLimiter = rateLimit({ interval: 3_600_000, limit: 3 })
+
 /** 20 requests per minute — for authenticated API routes */
 export const apiRouteLimiter = rateLimit({ interval: 60_000, limit: 20 })

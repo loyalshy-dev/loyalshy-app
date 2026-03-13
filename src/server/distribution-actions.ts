@@ -38,6 +38,7 @@ export type DirectIssueContact = {
 export type IssueContactResult = {
   contactId: string
   contactName: string
+  passInstanceId?: string
   status: "issued" | "already_exists" | "no_email" | "error"
   error?: string
 }
@@ -381,6 +382,7 @@ export async function issuePassToContacts(
     results.push({
       contactId: contact.id,
       contactName: contact.fullName,
+      passInstanceId: passInstance.id,
       status: contact.email ? "issued" : "no_email",
     })
   }
@@ -398,6 +400,7 @@ export type CreateAndIssueResult = {
   success: boolean
   contactId?: string
   contactName?: string
+  passInstanceId?: string
   error?: string
   duplicateField?: "email" | "phone"
 }
@@ -498,7 +501,11 @@ export async function createContactAndIssuePass(
 
   revalidatePath("/dashboard/contacts")
 
-  return { success: true, contactId: contact.id, contactName: contact.fullName }
+  const issuedPassInstanceId = issueResult.results.find(
+    (r) => r.contactId === contact.id && r.passInstanceId
+  )?.passInstanceId
+
+  return { success: true, contactId: contact.id, contactName: contact.fullName, passInstanceId: issuedPassInstanceId }
 }
 
 // ─── Bulk Import Contacts & Issue Passes ────────────────────
@@ -807,6 +814,74 @@ export async function bulkImportAndIssue(
   return { success: true, results, createdCount, issuedCount, skippedCount, errorCount }
 }
 
+// ─── Distribution Stats ─────────────────────────────────────
+
+export type DistributionStats = {
+  totalIssued: number
+  issuedThisWeek: number
+  eligibleContacts: number
+}
+
+export async function getDistributionStats(
+  templateId: string
+): Promise<DistributionStats> {
+  await assertAuthenticated()
+  const organization = await getOrganizationForUser()
+  if (!organization) return { totalIssued: 0, issuedThisWeek: 0, eligibleContacts: 0 }
+
+  const weekAgo = new Date()
+  weekAgo.setDate(weekAgo.getDate() - 7)
+
+  const [totalIssued, issuedThisWeek, eligibleContacts] = await Promise.all([
+    db.passInstance.count({
+      where: { passTemplateId: templateId },
+    }),
+    db.passInstance.count({
+      where: { passTemplateId: templateId, createdAt: { gte: weekAgo } },
+    }),
+    db.contact.count({
+      where: {
+        organizationId: organization.id,
+        deletedAt: null,
+        NOT: { passInstances: { some: { passTemplateId: templateId } } },
+      },
+    }),
+  ])
+
+  return { totalIssued, issuedThisWeek, eligibleContacts }
+}
+
+// ─── Issue Pass to All Eligible Contacts ─────────────────────
+
+export async function issuePassToAllEligible(
+  templateId: string
+): Promise<IssuePassToContactsResult & { totalEligible: number }> {
+  await assertAuthenticated()
+  const organization = await getOrganizationForUser()
+  if (!organization) {
+    return { success: false, results: [], issuedCount: 0, skippedCount: 0, totalEligible: 0, error: "No organization found" }
+  }
+
+  await assertOrganizationRole(organization.id, "owner")
+
+  const eligibleContacts = await db.contact.findMany({
+    where: {
+      organizationId: organization.id,
+      deletedAt: null,
+      NOT: { passInstances: { some: { passTemplateId: templateId } } },
+    },
+    select: { id: true },
+    take: 100,
+  })
+
+  if (eligibleContacts.length === 0) {
+    return { success: true, results: [], issuedCount: 0, skippedCount: 0, totalEligible: 0 }
+  }
+
+  const result = await issuePassToContacts(templateId, eligibleContacts.map((c) => c.id))
+  return { ...result, totalEligible: eligibleContacts.length }
+}
+
 // ─── Send Pass Email (re-send to existing pass instance) ────
 
 export async function sendPassEmail(
@@ -903,5 +978,130 @@ export async function sendPassEmail(
     console.error("Failed to send pass email:", message)
     return { success: false, error: message }
   }
+}
+
+// ─── Holder Photo (per-instance) ─────────────────────────────
+
+const HOLDER_PHOTO_PASS_TYPES = ["BUSINESS_ID", "MEMBERSHIP", "ACCESS"]
+
+export async function uploadInstanceHolderPhoto(
+  formData: FormData
+): Promise<{ success?: boolean; url?: string; error?: string }> {
+  const passInstanceId = formData.get("passInstanceId") as string
+  const file = formData.get("file") as File
+
+  if (!passInstanceId || !file) return { error: "Missing pass instance ID or file" }
+
+  await assertAuthenticated()
+  const organization = await getOrganizationForUser()
+  if (!organization) return { error: "No organization found" }
+
+  const passInstance = await db.passInstance.findFirst({
+    where: {
+      id: passInstanceId,
+      passTemplate: { organizationId: organization.id },
+    },
+    select: {
+      id: true,
+      data: true,
+      passTemplate: { select: { id: true, passType: true } },
+    },
+  })
+
+  if (!passInstance) return { error: "Pass instance not found" }
+  if (!HOLDER_PHOTO_PASS_TYPES.includes(passInstance.passTemplate.passType)) {
+    return { error: "This pass type does not support holder photos" }
+  }
+
+  await assertOrganizationRole(organization.id, "owner")
+
+  const maxSize = 2 * 1024 * 1024
+  if (file.size > maxSize) return { error: "File must be under 2MB" }
+
+  const validTypes = ["image/png", "image/jpeg", "image/webp"]
+  if (!validTypes.includes(file.type)) return { error: "File must be PNG, JPEG, or WebP" }
+
+  const rawBuffer = Buffer.from(await file.arrayBuffer())
+  let processedBuffer: Buffer = rawBuffer
+  try {
+    const { default: sharp } = await import("sharp")
+    processedBuffer = await sharp(rawBuffer)
+      .resize(256, 256, { fit: "cover" })
+      .png()
+      .toBuffer()
+  } catch { /* use original */ }
+
+  let url: string
+  try {
+    const { uploadFile, deleteFile } = await import("@/lib/storage")
+    // Delete old photo if exists
+    const existingData = (passInstance.data as Record<string, unknown>) ?? {}
+    if (typeof existingData.holderPhotoUrl === "string") {
+      await deleteFile(existingData.holderPhotoUrl)
+    }
+    url = await uploadFile(
+      processedBuffer,
+      `holder-photos/${passInstance.id}/${Date.now()}.png`,
+      "image/png"
+    )
+  } catch {
+    url = `data:image/png;base64,${processedBuffer.toString("base64")}`
+  }
+
+  // Store in PassInstance.data
+  const existingData = (passInstance.data as Record<string, unknown>) ?? {}
+  await db.passInstance.update({
+    where: { id: passInstance.id },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: { data: { ...existingData, holderPhotoUrl: url } as any },
+  })
+
+  revalidatePath(`/dashboard/programs/${passInstance.passTemplate.id}`)
+  revalidatePath("/dashboard/contacts")
+  return { success: true, url }
+}
+
+export async function deleteInstanceHolderPhoto(
+  passInstanceId: string
+): Promise<{ success?: boolean; error?: string }> {
+  if (!passInstanceId) return { error: "Missing pass instance ID" }
+
+  await assertAuthenticated()
+  const organization = await getOrganizationForUser()
+  if (!organization) return { error: "No organization found" }
+
+  const passInstance = await db.passInstance.findFirst({
+    where: {
+      id: passInstanceId,
+      passTemplate: { organizationId: organization.id },
+    },
+    select: {
+      id: true,
+      data: true,
+      passTemplate: { select: { id: true, passType: true } },
+    },
+  })
+
+  if (!passInstance) return { error: "Pass instance not found" }
+  await assertOrganizationRole(organization.id, "owner")
+
+  const existingData = (passInstance.data as Record<string, unknown>) ?? {}
+  if (typeof existingData.holderPhotoUrl === "string") {
+    try {
+      const { deleteFile } = await import("@/lib/storage")
+      await deleteFile(existingData.holderPhotoUrl)
+    } catch { /* ignore storage errors */ }
+  }
+
+  const { holderPhotoUrl: _, ...rest } = existingData
+  await db.passInstance.update({
+    where: { id: passInstance.id },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: { data: rest as any },
+  })
+
+  revalidatePath(`/dashboard/programs/${passInstance.passTemplate.id}`)
+  revalidatePath("/dashboard/contacts")
+  return { success: true }
 }
 

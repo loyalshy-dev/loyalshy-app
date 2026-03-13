@@ -205,13 +205,7 @@ export function TemplateCardPreview({
   const design = buildWalletPassDesign(template.passDesign)
   const typeProps = buildTypeProps(template.passType, template.config)
 
-  // Extract holderPhotoUrl from editorConfig for types with holder photo
-  if ((template.passType === "BUSINESS_ID" || template.passType === "MEMBERSHIP" || template.passType === "ACCESS") && template.passDesign?.editorConfig) {
-    const ec = template.passDesign.editorConfig as Record<string, unknown>
-    if (typeof ec.holderPhotoUrl === "string") {
-      typeProps.holderPhotoUrl = ec.holderPhotoUrl
-    }
-  }
+  // holderPhotoUrl is per-instance, not template-level — preview shows placeholder only
 
   // Derive defaults from stamp card config
   const cfg = (template.config as Record<string, unknown> | null) ?? {}

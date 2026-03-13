@@ -27,6 +27,7 @@ import {
   MailX,
   Pencil,
   AlertCircle,
+  UserCircle,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -73,6 +74,7 @@ import {
   searchContactsForIssue,
   issuePassToContacts,
   createContactAndIssuePass,
+  uploadInstanceHolderPhoto,
   type DirectIssueContact,
   type IssueContactResult,
 } from "@/server/distribution-actions"
@@ -312,7 +314,7 @@ function EditContactSheet({
           </div>
         </SheetHeader>
 
-        <div className="space-y-4 px-1">
+        <div className="space-y-4 px-4">
           <div className="space-y-1.5">
             <Label htmlFor="edit-name" className="text-[13px]">
               Full Name <span className="text-destructive">*</span>
@@ -407,20 +409,25 @@ function EditContactSheet({
 
 // ─── Row actions ───────────────────────────────────────────────
 
+const HOLDER_PHOTO_PASS_TYPES = ["BUSINESS_ID", "MEMBERSHIP", "ACCESS"]
+
 function RowActions({
   passInstanceId,
   currentStatus,
   contactEmail,
+  passType,
   onStatusChange,
   onEditContact,
 }: {
   passInstanceId: string
   currentStatus: string
   contactEmail: string | null
+  passType: string
   onStatusChange: () => void
   onEditContact: () => void
 }) {
   const [isPending, startTransition] = useTransition()
+  const photoInputRef = useRef<HTMLInputElement>(null)
 
   function handleAction(newStatus: "ACTIVE" | "SUSPENDED" | "REVOKED") {
     startTransition(async () => {
@@ -446,54 +453,89 @@ function RowActions({
     })
   }
 
+  function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    startTransition(async () => {
+      const fd = new FormData()
+      fd.append("passInstanceId", passInstanceId)
+      fd.append("file", file)
+      const result = await uploadInstanceHolderPhoto(fd)
+      if (result.error) {
+        toast.error(result.error)
+      } else {
+        toast.success("Holder photo uploaded")
+        onStatusChange()
+      }
+    })
+    if (photoInputRef.current) photoInputRef.current.value = ""
+  }
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7"
-          disabled={isPending}
-          aria-label="Pass actions"
-        >
-          <MoreHorizontal className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuItem onClick={onEditContact}>
-          <Pencil className="size-3.5 mr-2" />
-          Edit contact
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={handleSendEmail}
-          disabled={!contactEmail}
-        >
-          <Mail className="size-3.5 mr-2" />
-          {contactEmail ? "Send pass email" : "No email on file"}
-        </DropdownMenuItem>
-        {currentStatus === "SUSPENDED" && (
-          <DropdownMenuItem onClick={() => handleAction("ACTIVE")}>
-            <Undo2 className="size-3.5 mr-2" />
-            Reactivate
-          </DropdownMenuItem>
-        )}
-        {currentStatus === "ACTIVE" && (
-          <DropdownMenuItem onClick={() => handleAction("SUSPENDED")}>
-            <ShieldOff className="size-3.5 mr-2" />
-            Suspend
-          </DropdownMenuItem>
-        )}
-        {(currentStatus === "ACTIVE" || currentStatus === "SUSPENDED") && (
-          <DropdownMenuItem
-            onClick={() => handleAction("REVOKED")}
-            className="text-destructive focus:text-destructive"
+    <>
+      {HOLDER_PHOTO_PASS_TYPES.includes(passType) && (
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="hidden"
+          onChange={handlePhotoUpload}
+        />
+      )}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            disabled={isPending}
+            aria-label="Pass actions"
           >
-            <Ban className="size-3.5 mr-2" />
-            Revoke
+            <MoreHorizontal className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuItem onClick={onEditContact}>
+            <Pencil className="size-3.5 mr-2" />
+            Edit contact
           </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {HOLDER_PHOTO_PASS_TYPES.includes(passType) && (
+            <DropdownMenuItem onClick={() => photoInputRef.current?.click()}>
+              <UserCircle className="size-3.5 mr-2" />
+              Upload holder photo
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem
+            onClick={handleSendEmail}
+            disabled={!contactEmail}
+          >
+            <Mail className="size-3.5 mr-2" />
+            {contactEmail ? "Send pass email" : "No email on file"}
+          </DropdownMenuItem>
+          {currentStatus === "SUSPENDED" && (
+            <DropdownMenuItem onClick={() => handleAction("ACTIVE")}>
+              <Undo2 className="size-3.5 mr-2" />
+              Reactivate
+            </DropdownMenuItem>
+          )}
+          {currentStatus === "ACTIVE" && (
+            <DropdownMenuItem onClick={() => handleAction("SUSPENDED")}>
+              <ShieldOff className="size-3.5 mr-2" />
+              Suspend
+            </DropdownMenuItem>
+          )}
+          {(currentStatus === "ACTIVE" || currentStatus === "SUSPENDED") && (
+            <DropdownMenuItem
+              onClick={() => handleAction("REVOKED")}
+              className="text-destructive focus:text-destructive"
+            >
+              <Ban className="size-3.5 mr-2" />
+              Revoke
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   )
 }
 
@@ -503,14 +545,17 @@ function IssuePassSheet({
   open,
   onOpenChange,
   templateId,
+  passType,
   onIssued,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   templateId: string
+  passType: string
   onIssued: () => void
 }) {
   const [mode, setMode] = useState<"existing" | "new">("existing")
+  const supportsHolderPhoto = HOLDER_PHOTO_PASS_TYPES.includes(passType)
 
   // ── Existing contact state ──
   const [selectedContacts, setSelectedContacts] = useState<DirectIssueContact[]>([])
@@ -526,6 +571,9 @@ function IssuePassSheet({
   const [newName, setNewName] = useState("")
   const [newEmail, setNewEmail] = useState("")
   const [newPhone, setNewPhone] = useState("")
+  const [holderPhotoFile, setHolderPhotoFile] = useState<File | null>(null)
+  const [holderPhotoPreview, setHolderPhotoPreview] = useState<string | null>(null)
+  const holderPhotoInputRef = useRef<HTMLInputElement>(null)
   const [fieldError, setFieldError] = useState<{ field?: string; message: string } | null>(null)
 
   const handleSearch = useCallback(
@@ -622,10 +670,23 @@ function IssuePassSheet({
         return
       }
 
+      // Upload holder photo if provided
+      if (holderPhotoFile && result.passInstanceId) {
+        const fd = new FormData()
+        fd.append("passInstanceId", result.passInstanceId)
+        fd.append("file", holderPhotoFile)
+        const photoResult = await uploadInstanceHolderPhoto(fd)
+        if (photoResult.error) {
+          toast.warning(`Pass issued but photo upload failed: ${photoResult.error}`)
+        }
+      }
+
       toast.success(`Pass issued to ${result.contactName}`)
       setNewName("")
       setNewEmail("")
       setNewPhone("")
+      setHolderPhotoFile(null)
+      setHolderPhotoPreview(null)
       onIssued()
     })
   }
@@ -639,6 +700,8 @@ function IssuePassSheet({
       setNewName("")
       setNewEmail("")
       setNewPhone("")
+      setHolderPhotoFile(null)
+      setHolderPhotoPreview(null)
       setFieldError(null)
       setMode("existing")
     }
@@ -662,7 +725,7 @@ function IssuePassSheet({
           </div>
         </SheetHeader>
 
-        <div className="space-y-4 px-1">
+        <div className="space-y-4 px-4">
           {/* Mode toggle */}
           <div className="flex gap-1 rounded-lg bg-muted p-1">
             <button
@@ -917,6 +980,69 @@ function IssuePassSheet({
                     </p>
                   )}
                 </div>
+
+                {/* Holder photo upload for eligible types */}
+                {supportsHolderPhoto && (
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Holder Photo</Label>
+                    <input
+                      ref={holderPhotoInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        if (file.size > 2 * 1024 * 1024) {
+                          toast.error("File must be under 2MB")
+                          return
+                        }
+                        setHolderPhotoFile(file)
+                        const url = URL.createObjectURL(file)
+                        setHolderPhotoPreview(url)
+                      }}
+                    />
+                    <div
+                      onClick={() => holderPhotoInputRef.current?.click()}
+                      className="flex items-center gap-3 p-2.5 rounded-lg border border-dashed border-border cursor-pointer hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="size-10 rounded-full bg-muted border-2 border-border overflow-hidden flex items-center justify-center shrink-0">
+                        {holderPhotoPreview ? (
+                          <img
+                            src={holderPhotoPreview}
+                            alt="Holder photo preview"
+                            className="size-full object-cover"
+                          />
+                        ) : (
+                          <UserCircle className="size-5 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-medium">
+                          {holderPhotoFile ? holderPhotoFile.name : "Upload photo"}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {holderPhotoFile ? "Click to replace" : "PNG, JPEG, or WebP · 2MB max"}
+                        </p>
+                      </div>
+                      {holderPhotoFile && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setHolderPhotoFile(null)
+                            if (holderPhotoPreview) URL.revokeObjectURL(holderPhotoPreview)
+                            setHolderPhotoPreview(null)
+                          }}
+                          className="p-1 rounded-md hover:bg-muted-foreground/20 transition-colors"
+                          aria-label="Remove photo"
+                        >
+                          <X className="size-3.5 text-muted-foreground" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
@@ -1159,6 +1285,7 @@ export function PassInstancesView({
                             passInstanceId={pi.id}
                             currentStatus={pi.status}
                             contactEmail={pi.contact.email}
+                            passType={passType}
                             onStatusChange={() => router.refresh()}
                             onEditContact={() => setEditingContact(pi.contact)}
                           />
@@ -1215,6 +1342,7 @@ export function PassInstancesView({
         open={issueSheetOpen}
         onOpenChange={setIssueSheetOpen}
         templateId={templateId}
+        passType={passType}
         onIssued={() => router.refresh()}
       />
 

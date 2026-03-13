@@ -5,7 +5,7 @@ import { z } from "zod"
 import { headers } from "next/headers"
 import { db, getNextMemberNumber } from "@/lib/db"
 import { sanitizeText } from "@/lib/sanitize"
-import { publicFormLimiter } from "@/lib/rate-limit"
+import { publicFormLimiter, joinPassLimiter } from "@/lib/rate-limit"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
@@ -17,6 +17,8 @@ import type { MinigameConfig } from "@/types/pass-types"
 
 // ─── Types ──────────────────────────────────────────────────
 
+export type JoinRequirement = "email_or_phone" | "email_only"
+
 export type OrganizationPublicInfo = {
   id: string
   name: string
@@ -26,6 +28,7 @@ export type OrganizationPublicInfo = {
   logoGoogle: string | null
   brandColor: string | null
   secondaryColor: string | null
+  joinRequirement: JoinRequirement
   templates: PublicTemplateInfo[]
 }
 
@@ -68,7 +71,10 @@ const joinSchema = z.object({
     .or(z.literal("")),
   organizationSlug: z.string().min(1),
   templateId: z.string().min(1),
-})
+}).refine(
+  (data) => (data.email && data.email.length > 0) || (data.phone && data.phone.length > 0),
+  { message: "Email or phone number is required", path: ["email"] }
+)
 
 const passRequestSchema = z.object({
   passInstanceId: z.string().min(1),
@@ -92,6 +98,7 @@ export async function getOrganizationBySlug(
       logoGoogle: true,
       brandColor: true,
       secondaryColor: true,
+      settings: true,
       passTemplates: {
         where: { status: "ACTIVE" },
         select: {
@@ -140,6 +147,7 @@ export async function getOrganizationBySlug(
     logoGoogle: organization.logoGoogle ?? null,
     brandColor: organization.brandColor,
     secondaryColor: organization.secondaryColor,
+    joinRequirement: (((organization.settings as Record<string, unknown>) ?? {}).joinRequirement as JoinRequirement) ?? "email_or_phone",
     templates: organization.passTemplates.map((t) => {
       return {
         id: t.id,
@@ -198,6 +206,7 @@ export type PassInstanceCardData = {
     config: unknown
     passDesign: PublicTemplateInfo["passDesign"]
   }
+  holderPhotoUrl: string | null
   unrevealedReward: { rewardId: string; description: string } | null
   minigameConfig: MinigameConfig | null
 }
@@ -323,6 +332,7 @@ export async function getPassInstanceCardData(
           }
         : null,
     },
+    holderPhotoUrl: typeof instanceData.holderPhotoUrl === "string" ? instanceData.holderPhotoUrl : null,
     unrevealedReward: unrevealed
       ? { rewardId: unrevealed.id, description: unrevealed.description! }
       : null,
@@ -335,12 +345,12 @@ export async function getPassInstanceCardData(
 export async function joinTemplate(
   formData: FormData
 ): Promise<JoinResult> {
-  // Rate limit by IP
+  // Rate limit by IP — tight limit to prevent bulk pass creation abuse
   const headersList = await headers()
   const ip = headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-  const { success: rateLimitOk } = publicFormLimiter.check(`join:${ip}`)
+  const { success: rateLimitOk } = joinPassLimiter.check(`join:${ip}`)
   if (!rateLimitOk) {
-    return { success: false, error: "Too many requests. Please try again later." }
+    return { success: false, error: "Too many requests. Please try again in a while." }
   }
 
   const raw = {
@@ -367,11 +377,19 @@ export async function joinTemplate(
   // Fetch organization
   const organization = await db.organization.findUnique({
     where: { slug: organizationSlug },
-    select: { id: true },
+    select: { id: true, settings: true },
   })
 
   if (!organization) {
     return { success: false, error: "Organization not found" }
+  }
+
+  // Enforce org-level join requirement setting
+  const orgSettings = (organization.settings as Record<string, unknown>) ?? {}
+  const joinRequirement = (orgSettings.joinRequirement as string) ?? "email_or_phone"
+
+  if (joinRequirement === "email_only" && !cleanEmail) {
+    return { success: false, error: "Email address is required to join this program." }
   }
 
   // Fetch the specific template

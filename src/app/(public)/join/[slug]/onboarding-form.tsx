@@ -4,22 +4,19 @@ import { useState, useEffect, useTransition } from "react"
 import Image from "next/image"
 import {
   CreditCard,
-  Check,
   Loader2,
   ArrowLeft,
   Gift,
   ChevronRight,
-  Smartphone,
   Bookmark,
 } from "lucide-react"
 import { joinTemplate, requestWalletPass } from "@/server/onboarding-actions"
-import type { OrganizationPublicInfo, OnboardingResult, JoinResult } from "@/server/onboarding-actions"
+import type { OrganizationPublicInfo, JoinResult, JoinRequirement } from "@/server/onboarding-actions"
 import type { PublicTemplateInfo } from "@/types/pass-instance"
 import { computeTextColor } from "@/lib/wallet/card-design"
 import { TemplateCardPreview } from "@/components/template-card-preview"
 import { Card } from "@/components/ui/card"
 
-// Convenience helpers to extract config fields from PublicTemplateInfo
 function getVisitsRequired(p: PublicTemplateInfo): number {
   const cfg = p.config as Record<string, unknown> | null
   if (cfg && typeof cfg.stampsRequired === "number") return cfg.stampsRequired
@@ -33,18 +30,13 @@ function getRewardDescription(p: PublicTemplateInfo): string {
 }
 
 type Platform = "apple" | "google"
-type Step = "program-select" | "form" | "card-view" | "success"
+type Step = "program-select" | "form"
 
 function detectPlatform(): Platform {
   if (typeof navigator === "undefined") return "apple"
   const ua = navigator.userAgent.toLowerCase()
-  if (/iphone|ipad|ipod|macintosh/.test(ua) && "ontouchend" in document) {
-    return "apple"
-  }
-  if (/android/.test(ua)) {
-    return "google"
-  }
-  // Desktop fallback — show both but default to Apple
+  if (/iphone|ipad|ipod|macintosh/.test(ua) && "ontouchend" in document) return "apple"
+  if (/android/.test(ua)) return "google"
   return "apple"
 }
 
@@ -68,12 +60,10 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
   const programs = organization.templates
   const hasMultiplePrograms = programs.length > 1
 
-  // Resolve preselected template (must match a valid program)
   const preselected = preselectedTemplateId
     ? programs.find((p) => p.id === preselectedTemplateId) ?? null
     : null
 
-  // Auto-select if only one program OR if a valid preselectedTemplateId was provided
   const [selectedProgram, setSelectedProgram] = useState<PublicTemplateInfo | null>(
     preselected ?? (hasMultiplePrograms ? null : programs[0] ?? null)
   )
@@ -83,97 +73,21 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
   const [platform, setPlatform] = useState<Platform>("apple")
   const [showBothPlatforms, setShowBothPlatforms] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [isRequestingPass, startPassTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const [joinResult, setJoinResult] = useState<JoinResult | null>(null)
-  const [walletResult, setWalletResult] = useState<OnboardingResult | null>(null)
   const [name, setName] = useState("")
-  const [addedToWallet, setAddedToWallet] = useState(false)
+  const [loadingLabel, setLoadingLabel] = useState("Creating your card...")
 
   useEffect(() => {
     const detected = detectPlatform()
     setPlatform(detected)
-    // On desktop, show both platform buttons
     if (!isIOS() && !isAndroid()) {
       setShowBothPlatforms(true)
     }
   }, [])
 
-  function handleProgramSelect(program: PublicTemplateInfo) {
-    setSelectedProgram(program)
-    setStep("form")
-  }
+  const joinReq: JoinRequirement = organization.joinRequirement ?? "email_or_phone"
+  const requireEmailOnly = joinReq === "email_only"
 
-  function handleSubmit(formData: FormData) {
-    setError(null)
-    formData.set("organizationSlug", organization.slug)
-    if (selectedProgram) {
-      formData.set("templateId", selectedProgram.id)
-    }
-
-    startTransition(async () => {
-      const res = await joinTemplate(formData)
-
-      if (!res.success) {
-        setError(res.error ?? "Something went wrong")
-        return
-      }
-
-      setJoinResult(res)
-      setStep("card-view")
-    })
-  }
-
-  function handleAddToWallet(chosenPlatform: Platform) {
-    if (!joinResult?.passInstanceId) return
-    setError(null)
-
-    startPassTransition(async () => {
-      const res = await requestWalletPass(
-        joinResult.passInstanceId!,
-        organization.slug,
-        chosenPlatform
-      )
-
-      if (!res.success) {
-        setError(res.error ?? "Failed to generate wallet pass")
-        return
-      }
-
-      setWalletResult(res)
-      setAddedToWallet(true)
-
-      if (res.platform === "apple" && res.passBuffer) {
-        // Trigger .pkpass download
-        const bytes = Uint8Array.from(atob(res.passBuffer), (c) =>
-          c.charCodeAt(0)
-        )
-        const blob = new Blob([bytes], {
-          type: "application/vnd.apple.pkpass",
-        })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = "loyalty-card.pkpass"
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-      } else if (res.platform === "google" && res.saveUrl) {
-        // Redirect to Google Wallet save URL
-        window.location.href = res.saveUrl
-        return // Don't transition — page is navigating away
-      }
-
-      setStep("success")
-    })
-  }
-
-  function handleContinueWithoutWallet() {
-    setStep("success")
-  }
-
-  // Use selected program's card design, falling back to first program or organization defaults
   const activeProgram = selectedProgram ?? programs[0]
   const design = activeProgram?.passDesign
   const brandColor = design?.primaryColor ?? organization.brandColor ?? "oklch(0.55 0.2 265)"
@@ -181,12 +95,10 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
     /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : "#4F46E5"
   )
 
-  // Detect dark brand colors so badge stays visible
   const isColorDark = (() => {
     const m = brandColor.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/)
     if (!m) return false
     const [r, g, b] = [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)]
-    // Perceived brightness (ITU-R BT.601)
     return (r * 299 + g * 587 + b * 114) / 1000 < 60
   })()
   const badgeMix = isColorDark ? 20 : 12
@@ -199,225 +111,120 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
   }
   const webFont = fontFamilyCss[design?.fontFamily ?? "SANS"] ?? "inherit"
 
-  // --- Success screen ---
-  if (step === "success") {
-    return (
-      <div className="min-h-dvh flex items-center justify-center p-4 bg-background">
-        <div className="w-full max-w-md text-center space-y-6">
-          {/* Success checkmark */}
-          <div
-            className="mx-auto w-20 h-20 rounded-full flex items-center justify-center"
-            style={{
-              backgroundColor: brandColor,
-              animation: "scale-in 0.5s ease-out",
-            }}
-          >
-            <Check className="w-10 h-10 text-white" />
-          </div>
-
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {joinResult?.isReturning ? "Welcome back!" : "You're all set!"}
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              {addedToWallet
-                ? joinResult?.isReturning
-                  ? `Welcome back, ${joinResult.contactName}! Your loyalty card has been re-issued.`
-                  : `Your loyalty card for ${organization.name} is ready.`
-                : `Your loyalty card for ${organization.name} has been created.`}
-            </p>
-          </div>
-
-          {addedToWallet && walletResult?.platform === "apple" && (
-            <p className="text-sm text-muted-foreground">
-              Your pass should open automatically. Check your Wallet app if it
-              doesn't appear.
-            </p>
-          )}
-          {addedToWallet && walletResult?.platform === "google" && (
-            <p className="text-sm text-muted-foreground">
-              You're being redirected to Google Wallet. If nothing happens,{" "}
-              <a
-                href={walletResult.saveUrl}
-                className="underline underline-offset-4 hover:text-foreground"
-              >
-                tap here
-              </a>
-              .
-            </p>
-          )}
-          {!addedToWallet && (
-            <p className="text-sm text-muted-foreground">
-              Show your name at the counter to earn stamps on each visit.
-            </p>
-          )}
-
-          {joinResult?.cardUrl && (
-            <a
-              href={joinResult.cardUrl}
-              className="inline-flex items-center justify-center gap-2 w-full h-10 rounded-lg border border-input text-sm font-medium hover:bg-accent/50 transition-colors"
-            >
-              <Bookmark className="w-4 h-4" aria-hidden="true" />
-              View your card
-            </a>
-          )}
-
-          <button
-            onClick={() => {
-              setStep(hasMultiplePrograms ? "program-select" : "form")
-              setJoinResult(null)
-              setWalletResult(null)
-              setAddedToWallet(false)
-              setError(null)
-              if (hasMultiplePrograms) {
-                setSelectedProgram(null)
-              }
-            }}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Start over
-          </button>
-        </div>
-      </div>
-    )
+  function handleProgramSelect(program: PublicTemplateInfo) {
+    setSelectedProgram(program)
+    setStep("form")
   }
 
-  // --- Card view screen (post-enrollment, pre-wallet) ---
-  if (step === "card-view" && joinResult) {
-    return (
-      <div className="min-h-dvh flex flex-col items-center justify-center p-4 bg-background" style={{ fontFamily: webFont }}>
-        <div className="w-full max-w-md space-y-6">
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {joinResult.isReturning ? "Welcome back!" : "Your card is ready!"}
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              {joinResult.isReturning
-                ? `Welcome back, ${joinResult.contactName}!`
-                : `${joinResult.contactName}, here's your loyalty card for ${organization.name}.`}
-            </p>
-          </div>
+  // Combined: create pass + generate wallet + open wallet — one tap
+  function handleSubmitAndAddToWallet(formData: FormData, chosenPlatform: Platform) {
+    setError(null)
 
-          {/* Full-size card preview */}
-          {activeProgram && (
-            <div className="flex justify-center">
-              <TemplateCardPreview
-                template={activeProgram}
-                organizationName={organization.name}
-                logoUrl={organization.logo}
-                logoAppleUrl={organization.logoApple}
-                logoGoogleUrl={organization.logoGoogle}
-                customerName={joinResult.contactName}
-                currentVisits={joinResult.currentCycleVisits ?? 0}
-                hasReward={joinResult.hasAvailableReward}
-              />
-            </div>
-          )}
+    const email = (formData.get("email") as string)?.trim() ?? ""
+    const phone = (formData.get("phone") as string)?.trim() ?? ""
 
-          {/* Wallet buttons */}
-          <div className="space-y-3">
-            {/* Error */}
-            {error && (
-              <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
+    if (requireEmailOnly && !email) {
+      setError("Email address is required to join this program.")
+      return
+    }
 
-            {/* Show platform-specific or both wallet buttons */}
-            {isRequestingPass ? (
-              <div className="flex items-center justify-center h-12">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" aria-hidden="true" />
-                <span className="ml-2 text-sm text-muted-foreground">Adding to wallet...</span>
-              </div>
-            ) : showBothPlatforms ? (
-              <div className="flex items-center justify-center gap-3">
-                <button
-                  onClick={() => handleAddToWallet("apple")}
-                  disabled={isRequestingPass}
-                  className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Add to Apple Wallet"
-                >
-                  <Image
-                    src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg"
-                    alt="Add to Apple Wallet"
-                    width={156}
-                    height={48}
-                    className="h-12 w-auto"
-                  />
-                </button>
-                <button
-                  onClick={() => handleAddToWallet("google")}
-                  disabled={isRequestingPass}
-                  className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Add to Google Wallet"
-                >
-                  <Image
-                    src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg"
-                    alt="Add to Google Wallet"
-                    width={176}
-                    height={48}
-                    className="h-12 w-auto"
-                  />
-                </button>
-              </div>
-            ) : (
-              <div className="flex justify-center">
-                <button
-                  onClick={() => handleAddToWallet(platform)}
-                  disabled={isRequestingPass}
-                  className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label={`Add to ${platform === "apple" ? "Apple" : "Google"} Wallet`}
-                >
-                  <Image
-                    src={platform === "apple"
-                      ? "/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg"
-                      : "/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg"
-                    }
-                    alt={`Add to ${platform === "apple" ? "Apple" : "Google"} Wallet`}
-                    width={platform === "apple" ? 156 : 176}
-                    height={48}
-                    className="h-12 w-auto"
-                  />
-                </button>
-              </div>
-            )}
+    if (!requireEmailOnly && !email && !phone) {
+      setError("Please provide an email or phone number so we can find your card next time.")
+      return
+    }
 
-            {/* Continue without wallet */}
-            <button
-              onClick={handleContinueWithoutWallet}
-              disabled={isRequestingPass}
-              className="flex w-full items-center justify-center gap-2 h-10 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-            >
-              Continue without wallet
-            </button>
-          </div>
+    formData.set("organizationSlug", organization.slug)
+    if (selectedProgram) {
+      formData.set("templateId", selectedProgram.id)
+    }
 
-          {/* Bookmark hint */}
-          {joinResult.cardUrl && (
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <Bookmark className="w-3.5 h-3.5" aria-hidden="true" />
-              <a
-                href={joinResult.cardUrl}
-                className="underline underline-offset-4 hover:text-foreground transition-colors"
-              >
-                Bookmark your card
-              </a>
-              {" "}to access it anytime
-            </div>
-          )}
+    startTransition(async () => {
+      // Step 1: Create pass instance
+      setLoadingLabel("Creating your card...")
+      const joinRes = await joinTemplate(formData)
 
-          {/* Footer */}
-          <div className="text-center">
-            <p className="text-[11px] text-muted-foreground/70">
-              Powered by{" "}
-              <span className="font-medium text-muted-foreground">Loyalshy</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    )
+      if (!joinRes.success) {
+        setError(joinRes.error ?? "Something went wrong")
+        return
+      }
+
+      // Step 2: Generate wallet pass
+      setLoadingLabel("Adding to wallet...")
+      const walletRes = await requestWalletPass(
+        joinRes.passInstanceId!,
+        organization.slug,
+        chosenPlatform
+      )
+
+      if (!walletRes.success) {
+        // Pass was created but wallet generation failed — redirect to card page
+        if (joinRes.cardUrl) {
+          window.location.href = joinRes.cardUrl
+        }
+        return
+      }
+
+      // Step 3: Deliver wallet pass
+      if (walletRes.platform === "apple" && walletRes.passBuffer) {
+        const bytes = Uint8Array.from(atob(walletRes.passBuffer), (c) => c.charCodeAt(0))
+        const blob = new Blob([bytes], { type: "application/vnd.apple.pkpass" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = "loyalty-card.pkpass"
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+
+        // Redirect to card page after a brief moment (pass opens in Wallet)
+        if (joinRes.cardUrl) {
+          setTimeout(() => {
+            window.location.href = joinRes.cardUrl!
+          }, 1500)
+        }
+      } else if (walletRes.platform === "google" && walletRes.saveUrl) {
+        window.location.href = walletRes.saveUrl
+        return
+      }
+    })
+  }
+
+  // Submit without wallet — just create pass and go to card page
+  function handleSubmitWithoutWallet(formData: FormData) {
+    setError(null)
+
+    const email = (formData.get("email") as string)?.trim() ?? ""
+    const phone = (formData.get("phone") as string)?.trim() ?? ""
+
+    if (requireEmailOnly && !email) {
+      setError("Email address is required to join this program.")
+      return
+    }
+
+    if (!requireEmailOnly && !email && !phone) {
+      setError("Please provide an email or phone number so we can find your card next time.")
+      return
+    }
+
+    formData.set("organizationSlug", organization.slug)
+    if (selectedProgram) {
+      formData.set("templateId", selectedProgram.id)
+    }
+
+    startTransition(async () => {
+      setLoadingLabel("Creating your card...")
+      const res = await joinTemplate(formData)
+
+      if (!res.success) {
+        setError(res.error ?? "Something went wrong")
+        return
+      }
+
+      if (res.cardUrl) {
+        window.location.href = res.cardUrl
+      }
+    })
   }
 
   // --- Program selection screen (multi-program only) ---
@@ -451,22 +258,20 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
 
           {/* Program cards */}
           <div className="space-y-3">
-            {programs.map((program) => {
-              return (
-                <Card asChild key={program.id}>
+            {programs.map((program) => (
+              <Card asChild key={program.id}>
                 <button
                   onClick={() => handleProgramSelect(program)}
                   className="w-full text-left p-4 hover:bg-accent/50 hover:shadow-md transition-all group"
                 >
                   <div className="flex items-center gap-4">
-                    {/* Card preview thumbnail */}
                     <div className="shrink-0 rounded-lg overflow-hidden" style={{ width: 56, height: 72 }}>
                       <TemplateCardPreview
                         template={program}
                         organizationName={organization.name}
                         logoUrl={organization.logo}
-                logoAppleUrl={organization.logoApple}
-                logoGoogleUrl={organization.logoGoogle}
+                        logoAppleUrl={organization.logoApple}
+                        logoGoogleUrl={organization.logoGoogle}
                         compact
                         width={56}
                         height={72}
@@ -483,7 +288,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
                         {program.passType === "COUPON"
                           ? getRewardDescription(program)
                           : program.passType === "MEMBERSHIP"
-                            ? `${getRewardDescription(program)}`
+                            ? getRewardDescription(program)
                             : `${getRewardDescription(program)} after ${getVisitsRequired(program)} visits`}
                       </p>
                     </div>
@@ -491,9 +296,8 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
                     <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
                   </div>
                 </button>
-                </Card>
-              )
-            })}
+              </Card>
+            ))}
           </div>
 
           {/* Footer */}
@@ -515,7 +319,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
   // --- Form screen ---
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center p-4 bg-background" style={{ fontFamily: webFont }}>
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-6">
         {/* Back button for multi-program */}
         {hasMultiplePrograms && (
           <button
@@ -534,22 +338,22 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
         {/* Header */}
         <div className="text-center space-y-4">
           {(organization.logoGoogle ?? organization.logo) && (
-            <div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden bg-muted">
+            <div className="mx-auto w-16 h-16 rounded-2xl overflow-hidden bg-muted">
               <Image
                 src={(organization.logoGoogle ?? organization.logo)!}
                 alt={organization.name}
-                width={80}
-                height={80}
+                width={64}
+                height={64}
                 className="w-full h-full object-cover"
               />
             </div>
           )}
 
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight">
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold tracking-tight">
               {organization.name}
             </h1>
-            <p className="text-muted-foreground text-[15px]">
+            <p className="text-muted-foreground text-[14px]">
               {activeProgram?.name ?? "Get your digital loyalty card"}
             </p>
           </div>
@@ -557,13 +361,13 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
           {/* Reward info */}
           {activeProgram && (
             <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium"
               style={{
                 backgroundColor: `color-mix(in oklch, ${brandColor} ${badgeMix}%, transparent)`,
                 color: brandColor,
               }}
             >
-              <Gift className="w-4 h-4" aria-hidden="true" />
+              <Gift className="w-3.5 h-3.5" aria-hidden="true" />
               {getRewardDescription(activeProgram)} after{" "}
               {getVisitsRequired(activeProgram)} visits
             </div>
@@ -579,30 +383,18 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
           </div>
         )}
 
-        {/* Card preview */}
-        {activeProgram && (
-          <div className="flex justify-center">
-            <TemplateCardPreview
-              template={activeProgram}
-              organizationName={organization.name}
-              logoUrl={organization.logo}
-              logoAppleUrl={organization.logoApple}
-              logoGoogleUrl={organization.logoGoogle}
-              compact
-              customerName={name.trim() || undefined}
-              currentVisits={0}
-            />
-          </div>
-        )}
-
-        {/* Form */}
-        <form action={handleSubmit} className="space-y-4">
+        {/* Form — fields first, card preview after */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            const formData = new FormData(e.currentTarget)
+            handleSubmitAndAddToWallet(formData, platform)
+          }}
+          className="space-y-4"
+        >
           {/* Name */}
           <div className="space-y-1.5">
-            <label
-              htmlFor="fullName"
-              className="text-[13px] font-medium text-foreground"
-            >
+            <label htmlFor="fullName" className="text-[13px] font-medium text-foreground">
               Your name <span className="text-destructive">*</span>
             </label>
             <input
@@ -620,19 +412,19 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
 
           {/* Email */}
           <div className="space-y-1.5">
-            <label
-              htmlFor="email"
-              className="text-[13px] font-medium text-foreground"
-            >
+            <label htmlFor="email" className="text-[13px] font-medium text-foreground">
               Email{" "}
-              <span className="text-muted-foreground font-normal">
-                (optional)
-              </span>
+              {requireEmailOnly ? (
+                <span className="text-destructive">*</span>
+              ) : (
+                <span className="text-muted-foreground font-normal">(email or phone required)</span>
+              )}
             </label>
             <input
               id="email"
               name="email"
               type="email"
+              required={requireEmailOnly}
               autoComplete="email"
               placeholder="john@example.com"
               className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
@@ -640,25 +432,22 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
           </div>
 
           {/* Phone */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="phone"
-              className="text-[13px] font-medium text-foreground"
-            >
-              Phone{" "}
-              <span className="text-muted-foreground font-normal">
-                (optional)
-              </span>
-            </label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              autoComplete="tel"
-              placeholder="+1 (555) 123-4567"
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
-            />
-          </div>
+          {!requireEmailOnly && (
+            <div className="space-y-1.5">
+              <label htmlFor="phone" className="text-[13px] font-medium text-foreground">
+                Phone{" "}
+                <span className="text-muted-foreground font-normal">(if no email)</span>
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="+1 (555) 123-4567"
+                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
+              />
+            </div>
+          )}
 
           {/* Error */}
           {error && (
@@ -667,29 +456,114 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
             </div>
           )}
 
-          {/* Submit button */}
-          <button
-            type="submit"
-            disabled={isPending}
-            className="flex w-full items-center justify-center gap-2 h-12 rounded-lg text-[15px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: brandColor,
-              color: textOnBrand,
-            }}
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
-                Creating your card...
-              </>
-            ) : (
-              <>
-                <Smartphone className="w-5 h-5" aria-hidden="true" />
-                Get your card
-              </>
-            )}
-          </button>
+          {/* Wallet buttons — primary action */}
+          {isPending ? (
+            <div className="flex items-center justify-center gap-2 h-12">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" aria-hidden="true" />
+              <span className="text-sm text-muted-foreground">{loadingLabel}</span>
+            </div>
+          ) : showBothPlatforms ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const form = document.querySelector("form")
+                    if (!form) return
+                    if (!form.reportValidity()) return
+                    const formData = new FormData(form)
+                    handleSubmitAndAddToWallet(formData, "apple")
+                  }}
+                  disabled={isPending}
+                  className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Add to Apple Wallet"
+                >
+                  <Image
+                    src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg"
+                    alt="Add to Apple Wallet"
+                    width={156}
+                    height={48}
+                    className="h-12 w-auto"
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const form = document.querySelector("form")
+                    if (!form) return
+                    if (!form.reportValidity()) return
+                    const formData = new FormData(form)
+                    handleSubmitAndAddToWallet(formData, "google")
+                  }}
+                  disabled={isPending}
+                  className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Add to Google Wallet"
+                >
+                  <Image
+                    src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg"
+                    alt="Add to Google Wallet"
+                    width={176}
+                    height={48}
+                    className="h-12 w-auto"
+                  />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="submit"
+              disabled={isPending}
+              className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center w-full"
+              aria-label={`Add to ${platform === "apple" ? "Apple" : "Google"} Wallet`}
+            >
+              <Image
+                src={platform === "apple"
+                  ? "/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg"
+                  : "/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg"
+                }
+                alt={`Add to ${platform === "apple" ? "Apple" : "Google"} Wallet`}
+                width={platform === "apple" ? 156 : 176}
+                height={48}
+                className="h-12 w-auto"
+              />
+            </button>
+          )}
+
+          {/* Continue without wallet — text link */}
+          {!isPending && (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => {
+                const form = document.querySelector("form")
+                if (!form) return
+                if (!form.reportValidity()) return
+                const formData = new FormData(form)
+                handleSubmitWithoutWallet(formData)
+              }}
+              className="flex w-full items-center justify-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Bookmark className="w-3.5 h-3.5" aria-hidden="true" />
+              Continue without wallet
+            </button>
+          )}
         </form>
+
+        {/* Card preview — below the form, visible but not blocking */}
+        {activeProgram && !isPending && (
+          <div className="flex justify-center pt-2">
+            <TemplateCardPreview
+              template={activeProgram}
+              organizationName={organization.name}
+              logoUrl={organization.logo}
+              logoAppleUrl={organization.logoApple}
+              logoGoogleUrl={organization.logoGoogle}
+              compact
+              customerName={name.trim() || undefined}
+              currentVisits={0}
+            />
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center space-y-2">
@@ -706,4 +580,3 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
     </div>
   )
 }
-
