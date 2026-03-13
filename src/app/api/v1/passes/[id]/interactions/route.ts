@@ -10,6 +10,7 @@ import { serializeInteraction } from "@/lib/api-serializers"
 import { apiPaginated, apiCreated } from "@/lib/api-response"
 import { ValidationError, NotFoundError, UnprocessableError } from "@/lib/api-errors"
 import { db } from "@/lib/db"
+import type { Prisma } from "@prisma/client"
 import type { ApiContext } from "@/lib/api-auth"
 
 export const OPTIONS = handlePreflight
@@ -89,8 +90,8 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
       organizationId: ctx.organizationId,
       passTemplateId: pass.passTemplate.id,
       passInstanceId: passId,
-      type: parsed.data.type as import("@prisma/client").InteractionType,
-      metadata: (parsed.data.metadata ?? {}) as import("@prisma/client").Prisma.JsonObject,
+      type: parsed.data.type,
+      metadata: (parsed.data.metadata ?? {}) as Prisma.JsonObject,
     },
     select: {
       id: true,
@@ -117,7 +118,7 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     },
   })
 
-  const serialized = serializeInteraction(interaction)
+  const serialized = serializeInteraction(interaction as Parameters<typeof serializeInteraction>[0])
 
   import("@/lib/api-events").then(({ dispatchWebhookEvent }) =>
     dispatchWebhookEvent(ctx.organizationId, "interaction.created", { interaction: serialized })
