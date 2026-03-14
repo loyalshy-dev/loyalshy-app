@@ -137,7 +137,7 @@ export async function assertOrganizationRole(
  * Uses session.activeOrganizationId or falls back to first membership.
  * Includes all ACTIVE pass templates with their designs.
  */
-export async function getOrganizationForUser() {
+export const getOrganizationForUser = cache(async () => {
   const session = await assertAuthenticated()
 
   let organizationId = session.session.activeOrganizationId
@@ -167,7 +167,7 @@ export async function getOrganizationForUser() {
   })
 
   return organization
-}
+})
 
 /**
  * Returns all ACTIVE templates for an organization with their designs.

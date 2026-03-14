@@ -1,8 +1,7 @@
 import { connection } from "next/server"
-import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
+import { getOrganizationForUser } from "@/lib/dal"
 import { getContacts } from "@/server/contact-actions"
 import { ContactsView } from "@/components/dashboard/contacts/contacts-view"
-import { db } from "@/lib/db"
 
 export default async function ContactsPage({
   searchParams,
@@ -10,7 +9,6 @@ export default async function ContactsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   await connection()
-  const session = await assertAuthenticated()
   const organization = await getOrganizationForUser()
 
   if (!organization) {
@@ -40,11 +38,6 @@ export default async function ContactsPage({
     passType,
   })
 
-  // Check if this organization has ANY contacts (for empty state)
-  const totalContactCount = await db.contact.count({
-    where: { organizationId: organization.id },
-  })
-
   return (
     <ContactsView
       result={result}
@@ -54,7 +47,7 @@ export default async function ContactsPage({
       page={page}
       hasReward={hasReward}
       templateType={passType}
-      isEmpty={totalContactCount === 0}
+      isEmpty={result.total === 0}
     />
   )
 }

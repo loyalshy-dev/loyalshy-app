@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { connection } from "next/server"
-import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
+import { getOrganizationForUser } from "@/lib/dal"
 import { getOnboardingChecklist } from "@/server/onboarding-registration-actions"
 import {
   getOverviewStats,
@@ -27,7 +27,6 @@ import {
 
 export default async function OverviewPage() {
   await connection()
-  await assertAuthenticated()
 
   return (
     <div className="space-y-6">

@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { connection } from "next/server"
 import { redirect } from "next/navigation"
-import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
+import { getCurrentUser, getOrganizationForUser } from "@/lib/dal"
 import { getTemplatesList } from "@/server/template-actions"
 import { db } from "@/lib/db"
 import { TemplatesGridView } from "@/components/dashboard/templates-grid"
@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default async function ProgramsPage() {
   await connection()
-  await assertAuthenticated()
 
   return (
     <Suspense
@@ -33,9 +32,9 @@ export default async function ProgramsPage() {
 }
 
 async function ProgramsSection() {
-  const session = await assertAuthenticated()
+  const session = await getCurrentUser()
   const organization = await getOrganizationForUser()
-  if (!organization) {
+  if (!organization || !session) {
     redirect("/register?step=2")
   }
 

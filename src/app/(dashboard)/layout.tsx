@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { connection } from "next/server"
 import type { Metadata } from "next"
-import { getCurrentUser, getOrganizationForUser } from "@/lib/dal"
+import { getCurrentUser } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 
@@ -30,30 +30,28 @@ async function DashboardLayoutInner({
     redirect("/register?step=2")
   }
 
-  // Fetch organization for this user
-  const organization = await db.organization.findUnique({
-    where: { id: activeOrgId },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      logo: true,
-      logoGoogle: true,
-      plan: true,
-      subscriptionStatus: true,
-      trialEndsAt: true,
-    },
-  })
-
-  // Determine the user's org role
-  let orgRole: string | null = null
-  if (organization) {
-    const member = await db.member.findFirst({
-      where: { organizationId: organization.id, userId: user.id },
+  // Fetch organization and member role in parallel
+  const [organization, member] = await Promise.all([
+    db.organization.findUnique({
+      where: { id: activeOrgId },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        logo: true,
+        logoGoogle: true,
+        plan: true,
+        subscriptionStatus: true,
+        trialEndsAt: true,
+      },
+    }),
+    db.member.findFirst({
+      where: { organizationId: activeOrgId, userId: user.id },
       select: { role: true },
-    })
-    orgRole = member?.role ?? null
-  }
+    }),
+  ])
+
+  let orgRole: string | null = member?.role ?? null
 
   // Super admins always get owner-level access
   if (user.role === "SUPER_ADMIN") {
@@ -85,13 +83,45 @@ async function DashboardLayoutInner({
   )
 }
 
+function DashboardShellSkeleton() {
+  return (
+    <div className="flex h-dvh">
+      {/* Sidebar skeleton */}
+      <div className="hidden md:flex w-[var(--sidebar-width,16rem)] flex-col border-r bg-sidebar">
+        <div className="p-4 space-y-4">
+          <div className="h-8 w-32 rounded-md bg-muted animate-pulse" />
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-8 rounded-md bg-muted/50 animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* Main area skeleton */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="h-14 border-b flex items-center px-4">
+          <div className="h-6 w-48 rounded bg-muted animate-pulse" />
+        </div>
+        <div className="flex-1 p-6">
+          <div className="h-8 w-64 rounded bg-muted animate-pulse mb-6" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-28 rounded-lg bg-muted/50 animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <Suspense>
+    <Suspense fallback={<DashboardShellSkeleton />}>
       <DashboardLayoutInner>{children}</DashboardLayoutInner>
     </Suspense>
   )

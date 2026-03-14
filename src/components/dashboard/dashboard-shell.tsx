@@ -2,14 +2,16 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { AlertTriangle, Clock, Lock, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "./sidebar"
 import { Topbar } from "./topbar"
-import { CommandPalette } from "./command-palette"
 import { MobileNav } from "./mobile-nav"
-import { RegisterVisitDialog } from "./register-visit-dialog"
+
+const CommandPalette = dynamic(() => import("./command-palette").then(m => ({ default: m.CommandPalette })), { ssr: false })
+const RegisterVisitDialog = dynamic(() => import("./register-visit-dialog").then(m => ({ default: m.RegisterVisitDialog })), { ssr: false })
 
 type DashboardShellProps = {
   user: {
