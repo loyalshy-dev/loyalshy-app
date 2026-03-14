@@ -98,7 +98,7 @@ function JsonLd() {
 }
 
 const MARKETING_NAMESPACES = [
-  "nav", "hero", "socialProof", "featureShowcase", "howItWorks",
+  "common", "nav", "hero", "socialProof", "featureShowcase", "howItWorks",
   "features", "walletPreview", "testimonials", "pricing", "faq",
   "closingCta", "footer",
 ] as const
