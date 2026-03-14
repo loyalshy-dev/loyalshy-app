@@ -42,7 +42,7 @@
     "freeForever": "Gratis para siempre",
     "noCreditCard": "Sin tarjeta de crédito",
     "screenshotAlt": "Panel de Loyalshy mostrando programas de fidelización con diseños de tarjetas",
-    "browserUrl": "app.loyalshy.com/dashboard"
+    "browserUrl": "www.loyalshy.com/dashboard"
   },
   "socialProof": {
     "headline": "Impulsando pases digitales de wallet para negocios en todo el mundo"
@@ -50,7 +50,7 @@
   "featureShowcase": {
     "sectionLabel": "Plataforma",
     "title": "Todo en un solo lugar",
-    "browserUrl": "app.loyalshy.com",
+    "browserUrl": "www.loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Panel",

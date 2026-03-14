@@ -42,7 +42,7 @@
     "freeForever": "Free forever",
     "noCreditCard": "No credit card required",
     "screenshotAlt": "Loyalshy dashboard showing loyalty programs with beautiful card designs",
-    "browserUrl": "app.loyalshy.com/dashboard"
+    "browserUrl": "www.loyalshy.com/dashboard"
   },
   "socialProof": {
     "headline": "Powering digital wallet passes for businesses worldwide"
@@ -50,7 +50,7 @@
   "featureShowcase": {
     "sectionLabel": "Platform",
     "title": "Everything in one place",
-    "browserUrl": "app.loyalshy.com",
+    "browserUrl": "www.loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Dashboard",

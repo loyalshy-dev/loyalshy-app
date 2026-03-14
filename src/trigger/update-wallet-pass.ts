@@ -428,7 +428,7 @@ async function patchGooglePass(
   // Add reveal link if there's an unrevealed prize, clear it otherwise
   if (hasUnrevealedPrize && passInstance.passTemplate.organization.slug) {
     const { signCardAccess } = await import("@/lib/card-access")
-    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
+    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://www.loyalshy.com"
     const slug = passInstance.passTemplate.organization.slug
     const sig = signCardAccess(passInstance.id)
     const cardPageUrl = `${baseUrl}/join/${slug}/card/${passInstance.id}?sig=${sig}`

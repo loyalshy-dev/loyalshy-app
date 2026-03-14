@@ -389,7 +389,7 @@ export async function notifyGooglePassUpdate(
     )
     if (unrevealedReward) {
       const { signCardAccess } = await import("../../card-access")
-      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
+      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://www.loyalshy.com"
       const slug = passInstance.contact.organization.slug
       const sig = signCardAccess(passInstance.id)
       revealLink = `${baseUrl}/join/${slug}/card/${passInstance.id}?sig=${sig}`

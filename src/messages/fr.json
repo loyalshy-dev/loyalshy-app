@@ -42,7 +42,7 @@
     "freeForever": "Gratuit pour toujours",
     "noCreditCard": "Aucune carte bancaire requise",
     "screenshotAlt": "Tableau de bord Loyalshy montrant les programmes de fidélité avec de superbes designs de cartes",
-    "browserUrl": "app.loyalshy.com/dashboard"
+    "browserUrl": "www.loyalshy.com/dashboard"
   },
   "socialProof": {
     "headline": "Des passes de portefeuille digital pour les entreprises du monde entier"
@@ -50,7 +50,7 @@
   "featureShowcase": {
     "sectionLabel": "Plateforme",
     "title": "Tout au même endroit",
-    "browserUrl": "app.loyalshy.com",
+    "browserUrl": "www.loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Tableau de bord",

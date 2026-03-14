@@ -633,7 +633,7 @@ export async function generateApplePass(
   // Prize reveal link — shown when an unrevealed prize is pending
   if (input.hasUnrevealedPrize && input.passInstanceId && input.organizationSlug) {
     const { signCardAccess } = await import("../../card-access")
-    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://app.loyalshy.com"
+    const baseUrl = process.env.BETTER_AUTH_URL ?? "https://www.loyalshy.com"
     const sig = signCardAccess(input.passInstanceId)
     const cardPageUrl = `${baseUrl}/join/${input.organizationSlug}/card/${input.passInstanceId}?sig=${sig}`
     pass.backFields.push({
