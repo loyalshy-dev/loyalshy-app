@@ -27,12 +27,10 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Better Auth's forgetPassword endpoint — method exists via Proxy
-    // but TypeScript can't infer it from the client plugins alone
     const { error } = await (authClient as unknown as {
-      forgetPassword: (opts: { email: string; redirectTo: string }) =>
+      requestPasswordReset: (opts: { email: string; redirectTo: string }) =>
         Promise<{ error: { message: string } | null }>
-    }).forgetPassword({
+    }).requestPasswordReset({
       email,
       redirectTo: "/reset-password",
     })
