@@ -24,7 +24,7 @@ https://emma.io
 
 Google Cloud Console (Social Auth)
 Neon (Postgres) https://console.neon.tech/
-Uplash (Redis) https://console.upstash.com/
+Upstash (Redis) https://console.upstash.com/
 Trigger.dev (Jobs)
 Cloudflare (bucket i domini)
 Stripe

@@ -101,7 +101,10 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Root layout**: wraps children in `NextIntlClientProvider` with messages from `getMessages()`, inside a Suspense boundary (required for `cacheComponents: true`)
 - **Language switcher**: `src/components/language-switcher.tsx` — sets `locale` cookie and reloads, placed in marketing navbar and dashboard topbar
 - **Adding a new locale**: Add to `locales` array in `config.ts`, create `src/messages/{locale}.json`, add `localeNames` entry
-- **Remaining i18n work**: Contact detail sheet, contact columns/table, program editor, distribution sections, CSV import, settings forms (general, team, billing, API keys, webhooks), register visit dialog, dashboard shell trial banner, server action error messages, legal pages (long-form content)
+- **Server actions**: use `getTranslations("serverErrors")` from `next-intl/server` for error/validation messages
+- **Studio panels**: all use `useTranslations("studio.*")` — panels, colors, strip, notifications, details, prize, avatar, template, canvas
+- **Coverage**: 100% — 78 files, ~1,300 strings across marketing, auth, dashboard, studio, server actions, and legal pages
+- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, walletPreview, testimonials, pricing, faq, closingCta, footer, cookieBanner, auth.login, auth.register, auth.forgotPassword, auth.invite, auth.error, dashboard.nav, dashboard.overview, dashboard.activity, dashboard.topContacts, dashboard.programsSummary, dashboard.contacts, dashboard.addContact, dashboard.contactDetail, dashboard.contactColumns, dashboard.contactTable, dashboard.programs, dashboard.passInstances, dashboard.distribution, dashboard.programSettings, dashboard.programEditor, dashboard.settings, dashboard.settingsForms, dashboard.registerVisit, dashboard.shell, dashboard.rewards, dashboard.jobsHistory, dashboard.onboarding, dashboard.status, dashboard.chart, errors, privacy, terms, cookies, studio.panels, studio.colors, studio.strip, studio.logo, studio.notifications, studio.details, studio.prize, studio.avatar, studio.template, studio.canvas, serverErrors
 
 ### Prisma v7 Rules
 - Use `prisma.config.ts` for configuration (datasource URL lives here, NOT in schema.prisma)
@@ -224,7 +227,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase PRICING — New pricing model (Free tier on landing page, Pro €29, Business €49, Scale €99, no 14-day trial)
 - [x] Phase ONBOARDING — Simplified registration (2 steps: signup + org name → dashboard), FREE plan in Prisma enum + plans.ts, no trial/Stripe at signup, programs usage tracking in billing
 - [x] Phase SEO — Comprehensive SEO audit fixes (legal pages, structured data, LCP performance, sitemap, robots.txt, WCAG contrast, HSTS preload, fake social proof removal)
-- [x] Phase I18N — Internationalization with next-intl (English + Spanish, cookie-based locale, 36 components wired up, language switcher in navbar + dashboard)
+- [x] Phase I18N — Internationalization with next-intl (English + Spanish, cookie-based locale, 78 files / ~1,300 strings, 100% coverage — marketing, auth, dashboard, studio, server actions, legal pages)
 - [x] Phase PERF — Performance optimization (WebP images, CSS hero animations, Suspense restructure, cached DAL, parallel queries, lazy-loaded dashboard dialogs, skeleton fallbacks)
 - [ ] Phase 6.1 — Production deployment
 
