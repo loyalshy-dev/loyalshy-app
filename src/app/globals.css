@@ -346,6 +346,11 @@
   }
 }
 
+/* — Hero CSS animations (no JS needed) — */
+.hero-fade-in {
+  animation: mk-fade-up 0.6s ease-out both;
+}
+
 /* — Marketing Keyframes — */
 
 @keyframes mk-fade-up {
@@ -379,5 +384,9 @@
   .mk-carousel-track,
   [data-mk-marquee] {
     animation: none !important;
+  }
+  .hero-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
   }
 }

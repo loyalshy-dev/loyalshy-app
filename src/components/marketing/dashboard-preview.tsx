@@ -3,69 +3,66 @@
 import { useState } from "react"
 import Image from "next/image"
 import { BarChart3, CreditCard, Palette, QrCode, Smartphone, Users } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { FadeIn, ScaleIn } from "./motion"
-
-const FEATURES = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    icon: BarChart3,
-    description:
-      "Get a real-time overview of visits, rewards, and customer engagement — all in one place.",
-    image: "/platform/dashboard.png",
-    alt: "Program overview dashboard with stat cards and template details",
-  },
-  {
-    id: "card-designer",
-    label: "Card Designer",
-    icon: Palette,
-    description:
-      "Design stunning loyalty cards with our visual studio. Your brand, your style.",
-    image: "/platform/studio.png",
-    alt: "Card design studio with floating toolbar and live wallet pass preview",
-  },
-  {
-    id: "programs",
-    label: "Programs",
-    icon: CreditCard,
-    description:
-      "Manage all your loyalty programs in one place. Stamp cards, coupons, memberships, and more.",
-    image: "/platform/cards.png",
-    alt: "Programs grid showing different loyalty card types and designs",
-  },
-  {
-    id: "passes",
-    label: "Passes",
-    icon: Smartphone,
-    description:
-      "Track every issued pass. Filter by status, search contacts, and manage pass lifecycle.",
-    image: "/platform/passes.png",
-    alt: "Pass instances list with status filters and search",
-  },
-  {
-    id: "distribution",
-    label: "Distribution",
-    icon: QrCode,
-    description:
-      "Generate QR codes, share links, and issue passes directly. Multiple sizes for print.",
-    image: "/platform/distribution.png",
-    alt: "Distribution page with QR code, shareable link, and print sizes",
-  },
-  {
-    id: "team",
-    label: "Team",
-    icon: Users,
-    description:
-      "Invite staff with role-based access. Owners and staff see different views.",
-    image: "/platform/team.png",
-    alt: "Team settings showing members with roles and invite button",
-  },
-] as const
 
 /* ─── Main component ──────────────────────────────────────────────── */
 
 export function FeatureShowcase() {
+  const t = useTranslations("featureShowcase")
   const [activeTab, setActiveTab] = useState("dashboard")
+
+  const FEATURES = [
+    {
+      id: "dashboard",
+      label: t("tabs.dashboard.label"),
+      icon: BarChart3,
+      description: t("tabs.dashboard.description"),
+      image: "/platform/dashboard.webp",
+      alt: t("tabs.dashboard.alt"),
+    },
+    {
+      id: "card-designer",
+      label: t("tabs.cardDesigner.label"),
+      icon: Palette,
+      description: t("tabs.cardDesigner.description"),
+      image: "/platform/studio.webp",
+      alt: t("tabs.cardDesigner.alt"),
+    },
+    {
+      id: "programs",
+      label: t("tabs.programs.label"),
+      icon: CreditCard,
+      description: t("tabs.programs.description"),
+      image: "/platform/cards.webp",
+      alt: t("tabs.programs.alt"),
+    },
+    {
+      id: "passes",
+      label: t("tabs.passes.label"),
+      icon: Smartphone,
+      description: t("tabs.passes.description"),
+      image: "/platform/passes.webp",
+      alt: t("tabs.passes.alt"),
+    },
+    {
+      id: "distribution",
+      label: t("tabs.distribution.label"),
+      icon: QrCode,
+      description: t("tabs.distribution.description"),
+      image: "/platform/distribution.webp",
+      alt: t("tabs.distribution.alt"),
+    },
+    {
+      id: "team",
+      label: t("tabs.team.label"),
+      icon: Users,
+      description: t("tabs.team.description"),
+      image: "/platform/team.webp",
+      alt: t("tabs.team.alt"),
+    },
+  ]
+
   const activeFeature = FEATURES.find((f) => f.id === activeTab) ?? FEATURES[0]
 
   return (
@@ -78,13 +75,13 @@ export function FeatureShowcase() {
               className="text-[13px] font-medium uppercase tracking-widest mb-3"
               style={{ color: "var(--mk-brand-purple)" }}
             >
-              Platform
+              {t("sectionLabel")}
             </p>
             <h2
               className="text-3xl sm:text-[2.5rem] font-bold"
               style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
             >
-              Everything in one place
+              {t("title")}
             </h2>
           </div>
         </FadeIn>
@@ -114,30 +111,23 @@ export function FeatureShowcase() {
                 className="mx-auto rounded-md px-4 py-1 text-[11px]"
                 style={{ background: "var(--mk-surface)", color: "var(--mk-text-dimmed)", border: "1px solid var(--mk-border)" }}
               >
-                app.loyalshy.com
+                {t("browserUrl")}
               </div>
             </div>
 
-            {/* Screenshot area */}
+            {/* Screenshot area — only render active image to avoid loading all 6 */}
             <div className="relative overflow-hidden" style={{ minHeight: 320 }}>
-              {FEATURES.map((feature) => (
-                <Image
-                  key={feature.id}
-                  src={feature.image}
-                  alt={feature.alt}
-                  width={1920}
-                  height={1080}
-                  className="w-full h-auto transition-opacity duration-300"
-                  style={{
-                    opacity: activeTab === feature.id ? 1 : 0,
-                    position: activeTab === feature.id ? "relative" : "absolute",
-                    top: 0,
-                    left: 0,
-                  }}
-                  priority={feature.id === "dashboard" && activeTab === "dashboard"}
-                  loading={activeTab === feature.id ? "eager" : "lazy"}
-                />
-              ))}
+              <Image
+                key={activeTab}
+                src={activeFeature.image}
+                alt={activeFeature.alt}
+                width={1920}
+                height={1080}
+                className="w-full h-auto"
+                sizes="(max-width: 1280px) 100vw, 1280px"
+                priority={activeTab === "dashboard"}
+                loading={activeTab === "dashboard" ? "eager" : "lazy"}
+              />
             </div>
           </div>
         </ScaleIn>

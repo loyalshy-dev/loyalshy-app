@@ -1,13 +1,11 @@
-"use client"
-
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Star } from "lucide-react"
-import { FadeIn } from "./motion"
+import { getTranslations } from "next-intl/server"
 
 /* ─── Browser frame with real screenshot ──────────────────────────── */
 
-function BrowserFrame() {
+function BrowserFrame({ browserUrl, screenshotAlt }: { browserUrl: string; screenshotAlt: string }) {
   return (
     <div
       className="relative w-full rounded-xl overflow-hidden"
@@ -40,14 +38,14 @@ function BrowserFrame() {
             <circle cx="5" cy="5" r="4" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.5" />
             <path d="M5 3v2h2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
           </svg>
-          app.loyalshy.com/dashboard
+          {browserUrl}
         </div>
       </div>
 
       {/* Screenshot */}
       <Image
-        src="/platform/cards.png"
-        alt="Loyalshy dashboard showing loyalty programs with beautiful card designs"
+        src="/platform/cards.webp"
+        alt={screenshotAlt}
         width={1920}
         height={1080}
         className="w-full h-auto"
@@ -60,7 +58,10 @@ function BrowserFrame() {
 
 /* ─── Hero ────────────────────────────────────────────────────────── */
 
-export function Hero() {
+export async function Hero() {
+  const t = await getTranslations("hero")
+  const tCommon = await getTranslations("common")
+
   return (
     <section
       className="relative overflow-hidden pt-8 sm:pt-12 pb-20 sm:pb-28"
@@ -84,7 +85,7 @@ export function Hero() {
 
       <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
         {/* Badge */}
-        <FadeIn delay={0} duration={0.5}>
+        <div className="hero-fade-in" style={{ animationDelay: "0ms" }}>
           <div className="flex justify-center mb-6">
             <div
               className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[13px] font-medium"
@@ -95,57 +96,56 @@ export function Hero() {
               }}
             >
               <Star className="size-3.5 fill-current" />
-              The modern loyalty platform
+              {t("badge")}
             </div>
           </div>
-        </FadeIn>
+        </div>
 
         {/* Headline */}
-        <FadeIn delay={0.1} duration={0.7}>
+        <div className="hero-fade-in" style={{ animationDelay: "100ms" }}>
           <h1
             className="mx-auto max-w-4xl text-center text-[clamp(2.5rem,6vw,4.25rem)] font-bold leading-[1.08]"
             style={{ color: "var(--mk-text)", letterSpacing: "-0.035em" }}
           >
-            Digital loyalty cards{" "}
+            {t("title1")}{" "}
             <br className="hidden sm:block" />
-            your customers{" "}
-            <span className="mk-gradient-text">actually use</span>
+            {t("title2")}{" "}
+            <span className="mk-gradient-text">{t("titleHighlight")}</span>
           </h1>
-        </FadeIn>
+        </div>
 
         {/* Subtitle */}
-        <FadeIn delay={0.2} duration={0.6}>
+        <div className="hero-fade-in" style={{ animationDelay: "200ms" }}>
           <p
             className="mx-auto mt-6 max-w-xl text-center text-[17px] leading-relaxed"
             style={{ color: "var(--mk-text-muted)" }}
           >
-            Replace paper punch cards with Apple &amp; Google Wallet passes.
-            Set up in 5 minutes. No app required for your customers.
+            {t("subtitle")}
           </p>
-        </FadeIn>
+        </div>
 
         {/* CTAs */}
-        <FadeIn delay={0.3} duration={0.5}>
+        <div className="hero-fade-in" style={{ animationDelay: "300ms" }}>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link href="/register" className="mk-btn-primary !py-3.5 !px-8 !text-[15px] gap-2">
-              Get Started Free
+              {tCommon("getStartedFree")}
               <ArrowRight className="size-4" />
             </Link>
             <Link href="#features" className="mk-btn-ghost !py-3.5 !px-8 !text-[15px]">
-              See How It Works
+              {t("seeHowItWorks")}
             </Link>
           </div>
           <p
             className="mt-4 text-center text-[13px]"
             style={{ color: "var(--mk-text-dimmed)" }}
           >
-            Free forever &middot; No credit card required
+            {t("freeForever")} &middot; {t("noCreditCard")}
           </p>
-        </FadeIn>
+        </div>
 
         {/* Product screenshot */}
         <div className="mx-auto mt-16 max-w-5xl">
-          <BrowserFrame />
+          <BrowserFrame browserUrl={t("browserUrl")} screenshotAlt={t("screenshotAlt")} />
         </div>
       </div>
     </section>

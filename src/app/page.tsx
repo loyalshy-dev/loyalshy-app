@@ -156,7 +156,7 @@ function showcaseToMarketing(dbCards: { designData: unknown; metadata: unknown }
   return { cards, designs }
 }
 
-async function ShowcaseContent() {
+async function ShowcaseWalletPreview() {
   await connection()
 
   let showcaseCards: MarketingCard[] | undefined
@@ -173,20 +173,7 @@ async function ShowcaseContent() {
     // Fallback to hardcoded — DB may not be available
   }
 
-  return (
-    <>
-      <Hero />
-      <SocialProof />
-      <FeatureShowcase />
-      <HowItWorks />
-      <WalletPreview showcaseCards={showcaseCards} showcaseDesigns={showcaseDesigns} />
-      <Features />
-      <Testimonials />
-      <Pricing />
-      <FAQ />
-      <ClosingCTA />
-    </>
-  )
+  return <WalletPreview showcaseCards={showcaseCards} showcaseDesigns={showcaseDesigns} />
 }
 
 export default function LandingPage() {
@@ -195,22 +182,18 @@ export default function LandingPage() {
       <JsonLd />
       <MarketingNavbar />
       <main>
-        <Suspense fallback={
-          <>
-            <Hero />
-            <SocialProof />
-            <FeatureShowcase />
-            <HowItWorks />
-            <WalletPreview />
-            <Features />
-            <Testimonials />
-            <Pricing />
-            <FAQ />
-            <ClosingCTA />
-          </>
-        }>
-          <ShowcaseContent />
+        <Hero />
+        <SocialProof />
+        <FeatureShowcase />
+        <HowItWorks />
+        <Suspense fallback={<WalletPreview />}>
+          <ShowcaseWalletPreview />
         </Suspense>
+        <Features />
+        <Testimonials />
+        <Pricing />
+        <FAQ />
+        <ClosingCTA />
       </main>
       <MarketingFooter />
     </div>
