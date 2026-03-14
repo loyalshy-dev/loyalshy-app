@@ -10,9 +10,11 @@ export default async function SettingsPage(props: {
   searchParams: Promise<{ tab?: string; checkout?: string }>
 }) {
   await connection()
-  const searchParams = await props.searchParams
-  const t = await getTranslations("dashboard.settings")
-  const session = await assertAuthenticated()
+  const [searchParams, t, session] = await Promise.all([
+    props.searchParams,
+    getTranslations("dashboard.settings"),
+    assertAuthenticated(),
+  ])
 
   const organization = await getOrganizationForUser()
   if (!organization) {
@@ -26,7 +28,7 @@ export default async function SettingsPage(props: {
   // Fetch settings data and billing data in parallel
   const [data, billingResult] = await Promise.all([
     getSettingsData(),
-    activeTab === "billing" ? getBillingData() : Promise.resolve(null),
+    getBillingData(),
   ])
 
   if ("error" in data) {

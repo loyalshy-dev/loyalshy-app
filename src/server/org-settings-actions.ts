@@ -165,17 +165,48 @@ export async function getSettingsData() {
 
   await assertOrganizationRole(organization.id, "owner")
 
-  // Fetch ALL templates for this organization
-  const rawTemplates = await db.passTemplate.findMany({
-    where: { organizationId: organization.id },
-    include: {
-      passDesign: true,
-      _count: {
-        select: { passInstances: true },
+  // Fetch all settings data in parallel
+  const [rawTemplates, members, pendingInvitations, walletPassCount] = await Promise.all([
+    db.passTemplate.findMany({
+      where: { organizationId: organization.id },
+      include: {
+        passDesign: true,
+        _count: {
+          select: { passInstances: true },
+        },
       },
-    },
-    orderBy: { createdAt: "asc" },
-  })
+      orderBy: { createdAt: "asc" },
+    }),
+    db.member.findMany({
+      where: { organizationId: organization.id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            createdAt: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    db.staffInvitation.findMany({
+      where: {
+        organizationId: organization.id,
+        accepted: false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.passInstance.count({
+      where: {
+        passTemplate: { organizationId: organization.id },
+        walletProvider: { not: "NONE" },
+      },
+    }),
+  ])
 
   const templates: TemplateWithDesign[] = rawTemplates.map((t) => ({
     id: t.id,
@@ -216,41 +247,6 @@ export async function getSettingsData() {
         }
       : null,
   }))
-
-  // Get team members
-  const members = await db.member.findMany({
-    where: { organizationId: organization.id },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-          createdAt: true,
-        },
-      },
-    },
-    orderBy: { createdAt: "asc" },
-  })
-
-  // Get pending invitations
-  const pendingInvitations = await db.staffInvitation.findMany({
-    where: {
-      organizationId: organization.id,
-      accepted: false,
-      expiresAt: { gt: new Date() },
-    },
-    orderBy: { createdAt: "desc" },
-  })
-
-  // Count pass instances with wallet passes
-  const walletPassCount = await db.passInstance.count({
-    where: {
-      passTemplate: { organizationId: organization.id },
-      walletProvider: { not: "NONE" },
-    },
-  })
 
   return {
     organization: {

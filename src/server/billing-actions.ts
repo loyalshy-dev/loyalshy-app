@@ -42,21 +42,19 @@ export async function getBillingData(): Promise<BillingData | { error: string }>
     const plan = organization.plan as PlanId
     const limits = getPlanLimits(plan)
 
-    // Count current contacts
-    const contactCount = await db.contact.count({
-      where: { organizationId: organization.id },
-    })
-
-    // Count current staff (org members)
-    const memberCount = await db.member.count({
-      where: { organizationId: organization.id },
-    })
+    // Count usage metrics in parallel
+    const [contactCount, memberCount, programCount] = await Promise.all([
+      db.contact.count({
+        where: { organizationId: organization.id },
+      }),
+      db.member.count({
+        where: { organizationId: organization.id },
+      }),
+      db.passTemplate.count({
+        where: { organizationId: organization.id, status: "ACTIVE" },
+      }),
+    ])
     const staffCount = memberCount ?? 1
-
-    // Count current programs (active pass templates)
-    const programCount = await db.passTemplate.count({
-      where: { organizationId: organization.id, status: "ACTIVE" },
-    })
 
     const contactPercent = limits.customerLimit === Infinity
       ? 0
