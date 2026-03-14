@@ -1,8 +1,8 @@
 import { Gift } from "lucide-react"
-import { getTranslations } from "next-intl/server"
+import { useTranslations } from "next-intl"
 
-export async function RewardEmptyState() {
-  const t = await getTranslations("dashboard.rewards")
+export function RewardEmptyState() {
+  const t = useTranslations("dashboard.rewards")
 
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
