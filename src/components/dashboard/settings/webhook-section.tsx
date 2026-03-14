@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
+import { useTranslations } from "next-intl"
 import {
   Webhook,
   Plus,
@@ -47,20 +48,35 @@ import {
   type WebhookEndpointListItem,
 } from "@/server/api-key-actions"
 
-const AVAILABLE_EVENTS = [
-  { value: "contact.created", label: "Contact created" },
-  { value: "contact.updated", label: "Contact updated" },
-  { value: "contact.deleted", label: "Contact deleted" },
-  { value: "pass.issued", label: "Pass issued" },
-  { value: "pass.completed", label: "Pass completed" },
-  { value: "pass.suspended", label: "Pass suspended" },
-  { value: "pass.revoked", label: "Pass revoked" },
-  { value: "interaction.created", label: "Interaction created" },
-  { value: "reward.earned", label: "Reward earned" },
-  { value: "reward.redeemed", label: "Reward redeemed" },
-]
+const AVAILABLE_EVENT_VALUES = [
+  "contact.created",
+  "contact.updated",
+  "contact.deleted",
+  "pass.issued",
+  "pass.completed",
+  "pass.suspended",
+  "pass.revoked",
+  "interaction.created",
+  "reward.earned",
+  "reward.redeemed",
+] as const
+
+const EVENT_LABEL_KEYS = {
+  "contact.created": "contactCreated",
+  "contact.updated": "contactUpdated",
+  "contact.deleted": "contactDeleted",
+  "pass.issued": "passIssued",
+  "pass.completed": "passCompleted",
+  "pass.suspended": "passSuspended",
+  "pass.revoked": "passRevoked",
+  "interaction.created": "interactionCreated",
+  "reward.earned": "rewardEarned",
+  "reward.redeemed": "rewardRedeemed",
+} as const
 
 export function WebhookSection() {
+  const t = useTranslations("dashboard.settingsForms")
+  const tSettings = useTranslations("dashboard.settings")
   const [endpoints, setEndpoints] = useState<WebhookEndpointListItem[]>([])
   const [isPending, startTransition] = useTransition()
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -92,11 +108,11 @@ export function WebhookSection() {
 
   function handleCreate() {
     if (!newUrl.startsWith("https://")) {
-      toast.error("URL must use HTTPS.")
+      toast.error(t("webhookUrlHttps"))
       return
     }
     if (selectedEvents.length === 0) {
-      toast.error("Select at least one event.")
+      toast.error(t("selectEvents"))
       return
     }
     startTransition(async () => {
@@ -124,7 +140,7 @@ export function WebhookSection() {
         return
       }
       toast.success(
-        endpoint.enabled ? "Webhook disabled." : "Webhook enabled."
+        endpoint.enabled ? t("webhookDisabled") : t("webhookEnabled")
       )
       loadEndpoints()
     })
@@ -137,7 +153,7 @@ export function WebhookSection() {
         toast.error(result.error)
         return
       }
-      toast.success("Webhook endpoint deleted.")
+      toast.success(t("webhookDeleted"))
       setDeleteTarget(null)
       loadEndpoints()
     })
@@ -158,16 +174,16 @@ export function WebhookSection() {
 
   function copyToClipboard(text: string) {
     navigator.clipboard.writeText(text)
-    toast.success("Copied to clipboard.")
+    toast.success(tSettings("copied"))
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium">Webhook Endpoints</h3>
+          <h3 className="text-sm font-medium">{t("webhooks")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Receive real-time event notifications via HTTP.
+            {t("webhooksDescription")}
           </p>
         </div>
         <Button
@@ -176,7 +192,7 @@ export function WebhookSection() {
           className="gap-1.5"
         >
           <Plus className="h-3.5 w-3.5" />
-          Add endpoint
+          {t("addWebhook")}
         </Button>
       </div>
 
@@ -248,7 +264,7 @@ export function WebhookSection() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleRotateSecret(ep.id)}
-                    aria-label="Rotate secret"
+                    aria-label={t("rotateSecret")}
                   >
                     <RotateCw className="h-3.5 w-3.5" />
                   </Button>
@@ -280,38 +296,41 @@ export function WebhookSection() {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add Webhook Endpoint</DialogTitle>
+            <DialogTitle>{t("addWebhook")}</DialogTitle>
             <DialogDescription>
               We will send POST requests to this URL when events occur.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="webhook-url">Endpoint URL</Label>
+              <Label htmlFor="webhook-url">{t("webhookUrl")}</Label>
               <Input
                 id="webhook-url"
-                placeholder="https://example.com/webhooks/loyalshy"
+                placeholder={t("webhookUrlPlaceholder")}
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
               />
             </div>
             <div>
-              <Label>Events to subscribe</Label>
+              <Label>{t("webhookEvents")}</Label>
               <div className="grid grid-cols-2 gap-1.5 mt-2">
-                {AVAILABLE_EVENTS.map((ev) => (
-                  <label
-                    key={ev.value}
-                    className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted rounded px-2 py-1.5"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedEvents.includes(ev.value)}
-                      onChange={() => toggleEvent(ev.value)}
-                      className="rounded border-border"
-                    />
-                    {ev.label}
-                  </label>
-                ))}
+                {AVAILABLE_EVENT_VALUES.map((value) => {
+                  const labelKey = value.replace(".", "_").replace(/\./g, "_") as keyof typeof EVENT_LABEL_KEYS
+                  return (
+                    <label
+                      key={value}
+                      className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted rounded px-2 py-1.5"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedEvents.includes(value)}
+                        onChange={() => toggleEvent(value)}
+                        className="rounded border-border"
+                      />
+                      {t(`events.${EVENT_LABEL_KEYS[value as keyof typeof EVENT_LABEL_KEYS]}`)}
+                    </label>
+                  )
+                })}
               </div>
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import {
   CreditCard,
   Users,
@@ -40,16 +41,16 @@ const planBorders: Record<string, string> = {
 
 // ─── Status Labels ─────────────────────────────────────────
 
-function getStatusBadge(status: string) {
+function StatusBadge({ status, t }: { status: string; t: ReturnType<typeof useTranslations> }) {
   switch (status) {
     case "TRIALING":
-      return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px]">Trial</Badge>
+      return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px]">{t("statusTrial")}</Badge>
     case "ACTIVE":
-      return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">Active</Badge>
+      return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">{t("statusActive")}</Badge>
     case "PAST_DUE":
-      return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 text-[10px]">Past Due</Badge>
+      return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 text-[10px]">{t("statusPastDue")}</Badge>
     case "CANCELED":
-      return <Badge className="bg-muted text-muted-foreground text-[10px]">Canceled</Badge>
+      return <Badge className="bg-muted text-muted-foreground text-[10px]">{t("statusCanceled")}</Badge>
     default:
       return <Badge variant="secondary" className="text-[10px]">{status}</Badge>
   }
@@ -60,6 +61,7 @@ function getStatusBadge(status: string) {
 type BillingPeriod = "monthly" | "annual"
 
 export function BillingSettings({ data }: { data: BillingData }) {
+  const t = useTranslations("dashboard.settingsForms")
   const router = useRouter()
   const searchParams = useSearchParams()
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
@@ -187,9 +189,9 @@ export function BillingSettings({ data }: { data: BillingData }) {
       {/* Current Plan */}
       <Card>
         <div className="border-b border-border px-6 py-4">
-          <h2 className="text-sm font-semibold">Current Plan</h2>
+          <h2 className="text-sm font-semibold">{t("currentPlan")}</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Manage your subscription and billing.
+            {t("manageBillingDescription")}
           </p>
         </div>
         <div className="p-6">
@@ -203,7 +205,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                   <p className="text-sm font-semibold">
                     {plans[currentPlan as keyof typeof plans]?.name ?? currentPlan} Plan
                   </p>
-                  {getStatusBadge(organization.subscriptionStatus)}
+                  <StatusBadge status={organization.subscriptionStatus} t={t} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {organization.subscriptionStatus === "TRIALING"
@@ -228,7 +230,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                 ) : (
                   <CreditCard className="mr-1.5 h-3.5 w-3.5" />
                 )}
-                Manage Billing
+                {t("manageBilling")}
               </Button>
             )}
           </div>
@@ -238,9 +240,9 @@ export function BillingSettings({ data }: { data: BillingData }) {
       {/* Usage */}
       <Card>
         <div className="border-b border-border px-6 py-4">
-          <h2 className="text-sm font-semibold">Usage</h2>
+          <h2 className="text-sm font-semibold">{t("usage")}</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Your current usage and plan limits.
+            {t("usageDescription")}
           </p>
         </div>
         <div className="p-6">
@@ -250,7 +252,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
               <div className="flex items-center gap-3">
                 <Building2 className="h-5 w-5 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">Contacts</p>
+                  <p className="text-xs text-muted-foreground">{t("contactsLabel")}</p>
                   <p className="text-sm font-semibold">
                     {usage.contacts.toLocaleString()} / {usage.contactLimit === Infinity ? "Unlimited" : usage.contactLimit.toLocaleString()}
                   </p>
@@ -285,7 +287,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
               <div className="flex items-center gap-3">
                 <Users className="h-5 w-5 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">Team Members</p>
+                  <p className="text-xs text-muted-foreground">{t("teamMembersLabel")}</p>
                   <p className="text-sm font-semibold">
                     {usage.staff} / {usage.staffLimit === Infinity ? "Unlimited" : usage.staffLimit}
                   </p>
@@ -320,7 +322,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
               <div className="flex items-center gap-3">
                 <Layers className="h-5 w-5 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">Programs</p>
+                  <p className="text-xs text-muted-foreground">{t("programsLabel")}</p>
                   <p className="text-sm font-semibold">
                     {usage.programs} / {usage.programLimit === Infinity ? "Unlimited" : usage.programLimit}
                   </p>

@@ -80,6 +80,7 @@ import {
 } from "@/server/distribution-actions"
 import { updateContact } from "@/server/contact-actions"
 import { Label } from "@/components/ui/label"
+import { useTranslations } from "next-intl"
 
 // ─── Props ─────────────────────────────────────────────────────
 
@@ -112,19 +113,21 @@ const statusStyles: Record<string, string> = {
 
 // ─── Type-aware helpers ────────────────────────────────────────
 
-function getProgressColumnHeader(passType: string): string {
+type TranslationFn = (key: string) => string
+
+function getProgressColumnHeader(passType: string, t: TranslationFn): string {
   switch (passType) {
-    case "STAMP_CARD": return "Progress"
-    case "COUPON": return "Status"
-    case "MEMBERSHIP": return "Check-ins"
-    case "POINTS": return "Balance"
-    case "PREPAID": return "Remaining"
-    case "GIFT_CARD": return "Balance"
-    case "TICKET": return "Scans"
-    case "ACCESS": return "Granted"
-    case "TRANSIT": return "Status"
-    case "BUSINESS_ID": return "Verified"
-    default: return "Activity"
+    case "STAMP_CARD": return t("progress")
+    case "COUPON": return t("status")
+    case "MEMBERSHIP": return t("checkIns")
+    case "POINTS": return t("balance")
+    case "PREPAID": return t("remaining")
+    case "GIFT_CARD": return t("balance")
+    case "TICKET": return t("scans")
+    case "ACCESS": return t("granted")
+    case "TRANSIT": return t("status")
+    case "BUSINESS_ID": return t("verified")
+    default: return t("activity")
   }
 }
 
@@ -1090,6 +1093,8 @@ export function PassInstancesView({
   status,
   page,
 }: PassInstancesViewProps) {
+  const t = useTranslations("dashboard.passInstances")
+  const tStatus = useTranslations("dashboard.status")
   const router = useRouter()
   const pathname = usePathname()
   const [issueSheetOpen, setIssueSheetOpen] = useState(false)
@@ -1097,7 +1102,7 @@ export function PassInstancesView({
     id: string; fullName: string; email: string | null; phone: string | null
   } | null>(null)
   const totalPages = Math.ceil(result.total / result.perPage)
-  const progressHeader = getProgressColumnHeader(passType)
+  const progressHeader = getProgressColumnHeader(passType, t)
 
   const buildUrl = useCallback(
     (overrides: Record<string, string | number>) => {
@@ -1116,10 +1121,10 @@ export function PassInstancesView({
 
   const statusFilters = [
     { key: "all", label: "All", count: stats.total },
-    { key: "ACTIVE", label: "Active", count: stats.active },
-    { key: "COMPLETED", label: "Completed", count: stats.completed },
-    { key: "SUSPENDED", label: "Suspended", count: stats.suspended },
-    { key: "EXPIRED", label: "Expired", count: stats.expired },
+    { key: "ACTIVE", label: tStatus("active"), count: stats.active },
+    { key: "COMPLETED", label: tStatus("completed"), count: stats.completed },
+    { key: "SUSPENDED", label: tStatus("suspended"), count: stats.suspended },
+    { key: "EXPIRED", label: tStatus("expired"), count: stats.expired },
   ]
 
   return (
@@ -1155,7 +1160,7 @@ export function PassInstancesView({
           className="gap-1.5 text-[13px] shrink-0"
         >
           <Plus className="size-3.5" />
-          Issue pass
+          {t("issuePass")}
         </Button>
         <div className="flex gap-1 overflow-x-auto scrollbar-none">
           {statusFilters.map((f) => (
@@ -1185,11 +1190,11 @@ export function PassInstancesView({
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
             <Users className="h-5 w-5 text-muted-foreground" />
           </div>
-          <h2 className="text-sm font-semibold">No passes found</h2>
+          <h2 className="text-sm font-semibold">{t("noPass")}</h2>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm">
             {search
               ? "No passes match your search."
-              : "No passes have been issued for this program yet."}
+              : t("noPass")}
           </p>
         </Card>
       ) : (
@@ -1201,13 +1206,13 @@ export function PassInstancesView({
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
                     <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
-                      Contact
+                      {t("contact")}
                     </th>
                     <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground hidden sm:table-cell w-16">
                       #
                     </th>
                     <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
-                      Status
+                      {t("status")}
                     </th>
                     <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
                       {progressHeader}
@@ -1216,7 +1221,7 @@ export function PassInstancesView({
                       Wallet
                     </th>
                     <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground hidden sm:table-cell">
-                      Issued
+                      {t("issuedDate")}
                     </th>
                     <th className="w-10 px-2 py-2.5" />
                   </tr>

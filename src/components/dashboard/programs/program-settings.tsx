@@ -42,6 +42,7 @@ import {
 import type { TemplateDeleteCounts } from "@/server/org-settings-actions"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { Card } from "@/components/ui/card"
+import { useTranslations } from "next-intl"
 
 type ProgramSettingsProps = {
   program: {
@@ -54,6 +55,7 @@ type ProgramSettingsProps = {
 }
 
 export function ProgramSettings({ program, organizationId }: ProgramSettingsProps) {
+  const t = useTranslations("dashboard.programSettings")
   const router = useRouter()
   const [isDangerPending, startDangerTransition] = useTransition()
 
@@ -74,7 +76,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Program archived")
+        toast.success(t("statusUpdated"))
         setShowArchiveDialog(false)
         router.refresh()
       }
@@ -87,7 +89,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Program activated")
+        toast.success(t("statusUpdated"))
         router.refresh()
       }
     })
@@ -99,7 +101,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Program reactivated")
+        toast.success(t("statusUpdated"))
         setShowReactivateDialog(false)
         router.refresh()
       }
@@ -115,7 +117,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
         }
         toast.error(String(result.error))
       } else {
-        toast.success("Program deleted")
+        toast.success(t("programDeleted"))
         setShowDeleteDialog(false)
         router.push("/dashboard/programs")
       }
@@ -129,9 +131,9 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
     <div className="space-y-8 max-w-2xl">
       {/* Program info */}
       <div>
-        <h2 className="text-lg font-semibold tracking-tight">Settings</h2>
+        <h2 className="text-lg font-semibold tracking-tight">{t("title")}</h2>
         <p className="text-[13px] text-muted-foreground mt-1">
-          Manage the status and lifecycle of your program. Program configuration and card design are edited in the Card Design tab.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -145,7 +147,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
               <p className="text-sm font-medium">{program.name}</p>
             </div>
             <p className="text-xs text-muted-foreground">
-              Current status: <span className={`font-medium ${statusColor}`}>{statusLabel}</span>
+              {t("currentStatus")} <span className={`font-medium ${statusColor}`}>{statusLabel}</span>
             </p>
           </div>
         </Card>
@@ -162,9 +164,9 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
         {isDraft && (
           <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
             <div className="space-y-0.5">
-              <p className="text-sm font-medium">Activate program</p>
+              <p className="text-sm font-medium">{t("activateProgram")}</p>
               <p className="text-xs text-muted-foreground">
-                Make this program live so customers can start earning visits.
+                {t("activateDescription")}
               </p>
             </div>
             <Button
@@ -180,7 +182,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
               ) : (
                 <Play className="h-3.5 w-3.5" />
               )}
-              Activate
+              {t("activateProgram")}
             </Button>
           </div>
         )}
@@ -189,9 +191,9 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
         {program.status === "ACTIVE" && (
           <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
             <div className="space-y-0.5">
-              <p className="text-sm font-medium">Archive program</p>
+              <p className="text-sm font-medium">{t("archiveProgram")}</p>
               <p className="text-xs text-muted-foreground">
-                Active enrollments will be frozen and customers won&apos;t earn new visits.
+                {t("archiveDescription")}
               </p>
             </div>
             <Button
@@ -203,7 +205,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
               disabled={isDangerPending}
             >
               <Archive className="h-3.5 w-3.5" />
-              Archive
+              {t("archiveProgram")}
             </Button>
           </div>
         )}
@@ -212,9 +214,9 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
         {isArchived && (
           <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
             <div className="space-y-0.5">
-              <p className="text-sm font-medium">Reactivate program</p>
+              <p className="text-sm font-medium">{t("reactivateProgram")}</p>
               <p className="text-xs text-muted-foreground">
-                Set the program back to active and unfreeze all frozen enrollments.
+                {t("reactivateDescription")}
               </p>
             </div>
             <Button
@@ -226,7 +228,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
               disabled={isDangerPending}
             >
               <ArchiveRestore className="h-3.5 w-3.5" />
-              Reactivate
+              {t("reactivateProgram")}
             </Button>
           </div>
         )}
@@ -234,9 +236,9 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
         {/* Delete (all statuses) */}
         <div className="flex items-center justify-between gap-4 rounded-lg border border-destructive/30 p-4">
           <div className="space-y-0.5">
-            <p className="text-sm font-medium">Delete program</p>
+            <p className="text-sm font-medium">{t("deleteProgram")}</p>
             <p className="text-xs text-muted-foreground">
-              Permanently delete this program, including all passes, interactions, and rewards. This cannot be undone.
+              {t("deleteDescription")}
             </p>
           </div>
           <Button
@@ -252,7 +254,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
             disabled={isDangerPending}
           >
             <Trash2 className="h-3.5 w-3.5" />
-            Delete
+            {t("deleteProgram")}
           </Button>
         </div>
       </section>
@@ -261,20 +263,19 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
       <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Archive program</AlertDialogTitle>
+            <AlertDialogTitle>{t("archiveProgram")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Active enrollments will be frozen and customers won&apos;t earn new visits.
-              Earned rewards will remain valid. You can reactivate the program later.
+              {t("archiveDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDangerPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDangerPending}></AlertDialogCancel>
             <AlertDialogAction
               variant="default"
               onClick={handleArchive}
               disabled={isDangerPending}
             >
-              {isDangerPending ? "Archiving..." : "Archive program"}
+              {t("archiveProgram")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -284,20 +285,19 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
       <AlertDialog open={showReactivateDialog} onOpenChange={setShowReactivateDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Reactivate program</AlertDialogTitle>
+            <AlertDialogTitle>{t("reactivateProgram")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will set the program back to active and unfreeze all frozen enrollments.
-              Customers will be able to earn visits again.
+              {t("reactivateDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDangerPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDangerPending}></AlertDialogCancel>
             <AlertDialogAction
               variant="default"
               onClick={handleReactivate}
               disabled={isDangerPending}
             >
-              {isDangerPending ? "Reactivating..." : "Reactivate program"}
+              {t("reactivateProgram")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -307,10 +307,9 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete program</DialogTitle>
+            <DialogTitle>{t("deleteProgram")}</DialogTitle>
             <DialogDescription>
-              This action is permanent and cannot be undone. All data associated with
-              this program will be deleted.
+              {t("deleteConfirm")}
             </DialogDescription>
           </DialogHeader>
 
@@ -327,7 +326,7 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
 
           <div className="space-y-2">
             <Label htmlFor="delete-confirm">
-              Type <span className="font-semibold">{program.name}</span> to confirm
+              {t("typeToConfirm", { name: program.name })}
             </Label>
             <Input
               id="delete-confirm"
@@ -340,14 +339,14 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" disabled={isDangerPending}>Cancel</Button>
+              <Button variant="outline" disabled={isDangerPending}></Button>
             </DialogClose>
             <Button
               variant="destructive"
               onClick={handleDelete}
               disabled={deleteConfirmName !== program.name || isDangerPending}
             >
-              {isDangerPending ? "Deleting..." : "Delete program"}
+              {t("deleteProgram")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -14,6 +14,7 @@ import {
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 type ShareLinkSectionProps = {
   joinUrl: string
@@ -26,6 +27,7 @@ export function ShareLinkSection({
   templateName,
   organizationName,
 }: ShareLinkSectionProps) {
+  const t = useTranslations("dashboard.distribution")
   const [copied, setCopied] = useState(false)
   const [showEmbed, setShowEmbed] = useState(false)
   const [embedCopied, setEmbedCopied] = useState(false)
@@ -58,7 +60,7 @@ export function ShareLinkSection({
       /* ignore */
     }
     setEmbedCopied(true)
-    toast.success("Embed code copied")
+    toast.success(t("embedCopied"))
     setTimeout(() => setEmbedCopied(false), 2000)
   }
 
@@ -91,7 +93,7 @@ export function ShareLinkSection({
         <div className="flex size-7 items-center justify-center rounded-md bg-brand/10">
           <Link2 className="size-3.5 text-brand" />
         </div>
-        <h3 className="text-sm font-medium">Share link</h3>
+        <h3 className="text-sm font-medium">{t("shareLink")}</h3>
       </div>
 
       {/* Prominent URL + copy */}
@@ -112,7 +114,7 @@ export function ShareLinkSection({
           ) : (
             <Copy className="size-3.5" />
           )}
-          {copied ? "Copied" : "Copy link"}
+          {copied ? t("copied") : t("copyLink")}
         </Button>
       </div>
 

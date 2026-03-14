@@ -7,6 +7,7 @@ import {
   useCallback,
   useTransition,
 } from "react"
+import { useTranslations } from "next-intl"
 import { formatDistanceToNow } from "date-fns"
 import {
   Search,
@@ -108,6 +109,7 @@ export function RegisterVisitDialog({
   preselectedCustomerId,
   preselectedCustomerName,
 }: RegisterVisitDialogProps) {
+  const t = useTranslations("dashboard.registerVisit")
   const [step, setStep] = useState<Step>("search")
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<InteractionSearchResult[]>([])
@@ -305,11 +307,11 @@ export function RegisterVisitDialog({
       // Toast feedback
       if (result.wasRewardEarned) {
         toast.success(
-          `Visit registered — Reward earned!`,
+          t("stampAdded", { name: selectedCustomer?.fullName ?? "" }),
           { description: result.rewardDescription }
         )
       } else {
-        toast.success(`Visit registered for ${selectedCustomer?.fullName}`)
+        toast.success(t("stampAdded", { name: selectedCustomer?.fullName ?? "" }))
       }
 
       {
@@ -338,7 +340,7 @@ export function RegisterVisitDialog({
       }
 
       toast.success(
-        `Coupon redeemed for ${selectedCustomer?.fullName}`,
+        t("couponRedeemed", { name: selectedCustomer?.fullName ?? "" }),
         { description: result.discountText }
       )
 
@@ -368,7 +370,7 @@ export function RegisterVisitDialog({
         navigator.vibrate(10)
       }
 
-      toast.success(`Check-in recorded for ${selectedCustomer?.fullName}`)
+      toast.success(t("stampAdded", { name: selectedCustomer?.fullName ?? "" }))
 
       autoDismiss()
     })
@@ -393,7 +395,7 @@ export function RegisterVisitDialog({
       }
 
       toast.success(
-        `+${result.pointsEarned} pts earned for ${selectedCustomer?.fullName}`,
+        t("pointsAdded", { points: result.pointsEarned ?? 0, name: selectedCustomer?.fullName ?? "" }),
         { description: `New balance: ${result.newBalance} pts` }
       )
 
@@ -609,7 +611,7 @@ export function RegisterVisitDialog({
         {step === "search" && scanMode && (
           <div className="flex flex-col">
             <DialogHeader className="p-4 pb-0">
-              <DialogTitle className="text-base">Scan Wallet Pass</DialogTitle>
+              <DialogTitle className="text-base">{t("scanQr")}</DialogTitle>
             </DialogHeader>
             <div className="pt-3">
               <QrScannerView
@@ -721,10 +723,11 @@ function SearchStep({
   hasCamera: boolean | null
   onScanMode: () => void
 }) {
+  const t = useTranslations("dashboard.registerVisit")
   return (
     <>
       <DialogHeader className="p-4 pb-0">
-        <DialogTitle className="text-base">Register Visit</DialogTitle>
+        <DialogTitle className="text-base">{t("title")}</DialogTitle>
       </DialogHeader>
 
       <div className="p-4 pb-2">
@@ -1098,6 +1101,8 @@ function ConfirmStep({
   onBack: () => void
   cardDesign?: ConfirmStepCardDesign
 }) {
+  const t = useTranslations("dashboard.registerVisit")
+
   if (!passInstance) {
     return (
       <div className="flex flex-col">
@@ -1174,7 +1179,7 @@ function ConfirmStep({
           <ArrowLeft className="size-4" />
         </Button>
         <DialogTitle className="text-base">
-          {isMembership ? "Member Check-in" : isCoupon ? "Redeem Coupon" : isPoints ? "Points" : isPrepaid ? "Use Pass" : isGiftCard ? "Charge Gift Card" : isTicket ? "Scan Ticket" : isAccess ? "Grant Access" : isTransit ? "Board" : isBusinessId ? "Verify ID" : "Confirm Visit"}
+          {isMembership ? t("checkIn") : isCoupon ? t("redeemCoupon") : isPoints ? t("addPoints") : isPrepaid ? t("charge") : isGiftCard ? t("charge") : isTicket ? t("scanTicket") : isAccess ? t("grantAccess") : isTransit ? t("recharge") : isBusinessId ? "Verify ID" : t("registerStamp")}
         </DialogTitle>
       </div>
 
@@ -1343,7 +1348,7 @@ function ConfirmStep({
               type="number"
               step="0.01"
               min="0.01"
-              placeholder="Amount"
+              placeholder={t("amount")}
               value={giftCardAmount}
               onChange={(e) => onGiftCardAmountChange(e.target.value)}
               className="flex-1"
@@ -1356,7 +1361,7 @@ function ConfirmStep({
             disabled={isRegistering || giftBalanceCents <= 0}
           >
             {isRegistering ? <Loader2 className="size-4 animate-spin" /> : <Gift className="size-4" />}
-            Charge Gift Card
+            {t("charge")}
           </Button>
         </div>
       ) : (
@@ -1396,13 +1401,13 @@ function ConfirmStep({
             )}
             {isPrepaid
               ? remainingUses <= 0 ? "Depleted" : `Use 1 ${prepaidConfig?.useLabel ?? "use"}`
-              : isMembership ? "Check In"
-              : isCoupon ? "Redeem Coupon"
-              : isTicket ? (ticketScanCount >= ticketMaxScans ? "Max Scans Reached" : "Scan Ticket")
-              : isAccess ? "Grant Access"
-              : isTransit ? "Board"
+              : isMembership ? t("checkIn")
+              : isCoupon ? t("redeemCoupon")
+              : isTicket ? (ticketScanCount >= ticketMaxScans ? "Max Scans Reached" : t("scanTicket"))
+              : isAccess ? t("grantAccess")
+              : isTransit ? t("recharge")
               : isBusinessId ? "Verify ID"
-              : "Register Visit"}
+              : t("registerStamp")}
           </Button>
         </div>
       )}

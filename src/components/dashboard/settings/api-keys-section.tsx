@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
+import { useTranslations } from "next-intl"
 import { Key, Plus, Copy, Trash2, Eye, EyeOff, ExternalLink } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -35,6 +36,7 @@ import {
 } from "@/server/api-key-actions"
 
 export function ApiKeysSection() {
+  const t = useTranslations("dashboard.settings")
   const [keys, setKeys] = useState<ApiKeyListItem[]>([])
   const [isPending, startTransition] = useTransition()
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -77,7 +79,7 @@ export function ApiKeysSection() {
         toast.error(result.error)
         return
       }
-      toast.success("API key revoked.")
+      toast.success(t("keyRevoked"))
       setRevokeTarget(null)
       loadKeys()
     })
@@ -85,7 +87,7 @@ export function ApiKeysSection() {
 
   function copyToClipboard(text: string) {
     navigator.clipboard.writeText(text)
-    toast.success("Copied to clipboard.")
+    toast.success(t("copied"))
   }
 
   const activeKeys = keys.filter((k) => !k.revokedAt)
@@ -95,16 +97,16 @@ export function ApiKeysSection() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium">API Keys</h3>
+          <h3 className="text-sm font-medium">{t("apiKeys")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Manage API keys for programmatic access.{" "}
+            {t("apiKeysDescription")}{" "}
             <a
               href="/api/v1/docs"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-0.5 text-xs text-primary hover:underline"
             >
-              View API docs
+              {t("viewApiDocs")}
               <ExternalLink className="h-3 w-3" />
             </a>
           </p>
@@ -115,7 +117,7 @@ export function ApiKeysSection() {
           className="gap-1.5"
         >
           <Plus className="h-3.5 w-3.5" />
-          Create key
+          {t("createKey")}
         </Button>
       </div>
 
@@ -123,7 +125,7 @@ export function ApiKeysSection() {
         <Card className="p-6 text-center">
           <Key className="mx-auto h-8 w-8 text-muted-foreground" />
           <p className="mt-2 text-sm text-muted-foreground">
-            No API keys yet. Create one to get started.
+            {t("noApiKeys")}
           </p>
         </Card>
       )}
@@ -142,7 +144,7 @@ export function ApiKeysSection() {
                   </span>
                   {key.expiresAt && new Date(key.expiresAt) < new Date() && (
                     <Badge variant="destructive" className="text-[10px]">
-                      Expired
+                      {t("expired")}
                     </Badge>
                   )}
                 </div>

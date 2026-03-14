@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import dynamic from "next/dynamic"
 import { AlertTriangle, Clock, Lock, X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "./sidebar"
@@ -36,6 +37,7 @@ export function DashboardShell({
   orgRole,
   children,
 }: DashboardShellProps) {
+  const t = useTranslations("dashboard.shell")
   const [commandOpen, setCommandOpen] = useState(false)
   const [registerVisitOpen, setRegisterVisitOpen] = useState(false)
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(() => {
@@ -86,13 +88,13 @@ export function DashboardShell({
             <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
               <Clock className="h-3.5 w-3.5 shrink-0" />
               <span>
-                <strong>{trialDaysRemaining} day{trialDaysRemaining !== 1 ? "s" : ""}</strong> left in your trial.{" "}
+                {t("trialDaysLeft", { count: trialDaysRemaining ?? 0 })}{" "}
                 <Link href="/dashboard/settings?tab=billing" className="underline underline-offset-2 font-medium hover:text-amber-900 dark:hover:text-amber-300">
-                  Upgrade now
+                  {t("upgradeNow")}
                 </Link>
               </span>
             </div>
-            <button onClick={dismissTrialBanner} className="text-amber-600/60 hover:text-amber-700 dark:text-amber-400/60 dark:hover:text-amber-300" aria-label="Dismiss trial banner">
+            <button onClick={dismissTrialBanner} className="text-amber-600/60 hover:text-amber-700 dark:text-amber-400/60 dark:hover:text-amber-300" aria-label={t("dismissBanner")}>
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -103,9 +105,9 @@ export function DashboardShell({
             <div className="flex items-center gap-2 text-sm text-red-700 dark:text-red-400">
               <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
               <span>
-                Payment failed.{" "}
+                {t("pastDue")}{" "}
                 <Link href="/dashboard/settings?tab=billing" className="underline underline-offset-2 font-medium hover:text-red-900 dark:hover:text-red-300">
-                  Update your payment method
+                  {t("updateBilling")}
                 </Link>
               </span>
             </div>

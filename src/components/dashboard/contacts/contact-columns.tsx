@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/tooltip"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import type { ContactRow as ContactRow } from "@/server/contact-actions"
+import { useTranslations } from "next-intl"
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -46,8 +47,55 @@ type ColumnActions = {
   onDelete: (customer: ContactRow) => void
 }
 
-export function getContactColumns(
+type TranslationFn = ReturnType<typeof useTranslations<"dashboard.contactColumns">>
+
+function ActionsCell({
+  customer,
+  actions,
+}: {
+  customer: ContactRow
   actions: ColumnActions
+}) {
+  const t = useTranslations("dashboard.contactColumns")
+  const tCommon = useTranslations("common")
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon-xs" aria-label={t("actions")}>
+          <MoreHorizontal className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuItem
+          onClick={() => actions.onViewDetail(customer)}
+          className="text-[13px]"
+        >
+          <Eye className="size-3.5" />
+          {t("viewDetails")}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => actions.onEdit(customer)}
+          className="text-[13px]"
+        >
+          <Pencil className="size-3.5" />
+          {tCommon("edit")}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => actions.onDelete(customer)}
+          className="text-[13px] text-destructive focus:text-destructive"
+        >
+          <Trash2 className="size-3.5" />
+          {tCommon("delete")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+export function getContactColumns(
+  actions: ColumnActions,
+  t: TranslationFn
 ): ColumnDef<ContactRow>[] {
   return [
     {
@@ -59,7 +107,7 @@ export function getContactColumns(
           className="-ml-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          {t("name")}
           <ArrowUpDown className="size-3" />
         </Button>
       ),
@@ -81,7 +129,7 @@ export function getContactColumns(
                 {customer.fullName}
               </p>
               <p className="text-[11px] text-muted-foreground truncate">
-                {customer.email ?? customer.phone ?? "No contact"}
+                {customer.email ?? customer.phone ?? t("noContact")}
               </p>
             </div>
           </button>
@@ -92,7 +140,7 @@ export function getContactColumns(
       id: "programType",
       header: () => (
         <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Program
+          {t("program")}
         </span>
       ),
       cell: ({ row }) => {
@@ -134,7 +182,7 @@ export function getContactColumns(
           className="-ml-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Progress
+          {t("progress")}
           <ArrowUpDown className="size-3" />
         </Button>
       ),
@@ -154,21 +202,21 @@ export function getContactColumns(
         if (programType === "COUPON") {
           return (
             <span className="text-[12px] text-muted-foreground">
-              {hasAvailableReward ? "Ready" : "Redeemed"}
+              {hasAvailableReward ? t("ready") : t("scans")}
             </span>
           )
         }
 
         if (programType === "MEMBERSHIP") {
           return (
-            <span className="text-[12px] text-muted-foreground">Active</span>
+            <span className="text-[12px] text-muted-foreground">{t("ready")}</span>
           )
         }
 
         if (programType === "POINTS") {
           return (
             <span className="text-[13px] tabular-nums text-muted-foreground">
-              {(piData.pointsBalance as number) ?? 0} pts
+              {(piData.pointsBalance as number) ?? 0} {t("pts")}
             </span>
           )
         }
@@ -197,7 +245,7 @@ export function getContactColumns(
           const balanceCents = (piData.balanceCents as number) ?? 0
           return (
             <span className="text-[13px] tabular-nums text-muted-foreground">
-              {(balanceCents / 100).toFixed(2)} balance
+              {(balanceCents / 100).toFixed(2)} {t("balance")}
             </span>
           )
         }
@@ -207,14 +255,14 @@ export function getContactColumns(
           const maxScans = (piConfig.maxScans as number) ?? 1
           return (
             <span className="text-[13px] tabular-nums text-muted-foreground">
-              {scansUsed}/{maxScans} scans
+              {scansUsed}/{maxScans} {t("scans")}
             </span>
           )
         }
 
         if (programType === "ACCESS" || programType === "BUSINESS_ID" || programType === "TRANSIT") {
           return (
-            <span className="text-[12px] text-muted-foreground">Active</span>
+            <span className="text-[12px] text-muted-foreground">{t("ready")}</span>
           )
         }
 
@@ -245,7 +293,7 @@ export function getContactColumns(
           className="-ml-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground hidden sm:flex"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Total
+          {t("total")}
           <ArrowUpDown className="size-3" />
         </Button>
       ),
@@ -264,13 +312,13 @@ export function getContactColumns(
           className="-ml-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground hidden md:flex"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Last Visit
+          {t("lastVisit")}
           <ArrowUpDown className="size-3" />
         </Button>
       ),
       cell: ({ row }) => {
         const date = row.original.lastInteractionAt
-        if (!date) return <span className="text-[13px] text-muted-foreground hidden md:inline">Never</span>
+        if (!date) return <span className="text-[13px] text-muted-foreground hidden md:inline">{t("never")}</span>
         return (
           <span className="text-[13px] text-muted-foreground hidden md:inline">
             {formatDistanceToNow(new Date(date), { addSuffix: true })}
@@ -280,42 +328,9 @@ export function getContactColumns(
     },
     {
       id: "actions",
-      cell: ({ row }) => {
-        const customer = row.original
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-xs" aria-label="Customer actions">
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem
-                onClick={() => actions.onViewDetail(customer)}
-                className="text-[13px]"
-              >
-                <Eye className="size-3.5" />
-                View Details
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => actions.onEdit(customer)}
-                className="text-[13px]"
-              >
-                <Pencil className="size-3.5" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => actions.onDelete(customer)}
-                className="text-[13px] text-destructive focus:text-destructive"
-              >
-                <Trash2 className="size-3.5" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )
-      },
+      cell: ({ row }) => (
+        <ActionsCell customer={row.original} actions={actions} />
+      ),
     },
   ]
 }

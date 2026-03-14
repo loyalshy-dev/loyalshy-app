@@ -31,6 +31,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 | zundo | ~2.x | Undo/redo temporal middleware for zustand |
 | next-themes | 0.4.x | Light/dark mode with system preference detection |
 | motion | 12.x | Scroll-triggered animations for marketing landing page (FadeIn, Stagger, ScaleIn) |
+| next-intl | 4.8.x | i18n — cookie-based locale detection, no URL prefix routing |
 
 ## Critical Architecture Rules
 
@@ -42,7 +43,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - `assertSuperAdmin()` — checks User.role === "super_admin"
 - `assertOrganizationAccess(organizationId)` — verify org membership (super admins bypass)
 - `assertOrganizationRole(organizationId, "owner")` — verify org role with hierarchy (owner > admin > member)
-- `getOrganizationForUser()` — returns organization with billing + active templates via session.activeOrganizationId
+- `getOrganizationForUser()` — returns organization with billing + active templates via session.activeOrganizationId (cached per-request via React `cache()`)
 - `getActiveTemplates(organizationId)` — returns active PassTemplates with PassDesign
 - `getContactPassInstances(contactId, organizationId)` — returns PassInstances with PassTemplate
 
@@ -89,6 +90,18 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - NO `tailwind.config.js` — all config in CSS via `@theme`
 - Use `@tailwindcss/postcss` (NOT Vite plugin)
 - OKLCH color space
+
+### i18n Rules (next-intl)
+- **No URL-based locale routing** — locale is determined by `locale` cookie, then `Accept-Language` header, then default `en`
+- **Locales**: `en` (default), `es` (Spanish — first target market is Spain)
+- **Config**: `src/i18n/config.ts` (locale definitions), `src/i18n/request.ts` (server-side detection via `getRequestConfig`)
+- **Messages**: `src/messages/en.json` + `src/messages/es.json` — organized by namespace (common, nav, hero, features, pricing, faq, auth, dashboard, errors, etc.)
+- **Server components**: use `getTranslations("namespace")` from `next-intl/server` (must be async)
+- **Client components**: use `useTranslations("namespace")` from `next-intl`
+- **Root layout**: wraps children in `NextIntlClientProvider` with messages from `getMessages()`, inside a Suspense boundary (required for `cacheComponents: true`)
+- **Language switcher**: `src/components/language-switcher.tsx` — sets `locale` cookie and reloads, placed in marketing navbar and dashboard topbar
+- **Adding a new locale**: Add to `locales` array in `config.ts`, create `src/messages/{locale}.json`, add `localeNames` entry
+- **Remaining i18n work**: Contact detail sheet, contact columns/table, program editor, distribution sections, CSV import, settings forms (general, team, billing, API keys, webhooks), register visit dialog, dashboard shell trial banner, server action error messages, legal pages (long-form content)
 
 ### Prisma v7 Rules
 - Use `prisma.config.ts` for configuration (datasource URL lives here, NOT in schema.prisma)
@@ -138,8 +151,12 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
       /programs     → Program list view, tab nav, pass instances, settings
     /admin/showcase → Showcase card management + studio adapter
     /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, motion animations)
-      motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn)
+      motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn) — used below-fold only; Hero/SocialProof use CSS animations
     /wallet         → Wallet pass components
+  /i18n             → Internationalization config
+    config.ts       → Locale definitions (en, es)
+    request.ts      → Server-side locale detection (cookie → Accept-Language → default)
+  /messages         → Translation JSON files (en.json, es.json)
   /lib              → Utilities, db client, auth config, DAL
     /stores         → Zustand stores (card-design-store.ts)
     /wallet         → Wallet pass generation (Apple + Google)
@@ -206,6 +223,9 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase API-5 — API Dashboard UI (API keys section, webhook management section, server actions for CRUD, settings tab with plan gating)
 - [x] Phase PRICING — New pricing model (Free tier on landing page, Pro €29, Business €49, Scale €99, no 14-day trial)
 - [x] Phase ONBOARDING — Simplified registration (2 steps: signup + org name → dashboard), FREE plan in Prisma enum + plans.ts, no trial/Stripe at signup, programs usage tracking in billing
+- [x] Phase SEO — Comprehensive SEO audit fixes (legal pages, structured data, LCP performance, sitemap, robots.txt, WCAG contrast, HSTS preload, fake social proof removal)
+- [x] Phase I18N — Internationalization with next-intl (English + Spanish, cookie-based locale, 36 components wired up, language switcher in navbar + dashboard)
+- [x] Phase PERF — Performance optimization (WebP images, CSS hero animations, Suspense restructure, cached DAL, parallel queries, lazy-loaded dashboard dialogs, skeleton fallbacks)
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy

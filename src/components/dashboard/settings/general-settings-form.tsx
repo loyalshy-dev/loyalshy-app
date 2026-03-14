@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { Globe, Phone, MapPin, Shield, Info } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -57,6 +58,8 @@ type Organization = {
 }
 
 export function GeneralSettingsForm({ organization }: { organization: Organization }) {
+  const t = useTranslations("dashboard.settingsForms")
+  const tSettings = useTranslations("dashboard.settings")
   const [isPending, startTransition] = useTransition()
   const [isJoinPending, startJoinTransition] = useTransition()
   const [joinRequirement, setJoinRequirement] = useState<JoinRequirement>(
@@ -86,7 +89,7 @@ export function GeneralSettingsForm({ organization }: { organization: Organizati
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Organization profile updated")
+        toast.success(t("saved"))
       }
     })
   }
@@ -113,19 +116,19 @@ export function GeneralSettingsForm({ organization }: { organization: Organizati
         {/* Organization Profile */}
         <Card>
           <div className="border-b border-border px-6 py-4">
-            <h2 className="text-sm font-semibold">Organization Profile</h2>
+            <h2 className="text-sm font-semibold">{tSettings("orgProfile")}</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Basic information about your organization.
+              {tSettings("orgProfileDescription")}
             </p>
           </div>
           <div className="p-6 space-y-5">
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="name">Organization Name *</Label>
+                <Label htmlFor="name">{tSettings("orgName")} *</Label>
                 <Input
                   id="name"
-                  {...register("name", { required: "Organization name is required" })}
-                  placeholder="My Organization"
+                  {...register("name", { required: tSettings("orgNameRequired") })}
+                  placeholder={tSettings("orgNamePlaceholder")}
                 />
                 {errors.name && (
                   <p className="text-xs text-destructive">{errors.name.message}</p>
@@ -135,12 +138,12 @@ export function GeneralSettingsForm({ organization }: { organization: Organizati
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="address" className="flex items-center gap-1.5">
                   <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                  Address
+                  {tSettings("address")}
                 </Label>
                 <Input
                   id="address"
                   {...register("address")}
-                  placeholder="123 Main St, City, State"
+                  placeholder={tSettings("addressPlaceholder")}
                 />
                 {errors.address && (
                   <p className="text-xs text-destructive">{errors.address.message}</p>
@@ -204,7 +207,7 @@ export function GeneralSettingsForm({ organization }: { organization: Organizati
             disabled={isPending || !isDirty}
             size="sm"
           >
-            {isPending ? "Saving..." : "Save changes"}
+            {isPending ? t("saved") : "Save changes"}
           </Button>
         </div>
       </form>

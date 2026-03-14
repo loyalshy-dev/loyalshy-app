@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
@@ -21,6 +22,7 @@ export function RewardFilters({
   totalResults,
   basePath = "/dashboard/rewards",
 }: RewardFiltersProps) {
+  const t = useTranslations("dashboard.rewards")
   const router = useRouter()
   const searchParams = useSearchParams()
   const [search, setSearch] = useState(initialSearch)
@@ -71,7 +73,7 @@ export function RewardFilters({
         <div className="relative flex-1 min-w-45">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
-            placeholder="Search by customer name..."
+            placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 h-9 text-[13px]"

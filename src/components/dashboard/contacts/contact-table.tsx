@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import {
   useReactTable,
   getCoreRowModel,
@@ -44,6 +45,8 @@ export function ContactTable({
   onEdit,
   onDelete,
 }: ContactTableProps) {
+  const t = useTranslations("dashboard.contactTable")
+  const tColumns = useTranslations("dashboard.contactColumns")
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -73,7 +76,8 @@ export function ContactTable({
   }
 
   const columns = getContactColumns(
-    { onViewDetail, onEdit, onDelete }
+    { onViewDetail, onEdit, onDelete },
+    tColumns
   )
 
   const table = useReactTable({
@@ -126,7 +130,7 @@ export function ContactTable({
                 colSpan={columns.length}
                 className="h-32 text-center text-[13px] text-muted-foreground"
               >
-                No customers match your filters.
+                {t("noMatch")}
               </TableCell>
             </TableRow>
           ) : (
@@ -152,7 +156,7 @@ export function ContactTable({
       {pageCount > 1 && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-border">
           <p className="text-[11px] text-muted-foreground tabular-nums">
-            Page {currentPage} of {pageCount}
+            {t("page")} {currentPage} {t("of")} {pageCount}
           </p>
           <div className="flex items-center gap-1">
             <Button
@@ -160,7 +164,7 @@ export function ContactTable({
               size="icon-sm"
               onClick={() => handlePage(currentPage - 1)}
               disabled={currentPage <= 1}
-              aria-label="Previous page"
+              aria-label={t("previousPage")}
             >
               <ChevronLeft className="size-4" />
             </Button>
@@ -193,7 +197,7 @@ export function ContactTable({
               size="icon-sm"
               onClick={() => handlePage(currentPage + 1)}
               disabled={currentPage >= pageCount}
-              aria-label="Next page"
+              aria-label={t("nextPage")}
             >
               <ChevronRight className="size-4" />
             </Button>

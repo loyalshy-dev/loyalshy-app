@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useTransition, useMemo } from "react"
+import { useTranslations } from "next-intl"
 import { formatDistanceToNow, format } from "date-fns"
 import {
   Stamp,
@@ -86,52 +87,19 @@ function getInitials(name: string): string {
     .toUpperCase()
 }
 
-const passInstanceStatusConfig: Record<
-  string,
-  { label: string; className: string }
-> = {
-  ACTIVE: {
-    label: "Active",
-    className: "bg-success/10 text-success border-success/20",
-  },
-  FROZEN: {
-    label: "Frozen",
-    className: "bg-warning/10 text-warning border-warning/20",
-  },
-  COMPLETED: {
-    label: "Completed",
-    className: "bg-brand/10 text-brand border-brand/20",
-  },
-  CANCELLED: {
-    label: "Cancelled",
-    className: "bg-muted text-muted-foreground border-border",
-  },
-  SUSPENDED: {
-    label: "Suspended",
-    className: "bg-warning/10 text-warning border-warning/20",
-  },
-  EXPIRED: {
-    label: "Expired",
-    className: "bg-muted text-muted-foreground border-border",
-  },
+const passInstanceStatusClassNames: Record<string, string> = {
+  ACTIVE: "bg-success/10 text-success border-success/20",
+  FROZEN: "bg-warning/10 text-warning border-warning/20",
+  COMPLETED: "bg-brand/10 text-brand border-brand/20",
+  CANCELLED: "bg-muted text-muted-foreground border-border",
+  SUSPENDED: "bg-warning/10 text-warning border-warning/20",
+  EXPIRED: "bg-muted text-muted-foreground border-border",
 }
 
-const rewardStatusConfig: Record<
-  string,
-  { label: string; className: string }
-> = {
-  AVAILABLE: {
-    label: "Available",
-    className: "bg-success/10 text-success border-success/20",
-  },
-  REDEEMED: {
-    label: "Redeemed",
-    className: "bg-brand/10 text-brand border-brand/20",
-  },
-  EXPIRED: {
-    label: "Expired",
-    className: "bg-muted text-muted-foreground border-border",
-  },
+const rewardStatusClassNames: Record<string, string> = {
+  AVAILABLE: "bg-success/10 text-success border-success/20",
+  REDEEMED: "bg-brand/10 text-brand border-brand/20",
+  EXPIRED: "bg-muted text-muted-foreground border-border",
 }
 
 const passTypeIcons: Record<string, typeof Stamp> = {
@@ -274,6 +242,24 @@ export function ContactDetailSheet({
   onContactDeleted,
   onRegisterVisit,
 }: ContactDetailSheetProps) {
+  const t = useTranslations("dashboard.contactDetail")
+  const tStatus = useTranslations("dashboard.status")
+
+  const passInstanceStatusConfig: Record<string, { label: string; className: string }> = {
+    ACTIVE: { label: tStatus("active"), className: passInstanceStatusClassNames.ACTIVE },
+    FROZEN: { label: tStatus("frozen"), className: passInstanceStatusClassNames.FROZEN },
+    COMPLETED: { label: tStatus("completed"), className: passInstanceStatusClassNames.COMPLETED },
+    CANCELLED: { label: tStatus("cancelled"), className: passInstanceStatusClassNames.CANCELLED },
+    SUSPENDED: { label: tStatus("suspended"), className: passInstanceStatusClassNames.SUSPENDED },
+    EXPIRED: { label: tStatus("expired"), className: passInstanceStatusClassNames.EXPIRED },
+  }
+
+  const rewardStatusConfig: Record<string, { label: string; className: string }> = {
+    AVAILABLE: { label: tStatus("available"), className: rewardStatusClassNames.AVAILABLE },
+    REDEEMED: { label: tStatus("redeemed"), className: rewardStatusClassNames.REDEEMED },
+    EXPIRED: { label: tStatus("expired"), className: rewardStatusClassNames.EXPIRED },
+  }
+
   const [detail, setDetail] = useState<ContactDetail | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -312,7 +298,7 @@ export function ContactDetailSheet({
     startDelete(async () => {
       const result = await deleteContact(contactId)
       if (result.success) {
-        toast.success("Contact deleted")
+        toast.success(t("contactDeleted"))
         setShowDeleteDialog(false)
         onOpenChange(false)
         onContactDeleted()
@@ -364,7 +350,7 @@ export function ContactDetailSheet({
     startIssuePass(async () => {
       const result = await issuePassToContacts(templateId, [contactId])
       if (result.success && result.issuedCount > 0) {
-        toast.success("Pass issued successfully")
+        toast.success(t("passIssued", { name: detail?.fullName ?? "" }))
         setIssuePassOpen(false)
         // Refresh detail
         const updated = await getContactDetail(contactId)
@@ -483,7 +469,7 @@ export function ContactDetailSheet({
                           className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0 rounded-full border border-dashed border-brand/40 text-brand hover:bg-brand/5 transition-colors"
                         >
                           <Plus className="size-3" />
-                          Issue Pass
+                          {t("issuePass")}
                         </button>
                       </PopoverTrigger>
                       <PopoverContent align="start" className="w-64 p-0">
@@ -498,7 +484,7 @@ export function ContactDetailSheet({
                         ) : (
                           <div className="py-1">
                             <p className="text-[11px] font-medium text-muted-foreground px-3 py-1.5">
-                              Select a program
+                              {t("selectProgram")}
                             </p>
                             {availableTemplates.map((t) => {
                               const meta = PASS_TYPE_META[t.passType as PassType]
@@ -528,7 +514,7 @@ export function ContactDetailSheet({
                 </SheetHeader>
 
                 {/* Pass Instance Progress Rings */}
-                <PassInstanceProgressSection passInstances={detail.passInstances} />
+                <PassInstanceProgressSection passInstances={detail.passInstances} statusConfig={passInstanceStatusConfig} />
 
                 {/* Stats row */}
                 <div className="grid grid-cols-3 gap-4 px-6 pb-4">
@@ -552,13 +538,13 @@ export function ContactDetailSheet({
                 <Tabs defaultValue="passes">
                   <TabsList className="mx-6 mt-4 mb-0 h-8 bg-muted/50">
                     <TabsTrigger value="passes" className="text-[12px] h-6 px-3">
-                      Passes ({detail.passInstances.length})
+                      {t("passes")} ({detail.passInstances.length})
                     </TabsTrigger>
                     <TabsTrigger value="visits" className="text-[12px] h-6 px-3">
-                      Visits ({detail.interactions.length})
+                      {t("visits")} ({detail.interactions.length})
                     </TabsTrigger>
                     <TabsTrigger value="rewards" className="text-[12px] h-6 px-3">
-                      Rewards ({detail.rewards.length})
+                      {t("rewards")} ({detail.rewards.length})
                     </TabsTrigger>
                   </TabsList>
 
@@ -566,7 +552,7 @@ export function ContactDetailSheet({
                     <div className="px-6 pt-3 pb-4">
                       {detail.passInstances.length === 0 ? (
                         <p className="text-[13px] text-muted-foreground text-center py-8">
-                          No passes issued yet.
+                          {t("noPasses")}
                         </p>
                       ) : (
                         <div className="space-y-0">
@@ -645,11 +631,11 @@ export function ContactDetailSheet({
 
                       {detail.interactions.length === 0 ? (
                         <p className="text-[13px] text-muted-foreground text-center py-8">
-                          No visits recorded yet.
+                          {t("noVisits")}
                         </p>
                       ) : filteredVisits.length === 0 ? (
                         <p className="text-[13px] text-muted-foreground text-center py-8">
-                          No visits for this program.
+                          {t("noVisits")}
                         </p>
                       ) : (
                         <div className="space-y-0">
@@ -724,11 +710,11 @@ export function ContactDetailSheet({
 
                       {detail.rewards.length === 0 ? (
                         <p className="text-[13px] text-muted-foreground text-center py-8">
-                          No rewards earned yet.
+                          {t("noRewards")}
                         </p>
                       ) : filteredRewards.length === 0 ? (
                         <p className="text-[13px] text-muted-foreground text-center py-8">
-                          No rewards for this program.
+                          {t("noRewards")}
                         </p>
                       ) : (
                         <div className="space-y-0">
@@ -825,7 +811,7 @@ export function ContactDetailSheet({
                   onClick={() => setIsEditing(true)}
                 >
                   <Pencil className="size-3.5" />
-                  Edit
+                  {t("editContact")}
                 </Button>
                 <Button
                   variant="outline"
@@ -834,7 +820,7 @@ export function ContactDetailSheet({
                   onClick={() => setShowDeleteDialog(true)}
                 >
                   <Trash2 className="size-3.5" />
-                  <span className="hidden xs:inline">Delete</span>
+                  <span className="hidden xs:inline">{t("deleteContact")}</span>
                 </Button>
               </div>
             </>
@@ -868,11 +854,9 @@ export function ContactDetailSheet({
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-base">Delete Contact</DialogTitle>
+            <DialogTitle className="text-base">{t("deleteContact")}</DialogTitle>
             <DialogDescription className="text-[13px]">
-              Are you sure you want to delete{" "}
-              <span className="font-medium text-foreground">{detail?.fullName}</span>?
-              This will permanently remove all their visit and reward history.
+              {t("deleteConfirm")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
@@ -915,9 +899,15 @@ const typeLabels: Record<string, string> = {
   PREPAID: "Prepaid Pass",
 }
 
-function PassInstanceCard({ passInstance }: { passInstance: PassInstanceDetail }) {
+function PassInstanceCard({
+  passInstance,
+  statusConfig,
+}: {
+  passInstance: PassInstanceDetail
+  statusConfig: Record<string, { label: string; className: string }>
+}) {
   const TypeIcon = passTypeIcons[passInstance.passType] ?? Stamp
-  const statusCfg = passInstanceStatusConfig[passInstance.status] ?? passInstanceStatusConfig.CANCELLED
+  const statusCfg = statusConfig[passInstance.status] ?? statusConfig.CANCELLED
   const isInactive = passInstance.status !== "ACTIVE"
   const design = buildWalletDesign(passInstance)
   const walletLabel = passInstance.walletProvider === "APPLE" ? "Apple Wallet"
@@ -1075,8 +1065,10 @@ function PassInstanceCard({ passInstance }: { passInstance: PassInstanceDetail }
 
 function PassInstanceProgressSection({
   passInstances,
+  statusConfig,
 }: {
   passInstances: PassInstanceDetail[]
+  statusConfig: Record<string, { label: string; className: string }>
 }) {
   if (passInstances.length === 0) {
     return (
@@ -1096,7 +1088,7 @@ function PassInstanceProgressSection({
   return (
     <div className="px-6 py-4 space-y-2">
       {sorted.map((passInstance) => (
-        <PassInstanceCard key={passInstance.passInstanceId} passInstance={passInstance} />
+        <PassInstanceCard key={passInstance.passInstanceId} passInstance={passInstance} statusConfig={statusConfig} />
       ))}
     </div>
   )
@@ -1117,6 +1109,7 @@ function EditContactDialog({
   onOpenChange,
   onUpdated,
 }: EditContactDialogProps) {
+  const t = useTranslations("dashboard.contactDetail")
   const [isUpdating, startUpdate] = useTransition()
 
   const {
@@ -1152,7 +1145,7 @@ function EditContactDialog({
         return
       }
 
-      toast.success("Contact updated")
+      toast.success(t("contactUpdated"))
       onUpdated({
         fullName: data.fullName,
         email: data.email || null,
@@ -1165,7 +1158,7 @@ function EditContactDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-base">Edit Contact</DialogTitle>
+          <DialogTitle className="text-base">{t("editContact")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">

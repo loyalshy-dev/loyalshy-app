@@ -21,6 +21,7 @@ import {
   type BulkImportRow,
   type IssueContactResult,
 } from "@/server/distribution-actions"
+import { useTranslations } from "next-intl"
 
 // ─── Constants ──────────────────────────────────────────────
 
@@ -125,6 +126,7 @@ export function CsvImportSection({
   templateId,
   templateName,
 }: CsvImportSectionProps) {
+  const t = useTranslations("dashboard.distribution")
   const [parsedRows, setParsedRows] = useState<BulkImportRow[] | null>(null)
   const [parseErrors, setParseErrors] = useState<string[]>([])
   const [fileName, setFileName] = useState<string | null>(null)
@@ -195,7 +197,7 @@ export function CsvImportSection({
       const result = await bulkImportAndIssue(templateId, parsedRows)
 
       if (!result.success) {
-        toast.error(result.error ?? "Import failed")
+        toast.error(result.error ?? t("importFailed"))
         return
       }
 
@@ -211,9 +213,7 @@ export function CsvImportSection({
       if (fileInputRef.current) fileInputRef.current.value = ""
 
       if (result.issuedCount > 0) {
-        toast.success(
-          `Imported ${result.issuedCount} pass${result.issuedCount !== 1 ? "es" : ""} (${result.createdCount} new contact${result.createdCount !== 1 ? "s" : ""})`
-        )
+        toast.success(t("imported", { count: result.issuedCount }))
       }
     })
   }
@@ -225,12 +225,10 @@ export function CsvImportSection({
           <div className="flex size-7 items-center justify-center rounded-md bg-brand/10">
             <Upload className="size-3.5 text-brand" />
           </div>
-          <h3 className="text-sm font-medium">Bulk import from CSV</h3>
+          <h3 className="text-sm font-medium">{t("bulkImport")}</h3>
         </div>
         <p className="text-[13px] text-muted-foreground ml-9">
-          Upload a CSV file to create contacts and issue passes for{" "}
-          <span className="font-medium text-foreground">{templateName}</span>.
-          Maximum {MAX_ROWS} rows per import.
+          {t("bulkImportDescription")}
         </p>
       </div>
 
@@ -267,7 +265,7 @@ export function CsvImportSection({
           >
             <FileSpreadsheet className="size-5 text-muted-foreground" />
             <span className="text-[13px] text-muted-foreground">
-              Click to upload CSV file
+              {t("uploadCsv")}
             </span>
           </label>
         ) : (

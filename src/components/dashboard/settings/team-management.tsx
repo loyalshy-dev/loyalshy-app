@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
+import { useTranslations } from "next-intl"
 import {
   UserPlus,
   MoreHorizontal,
@@ -106,6 +107,8 @@ export function TeamManagement({
   pendingInvitations: PendingInvitation[]
   currentUserId: string
 }) {
+  const t = useTranslations("dashboard.settingsForms")
+  const tSettings = useTranslations("dashboard.settings")
   const [isPending, startTransition] = useTransition()
   const [inviteOpen, setInviteOpen] = useState(false)
   const [removeMember, setRemoveMember] = useState<Member | null>(null)
@@ -133,7 +136,7 @@ export function TeamManagement({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success(`Invitation sent to ${data.email}`)
+        toast.success(tSettings("inviteSent", { email: data.email }))
         setInviteOpen(false)
         reset()
       }
@@ -147,7 +150,7 @@ export function TeamManagement({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success(`${removeMember.user.name} has been removed`)
+        toast.success(tSettings("memberRemoved", { name: removeMember.user.name }))
       }
       setRemoveMember(null)
     })
@@ -160,7 +163,7 @@ export function TeamManagement({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Invitation cancelled")
+        toast.success(t("inviteCancelled"))
       }
       setCancelInvite(null)
     })
@@ -172,7 +175,7 @@ export function TeamManagement({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success(`Invitation resent to ${invitation.email}`)
+        toast.success(tSettings("inviteSent", { email: invitation.email }))
       }
     })
   }
@@ -195,7 +198,7 @@ export function TeamManagement({
       <Card>
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div>
-            <h2 className="text-sm font-semibold">Team Members</h2>
+            <h2 className="text-sm font-semibold">{t("members")}</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
               {members.length} member{members.length !== 1 ? "s" : ""}
             </p>
@@ -240,7 +243,7 @@ export function TeamManagement({
                   ) : (
                     <Shield className="mr-1 h-3 w-3" />
                   )}
-                  {member.role === "owner" ? "Owner" : "Staff"}
+                  {member.role === "owner" ? t("owner") : t("staff")}
                 </Badge>
                 <p className="text-xs text-muted-foreground hidden sm:block w-28 text-right">
                   Joined {formatDistanceToNow(new Date(member.createdAt), { addSuffix: true })}
@@ -288,7 +291,7 @@ export function TeamManagement({
       {pendingInvitations.length > 0 && (
         <Card>
           <div className="border-b border-border px-6 py-4">
-            <h2 className="text-sm font-semibold">Pending Invitations</h2>
+            <h2 className="text-sm font-semibold">{t("pendingInvitations")}</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
               {pendingInvitations.length} pending invitation{pendingInvitations.length !== 1 ? "s" : ""}
             </p>
@@ -315,7 +318,7 @@ export function TeamManagement({
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-[10px]">
-                    {inv.role === "OWNER" ? "Owner" : "Staff"}
+                    {inv.role === "OWNER" ? t("owner") : t("staff")}
                   </Badge>
                   <Button
                     variant="ghost"
@@ -348,18 +351,18 @@ export function TeamManagement({
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
         <DialogContent className="rounded-4xl sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Invite team member</DialogTitle>
+            <DialogTitle>{tSettings("inviteTeam")}</DialogTitle>
             <DialogDescription>
               Send an invitation to join {organization.name} as a team member.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onInviteSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="invite-email">Email address</Label>
+              <Label htmlFor="invite-email">{t("inviteEmail")}</Label>
               <Input
                 id="invite-email"
                 type="email"
-                placeholder="colleague@example.com"
+                placeholder={t("inviteEmailPlaceholder")}
                 className="rounded-2xl"
                 aria-invalid={!!errors.email}
                 aria-describedby={errors.email ? "invite-email-error" : undefined}
@@ -370,7 +373,7 @@ export function TeamManagement({
               )}
             </div>
             <div className="space-y-2">
-              <Label>Role</Label>
+              <Label>{t("inviteRole")}</Label>
               <div className="grid gap-2">
                 <Card
                   asChild
@@ -386,7 +389,7 @@ export function TeamManagement({
                   >
                     <Shield className="mt-0.5 h-4 w-4 shrink-0" />
                     <div className="flex-1 space-y-1">
-                      <span className="text-sm font-medium">Staff</span>
+                      <span className="text-sm font-medium">{t("staff")}</span>
                       <ul className="space-y-0.5 text-[11px] text-muted-foreground">
                         <li>Register contacts & scan passes</li>
                         <li>Record stamps, check-ins & redemptions</li>
@@ -412,7 +415,7 @@ export function TeamManagement({
                   >
                     <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
                     <div className="flex-1 space-y-1">
-                      <span className="text-sm font-medium">Owner</span>
+                      <span className="text-sm font-medium">{t("owner")}</span>
                       <ul className="space-y-0.5 text-[11px] text-muted-foreground">
                         <li>Everything Staff can do</li>
                         <li>Manage programs, design & settings</li>
@@ -437,7 +440,7 @@ export function TeamManagement({
                 Cancel
               </Button>
               <Button type="submit" className="rounded-2xl" disabled={isPending}>
-                {isPending ? "Sending..." : "Send invitation"}
+                {isPending ? "Sending..." : t("sendInvite")}
               </Button>
             </DialogFooter>
           </form>

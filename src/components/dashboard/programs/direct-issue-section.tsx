@@ -48,6 +48,7 @@ import {
   type DirectIssueContact,
   type IssueContactResult,
 } from "@/server/distribution-actions"
+import { useTranslations } from "next-intl"
 
 // ─── Props ──────────────────────────────────────────────────
 
@@ -66,6 +67,7 @@ export function DirectIssueSection({
   passType,
   eligibleCount: initialEligibleCount,
 }: DirectIssueSectionProps) {
+  const t = useTranslations("dashboard.distribution")
   const [selectedContacts, setSelectedContacts] = useState<DirectIssueContact[]>([])
   const [searchResults, setSearchResults] = useState<DirectIssueContact[]>([])
   const [searchQuery, setSearchQuery] = useState("")
@@ -179,12 +181,10 @@ export function DirectIssueSection({
           <div className="flex size-7 items-center justify-center rounded-md bg-brand/10">
             <Send className="size-3.5 text-brand" />
           </div>
-          <h3 className="text-sm font-medium">Issue directly to contacts</h3>
+          <h3 className="text-sm font-medium">{t("directIssue")}</h3>
         </div>
         <p className="text-[13px] text-muted-foreground ml-9">
-          Select existing contacts to create and deliver a pass for{" "}
-          <span className="font-medium text-foreground">{templateName}</span>.
-          Contacts with an email will receive a notification.
+          {t("directIssueDescription")}
         </p>
       </div>
 
@@ -200,7 +200,7 @@ export function DirectIssueSection({
               className="w-full justify-start h-9 text-[13px] font-normal text-muted-foreground"
             >
               <Search className="mr-2 size-3.5 shrink-0 opacity-50" />
-              Search contacts by name, email, or phone...
+              {t("selectContact")}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">

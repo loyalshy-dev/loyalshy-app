@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { RefreshCw, CheckCircle2, AlertCircle, ArrowUpCircle, Send } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { getRecentJobLogs, type JobLogEntry } from "@/server/jobs-actions"
@@ -16,34 +17,34 @@ type JobsHistoryProps = {
 
 // ─── Action Badge ───────────────────────────────────────────
 
-function ActionBadge({ action }: { action: string }) {
+function ActionBadge({ action, t }: { action: string; t: ReturnType<typeof useTranslations> }) {
   switch (action) {
     case "CREATED":
       return (
         <Badge variant="default" className="gap-1 bg-emerald-600/10 text-emerald-600 border-emerald-600/20 hover:bg-emerald-600/10">
           <CheckCircle2 className="h-3 w-3" />
-          Created
+          {t("created")}
         </Badge>
       )
     case "UPDATED":
       return (
         <Badge variant="default" className="gap-1 bg-blue-600/10 text-blue-600 border-blue-600/20 hover:bg-blue-600/10">
           <ArrowUpCircle className="h-3 w-3" />
-          Updated
+          {t("updated")}
         </Badge>
       )
     case "PUSH_SENT":
       return (
         <Badge variant="default" className="gap-1 bg-violet-600/10 text-violet-600 border-violet-600/20 hover:bg-violet-600/10">
           <Send className="h-3 w-3" />
-          Push Sent
+          {t("pushSent")}
         </Badge>
       )
     case "PUSH_FAILED":
       return (
         <Badge variant="destructive" className="gap-1">
           <AlertCircle className="h-3 w-3" />
-          Push Failed
+          {t("pushFailed")}
         </Badge>
       )
     default:
@@ -53,23 +54,23 @@ function ActionBadge({ action }: { action: string }) {
 
 // ─── Detail Pills ───────────────────────────────────────────
 
-function DetailPills({ details }: { details: Record<string, unknown> }) {
+function DetailPills({ details, t }: { details: Record<string, unknown>; t: ReturnType<typeof useTranslations> }) {
   const pills: { label: string; value: string }[] = []
 
   if (details.platform) {
-    pills.push({ label: "Platform", value: String(details.platform) })
+    pills.push({ label: t("platform"), value: String(details.platform) })
   }
   if (details.trigger) {
-    pills.push({ label: "Trigger", value: String(details.trigger).replace(/_/g, " ") })
+    pills.push({ label: t("trigger"), value: String(details.trigger).replace(/_/g, " ") })
   }
   if (typeof details.devicesNotified === "number") {
-    pills.push({ label: "Devices", value: String(details.devicesNotified) })
+    pills.push({ label: t("devices"), value: String(details.devicesNotified) })
   }
   if (typeof details.pushSent === "number") {
-    pills.push({ label: "Sent", value: String(details.pushSent) })
+    pills.push({ label: t("sent"), value: String(details.pushSent) })
   }
   if (typeof details.pushFailed === "number" && details.pushFailed > 0) {
-    pills.push({ label: "Failed", value: String(details.pushFailed) })
+    pills.push({ label: t("failed"), value: String(details.pushFailed) })
   }
 
   if (pills.length === 0) return null
@@ -92,6 +93,7 @@ function DetailPills({ details }: { details: Record<string, unknown> }) {
 // ─── Component ──────────────────────────────────────────────
 
 export function JobsHistory({ initialLogs, initialTotal }: JobsHistoryProps) {
+  const t = useTranslations("dashboard.jobsHistory")
   const [logs, setLogs] = useState(initialLogs)
   const [total, setTotal] = useState(initialTotal)
   const [page, setPage] = useState(1)
@@ -165,10 +167,10 @@ export function JobsHistory({ initialLogs, initialTotal }: JobsHistoryProps) {
                   <tr key={log.id} className="border-b last:border-b-0 hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3 font-medium">{log.contactName}</td>
                     <td className="px-4 py-3">
-                      <ActionBadge action={log.action} />
+                      <ActionBadge action={log.action} t={t} />
                     </td>
                     <td className="px-4 py-3">
-                      <DetailPills details={log.details} />
+                      <DetailPills details={log.details} t={t} />
                     </td>
                     <td className="px-4 py-3 text-right text-muted-foreground whitespace-nowrap">
                       {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
