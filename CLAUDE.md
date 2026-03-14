@@ -113,6 +113,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - Use `@default(dbgenerated("uuidv7()::text"))` for ALL primary key UUIDs (cast to text for String type)
 - Mapped enums with `@map` for clean DB values
 - `db.ts` uses a lazy Proxy so PrismaClient is not constructed at import time
+- **Runtime adapter required**: Prisma v7 datasource URL is build-time only (`prisma.config.ts`). At runtime, `PrismaClient` MUST use `new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) })` — bare `new PrismaClient()` will fail. This applies to both `src/lib/db.ts` and `src/trigger/db.ts`.
 
 ## Folder Structure
 
