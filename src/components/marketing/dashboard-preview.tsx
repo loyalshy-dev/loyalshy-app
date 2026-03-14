@@ -134,7 +134,8 @@ export function FeatureShowcase() {
                     top: 0,
                     left: 0,
                   }}
-                  priority={feature.id === "dashboard"}
+                  priority={feature.id === "dashboard" && activeTab === "dashboard"}
+                  loading={activeTab === feature.id ? "eager" : "lazy"}
                 />
               ))}
             </div>

@@ -260,7 +260,7 @@
     --mk-border-hover: oklch(0.85 0.008 285);
     --mk-text: oklch(0.13 0.005 285);
     --mk-text-muted: oklch(0.45 0.01 285);
-    --mk-text-dimmed: oklch(0.60 0.008 285);
+    --mk-text-dimmed: oklch(0.50 0.008 285);
     --mk-brand-purple: oklch(0.55 0.2 265);
     --mk-brand-green: oklch(0.55 0.17 155);
   }

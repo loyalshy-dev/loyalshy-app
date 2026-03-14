@@ -173,7 +173,7 @@ export function MarketingNavbar() {
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    "rounded-md px-3 py-2.5 text-[13px] font-medium text-muted-foreground",
+                    "rounded-md px-3 py-3 text-[13px] font-medium text-muted-foreground",
                     "transition-colors duration-150 hover:bg-accent hover:text-foreground",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   )}

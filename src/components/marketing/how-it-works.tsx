@@ -85,6 +85,7 @@ export function HowItWorks() {
                       width={800}
                       height={600}
                       className="w-full h-auto"
+                      loading="lazy"
                     />
                   </div>
 

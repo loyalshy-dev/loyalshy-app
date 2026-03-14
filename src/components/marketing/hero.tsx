@@ -51,6 +51,7 @@ function BrowserFrame() {
         width={1920}
         height={1080}
         className="w-full h-auto"
+        sizes="(max-width: 1280px) 100vw, 1280px"
         priority
       />
     </div>
@@ -143,11 +144,9 @@ export function Hero() {
         </FadeIn>
 
         {/* Product screenshot */}
-        <FadeIn delay={0.5} duration={0.8} direction="up" distance={40}>
-          <div className="mx-auto mt-16 max-w-5xl">
-            <BrowserFrame />
-          </div>
-        </FadeIn>
+        <div className="mx-auto mt-16 max-w-5xl">
+          <BrowserFrame />
+        </div>
       </div>
     </section>
   )
