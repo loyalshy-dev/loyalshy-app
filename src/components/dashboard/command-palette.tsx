@@ -9,6 +9,7 @@ import {
   Settings,
   Stamp,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import {
   CommandDialog,
   CommandEmpty,
@@ -30,6 +31,7 @@ export function CommandPalette({
   onOpenChange,
   onRegisterVisit,
 }: CommandPaletteProps) {
+  const t = useTranslations("dashboard.nav")
   const router = useRouter()
 
   useEffect(() => {
@@ -50,38 +52,38 @@ export function CommandPalette({
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput placeholder="Search actions, pages..." />
+      <CommandInput placeholder={t("search")} />
       <CommandList>
         <CommandEmpty>
           <div className="flex flex-col items-center gap-1 py-4">
             <Search className="size-5 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">No results found.</p>
+            <p className="text-sm text-muted-foreground">{t("noResults")}</p>
           </div>
         </CommandEmpty>
 
-        <CommandGroup heading="Quick Actions">
+        <CommandGroup heading={t("quickActions")}>
           <CommandItem
             onSelect={() => runCommand(onRegisterVisit)}
           >
             <Stamp className="size-4" />
-            Register Interaction
+            {t("registerInteraction")}
           </CommandItem>
           <CommandItem
             onSelect={() => runCommand(() => router.push("/dashboard?action=create"))}
           >
             <Plus className="size-4" />
-            Create Program
+            {t("createProgram")}
           </CommandItem>
         </CommandGroup>
 
         <CommandSeparator />
 
-        <CommandGroup heading="Navigate">
+        <CommandGroup heading={t("navigate")}>
           <CommandItem
             onSelect={() => runCommand(() => router.push("/dashboard"))}
           >
             <LayoutGrid className="size-4" />
-            Overview
+            {t("overview")}
           </CommandItem>
           <CommandItem
             onSelect={() =>
@@ -89,7 +91,7 @@ export function CommandPalette({
             }
           >
             <Settings className="size-4" />
-            Settings
+            {t("settings")}
           </CommandItem>
         </CommandGroup>
       </CommandList>

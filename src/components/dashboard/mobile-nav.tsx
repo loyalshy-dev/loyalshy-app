@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LayoutGrid, Plus, Users, Layers, MoreHorizontal } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 
 type MobileNavProps = {
@@ -11,6 +12,7 @@ type MobileNavProps = {
 }
 
 export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
+  const t = useTranslations("dashboard.nav")
   const pathname = usePathname()
 
   function isOverviewActive() {
@@ -27,7 +29,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
 
   return (
     <nav
-      aria-label="Mobile navigation"
+      aria-label={t("mobileNav")}
       className="fixed bottom-0 inset-x-0 z-50 md:hidden bg-background/95 backdrop-blur-md border-t border-border safe-area-bottom"
     >
       <div className="flex items-end justify-around px-2 pt-1 pb-1">
@@ -42,7 +44,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
             className={cn("size-5", isOverviewActive() && "text-brand")}
             strokeWidth={isOverviewActive() ? 2 : 1.5}
           />
-          <span className="text-[10px] font-medium">Overview</span>
+          <span className="text-[10px] font-medium">{t("overview")}</span>
         </Link>
 
         <Link
@@ -56,7 +58,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
             className={cn("size-5", isContactsActive() && "text-brand")}
             strokeWidth={isContactsActive() ? 2 : 1.5}
           />
-          <span className="text-[10px] font-medium">Contacts</span>
+          <span className="text-[10px] font-medium">{t("contacts")}</span>
         </Link>
 
         {/* Center FAB — Register Interaction */}
@@ -65,12 +67,12 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
             type="button"
             onClick={onOpenRegisterVisit}
             className="flex items-center justify-center size-12 -mt-4 rounded-full bg-brand text-brand-foreground shadow-lg shadow-brand/25 active:scale-95 transition-transform"
-            aria-label="Register Interaction"
+            aria-label={t("registerInteraction")}
           >
             <Plus className="size-6" strokeWidth={2.5} />
           </button>
           <span className="text-[10px] font-medium text-brand mt-0.5">
-            Action
+            {t("action")}
           </span>
         </div>
 
@@ -85,7 +87,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
             className={cn("size-5", isProgramsActive() && "text-brand")}
             strokeWidth={isProgramsActive() ? 2 : 1.5}
           />
-          <span className="text-[10px] font-medium">Programs</span>
+          <span className="text-[10px] font-medium">{t("programs")}</span>
         </Link>
 
         <button
@@ -94,7 +96,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
           className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] rounded-md transition-colors text-muted-foreground"
         >
           <MoreHorizontal className="size-5" strokeWidth={1.5} />
-          <span className="text-[10px] font-medium">More</span>
+          <span className="text-[10px] font-medium">{t("more")}</span>
         </button>
       </div>
     </nav>

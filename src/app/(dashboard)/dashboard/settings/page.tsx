@@ -3,6 +3,7 @@ import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } f
 import { getSettingsData } from "@/server/org-settings-actions"
 import { getBillingData } from "@/server/billing-actions"
 import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { SettingsView } from "@/components/dashboard/settings/settings-view"
 
 export default async function SettingsPage(props: {
@@ -10,6 +11,7 @@ export default async function SettingsPage(props: {
 }) {
   await connection()
   const searchParams = await props.searchParams
+  const t = await getTranslations("dashboard.settings")
   const session = await assertAuthenticated()
 
   const organization = await getOrganizationForUser()
@@ -36,9 +38,9 @@ export default async function SettingsPage(props: {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage your organization settings.
+          {t("subtitle")}
         </p>
       </div>
 

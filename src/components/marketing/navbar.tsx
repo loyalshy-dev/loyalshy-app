@@ -4,6 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Menu } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -14,6 +15,7 @@ import {
   SheetClose,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { LanguageSwitcher } from "@/components/language-switcher"
 import { cn } from "@/lib/utils"
 
 interface NavLink {
@@ -21,15 +23,18 @@ interface NavLink {
   href: string
 }
 
-const NAV_LINKS: NavLink[] = [
-  { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
-]
-
 export function MarketingNavbar() {
+  const t = useTranslations("nav")
+  const tCommon = useTranslations("common")
+
   const [scrolled, setScrolled] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
+
+  const NAV_LINKS: NavLink[] = [
+    { label: t("features"), href: "#features" },
+    { label: t("pricing"), href: "#pricing" },
+    { label: t("faq"), href: "#faq" },
+  ]
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -54,11 +59,11 @@ export function MarketingNavbar() {
         <Link
           href="/"
           className="flex items-center transition-opacity hover:opacity-80"
-          aria-label="Loyalshy home"
+          aria-label={t("home")}
         >
           <Image
             src="/logo.svg"
-            alt="Loyalshy"
+            alt={tCommon("loyalshy")}
             width={160}
             height={44}
             className="h-8 w-auto dark:invert"
@@ -89,18 +94,19 @@ export function MarketingNavbar() {
 
         {/* Right side actions — desktop */}
         <div className="hidden items-center gap-5 md:flex">
+          <LanguageSwitcher />
           <Link
             href="/login"
             className="text-base font-medium transition-colors"
             style={{ color: "var(--mk-text-muted)" }}
           >
-            Log In
+            {tCommon("logIn")}
           </Link>
           <Link
             href="/register"
             className="mk-btn-primary !py-3 !px-8 !text-base"
           >
-            Get Started
+            {tCommon("getStarted")}
           </Link>
         </div>
 
@@ -112,7 +118,7 @@ export function MarketingNavbar() {
               size="icon-sm"
               className="md:hidden"
               style={{ color: "var(--mk-text-muted)" }}
-              aria-label="Open menu"
+              aria-label={t("openMenu")}
             >
               <Menu className="size-4.5" />
             </Button>
@@ -129,7 +135,7 @@ export function MarketingNavbar() {
                   >
                     <Image
                       src="/logo.png"
-                      alt="Loyalshy"
+                      alt={tCommon("loyalshy")}
                       width={120}
                       height={32}
                       className="h-6 w-auto dark:invert"
@@ -141,7 +147,7 @@ export function MarketingNavbar() {
                     variant="ghost"
                     size="icon-sm"
                     className="text-muted-foreground"
-                    aria-label="Close menu"
+                    aria-label={t("closeMenu")}
                   >
                     <svg
                       width="15"
@@ -191,7 +197,7 @@ export function MarketingNavbar() {
                 className="w-full text-[13px] font-medium"
               >
                 <Link href="/login" onClick={() => setMobileOpen(false)}>
-                  Log In
+                  {tCommon("logIn")}
                 </Link>
               </Button>
               <Link
@@ -199,7 +205,7 @@ export function MarketingNavbar() {
                 onClick={() => setMobileOpen(false)}
                 className="mk-btn-primary w-full text-center !text-[13px]"
               >
-                Get Started
+                {tCommon("getStarted")}
               </Link>
             </div>
           </SheetContent>

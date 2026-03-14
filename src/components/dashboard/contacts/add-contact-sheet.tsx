@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useTransition } from "react"
+import { useTranslations } from "next-intl"
 import { UserPlus, Loader2, AlertCircle } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -17,9 +18,10 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { addContact } from "@/server/contact-actions"
 
+// Schema messages are overridden per-field via register() options
 const schema = z.object({
-  fullName: z.string().min(1, "Name is required").max(100),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  fullName: z.string().min(1).max(100),
+  email: z.string().email().optional().or(z.literal("")),
   phone: z.string().max(30).optional().or(z.literal("")),
 })
 
@@ -31,6 +33,8 @@ type AddContactSheetProps = {
 }
 
 export function AddContactSheet({ open, onOpenChange }: AddContactSheetProps) {
+  const t = useTranslations("dashboard.addContact")
+  const tc = useTranslations("common")
   const [isPending, startTransition] = useTransition()
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -62,7 +66,7 @@ export function AddContactSheet({ open, onOpenChange }: AddContactSheetProps) {
         return
       }
 
-      toast.success(`${data.fullName} added successfully`)
+      toast.success(t("addedSuccess", { name: data.fullName }))
       reset()
       onOpenChange(false)
     })
@@ -77,9 +81,9 @@ export function AddContactSheet({ open, onOpenChange }: AddContactSheetProps) {
               <UserPlus className="size-4 text-brand" />
             </div>
             <div>
-              <SheetTitle className="text-base">Add Customer</SheetTitle>
+              <SheetTitle className="text-base">{t("title")}</SheetTitle>
               <SheetDescription className="text-[13px]">
-                Add a new customer to your loyalty program.
+                {t("subtitle")}
               </SheetDescription>
             </div>
           </div>
@@ -93,16 +97,16 @@ export function AddContactSheet({ open, onOpenChange }: AddContactSheetProps) {
           {/* Full Name */}
           <div className="space-y-1.5">
             <Label htmlFor="fullName" className="text-[13px]">
-              Full Name <span className="text-destructive">*</span>
+              {t("fullName")} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="fullName"
-              placeholder="John Doe"
+              placeholder={t("namePlaceholder")}
               className="h-9 text-[13px]"
               autoFocus
               aria-invalid={!!errors.fullName}
               aria-describedby={errors.fullName ? "fullName-error" : undefined}
-              {...register("fullName", { required: "Name is required" })}
+              {...register("fullName", { required: t("nameRequired") })}
             />
             {errors.fullName && (
               <p id="fullName-error" className="flex items-center gap-1 text-[11px] text-destructive" role="alert">
@@ -115,16 +119,19 @@ export function AddContactSheet({ open, onOpenChange }: AddContactSheetProps) {
           {/* Email */}
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-[13px]">
-              Email
+              {t("email")}
             </Label>
             <Input
               id="email"
               type="email"
-              placeholder="john@example.com"
+              placeholder={t("emailPlaceholder")}
               className="h-9 text-[13px]"
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? "email-error" : undefined}
-              {...register("email")}
+              {...register("email", {
+                validate: (val) =>
+                  !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || t("invalidEmail"),
+              })}
             />
             {errors.email && (
               <p id="email-error" className="flex items-center gap-1 text-[11px] text-destructive" role="alert">
@@ -137,12 +144,12 @@ export function AddContactSheet({ open, onOpenChange }: AddContactSheetProps) {
           {/* Phone */}
           <div className="space-y-1.5">
             <Label htmlFor="phone" className="text-[13px]">
-              Phone
+              {t("phone")}
             </Label>
             <Input
               id="phone"
               type="tel"
-              placeholder="+1 (555) 123-4567"
+              placeholder={t("phonePlaceholder")}
               className="h-9 text-[13px]"
               aria-invalid={!!errors.phone}
               aria-describedby={errors.phone ? "phone-error" : undefined}
@@ -168,7 +175,7 @@ export function AddContactSheet({ open, onOpenChange }: AddContactSheetProps) {
               }}
               className="text-[13px]"
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button type="submit" size="sm" disabled={isPending} className="gap-1.5 text-[13px]">
               {isPending ? (
@@ -176,7 +183,7 @@ export function AddContactSheet({ open, onOpenChange }: AddContactSheetProps) {
               ) : (
                 <UserPlus className="size-3.5" />
               )}
-              Add Customer
+              {t("title")}
             </Button>
           </div>
         </form>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { Users, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -9,6 +10,7 @@ type ContactEmptyStateProps = {
 }
 
 export function ContactEmptyState({ onAddContact }: ContactEmptyStateProps) {
+  const t = useTranslations("dashboard.contacts")
   return (
     <Card>
       <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
@@ -22,7 +24,7 @@ export function ContactEmptyState({ onAddContact }: ContactEmptyStateProps) {
         </p>
         <Button size="sm" className="gap-1.5" onClick={onAddContact}>
           <UserPlus className="size-3.5" />
-          Add Customer
+          {t("addContact")}
         </Button>
       </div>
     </Card>

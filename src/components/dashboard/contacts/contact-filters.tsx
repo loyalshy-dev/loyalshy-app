@@ -2,6 +2,7 @@
 
 import { useTransition, useRef, useCallback } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Search, X, Download } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -25,6 +26,7 @@ export function ContactFilters({
   programType,
   totalResults,
 }: ContactFiltersProps) {
+  const t = useTranslations("dashboard.contacts")
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -86,9 +88,9 @@ export function ContactFilters({
         a.download = `customers-${new Date().toISOString().split("T")[0]}.csv`
         a.click()
         URL.revokeObjectURL(url)
-        toast.success("Customers exported")
+        toast.success(t("exported"))
       } catch {
-        toast.error("Failed to export customers")
+        toast.error(t("exportFailed"))
       }
     })
   }
@@ -102,7 +104,7 @@ export function ContactFilters({
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search by name, email, phone..."
+            placeholder={t("searchPlaceholder")}
             defaultValue={search}
             onChange={(e) => handleSearchDebounced(e.target.value)}
             className="pl-8 h-8 text-[13px]"
@@ -118,14 +120,14 @@ export function ContactFilters({
           disabled={isExporting}
         >
           <Download className="size-3.5" />
-          <span className="hidden sm:inline">Export</span>
+          <span className="hidden sm:inline">{t("export")}</span>
         </Button>
       </div>
 
       {/* Filter chips */}
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-          Filter
+          {t("filter")}
         </span>
 
         {/* Has Reward chip */}
@@ -141,7 +143,7 @@ export function ContactFilters({
                 : "hover:bg-accent"
             }`}
           >
-            Has Reward
+            {t("hasReward")}
           </Badge>
         </button>
 
@@ -178,7 +180,7 @@ export function ContactFilters({
               className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="size-3" />
-              Clear filters
+              {t("clearFilters")}
             </button>
           </>
         )}

@@ -1,6 +1,7 @@
 "use client"
 
 import { Users, Activity, Gift, Trophy, TrendingUp, TrendingDown } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useAnimatedCounter } from "@/hooks/use-animated-counter"
 import type { PassInstancesByType } from "@/server/analytics"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
@@ -104,10 +105,11 @@ export function StatCards({
   activePassInstances,
   passInstancesByType,
 }: StatCardsProps) {
+  const t = useTranslations("dashboard.overview")
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        label="Total Contacts"
+        label={t("totalContacts")}
         value={totalContacts}
         change={totalContactsChange}
         icon={<Users className="size-4" />}
@@ -115,7 +117,7 @@ export function StatCards({
       <Card className="p-5 space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-[13px] font-medium text-muted-foreground">
-            Active Pass Instances
+            {t("activePasses")}
           </span>
           <span className="text-muted-foreground/60">
             <Activity className="size-4" />
@@ -129,13 +131,13 @@ export function StatCards({
         </div>
       </Card>
       <StatCard
-        label="Activity This Month"
+        label={t("activityThisMonth")}
         value={activityThisMonth}
         change={activityChange}
         icon={<Gift className="size-4" />}
       />
       <StatCard
-        label="Redeemed This Month"
+        label={t("redeemedThisMonth")}
         value={rewardsRedeemedThisMonth}
         change={rewardsRedeemedChange}
         icon={<Trophy className="size-4" />}

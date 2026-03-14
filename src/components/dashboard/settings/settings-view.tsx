@@ -1,6 +1,8 @@
 "use client"
 
+import type React from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { Building2, Users, CreditCard, Activity, Key } from "lucide-react"
 import { GeneralSettingsForm } from "./general-settings-form"
@@ -14,12 +16,6 @@ import type { PlanId } from "@/lib/plans"
 import { Card } from "@/components/ui/card"
 
 type Tab = "general" | "team" | "billing" | "api"
-
-const baseTabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: "general", label: "General", icon: Building2 },
-  { id: "team", label: "Team", icon: Users },
-  { id: "billing", label: "Billing", icon: CreditCard },
-]
 
 type Organization = {
   id: string
@@ -76,18 +72,25 @@ export function SettingsView({
   billingData,
   currentUserId,
 }: SettingsViewProps) {
+  const t = useTranslations("dashboard.settings")
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  const baseTabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { id: "general", label: t("general"), icon: Building2 },
+    { id: "team", label: t("team"), icon: Users },
+    { id: "billing", label: t("billing"), icon: CreditCard },
+  ]
 
   // Build tabs list — include API tab only for Growth+ plans
   const plan = PLANS[organization.plan as PlanId]
   const tabs = plan?.apiAccess
-    ? [...baseTabs, { id: "api" as Tab, label: "API", icon: Key }]
+    ? [...baseTabs, { id: "api" as Tab, label: t("api"), icon: Key }]
     : baseTabs
 
   // Support legacy tabs by falling back to "general"
   const resolvedTab = activeTab === "loyalty" || activeTab === "card-design" || activeTab === "programs" ? "general" : activeTab
-  const currentTab = (tabs.find((t) => t.id === resolvedTab)?.id ?? "general") as Tab
+  const currentTab = (tabs.find((tab) => tab.id === resolvedTab)?.id ?? "general") as Tab
 
   function setTab(tab: Tab) {
     const params = new URLSearchParams(searchParams.toString())
@@ -132,7 +135,7 @@ export function SettingsView({
           className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border transition-colors -mb-px whitespace-nowrap"
         >
           <Activity className="h-4 w-4" />
-          Jobs
+          {t("jobs")}
         </Link>
       </div>
 

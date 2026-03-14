@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,6 +20,7 @@ import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 
 export default function LoginPage() {
+  const t = useTranslations("auth.login")
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
@@ -38,7 +40,7 @@ export default function LoginPage() {
     })
 
     if (error) {
-      toast.error(error.message || "Invalid email or password")
+      toast.error(error.message || t("invalidCredentials"))
       setIsLoading(false)
       return
     }
@@ -58,8 +60,8 @@ export default function LoginPage() {
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-        <CardDescription>Sign in to your Loyalshy account</CardDescription>
+        <CardTitle className="text-2xl font-bold">{t("title")}</CardTitle>
+        <CardDescription>{t("subtitle")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button
@@ -73,23 +75,23 @@ export default function LoginPage() {
           ) : (
             <GoogleIcon />
           )}
-          Continue with Google
+          {t("continueWithGoogle")}
         </Button>
 
         <div className="relative">
           <Separator />
           <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-            or
+            {t("or")}
           </span>
         </div>
 
         <form onSubmit={handleEmailLogin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -98,18 +100,18 @@ export default function LoginPage() {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("password")}</Label>
               <Link
                 href="/forgot-password"
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
-                Forgot password?
+                {t("forgotPassword")}
               </Link>
             </div>
             <Input
               id="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder={t("passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -119,15 +121,15 @@ export default function LoginPage() {
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <LoadingSpinner />}
-            Sign in
+            {t("submit")}
           </Button>
         </form>
       </CardContent>
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
+          {t("noAccount")}{" "}
           <Link href="/register" className="font-medium text-foreground hover:underline">
-            Sign up
+            {t("signUp")}
           </Link>
         </p>
       </CardFooter>

@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { CookieBanner } from "@/components/cookie-banner";
 import { Analytics } from "@vercel/analytics/next"
@@ -80,25 +83,38 @@ export const metadata: Metadata = {
   },
 };
 
+async function IntlProvider({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
+  return (
+    <html lang={locale} suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <NextIntlClientProvider messages={messages}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            {children}
+            <SpeedInsights />
+            <Analytics />
+            <Toaster richColors position="top-center" />
+            <CookieBanner />
+          </ThemeProvider>
+        </NextIntlClientProvider>
+        <AnalyticsProvider />
+      </body>
+    </html>
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-          <SpeedInsights />
-          <Analytics />
-          <Toaster richColors position="top-center" />
-          <CookieBanner />
-        </ThemeProvider>
-        <AnalyticsProvider />
-      </body>
-    </html>
+    <Suspense>
+      <IntlProvider>{children}</IntlProvider>
+    </Suspense>
   );
 }

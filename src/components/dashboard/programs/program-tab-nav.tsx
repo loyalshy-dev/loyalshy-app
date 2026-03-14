@@ -3,6 +3,7 @@
 import { useTransition } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { Rocket, Loader2, ArrowLeft } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -26,37 +27,8 @@ type Tab = {
   ownerOnly?: boolean
 }
 
-function getPassesTabLabel(passType: string): string {
-  switch (passType) {
-    case "TICKET":
-      return "Attendees"
-    case "MEMBERSHIP":
-    case "BUSINESS_ID":
-      return "Members"
-    case "GIFT_CARD":
-      return "Cards"
-    default:
-      return "Passes"
-  }
-}
-
 function hasRewardsTab(passType: string): boolean {
   return ["STAMP_CARD", "COUPON", "POINTS"].includes(passType)
-}
-
-function getRewardsTabLabel(passType: string): string {
-  switch (passType) {
-    case "COUPON":
-      return "Redemptions"
-    case "POINTS":
-      return "Catalog"
-    default:
-      return "Rewards"
-  }
-}
-
-function getDistributionLabel(_passType: string): string {
-  return "Distribution"
 }
 
 export function ProgramTabNav({
@@ -67,10 +39,37 @@ export function ProgramTabNav({
   organizationId,
   isOwner,
 }: ProgramTabNavProps) {
+  const t = useTranslations("dashboard.programs")
+  const tnav = useTranslations("dashboard.nav")
   const pathname = usePathname()
   const router = useRouter()
   const [isActivating, startTransition] = useTransition()
   const basePath = `/dashboard/programs/${templateId}`
+
+  function getPassesTabLabel(type: string): string {
+    switch (type) {
+      case "TICKET":
+        return t("attendees")
+      case "MEMBERSHIP":
+      case "BUSINESS_ID":
+        return "Members"
+      case "GIFT_CARD":
+        return t("cardsTab")
+      default:
+        return t("passes")
+    }
+  }
+
+  function getRewardsTabLabel(type: string): string {
+    switch (type) {
+      case "COUPON":
+        return t("redemptions")
+      case "POINTS":
+        return t("catalog")
+      default:
+        return t("rewards")
+    }
+  }
 
   function handleActivate() {
     startTransition(async () => {
@@ -78,14 +77,14 @@ export function ProgramTabNav({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Program activated! Contacts can now receive passes.")
+        toast.success(t("activated"))
         router.refresh()
       }
     })
   }
 
   const tabs: Tab[] = [
-    { label: "Overview", href: basePath },
+    { label: t("overview"), href: basePath },
     { label: getPassesTabLabel(passType), href: `${basePath}/passes` },
   ]
 
@@ -97,13 +96,13 @@ export function ProgramTabNav({
   }
 
   tabs.push(
-    { label: "Card Design", href: `${basePath}/design`, ownerOnly: true },
+    { label: t("cardDesign"), href: `${basePath}/design`, ownerOnly: true },
     {
-      label: getDistributionLabel(passType),
+      label: t("distribution"),
       href: `${basePath}/distribution`,
       ownerOnly: true,
     },
-    { label: "Settings", href: `${basePath}/settings`, ownerOnly: true }
+    { label: tnav("settings"), href: `${basePath}/settings`, ownerOnly: true }
   )
 
   const visibleTabs = tabs.filter((t) => !t.ownerOnly || isOwner)
@@ -143,8 +142,7 @@ export function ProgramTabNav({
           <div className="flex items-center gap-2 min-w-0">
             <Rocket className="h-4 w-4 text-muted-foreground shrink-0" />
             <p className="text-[13px] text-muted-foreground truncate">
-              This program is in draft mode. Activate it to start issuing
-              passes.
+              {t("draftBanner")}
             </p>
           </div>
           <Button
@@ -158,7 +156,7 @@ export function ProgramTabNav({
             ) : (
               <Rocket className="h-3.5 w-3.5" />
             )}
-            Activate
+            {t("activate")}
           </Button>
         </div>
       )}

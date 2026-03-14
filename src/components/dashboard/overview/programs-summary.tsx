@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { ChevronRight, Plus } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import type { TemplateSummaryItem } from "@/server/analytics"
 import { Card } from "@/components/ui/card"
@@ -10,50 +11,52 @@ type ProgramsSummaryProps = {
   programs: TemplateSummaryItem[]
 }
 
-function getMetricLine(program: TemplateSummaryItem): string {
-  switch (program.passType) {
-    case "STAMP_CARD":
-      return `${program.activePassInstances} enrolled \u00b7 ${program.redeemedRewards} rewards earned`
-    case "COUPON":
-      return `${program.availableRewards + program.redeemedRewards} issued \u00b7 ${program.redeemedRewards} redeemed`
-    case "MEMBERSHIP":
-      return `${program.activePassInstances} members \u00b7 ${program.totalInteractions} check-ins`
-    case "POINTS":
-      return `${program.activePassInstances} enrolled \u00b7 ${program.redeemedRewards} redeemed`
-    case "PREPAID":
-      return `${program.activePassInstances} issued \u00b7 ${program.totalInteractions} uses`
-    case "GIFT_CARD":
-      return `${program.activePassInstances} cards \u00b7 ${program.totalInteractions} transactions`
-    case "TICKET":
-      return `${program.activePassInstances} tickets \u00b7 ${program.totalInteractions} scans`
-    case "ACCESS":
-      return `${program.activePassInstances} passes \u00b7 ${program.totalInteractions} access logs`
-    case "TRANSIT":
-      return `${program.activePassInstances} passes \u00b7 ${program.totalInteractions} trips`
-    case "BUSINESS_ID":
-      return `${program.activePassInstances} IDs \u00b7 ${program.totalInteractions} verifications`
-    default:
-      return `${program.activePassInstances} enrolled`
-  }
-}
-
 export function ProgramsSummary({ programs }: ProgramsSummaryProps) {
+  const t = useTranslations("dashboard.programsSummary")
+
+  function getMetricLine(program: TemplateSummaryItem): string {
+    switch (program.passType) {
+      case "STAMP_CARD":
+        return `${program.activePassInstances} ${t("enrolled")} \u00b7 ${program.redeemedRewards} ${t("rewardsEarned")}`
+      case "COUPON":
+        return `${program.availableRewards + program.redeemedRewards} ${t("issued")} \u00b7 ${program.redeemedRewards} ${t("redeemed")}`
+      case "MEMBERSHIP":
+        return `${program.activePassInstances} ${t("members")} \u00b7 ${program.totalInteractions} ${t("checkIns")}`
+      case "POINTS":
+        return `${program.activePassInstances} ${t("enrolled")} \u00b7 ${program.redeemedRewards} ${t("redeemed")}`
+      case "PREPAID":
+        return `${program.activePassInstances} ${t("issued")} \u00b7 ${program.totalInteractions} ${t("uses")}`
+      case "GIFT_CARD":
+        return `${program.activePassInstances} ${t("cards")} \u00b7 ${program.totalInteractions} ${t("transactions")}`
+      case "TICKET":
+        return `${program.activePassInstances} ${t("tickets")} \u00b7 ${program.totalInteractions} ${t("scans")}`
+      case "ACCESS":
+        return `${program.activePassInstances} ${t("passes")} \u00b7 ${program.totalInteractions} ${t("accessLogs")}`
+      case "TRANSIT":
+        return `${program.activePassInstances} ${t("passes")} \u00b7 ${program.totalInteractions} ${t("trips")}`
+      case "BUSINESS_ID":
+        return `${program.activePassInstances} ${t("ids")} \u00b7 ${program.totalInteractions} ${t("verifications")}`
+      default:
+        return `${program.activePassInstances} ${t("enrolled")}`
+    }
+  }
+
   if (programs.length === 0) {
     return (
       <Card className="p-5">
         <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
-          Programs
+          {t("title")}
         </h3>
         <div className="py-6 text-center">
           <p className="text-sm text-muted-foreground mb-3">
-            No active programs yet.
+            {t("empty")}
           </p>
           <Link
             href="/dashboard/programs"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand/80 transition-colors"
           >
             <Plus className="size-3.5" />
-            Create a program
+            {t("createProgram")}
           </Link>
         </div>
       </Card>
@@ -63,7 +66,7 @@ export function ProgramsSummary({ programs }: ProgramsSummaryProps) {
   return (
     <Card className="p-5">
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
-        Programs
+        {t("title")}
       </h3>
       <div className="space-y-0">
         {programs.map((program) => {

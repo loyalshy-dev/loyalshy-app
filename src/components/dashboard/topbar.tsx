@@ -3,10 +3,12 @@
 import React from "react"
 import { usePathname } from "next/navigation"
 import { Plus, Search } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { LanguageSwitcher } from "@/components/language-switcher"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,16 +23,6 @@ type TopbarProps = {
   onOpenRegisterVisit: () => void
 }
 
-const breadcrumbLabels: Record<string, string> = {
-  dashboard: "Overview",
-  customers: "Contacts",
-  rewards: "Rewards",
-  programs: "Programs",
-  settings: "Settings",
-  design: "Card Design",
-  distribution: "Distribution",
-}
-
 // UUID v7 pattern (8-4-4-4-12 hex)
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -38,8 +30,21 @@ export function Topbar({
   onOpenCommandPalette,
   onOpenRegisterVisit,
 }: TopbarProps) {
+  const t = useTranslations("dashboard.nav")
+  const tCommon = useTranslations("common")
   const pathname = usePathname()
   const segments = pathname.split("/").filter(Boolean)
+
+  const tPrograms = useTranslations("dashboard.programs")
+  const breadcrumbLabels: Record<string, string> = {
+    dashboard: t("overview"),
+    customers: t("contacts"),
+    rewards: tPrograms("rewards"),
+    programs: t("programs"),
+    settings: t("settings"),
+    design: tPrograms("cardDesign"),
+    distribution: tPrograms("distribution"),
+  }
 
   return (
     <header className="flex items-center justify-between gap-4 h-14 px-4 lg:px-6 border-b border-border bg-background/80 backdrop-blur-sm shrink-0">
@@ -92,7 +97,7 @@ export function Topbar({
           onClick={onOpenCommandPalette}
         >
           <Search className="size-3.5" />
-          <span className="text-[13px]">Search...</span>
+          <span className="text-[13px]">{tCommon("search")}</span>
           <kbd className="pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
             <span className="text-xs">&#8984;</span>K
           </kbd>
@@ -109,13 +114,16 @@ export function Topbar({
           <Search className="size-4" />
         </Button>
 
+        {/* Language switcher */}
+        <LanguageSwitcher />
+
         {/* Theme toggle */}
         <ThemeToggle />
 
         {/* Register Visit CTA */}
         <Button className="gap-1.5" onClick={onOpenRegisterVisit}>
           <Plus className="size-3.5" />
-          <span className="hidden sm:inline">New Interaction</span>
+          <span className="hidden sm:inline">{t("newInteraction")}</span>
         </Button>
       </div>
     </header>

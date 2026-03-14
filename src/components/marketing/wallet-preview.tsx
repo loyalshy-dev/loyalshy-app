@@ -1,31 +1,25 @@
 import { QrCode, RefreshCw, Wallet } from "lucide-react"
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 import { PhoneMockupInteractive } from "./phone-mockup"
 import { FadeIn } from "./motion"
 import type { MarketingCard } from "./wallet-card-data"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
-
-const bullets = [
-  {
-    icon: Wallet,
-    text: "Works with Apple & Google Wallet",
-  },
-  {
-    icon: RefreshCw,
-    text: "Updates automatically on every visit",
-  },
-  {
-    icon: QrCode,
-    text: "One scan to join, no app required",
-  },
-] as const
 
 type WalletPreviewProps = {
   showcaseCards?: MarketingCard[]
   showcaseDesigns?: WalletPassDesign[]
 }
 
-export function WalletPreview({ showcaseCards, showcaseDesigns }: WalletPreviewProps = {}) {
+export async function WalletPreview({ showcaseCards, showcaseDesigns }: WalletPreviewProps = {}) {
+  const t = await getTranslations("walletPreview")
+
+  const bullets = [
+    { icon: Wallet, text: t("badge1") },
+    { icon: RefreshCw, text: t("badge2") },
+    { icon: QrCode, text: t("badge3") },
+  ]
+
   return (
     <section
       id="customer-view"
@@ -45,21 +39,19 @@ export function WalletPreview({ showcaseCards, showcaseDesigns }: WalletPreviewP
               className="text-[13px] font-medium uppercase tracking-widest"
               style={{ color: "var(--mk-brand-purple)" }}
             >
-              The customer experience
+              {t("sectionLabel")}
             </p>
             <h2
               className="mt-3 text-3xl font-bold sm:text-[2.5rem]"
               style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
             >
-              Beautiful passes that live in their wallet
+              {t("title")}
             </h2>
             <p
               className="mt-5 text-[16px] leading-relaxed"
               style={{ color: "var(--mk-text-muted)" }}
             >
-              No app to download. No account to create. Your customers scan once
-              and get a loyalty card that lives right next to their boarding
-              passes&nbsp;&mdash; and updates automatically every visit.
+              {t("description")}
             </p>
 
             <ul className="mt-8 space-y-4">
@@ -97,7 +89,7 @@ export function WalletPreview({ showcaseCards, showcaseDesigns }: WalletPreviewP
                 className="text-[14px] font-medium transition-colors hover:opacity-70"
                 style={{ color: "var(--mk-brand-purple)" }}
               >
-                See pricing &rarr;
+                {t("seePricing")}
               </Link>
             </div>
           </FadeIn>

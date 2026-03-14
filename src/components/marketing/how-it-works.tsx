@@ -1,40 +1,40 @@
 import Image from "next/image"
 import { Building2, QrCode, Smartphone } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 import { FadeIn, Stagger, StaggerItem } from "./motion"
-
-const steps = [
-  {
-    number: "01",
-    icon: Building2,
-    title: "Set up your business",
-    description:
-      "Create your account, customize your brand and loyalty program in minutes.",
-    image: "/platform/studio.png",
-    alt: "Card design studio — customize your loyalty card",
-  },
-  {
-    number: "02",
-    icon: QrCode,
-    title: "Print your QR code",
-    description:
-      "Download your unique QR code and place it at your counter or on tables.",
-    image: "/platform/distribution.png",
-    alt: "Distribution page with printable QR code and shareable link",
-  },
-  {
-    number: "03",
-    icon: Smartphone,
-    title: "Customers scan & earn",
-    description:
-      "Customers scan, get a digital wallet pass, and start earning rewards instantly.",
-    image: "/platform/passes.png",
-    alt: "Pass management showing issued loyalty passes",
-  },
-] as const
 
 /* ─── Section ─────────────────────────────────────────────────────── */
 
-export function HowItWorks() {
+export async function HowItWorks() {
+  const t = await getTranslations("howItWorks")
+
+  const steps = [
+    {
+      number: "01",
+      icon: Building2,
+      title: t("steps.setup.title"),
+      description: t("steps.setup.description"),
+      image: "/platform/studio.png",
+      alt: t("steps.setup.alt"),
+    },
+    {
+      number: "02",
+      icon: QrCode,
+      title: t("steps.qr.title"),
+      description: t("steps.qr.description"),
+      image: "/platform/distribution.png",
+      alt: t("steps.qr.alt"),
+    },
+    {
+      number: "03",
+      icon: Smartphone,
+      title: t("steps.earn.title"),
+      description: t("steps.earn.description"),
+      image: "/platform/passes.png",
+      alt: t("steps.earn.alt"),
+    },
+  ]
+
   return (
     <section
       id="how-it-works"
@@ -48,19 +48,19 @@ export function HowItWorks() {
               className="text-[13px] font-medium uppercase tracking-widest mb-3"
               style={{ color: "var(--mk-brand-purple)" }}
             >
-              How it works
+              {t("sectionLabel")}
             </p>
             <h2
               className="text-3xl sm:text-[2.5rem] font-bold"
               style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
             >
-              Three steps to launch
+              {t("title")}
             </h2>
             <p
               className="mt-4 text-[16px] leading-relaxed"
               style={{ color: "var(--mk-text-muted)" }}
             >
-              Go from zero to live loyalty program in under 5 minutes
+              {t("subtitle")}
             </p>
           </div>
         </FadeIn>

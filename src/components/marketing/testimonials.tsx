@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server"
 import { FadeIn, Stagger, StaggerItem } from "./motion"
 
 /* ─── Avatar colors ───────────────────────────────────────────────── */
@@ -30,61 +31,13 @@ function getInitials(name: string): string {
 
 /* ─── Data ────────────────────────────────────────────────────────── */
 
-const testimonials = [
-  {
-    name: "Maria Santos",
-    role: "Owner, Trattoria Bella",
-    stat: "3x",
-    statLabel: "more repeat visits",
-    quote:
-      "We replaced our old paper punch cards and saw 3x more repeat visits in the first month. The wallet passes are beautiful and customers actually keep them.",
-    stars: 5,
-  },
-  {
-    name: "James Chen",
-    role: "Manager, Sushi Express",
-    stat: "5 min",
-    statLabel: "setup time",
-    quote:
-      "Setup took literally 5 minutes. Our staff loves how easy it is to register visits, and customers love the digital cards. No more lost punch cards.",
-    stars: 5,
-  },
-  {
-    name: "Sophie Dubois",
-    role: "Owner, Cafe Lumiere",
-    stat: "40%",
-    statLabel: "revenue increase",
-    quote:
-      "The analytics alone are worth it. I finally know which customers are my regulars and can reward them properly. Revenue from repeat customers is up 40%.",
-    stars: 5,
-  },
-  {
-    name: "Luca Moretti",
-    role: "Owner, Pizzeria Napoli",
-    stat: "850+",
-    statLabel: "loyalty members",
-    quote:
-      "We went from zero to 850 loyalty members in three months. The QR code at the counter does all the work — customers sign up themselves.",
-    stars: 5,
-  },
-  {
-    name: "Aisha Patel",
-    role: "Manager, Spice Garden",
-    stat: "92%",
-    statLabel: "redemption rate",
-    quote:
-      "Our redemption rate went from 15% with paper cards to 92% with Loyalshy. Digital passes actually get used because they're always in the customer's phone.",
-    stars: 5,
-  },
-  {
-    name: "Thomas Bergstrom",
-    role: "Owner, Nordic Kitchen",
-    stat: "2 hrs",
-    statLabel: "saved per week",
-    quote:
-      "We used to spend hours managing punch cards and tracking rewards manually. Loyalshy automated everything. My staff can focus on what matters — great food.",
-    stars: 5,
-  },
+const TESTIMONIAL_KEYS = [
+  "maria",
+  "james",
+  "sophie",
+  "luca",
+  "aisha",
+  "thomas",
 ] as const
 
 /* ─── Star rating ─────────────────────────────────────────────────── */
@@ -126,14 +79,25 @@ function QuoteIcon() {
 
 /* ─── Card ────────────────────────────────────────────────────────── */
 
+type TestimonialCardProps = {
+  name: string
+  role: string
+  quote: string
+  stat: string
+  statLabel: string
+  avatarAlt: string
+  stars: number
+}
+
 function TestimonialCard({
   name,
   role,
   quote,
   stat,
   statLabel,
+  avatarAlt,
   stars,
-}: (typeof testimonials)[number]) {
+}: TestimonialCardProps) {
   const color = getAvatarColor(name)
   const initials = getInitials(name)
 
@@ -174,7 +138,7 @@ function TestimonialCard({
         <div
           className="flex size-10 shrink-0 items-center justify-center rounded-full text-[12px] font-semibold tracking-wide select-none"
           style={{ background: color.bg, color: color.text }}
-          aria-label={`Avatar for ${name}`}
+          aria-label={avatarAlt}
         >
           {initials}
         </div>
@@ -200,7 +164,20 @@ function TestimonialCard({
 
 /* ─── Section ─────────────────────────────────────────────────────── */
 
-export function Testimonials() {
+export async function Testimonials() {
+  const t = await getTranslations("testimonials")
+
+  const testimonials = TESTIMONIAL_KEYS.map((key) => ({
+    key,
+    name: t(`items.${key}.name`),
+    role: t(`items.${key}.role`),
+    stat: t(`items.${key}.stat`),
+    statLabel: t(`items.${key}.statLabel`),
+    quote: t(`items.${key}.quote`),
+    avatarAlt: t("avatarAlt", { name: t(`items.${key}.name`) }),
+    stars: 5,
+  }))
+
   return (
     <section
       id="testimonials"
@@ -214,19 +191,19 @@ export function Testimonials() {
               className="text-[13px] font-medium uppercase tracking-widest mb-3"
               style={{ color: "var(--mk-brand-purple)" }}
             >
-              Testimonials
+              {t("sectionLabel")}
             </p>
             <h2
               className="text-3xl sm:text-[2.5rem] font-bold"
               style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
             >
-              Loved by business owners
+              {t("title")}
             </h2>
             <p
               className="mt-4 text-[16px] leading-relaxed"
               style={{ color: "var(--mk-text-muted)" }}
             >
-              See how businesses are growing repeat customers with Loyalshy
+              {t("subtitle")}
             </p>
           </div>
         </FadeIn>
@@ -235,9 +212,9 @@ export function Testimonials() {
           className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
           stagger={0.08}
         >
-          {testimonials.map((t) => (
-            <StaggerItem key={t.name}>
-              <TestimonialCard {...t} />
+          {testimonials.map(({ key, ...props }) => (
+            <StaggerItem key={key}>
+              <TestimonialCard {...props} />
             </StaggerItem>
           ))}
         </Stagger>

@@ -1,64 +1,7 @@
+import type React from "react"
 import { Smartphone, Wallet, BarChart3, Users, Palette, QrCode, Zap, Shield } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 import { FadeIn, Stagger, StaggerItem } from "./motion"
-
-const features = [
-  {
-    icon: Smartphone,
-    title: "Apple Wallet",
-    description:
-      "Native passes that live right next to boarding passes and tickets. Auto-update on every visit.",
-    size: "large" as const,
-  },
-  {
-    icon: Wallet,
-    title: "Google Wallet",
-    description:
-      "Full Android support. Passes update automatically — no app needed.",
-    size: "small" as const,
-  },
-  {
-    icon: BarChart3,
-    title: "Real-time Analytics",
-    description:
-      "Track visits, rewards, and engagement with beautiful dashboards and exportable reports.",
-    size: "small" as const,
-  },
-  {
-    icon: Palette,
-    title: "Card Designer",
-    description:
-      "Design stunning loyalty cards with our visual studio. Upload logos, choose colors, pick patterns — make it yours.",
-    size: "large" as const,
-  },
-  {
-    icon: QrCode,
-    title: "QR Onboarding",
-    description:
-      "Print a QR code, place it at your counter. Customers join in seconds — no app downloads.",
-    size: "small" as const,
-  },
-  {
-    icon: Users,
-    title: "Team Management",
-    description:
-      "Invite staff with role-based access. Owners and staff see different views.",
-    size: "small" as const,
-  },
-  {
-    icon: Zap,
-    title: "10 Pass Types",
-    description:
-      "Stamp cards, coupons, memberships, points, prepaid, gift cards, tickets, access passes, transit, and business IDs.",
-    size: "large" as const,
-  },
-  {
-    icon: Shield,
-    title: "Secure & Private",
-    description:
-      "Enterprise-grade encryption, secure auth, and GDPR-ready. Your customer data stays yours.",
-    size: "small" as const,
-  },
-]
 
 /* ─── Bento card ──────────────────────────────────────────────────── */
 
@@ -68,7 +11,7 @@ function FeatureCard({
   description,
   size,
 }: {
-  icon: typeof features[number]["icon"]
+  icon: React.ElementType
   title: string
   description: string
   size: "large" | "small"
@@ -129,7 +72,60 @@ function FeatureCard({
 
 /* ─── Section ─────────────────────────────────────────────────────── */
 
-export function Features() {
+export async function Features() {
+  const t = await getTranslations("features")
+
+  const features = [
+    {
+      icon: Smartphone,
+      title: t("appleWallet.title"),
+      description: t("appleWallet.description"),
+      size: "large" as const,
+    },
+    {
+      icon: Wallet,
+      title: t("googleWallet.title"),
+      description: t("googleWallet.description"),
+      size: "small" as const,
+    },
+    {
+      icon: BarChart3,
+      title: t("analytics.title"),
+      description: t("analytics.description"),
+      size: "small" as const,
+    },
+    {
+      icon: Palette,
+      title: t("designer.title"),
+      description: t("designer.description"),
+      size: "large" as const,
+    },
+    {
+      icon: QrCode,
+      title: t("qr.title"),
+      description: t("qr.description"),
+      size: "small" as const,
+    },
+    {
+      icon: Users,
+      title: t("team.title"),
+      description: t("team.description"),
+      size: "small" as const,
+    },
+    {
+      icon: Zap,
+      title: t("passTypes.title"),
+      description: t("passTypes.description"),
+      size: "large" as const,
+    },
+    {
+      icon: Shield,
+      title: t("security.title"),
+      description: t("security.description"),
+      size: "small" as const,
+    },
+  ]
+
   return (
     <section
       id="features"
@@ -143,19 +139,19 @@ export function Features() {
               className="text-[13px] font-medium uppercase tracking-widest mb-3"
               style={{ color: "var(--mk-brand-purple)" }}
             >
-              Features
+              {t("sectionLabel")}
             </p>
             <h2
               className="text-3xl sm:text-[2.5rem] font-bold"
               style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
             >
-              Everything you need to grow loyalty
+              {t("title")}
             </h2>
             <p
               className="mt-4 text-[16px] leading-relaxed"
               style={{ color: "var(--mk-text-muted)" }}
             >
-              A complete platform built for businesses that take customer retention seriously
+              {t("subtitle")}
             </p>
           </div>
         </FadeIn>

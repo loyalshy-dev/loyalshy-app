@@ -1,38 +1,43 @@
 import Image from "next/image"
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 
 interface FooterColumn {
   heading: string
   links: { label: string; href: string; external?: boolean }[]
 }
 
-const FOOTER_COLUMNS: FooterColumn[] = [
-  {
-    heading: "Product",
-    links: [
-      { label: "Features", href: "#features" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "FAQ", href: "#faq" },
-      { label: "API Docs", href: "/api/v1/docs" },
-    ],
-  },
-  {
-    heading: "Company",
-    links: [
-      { label: "Contact", href: "mailto:hello@loyalshy.com" },
-    ],
-  },
-  {
-    heading: "Legal",
-    links: [
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Cookie Policy", href: "/cookies" },
-    ],
-  },
-]
+export async function MarketingFooter() {
+  const t = await getTranslations("footer")
+  const tNav = await getTranslations("nav")
+  const tCommon = await getTranslations("common")
 
-export function MarketingFooter() {
+  const FOOTER_COLUMNS: FooterColumn[] = [
+    {
+      heading: t("product"),
+      links: [
+        { label: tNav("features"), href: "#features" },
+        { label: tNav("pricing"), href: "#pricing" },
+        { label: tNav("faq"), href: "#faq" },
+        { label: tNav("apiDocs"), href: "/api/v1/docs" },
+      ],
+    },
+    {
+      heading: t("company"),
+      links: [
+        { label: tCommon("contact"), href: "mailto:hello@loyalshy.com" },
+      ],
+    },
+    {
+      heading: t("legal"),
+      links: [
+        { label: t("privacyPolicy"), href: "/privacy" },
+        { label: t("termsOfService"), href: "/terms" },
+        { label: t("cookiePolicy"), href: "/cookies" },
+      ],
+    },
+  ]
+
   return (
     <footer
       aria-label="Site footer"
@@ -62,7 +67,7 @@ export function MarketingFooter() {
               className="mt-3 text-[14px] leading-relaxed max-w-[220px]"
               style={{ color: "oklch(0.45 0.008 285)" }}
             >
-              Digital loyalty cards for modern businesses.
+              {t("tagline")}
             </p>
           </div>
 
@@ -105,13 +110,13 @@ export function MarketingFooter() {
             className="text-[13px]"
             style={{ color: "oklch(0.40 0.008 285)" }}
           >
-            &copy; 2026 Loyalshy. All rights reserved.
+            {t("copyright")}
           </p>
           <p
             className="text-[13px]"
             style={{ color: "oklch(0.40 0.008 285)" }}
           >
-            Built with care for business owners.
+            {t("builtWith")}
           </p>
         </div>
       </div>

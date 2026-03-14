@@ -1,0 +1,611 @@
+{
+  "common": {
+    "loyalshy": "Loyalshy",
+    "getStarted": "Empezar",
+    "getStartedFree": "Empezar Gratis",
+    "logIn": "Iniciar Sesión",
+    "learnMore": "Más información",
+    "contact": "Contacto",
+    "contactSales": "Contactar Ventas",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "loading": "Cargando...",
+    "error": "Algo salió mal",
+    "success": "Éxito",
+    "search": "Buscar...",
+    "noResults": "Sin resultados",
+    "perMonth": "€/mes",
+    "backToHome": "← Volver a Loyalshy"
+  },
+  "nav": {
+    "features": "Funciones",
+    "pricing": "Precios",
+    "faq": "Preguntas",
+    "apiDocs": "API Docs",
+    "home": "Inicio Loyalshy",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "switchLanguage": "Cambiar idioma"
+  },
+  "hero": {
+    "badge": "La plataforma de fidelización moderna",
+    "title1": "Tarjetas de fidelización digitales",
+    "title2": "que tus clientes",
+    "titleHighlight": "realmente usan",
+    "subtitle": "Sustituye las tarjetas de sellos de papel por pases de Apple y Google Wallet. Configúralo en 5 minutos. Sin app para tus clientes.",
+    "seeHowItWorks": "Cómo Funciona",
+    "freeForever": "Gratis para siempre",
+    "noCreditCard": "Sin tarjeta de crédito",
+    "screenshotAlt": "Panel de Loyalshy mostrando programas de fidelización con diseños de tarjetas",
+    "browserUrl": "app.loyalshy.com/dashboard"
+  },
+  "socialProof": {
+    "headline": "Impulsando pases digitales de wallet para negocios en todo el mundo"
+  },
+  "featureShowcase": {
+    "sectionLabel": "Plataforma",
+    "title": "Todo en un solo lugar",
+    "browserUrl": "app.loyalshy.com",
+    "tabs": {
+      "dashboard": {
+        "label": "Panel",
+        "description": "Obtén una visión en tiempo real de visitas, recompensas y engagement — todo en un solo lugar.",
+        "alt": "Panel de control del programa con tarjetas de estadísticas y detalles de plantilla"
+      },
+      "cardDesigner": {
+        "label": "Diseñador",
+        "description": "Diseña tarjetas de fidelización impresionantes con nuestro estudio visual. Tu marca, tu estilo.",
+        "alt": "Estudio de diseño de tarjetas con barra flotante y vista previa del pase"
+      },
+      "programs": {
+        "label": "Programas",
+        "description": "Gestiona todos tus programas de fidelización en un solo lugar. Sellos, cupones, membresías y más.",
+        "alt": "Cuadrícula de programas mostrando diferentes tipos y diseños de tarjetas"
+      },
+      "passes": {
+        "label": "Pases",
+        "description": "Rastrea cada pase emitido. Filtra por estado, busca contactos y gestiona el ciclo de vida.",
+        "alt": "Lista de pases con filtros de estado y búsqueda"
+      },
+      "distribution": {
+        "label": "Distribución",
+        "description": "Genera códigos QR, comparte enlaces y emite pases directamente. Varios tamaños para imprimir.",
+        "alt": "Página de distribución con código QR, enlace compartible y tamaños de impresión"
+      },
+      "team": {
+        "label": "Equipo",
+        "description": "Invita al personal con acceso por roles. Propietarios y empleados ven vistas diferentes.",
+        "alt": "Configuración del equipo mostrando miembros con roles y botón de invitación"
+      }
+    }
+  },
+  "howItWorks": {
+    "sectionLabel": "Cómo funciona",
+    "title": "Tres pasos para empezar",
+    "subtitle": "De cero a programa de fidelización activo en menos de 5 minutos",
+    "steps": {
+      "setup": {
+        "title": "Configura tu negocio",
+        "description": "Crea tu cuenta, personaliza tu marca y programa de fidelización en minutos.",
+        "alt": "Estudio de diseño de tarjetas — personaliza tu tarjeta"
+      },
+      "qr": {
+        "title": "Imprime tu código QR",
+        "description": "Descarga tu código QR único y colócalo en tu mostrador o mesas.",
+        "alt": "Página de distribución con código QR imprimible y enlace compartible"
+      },
+      "earn": {
+        "title": "Los clientes escanean y ganan",
+        "description": "Los clientes escanean, reciben un pase digital y empiezan a ganar recompensas al instante.",
+        "alt": "Gestión de pases mostrando pases de fidelización emitidos"
+      }
+    }
+  },
+  "features": {
+    "sectionLabel": "Funciones",
+    "title": "Todo lo que necesitas para fidelizar",
+    "subtitle": "Una plataforma completa para negocios que se toman en serio la retención de clientes",
+    "appleWallet": {
+      "title": "Apple Wallet",
+      "description": "Pases nativos junto a tarjetas de embarque y entradas. Se actualizan automáticamente en cada visita."
+    },
+    "googleWallet": {
+      "title": "Google Wallet",
+      "description": "Soporte completo para Android. Los pases se actualizan automáticamente — sin app necesaria."
+    },
+    "analytics": {
+      "title": "Analíticas en Tiempo Real",
+      "description": "Rastrea visitas, recompensas y engagement con paneles intuitivos e informes exportables."
+    },
+    "designer": {
+      "title": "Diseñador de Tarjetas",
+      "description": "Diseña tarjetas de fidelización con nuestro estudio visual. Sube logos, elige colores, selecciona patrones — hazla tuya."
+    },
+    "qr": {
+      "title": "Alta por QR",
+      "description": "Imprime un código QR, ponlo en tu mostrador. Los clientes se unen en segundos — sin descargas."
+    },
+    "team": {
+      "title": "Gestión de Equipo",
+      "description": "Invita al personal con acceso por roles. Propietarios y empleados ven vistas diferentes."
+    },
+    "passTypes": {
+      "title": "10 Tipos de Pases",
+      "description": "Sellos, cupones, membresías, puntos, prepago, tarjetas regalo, entradas, accesos, tránsito e identificaciones."
+    },
+    "security": {
+      "title": "Seguro y Privado",
+      "description": "Cifrado de nivel empresarial, autenticación segura y preparado para RGPD. Los datos de tus clientes son tuyos."
+    }
+  },
+  "walletPreview": {
+    "badge1": "Compatible con Apple y Google Wallet",
+    "badge2": "Se actualiza automáticamente en cada visita",
+    "badge3": "Un escaneo para unirse, sin app necesaria",
+    "sectionLabel": "La experiencia del cliente",
+    "title": "Pases bonitos que viven en su wallet",
+    "description": "Sin app que descargar. Sin cuenta que crear. Tus clientes escanean una vez y obtienen una tarjeta de fidelización junto a sus tarjetas de embarque — y se actualiza automáticamente en cada visita.",
+    "seePricing": "Ver precios →"
+  },
+  "testimonials": {
+    "sectionLabel": "Testimonios",
+    "title": "Amado por dueños de negocios",
+    "subtitle": "Descubre cómo los negocios están aumentando clientes recurrentes con Loyalshy",
+    "avatarAlt": "Avatar de {name}",
+    "items": {
+      "maria": {
+        "name": "María Santos",
+        "role": "Propietaria, Trattoria Bella",
+        "stat": "3x",
+        "statLabel": "más visitas repetidas",
+        "quote": "Reemplazamos las viejas tarjetas de sellos de papel y vimos 3 veces más visitas repetidas en el primer mes. Los pases son preciosos y los clientes los conservan."
+      },
+      "james": {
+        "name": "James Chen",
+        "role": "Gerente, Sushi Express",
+        "stat": "5 min",
+        "statLabel": "tiempo de configuración",
+        "quote": "La configuración tardó literalmente 5 minutos. A nuestro personal le encanta lo fácil que es registrar visitas, y a los clientes les encantan las tarjetas digitales."
+      },
+      "sophie": {
+        "name": "Sophie Dubois",
+        "role": "Propietaria, Cafe Lumiere",
+        "stat": "40%",
+        "statLabel": "aumento de ingresos",
+        "quote": "Solo las analíticas ya lo valen. Por fin sé quiénes son mis clientes habituales y puedo recompensarlos como merecen. Los ingresos por clientes recurrentes subieron un 40%."
+      },
+      "luca": {
+        "name": "Luca Moretti",
+        "role": "Propietario, Pizzeria Napoli",
+        "stat": "850+",
+        "statLabel": "miembros de fidelización",
+        "quote": "Pasamos de cero a 850 miembros de fidelización en tres meses. El código QR en el mostrador hace todo el trabajo — los clientes se registran solos."
+      },
+      "aisha": {
+        "name": "Aisha Patel",
+        "role": "Gerente, Spice Garden",
+        "stat": "92%",
+        "statLabel": "tasa de canje",
+        "quote": "Nuestra tasa de canje pasó del 15% con tarjetas de papel al 92% con Loyalshy. Los pases digitales se usan porque siempre están en el móvil del cliente."
+      },
+      "thomas": {
+        "name": "Thomas Bergstrom",
+        "role": "Propietario, Nordic Kitchen",
+        "stat": "2 hrs",
+        "statLabel": "ahorradas por semana",
+        "quote": "Solíamos pasar horas gestionando tarjetas de sellos y rastreando recompensas manualmente. Loyalshy automatizó todo. Mi equipo puede centrarse en lo importante — buena comida."
+      }
+    }
+  },
+  "pricing": {
+    "sectionLabel": "Precios",
+    "title": "Empieza gratis, escala cuando crezcas",
+    "subtitle": "Sin tarjeta de crédito. Mejora cuando necesites más.",
+    "monthly": "Mensual",
+    "annual": "Anual",
+    "save20": "Ahorra 20%",
+    "savedPerYear": "ahorrado al año",
+    "mostPopular": "Más Popular",
+    "upTo": "Hasta",
+    "contacts": "contactos",
+    "staffMembers": "{count, plural, one {# miembro del equipo} other {# miembros del equipo}}",
+    "programs": "{count} programas",
+    "unlimitedContacts": "Contactos ilimitados",
+    "unlimitedPrograms": "Programas ilimitados",
+    "free": {
+      "name": "Gratis",
+      "description": "Prueba Loyalshy con tus primeros clientes",
+      "features": {
+        "contacts": "Hasta 50 contactos",
+        "programs": "1 programa de sellos",
+        "staff": "1 miembro del equipo",
+        "wallet": "Pases de Apple y Google Wallet",
+        "studio": "Estudio de diseño de tarjetas",
+        "analytics": "Analíticas del panel",
+        "branding": "Incluye \"Powered by Loyalshy\" en los pases"
+      }
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "description": "Plan personalizado para grandes equipos",
+      "features": "Todo ilimitado, marca blanca, soporte dedicado y SLA."
+    }
+  },
+  "faq": {
+    "sectionLabel": "Preguntas",
+    "title": "Preguntas frecuentes",
+    "subtitle": "Todo lo que necesitas saber sobre Loyalshy",
+    "stillHaveQuestions": "¿Aún tienes preguntas?",
+    "emailUs": "Escríbenos",
+    "replyTime": "— normalmente respondemos en pocas horas.",
+    "items": {
+      "howWorks": {
+        "question": "¿Cómo funciona Loyalshy?",
+        "answer": "Loyalshy sustituye las tarjetas de sellos de papel por tarjetas de fidelización digitales que viven en el Apple o Google Wallet de tus clientes. Configuras tu negocio, imprimes un código QR y los clientes lo escanean para obtener su pase digital. El personal registra visitas desde el panel y los clientes ganan recompensas automáticamente."
+      },
+      "devices": {
+        "question": "¿Qué dispositivos son compatibles?",
+        "answer": "Loyalshy funciona con Apple Wallet (iPhone, Apple Watch) y Google Wallet (Android). Los pases se actualizan automáticamente cada vez que se registra una visita — sin necesidad de descargar una app."
+      },
+      "setup": {
+        "question": "¿Cuánto tarda la configuración?",
+        "answer": "La mayoría de negocios están funcionando en menos de 5 minutos. Crea tu cuenta, personaliza tu programa de fidelización, imprime tu código QR y listo."
+      },
+      "passTypes": {
+        "question": "¿Qué tipos de pases puedo crear?",
+        "answer": "Loyalshy soporta 10 tipos de pases: tarjetas de sellos, cupones, membresías, programas de puntos, tarjetas prepago, tarjetas regalo, entradas, pases de acceso, pases de tránsito e identificaciones. Cada tipo tiene sus propias funciones e interacciones."
+      },
+      "freePlan": {
+        "question": "¿Hay un plan gratuito?",
+        "answer": "¡Sí! Nuestro plan Gratis te permite empezar con hasta 50 contactos y 1 programa de sellos. Sin tarjeta de crédito, gratis para siempre. Mejora cuando necesites más."
+      },
+      "cancel": {
+        "question": "¿Cómo cancelo?",
+        "answer": "Puedes cancelar tu suscripción en cualquier momento desde los ajustes de facturación. No hay contratos a largo plazo ni cargos por cancelación."
+      },
+      "security": {
+        "question": "¿Están seguros mis datos?",
+        "answer": "Sí. Utilizamos cifrado estándar de la industria, autenticación segura y tus datos se almacenan en infraestructura de nivel empresarial. Nunca compartimos los datos de tus clientes con terceros."
+      },
+      "customize": {
+        "question": "¿Puedo personalizar el diseño de la tarjeta?",
+        "answer": "¡Sí! Nuestro estudio visual te permite subir tu logo, elegir colores de marca, seleccionar patrones y personalizar completamente cómo se ven tus pases. Cada pase refleja la identidad de tu negocio."
+      }
+    }
+  },
+  "closingCta": {
+    "title1": "¿Listo para aumentar tus",
+    "titleHighlight": "clientes recurrentes",
+    "subtitle": "Únete a negocios que usan Loyalshy para convertir visitantes en clientes fieles. Configúralo en 5 minutos, sin tarjeta de crédito.",
+    "viewPricing": "Ver Precios"
+  },
+  "footer": {
+    "product": "Producto",
+    "company": "Empresa",
+    "legal": "Legal",
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio",
+    "cookiePolicy": "Política de Cookies",
+    "tagline": "Tarjetas de fidelización digitales para negocios modernos.",
+    "copyright": "© 2026 Loyalshy. Todos los derechos reservados.",
+    "builtWith": "Hecho con cariño para dueños de negocios."
+  },
+  "cookieBanner": {
+    "message": "Usamos cookies esenciales para autenticación y preferencias. Sin cookies de rastreo.",
+    "accept": "Entendido",
+    "dismiss": "Cerrar aviso de cookies"
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Inicia sesión en tu cuenta de Loyalshy",
+      "continueWithGoogle": "Continuar con Google",
+      "or": "o",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Introduce tu contraseña",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "submit": "Iniciar sesión",
+      "noAccount": "¿No tienes cuenta?",
+      "signUp": "Regístrate",
+      "invalidCredentials": "Email o contraseña incorrectos"
+    },
+    "register": {
+      "stepAccount": "Cuenta",
+      "stepOrganization": "Organización",
+      "title": "Crea una cuenta",
+      "subtitle": "Empieza con Loyalshy gratis",
+      "continueWithGoogle": "Continuar con Google",
+      "or": "o",
+      "fullName": "Nombre completo",
+      "fullNamePlaceholder": "María García",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "password": "Contraseña",
+      "passwordHint": "Mínimo 8 caracteres",
+      "submit": "Crear cuenta",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "signIn": "Inicia sesión",
+      "strengthWeak": "Débil",
+      "strengthFair": "Regular",
+      "strengthGood": "Buena",
+      "strengthStrong": "Fuerte",
+      "orgTitle": "Nombra tu organización",
+      "orgSubtitle": "Puedes actualizar esto y añadir más detalles en ajustes.",
+      "orgName": "Nombre de la organización",
+      "orgPlaceholder": "ej. Trattoria Bella",
+      "orgSubmit": "Empezar",
+      "accountCreated": "¡Cuenta creada!",
+      "allSet": "¡Todo listo!",
+      "createFailed": "Error al crear la cuenta",
+      "genericError": "Algo salió mal. Inténtalo de nuevo."
+    },
+    "forgotPassword": {
+      "title": "¿Olvidaste tu contraseña?",
+      "subtitle": "Introduce tu email y te enviaremos un enlace para restablecerla",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "submit": "Enviar enlace",
+      "backToLogin": "Volver a iniciar sesión",
+      "checkEmail": "Revisa tu correo",
+      "emailSent": "Hemos enviado un enlace para restablecer la contraseña a {email}",
+      "noEmail": "¿No recibiste el email? Revisa tu carpeta de spam o inténtalo de nuevo.",
+      "tryDifferent": "Probar con otro email"
+    },
+    "invite": {
+      "joinOrg": "Unirse a {organizationName}",
+      "invitedAs": "Has sido invitado como {role}.",
+      "createAccount": "Crea tu cuenta para empezar.",
+      "signInToAccept": "Inicia sesión para aceptar la invitación.",
+      "createAndJoin": "Crear cuenta y unirse",
+      "signInAndJoin": "Iniciar sesión y unirse",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "signInInstead": "Inicia sesión",
+      "noAccount": "¿No tienes cuenta?",
+      "createOne": "Crea una",
+      "validating": "Validando invitación...",
+      "invalid": "Invitación No Válida",
+      "goToSignIn": "Ir a iniciar sesión",
+      "welcome": "¡Bienvenido a {organizationName}!",
+      "createFailed": "Error al crear la cuenta",
+      "invalidCredentials": "Credenciales incorrectas"
+    },
+    "error": {
+      "title": "Error de autenticación",
+      "message": "Algo salió mal durante la autenticación. Inténtalo de nuevo.",
+      "errorId": "ID de error: {digest}",
+      "tryAgain": "Reintentar",
+      "backToLogin": "Volver al inicio de sesión"
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "overview": "Resumen",
+      "contacts": "Contactos",
+      "programs": "Programas",
+      "settings": "Ajustes",
+      "signOut": "Cerrar sesión",
+      "search": "Buscar acciones, páginas...",
+      "noResults": "Sin resultados.",
+      "quickActions": "Acciones Rápidas",
+      "registerInteraction": "Registrar Interacción",
+      "createProgram": "Crear Programa",
+      "navigate": "Navegar",
+      "newInteraction": "Nueva Interacción",
+      "action": "Acción",
+      "more": "Más",
+      "mobileNav": "Navegación móvil"
+    },
+    "overview": {
+      "totalContacts": "Total de Contactos",
+      "activePasses": "Pases Activos",
+      "activityThisMonth": "Actividad Este Mes",
+      "redeemedThisMonth": "Canjeados Este Mes"
+    },
+    "activity": {
+      "title": "Actividad Reciente",
+      "stamp": "registró una visita",
+      "checkIn": "hizo check-in",
+      "passUse": "usó un pase",
+      "pointsEarn": "ganó puntos",
+      "recharge": "recargó un pase",
+      "giftUse": "usó tarjeta regalo",
+      "ticketScan": "escaneó entrada",
+      "access": "accedió al local",
+      "board": "embarcó",
+      "verify": "verificó ID",
+      "rewardEarned": "ganó una recompensa",
+      "rewardRedeemed": "canjeó una recompensa",
+      "couponRedeemed": "canjeó un cupón",
+      "empty": "Sin actividad todavía. Registra tu primera interacción para verla aquí.",
+      "by": "por"
+    },
+    "topContacts": {
+      "title": "Mejores Contactos",
+      "empty": "Sin contactos todavía",
+      "lastInteraction": "Última interacción"
+    },
+    "programsSummary": {
+      "title": "Programas",
+      "empty": "Sin programas activos todavía.",
+      "createProgram": "Crear un programa",
+      "enrolled": "inscritos",
+      "rewardsEarned": "recompensas ganadas",
+      "issued": "emitidos",
+      "redeemed": "canjeados",
+      "members": "miembros",
+      "checkIns": "check-ins",
+      "uses": "usos",
+      "cards": "tarjetas",
+      "transactions": "transacciones",
+      "tickets": "entradas",
+      "scans": "escaneos",
+      "passes": "pases",
+      "accessLogs": "registros de acceso",
+      "trips": "viajes",
+      "ids": "identificaciones",
+      "verifications": "verificaciones"
+    },
+    "contacts": {
+      "title": "Contactos",
+      "subtitle": "Gestiona tus titulares de pases.",
+      "addContact": "Añadir Contacto",
+      "searchPlaceholder": "Buscar por nombre, email, teléfono...",
+      "export": "Exportar",
+      "filter": "Filtrar",
+      "hasReward": "Con Recompensa",
+      "clearFilters": "Limpiar filtros",
+      "exported": "Clientes exportados",
+      "exportFailed": "Error al exportar clientes",
+      "name": "Nombre",
+      "program": "Programa",
+      "progress": "Progreso",
+      "total": "Total",
+      "lastVisit": "Última Visita",
+      "noContact": "Sin contacto",
+      "viewDetails": "Ver Detalles",
+      "never": "Nunca",
+      "ready": "Listo",
+      "active": "Activo",
+      "noMatch": "Ningún cliente coincide con tus filtros.",
+      "page": "Página",
+      "of": "de",
+      "previousPage": "Página anterior",
+      "nextPage": "Página siguiente",
+      "actions": "Acciones del cliente"
+    },
+    "addContact": {
+      "title": "Añadir Cliente",
+      "subtitle": "Añade un nuevo cliente a tu programa de fidelización.",
+      "fullName": "Nombre Completo",
+      "nameRequired": "El nombre es obligatorio",
+      "email": "Email",
+      "invalidEmail": "Email no válido",
+      "phone": "Teléfono",
+      "namePlaceholder": "Juan García",
+      "emailPlaceholder": "juan@ejemplo.com",
+      "phonePlaceholder": "+34 612 345 678",
+      "addedSuccess": "{name} añadido correctamente"
+    },
+    "programs": {
+      "title": "Programas",
+      "subtitle": "Gestiona tus programas de fidelización, recompensas y diseños.",
+      "createProgram": "Crear Programa",
+      "newProgram": "Nuevo Programa",
+      "newProgramDescription": "Elige un tipo de programa y configúralo. Empieza como borrador — actívalo cuando esté listo.",
+      "all": "Todos",
+      "stampCards": "Sellos",
+      "coupons": "Cupones",
+      "memberships": "Membresías",
+      "points": "Puntos",
+      "prepaid": "Prepago",
+      "noPrograms": "Sin programas todavía",
+      "createFirst": "Crea tu primer programa de fidelización para empezar a recompensar a tus clientes.",
+      "createToStart": "Crea un nuevo programa para empezar.",
+      "chooseType": "Elige un tipo de programa para empezar.",
+      "programName": "Nombre del Programa",
+      "nameRequired": "El nombre del programa es obligatorio",
+      "namePlaceholder": "ej., Fidelización Café, Menú Especial",
+      "backToType": "Volver a selección de tipo",
+      "overview": "Resumen",
+      "passes": "Pases",
+      "attendees": "Asistentes",
+      "cardsTab": "Tarjetas",
+      "rewards": "Recompensas",
+      "redemptions": "Canjes",
+      "catalog": "Catálogo",
+      "distribution": "Distribución",
+      "cardDesign": "Diseño de Tarjeta",
+      "backToOverview": "Volver al resumen",
+      "draftBanner": "Este programa está en modo borrador. Actívalo para empezar a emitir pases.",
+      "activate": "Activar",
+      "activated": "¡Programa activado! Los contactos ya pueden recibir pases."
+    },
+    "settings": {
+      "title": "Ajustes",
+      "subtitle": "Gestiona los ajustes de tu organización.",
+      "general": "General",
+      "team": "Equipo",
+      "billing": "Facturación",
+      "api": "API",
+      "jobs": "Tareas",
+      "orgProfile": "Perfil de la Organización",
+      "orgProfileDescription": "Información básica de tu organización.",
+      "orgName": "Nombre de la Organización",
+      "orgNamePlaceholder": "Mi Organización",
+      "orgNameRequired": "El nombre de la organización es obligatorio",
+      "address": "Dirección",
+      "addressPlaceholder": "Calle Principal 123, Ciudad",
+      "inviteTeam": "Invitar miembros del equipo",
+      "inviteSent": "Invitación enviada a {email}",
+      "memberRemoved": "{name} ha sido eliminado",
+      "apiKeys": "Claves API",
+      "apiKeysDescription": "Gestiona claves API para acceso programático.",
+      "viewApiDocs": "Ver documentación API",
+      "createKey": "Crear clave",
+      "noApiKeys": "Sin claves API todavía. Crea una para empezar.",
+      "expired": "Expirada",
+      "copied": "Copiado al portapapeles.",
+      "keyRevoked": "Clave API revocada.",
+      "backgroundJobs": "Tareas en Segundo Plano",
+      "backgroundJobsDescription": "Actualizaciones recientes de pases y actividad de tareas."
+    },
+    "onboarding": {
+      "title": "Empieza con Loyalshy",
+      "completed": "completados",
+      "uploadLogo": "Sube tu logo",
+      "uploadLogoDescription": "Personaliza tus pases con el logo de tu organización",
+      "customizeCard": "Personaliza tu tarjeta",
+      "customizeCardDescription": "Configura visitas requeridas, descripción de recompensa y caducidad",
+      "printQr": "Imprime tu código QR",
+      "printQrDescription": "Descarga y muestra tu código QR en tu mostrador",
+      "firstContact": "Registra tu primer contacto",
+      "firstContactDescription": "Añade un contacto o haz que escaneen tu código QR",
+      "inviteStaff": "Invita a tu equipo",
+      "inviteStaffDescription": "Añade miembros del equipo para ayudar a gestionar visitas",
+      "dismiss": "Cerrar lista de tareas"
+    },
+    "status": {
+      "active": "Activo",
+      "draft": "Borrador",
+      "archived": "Archivado",
+      "frozen": "Congelado",
+      "completed": "Completado",
+      "cancelled": "Cancelado",
+      "suspended": "Suspendido",
+      "revoked": "Revocado",
+      "available": "Disponible",
+      "redeemed": "Canjeado",
+      "expired": "Expirado"
+    },
+    "chart": {
+      "7d": "7d",
+      "30d": "30d",
+      "90d": "90d",
+      "12m": "12m",
+      "interaction": "interacción",
+      "interactions": "interacciones"
+    }
+  },
+  "errors": {
+    "notFound": {
+      "code": "404",
+      "title": "Página no encontrada",
+      "message": "La página que buscas no existe o ha sido movida.",
+      "goHome": "Ir al inicio"
+    },
+    "global": {
+      "title": "Algo salió mal",
+      "message": "Ocurrió un error inesperado. Nuestro equipo ha sido notificado.",
+      "errorId": "ID de error: {digest}",
+      "tryAgain": "Reintentar",
+      "goHome": "Ir al inicio"
+    }
+  }
+}

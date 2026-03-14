@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ContactTable } from "./contact-table"
@@ -32,6 +33,7 @@ export function ContactsView({
   templateType,
   isEmpty,
 }: ContactsViewProps) {
+  const t = useTranslations("dashboard.contacts")
   const [addSheetOpen, setAddSheetOpen] = useState(false)
   const [detailContactId, setDetailContactId] = useState<string | null>(null)
   const [detailSheetOpen, setDetailSheetOpen] = useState(false)
@@ -59,9 +61,9 @@ export function ContactsView({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Contacts</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">
-            Manage your pass holders.
+            {t("subtitle")}
           </p>
         </div>
         {!isEmpty && (
@@ -71,7 +73,7 @@ export function ContactsView({
             onClick={() => setAddSheetOpen(true)}
           >
             <UserPlus className="size-3.5" />
-            <span className="hidden sm:inline">Add Contact</span>
+            <span className="hidden sm:inline">{t("addContact")}</span>
           </Button>
         )}
       </div>

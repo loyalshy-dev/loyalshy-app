@@ -1,6 +1,7 @@
 "use client"
 
 import { formatDistanceToNow } from "date-fns"
+import { useTranslations } from "next-intl"
 import type { TopContactItem } from "@/server/analytics"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { Card } from "@/components/ui/card"
@@ -31,14 +32,16 @@ type TopContactsProps = {
 }
 
 export function TopContacts({ contacts }: TopContactsProps) {
+  const t = useTranslations("dashboard.topContacts")
+
   if (contacts.length === 0) {
     return (
       <Card className="p-5">
         <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
-          Top Contacts
+          {t("title")}
         </h3>
         <p className="text-sm text-muted-foreground py-8 text-center">
-          No contacts yet
+          {t("empty")}
         </p>
       </Card>
     )
@@ -47,7 +50,7 @@ export function TopContacts({ contacts }: TopContactsProps) {
   return (
     <Card className="p-5">
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
-        Top Contacts
+        {t("title")}
       </h3>
       <div className="space-y-0">
         {contacts.map((contact) => {
@@ -73,7 +76,7 @@ export function TopContacts({ contacts }: TopContactsProps) {
                 </p>
                 {contact.lastInteractionAt && (
                   <p className="text-[11px] text-muted-foreground">
-                    Last interaction{" "}
+                    {t("lastInteraction")}{" "}
                     {formatDistanceToNow(new Date(contact.lastInteractionAt), {
                       addSuffix: true,
                     })}

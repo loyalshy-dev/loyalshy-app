@@ -11,6 +11,7 @@ import {
   Users,
   Layers,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { authClient } from "@/lib/auth-client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -48,16 +49,6 @@ type AppSidebarProps = {
   orgRole: string | null
 }
 
-const navItems = [
-  { label: "Overview", href: "/dashboard", icon: LayoutGrid },
-  { label: "Contacts", href: "/dashboard/contacts", icon: Users },
-  { label: "Programs", href: "/dashboard/programs", icon: Layers },
-]
-
-const ownerItems = [
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
-]
-
 function getInitials(name: string) {
   return name
     .split(" ")
@@ -68,9 +59,20 @@ function getInitials(name: string) {
 }
 
 export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
+  const t = useTranslations("dashboard.nav")
   const pathname = usePathname()
   const router = useRouter()
   const isOwner = orgRole === "owner"
+
+  const navItems = [
+    { label: t("overview"), href: "/dashboard", icon: LayoutGrid },
+    { label: t("contacts"), href: "/dashboard/contacts", icon: Users },
+    { label: t("programs"), href: "/dashboard/programs", icon: Layers },
+  ]
+
+  const ownerItems = [
+    { label: t("settings"), href: "/dashboard/settings", icon: Settings },
+  ]
 
   function isActive(href: string) {
     if (href === "/dashboard") return pathname === "/dashboard"
@@ -212,7 +214,7 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
                   <LogOut className="size-4" />
-                  Sign out
+                  {t("signOut")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -1,5 +1,8 @@
 import { withSentryConfig } from "@sentry/nextjs";
+import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
@@ -43,7 +46,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withNextIntl(nextConfig), {
   // Only upload source maps when SENTRY_AUTH_TOKEN is set
   silent: !process.env.SENTRY_AUTH_TOKEN,
 

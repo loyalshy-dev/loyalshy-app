@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,19 +26,18 @@ import {
   Store,
 } from "lucide-react"
 
-// ─── Step definitions ───────────────────────────────────────
-
-const STEPS = [
-  { number: 1, label: "Account", icon: Check },
-  { number: 2, label: "Organization", icon: Store },
-] as const
-
 // ─── Main Page Component ────────────────────────────────────
 
 export default function RegisterPage() {
+  const t = useTranslations("auth.register")
   const searchParams = useSearchParams()
   const stepParam = searchParams.get("step")
   const [currentStep, setCurrentStep] = useState(stepParam === "2" ? 2 : 1)
+
+  const STEPS = [
+    { number: 1, label: t("stepAccount"), icon: Check },
+    { number: 2, label: t("stepOrganization"), icon: Store },
+  ] as const
 
   // Sync step from URL (for Google OAuth callback to ?step=2)
   useEffect(() => {
@@ -88,6 +88,7 @@ export default function RegisterPage() {
 // ─── Step 1: Account ────────────────────────────────────────
 
 function AccountStep({ onNext }: { onNext: () => void }) {
+  const t = useTranslations("auth.register")
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -115,12 +116,12 @@ function AccountStep({ onNext }: { onNext: () => void }) {
     })
 
     if (error) {
-      toast.error(error.message || "Failed to create account")
+      toast.error(error.message || t("createFailed"))
       setIsLoading(false)
       return
     }
 
-    toast.success("Account created!")
+    toast.success(t("accountCreated"))
     onNext()
   }
 
@@ -135,8 +136,8 @@ function AccountStep({ onNext }: { onNext: () => void }) {
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-        <CardDescription>Get started with Loyalshy for free</CardDescription>
+        <CardTitle className="text-2xl font-bold">{t("title")}</CardTitle>
+        <CardDescription>{t("subtitle")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button
@@ -146,23 +147,23 @@ function AccountStep({ onNext }: { onNext: () => void }) {
           disabled={isGoogleLoading}
         >
           {isGoogleLoading ? <LoadingSpinner /> : <GoogleIcon />}
-          Continue with Google
+          {t("continueWithGoogle")}
         </Button>
 
         <div className="relative">
           <Separator />
           <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-            or
+            {t("or")}
           </span>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Full name</Label>
+            <Label htmlFor="name">{t("fullName")}</Label>
             <Input
               id="name"
               type="text"
-              placeholder="Jane Doe"
+              placeholder={t("fullNamePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -170,11 +171,11 @@ function AccountStep({ onNext }: { onNext: () => void }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -182,11 +183,11 @@ function AccountStep({ onNext }: { onNext: () => void }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("password")}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="At least 8 characters"
+              placeholder={t("passwordHint")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -197,15 +198,15 @@ function AccountStep({ onNext }: { onNext: () => void }) {
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <LoadingSpinner />}
-            Create account
+            {t("submit")}
           </Button>
         </form>
       </CardContent>
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t("hasAccount")}{" "}
           <Link href="/login" className="font-medium text-foreground hover:underline">
-            Sign in
+            {t("signIn")}
           </Link>
         </p>
       </CardFooter>
@@ -216,6 +217,7 @@ function AccountStep({ onNext }: { onNext: () => void }) {
 // ─── Step 2: Organization Name ──────────────────────────────
 
 function OrganizationStep() {
+  const t = useTranslations("auth.register")
   const router = useRouter()
   const [name, setName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -234,7 +236,7 @@ function OrganizationStep() {
       }
 
       if ("organizationId" in result && result.organizationId) {
-        toast.success("You're all set!")
+        toast.success(t("allSet"))
         router.push("/dashboard")
         return
       }
@@ -242,7 +244,7 @@ function OrganizationStep() {
       // Shouldn't reach here, but handle gracefully
       setIsLoading(false)
     } catch {
-      toast.error("Something went wrong. Please try again.")
+      toast.error(t("genericError"))
       setIsLoading(false)
     }
   }
@@ -253,19 +255,19 @@ function OrganizationStep() {
         <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10">
           <Store className="size-5 text-primary" />
         </div>
-        <CardTitle className="text-xl font-bold">Name your organization</CardTitle>
+        <CardTitle className="text-xl font-bold">{t("orgTitle")}</CardTitle>
         <CardDescription>
-          You can update this and add more details later in settings.
+          {t("orgSubtitle")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="org-name">Organization name</Label>
+            <Label htmlFor="org-name">{t("orgName")}</Label>
             <Input
               id="org-name"
               type="text"
-              placeholder="e.g. Trattoria Bella"
+              placeholder={t("orgPlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -274,7 +276,7 @@ function OrganizationStep() {
           </div>
           <Button type="submit" className="w-full" disabled={isLoading || !name.trim()}>
             {isLoading ? <Loader2 className="size-4 animate-spin" /> : <ChevronRight className="size-4" />}
-            Get started
+            {t("orgSubmit")}
           </Button>
         </form>
       </CardContent>
@@ -284,11 +286,7 @@ function OrganizationStep() {
 
 // ─── Password Strength ──────────────────────────────────────
 
-function getPasswordStrength(password: string): {
-  score: number
-  label: string
-  color: string
-} {
+function getPasswordScore(password: string): { score: number; color: string } {
   let score = 0
   if (password.length >= 8) score++
   if (/[a-z]/.test(password)) score++
@@ -296,14 +294,24 @@ function getPasswordStrength(password: string): {
   if (/[0-9]/.test(password)) score++
   if (/[^a-zA-Z0-9]/.test(password)) score++
 
-  if (score <= 2) return { score, label: "Weak", color: "bg-destructive" }
-  if (score <= 3) return { score, label: "Fair", color: "bg-warning" }
-  if (score <= 4) return { score, label: "Good", color: "bg-brand" }
-  return { score, label: "Strong", color: "bg-success" }
+  if (score <= 2) return { score, color: "bg-destructive" }
+  if (score <= 3) return { score, color: "bg-warning" }
+  if (score <= 4) return { score, color: "bg-brand" }
+  return { score, color: "bg-success" }
 }
 
 function PasswordStrength({ password }: { password: string }) {
-  const { score, label, color } = getPasswordStrength(password)
+  const t = useTranslations("auth.register")
+  const { score, color } = getPasswordScore(password)
+
+  const label =
+    score <= 2
+      ? t("strengthWeak")
+      : score <= 3
+        ? t("strengthFair")
+        : score <= 4
+          ? t("strengthGood")
+          : t("strengthStrong")
 
   return (
     <div className="space-y-1.5">

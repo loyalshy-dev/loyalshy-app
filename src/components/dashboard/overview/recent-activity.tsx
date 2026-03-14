@@ -14,88 +14,91 @@ import {
   BadgeCheck,
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { useTranslations } from "next-intl"
 import type { ActivityItem } from "@/server/analytics"
 import { Card } from "@/components/ui/card"
 
+type ActivityVerbKey = "stamp" | "checkIn" | "passUse" | "pointsEarn" | "recharge" | "giftUse" | "ticketScan" | "access" | "board" | "verify" | "rewardEarned" | "rewardRedeemed" | "couponRedeemed"
+
 const ACTIVITY_CONFIG: Record<
   ActivityItem["type"],
-  { icon: typeof Stamp; verb: string; color: string; bg: string }
+  { icon: typeof Stamp; verbKey: ActivityVerbKey; color: string; bg: string }
 > = {
   stamp: {
     icon: Stamp,
-    verb: "registered a visit",
+    verbKey: "stamp",
     color: "text-brand",
     bg: "bg-brand/10",
   },
   check_in: {
     icon: Crown,
-    verb: "checked in",
+    verbKey: "checkIn",
     color: "text-brand",
     bg: "bg-brand/10",
   },
   prepaid_use: {
     icon: CreditCard,
-    verb: "used a pass",
+    verbKey: "passUse",
     color: "text-brand",
     bg: "bg-brand/10",
   },
   points_earned: {
     icon: Coins,
-    verb: "earned points",
+    verbKey: "pointsEarn",
     color: "text-brand",
     bg: "bg-brand/10",
   },
   prepaid_recharge: {
     icon: CreditCard,
-    verb: "recharged a pass",
+    verbKey: "recharge",
     color: "text-success",
     bg: "bg-success/10",
   },
   gift_charge: {
     icon: Gift,
-    verb: "used gift card",
+    verbKey: "giftUse",
     color: "text-brand",
     bg: "bg-brand/10",
   },
   ticket_scan: {
     icon: CalendarDays,
-    verb: "scanned ticket",
+    verbKey: "ticketScan",
     color: "text-brand",
     bg: "bg-brand/10",
   },
   access_grant: {
     icon: ShieldCheck,
-    verb: "accessed facility",
+    verbKey: "access",
     color: "text-brand",
     bg: "bg-brand/10",
   },
   transit_board: {
     icon: Bus,
-    verb: "boarded",
+    verbKey: "board",
     color: "text-brand",
     bg: "bg-brand/10",
   },
   id_verify: {
     icon: BadgeCheck,
-    verb: "verified ID",
+    verbKey: "verify",
     color: "text-brand",
     bg: "bg-brand/10",
   },
   reward_earned: {
     icon: Gift,
-    verb: "earned a reward",
+    verbKey: "rewardEarned",
     color: "text-success",
     bg: "bg-success/10",
   },
   reward_redeemed: {
     icon: Trophy,
-    verb: "redeemed a reward",
+    verbKey: "rewardRedeemed",
     color: "text-warning",
     bg: "bg-warning/10",
   },
   coupon_redeemed: {
     icon: Ticket,
-    verb: "redeemed a coupon",
+    verbKey: "couponRedeemed",
     color: "text-warning",
     bg: "bg-warning/10",
   },
@@ -106,14 +109,16 @@ type RecentActivityProps = {
 }
 
 export function RecentActivity({ items }: RecentActivityProps) {
+  const t = useTranslations("dashboard.activity")
+
   if (items.length === 0) {
     return (
       <Card className="p-5">
         <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
-          Recent Activity
+          {t("title")}
         </h3>
         <p className="text-sm text-muted-foreground py-8 text-center">
-          No activity yet. Register your first interaction to see it here.
+          {t("empty")}
         </p>
       </Card>
     )
@@ -122,7 +127,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
   return (
     <Card className="p-5">
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
-        Recent Activity
+        {t("title")}
       </h3>
       <div className="space-y-0">
         {items.map((item) => {
@@ -143,7 +148,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
                 <p className="text-[13px] leading-snug">
                   <span className="font-medium">{item.contactName}</span>
                   {" "}
-                  <span className="text-muted-foreground">{config.verb}</span>
+                  <span className="text-muted-foreground">{t(config.verbKey)}</span>
                   {item.detail && (
                     <span className="text-muted-foreground">
                       {" "}&middot; {item.detail}
@@ -155,7 +160,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
                     addSuffix: true,
                   })}
                   {item.staffName && (
-                    <span> &middot; by {item.staffName}</span>
+                    <span> &middot; {t("by")} {item.staffName}</span>
                   )}
                 </p>
               </div>

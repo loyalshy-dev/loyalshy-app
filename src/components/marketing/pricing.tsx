@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { Check, ArrowRight } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { PLANS, type PlanId } from "@/lib/plans"
@@ -15,10 +16,6 @@ function formatPrice(price: number | null): string {
   return `${price}`
 }
 
-function formatLimit(limit: number): string {
-  return limit === Infinity ? "Unlimited" : limit.toString()
-}
-
 type BillingPeriod = "monthly" | "annual"
 
 function BillingToggle({
@@ -28,6 +25,8 @@ function BillingToggle({
   period: BillingPeriod
   onChange: (p: BillingPeriod) => void
 }) {
+  const t = useTranslations("pricing")
+
   return (
     <div
       className="inline-flex items-center gap-1 rounded-full p-1"
@@ -47,7 +46,7 @@ function BillingToggle({
             period === "monthly" ? "var(--mk-bg)" : "var(--mk-text-muted)",
         }}
       >
-        Monthly
+        {t("monthly")}
       </button>
       <button
         type="button"
@@ -60,7 +59,7 @@ function BillingToggle({
             period === "annual" ? "var(--mk-bg)" : "var(--mk-text-muted)",
         }}
       >
-        Annual
+        {t("annual")}
         <span
           className="absolute -top-2.5 -right-12 rounded-full px-2 py-0.5 text-[10px] font-bold whitespace-nowrap"
           style={{
@@ -68,7 +67,7 @@ function BillingToggle({
             color: "oklch(0.45 0.17 155)",
           }}
         >
-          Save 20%
+          {t("save20")}
         </span>
       </button>
     </div>
@@ -78,6 +77,18 @@ function BillingToggle({
 /* ─── Free tier card (marketing-only, not in billing system) ─────── */
 
 function FreePlanCard() {
+  const t = useTranslations("pricing")
+  const tc = useTranslations("common")
+
+  const freeFeatures = [
+    t("free.features.contacts"),
+    t("free.features.programs"),
+    t("free.features.staff"),
+    t("free.features.wallet"),
+    t("free.features.studio"),
+    t("free.features.analytics"),
+  ] as const
+
   return (
     <div
       className="relative flex flex-col rounded-2xl p-7 transition-all duration-300"
@@ -92,13 +103,13 @@ function FreePlanCard() {
           className="text-[13px] font-semibold uppercase tracking-widest mb-1"
           style={{ color: "var(--mk-text-dimmed)" }}
         >
-          Free
+          {t("free.name")}
         </p>
         <p
           className="text-[14px]"
           style={{ color: "var(--mk-text-muted)" }}
         >
-          Try Loyalshy with your first customers
+          {t("free.description")}
         </p>
       </div>
 
@@ -113,7 +124,7 @@ function FreePlanCard() {
           className="text-[15px] font-medium"
           style={{ color: "var(--mk-text-dimmed)" }}
         >
-          &euro;/mo
+          {tc("perMonth")}
         </span>
       </div>
 
@@ -125,7 +136,7 @@ function FreePlanCard() {
         size="lg"
         className="w-full mb-6 text-[14px] font-medium"
       >
-        <Link href="/register">Get Started</Link>
+        <Link href="/register">{tc("getStarted")}</Link>
       </Button>
 
       <div
@@ -134,14 +145,7 @@ function FreePlanCard() {
       />
 
       <ul className="flex flex-col gap-3">
-        {[
-          "Up to 50 contacts",
-          "1 stamp card program",
-          "1 staff member",
-          "Apple & Google Wallet passes",
-          "Card design studio",
-          "Dashboard analytics",
-        ].map((feature) => (
+        {freeFeatures.map((feature) => (
           <li key={feature} className="flex items-start gap-3">
             <div
               className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"
@@ -167,7 +171,7 @@ function FreePlanCard() {
         className="mt-6 text-[13px]"
         style={{ color: "var(--mk-text-dimmed)" }}
       >
-        Includes &ldquo;Powered by Loyalshy&rdquo; on passes
+        {t("free.features.branding")}
       </p>
     </div>
   )
@@ -186,8 +190,17 @@ function PlanCard({
   highlighted = false,
   period,
 }: PlanCardProps) {
+  const t = useTranslations("pricing")
+  const tc = useTranslations("common")
   const plan = PLANS[planKey]
   const price = period === "annual" ? plan.annualPrice : plan.price
+
+  const contactsLabel =
+    plan.customerLimit === Infinity
+      ? t("unlimitedContacts")
+      : `${t("upTo")} ${plan.customerLimit} ${t("contacts")}`
+
+  const staffLabel = t("staffMembers", { count: plan.staffLimit })
 
   return (
     <div
@@ -215,7 +228,7 @@ function PlanCard({
               boxShadow: "0 2px 12px oklch(0.55 0.2 265 / 0.3)",
             }}
           >
-            Most Popular
+            {t("mostPopular")}
           </span>
         </div>
       )}
@@ -246,7 +259,7 @@ function PlanCard({
           className="text-[15px] font-medium"
           style={{ color: "var(--mk-text-dimmed)" }}
         >
-          &euro;/mo
+          {tc("perMonth")}
         </span>
       </div>
 
@@ -255,7 +268,7 @@ function PlanCard({
           className="text-[13px] font-medium mb-5"
           style={{ color: "oklch(0.45 0.17 155)" }}
         >
-          {(plan.price - (plan.annualPrice ?? 0)) * 12}&euro; saved per year
+          {(plan.price - (plan.annualPrice ?? 0)) * 12}&euro; {t("savedPerYear")}
         </p>
       )}
       {period === "monthly" && <div className="mb-5" />}
@@ -265,7 +278,7 @@ function PlanCard({
           href="/register"
           className="mk-btn-primary w-full text-center mb-6 gap-2"
         >
-          Get Started
+          {tc("getStarted")}
           <ArrowRight className="size-4" />
         </Link>
       ) : (
@@ -275,7 +288,7 @@ function PlanCard({
           size="lg"
           className="w-full mb-6 text-[14px] font-medium"
         >
-          <Link href="/register">Get Started</Link>
+          <Link href="/register">{tc("getStarted")}</Link>
         </Button>
       )}
 
@@ -319,9 +332,7 @@ function PlanCard({
         className="mt-6 text-[13px]"
         style={{ color: "var(--mk-text-dimmed)" }}
       >
-        Up to {formatLimit(plan.customerLimit)} contacts &middot;{" "}
-        {formatLimit(plan.staffLimit)} staff
-        {plan.staffLimit === 1 ? " member" : " members"}
+        {contactsLabel} &middot; {staffLabel}
       </p>
     </div>
   )
@@ -331,6 +342,8 @@ function PlanCard({
 
 export function Pricing() {
   const [period, setPeriod] = React.useState<BillingPeriod>("monthly")
+  const t = useTranslations("pricing")
+  const tc = useTranslations("common")
 
   return (
     <section
@@ -359,7 +372,7 @@ export function Pricing() {
                 color: "var(--mk-text-dimmed)",
               }}
             >
-              Pricing
+              {t("sectionLabel")}
             </p>
             <h2
               className="text-3xl sm:text-[2.5rem] font-bold mb-4"
@@ -368,13 +381,13 @@ export function Pricing() {
                 letterSpacing: "-0.03em",
               }}
             >
-              Start free, scale as you grow
+              {t("title")}
             </h2>
             <p
               className="text-[16px] max-w-md mx-auto"
               style={{ color: "var(--mk-text-muted)" }}
             >
-              No credit card required. Upgrade when you need more.
+              {t("subtitle")}
             </p>
           </div>
         </FadeIn>
@@ -413,14 +426,13 @@ export function Pricing() {
                 className="text-[15px] font-semibold mb-1"
                 style={{ color: "var(--mk-text)" }}
               >
-                {ENTERPRISE.name}
+                {t("enterprise.name")}
               </p>
               <p
                 className="text-[14px]"
                 style={{ color: "var(--mk-text-muted)" }}
               >
-                {ENTERPRISE.description}. Unlimited everything, white-label
-                branding, dedicated support & SLA.
+                {t("enterprise.description")}. {t("enterprise.features")}
               </p>
             </div>
             <Button
@@ -429,7 +441,7 @@ export function Pricing() {
               size="sm"
               className="shrink-0 text-[14px] font-medium"
             >
-              <Link href="mailto:sales@loyalshy.com">Contact Sales</Link>
+              <Link href="mailto:sales@loyalshy.com">{tc("contactSales")}</Link>
             </Button>
           </div>
         </FadeIn>

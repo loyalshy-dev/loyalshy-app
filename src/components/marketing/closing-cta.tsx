@@ -1,8 +1,12 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 import { FadeIn } from "./motion"
 
-export function ClosingCTA() {
+export async function ClosingCTA() {
+  const t = await getTranslations("closingCta")
+  const tCommon = await getTranslations("common")
+
   return (
     <section
       className="relative isolate overflow-hidden py-24 sm:py-32"
@@ -36,26 +40,25 @@ export function ClosingCTA() {
             className="text-3xl font-bold sm:text-[2.5rem]"
             style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
           >
-            Ready to grow your{" "}
-            <span className="mk-gradient-text">repeat business</span>?
+            {t("title1")}{" "}
+            <span className="mk-gradient-text">{t("titleHighlight")}</span>?
           </h2>
           <p
             className="mt-5 text-[16px] leading-relaxed"
             style={{ color: "var(--mk-text-muted)" }}
           >
-            Join businesses using Loyalshy to turn first-time visitors into
-            loyal regulars. Set up in 5 minutes, no credit card required.
+            {t("subtitle")}
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/register"
               className="mk-btn-primary !py-3.5 !px-8 !text-[15px] gap-2"
             >
-              Get Started Free
+              {tCommon("getStartedFree")}
               <ArrowRight className="size-4" />
             </Link>
             <Link href="#pricing" className="mk-btn-ghost !py-3.5 !px-8 !text-[15px]">
-              View Pricing
+              {t("viewPricing")}
             </Link>
           </div>
         </FadeIn>

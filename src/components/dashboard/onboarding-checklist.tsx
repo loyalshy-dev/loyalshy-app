@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { dismissOnboardingChecklist } from "@/server/onboarding-registration-actions"
 import type { OnboardingChecklistData } from "@/server/onboarding-registration-actions"
@@ -32,6 +33,7 @@ export function OnboardingChecklist({
   organizationId: string
   data: OnboardingChecklistData
 }) {
+  const t = useTranslations("dashboard.onboarding")
   const [dismissed, setDismissed] = useState(false)
   const [isPending, startTransition] = useTransition()
 
@@ -40,40 +42,40 @@ export function OnboardingChecklist({
   const items: ChecklistItem[] = [
     {
       id: "logo",
-      label: "Upload your logo",
-      description: "Brand your passes with your organization's logo",
+      label: t("uploadLogo"),
+      description: t("uploadLogoDescription"),
       completed: data.hasLogo,
       href: "/dashboard/settings?tab=general",
       icon: Image,
     },
     {
       id: "loyalty",
-      label: "Customize your loyalty card",
-      description: "Set visits required, reward description, and expiry",
+      label: t("customizeCard"),
+      description: t("customizeCardDescription"),
       completed: data.hasCustomTemplate,
       href: "/dashboard/settings?tab=loyalty",
       icon: Gift,
     },
     {
       id: "qr",
-      label: "Print your QR code",
-      description: "Download and display your QR code at your counter",
+      label: t("printQr"),
+      description: t("printQrDescription"),
       completed: data.hasQrPrinted,
       href: "/dashboard/settings/qr-code",
       icon: QrCode,
     },
     {
       id: "contact",
-      label: "Register your first contact",
-      description: "Add a contact or have them scan your QR code",
+      label: t("firstContact"),
+      description: t("firstContactDescription"),
       completed: data.hasContact,
       href: "/dashboard/contacts",
       icon: UserPlus,
     },
     {
       id: "staff",
-      label: "Invite your staff",
-      description: "Add team members to help manage visits",
+      label: t("inviteStaff"),
+      description: t("inviteStaffDescription"),
       completed: data.hasStaff,
       href: "/dashboard/settings?tab=team",
       icon: Users,
@@ -99,9 +101,9 @@ export function OnboardingChecklist({
             <Check className="size-4 text-primary" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold">Get started with Loyalshy</h2>
+            <h2 className="text-sm font-semibold">{t("title")}</h2>
             <p className="text-xs text-muted-foreground">
-              {completedCount} of {items.length} completed
+              {completedCount} of {items.length} {t("completed")}
             </p>
           </div>
         </div>
@@ -109,7 +111,7 @@ export function OnboardingChecklist({
           onClick={handleDismiss}
           disabled={isPending}
           className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          aria-label="Dismiss checklist"
+          aria-label={t("dismiss")}
         >
           <X className="size-4" />
         </button>
@@ -171,7 +173,7 @@ export function OnboardingChecklist({
             onClick={handleDismiss}
             disabled={isPending}
           >
-            All done! Dismiss checklist
+            {t("dismiss")}
           </Button>
         </div>
       )}

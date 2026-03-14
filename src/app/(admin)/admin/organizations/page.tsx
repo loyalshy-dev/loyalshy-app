@@ -1,9 +1,10 @@
+import { Suspense } from "react"
 import { connection } from "next/server"
 import { assertSuperAdmin } from "@/lib/dal"
 import { getAdminOrganizations } from "@/server/admin-actions"
 import { AdminOrganizationsView } from "@/components/admin/organizations/admin-organizations-view"
 
-export default async function AdminOrganizationsPage({
+async function OrganizationsContent({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | undefined>>
@@ -41,5 +42,17 @@ export default async function AdminOrganizationsPage({
       pageCount={result.pageCount}
       params={{ search, sort, order, page, filter }}
     />
+  )
+}
+
+export default function AdminOrganizationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>
+}) {
+  return (
+    <Suspense>
+      <OrganizationsContent searchParams={searchParams} />
+    </Suspense>
   )
 }

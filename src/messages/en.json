@@ -1,0 +1,611 @@
+{
+  "common": {
+    "loyalshy": "Loyalshy",
+    "getStarted": "Get Started",
+    "getStartedFree": "Get Started Free",
+    "logIn": "Log In",
+    "learnMore": "Learn more",
+    "contact": "Contact",
+    "contactSales": "Contact Sales",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "success": "Success",
+    "search": "Search...",
+    "noResults": "No results found",
+    "perMonth": "€/mo",
+    "backToHome": "← Back to Loyalshy"
+  },
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "apiDocs": "API Docs",
+    "home": "Loyalshy home",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "switchLanguage": "Switch language"
+  },
+  "hero": {
+    "badge": "The modern loyalty platform",
+    "title1": "Digital loyalty cards",
+    "title2": "your customers",
+    "titleHighlight": "actually use",
+    "subtitle": "Replace paper punch cards with Apple & Google Wallet passes. Set up in 5 minutes. No app required for your customers.",
+    "seeHowItWorks": "See How It Works",
+    "freeForever": "Free forever",
+    "noCreditCard": "No credit card required",
+    "screenshotAlt": "Loyalshy dashboard showing loyalty programs with beautiful card designs",
+    "browserUrl": "app.loyalshy.com/dashboard"
+  },
+  "socialProof": {
+    "headline": "Powering digital wallet passes for businesses worldwide"
+  },
+  "featureShowcase": {
+    "sectionLabel": "Platform",
+    "title": "Everything in one place",
+    "browserUrl": "app.loyalshy.com",
+    "tabs": {
+      "dashboard": {
+        "label": "Dashboard",
+        "description": "Get a real-time overview of visits, rewards, and customer engagement — all in one place.",
+        "alt": "Program overview dashboard with stat cards and template details"
+      },
+      "cardDesigner": {
+        "label": "Card Designer",
+        "description": "Design stunning loyalty cards with our visual studio. Your brand, your style.",
+        "alt": "Card design studio with floating toolbar and live wallet pass preview"
+      },
+      "programs": {
+        "label": "Programs",
+        "description": "Manage all your loyalty programs in one place. Stamp cards, coupons, memberships, and more.",
+        "alt": "Programs grid showing different loyalty card types and designs"
+      },
+      "passes": {
+        "label": "Passes",
+        "description": "Track every issued pass. Filter by status, search contacts, and manage pass lifecycle.",
+        "alt": "Pass instances list with status filters and search"
+      },
+      "distribution": {
+        "label": "Distribution",
+        "description": "Generate QR codes, share links, and issue passes directly. Multiple sizes for print.",
+        "alt": "Distribution page with QR code, shareable link, and print sizes"
+      },
+      "team": {
+        "label": "Team",
+        "description": "Invite staff with role-based access. Owners and staff see different views.",
+        "alt": "Team settings showing members with roles and invite button"
+      }
+    }
+  },
+  "howItWorks": {
+    "sectionLabel": "How it works",
+    "title": "Three steps to launch",
+    "subtitle": "Go from zero to live loyalty program in under 5 minutes",
+    "steps": {
+      "setup": {
+        "title": "Set up your business",
+        "description": "Create your account, customize your brand and loyalty program in minutes.",
+        "alt": "Card design studio — customize your loyalty card"
+      },
+      "qr": {
+        "title": "Print your QR code",
+        "description": "Download your unique QR code and place it at your counter or on tables.",
+        "alt": "Distribution page with printable QR code and shareable link"
+      },
+      "earn": {
+        "title": "Customers scan & earn",
+        "description": "Customers scan, get a digital wallet pass, and start earning rewards instantly.",
+        "alt": "Pass management showing issued loyalty passes"
+      }
+    }
+  },
+  "features": {
+    "sectionLabel": "Features",
+    "title": "Everything you need to grow loyalty",
+    "subtitle": "A complete platform built for businesses that take customer retention seriously",
+    "appleWallet": {
+      "title": "Apple Wallet",
+      "description": "Native passes that live right next to boarding passes and tickets. Auto-update on every visit."
+    },
+    "googleWallet": {
+      "title": "Google Wallet",
+      "description": "Full Android support. Passes update automatically — no app needed."
+    },
+    "analytics": {
+      "title": "Real-time Analytics",
+      "description": "Track visits, rewards, and engagement with beautiful dashboards and exportable reports."
+    },
+    "designer": {
+      "title": "Card Designer",
+      "description": "Design stunning loyalty cards with our visual studio. Upload logos, choose colors, pick patterns — make it yours."
+    },
+    "qr": {
+      "title": "QR Onboarding",
+      "description": "Print a QR code, place it at your counter. Customers join in seconds — no app downloads."
+    },
+    "team": {
+      "title": "Team Management",
+      "description": "Invite staff with role-based access. Owners and staff see different views."
+    },
+    "passTypes": {
+      "title": "10 Pass Types",
+      "description": "Stamp cards, coupons, memberships, points, prepaid, gift cards, tickets, access passes, transit, and business IDs."
+    },
+    "security": {
+      "title": "Secure & Private",
+      "description": "Enterprise-grade encryption, secure auth, and GDPR-ready. Your customer data stays yours."
+    }
+  },
+  "walletPreview": {
+    "badge1": "Works with Apple & Google Wallet",
+    "badge2": "Updates automatically on every visit",
+    "badge3": "One scan to join, no app required",
+    "sectionLabel": "The customer experience",
+    "title": "Beautiful passes that live in their wallet",
+    "description": "No app to download. No account to create. Your customers scan once and get a loyalty card that lives right next to their boarding passes — and updates automatically every visit.",
+    "seePricing": "See pricing →"
+  },
+  "testimonials": {
+    "sectionLabel": "Testimonials",
+    "title": "Loved by business owners",
+    "subtitle": "See how businesses are growing repeat customers with Loyalshy",
+    "avatarAlt": "Avatar for {name}",
+    "items": {
+      "maria": {
+        "name": "Maria Santos",
+        "role": "Owner, Trattoria Bella",
+        "stat": "3x",
+        "statLabel": "more repeat visits",
+        "quote": "We replaced our old paper punch cards and saw 3x more repeat visits in the first month. The wallet passes are beautiful and customers actually keep them."
+      },
+      "james": {
+        "name": "James Chen",
+        "role": "Manager, Sushi Express",
+        "stat": "5 min",
+        "statLabel": "setup time",
+        "quote": "Setup took literally 5 minutes. Our staff loves how easy it is to register visits, and customers love the digital cards. No more lost punch cards."
+      },
+      "sophie": {
+        "name": "Sophie Dubois",
+        "role": "Owner, Cafe Lumiere",
+        "stat": "40%",
+        "statLabel": "revenue increase",
+        "quote": "The analytics alone are worth it. I finally know which customers are my regulars and can reward them properly. Revenue from repeat customers is up 40%."
+      },
+      "luca": {
+        "name": "Luca Moretti",
+        "role": "Owner, Pizzeria Napoli",
+        "stat": "850+",
+        "statLabel": "loyalty members",
+        "quote": "We went from zero to 850 loyalty members in three months. The QR code at the counter does all the work — customers sign up themselves."
+      },
+      "aisha": {
+        "name": "Aisha Patel",
+        "role": "Manager, Spice Garden",
+        "stat": "92%",
+        "statLabel": "redemption rate",
+        "quote": "Our redemption rate went from 15% with paper cards to 92% with Loyalshy. Digital passes actually get used because they're always in the customer's phone."
+      },
+      "thomas": {
+        "name": "Thomas Bergstrom",
+        "role": "Owner, Nordic Kitchen",
+        "stat": "2 hrs",
+        "statLabel": "saved per week",
+        "quote": "We used to spend hours managing punch cards and tracking rewards manually. Loyalshy automated everything. My staff can focus on what matters — great food."
+      }
+    }
+  },
+  "pricing": {
+    "sectionLabel": "Pricing",
+    "title": "Start free, scale as you grow",
+    "subtitle": "No credit card required. Upgrade when you need more.",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "save20": "Save 20%",
+    "savedPerYear": "saved per year",
+    "mostPopular": "Most Popular",
+    "upTo": "Up to",
+    "contacts": "contacts",
+    "staffMembers": "{count, plural, one {# staff member} other {# staff members}}",
+    "programs": "{count} programs",
+    "unlimitedContacts": "Unlimited contacts",
+    "unlimitedPrograms": "Unlimited programs",
+    "free": {
+      "name": "Free",
+      "description": "Try Loyalshy with your first customers",
+      "features": {
+        "contacts": "Up to 50 contacts",
+        "programs": "1 stamp card program",
+        "staff": "1 staff member",
+        "wallet": "Apple & Google Wallet passes",
+        "studio": "Card design studio",
+        "analytics": "Dashboard analytics",
+        "branding": "Includes \"Powered by Loyalshy\" on passes"
+      }
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "description": "Custom plan for large teams",
+      "features": "Unlimited everything, white-label branding, dedicated support & SLA."
+    }
+  },
+  "faq": {
+    "sectionLabel": "FAQ",
+    "title": "Frequently asked questions",
+    "subtitle": "Everything you need to know about Loyalshy",
+    "stillHaveQuestions": "Still have questions?",
+    "emailUs": "Email us",
+    "replyTime": "— we typically reply within a few hours.",
+    "items": {
+      "howWorks": {
+        "question": "How does Loyalshy work?",
+        "answer": "Loyalshy replaces paper punch cards with digital loyalty cards that live in your customers' Apple or Google Wallet. You set up your business, print a QR code, and customers scan it to get their digital pass. Staff register visits from the dashboard, and customers automatically earn rewards."
+      },
+      "devices": {
+        "question": "What devices are supported?",
+        "answer": "Loyalshy works with Apple Wallet (iPhone, Apple Watch) and Google Wallet (Android). The passes automatically update whenever a visit is registered — no app download required for customers."
+      },
+      "setup": {
+        "question": "How long does setup take?",
+        "answer": "Most businesses are up and running in under 5 minutes. Create your account, customize your loyalty program, print your QR code, and you're ready to go."
+      },
+      "passTypes": {
+        "question": "What types of passes can I create?",
+        "answer": "Loyalshy supports 10 pass types: stamp cards, coupons, memberships, points programs, prepaid cards, gift cards, tickets, access passes, transit passes, and business IDs. Each type has its own set of features and interactions."
+      },
+      "freePlan": {
+        "question": "Is there a free plan?",
+        "answer": "Yes! Our Free plan lets you get started with up to 50 contacts and 1 stamp card program. No credit card required, free forever. Upgrade anytime when you need more."
+      },
+      "cancel": {
+        "question": "How do I cancel?",
+        "answer": "You can cancel your subscription at any time from your billing settings. There are no long-term contracts or cancellation fees."
+      },
+      "security": {
+        "question": "Is my data secure?",
+        "answer": "Yes. We use industry-standard encryption, secure authentication, and your data is stored on enterprise-grade infrastructure. We never share your customer data with third parties."
+      },
+      "customize": {
+        "question": "Can I customize the loyalty card design?",
+        "answer": "Yes! Our visual studio lets you upload your logo, set brand colors, choose patterns, and fully customize how your wallet passes look. Every pass matches your business's identity."
+      }
+    }
+  },
+  "closingCta": {
+    "title1": "Ready to grow your",
+    "titleHighlight": "repeat business",
+    "subtitle": "Join businesses using Loyalshy to turn first-time visitors into loyal regulars. Set up in 5 minutes, no credit card required.",
+    "viewPricing": "View Pricing"
+  },
+  "footer": {
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "cookiePolicy": "Cookie Policy",
+    "tagline": "Digital loyalty cards for modern businesses.",
+    "copyright": "© 2026 Loyalshy. All rights reserved.",
+    "builtWith": "Built with care for business owners."
+  },
+  "cookieBanner": {
+    "message": "We use essential cookies for authentication and preferences. No tracking cookies.",
+    "accept": "Got it",
+    "dismiss": "Dismiss cookie banner"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your Loyalshy account",
+      "continueWithGoogle": "Continue with Google",
+      "or": "or",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "invalidCredentials": "Invalid email or password"
+    },
+    "register": {
+      "stepAccount": "Account",
+      "stepOrganization": "Organization",
+      "title": "Create an account",
+      "subtitle": "Get started with Loyalshy for free",
+      "continueWithGoogle": "Continue with Google",
+      "or": "or",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Jane Doe",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordHint": "At least 8 characters",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "strengthWeak": "Weak",
+      "strengthFair": "Fair",
+      "strengthGood": "Good",
+      "strengthStrong": "Strong",
+      "orgTitle": "Name your organization",
+      "orgSubtitle": "You can update this and add more details later in settings.",
+      "orgName": "Organization name",
+      "orgPlaceholder": "e.g. Trattoria Bella",
+      "orgSubmit": "Get started",
+      "accountCreated": "Account created!",
+      "allSet": "You're all set!",
+      "createFailed": "Failed to create account",
+      "genericError": "Something went wrong. Please try again."
+    },
+    "forgotPassword": {
+      "title": "Forgot your password?",
+      "subtitle": "Enter your email and we'll send you a reset link",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Send reset link",
+      "backToLogin": "Back to sign in",
+      "checkEmail": "Check your email",
+      "emailSent": "We sent a password reset link to {email}",
+      "noEmail": "Didn't receive the email? Check your spam folder or try again.",
+      "tryDifferent": "Try a different email"
+    },
+    "invite": {
+      "joinOrg": "Join {organizationName}",
+      "invitedAs": "You've been invited as {role}.",
+      "createAccount": "Create your account to get started.",
+      "signInToAccept": "Sign in to accept the invitation.",
+      "createAndJoin": "Create account & join",
+      "signInAndJoin": "Sign in & join",
+      "hasAccount": "Already have an account?",
+      "signInInstead": "Sign in instead",
+      "noAccount": "Don't have an account?",
+      "createOne": "Create one",
+      "validating": "Validating invitation...",
+      "invalid": "Invalid Invitation",
+      "goToSignIn": "Go to sign in",
+      "welcome": "Welcome to {organizationName}!",
+      "createFailed": "Failed to create account",
+      "invalidCredentials": "Invalid credentials"
+    },
+    "error": {
+      "title": "Authentication error",
+      "message": "Something went wrong during authentication. Please try again.",
+      "errorId": "Error ID: {digest}",
+      "tryAgain": "Try again",
+      "backToLogin": "Back to login"
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "overview": "Overview",
+      "contacts": "Contacts",
+      "programs": "Programs",
+      "settings": "Settings",
+      "signOut": "Sign out",
+      "search": "Search actions, pages...",
+      "noResults": "No results found.",
+      "quickActions": "Quick Actions",
+      "registerInteraction": "Register Interaction",
+      "createProgram": "Create Program",
+      "navigate": "Navigate",
+      "newInteraction": "New Interaction",
+      "action": "Action",
+      "more": "More",
+      "mobileNav": "Mobile navigation"
+    },
+    "overview": {
+      "totalContacts": "Total Contacts",
+      "activePasses": "Active Pass Instances",
+      "activityThisMonth": "Activity This Month",
+      "redeemedThisMonth": "Redeemed This Month"
+    },
+    "activity": {
+      "title": "Recent Activity",
+      "stamp": "registered a visit",
+      "checkIn": "checked in",
+      "passUse": "used a pass",
+      "pointsEarn": "earned points",
+      "recharge": "recharged a pass",
+      "giftUse": "used gift card",
+      "ticketScan": "scanned ticket",
+      "access": "accessed facility",
+      "board": "boarded",
+      "verify": "verified ID",
+      "rewardEarned": "earned a reward",
+      "rewardRedeemed": "redeemed a reward",
+      "couponRedeemed": "redeemed a coupon",
+      "empty": "No activity yet. Register your first interaction to see it here.",
+      "by": "by"
+    },
+    "topContacts": {
+      "title": "Top Contacts",
+      "empty": "No contacts yet",
+      "lastInteraction": "Last interaction"
+    },
+    "programsSummary": {
+      "title": "Programs",
+      "empty": "No active programs yet.",
+      "createProgram": "Create a program",
+      "enrolled": "enrolled",
+      "rewardsEarned": "rewards earned",
+      "issued": "issued",
+      "redeemed": "redeemed",
+      "members": "members",
+      "checkIns": "check-ins",
+      "uses": "uses",
+      "cards": "cards",
+      "transactions": "transactions",
+      "tickets": "tickets",
+      "scans": "scans",
+      "passes": "passes",
+      "accessLogs": "access logs",
+      "trips": "trips",
+      "ids": "IDs",
+      "verifications": "verifications"
+    },
+    "contacts": {
+      "title": "Contacts",
+      "subtitle": "Manage your pass holders.",
+      "addContact": "Add Contact",
+      "searchPlaceholder": "Search by name, email, phone...",
+      "export": "Export",
+      "filter": "Filter",
+      "hasReward": "Has Reward",
+      "clearFilters": "Clear filters",
+      "exported": "Customers exported",
+      "exportFailed": "Failed to export customers",
+      "name": "Name",
+      "program": "Program",
+      "progress": "Progress",
+      "total": "Total",
+      "lastVisit": "Last Visit",
+      "noContact": "No contact",
+      "viewDetails": "View Details",
+      "never": "Never",
+      "ready": "Ready",
+      "active": "Active",
+      "noMatch": "No customers match your filters.",
+      "page": "Page",
+      "of": "of",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "actions": "Customer actions"
+    },
+    "addContact": {
+      "title": "Add Customer",
+      "subtitle": "Add a new customer to your loyalty program.",
+      "fullName": "Full Name",
+      "nameRequired": "Name is required",
+      "email": "Email",
+      "invalidEmail": "Invalid email",
+      "phone": "Phone",
+      "namePlaceholder": "John Doe",
+      "emailPlaceholder": "john@example.com",
+      "phonePlaceholder": "+1 (555) 123-4567",
+      "addedSuccess": "{name} added successfully"
+    },
+    "programs": {
+      "title": "Programs",
+      "subtitle": "Manage your loyalty programs, rewards, and card designs.",
+      "createProgram": "Create Program",
+      "newProgram": "New Program",
+      "newProgramDescription": "Choose a program type and configure it. It starts as a draft — activate it when ready.",
+      "all": "All",
+      "stampCards": "Stamp Cards",
+      "coupons": "Coupons",
+      "memberships": "Memberships",
+      "points": "Points",
+      "prepaid": "Prepaid",
+      "noPrograms": "No programs yet",
+      "createFirst": "Create your first loyalty program to start rewarding your customers.",
+      "createToStart": "Create a new program to get started.",
+      "chooseType": "Choose a program type to get started.",
+      "programName": "Program Name",
+      "nameRequired": "Program name is required",
+      "namePlaceholder": "e.g., Coffee Loyalty, Lunch Special",
+      "backToType": "Back to type selection",
+      "overview": "Overview",
+      "passes": "Passes",
+      "attendees": "Attendees",
+      "cardsTab": "Cards",
+      "rewards": "Rewards",
+      "redemptions": "Redemptions",
+      "catalog": "Catalog",
+      "distribution": "Distribution",
+      "cardDesign": "Card Design",
+      "backToOverview": "Back to overview",
+      "draftBanner": "This program is in draft mode. Activate it to start issuing passes.",
+      "activate": "Activate",
+      "activated": "Program activated! Contacts can now receive passes."
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Manage your organization settings.",
+      "general": "General",
+      "team": "Team",
+      "billing": "Billing",
+      "api": "API",
+      "jobs": "Jobs",
+      "orgProfile": "Organization Profile",
+      "orgProfileDescription": "Basic information about your organization.",
+      "orgName": "Organization Name",
+      "orgNamePlaceholder": "My Organization",
+      "orgNameRequired": "Organization name is required",
+      "address": "Address",
+      "addressPlaceholder": "123 Main St, City, State",
+      "inviteTeam": "Invite team members",
+      "inviteSent": "Invitation sent to {email}",
+      "memberRemoved": "{name} has been removed",
+      "apiKeys": "API Keys",
+      "apiKeysDescription": "Manage API keys for programmatic access.",
+      "viewApiDocs": "View API docs",
+      "createKey": "Create key",
+      "noApiKeys": "No API keys yet. Create one to get started.",
+      "expired": "Expired",
+      "copied": "Copied to clipboard.",
+      "keyRevoked": "API key revoked.",
+      "backgroundJobs": "Background Jobs",
+      "backgroundJobsDescription": "Recent wallet pass updates and background job activity."
+    },
+    "onboarding": {
+      "title": "Get started with Loyalshy",
+      "completed": "completed",
+      "uploadLogo": "Upload your logo",
+      "uploadLogoDescription": "Brand your passes with your organization's logo",
+      "customizeCard": "Customize your loyalty card",
+      "customizeCardDescription": "Set visits required, reward description, and expiry",
+      "printQr": "Print your QR code",
+      "printQrDescription": "Download and display your QR code at your counter",
+      "firstContact": "Register your first contact",
+      "firstContactDescription": "Add a contact or have them scan your QR code",
+      "inviteStaff": "Invite your staff",
+      "inviteStaffDescription": "Add team members to help manage visits",
+      "dismiss": "Dismiss checklist"
+    },
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "archived": "Archived",
+      "frozen": "Frozen",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "suspended": "Suspended",
+      "revoked": "Revoked",
+      "available": "Available",
+      "redeemed": "Redeemed",
+      "expired": "Expired"
+    },
+    "chart": {
+      "7d": "7d",
+      "30d": "30d",
+      "90d": "90d",
+      "12m": "12m",
+      "interaction": "interaction",
+      "interactions": "interactions"
+    }
+  },
+  "errors": {
+    "notFound": {
+      "code": "404",
+      "title": "Page not found",
+      "message": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Go home"
+    },
+    "global": {
+      "title": "Something went wrong",
+      "message": "An unexpected error occurred. Our team has been notified.",
+      "errorId": "Error ID: {digest}",
+      "tryAgain": "Try again",
+      "goHome": "Go home"
+    }
+  }
+}

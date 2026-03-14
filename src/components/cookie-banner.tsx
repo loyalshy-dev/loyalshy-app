@@ -3,10 +3,13 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { X } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const COOKIE_CONSENT_KEY = "loyalshy-cookie-consent"
 
 export function CookieBanner() {
+  const t = useTranslations("cookieBanner")
+  const tCommon = useTranslations("common")
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -43,13 +46,13 @@ export function CookieBanner() {
             className="text-[13px] leading-relaxed"
             style={{ color: "var(--mk-text-muted, hsl(var(--muted-foreground)))" }}
           >
-            We use essential cookies for authentication and preferences. No tracking cookies.{" "}
+            {t("message")}{" "}
             <Link
               href="/cookies"
               className="underline underline-offset-2 transition-opacity hover:opacity-70"
               style={{ color: "var(--mk-text, hsl(var(--foreground)))" }}
             >
-              Learn more
+              {tCommon("learnMore")}
             </Link>
           </p>
         </div>
@@ -59,12 +62,12 @@ export function CookieBanner() {
             className="rounded-lg px-4 py-2 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
             style={{ background: "var(--mk-text, hsl(var(--foreground)))" }}
           >
-            Got it
+            {t("accept")}
           </button>
           <button
             onClick={accept}
             className="rounded-lg p-1.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-            aria-label="Dismiss cookie banner"
+            aria-label={t("dismiss")}
             style={{ color: "var(--mk-text-dimmed, hsl(var(--muted-foreground)))" }}
           >
             <X className="size-4" />

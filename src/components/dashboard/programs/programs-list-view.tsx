@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { Plus, Users, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -67,6 +68,7 @@ export function TemplatesListView({
   organizationLogo,
   isOwner,
 }: TemplatesListViewProps) {
+  const t = useTranslations("dashboard.programs")
   const router = useRouter()
   const [showCreate, setShowCreate] = useState(false)
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL")
@@ -87,12 +89,12 @@ export function TemplatesListView({
       : programs.filter((p) => p.passType === typeFilter)
 
   const filterTabs: { key: TypeFilter; label: string }[] = [
-    { key: "ALL", label: "All" },
-    { key: "STAMP_CARD", label: "Stamp Cards" },
-    { key: "COUPON", label: "Coupons" },
-    { key: "MEMBERSHIP", label: "Memberships" },
-    { key: "POINTS", label: "Points" },
-    { key: "PREPAID", label: "Prepaid" },
+    { key: "ALL", label: t("all") },
+    { key: "STAMP_CARD", label: t("stampCards") },
+    { key: "COUPON", label: t("coupons") },
+    { key: "MEMBERSHIP", label: t("memberships") },
+    { key: "POINTS", label: t("points") },
+    { key: "PREPAID", label: t("prepaid") },
   ]
 
   // Only show filter tabs if there's more than one type
@@ -105,9 +107,9 @@ export function TemplatesListView({
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Programs</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">
-            Manage your loyalty programs, rewards, and card designs.
+            {t("subtitle")}
           </p>
         </div>
         {isOwner && (
@@ -117,7 +119,7 @@ export function TemplatesListView({
             onClick={() => setShowCreate(!showCreate)}
           >
             <Plus className="h-3.5 w-3.5" />
-            Create Program
+            {t("createProgram")}
           </Button>
         )}
       </div>
@@ -126,9 +128,9 @@ export function TemplatesListView({
       {showCreate && (
         <Card>
           <div className="border-b border-border px-6 py-4">
-            <h2 className="text-sm font-semibold">New Program</h2>
+            <h2 className="text-sm font-semibold">{t("newProgram")}</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Choose a program type and configure it. It starts as a draft -- activate it when ready.
+              {t("newProgramDescription")}
             </p>
           </div>
           <div className="p-6">
@@ -176,12 +178,12 @@ export function TemplatesListView({
             <Layers className="h-5 w-5 text-muted-foreground" />
           </div>
           <h2 className="text-sm font-semibold">
-            {typeFilter === "ALL" ? "No programs yet" : `No ${filterTabs.find((t) => t.key === typeFilter)?.label.toLowerCase() ?? "programs"} yet`}
+            {typeFilter === "ALL" ? t("noPrograms") : `No ${filterTabs.find((tab) => tab.key === typeFilter)?.label.toLowerCase() ?? "programs"} yet`}
           </h2>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm">
             {typeFilter === "ALL"
-              ? "Create your first loyalty program to start rewarding your customers."
-              : "Create a new program to get started."}
+              ? t("createFirst")
+              : t("createToStart")}
           </p>
           {isOwner && typeFilter === "ALL" && (
             <Button
@@ -190,7 +192,7 @@ export function TemplatesListView({
               onClick={() => setShowCreate(true)}
             >
               <Plus className="h-3.5 w-3.5" />
-              Create Program
+              {t("createProgram")}
             </Button>
           )}
         </Card>
