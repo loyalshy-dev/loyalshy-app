@@ -358,6 +358,23 @@
       "noEmail": "¿No recibiste el email? Revisa tu carpeta de spam o inténtalo de nuevo.",
       "tryDifferent": "Probar con otro email"
     },
+    "resetPassword": {
+      "title": "Restablece tu contraseña",
+      "subtitle": "Introduce tu nueva contraseña",
+      "newPassword": "Nueva contraseña",
+      "newPasswordPlaceholder": "Introduce nueva contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "confirmPasswordPlaceholder": "Confirma tu nueva contraseña",
+      "submit": "Restablecer contraseña",
+      "backToLogin": "Volver a iniciar sesión",
+      "mismatch": "Las contraseñas no coinciden",
+      "tooShort": "La contraseña debe tener al menos 8 caracteres",
+      "failed": "Error al restablecer la contraseña. El enlace puede haber caducado.",
+      "success": "¡Contraseña restablecida! Ya puedes iniciar sesión.",
+      "invalidTitle": "Enlace no válido",
+      "invalidDescription": "Este enlace para restablecer la contraseña no es válido o ha caducado.",
+      "requestNewLink": "Solicitar nuevo enlace"
+    },
     "invite": {
       "joinOrg": "Unirse a {organizationName}",
       "invitedAs": "Has sido invitado como {role}.",

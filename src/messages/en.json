@@ -358,6 +358,23 @@
       "noEmail": "Didn't receive the email? Check your spam folder or try again.",
       "tryDifferent": "Try a different email"
     },
+    "resetPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your new password below",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "submit": "Reset password",
+      "backToLogin": "Back to sign in",
+      "mismatch": "Passwords do not match",
+      "tooShort": "Password must be at least 8 characters",
+      "failed": "Failed to reset password. The link may have expired.",
+      "success": "Password reset successfully! You can now sign in.",
+      "invalidTitle": "Invalid reset link",
+      "invalidDescription": "This password reset link is invalid or has expired.",
+      "requestNewLink": "Request a new reset link"
+    },
     "invite": {
       "joinOrg": "Join {organizationName}",
       "invitedAs": "You've been invited as {role}.",
