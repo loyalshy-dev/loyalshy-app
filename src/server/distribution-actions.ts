@@ -3,6 +3,7 @@
 import { randomUUID } from "crypto"
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
 import { db, getNextMemberNumber } from "@/lib/db"
 import {
   assertAuthenticated,
@@ -137,10 +138,11 @@ export async function issuePassToContacts(
   templateId: string,
   contactIds: string[]
 ): Promise<IssuePassToContactsResult> {
+  const t = await getTranslations("serverErrors")
   await assertAuthenticated()
   const organization = await getOrganizationForUser()
   if (!organization) {
-    return { success: false, results: [], issuedCount: 0, skippedCount: 0, error: "No organization found" }
+    return { success: false, results: [], issuedCount: 0, skippedCount: 0, error: t("noOrganization") }
   }
 
   await assertOrganizationRole(organization.id, "owner")
@@ -152,7 +154,7 @@ export async function issuePassToContacts(
       results: [],
       issuedCount: 0,
       skippedCount: 0,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
+      error: parsed.error.issues[0]?.message ?? t("invalidInput"),
     }
   }
 
@@ -172,7 +174,7 @@ export async function issuePassToContacts(
       results: [],
       issuedCount: 0,
       skippedCount: 0,
-      error: "Program not found or not active",
+      error: t("programNotFound"),
     }
   }
 
@@ -196,7 +198,7 @@ export async function issuePassToContacts(
         contactId,
         contactName: "Unknown",
         status: "error",
-        error: "Contact not found",
+        error: t("contactNotFound"),
       })
       continue
     }
@@ -418,17 +420,18 @@ export async function createContactAndIssuePass(
   email: string,
   phone: string
 ): Promise<CreateAndIssueResult> {
+  const t = await getTranslations("serverErrors")
   await assertAuthenticated()
   const organization = await getOrganizationForUser()
   if (!organization) {
-    return { success: false, error: "No organization found" }
+    return { success: false, error: t("noOrganization") }
   }
 
   await assertOrganizationRole(organization.id, "owner")
 
   const parsed = createAndIssueSchema.safeParse({ templateId, fullName, email, phone })
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" }
+    return { success: false, error: parsed.error.issues[0]?.message ?? t("invalidInput") }
   }
 
   const cleanName = sanitizeText(parsed.data.fullName, 100)
@@ -442,7 +445,7 @@ export async function createContactAndIssuePass(
   })
 
   if (!template) {
-    return { success: false, error: "Program not found or not active" }
+    return { success: false, error: t("programNotFound") }
   }
 
   // Find existing contact by email or phone, or create a new one
@@ -474,7 +477,7 @@ export async function createContactAndIssuePass(
       select: { id: true },
     })
     if (existingPass) {
-      return { success: false, error: "This contact already has a pass for this program." }
+      return { success: false, error: t("alreadyHasPass") }
     }
   }
 
@@ -528,10 +531,11 @@ export async function bulkImportAndIssue(
   templateId: string,
   rows: BulkImportRow[]
 ): Promise<BulkImportResult> {
+  const t = await getTranslations("serverErrors")
   await assertAuthenticated()
   const organization = await getOrganizationForUser()
   if (!organization) {
-    return { success: false, results: [], createdCount: 0, issuedCount: 0, skippedCount: 0, errorCount: 0, error: "No organization found" }
+    return { success: false, results: [], createdCount: 0, issuedCount: 0, skippedCount: 0, errorCount: 0, error: t("noOrganization") }
   }
 
   await assertOrganizationRole(organization.id, "owner")
@@ -545,7 +549,7 @@ export async function bulkImportAndIssue(
       issuedCount: 0,
       skippedCount: 0,
       errorCount: 0,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
+      error: parsed.error.issues[0]?.message ?? t("invalidInput"),
     }
   }
 
@@ -567,7 +571,7 @@ export async function bulkImportAndIssue(
       issuedCount: 0,
       skippedCount: 0,
       errorCount: 0,
-      error: "Program not found or not active",
+      error: t("programNotFound"),
     }
   }
 
@@ -588,7 +592,7 @@ export async function bulkImportAndIssue(
         contactId: "",
         contactName: row.fullName || "Empty name",
         status: "error",
-        error: "Name is required",
+        error: t("nameRequired"),
       })
       continue
     }
@@ -856,10 +860,11 @@ export async function getDistributionStats(
 export async function issuePassToAllEligible(
   templateId: string
 ): Promise<IssuePassToContactsResult & { totalEligible: number }> {
+  const t = await getTranslations("serverErrors")
   await assertAuthenticated()
   const organization = await getOrganizationForUser()
   if (!organization) {
-    return { success: false, results: [], issuedCount: 0, skippedCount: 0, totalEligible: 0, error: "No organization found" }
+    return { success: false, results: [], issuedCount: 0, skippedCount: 0, totalEligible: 0, error: t("noOrganization") }
   }
 
   await assertOrganizationRole(organization.id, "owner")
@@ -887,10 +892,11 @@ export async function issuePassToAllEligible(
 export async function sendPassEmail(
   passInstanceId: string
 ): Promise<{ success: boolean; error?: string }> {
+  const t = await getTranslations("serverErrors")
   await assertAuthenticated()
   const organization = await getOrganizationForUser()
   if (!organization) {
-    return { success: false, error: "No organization found" }
+    return { success: false, error: t("noOrganization") }
   }
 
   const passInstance = await db.passInstance.findFirst({
@@ -916,11 +922,11 @@ export async function sendPassEmail(
   })
 
   if (!passInstance) {
-    return { success: false, error: "Pass not found" }
+    return { success: false, error: t("passInstanceNotFound") }
   }
 
   if (!passInstance.contact.email) {
-    return { success: false, error: "Contact has no email address" }
+    return { success: false, error: t("contactNoEmail") }
   }
 
   const cardUrl = buildCardUrl(
@@ -987,14 +993,15 @@ const HOLDER_PHOTO_PASS_TYPES = ["BUSINESS_ID", "MEMBERSHIP", "ACCESS"]
 export async function uploadInstanceHolderPhoto(
   formData: FormData
 ): Promise<{ success?: boolean; url?: string; error?: string }> {
+  const t = await getTranslations("serverErrors")
   const passInstanceId = formData.get("passInstanceId") as string
   const file = formData.get("file") as File
 
-  if (!passInstanceId || !file) return { error: "Missing pass instance ID or file" }
+  if (!passInstanceId || !file) return { error: t("missingPassOrFile") }
 
   await assertAuthenticated()
   const organization = await getOrganizationForUser()
-  if (!organization) return { error: "No organization found" }
+  if (!organization) return { error: t("noOrganization") }
 
   const passInstance = await db.passInstance.findFirst({
     where: {
@@ -1008,18 +1015,18 @@ export async function uploadInstanceHolderPhoto(
     },
   })
 
-  if (!passInstance) return { error: "Pass instance not found" }
+  if (!passInstance) return { error: t("passInstanceNotFound") }
   if (!HOLDER_PHOTO_PASS_TYPES.includes(passInstance.passTemplate.passType)) {
-    return { error: "This pass type does not support holder photos" }
+    return { error: t("passTypeNoPhoto") }
   }
 
   await assertOrganizationRole(organization.id, "owner")
 
   const maxSize = 2 * 1024 * 1024
-  if (file.size > maxSize) return { error: "File must be under 2MB" }
+  if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
 
   const validTypes = ["image/png", "image/jpeg", "image/webp"]
-  if (!validTypes.includes(file.type)) return { error: "File must be PNG, JPEG, or WebP" }
+  if (!validTypes.includes(file.type)) return { error: t("invalidFileType") }
 
   const rawBuffer = Buffer.from(await file.arrayBuffer())
   let processedBuffer: Buffer = rawBuffer
@@ -1064,11 +1071,12 @@ export async function uploadInstanceHolderPhoto(
 export async function deleteInstanceHolderPhoto(
   passInstanceId: string
 ): Promise<{ success?: boolean; error?: string }> {
-  if (!passInstanceId) return { error: "Missing pass instance ID" }
+  const t = await getTranslations("serverErrors")
+  if (!passInstanceId) return { error: t("missingPassId") }
 
   await assertAuthenticated()
   const organization = await getOrganizationForUser()
-  if (!organization) return { error: "No organization found" }
+  if (!organization) return { error: t("noOrganization") }
 
   const passInstance = await db.passInstance.findFirst({
     where: {
@@ -1082,7 +1090,7 @@ export async function deleteInstanceHolderPhoto(
     },
   })
 
-  if (!passInstance) return { error: "Pass instance not found" }
+  if (!passInstance) return { error: t("passInstanceNotFound") }
   await assertOrganizationRole(organization.id, "owner")
 
   const existingData = (passInstance.data as Record<string, unknown>) ?? {}

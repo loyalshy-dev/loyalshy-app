@@ -25,6 +25,7 @@ import type { CardType } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 import type { ProgramConfigState } from "@/lib/stores/card-design-store"
 import { Save, Smartphone, Tablet, Palette, BarChart3, ImagePlus, MoreHorizontal, SlidersHorizontal, Undo2, Redo2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 /** Map PassType → CardType for visual rendering */
 function passTypeToCardType(passType: string): CardType {
@@ -171,6 +172,12 @@ export function StudioLayout({
   walletPassCount,
   embedded = false,
 }: StudioLayoutProps) {
+  const tStudio = useTranslations("dashboard.studio")
+  // Store translation fn in a ref so it's accessible inside useCallback without
+  // adding it to the dependency array (translation fn identity is stable).
+  const tStudioRef = useRef(tStudio)
+  useEffect(() => { tStudioRef.current = tStudio }, [tStudio])
+
   const cardType = passTypeToCardType(passType)
   // Create store once per mount
   const storeRef = useRef<CardDesignStoreApi | null>(null)
@@ -441,14 +448,22 @@ export function StudioLayout({
           current.markConfigClean()
         }
         const designResult = hasDesignChanges ? results[0] as { hashChanged?: boolean } : null
+        // Note: toast messages here use inline strings because this callback is
+        // defined outside component render — translations are accessed via the
+        // tStudio ref set during render.
         toast.success(
           designResult?.hashChanged && walletPassCount > 0
-            ? `Saved! Updating ${walletPassCount} wallet pass${walletPassCount !== 1 ? "es" : ""}...`
-            : "Saved!"
+            ? tStudioRef.current?.("saveSuccessWithUpdate", {
+                count: walletPassCount,
+                passLabel: walletPassCount !== 1
+                  ? tStudioRef.current?.("walletPasses")
+                  : tStudioRef.current?.("walletPass"),
+              }) ?? "Saved!"
+            : tStudioRef.current?.("saveSuccess") ?? "Saved!"
         )
       }
     } catch {
-      toast.error("Failed to save")
+      toast.error(tStudioRef.current?.("saveFailed") ?? "Failed to save")
     } finally {
       store.getState().setSaving(false)
     }
@@ -735,6 +750,7 @@ function CanvasControls({
   onRedo: () => void
   onSave: () => void
 }) {
+  const t = useTranslations("dashboard.studio")
   return (
     <div
       style={{
@@ -773,7 +789,7 @@ function CanvasControls({
             display: "flex",
             alignItems: "center",
           }}
-          aria-label="Undo"
+          aria-label={t("undo")}
         >
           <Undo2 size={14} />
         </button>
@@ -791,7 +807,7 @@ function CanvasControls({
             display: "flex",
             alignItems: "center",
           }}
-          aria-label="Redo"
+          aria-label={t("redo")}
         >
           <Redo2 size={14} />
         </button>
@@ -853,10 +869,10 @@ function CanvasControls({
           opacity: isSaving ? 0.7 : 1,
           boxShadow: isDirty ? "0 2px 8px rgba(0,0,0,0.15)" : "0 2px 8px rgba(0,0,0,0.08)",
         }}
-        aria-label="Save design"
+        aria-label={t("saveDesign")}
       >
         <Save size={13} />
-        {isSaving ? "Saving..." : isDirty ? "Save" : "Saved"}
+        {isSaving ? t("saving") : isDirty ? t("save") : t("saved")}
       </button>
     </div>
   )
@@ -865,13 +881,6 @@ function CanvasControls({
 // ─── Mobile Tool Bar ──────────────────────────────────────
 
 import { ToolSelector } from "./tools/tool-selector"
-
-const MOBILE_QUICK_TOOLS: { id: StudioTool; label: string; icon: React.ReactNode }[] = [
-  { id: "program", label: "Program", icon: <SlidersHorizontal size={18} /> },
-  { id: "colors", label: "Colors", icon: <Palette size={18} /> },
-  { id: "progress", label: "Progress", icon: <BarChart3 size={18} /> },
-  { id: "strip", label: "Strip", icon: <ImagePlus size={18} /> },
-]
 
 function MobileToolBar({
   activeTool,
@@ -882,6 +891,13 @@ function MobileToolBar({
   onToolSelect: (tool: StudioTool | null) => void
   cardType?: CardType
 }) {
+  const t = useTranslations("dashboard.studio")
+  const MOBILE_QUICK_TOOLS: { id: StudioTool; label: string; icon: React.ReactNode }[] = [
+    { id: "program", label: t("program"), icon: <SlidersHorizontal size={18} /> },
+    { id: "colors", label: t("colors"), icon: <Palette size={18} /> },
+    { id: "progress", label: t("progress"), icon: <BarChart3 size={18} /> },
+    { id: "strip", label: t("strip"), icon: <ImagePlus size={18} /> },
+  ]
   const [showMore, setShowMore] = useState(false)
   const filteredQuickTools = cardType && cardType !== "STAMP"
     ? MOBILE_QUICK_TOOLS.filter((t) => t.id !== "progress")
@@ -928,7 +944,7 @@ function MobileToolBar({
       })}
       <button
         onClick={() => setShowMore(!showMore)}
-        aria-label="More tools"
+        aria-label={t("moreTools")}
         style={{
           flex: 1,
           display: "flex",
@@ -946,7 +962,7 @@ function MobileToolBar({
         }}
       >
         <MoreHorizontal size={18} />
-        <span>More</span>
+        <span>{t("more")}</span>
       </button>
 
       {showMore && (
@@ -1002,15 +1018,16 @@ function MinigamePreview({
   accentColor: string
   templateId: string
 }) {
+  const t = useTranslations("dashboard.studio")
   const [previewKey, setPreviewKey] = useState(0)
   const filledPrizes = prizes.filter((p) => p.name.trim())
   const rewardText = filledPrizes.length > 0 ? filledPrizes[0].name : (rewardDescription || "Free reward!")
   const prizeNames = filledPrizes.length > 0 ? filledPrizes.map((p) => p.name) : undefined
 
   const gameLabel =
-    gameType === "scratch" ? "Scratch Card"
-    : gameType === "slots" ? "Slot Machine"
-    : "Wheel of Fortune"
+    gameType === "scratch" ? t("scratchCard")
+    : gameType === "slots" ? t("slotMachine")
+    : t("wheelOfFortune")
 
   return (
     <div
@@ -1044,11 +1061,11 @@ function MinigamePreview({
         }}
       >
         <span style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)", flex: 1 }}>
-          {gameLabel} Preview
+          {gameLabel}
         </span>
         <button
           onClick={() => setPreviewKey((k) => k + 1)}
-          aria-label="Replay animation"
+          aria-label={t("replayAnimation")}
           style={{
             padding: "4px 12px",
             borderRadius: 9999,
@@ -1060,7 +1077,7 @@ function MinigamePreview({
             fontWeight: 500,
           }}
         >
-          Replay
+          {t("replay")}
         </button>
       </div>
 
@@ -1117,8 +1134,8 @@ function MinigamePreview({
         }}
       >
         {filledPrizes.length >= 2
-          ? `${filledPrizes.length} prizes · Showing "${rewardText}"`
-          : "Add at least 2 prizes to see the full experience"}
+          ? t("prizeCountHint", { count: filledPrizes.length, name: rewardText })
+          : t("addPrizesHint")}
       </div>
 
       <style>{`

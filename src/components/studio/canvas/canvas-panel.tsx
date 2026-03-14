@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { useTranslations } from "next-intl"
 import type { PreviewFormat, DeviceFrame } from "@/types/editor"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { DeviceFrameWrapper } from "./device-frame"
@@ -12,21 +13,6 @@ import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 type PreviewState = string
 
 type PreviewStateOption = { id: PreviewState; label: string }
-
-const STAMP_PREVIEW_STATES: PreviewStateOption[] = [
-  { id: "in-progress", label: "In Progress" },
-  { id: "almost-done", label: "Almost Done" },
-  { id: "completed", label: "Completed" },
-]
-
-const COUPON_PREVIEW_STATES: PreviewStateOption[] = [
-  { id: "available", label: "Available" },
-  { id: "redeemed", label: "Redeemed" },
-]
-
-const MEMBERSHIP_PREVIEW_STATES: PreviewStateOption[] = [
-  { id: "active", label: "Active" },
-]
 
 type CanvasPanelProps = {
   design: WalletPassDesign
@@ -70,6 +56,23 @@ export function CanvasPanel({
   holderPhotoUrl,
   store,
 }: CanvasPanelProps) {
+  const t = useTranslations("studio.canvas")
+
+  const STAMP_PREVIEW_STATES: PreviewStateOption[] = [
+    { id: "in-progress", label: t("inProgress") },
+    { id: "almost-done", label: t("almostDone") },
+    { id: "completed", label: t("completed") },
+  ]
+
+  const COUPON_PREVIEW_STATES: PreviewStateOption[] = [
+    { id: "available", label: t("available") },
+    { id: "redeemed", label: t("redeemed") },
+  ]
+
+  const MEMBERSHIP_PREVIEW_STATES: PreviewStateOption[] = [
+    { id: "active", label: t("active") },
+  ]
+
   const previewStates: PreviewStateOption[] =
     passType === "COUPON" ? COUPON_PREVIEW_STATES
     : passType === "MEMBERSHIP" ? MEMBERSHIP_PREVIEW_STATES
@@ -96,7 +99,7 @@ export function CanvasPanel({
     const discountText = config ? formatCouponValue(config) : rewardDescription
     const validUntil = config?.validUntil
       ? new Date(config.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-      : "No expiry"
+      : t("noExpiry")
     const couponCode = config?.couponCode ?? undefined
     return { discountText, validUntil, couponCode }
   }, [passType, templateConfig, rewardDescription])
@@ -220,7 +223,7 @@ export function CanvasPanel({
                 totalUses={prepaidConfig?.totalUses}
                 prepaidValidUntil={prepaidConfig?.validUntil
                   ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                  : passType === "PREPAID" ? "No expiry" : undefined}
+                  : passType === "PREPAID" ? t("noExpiry") : undefined}
                 // Gift card props
                 giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
                 giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}

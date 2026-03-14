@@ -3,6 +3,7 @@
 import { z } from "zod"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
 import { db, getNextMemberNumber } from "@/lib/db"
 import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
@@ -392,6 +393,7 @@ export type AddContactResult = {
 export async function addContact(
   formData: FormData
 ): Promise<AddContactResult> {
+  const t = await getTranslations("serverErrors")
   const organizationId = await requireOrganizationId()
 
   // Check plan contact limit
@@ -400,7 +402,7 @@ export async function addContact(
   if (!limitCheck.allowed) {
     return {
       success: false,
-      error: `You've reached the ${limitCheck.limit} contact limit for your plan. Upgrade to add more contacts.`,
+      error: t("contactLimitReached", { limit: limitCheck.limit }),
     }
   }
 
@@ -414,7 +416,7 @@ export async function addContact(
   if (!parsed.success) {
     return {
       success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
+      error: parsed.error.issues[0]?.message ?? t("invalidInput"),
     }
   }
 
@@ -431,7 +433,7 @@ export async function addContact(
     if (existing) {
       return {
         success: false,
-        error: `A contact with email "${cleanEmail}" already exists.`,
+        error: t("contactEmailExists", { email: cleanEmail }),
         duplicateField: "email",
       }
     }
@@ -445,7 +447,7 @@ export async function addContact(
     if (existing) {
       return {
         success: false,
-        error: `A contact with phone "${cleanPhone}" already exists.`,
+        error: t("contactPhoneExists", { phone: cleanPhone }),
         duplicateField: "phone",
       }
     }
@@ -534,6 +536,7 @@ export type UpdateContactResult = {
 export async function updateContact(
   formData: FormData
 ): Promise<UpdateContactResult> {
+  const t = await getTranslations("serverErrors")
   const organizationId = await requireOrganizationId()
 
   const raw = {
@@ -547,7 +550,7 @@ export async function updateContact(
   if (!parsed.success) {
     return {
       success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
+      error: parsed.error.issues[0]?.message ?? t("invalidInput"),
     }
   }
 
@@ -563,7 +566,7 @@ export async function updateContact(
   })
 
   if (!existing) {
-    return { success: false, error: "Contact not found" }
+    return { success: false, error: t("contactNotFound") }
   }
 
   // Duplicate detection (skip if unchanged, exclude soft-deleted)
@@ -575,7 +578,7 @@ export async function updateContact(
     if (dup) {
       return {
         success: false,
-        error: `A contact with email "${cleanEmail}" already exists.`,
+        error: t("contactEmailExists", { email: cleanEmail }),
         duplicateField: "email",
       }
     }
@@ -589,7 +592,7 @@ export async function updateContact(
     if (dup) {
       return {
         success: false,
-        error: `A contact with phone "${cleanPhone}" already exists.`,
+        error: t("contactPhoneExists", { phone: cleanPhone }),
         duplicateField: "phone",
       }
     }
@@ -611,6 +614,7 @@ export async function updateContact(
 export async function deleteContact(
   contactId: string
 ): Promise<{ success: boolean; error?: string }> {
+  const t = await getTranslations("serverErrors")
   const organizationId = await requireOrganizationId()
 
   const contact = await db.contact.findFirst({
@@ -619,7 +623,7 @@ export async function deleteContact(
   })
 
   if (!contact) {
-    return { success: false, error: "Contact not found" }
+    return { success: false, error: t("contactNotFound") }
   }
 
   // Soft delete
@@ -637,6 +641,7 @@ export async function deleteContact(
 // ─── Export Contacts CSV ───────────────────────────────────
 
 export async function exportContactsCSV(): Promise<string> {
+  const t = await getTranslations("serverErrors")
   const organizationId = await requireOrganizationId()
 
   const contacts = await db.contact.findMany({
@@ -657,13 +662,13 @@ export async function exportContactsCSV(): Promise<string> {
   })
 
   const headers = [
-    "Name",
-    "Email",
-    "Phone",
-    "Total Interactions",
-    "Active Passes",
-    "Last Interaction",
-    "Joined",
+    t("csvName"),
+    t("csvEmail"),
+    t("csvPhone"),
+    t("csvTotalInteractions"),
+    t("csvActivePasses"),
+    t("csvLastInteraction"),
+    t("csvJoined"),
   ]
 
   const rows = contacts.map((c) => [
@@ -682,6 +687,7 @@ export async function exportContactsCSV(): Promise<string> {
 // ─── Export Contact Data (GDPR) ────────────────────────────
 
 export async function exportContactData(contactId: string) {
+  const t = await getTranslations("serverErrors")
   const organizationId = await requireOrganizationId()
 
   // Owner-only for GDPR data export
@@ -727,7 +733,7 @@ export async function exportContactData(contactId: string) {
   })
 
   if (!contact) {
-    return { error: "Contact not found" }
+    return { error: t("contactNotFound") }
   }
 
   return {

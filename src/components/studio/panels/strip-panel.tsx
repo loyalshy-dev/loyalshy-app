@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react"
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import type { PatternStyle } from "@/lib/wallet/card-design"
 import { uploadStripImage, deleteStripImage } from "@/server/org-settings-actions"
@@ -24,24 +25,6 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
   )
 }
 
-const PRESET_STRIP_IMAGES: { id: string; src: string; label: string }[] = [
-  { id: "burger", src: "/strip-images/burger.webp", label: "Burger" },
-  { id: "caffe-beans", src: "/strip-images/caffe-beans.webp", label: "Coffee Beans" },
-  { id: "pizza", src: "/strip-images/pizza.webp", label: "Pizza" },
-  { id: "club", src: "/strip-images/club.webp", label: "Club" },
-  { id: "gym", src: "/strip-images/gym.jpg", label: "Gym" },
-]
-
-const PATTERN_OPTIONS: { id: PatternStyle; label: string }[] = [
-  { id: "NONE", label: "None" },
-  { id: "DOTS", label: "Dots" },
-  { id: "WAVES", label: "Waves" },
-  { id: "GEOMETRIC", label: "Geometric" },
-  { id: "CHEVRON", label: "Chevron" },
-  { id: "CROSSHATCH", label: "Crosshatch" },
-  { id: "DIAMONDS", label: "Diamonds" },
-  { id: "CONFETTI", label: "Confetti" },
-]
 
 function ColorRow({
   label,
@@ -89,6 +72,26 @@ type Props = {
 }
 
 export function StripPanel({ store, programId, forceStrip, cardType, onUploadStrip, onDeleteStrip }: Props) {
+  const t = useTranslations("studio.strip")
+
+  const PRESET_STRIP_IMAGES: { id: string; src: string; label: string }[] = [
+    { id: "burger", src: "/strip-images/burger.webp", label: t("burger") },
+    { id: "caffe-beans", src: "/strip-images/caffe-beans.webp", label: t("coffeeBeans") },
+    { id: "pizza", src: "/strip-images/pizza.webp", label: t("pizza") },
+    { id: "club", src: "/strip-images/club.webp", label: t("club") },
+    { id: "gym", src: "/strip-images/gym.jpg", label: t("gym") },
+  ]
+
+  const PATTERN_OPTIONS: { id: PatternStyle; label: string }[] = [
+    { id: "NONE", label: t("none") },
+    { id: "DOTS", label: t("dots") },
+    { id: "WAVES", label: t("waves") },
+    { id: "GEOMETRIC", label: t("geometric") },
+    { id: "CHEVRON", label: t("chevron") },
+    { id: "CROSSHATCH", label: t("crosshatch") },
+    { id: "DIAMONDS", label: t("diamonds") },
+    { id: "CONFETTI", label: t("confetti") },
+  ]
   const showStrip = useStore(store, (s) => s.wallet.showStrip)
   const stripImageUrl = useStore(store, (s) => s.wallet.stripImageUrl)
   const stripOpacity = useStore(store, (s) => s.wallet.stripOpacity)
@@ -129,7 +132,7 @@ export function StripPanel({ store, programId, forceStrip, cardType, onUploadStr
             color: "var(--muted-foreground)",
           }}
         >
-          Strip is always on for this card type to ensure consistent rendering across Apple and Google Wallet.
+          {t("alwaysOn")}
         </div>
       ) : (
         <>
@@ -146,7 +149,7 @@ export function StripPanel({ store, programId, forceStrip, cardType, onUploadStr
               marginBottom: 12,
             }}
           >
-            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>Show Strip</span>
+            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>{t("showStrip")}</span>
             <input
               type="checkbox"
               checked={showStrip}
@@ -166,7 +169,7 @@ export function StripPanel({ store, programId, forceStrip, cardType, onUploadStr
                 color: "var(--muted-foreground)",
               }}
             >
-              Enable &ldquo;Show Strip&rdquo; to configure strip image, colors, and patterns.
+              {t("enablePrompt")}
             </div>
           )}
         </>

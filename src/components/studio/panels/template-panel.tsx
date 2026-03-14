@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react"
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import {
   Coffee,
@@ -22,16 +23,7 @@ import { extractPaletteFromLogoUrl } from "@/server/org-settings-actions"
 import { getStampIconPaths, getRewardIconPaths } from "@/lib/wallet/stamp-icons"
 import type { CardType, StampGridConfig } from "@/lib/wallet/card-design"
 
-// ─── Vibe Options ───────────────────────────────────────────
-
-const VIBE_OPTIONS: { id: BusinessCategory; label: string; icon: typeof Coffee }[] = [
-  { id: "cafe", label: "Cafe", icon: Coffee },
-  { id: "fine-dining", label: "Fine Dining", icon: UtensilsCrossed },
-  { id: "casual", label: "Casual", icon: Smile },
-  { id: "bar", label: "Bar", icon: Wine },
-  { id: "bakery", label: "Bakery", icon: CakeSlice },
-  { id: "general", label: "General", icon: Sparkles },
-]
+// ─── Vibe Options are defined inside the component to use translations ───────
 
 // ─── Template Swatch Preview ─────────────────────────────────
 
@@ -161,8 +153,18 @@ type Props = {
 // ─── Component ──────────────────────────────────────────────
 
 export function TemplatePanel({ store, organizationId, organizationLogo, cardType }: Props) {
+  const t = useTranslations("studio.template")
   const currentTemplateId = useStore(store, (s) => s.wallet.templateId)
   const [categoryFilter, setCategoryFilter] = useState<BusinessCategory | "all">("all")
+
+  const VIBE_OPTIONS: { id: BusinessCategory; label: string; icon: typeof Coffee }[] = [
+    { id: "cafe", label: t("cafe"), icon: Coffee },
+    { id: "fine-dining", label: t("fineDining"), icon: UtensilsCrossed },
+    { id: "casual", label: t("casual"), icon: Smile },
+    { id: "bar", label: t("bar"), icon: Wine },
+    { id: "bakery", label: t("bakery"), icon: CakeSlice },
+    { id: "general", label: t("general"), icon: Sparkles },
+  ]
 
   // Brand Match state
   const [brandCategory, setBrandCategory] = useState<BusinessCategory | null>(null)

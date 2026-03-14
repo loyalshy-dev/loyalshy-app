@@ -1,6 +1,7 @@
 "use client"
 
 import { X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { StudioTool } from "@/types/editor"
 
 type PanelShellProps = {
@@ -10,19 +11,21 @@ type PanelShellProps = {
   children: React.ReactNode
 }
 
-const PANEL_TITLES: Record<StudioTool, string> = {
-  program: "Program Settings",
-  colors: "Colors",
-  progress: "Progress Style",
-  strip: "Strip Image",
-  logo: "Logo",
-  prize: "Prize Reveal",
-  avatar: "Holder Photo",
-  notifications: "Notifications",
-  details: "Back-of-Pass Details",
-}
-
 export function PanelShell({ activeTool, onClose, children }: PanelShellProps) {
+  const t = useTranslations("studio.panels")
+
+  const PANEL_TITLES: Record<StudioTool, string> = {
+    program: t("programSettings"),
+    colors: t("colors"),
+    progress: t("progressStyle"),
+    strip: t("stripImage"),
+    logo: t("logo"),
+    prize: t("prizeReveal"),
+    avatar: t("holderPhoto"),
+    notifications: t("notifications"),
+    details: t("backOfPass"),
+  }
+
   return (
     <div
       style={{
@@ -47,7 +50,7 @@ export function PanelShell({ activeTool, onClose, children }: PanelShellProps) {
         }}
       >
         <span style={{ fontSize: 13, fontWeight: 600 }}>
-          {PANEL_TITLES[activeTool] ?? "Properties"}
+          {PANEL_TITLES[activeTool] ?? t("properties")}
         </span>
         <button
           onClick={onClose}
@@ -59,7 +62,7 @@ export function PanelShell({ activeTool, onClose, children }: PanelShellProps) {
             color: "var(--muted-foreground)",
             cursor: "pointer",
           }}
-          aria-label="Close panel"
+          aria-label={t("closePanel")}
         >
           <X size={14} />
         </button>

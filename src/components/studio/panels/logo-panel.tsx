@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react"
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import { ChevronDown, RotateCcw, Wand2, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
@@ -59,6 +60,7 @@ function Placeholder({ initial, fontSize }: { initial: string; fontSize: number 
 }
 
 export function LogoPanel({ store, organizationId, organizationName, organizationLogo, organizationLogoApple, organizationLogoGoogle, templateId }: Props) {
+  const t = useTranslations("studio.logo")
   const logoAppleUrl = useStore(store, (s) => s.wallet.logoAppleUrl)
   const logoGoogleUrl = useStore(store, (s) => s.wallet.logoGoogleUrl)
   const logoAppleZoom = useStore(store, (s) => s.wallet.logoAppleZoom)
@@ -122,7 +124,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
     store.getState().setWalletField("programLogoUrl", null)
     setMatchPalette(null)
     paletteCacheRef.current = null
-    toast.success("Using organization logo")
+    toast.success(t("usingOrgLogo"))
   }
 
   // ─── Platform override ──────────────────────────────────

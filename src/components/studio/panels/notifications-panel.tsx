@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import { MapPin } from "lucide-react"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 
@@ -12,6 +13,7 @@ type Props = {
 }
 
 export function NotificationsPanel({ store, organizationName, organizationLogo }: Props) {
+  const t = useTranslations("studio.notifications")
   const mapAddress = useStore(store, (s) => s.wallet.mapAddress)
   const mapLatitude = useStore(store, (s) => s.wallet.mapLatitude)
   const mapLongitude = useStore(store, (s) => s.wallet.mapLongitude)
@@ -28,17 +30,17 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
   return (
     <div>
       <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 12 }}>
-        When a customer is near your location, their wallet pass appears on the lock screen automatically.
+        {t("description")}
       </div>
 
       {/* Address input */}
       <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 12, color: "var(--foreground)", marginBottom: 4 }}>Business address</div>
+        <div style={{ fontSize: 12, color: "var(--foreground)", marginBottom: 4 }}>{t("businessAddress")}</div>
         <input
           type="text"
           value={mapAddress}
           onChange={(e) => set("mapAddress", e.target.value)}
-          placeholder="123 Main St, City, State"
+          placeholder={t("addressPlaceholder")}
           maxLength={500}
           style={{
             width: "100%",
@@ -69,7 +71,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
         >
           <MapPin size={13} style={{ color: "var(--primary)", flexShrink: 0 }} />
           <div style={{ fontSize: 11, color: "var(--foreground)", lineHeight: 1.4 }}>
-            <div style={{ fontWeight: 600 }}>Location active</div>
+            <div style={{ fontWeight: 600 }}>{t("locationActive")}</div>
             <div style={{ color: "var(--muted-foreground)", fontFamily: "monospace", fontSize: 10 }}>
               {mapLatitude.toFixed(5)}, {mapLongitude.toFixed(5)}
             </div>
@@ -90,7 +92,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
         >
           <MapPin size={13} style={{ color: "var(--muted-foreground)", flexShrink: 0 }} />
           <div style={{ fontSize: 11, color: "var(--muted-foreground)" }}>
-            Coordinates will be resolved on save
+            {t("coordinatesResolved")}
           </div>
         </div>
       ) : null}
@@ -98,12 +100,12 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
       {/* Notification message */}
       {mapAddress && (
         <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 12, color: "var(--foreground)", marginBottom: 4 }}>Notification message</div>
+          <div style={{ fontSize: 12, color: "var(--foreground)", marginBottom: 4 }}>{t("notificationMessage")}</div>
           <input
             type="text"
             value={locationMessage}
             onChange={(e) => set("locationMessage", e.target.value)}
-            placeholder="You're nearby! Show your pass."
+            placeholder={t("messagePlaceholder")}
             maxLength={200}
             style={{
               width: "100%",
@@ -117,7 +119,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
             }}
           />
           <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 4 }}>
-            Shown on the lock screen when near your location. Leave empty for default.
+            {t("messageHint")}
           </div>
         </div>
       )}
@@ -125,7 +127,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
       {/* Notification preview */}
       {mapAddress && (
         <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)", marginBottom: 8 }}>Preview</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)", marginBottom: 8 }}>{t("preview")}</div>
 
           {/* Platform toggle */}
           <div style={{ display: "flex", gap: 4, marginBottom: 10, backgroundColor: "var(--muted)", borderRadius: 9999, padding: 3 }}>
@@ -147,7 +149,7 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
                   boxShadow: previewPlatform === p ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
                 }}
               >
-                {p === "apple" ? "iOS" : "Android"}
+                {p === "apple" ? t("ios") : t("android")}
               </button>
             ))}
           </div>
@@ -180,9 +182,9 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
             backgroundColor: "var(--muted)",
           }}
         >
-          <div style={{ fontWeight: 600, marginBottom: 4, color: "var(--foreground)" }}>How it works</div>
-          <div style={{ marginBottom: 2 }}><strong>Apple:</strong> Pass appears on lock screen within ~100m</div>
-          <div><strong>Google:</strong> Notification when near your location</div>
+          <div style={{ fontWeight: 600, marginBottom: 4, color: "var(--foreground)" }}>{t("howItWorks")}</div>
+          <div style={{ marginBottom: 2 }}><strong>{t("apple")}</strong> Pass appears on lock screen within ~100m</div>
+          <div><strong>{t("google")}</strong> Notification when near your location</div>
         </div>
       )}
     </div>
@@ -200,6 +202,7 @@ function AppleNotificationPreview({
   organizationLogo: string | null
   message: string
 }) {
+  const t = useTranslations("studio.notifications")
   const now = new Date()
   const timeStr = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
 
@@ -259,7 +262,7 @@ function AppleNotificationPreview({
               </div>
             )}
             <span style={{ fontSize: 13, fontWeight: 600, color: "#1c1c1e", flex: 1 }}>
-              Wallet
+              {t("wallet")}
             </span>
             <span style={{ fontSize: 11, color: "#8e8e93" }}>now</span>
           </div>
@@ -286,6 +289,7 @@ function GoogleNotificationPreview({
   organizationLogo: string | null
   message: string
 }) {
+  const t = useTranslations("studio.notifications")
   return (
     <div
       style={{
@@ -334,7 +338,7 @@ function GoogleNotificationPreview({
             </div>
           )}
           <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", flex: 1 }}>
-            Google Wallet
+            {t("googleWallet")}
           </span>
           <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>now</span>
         </div>

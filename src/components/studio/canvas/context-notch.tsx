@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import type { ColorZone, StudioTool } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
@@ -40,13 +41,7 @@ function toNotchZone(zone: ColorZone): NotchZone {
   return zone
 }
 
-const ZONE_LABELS: Record<NotchZone, string> = {
-  background: "Background",
-  strip: "Strip",
-  fields: "Fields",
-  logo: "Logo",
-  progress: "Progress",
-}
+// ZONE_LABELS are now computed inside components using useTranslations("studio.canvas")
 
 // ─── WCAG helpers ────────────────────────────────────────────
 
@@ -74,13 +69,7 @@ function wcagBadge(ratio: number): { label: string; color: string } {
 
 // ─── Strip image presets ─────────────────────────────────────
 
-const STRIP_PRESETS: { id: string; src: string; label: string }[] = [
-  { id: "burger", src: "/strip-images/burger.webp", label: "Burger" },
-  { id: "caffe-beans", src: "/strip-images/caffe-beans.webp", label: "Coffee" },
-  { id: "pizza", src: "/strip-images/pizza.webp", label: "Pizza" },
-  { id: "club", src: "/strip-images/club.webp", label: "Club" },
-  { id: "gym", src: "/strip-images/gym.jpg", label: "Gym" },
-]
+// STRIP_PRESETS are now computed inside ContextNotch using useTranslations("studio.strip")
 
 // ─── Component ──────────────────────────────────────────────
 
@@ -97,6 +86,25 @@ type Props = {
 }
 
 export function ContextNotch({ store, passType, organizationId, organizationName, organizationLogo, organizationLogoApple, organizationLogoGoogle, templateId }: Props) {
+  const tCanvas = useTranslations("studio.canvas")
+  const tStrip = useTranslations("studio.strip")
+
+  const ZONE_LABELS: Record<NotchZone, string> = {
+    background: tCanvas("background"),
+    strip: tCanvas("strip"),
+    fields: tCanvas("fields"),
+    logo: tCanvas("logo"),
+    progress: tCanvas("progress"),
+  }
+
+  const STRIP_PRESETS: { id: string; src: string; label: string }[] = [
+    { id: "burger", src: "/strip-images/burger.webp", label: tStrip("burger") },
+    { id: "caffe-beans", src: "/strip-images/caffe-beans.webp", label: tStrip("coffeeBeans") },
+    { id: "pizza", src: "/strip-images/pizza.webp", label: tStrip("pizza") },
+    { id: "club", src: "/strip-images/club.webp", label: tStrip("club") },
+    { id: "gym", src: "/strip-images/gym.jpg", label: tStrip("gym") },
+  ]
+
   const selectedZone = useStore(store, (s) => s.ui.selectedColorZone)
   const previewFormat = useStore(store, (s) => s.ui.previewFormat)
   const primaryColor = useStore(store, (s) => s.wallet.primaryColor)
@@ -363,20 +371,21 @@ type ToolMenuItem = {
   icon: React.ReactNode
 }
 
-const TOOL_MENU_ITEMS: ToolMenuItem[] = [
-  { id: "program", label: "Program", icon: <SlidersHorizontal size={18} /> },
-  { id: "colors", label: "Colors", icon: <Palette size={18} /> },
-  { id: "progress", label: "Progress", icon: <BarChart3 size={18} /> },
-  { id: "strip", label: "Strip", icon: <ImagePlus size={18} /> },
-  { id: "logo", label: "Logo", icon: <Image size={18} /> },
-  { id: "prize", label: "Prize", icon: <Gift size={18} /> },
-  { id: "avatar", label: "Avatar", icon: <UserCircle size={18} /> },
-  { id: "notifications", label: "Alerts", icon: <Bell size={18} /> },
-  { id: "details", label: "Back", icon: <FileText size={18} /> },
-]
-
 export function FloatingToolMenu({ store, cardType }: { store: CardDesignStoreApi; cardType?: CardType }) {
+  const tPanels = useTranslations("studio.panels")
   const activeTool = useStore(store, (s) => s.ui.activeTool)
+
+  const TOOL_MENU_ITEMS: ToolMenuItem[] = [
+    { id: "program", label: tPanels("programSettings"), icon: <SlidersHorizontal size={18} /> },
+    { id: "colors", label: tPanels("colors"), icon: <Palette size={18} /> },
+    { id: "progress", label: tPanels("progressStyle"), icon: <BarChart3 size={18} /> },
+    { id: "strip", label: tPanels("stripImage"), icon: <ImagePlus size={18} /> },
+    { id: "logo", label: tPanels("logo"), icon: <Image size={18} /> },
+    { id: "prize", label: tPanels("prizeReveal"), icon: <Gift size={18} /> },
+    { id: "avatar", label: tPanels("holderPhoto"), icon: <UserCircle size={18} /> },
+    { id: "notifications", label: tPanels("notifications"), icon: <Bell size={18} /> },
+    { id: "details", label: tPanels("backOfPass"), icon: <FileText size={18} /> },
+  ]
   const selectedZone = useStore(store, (s) => s.ui.selectedColorZone)
 
   const hasProgress = cardType === "STAMP" || cardType === "POINTS"
@@ -451,19 +460,39 @@ export function FloatingToolMenu({ store, cardType }: { store: CardDesignStoreAp
 
 // ─── Context Panel (floating card) ──────────────────────────
 
-const TOOL_LABELS: Record<StudioTool, string> = {
-  program: "Program",
-  colors: "Colors",
-  progress: "Progress",
-  strip: "Strip Image",
-  logo: "Logo",
-  prize: "Prize Reveal",
-  avatar: "Holder Photo",
-  notifications: "Notifications",
-  details: "Back of Pass",
-}
-
 export function ContextPanel({ store, passType, organizationId, organizationName, organizationLogo, organizationLogoApple, organizationLogoGoogle, templateId, cardType }: Props) {
+  const tPanels = useTranslations("studio.panels")
+  const tCanvas = useTranslations("studio.canvas")
+  const tStrip = useTranslations("studio.strip")
+
+  const STRIP_PRESETS: { id: string; src: string; label: string }[] = [
+    { id: "burger", src: "/strips/burger.webp", label: tStrip("burger") },
+    { id: "coffee", src: "/strips/coffee.webp", label: tStrip("coffeeBeans") },
+    { id: "pizza", src: "/strips/pizza.webp", label: tStrip("pizza") },
+    { id: "club", src: "/strips/club.webp", label: tStrip("club") },
+    { id: "gym", src: "/strips/gym.webp", label: tStrip("gym") },
+  ]
+
+  const TOOL_LABELS: Record<StudioTool, string> = {
+    program: tPanels("programSettings"),
+    colors: tPanels("colors"),
+    progress: tPanels("progressStyle"),
+    strip: tPanels("stripImage"),
+    logo: tPanels("logo"),
+    prize: tPanels("prizeReveal"),
+    avatar: tPanels("holderPhoto"),
+    notifications: tPanels("notifications"),
+    details: tPanels("backOfPass"),
+  }
+
+  const ZONE_LABELS_PANEL: Record<NotchZone, string> = {
+    background: tCanvas("background"),
+    strip: tCanvas("strip"),
+    fields: tCanvas("fields"),
+    logo: tCanvas("logo"),
+    progress: tCanvas("progress"),
+  }
+
   const selectedZone = useStore(store, (s) => s.ui.selectedColorZone)
   const activeTool = useStore(store, (s) => s.ui.activeTool)
   const previewFormat = useStore(store, (s) => s.ui.previewFormat)
@@ -527,7 +556,7 @@ export function ContextPanel({ store, passType, organizationId, organizationName
   const title = mode === "tool" && activeTool
     ? TOOL_LABELS[activeTool]
     : notchZone
-      ? ZONE_LABELS[notchZone]
+      ? ZONE_LABELS_PANEL[notchZone]
       : ""
 
   if (!isOpen) return null
@@ -616,7 +645,7 @@ export function ContextPanel({ store, passType, organizationId, organizationName
 
         <button
           onClick={dismiss}
-          aria-label="Close panel"
+          aria-label={tPanels("closePanel")}
           style={{
             width: 28,
             height: 28,
@@ -1090,6 +1119,15 @@ function StripControls({
   templateId: string
   store: CardDesignStoreApi
 }) {
+  const tStrip = useTranslations("studio.strip")
+  const STRIP_PRESETS: { id: string; src: string; label: string }[] = [
+    { id: "burger", src: "/strips/burger.webp", label: tStrip("burger") },
+    { id: "coffee", src: "/strips/coffee.webp", label: tStrip("coffeeBeans") },
+    { id: "pizza", src: "/strips/pizza.webp", label: tStrip("pizza") },
+    { id: "club", src: "/strips/club.webp", label: tStrip("club") },
+    { id: "gym", src: "/strips/gym.webp", label: tStrip("gym") },
+  ]
+
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
 

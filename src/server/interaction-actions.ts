@@ -11,6 +11,7 @@
  */
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
 import { db } from "@/lib/db"
 import {
   assertAuthenticated,
@@ -26,9 +27,10 @@ import { parseCouponConfig, parsePointsConfig, parsePrepaidConfig, parseMinigame
 // ─── Shared helper ────────────────────────────────────────────
 
 async function fetchPassInstanceForInteraction(passInstanceId: string) {
+  const t = await getTranslations("serverErrors")
   await assertAuthenticated()
   const organization = await getOrganizationForUser()
-  if (!organization) return { error: "No organization found", organization: null, passInstance: null }
+  if (!organization) return { error: t("noOrganization"), organization: null, passInstance: null }
   await assertOrganizationAccess(organization.id)
 
   const passInstance = await db.passInstance.findUnique({
@@ -55,13 +57,13 @@ async function fetchPassInstanceForInteraction(passInstanceId: string) {
     },
   })
 
-  if (!passInstance) return { error: "Pass instance not found", organization: null, passInstance: null }
-  if (passInstance.contact.organizationId !== organization.id) return { error: "Pass instance not found", organization: null, passInstance: null }
-  if (passInstance.contact.deletedAt) return { error: "Contact has been deleted", organization: null, passInstance: null }
-  if (passInstance.status !== "ACTIVE") return { error: `This pass is ${passInstance.status.toLowerCase()}`, organization: null, passInstance: null }
-  if (passInstance.passTemplate.status !== "ACTIVE") return { error: "This pass template is no longer active", organization: null, passInstance: null }
+  if (!passInstance) return { error: t("passInstanceNotFound"), organization: null, passInstance: null }
+  if (passInstance.contact.organizationId !== organization.id) return { error: t("passInstanceNotFound"), organization: null, passInstance: null }
+  if (passInstance.contact.deletedAt) return { error: t("contactDeleted"), organization: null, passInstance: null }
+  if (passInstance.status !== "ACTIVE") return { error: t("passStatus", { status: passInstance.status.toLowerCase() }), organization: null, passInstance: null }
+  if (passInstance.passTemplate.status !== "ACTIVE") return { error: t("templateNoLongerActive"), organization: null, passInstance: null }
   if (passInstance.passTemplate.endsAt && passInstance.passTemplate.endsAt < new Date()) {
-    return { error: "This pass template has expired", organization: null, passInstance: null }
+    return { error: t("templateExpired"), organization: null, passInstance: null }
   }
 
   return { error: null, organization, passInstance }
@@ -98,15 +100,16 @@ export type RedeemCouponResult = {
 export async function redeemCoupon(
   passInstanceId: string
 ): Promise<RedeemCouponResult> {
+  const t = await getTranslations("serverErrors")
   const session = await assertAuthenticated()
   const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
 
   if (error || !organization || !passInstance) {
-    return { success: false, error: error ?? "Unknown error" }
+    return { success: false, error: error ?? t("unknownError") }
   }
 
   if (passInstance.passTemplate.passType !== "COUPON") {
-    return { success: false, error: "This pass is not a coupon" }
+    return { success: false, error: t("notACoupon") }
   }
 
   const config = parseCouponConfig(passInstance.passTemplate.config)
@@ -115,7 +118,7 @@ export async function redeemCoupon(
   const isRedeemed = (instanceData.redeemed as boolean) ?? false
 
   if (isRedeemed) {
-    return { success: false, error: "This coupon has already been redeemed" }
+    return { success: false, error: t("couponAlreadyRedeemed") }
   }
 
   // Pick a prize if minigame is configured
@@ -199,15 +202,16 @@ export type CheckInResult = {
 export async function checkInMember(
   passInstanceId: string
 ): Promise<CheckInResult> {
+  const t = await getTranslations("serverErrors")
   const session = await assertAuthenticated()
   const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
 
   if (error || !organization || !passInstance) {
-    return { success: false, error: error ?? "Unknown error" }
+    return { success: false, error: error ?? t("unknownError") }
   }
 
   if (passInstance.passTemplate.passType !== "MEMBERSHIP") {
-    return { success: false, error: "This pass is not a membership" }
+    return { success: false, error: t("notAMembership") }
   }
 
   const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
@@ -271,15 +275,16 @@ export type EarnPointsResult = {
 export async function earnPoints(
   passInstanceId: string
 ): Promise<EarnPointsResult> {
+  const t = await getTranslations("serverErrors")
   const session = await assertAuthenticated()
   const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
 
   if (error || !organization || !passInstance) {
-    return { success: false, error: error ?? "Unknown error" }
+    return { success: false, error: error ?? t("unknownError") }
   }
 
   if (passInstance.passTemplate.passType !== "POINTS") {
-    return { success: false, error: "This pass is not a points card" }
+    return { success: false, error: t("notAPointsCard") }
   }
 
   const pConfig = parsePointsConfig(passInstance.passTemplate.config)
@@ -351,21 +356,22 @@ export async function redeemPoints(
   passInstanceId: string,
   catalogItemId: string
 ): Promise<RedeemPointsResult> {
+  const t = await getTranslations("serverErrors")
   const session = await assertAuthenticated()
   const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
 
   if (error || !organization || !passInstance) {
-    return { success: false, error: error ?? "Unknown error" }
+    return { success: false, error: error ?? t("unknownError") }
   }
 
   if (passInstance.passTemplate.passType !== "POINTS") {
-    return { success: false, error: "This pass is not a points card" }
+    return { success: false, error: t("notAPointsCard") }
   }
 
   const pConfig = parsePointsConfig(passInstance.passTemplate.config)
   const catalogItem = pConfig?.catalog.find((item) => item.id === catalogItemId)
   if (!catalogItem) {
-    return { success: false, error: "Reward not found in catalog" }
+    return { success: false, error: t("rewardNotInCatalog") }
   }
 
   const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
@@ -373,7 +379,7 @@ export async function redeemPoints(
   const totalPointsSpent = (instanceData.totalPointsSpent as number) ?? 0
 
   if (currentBalance < catalogItem.pointsCost) {
-    return { success: false, error: `Not enough points. Need ${catalogItem.pointsCost}, have ${currentBalance}` }
+    return { success: false, error: t("notEnoughPoints", { needed: catalogItem.pointsCost, current: currentBalance }) }
   }
 
   const newBalance = currentBalance - catalogItem.pointsCost
@@ -455,15 +461,16 @@ export type UsePrepaidResult = {
 export async function usePrepaid(
   passInstanceId: string
 ): Promise<UsePrepaidResult> {
+  const t = await getTranslations("serverErrors")
   const session = await assertAuthenticated()
   const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
 
   if (error || !organization || !passInstance) {
-    return { success: false, error: error ?? "Unknown error" }
+    return { success: false, error: error ?? t("unknownError") }
   }
 
   if (passInstance.passTemplate.passType !== "PREPAID") {
-    return { success: false, error: "This pass is not a prepaid pass" }
+    return { success: false, error: t("notAPrepaidPass") }
   }
 
   const prepaidConfig = parsePrepaidConfig(passInstance.passTemplate.config)
@@ -475,7 +482,7 @@ export async function usePrepaid(
   const totalUsed = (instanceData.totalUsed as number) ?? 0
 
   if (currentRemaining <= 0) {
-    return { success: false, error: "This pass has no remaining uses" }
+    return { success: false, error: t("noRemainingUses") }
   }
 
   const newRemaining = currentRemaining - 1

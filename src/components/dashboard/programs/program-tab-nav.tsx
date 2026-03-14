@@ -52,7 +52,7 @@ export function ProgramTabNav({
         return t("attendees")
       case "MEMBERSHIP":
       case "BUSINESS_ID":
-        return "Members"
+        return t("members")
       case "GIFT_CARD":
         return t("cardsTab")
       default:

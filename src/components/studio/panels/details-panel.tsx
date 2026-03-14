@@ -1,6 +1,7 @@
 "use client"
 
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -61,6 +62,7 @@ function TextInput({
 type Props = { store: CardDesignStoreApi }
 
 export function DetailsPanel({ store }: Props) {
+  const t = useTranslations("studio.details")
   const businessHours = useStore(store, (s) => s.wallet.businessHours)
   const socialLinks = useStore(store, (s) => s.wallet.socialLinks)
   const customMessage = useStore(store, (s) => s.wallet.customMessage)
@@ -70,14 +72,14 @@ export function DetailsPanel({ store }: Props) {
   return (
     <div>
       <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 12 }}>
-        Back-of-pass details. These appear when the customer taps the card for more info.
+        {t("description")}
       </div>
 
-      <SectionHeader>Business Hours</SectionHeader>
+      <SectionHeader>{t("businessHours")}</SectionHeader>
       <textarea
         value={businessHours}
         onChange={(e) => set("businessHours", e.target.value)}
-        placeholder={"Mon–Fri: 7am–9pm\nSat–Sun: 8am–10pm"}
+        placeholder={t("hoursPlaceholder")}
         maxLength={1000}
         rows={3}
         style={{
@@ -94,41 +96,41 @@ export function DetailsPanel({ store }: Props) {
         }}
       />
 
-      <SectionHeader>Social Links</SectionHeader>
+      <SectionHeader>{t("socialLinks")}</SectionHeader>
       <TextInput
-        label="Instagram"
+        label={t("instagram")}
         value={socialLinks.instagram ?? ""}
         onChange={(v) => set("socialLinks", { ...socialLinks, instagram: v || undefined })}
-        placeholder="@yourbusiness"
+        placeholder={t("handlePlaceholder")}
         maxLength={200}
       />
       <TextInput
-        label="Facebook"
+        label={t("facebook")}
         value={socialLinks.facebook ?? ""}
         onChange={(v) => set("socialLinks", { ...socialLinks, facebook: v || undefined })}
-        placeholder="facebook.com/yourbusiness"
+        placeholder={t("facebookPlaceholder")}
         maxLength={200}
       />
       <TextInput
-        label="TikTok"
+        label={t("tiktok")}
         value={socialLinks.tiktok ?? ""}
         onChange={(v) => set("socialLinks", { ...socialLinks, tiktok: v || undefined })}
-        placeholder="@yourbusiness"
+        placeholder={t("handlePlaceholder")}
         maxLength={200}
       />
       <TextInput
-        label="X (Twitter)"
+        label={t("twitter")}
         value={socialLinks.x ?? ""}
         onChange={(v) => set("socialLinks", { ...socialLinks, x: v || undefined })}
-        placeholder="@yourbusiness"
+        placeholder={t("handlePlaceholder")}
         maxLength={200}
       />
 
-      <SectionHeader>Custom Message</SectionHeader>
+      <SectionHeader>{t("customMessage")}</SectionHeader>
       <textarea
         value={customMessage}
         onChange={(e) => set("customMessage", e.target.value)}
-        placeholder="Thank you for being a loyal customer!"
+        placeholder={t("messagePlaceholder")}
         maxLength={2000}
         rows={3}
         style={{

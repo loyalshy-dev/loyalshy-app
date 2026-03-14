@@ -1,6 +1,7 @@
 "use client"
 
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,7 @@ type Props = {
 }
 
 export function AvatarPanel({ store }: Props) {
+  const t = useTranslations("studio.avatar")
   const showHolderPhoto = useStore(store, (s) => s.programConfig.showHolderPhoto)
   const holderPhotoPosition = useStore(store, (s) => s.programConfig.holderPhotoPosition)
 
@@ -48,10 +50,10 @@ export function AvatarPanel({ store }: Props) {
       >
         <div>
           <div style={{ fontSize: 12, fontWeight: 500, color: "var(--foreground)" }}>
-            Show holder photo
+            {t("showHolderPhoto")}
           </div>
           <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 2 }}>
-            Overlay a circular avatar on the strip
+            {t("overlayAvatar")}
           </div>
         </div>
         <div

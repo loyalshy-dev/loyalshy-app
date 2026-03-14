@@ -4,6 +4,7 @@ import { z } from "zod"
 import crypto from "crypto"
 import { revalidatePath } from "next/cache"
 import { addDays } from "date-fns"
+import { getTranslations } from "next-intl/server"
 import { db } from "@/lib/db"
 import { assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
@@ -156,9 +157,10 @@ const createPassTemplateSchema = z.object({
 // ─── Get Settings Data ──────────────────────────────────────
 
 export async function getSettingsData() {
+  const t = await getTranslations("serverErrors")
   const organization = await getOrganizationForUser()
   if (!organization) {
-    return { error: "No organization found" }
+    return { error: t("noOrganization") }
   }
 
   await assertOrganizationRole(organization.id, "owner")
@@ -342,13 +344,14 @@ export async function updateJoinRequirement(
 // ─── Create Pass Template ─────────────────────────────────
 
 export async function createPassTemplate(input: z.infer<typeof createPassTemplateSchema>) {
+  const t = await getTranslations("serverErrors")
   const parsed = createPassTemplateSchema.parse(input)
   await assertOrganizationRole(parsed.organizationId, "owner")
 
   // Enforce plan template limit
   const templateCheck = await checkTemplateLimit(parsed.organizationId)
   if (!templateCheck.allowed) {
-    return { error: `Template limit reached (${templateCheck.limit}). Upgrade your plan to create more templates.` }
+    return { error: t("templateLimitReached", { limit: templateCheck.limit }) }
   }
 
   // Map pass type to default card type
@@ -389,6 +392,7 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
 // ─── Archive Pass Template ────────────────────────────────
 
 export async function archivePassTemplate(organizationId: string, templateId: string) {
+  const t = await getTranslations("serverErrors")
   await assertOrganizationRole(organizationId, "owner")
 
   const template = await db.passTemplate.findUnique({
@@ -397,11 +401,11 @@ export async function archivePassTemplate(organizationId: string, templateId: st
   })
 
   if (!template || template.organizationId !== organizationId) {
-    return { error: "Pass template not found" }
+    return { error: t("templateNotFound") }
   }
 
   if (template.status === "ARCHIVED") {
-    return { error: "Template is already archived" }
+    return { error: t("templateAlreadyArchived") }
   }
 
   await db.$transaction(async (tx) => {
@@ -467,6 +471,7 @@ export async function archivePassTemplate(organizationId: string, templateId: st
 }
 
 export async function activateTemplate(organizationId: string, templateId: string) {
+  const t = await getTranslations("serverErrors")
   await assertOrganizationRole(organizationId, "owner")
 
   const template = await db.passTemplate.findUnique({
@@ -475,15 +480,15 @@ export async function activateTemplate(organizationId: string, templateId: strin
   })
 
   if (!template || template.organizationId !== organizationId) {
-    return { error: "Pass template not found" }
+    return { error: t("templateNotFound") }
   }
 
   if (template.status === "ACTIVE") {
-    return { error: "Template is already active" }
+    return { error: t("templateAlreadyActive") }
   }
 
   if (template.status === "ARCHIVED") {
-    return { error: "Cannot activate an archived template" }
+    return { error: t("cannotActivateArchived") }
   }
 
   await db.passTemplate.update({
@@ -499,6 +504,7 @@ export async function activateTemplate(organizationId: string, templateId: strin
 // ─── Reactivate Template ────────────────────────────────────
 
 export async function reactivateTemplate(organizationId: string, templateId: string) {
+  const t = await getTranslations("serverErrors")
   await assertOrganizationRole(organizationId, "owner")
 
   const template = await db.passTemplate.findUnique({
@@ -507,16 +513,16 @@ export async function reactivateTemplate(organizationId: string, templateId: str
   })
 
   if (!template || template.organizationId !== organizationId) {
-    return { error: "Pass template not found" }
+    return { error: t("templateNotFound") }
   }
 
   if (template.status !== "ARCHIVED") {
-    return { error: "Only archived templates can be reactivated" }
+    return { error: t("onlyArchivedReactivate") }
   }
 
   const templateCheck = await checkTemplateLimit(organizationId)
   if (!templateCheck.allowed) {
-    return { error: `Template limit reached (${templateCheck.limit}). Upgrade your plan to reactivate this template.` }
+    return { error: t("templateLimitReached", { limit: templateCheck.limit }) }
   }
 
   await db.$transaction(async (tx) => {
@@ -594,6 +600,7 @@ export async function deleteTemplate(
   templateId: string,
   confirmName: string
 ): Promise<{ error: string; counts?: TemplateDeleteCounts } | { success: true }> {
+  const t = await getTranslations("serverErrors")
   await assertOrganizationRole(organizationId, "owner")
 
   const template = await db.passTemplate.findUnique({
@@ -612,12 +619,12 @@ export async function deleteTemplate(
   })
 
   if (!template || template.organizationId !== organizationId) {
-    return { error: "Pass template not found" }
+    return { error: t("templateNotFound") }
   }
 
   if (confirmName !== template.name) {
     return {
-      error: "Template name does not match",
+      error: t("templateNameMismatch"),
       counts: {
         passInstances: template._count.passInstances,
         interactions: template._count.interactions,
@@ -637,14 +644,15 @@ export async function deleteTemplate(
 // ─── Save Pass Design ──────────────────────────────────────
 
 export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>) {
+  const t = await getTranslations("serverErrors")
   let parsed: z.infer<typeof savePassDesignSchema>
   try {
     parsed = savePassDesignSchema.parse(input)
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return { error: `Validation failed: ${err.issues.map((e: { message: string }) => e.message).join(", ")}` }
+      return { error: t("validationFailed", { issues: err.issues.map((e: { message: string }) => e.message).join(", ") }) }
     }
-    return { error: "Invalid design data" }
+    return { error: t("invalidDesignData") }
   }
 
   // Look up the template to get the organizationId for auth check
@@ -654,7 +662,7 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
   })
 
   if (!template) {
-    return { error: "Pass template not found" }
+    return { error: t("templateNotFound") }
   }
 
   await assertOrganizationRole(template.organizationId, "owner")
@@ -964,11 +972,12 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
 // ─── Upload Strip Image ──────────────────────────────────────
 
 export async function uploadStripImage(formData: FormData) {
+  const t = await getTranslations("serverErrors")
   const templateId = formData.get("templateId") as string
   const file = formData.get("file") as File
 
   if (!templateId || !file) {
-    return { error: "Missing template ID or file" }
+    return { error: t("missingFields") }
   }
 
   const template = await db.passTemplate.findUnique({
@@ -977,16 +986,16 @@ export async function uploadStripImage(formData: FormData) {
   })
 
   if (!template) {
-    return { error: "Pass template not found" }
+    return { error: t("templateNotFound") }
   }
 
   await assertOrganizationRole(template.organizationId, "owner")
 
   const maxSize = 5 * 1024 * 1024
-  if (file.size > maxSize) return { error: "File must be under 5MB" }
+  if (file.size > maxSize) return { error: t("fileTooLarge5MB") }
 
   const validTypes = ["image/png", "image/jpeg", "image/webp"]
-  if (!validTypes.includes(file.type)) return { error: "File must be PNG, JPEG, or WebP" }
+  if (!validTypes.includes(file.type)) return { error: t("invalidFileType") }
 
   const originalBuffer = Buffer.from(await file.arrayBuffer())
 
@@ -1046,12 +1055,13 @@ export async function uploadStripImage(formData: FormData) {
 // ─── Delete Strip Image ─────────────────────────────────────
 
 export async function deleteStripImage(templateId: string) {
+  const t = await getTranslations("serverErrors")
   const template = await db.passTemplate.findUnique({
     where: { id: templateId },
     select: { organizationId: true },
   })
 
-  if (!template) return { error: "Pass template not found" }
+  if (!template) return { error: t("templateNotFound") }
 
   await assertOrganizationRole(template.organizationId, "owner")
 
@@ -1082,25 +1092,26 @@ export async function deleteStripImage(templateId: string) {
 type StampIconSlot = "customStampIconUrl" | "customRewardIconUrl" | "customEmptyIconUrl"
 
 async function uploadStampIconGeneric(formData: FormData, slot: StampIconSlot) {
+  const t = await getTranslations("serverErrors")
   const templateId = formData.get("templateId") as string
   const file = formData.get("file") as File
 
-  if (!templateId || !file) return { error: "Missing template ID or file" }
+  if (!templateId || !file) return { error: t("missingFields") }
 
   const template = await db.passTemplate.findUnique({
     where: { id: templateId },
     select: { organizationId: true },
   })
 
-  if (!template) return { error: "Pass template not found" }
+  if (!template) return { error: t("templateNotFound") }
 
   await assertOrganizationRole(template.organizationId, "owner")
 
   const maxSize = 2 * 1024 * 1024
-  if (file.size > maxSize) return { error: "File must be under 2MB" }
+  if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
 
   const validTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"]
-  if (!validTypes.includes(file.type)) return { error: "File must be PNG, JPEG, WebP, or SVG" }
+  if (!validTypes.includes(file.type)) return { error: t("invalidFileTypeSvg") }
 
   const existing = await db.passDesign.findUnique({
     where: { passTemplateId: templateId },
@@ -1147,12 +1158,13 @@ async function uploadStampIconGeneric(formData: FormData, slot: StampIconSlot) {
 }
 
 async function deleteStampIconGeneric(templateId: string, slot: StampIconSlot) {
+  const t = await getTranslations("serverErrors")
   const template = await db.passTemplate.findUnique({
     where: { id: templateId },
     select: { organizationId: true },
   })
 
-  if (!template) return { error: "Pass template not found" }
+  if (!template) return { error: t("templateNotFound") }
 
   await assertOrganizationRole(template.organizationId, "owner")
 
@@ -1201,23 +1213,24 @@ export async function deleteEmptyIcon(templateId: string) {
 // ─── Holder Photo Upload (Business ID) ──────────────────────
 
 export async function uploadHolderPhoto(formData: FormData) {
+  const t = await getTranslations("serverErrors")
   const templateId = formData.get("templateId") as string
   const file = formData.get("file") as File
 
-  if (!templateId || !file) return { error: "Missing template ID or file" }
+  if (!templateId || !file) return { error: t("missingFields") }
 
   const template = await db.passTemplate.findUnique({
     where: { id: templateId },
     select: { organizationId: true },
   })
-  if (!template) return { error: "Pass template not found" }
+  if (!template) return { error: t("templateNotFound") }
   await assertOrganizationRole(template.organizationId, "owner")
 
   const maxSize = 2 * 1024 * 1024
-  if (file.size > maxSize) return { error: "File must be under 2MB" }
+  if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
 
   const validTypes = ["image/png", "image/jpeg", "image/webp"]
-  if (!validTypes.includes(file.type)) return { error: "File must be PNG, JPEG, or WebP" }
+  if (!validTypes.includes(file.type)) return { error: t("invalidFileType") }
 
   const rawBuffer = Buffer.from(await file.arrayBuffer())
   let processedBuffer: Buffer = rawBuffer
@@ -1262,11 +1275,12 @@ export async function uploadHolderPhoto(formData: FormData) {
 }
 
 export async function deleteHolderPhoto(templateId: string) {
+  const t = await getTranslations("serverErrors")
   const template = await db.passTemplate.findUnique({
     where: { id: templateId },
     select: { organizationId: true },
   })
-  if (!template) return { error: "Pass template not found" }
+  if (!template) return { error: t("templateNotFound") }
   await assertOrganizationRole(template.organizationId, "owner")
 
   const existing = await db.passDesign.findUnique({
@@ -1333,18 +1347,19 @@ async function deleteBlob(url: string | null | undefined) {
 // ─── Upload Organization Logo ─────────────────────────────────
 
 export async function uploadOrganizationLogo(formData: FormData) {
+  const t = await getTranslations("serverErrors")
   const organizationId = formData.get("organizationId") as string
   const file = formData.get("file") as File
 
-  if (!organizationId || !file) return { error: "Missing organization ID or file" }
+  if (!organizationId || !file) return { error: t("missingFields") }
 
   await assertOrganizationRole(organizationId, "owner")
 
   const maxSize = 2 * 1024 * 1024
-  if (file.size > maxSize) return { error: "File must be under 2MB" }
+  if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
 
   const validTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"]
-  if (!validTypes.includes(file.type)) return { error: "File must be PNG, JPEG, WebP, or SVG" }
+  if (!validTypes.includes(file.type)) return { error: t("invalidFileTypeSvg") }
 
   const old = await db.organization.findUnique({
     where: { id: organizationId },
@@ -1408,19 +1423,20 @@ export async function deleteOrganizationLogo(organizationId: string) {
 // ─── Upload Program Logo ──────────────────────────────────────
 
 export async function uploadProgramLogo(formData: FormData) {
+  const t = await getTranslations("serverErrors")
   const organizationId = formData.get("organizationId") as string
   const templateId = formData.get("templateId") as string
   const file = formData.get("file") as File
 
-  if (!organizationId || !templateId || !file) return { error: "Missing required fields" }
+  if (!organizationId || !templateId || !file) return { error: t("missingFields") }
 
   await assertOrganizationRole(organizationId, "owner")
 
   const maxSize = 2 * 1024 * 1024
-  if (file.size > maxSize) return { error: "File must be under 2MB" }
+  if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
 
   const validTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"]
-  if (!validTypes.includes(file.type)) return { error: "File must be PNG, JPEG, WebP, or SVG" }
+  if (!validTypes.includes(file.type)) return { error: t("invalidFileTypeSvg") }
 
   // Delete old program logos
   const old = await db.passDesign.findUnique({
@@ -1482,16 +1498,17 @@ export async function deleteProgramLogo(organizationId: string, templateId: stri
 // ─── Upload Program Platform Logo ─────────────────────────────
 
 export async function uploadProgramPlatformLogo(formData: FormData) {
+  const t = await getTranslations("serverErrors")
   const organizationId = formData.get("organizationId") as string
   const templateId = formData.get("templateId") as string
   const platform = formData.get("platform") as "apple" | "google" | null
   const file = formData.get("file") as File
 
-  if (!organizationId || !templateId || !file || !platform) return { error: "Missing required fields" }
+  if (!organizationId || !templateId || !file || !platform) return { error: t("missingFields") }
   await assertOrganizationRole(organizationId, "owner")
 
   const maxSize = 2 * 1024 * 1024
-  if (file.size > maxSize) return { error: "File must be under 2MB" }
+  if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
 
   const sourceBuffer = Buffer.from(await file.arrayBuffer())
   const field = platform === "apple" ? "logoAppleUrl" : "logoGoogleUrl"
@@ -1560,6 +1577,7 @@ const updateMinigameConfigSchema = z.object({
 })
 
 export async function updateMinigameConfig(input: z.infer<typeof updateMinigameConfigSchema>) {
+  const t = await getTranslations("serverErrors")
   const parsed = updateMinigameConfigSchema.parse(input)
   await assertOrganizationRole(parsed.organizationId, "owner")
 
@@ -1569,7 +1587,7 @@ export async function updateMinigameConfig(input: z.infer<typeof updateMinigameC
   })
 
   if (!template || template.organizationId !== parsed.organizationId) {
-    return { error: "Pass template not found" }
+    return { error: t("templateNotFound") }
   }
 
   const existingConfig = (template.config as Record<string, unknown>) ?? {}
@@ -1594,6 +1612,7 @@ export async function updateMinigameConfig(input: z.infer<typeof updateMinigameC
 // ─── Update Pass Template Settings ───────────────────────────
 
 export async function updatePassTemplate(input: z.infer<typeof updatePassTemplateSchema>) {
+  const t = await getTranslations("serverErrors")
   const parsed = updatePassTemplateSchema.parse(input)
   await assertOrganizationRole(parsed.organizationId, "owner")
 
@@ -1603,7 +1622,7 @@ export async function updatePassTemplate(input: z.infer<typeof updatePassTemplat
   })
 
   if (!template || template.organizationId !== parsed.organizationId) {
-    return { error: "Pass template not found" }
+    return { error: t("templateNotFound") }
   }
 
   const updateData: Record<string, unknown> = {
@@ -1630,6 +1649,7 @@ export async function updatePassTemplate(input: z.infer<typeof updatePassTemplat
 // ─── Extract Palette from Logo URL ───────────────────────────
 
 export async function extractPaletteFromLogoUrl(organizationId: string) {
+  const t = await getTranslations("serverErrors")
   await assertOrganizationRole(organizationId, "owner")
 
   const organization = await db.organization.findUnique({
@@ -1637,7 +1657,7 @@ export async function extractPaletteFromLogoUrl(organizationId: string) {
     select: { logo: true },
   })
 
-  if (!organization?.logo) return { error: "No logo uploaded" }
+  if (!organization?.logo) return { error: t("noLogoUploaded") }
 
   try {
     const { extractPaletteFromBuffer } = await import("@/lib/color-extraction")
@@ -1647,29 +1667,30 @@ export async function extractPaletteFromLogoUrl(organizationId: string) {
       sourceBuffer = Buffer.from(base64, "base64")
     } else {
       const res = await fetch(organization.logo)
-      if (!res.ok) return { error: "Failed to fetch logo" }
+      if (!res.ok) return { error: t("failedFetchLogo") }
       sourceBuffer = Buffer.from(await res.arrayBuffer())
     }
 
     const palette = await extractPaletteFromBuffer(sourceBuffer)
     return { success: true, palette }
   } catch {
-    return { error: "Failed to extract colors" }
+    return { error: t("failedExtractColors") }
   }
 }
 
 // ─── Platform-Specific Logo Upload ───────────────────────────
 
 export async function uploadPlatformLogo(formData: FormData) {
+  const t = await getTranslations("serverErrors")
   const organizationId = formData.get("organizationId") as string
   const platform = formData.get("platform") as "apple" | "google" | null
   const file = formData.get("file") as File
 
-  if (!organizationId || !file || !platform) return { error: "Missing required fields" }
+  if (!organizationId || !file || !platform) return { error: t("missingFields") }
   await assertOrganizationRole(organizationId, "owner")
 
   const maxSize = 2 * 1024 * 1024
-  if (file.size > maxSize) return { error: "File must be under 2MB" }
+  if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
 
   const sourceBuffer = Buffer.from(await file.arrayBuffer())
   const field = platform === "apple" ? "logoApple" : "logoGoogle"
@@ -1734,6 +1755,7 @@ export async function inviteTeamMember(input: {
 }
 
 export async function removeTeamMember(organizationId: string, memberId: string) {
+  const t = await getTranslations("serverErrors")
   const { session } = await assertOrganizationRole(organizationId, "owner")
 
   const member = await db.member.findUnique({
@@ -1742,12 +1764,12 @@ export async function removeTeamMember(organizationId: string, memberId: string)
   })
 
   if (!member || member.organizationId !== organizationId) {
-    return { error: "Member not found" }
+    return { error: t("memberNotFound") }
   }
 
   // Prevent self-removal
   if (member.userId === session.user.id) {
-    return { error: "You cannot remove yourself from the organization" }
+    return { error: t("cannotRemoveSelf") }
   }
 
   // Prevent removing the last owner
@@ -1756,7 +1778,7 @@ export async function removeTeamMember(organizationId: string, memberId: string)
       where: { organizationId, role: "owner" },
     })
     if (ownerCount <= 1) {
-      return { error: "Cannot remove the last owner. Transfer ownership first." }
+      return { error: t("cannotRemoveLastOwner") }
     }
   }
 
@@ -1771,6 +1793,7 @@ export async function changeTeamMemberRole(
   memberId: string,
   newRole: "owner" | "member"
 ) {
+  const t = await getTranslations("serverErrors")
   const { session } = await assertOrganizationRole(organizationId, "owner")
 
   const member = await db.member.findUnique({
@@ -1779,16 +1802,16 @@ export async function changeTeamMemberRole(
   })
 
   if (!member || member.organizationId !== organizationId) {
-    return { error: "Member not found" }
+    return { error: t("memberNotFound") }
   }
 
   if (member.role === newRole) {
-    return { error: "Member already has this role" }
+    return { error: t("memberAlreadyRole") }
   }
 
   // Prevent demoting yourself
   if (member.userId === session.user.id) {
-    return { error: "You cannot change your own role" }
+    return { error: t("cannotChangeOwnRole") }
   }
 
   // Prevent demoting the last owner
@@ -1797,7 +1820,7 @@ export async function changeTeamMemberRole(
       where: { organizationId, role: "owner" },
     })
     if (ownerCount <= 1) {
-      return { error: "Cannot demote the last owner. Promote another member first." }
+      return { error: t("cannotDemoteLastOwner") }
     }
   }
 
@@ -1811,6 +1834,7 @@ export async function changeTeamMemberRole(
 }
 
 export async function cancelInvitation(organizationId: string, invitationId: string) {
+  const t = await getTranslations("serverErrors")
   await assertOrganizationRole(organizationId, "owner")
 
   const invitation = await db.staffInvitation.findUnique({
@@ -1819,7 +1843,7 @@ export async function cancelInvitation(organizationId: string, invitationId: str
   })
 
   if (!invitation || invitation.organizationId !== organizationId) {
-    return { error: "Invitation not found" }
+    return { error: t("invitationNotFound") }
   }
 
   await db.staffInvitation.delete({ where: { id: invitationId } })
@@ -1829,6 +1853,7 @@ export async function cancelInvitation(organizationId: string, invitationId: str
 }
 
 export async function resendInvitation(organizationId: string, invitationId: string) {
+  const t = await getTranslations("serverErrors")
   await assertOrganizationRole(organizationId, "owner")
 
   const invitation = await db.staffInvitation.findUnique({
@@ -1843,7 +1868,7 @@ export async function resendInvitation(organizationId: string, invitationId: str
   })
 
   if (!invitation || invitation.organizationId !== organizationId) {
-    return { error: "Invitation not found" }
+    return { error: t("invitationNotFound") }
   }
 
   // Extend expiry by 7 days

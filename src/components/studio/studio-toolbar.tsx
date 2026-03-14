@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Undo2, Redo2, Save, Smartphone, Tablet } from "lucide-react"
 import type { PreviewFormat } from "@/types/editor"
+import { useTranslations } from "next-intl"
 
 type StudioToolbarProps = {
   programName: string
@@ -35,6 +36,7 @@ export function StudioToolbar({
   embedded = false,
 }: StudioToolbarProps) {
   const router = useRouter()
+  const t = useTranslations("dashboard.studio")
 
   return (
     <div
@@ -65,7 +67,7 @@ export function StudioToolbar({
             cursor: "pointer",
             fontSize: 13,
           }}
-          aria-label="Back to design"
+          aria-label={t("backToDesign")}
         >
           <ArrowLeft size={16} />
           <span style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -90,7 +92,7 @@ export function StudioToolbar({
             cursor: canUndo ? "pointer" : "default",
             opacity: canUndo ? 1 : 0.4,
           }}
-          aria-label="Undo"
+          aria-label={t("undo")}
         >
           <Undo2 size={16} />
         </button>
@@ -106,7 +108,7 @@ export function StudioToolbar({
             cursor: canRedo ? "pointer" : "default",
             opacity: canRedo ? 1 : 0.4,
           }}
-          aria-label="Redo"
+          aria-label={t("redo")}
         >
           <Redo2 size={16} />
         </button>
@@ -164,10 +166,10 @@ export function StudioToolbar({
           fontWeight: 500,
           opacity: isSaving ? 0.7 : 1,
         }}
-        aria-label="Save design"
+        aria-label={t("saveDesign")}
       >
         <Save size={14} />
-        {isSaving ? "Saving..." : isDirty ? "Save" : "Saved"}
+        {isSaving ? t("saving") : isDirty ? t("save") : t("saved")}
       </button>
     </div>
   )

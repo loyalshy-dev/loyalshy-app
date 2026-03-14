@@ -1,6 +1,7 @@
 "use client"
 
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import { PALETTE_PRESETS, computeTextColor } from "@/lib/wallet/card-design"
 import { blendColors } from "@/lib/wallet/apple/colors"
@@ -32,20 +33,19 @@ function wcagLevel(ratio: number): { label: string; color: string } {
   return { label: "Fail", color: "#ef4444" }
 }
 
-// ─── Zone → Color mapping ──────────────────────────────────
-
-const ZONE_CONFIG: { zone: ColorZone; label: string; description: string }[] = [
-  { zone: "background", label: "Background", description: "Card background color" },
-  { zone: "strip", label: "Strip / Accent", description: "Strip area and accents" },
-  { zone: "text", label: "Field Values", description: "Text on the card" },
-  { zone: "labels", label: "Labels", description: "Field label text (Apple only)" },
-]
-
 // ─── Component ────────────────────────────────────────────
 
 type Props = { store: CardDesignStoreApi }
 
 export function ColorsPanel({ store }: Props) {
+  const t = useTranslations("studio.colors")
+
+  const ZONE_CONFIG: { zone: ColorZone; label: string; description: string }[] = [
+    { zone: "background", label: t("background"), description: t("bgDescription") },
+    { zone: "strip", label: t("stripAccent"), description: t("stripDescription") },
+    { zone: "text", label: t("fieldValues"), description: t("fieldDescription") },
+    { zone: "labels", label: t("labels"), description: t("labelDescription") },
+  ]
   const primaryColor = useStore(store, (s) => s.wallet.primaryColor)
   const secondaryColor = useStore(store, (s) => s.wallet.secondaryColor)
   const textColor = useStore(store, (s) => s.wallet.textColor)
@@ -126,7 +126,7 @@ export function ColorsPanel({ store }: Props) {
           marginBottom: 12,
         }}
       >
-        Click a color below or tap an area on the card preview to edit.
+        {t("instruction")}
       </div>
 
       {/* Color zone rows */}

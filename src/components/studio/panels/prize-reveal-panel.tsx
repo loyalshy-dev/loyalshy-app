@@ -1,11 +1,13 @@
 "use client"
 
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 
 // ─── Prize Reveal (Minigame) Panel ──────────────────────────
 
 export function PrizeRevealPanel({ store }: { store: CardDesignStoreApi }) {
+  const t = useTranslations("studio.prize")
   const enabled = useStore(store, (s) => s.programConfig.minigameEnabled)
   const gameType = useStore(store, (s) => s.programConfig.minigameType)
   const prizes = useStore(store, (s) => s.programConfig.minigamePrizes)
@@ -42,12 +44,12 @@ export function PrizeRevealPanel({ store }: { store: CardDesignStoreApi }) {
       {/* Reward description */}
       <div style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 12, fontWeight: 500, color: "var(--foreground)", marginBottom: 6 }}>
-          Reward description
+          {t("rewardDescription")}
         </div>
         <input
           value={rewardDescription}
           onChange={(e) => set("rewardDescription", e.target.value)}
-          placeholder="Free coffee"
+          placeholder={t("rewardPlaceholder")}
           maxLength={200}
           style={{
             width: "100%",
@@ -61,7 +63,7 @@ export function PrizeRevealPanel({ store }: { store: CardDesignStoreApi }) {
           }}
         />
         <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 4, lineHeight: 1.4 }}>
-          Shown on the card as the next reward. Used as fallback when no prizes are set.
+          {t("rewardHint")}
         </div>
       </div>
 
@@ -77,12 +79,12 @@ export function PrizeRevealPanel({ store }: { store: CardDesignStoreApi }) {
       >
         <div>
           <div style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>
-            Reward reveal game
+            {t("rewardRevealGame")}
           </div>
           <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 2, lineHeight: 1.4 }}>
             {enabled && filledPrizes.length >= 2
               ? `${filledPrizes.length} prizes configured — ${filledPrizes.map((p) => p.name).join(", ")}`
-              : "Show a fun minigame when customers earn a reward"}
+              : t("showMinigame")}
           </div>
         </div>
         <button
