@@ -14,7 +14,7 @@ export async function HowItWorks() {
       icon: Building2,
       title: t("steps.setup.title"),
       description: t("steps.setup.description"),
-      image: "/platform/studio.png",
+      image: "/platform/studio.webp",
       alt: t("steps.setup.alt"),
     },
     {
@@ -22,7 +22,7 @@ export async function HowItWorks() {
       icon: QrCode,
       title: t("steps.qr.title"),
       description: t("steps.qr.description"),
-      image: "/platform/distribution.png",
+      image: "/platform/distribution.webp",
       alt: t("steps.qr.alt"),
     },
     {
@@ -30,7 +30,7 @@ export async function HowItWorks() {
       icon: Smartphone,
       title: t("steps.earn.title"),
       description: t("steps.earn.description"),
-      image: "/platform/passes.png",
+      image: "/platform/passes.webp",
       alt: t("steps.earn.alt"),
     },
   ]
