@@ -6,6 +6,7 @@ import type { Metadata } from "next"
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages } from "next-intl/server"
 import { getCurrentUser } from "@/lib/dal"
+import { db } from "@/lib/db"
 
 const AUTH_NAMESPACES = ["common", "auth", "nav"] as const
 
@@ -22,8 +23,29 @@ async function AuthLayoutInner({
   const session = await getCurrentUser()
 
   if (session) {
-    // Fully onboarded user — all auth pages are irrelevant
-    if (session.session.activeOrganizationId) {
+    // Check if user has an org — either via session or by membership lookup
+    let hasOrg = !!session.session.activeOrganizationId
+
+    if (!hasOrg) {
+      // Session lost activeOrganizationId (e.g., new session after password reset).
+      // Check if user actually has an org membership and restore it.
+      const membership = await db.member.findFirst({
+        where: { userId: session.user.id },
+        select: { organizationId: true },
+        orderBy: { createdAt: "asc" },
+      })
+
+      if (membership) {
+        // Restore activeOrganizationId on all active sessions
+        await db.session.updateMany({
+          where: { userId: session.user.id },
+          data: { activeOrganizationId: membership.organizationId },
+        })
+        hasOrg = true
+      }
+    }
+
+    if (hasOrg) {
       redirect("/dashboard")
     }
 
