@@ -67,6 +67,31 @@ export async function assertSuperAdmin(): Promise<AuthSession> {
 }
 
 /**
+ * Returns the member record for the current user in the given organization.
+ * Cached per-request to avoid duplicate DB lookups across layout/page/actions.
+ */
+export const getOrgMember = cache(async (organizationId: string): Promise<OrgMember | null> => {
+  const session = await assertAuthenticated()
+
+  // Super admins always get owner-level access
+  if (session.user.role === "SUPER_ADMIN") {
+    return {
+      id: "super_admin",
+      organizationId,
+      userId: session.user.id,
+      role: "owner",
+      createdAt: new Date(),
+    }
+  }
+
+  const member = await db.member.findFirst({
+    where: { organizationId, userId: session.user.id },
+  })
+
+  return member as OrgMember | null
+})
+
+/**
  * Verifies user is a member of the organization.
  * Direct lookup — no slug translation needed (org IS the tenant).
  */
@@ -74,36 +99,13 @@ export async function assertOrganizationAccess(
   organizationId: string
 ): Promise<{ session: AuthSession; member: OrgMember }> {
   const session = await assertAuthenticated()
-
-  // Super admins can access any organization
-  if (session.user.role === "SUPER_ADMIN") {
-    return {
-      session,
-      member: {
-        id: "super_admin",
-        organizationId,
-        userId: session.user.id,
-        role: "owner",
-        createdAt: new Date(),
-      },
-    }
-  }
-
-  const member = await db.member.findFirst({
-    where: {
-      organizationId,
-      userId: session.user.id,
-    },
-  })
+  const member = await getOrgMember(organizationId)
 
   if (!member) {
     redirect("/dashboard")
   }
 
-  return {
-    session,
-    member: member as OrgMember,
-  }
+  return { session, member }
 }
 
 /**
@@ -157,13 +159,6 @@ export const getOrganizationForUser = cache(async () => {
 
   const organization = await db.organization.findUnique({
     where: { id: organizationId },
-    include: {
-      passTemplates: {
-        where: { status: "ACTIVE" },
-        include: { passDesign: true },
-        orderBy: { createdAt: "asc" },
-      },
-    },
   })
 
   return organization

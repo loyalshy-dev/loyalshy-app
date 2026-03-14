@@ -1,9 +1,8 @@
 import { Suspense } from "react"
 import { connection } from "next/server"
 import { redirect } from "next/navigation"
-import { getCurrentUser, getOrganizationForUser } from "@/lib/dal"
+import { getOrganizationForUser, getOrgMember } from "@/lib/dal"
 import { getTemplatesList } from "@/server/template-actions"
-import { db } from "@/lib/db"
 import { TemplatesGridView } from "@/components/dashboard/templates-grid"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -32,24 +31,18 @@ export default async function ProgramsPage() {
 }
 
 async function ProgramsSection() {
-  const session = await getCurrentUser()
   const organization = await getOrganizationForUser()
-  if (!organization || !session) {
+  if (!organization) {
     redirect("/register?step=2")
   }
 
-  const templates = await getTemplatesList()
+  // Run templates fetch and member lookup in parallel (getOrgMember is cached per-request)
+  const [templates, member] = await Promise.all([
+    getTemplatesList(),
+    getOrgMember(organization.id),
+  ])
 
-  let isOwner = false
-  if (session.user.role === "SUPER_ADMIN") {
-    isOwner = true
-  } else {
-    const member = await db.member.findFirst({
-      where: { organizationId: organization.id, userId: session.user.id },
-      select: { role: true },
-    })
-    isOwner = member?.role === "owner"
-  }
+  const isOwner = member?.role === "owner"
 
   return (
     <TemplatesGridView

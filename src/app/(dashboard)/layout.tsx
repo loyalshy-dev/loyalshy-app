@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { connection } from "next/server"
 import type { Metadata } from "next"
-import { getCurrentUser } from "@/lib/dal"
+import { getCurrentUser, getOrgMember } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 
@@ -30,7 +30,7 @@ async function DashboardLayoutInner({
     redirect("/register?step=2")
   }
 
-  // Fetch organization and member role in parallel
+  // Fetch organization and member role in parallel (getOrgMember is cached per-request)
   const [organization, member] = await Promise.all([
     db.organization.findUnique({
       where: { id: activeOrgId },
@@ -45,18 +45,10 @@ async function DashboardLayoutInner({
         trialEndsAt: true,
       },
     }),
-    db.member.findFirst({
-      where: { organizationId: activeOrgId, userId: user.id },
-      select: { role: true },
-    }),
+    getOrgMember(activeOrgId),
   ])
 
-  let orgRole: string | null = member?.role ?? null
-
-  // Super admins always get owner-level access
-  if (user.role === "SUPER_ADMIN") {
-    orgRole = "owner"
-  }
+  const orgRole: string | null = member?.role ?? null
 
   return (
     <DashboardShell

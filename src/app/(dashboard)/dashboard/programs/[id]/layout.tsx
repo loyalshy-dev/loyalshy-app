@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { connection } from "next/server"
 import { notFound } from "next/navigation"
-import { assertAuthenticated, getOrganizationForUser } from "@/lib/dal"
+import { getOrganizationForUser, getOrgMember } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { ProgramTabNav } from "@/components/dashboard/programs/program-tab-nav"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -15,34 +15,26 @@ async function ProgramLayoutInner({
 }) {
   await connection()
   const { id: programId } = await params
-  const session = await assertAuthenticated()
 
   const organization = await getOrganizationForUser()
   if (!organization) {
     notFound()
   }
 
-  // Validate pass template belongs to this organization
-  const program = await db.passTemplate.findFirst({
-    where: { id: programId, organizationId: organization.id },
-    select: { id: true, name: true, status: true, passType: true },
-  })
+  // Validate pass template and get member role in parallel (getOrgMember is cached per-request)
+  const [program, member] = await Promise.all([
+    db.passTemplate.findFirst({
+      where: { id: programId, organizationId: organization.id },
+      select: { id: true, name: true, status: true, passType: true },
+    }),
+    getOrgMember(organization.id),
+  ])
 
   if (!program) {
     notFound()
   }
 
-  // Compute isOwner
-  let isOwner = false
-  if (session.user.role === "SUPER_ADMIN") {
-    isOwner = true
-  } else {
-    const member = await db.member.findFirst({
-      where: { organizationId: organization.id, userId: session.user.id },
-      select: { role: true },
-    })
-    isOwner = member?.role === "owner"
-  }
+  const isOwner = member?.role === "owner"
 
   return (
     <div className="space-y-6">
