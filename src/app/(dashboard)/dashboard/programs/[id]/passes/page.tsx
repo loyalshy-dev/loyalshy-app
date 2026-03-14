@@ -20,17 +20,16 @@ export default async function TemplatePasses({ params, searchParams }: Props) {
   const organization = await getOrganizationForUser()
   if (!organization) notFound()
 
-  const template = await db.passTemplate.findFirst({
-    where: { id: templateId, organizationId: organization.id },
-    select: { id: true, passType: true, config: true },
-  })
-  if (!template) notFound()
-
   const search = (sp.search as string) ?? ""
   const status = (sp.status as string) ?? "all"
   const page = Number(sp.page) || 1
 
-  const [result, stats] = await Promise.all([
+  // Run template validation, pass instances, and stats in parallel
+  const [template, result, stats] = await Promise.all([
+    db.passTemplate.findFirst({
+      where: { id: templateId, organizationId: organization.id },
+      select: { id: true, passType: true, config: true },
+    }),
     getTemplatePassInstances(templateId, {
       page,
       perPage: 20,
@@ -39,6 +38,7 @@ export default async function TemplatePasses({ params, searchParams }: Props) {
     }),
     getTemplatePassStats(templateId),
   ])
+  if (!template) notFound()
 
   return (
     <PassInstancesView

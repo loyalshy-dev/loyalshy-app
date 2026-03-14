@@ -19,21 +19,22 @@ export default async function ProgramDesignPage(props: {
 
   await assertOrganizationRole(organization.id, "owner")
 
-  const program = await db.passTemplate.findFirst({
-    where: { id: programId, organizationId: organization.id },
-    include: { passDesign: true },
-  })
+  const [program, walletPassCount] = await Promise.all([
+    db.passTemplate.findFirst({
+      where: { id: programId, organizationId: organization.id },
+      include: { passDesign: true },
+    }),
+    db.passInstance.count({
+      where: {
+        passTemplateId: programId,
+        walletProvider: { not: "NONE" },
+      },
+    }),
+  ])
 
   if (!program) {
     notFound()
   }
-
-  const walletPassCount = await db.passInstance.count({
-    where: {
-      passTemplateId: programId,
-      walletProvider: { not: "NONE" },
-    },
-  })
 
   // Serialize pass design for client
   const passDesign = program.passDesign

@@ -22,43 +22,39 @@ export default async function ProgramDistributionPage(props: {
 
   await assertOrganizationRole(organization.id, "owner")
 
-  const program = await db.passTemplate.findFirst({
-    where: { id: programId, organizationId: organization.id },
-    select: {
-      id: true,
-      name: true,
-      passType: true,
-      config: true,
-      passDesign: {
-        select: {
-          cardType: true,
-          primaryColor: true,
-          secondaryColor: true,
-          textColor: true,
-          showStrip: true,
-          patternStyle: true,
-          progressStyle: true,
-          labelFormat: true,
-          customProgressLabel: true,
-          stripImageUrl: true,
-          editorConfig: true,
-          logoUrl: true,
-          logoAppleUrl: true,
-          logoGoogleUrl: true,
-        },
-      },
-    },
-  })
-
-  if (!program) {
-    notFound()
-  }
-
   // Distribution stats
   const weekAgo = new Date()
   weekAgo.setDate(weekAgo.getDate() - 7)
 
-  const [totalIssued, issuedThisWeek, eligibleContacts] = await Promise.all([
+  // Run program validation and stats in parallel
+  const [program, totalIssued, issuedThisWeek, eligibleContacts] = await Promise.all([
+    db.passTemplate.findFirst({
+      where: { id: programId, organizationId: organization.id },
+      select: {
+        id: true,
+        name: true,
+        passType: true,
+        config: true,
+        passDesign: {
+          select: {
+            cardType: true,
+            primaryColor: true,
+            secondaryColor: true,
+            textColor: true,
+            showStrip: true,
+            patternStyle: true,
+            progressStyle: true,
+            labelFormat: true,
+            customProgressLabel: true,
+            stripImageUrl: true,
+            editorConfig: true,
+            logoUrl: true,
+            logoAppleUrl: true,
+            logoGoogleUrl: true,
+          },
+        },
+      },
+    }),
     db.passInstance.count({ where: { passTemplateId: programId } }),
     db.passInstance.count({ where: { passTemplateId: programId, createdAt: { gte: weekAgo } } }),
     db.contact.count({
@@ -69,6 +65,10 @@ export default async function ProgramDistributionPage(props: {
       },
     }),
   ])
+
+  if (!program) {
+    notFound()
+  }
 
   // Build join URL
   const origin = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? ""

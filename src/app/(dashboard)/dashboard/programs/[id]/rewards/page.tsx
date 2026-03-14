@@ -24,15 +24,6 @@ export default async function ProgramRewardsPage({
     notFound()
   }
 
-  // Verify pass template belongs to this organization
-  const program = await db.passTemplate.findFirst({
-    where: { id: programId, organizationId: organization.id },
-    select: { id: true, name: true },
-  })
-  if (!program) {
-    notFound()
-  }
-
   const tab = (sp.tab as "available" | "redeemed" | "expired") ?? "available"
   const search = (sp.search as string) ?? ""
   const sort = (sp.sort as string) ?? "earnedAt"
@@ -41,16 +32,22 @@ export default async function ProgramRewardsPage({
   const dateFrom = (sp.dateFrom as string) ?? ""
   const dateTo = (sp.dateTo as string) ?? ""
 
-  // Check if there are any rewards for this pass template
-  const totalRewards = await db.reward.count({
-    where: { passInstance: { passTemplateId: programId } },
-  })
-  const isEmpty = totalRewards === 0
-
-  const [result, stats] = await Promise.all([
+  // Run all queries in parallel — program validation, reward count, rewards list, and stats
+  const [program, totalRewards, result, stats] = await Promise.all([
+    db.passTemplate.findFirst({
+      where: { id: programId, organizationId: organization.id },
+      select: { id: true, name: true },
+    }),
+    db.reward.count({
+      where: { passInstance: { passTemplateId: programId } },
+    }),
     getRewards({ tab, page, search, sort, order, dateFrom, dateTo, templateId: programId }),
     getRewardStats(programId),
   ])
+  if (!program) {
+    notFound()
+  }
+  const isEmpty = totalRewards === 0
 
   return (
     <RewardsView

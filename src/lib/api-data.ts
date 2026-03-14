@@ -1478,7 +1478,7 @@ export async function queryTemplateStats(organizationId: string, templateId: str
   const template = await db.passTemplate.findFirst({ where: { id: templateId, organizationId }, select: { id: true } })
   if (!template) return null
 
-  const [active, completed, suspended, revoked, expired, voided, totalInteractionsCount, rewardsEarned, rewardsRedeemed, rewardsExpired, rewardsAvailable] = await Promise.all([
+  const [active, completed, suspended, revoked, expired, voided, totalInteractionsCount, rewardsEarned, rewardsRedeemed, rewardsExpired, rewardsAvailable, interactionsByType] = await Promise.all([
     db.passInstance.count({ where: { passTemplateId: templateId, status: "ACTIVE" } }),
     db.passInstance.count({ where: { passTemplateId: templateId, status: "COMPLETED" } }),
     db.passInstance.count({ where: { passTemplateId: templateId, status: "SUSPENDED" } }),
@@ -1490,9 +1490,8 @@ export async function queryTemplateStats(organizationId: string, templateId: str
     db.reward.count({ where: { passTemplateId: templateId, status: "REDEEMED" } }),
     db.reward.count({ where: { passTemplateId: templateId, status: "EXPIRED" } }),
     db.reward.count({ where: { passTemplateId: templateId, status: "AVAILABLE" } }),
+    db.interaction.groupBy({ by: ["type"], where: { passTemplateId: templateId }, _count: true }),
   ])
-
-  const interactionsByType = await db.interaction.groupBy({ by: ["type"], where: { passTemplateId: templateId }, _count: true })
   const byType: Record<string, number> = {}
   for (const row of interactionsByType) byType[row.type] = row._count
 
