@@ -81,7 +81,7 @@ export async function sendApnsPush(
   try {
     for (const pushToken of pushTokens) {
       try {
-        const statusCode = await new Promise<number>((resolve, reject) => {
+        const { status: statusCode, body: responseBody } = await new Promise<{ status: number; body: string }>((resolve, reject) => {
           const req = session.request({
             ":method": "POST",
             ":path": `/3/device/${pushToken}`,
@@ -90,8 +90,11 @@ export async function sendApnsPush(
             "apns-priority": "5",
           })
 
+          let body = ""
           req.on("response", (headers) => {
-            resolve(Number(headers[":status"]) || 0)
+            const s = Number(headers[":status"]) || 0
+            req.on("data", (chunk: Buffer) => { body += chunk.toString() })
+            req.on("end", () => resolve({ status: s, body }))
           })
 
           req.on("error", reject)
@@ -101,6 +104,7 @@ export async function sendApnsPush(
         if (statusCode === 200) {
           sent++
         } else {
+          console.error(`APNs push failed for token ${pushToken.slice(0, 8)}...: status=${statusCode} body=${responseBody}`)
           failed++
         }
       } catch {

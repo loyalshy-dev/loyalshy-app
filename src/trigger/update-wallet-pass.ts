@@ -7,7 +7,7 @@ import { createDb } from "./db"
 
 type UpdateWalletPassPayload = {
   passInstanceId: string
-  updateType: "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "TEMPLATE_CHANGE" | "PASS_INSTANCE_SUSPENDED" | "CHECK_IN" | "POINTS_EARNED" | "POINTS_REDEEMED" | "PREPAID_USE" | "PREPAID_RECHARGE" | "GIFT_CHARGE" | "GIFT_REFUND" | "TICKET_SCAN" | "TICKET_VOID" | "ACCESS_GRANT" | "ACCESS_DENY" | "TRANSIT_BOARD" | "TRANSIT_EXIT" | "ID_VERIFY"
+  updateType: "STAMP" | "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "TEMPLATE_CHANGE" | "PASS_INSTANCE_SUSPENDED" | "CHECK_IN" | "POINTS_EARNED" | "POINTS_REDEEMED" | "PREPAID_USE" | "PREPAID_RECHARGE" | "GIFT_CHARGE" | "GIFT_REFUND" | "TICKET_SCAN" | "TICKET_VOID" | "ACCESS_GRANT" | "ACCESS_DENY" | "TRANSIT_BOARD" | "TRANSIT_EXIT" | "ID_VERIFY"
 }
 
 // ─── Task ───────────────────────────────────────────────────
@@ -122,7 +122,7 @@ export const updateWalletPassTask = task({
         const pushTokens = passInstance.deviceRegistrations.map(
           (d: { pushToken: string }) => d.pushToken
         )
-        let pushResult = { sent: 0, failed: 0 }
+        let pushResult = { sent: 0, failed: 0, errors: [] as string[] }
 
         if (pushTokens.length > 0) {
           pushResult = await sendApnsPush(pushTokens)
@@ -139,6 +139,7 @@ export const updateWalletPassTask = task({
               devicesNotified: pushTokens.length,
               pushSent: pushResult.sent,
               pushFailed: pushResult.failed,
+              ...(pushResult.errors.length > 0 && { apnsErrors: pushResult.errors }),
             },
           },
         })
@@ -148,6 +149,7 @@ export const updateWalletPassTask = task({
           devicesNotified: pushTokens.length,
           pushSent: pushResult.sent,
           pushFailed: pushResult.failed,
+          ...(pushResult.errors.length > 0 && { apnsErrors: pushResult.errors }),
         }
       } else if (passInstance.walletProvider === "GOOGLE") {
         // ── Google Wallet: PATCH the loyalty object via REST API ──
@@ -565,10 +567,10 @@ async function generateStampGridToR2(
  */
 async function sendApnsPush(
   pushTokens: string[]
-): Promise<{ sent: number; failed: number }> {
+): Promise<{ sent: number; failed: number; errors: string[] }> {
   const passTypeIdentifier = process.env.APPLE_PASS_TYPE_IDENTIFIER
   if (!passTypeIdentifier) {
-    return { sent: 0, failed: pushTokens.length }
+    return { sent: 0, failed: pushTokens.length, errors: ["APPLE_PASS_TYPE_IDENTIFIER not set"] }
   }
 
   const certB64 = process.env.APPLE_PASS_CERTIFICATE
@@ -576,7 +578,7 @@ async function sendApnsPush(
   const keyPassphrase = process.env.APPLE_PASS_KEY_PASSPHRASE ?? ""
 
   if (!certB64 || !keyB64) {
-    return { sent: 0, failed: pushTokens.length }
+    return { sent: 0, failed: pushTokens.length, errors: ["APPLE_PASS_CERTIFICATE or APPLE_PASS_KEY not set"] }
   }
 
   const cert = Buffer.from(certB64, "base64")
@@ -585,6 +587,7 @@ async function sendApnsPush(
 
   let sent = 0
   let failed = 0
+  const errors: string[] = []
 
   // Create a single HTTP/2 session for all pushes
   const session = http2.connect(`https://${apnsHost}`, {
@@ -596,7 +599,7 @@ async function sendApnsPush(
   try {
     for (const pushToken of pushTokens) {
       try {
-        const statusCode = await new Promise<number>((resolve, reject) => {
+        const { status: statusCode, body: responseBody } = await new Promise<{ status: number; body: string }>((resolve, reject) => {
           const req = session.request({
             ":method": "POST",
             ":path": `/3/device/${pushToken}`,
@@ -605,8 +608,11 @@ async function sendApnsPush(
             "apns-priority": "5",
           })
 
+          let body = ""
           req.on("response", (headers) => {
-            resolve(Number(headers[":status"]) || 0)
+            const s = Number(headers[":status"]) || 0
+            req.on("data", (chunk: Buffer) => { body += chunk.toString() })
+            req.on("end", () => resolve({ status: s, body }))
           })
 
           req.on("error", reject)
@@ -616,9 +622,15 @@ async function sendApnsPush(
         if (statusCode === 200) {
           sent++
         } else {
+          const errorMsg = `status=${statusCode} body=${responseBody}`
+          console.error(`APNs push failed for token ${pushToken.slice(0, 8)}...: ${errorMsg}`)
+          errors.push(errorMsg)
           failed++
         }
-      } catch {
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err)
+        console.error(`APNs push error for token ${pushToken.slice(0, 8)}...: ${errorMsg}`)
+        errors.push(errorMsg)
         failed++
       }
     }
@@ -626,5 +638,5 @@ async function sendApnsPush(
     session.close()
   }
 
-  return { sent, failed }
+  return { sent, failed, errors }
 }
