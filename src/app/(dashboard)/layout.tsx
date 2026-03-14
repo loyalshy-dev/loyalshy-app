@@ -8,7 +8,7 @@ import { getCurrentUser, getOrgMember } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 
-const DASHBOARD_NAMESPACES = ["dashboard", "studio", "serverErrors"] as const
+const DASHBOARD_NAMESPACES = ["common", "dashboard", "studio", "serverErrors"] as const
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },

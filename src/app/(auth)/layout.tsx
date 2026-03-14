@@ -7,7 +7,7 @@ import { NextIntlClientProvider } from "next-intl"
 import { getMessages } from "next-intl/server"
 import { getCurrentUser } from "@/lib/dal"
 
-const AUTH_NAMESPACES = ["auth", "nav"] as const
+const AUTH_NAMESPACES = ["common", "auth", "nav"] as const
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -32,7 +32,7 @@ async function AuthLayoutInner({
     const headerList = await headers()
     const pathname = headerList.get("x-pathname") || ""
 
-    if (pathname && !pathname.startsWith("/register")) {
+    if (pathname && !pathname.startsWith("/register") && !pathname.startsWith("/reset-password")) {
       redirect("/register?step=2")
     }
   }

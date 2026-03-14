@@ -100,7 +100,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Server components**: use `getTranslations("namespace")` from `next-intl/server` (must be async)
 - **Client components**: use `useTranslations("namespace")` from `next-intl`
 - **Root layout**: wraps children in `NextIntlClientProvider` with only shared namespaces (`common`, `errors`, `cookieBanner` ~1KB), inside a Suspense boundary (required for `cacheComponents: true`)
-- **Route group providers**: Each route group adds a nested `NextIntlClientProvider` with its specific namespaces — `(dashboard)` provides `dashboard`, `studio`, `serverErrors`; `(auth)` provides `auth`, `nav`; landing page provides marketing namespaces. This reduces RSC payload from ~67KB to only what's needed per route.
+- **Route group providers**: Each route group adds a nested `NextIntlClientProvider` with its specific namespaces — nested providers **override** (not merge with) the parent, so each MUST include `common` alongside its route-specific namespaces. `(dashboard)` provides `common`, `dashboard`, `studio`, `serverErrors`; `(auth)` provides `common`, `auth`, `nav`; landing page provides `common` + marketing namespaces. This reduces RSC payload from ~67KB to only what's needed per route.
 - **Language switcher**: `src/components/language-switcher.tsx` — sets `locale` cookie and reloads, placed in marketing navbar and dashboard topbar
 - **Adding a new locale**: Add to `locales` array in `config.ts`, create `src/messages/{locale}.json`, add `localeNames` entry
 - **Server actions**: use `getTranslations("serverErrors")` from `next-intl/server` for error/validation messages
