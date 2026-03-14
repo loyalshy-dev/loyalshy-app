@@ -1,17 +1,10 @@
 import { QrCode, RefreshCw, Wallet } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
-import { PhoneMockupInteractive } from "./phone-mockup"
 import { FadeIn } from "./motion"
-import type { MarketingCard } from "./wallet-card-data"
-import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 
-type WalletPreviewProps = {
-  showcaseCards?: MarketingCard[]
-  showcaseDesigns?: WalletPassDesign[]
-}
-
-export async function WalletPreview({ showcaseCards, showcaseDesigns }: WalletPreviewProps = {}) {
+export async function WalletPreview() {
   const t = await getTranslations("walletPreview")
 
   const bullets = [
@@ -30,7 +23,15 @@ export async function WalletPreview({ showcaseCards, showcaseDesigns }: WalletPr
         <div className="lg:grid lg:grid-cols-2 lg:items-center lg:gap-x-20">
           {/* Phone mockup */}
           <FadeIn direction="right" delay={0.2} className="flex justify-center lg:order-last">
-            <PhoneMockupInteractive cards={showcaseCards} designs={showcaseDesigns} />
+            <Image
+              src="/wallet-card.webp"
+              alt="Digital wallet pass showing a loyalty stamp card in Apple Wallet"
+              width={280}
+              height={606}
+              className="drop-shadow-2xl"
+              style={{ borderRadius: 44 }}
+              priority
+            />
           </FadeIn>
 
           {/* Text column */}
