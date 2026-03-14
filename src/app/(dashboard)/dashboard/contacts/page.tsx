@@ -1,7 +1,9 @@
+import { Suspense } from "react"
 import { connection } from "next/server"
 import { getOrganizationForUser } from "@/lib/dal"
 import { getContacts } from "@/server/contact-actions"
 import { ContactsView } from "@/components/dashboard/contacts/contacts-view"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default async function ContactsPage({
   searchParams,
@@ -9,6 +11,30 @@ export default async function ContactsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   await connection()
+
+  return (
+    <Suspense
+      fallback={
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-9 w-32" />
+          </div>
+          <Skeleton className="h-10 w-full max-w-sm" />
+          <Skeleton className="h-[400px] rounded-lg" />
+        </div>
+      }
+    >
+      <ContactsSection searchParams={searchParams} />
+    </Suspense>
+  )
+}
+
+async function ContactsSection({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   const organization = await getOrganizationForUser()
 
   if (!organization) {

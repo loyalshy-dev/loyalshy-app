@@ -2,9 +2,13 @@ import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { connection } from "next/server"
 import type { Metadata } from "next"
+import { NextIntlClientProvider } from "next-intl"
+import { getMessages } from "next-intl/server"
 import { getCurrentUser, getOrgMember } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
+
+const DASHBOARD_NAMESPACES = ["dashboard", "studio", "serverErrors"] as const
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -50,28 +54,37 @@ async function DashboardLayoutInner({
 
   const orgRole: string | null = member?.role ?? null
 
+  // Provide dashboard-specific i18n namespaces (~28KB instead of full ~67KB)
+  const messages = await getMessages()
+  const dashboardMessages: Record<string, unknown> = {}
+  for (const ns of DASHBOARD_NAMESPACES) {
+    if (ns in messages) dashboardMessages[ns] = messages[ns as keyof typeof messages]
+  }
+
   return (
-    <DashboardShell
-      user={{
-        name: user.name,
-        email: user.email,
-        image: user.image,
-      }}
-      organization={
-        organization
-          ? {
-              name: organization.name,
-              logo: organization.logo,
-              logoGoogle: organization.logoGoogle,
-              subscriptionStatus: organization.subscriptionStatus,
-              trialEndsAt: organization.trialEndsAt?.toISOString() ?? null,
-            }
-          : null
-      }
-      orgRole={orgRole}
-    >
-      {children}
-    </DashboardShell>
+    <NextIntlClientProvider messages={dashboardMessages}>
+      <DashboardShell
+        user={{
+          name: user.name,
+          email: user.email,
+          image: user.image,
+        }}
+        organization={
+          organization
+            ? {
+                name: organization.name,
+                logo: organization.logo,
+                logoGoogle: organization.logoGoogle,
+                subscriptionStatus: organization.subscriptionStatus,
+                trialEndsAt: organization.trialEndsAt?.toISOString() ?? null,
+              }
+            : null
+        }
+        orgRole={orgRole}
+      >
+        {children}
+      </DashboardShell>
+    </NextIntlClientProvider>
   )
 }
 

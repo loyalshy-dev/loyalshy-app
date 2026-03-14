@@ -461,6 +461,7 @@ model Interaction {
   @@index([organizationId, type])
   @@index([passInstanceId])
   @@index([contactId, createdAt])
+  @@index([passTemplateId, createdAt])
   @@map("interaction")
 }
 
@@ -490,6 +491,8 @@ model Reward {
   @@index([status])
   @@index([organizationId, status])
   @@index([organizationId, expiresAt])
+  @@index([organizationId, status, redeemedAt])
+  @@index([passTemplateId, status])
   @@map("reward")
 }
 

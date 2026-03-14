@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import { NextIntlClientProvider } from "next-intl"
+import { getMessages } from "next-intl/server"
 import { MarketingNavbar } from "@/components/marketing/navbar"
 import { Hero } from "@/components/marketing/hero"
 import { FeatureShowcase } from "@/components/marketing/dashboard-preview"
@@ -95,24 +97,38 @@ function JsonLd() {
   )
 }
 
-export default function LandingPage() {
+const MARKETING_NAMESPACES = [
+  "nav", "hero", "socialProof", "featureShowcase", "howItWorks",
+  "features", "walletPreview", "testimonials", "pricing", "faq",
+  "closingCta", "footer",
+] as const
+
+export default async function LandingPage() {
+  const messages = await getMessages()
+  const marketingMessages: Record<string, unknown> = {}
+  for (const ns of MARKETING_NAMESPACES) {
+    if (ns in messages) marketingMessages[ns] = messages[ns as keyof typeof messages]
+  }
+
   return (
-    <div className="min-h-screen" style={{ background: "var(--mk-bg)" }}>
-      <JsonLd />
-      <MarketingNavbar />
-      <main>
-        <Hero />
-        <SocialProof />
-        <FeatureShowcase />
-        <HowItWorks />
-        <WalletPreview />
-        <Features />
-        <Testimonials />
-        <Pricing />
-        <FAQ />
-        <ClosingCTA />
-      </main>
-      <MarketingFooter />
-    </div>
+    <NextIntlClientProvider messages={marketingMessages}>
+      <div className="min-h-screen" style={{ background: "var(--mk-bg)" }}>
+        <JsonLd />
+        <MarketingNavbar />
+        <main>
+          <Hero />
+          <SocialProof />
+          <FeatureShowcase />
+          <HowItWorks />
+          <WalletPreview />
+          <Features />
+          <Testimonials />
+          <Pricing />
+          <FAQ />
+          <ClosingCTA />
+        </main>
+        <MarketingFooter />
+      </div>
+    </NextIntlClientProvider>
   )
 }

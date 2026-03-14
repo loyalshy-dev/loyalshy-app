@@ -3,7 +3,11 @@ import { redirect } from "next/navigation"
 import { connection } from "next/server"
 import { headers } from "next/headers"
 import type { Metadata } from "next"
+import { NextIntlClientProvider } from "next-intl"
+import { getMessages } from "next-intl/server"
 import { getCurrentUser } from "@/lib/dal"
+
+const AUTH_NAMESPACES = ["auth", "nav"] as const
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -36,12 +40,19 @@ async function AuthLayoutInner({
   return children
 }
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const messages = await getMessages()
+  const authMessages: Record<string, unknown> = {}
+  for (const ns of AUTH_NAMESPACES) {
+    if (ns in messages) authMessages[ns] = messages[ns as keyof typeof messages]
+  }
+
   return (
+    <NextIntlClientProvider messages={authMessages}>
     <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-muted p-4">
       {/* Grid pattern */}
       <div
@@ -69,5 +80,6 @@ export default function AuthLayout({
         </Suspense>
       </div>
     </div>
+    </NextIntlClientProvider>
   )
 }

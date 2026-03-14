@@ -83,6 +83,21 @@ export const metadata: Metadata = {
   },
 };
 
+// Only send shared namespaces at root level (~1KB instead of ~67KB).
+// Route group layouts provide their own namespaces via nested NextIntlClientProvider.
+const SHARED_NAMESPACES = ["common", "errors", "cookieBanner"] as const;
+
+function pickMessages(
+  messages: Record<string, unknown>,
+  namespaces: readonly string[]
+): Record<string, unknown> {
+  const picked: Record<string, unknown> = {};
+  for (const ns of namespaces) {
+    if (ns in messages) picked[ns] = messages[ns];
+  }
+  return picked;
+}
+
 async function IntlProvider({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   const messages = await getMessages();
@@ -92,7 +107,7 @@ async function IntlProvider({ children }: { children: React.ReactNode }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider messages={pickMessages(messages, SHARED_NAMESPACES)}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             {children}
             <SpeedInsights />
