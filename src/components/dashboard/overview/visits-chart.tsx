@@ -14,6 +14,7 @@ import { format, parseISO } from "date-fns"
 import type { InteractionsDataPoint } from "@/server/analytics"
 import { getInteractionsOverTime } from "@/server/analytics"
 import { Card } from "@/components/ui/card"
+import { useTranslations } from "next-intl"
 
 type Range = "7d" | "30d" | "90d" | "12m"
 
@@ -32,6 +33,7 @@ function CustomTooltip({
   payload?: { value: number; payload: InteractionsDataPoint }[]
   label?: string
 }) {
+  const t = useTranslations("dashboard.visitsChart")
   if (!active || !payload?.length) return null
   const data = payload[0]
   return (
@@ -40,7 +42,7 @@ function CustomTooltip({
         {format(parseISO(data.payload.date), "MMM d, yyyy")}
       </p>
       <p className="text-sm font-medium">
-        {data.value} interaction{data.value !== 1 ? "s" : ""}
+        {data.value} {data.value !== 1 ? t("interactions") : t("interaction")}
       </p>
     </div>
   )
@@ -52,6 +54,7 @@ type InteractionsChartProps = {
 }
 
 export function InteractionsChart({ initialData, initialRange }: InteractionsChartProps) {
+  const t = useTranslations("dashboard.visitsChart")
   const [mounted, setMounted] = useState(false)
   const [range, setRange] = useState<Range>(initialRange)
   const [data, setData] = useState(initialData)
@@ -83,7 +86,7 @@ export function InteractionsChart({ initialData, initialRange }: InteractionsCha
     <Card className="p-5">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <h3 className="text-[13px] font-medium text-muted-foreground">
-          Activity Over Time
+          {t("activityOverTime")}
         </h3>
         <div className="flex items-center gap-0.5 rounded-md border border-border bg-muted/50 p-0.5">
           {RANGE_LABELS.map((r) => (

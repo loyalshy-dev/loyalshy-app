@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import Link from "next/link"
 import { AlertTriangle, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "next-intl"
 
 export default function AuthError({
   error,
@@ -12,6 +13,8 @@ export default function AuthError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const t = useTranslations("auth.error")
+
   useEffect(() => {
     console.error("Auth error:", error)
   }, [error])
@@ -22,23 +25,23 @@ export default function AuthError({
         <AlertTriangle className="h-6 w-6 text-destructive" />
       </div>
       <h1 className="text-xl font-semibold tracking-tight">
-        Authentication error
+        {t("title")}
       </h1>
       <p className="text-sm text-muted-foreground">
-        Something went wrong during authentication. Please try again.
+        {t("message")}
       </p>
       {error.digest && (
         <p className="text-xs text-muted-foreground/60 font-mono">
-          Error ID: {error.digest}
+          {t("errorId", { digest: error.digest })}
         </p>
       )}
       <div className="flex justify-center gap-3 pt-2">
         <Button onClick={reset} className="gap-2">
           <RotateCcw className="h-4 w-4" />
-          Try again
+          {t("tryAgain")}
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/login">Back to login</Link>
+          <Link href="/login">{t("backToLogin")}</Link>
         </Button>
       </div>
     </div>

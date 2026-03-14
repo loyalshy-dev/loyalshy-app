@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 type InvitationData = {
   id: string
@@ -26,6 +27,8 @@ type InvitationData = {
 
 export function InviteForm({ token }: { token: string }) {
   const router = useRouter()
+  const t = useTranslations("auth.invite")
+  const tAuth = useTranslations("auth.register")
   const [invitation, setInvitation] = useState<InvitationData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isValidating, setIsValidating] = useState(true)
@@ -60,7 +63,7 @@ export function InviteForm({ token }: { token: string }) {
     })
 
     if (signUpError || !data) {
-      toast.error(signUpError?.message || "Failed to create account")
+      toast.error(signUpError?.message || t("createFailed"))
       setIsSubmitting(false)
       return
     }
@@ -77,7 +80,7 @@ export function InviteForm({ token }: { token: string }) {
       return
     }
 
-    toast.success(`Welcome to ${invitation.organizationName}!`)
+    toast.success(t("welcome", { organizationName: invitation.organizationName }))
     router.push("/dashboard")
     router.refresh()
   }
@@ -93,7 +96,7 @@ export function InviteForm({ token }: { token: string }) {
     })
 
     if (signInError || !data) {
-      toast.error(signInError?.message || "Invalid credentials")
+      toast.error(signInError?.message || t("invalidCredentials"))
       setIsSubmitting(false)
       return
     }
@@ -109,7 +112,7 @@ export function InviteForm({ token }: { token: string }) {
       return
     }
 
-    toast.success(`Welcome to ${invitation.organizationName}!`)
+    toast.success(t("welcome", { organizationName: invitation.organizationName }))
     router.push("/dashboard")
     router.refresh()
   }
@@ -119,7 +122,7 @@ export function InviteForm({ token }: { token: string }) {
       <Card>
         <CardContent className="flex items-center justify-center py-12">
           <LoadingSpinner />
-          <span className="ml-2 text-muted-foreground">Validating invitation...</span>
+          <span className="ml-2 text-muted-foreground">{t("validating")}</span>
         </CardContent>
       </Card>
     )
@@ -129,12 +132,12 @@ export function InviteForm({ token }: { token: string }) {
     return (
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Invalid Invitation</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t("invalid")}</CardTitle>
           <CardDescription>{error}</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
           <Button variant="outline" onClick={() => router.push("/login")}>
-            Go to sign in
+            {t("goToSignIn")}
           </Button>
         </CardContent>
       </Card>
@@ -146,20 +149,19 @@ export function InviteForm({ token }: { token: string }) {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Join {invitation.organizationName}</CardTitle>
+        <CardTitle className="text-2xl font-bold">{t("joinOrg", { organizationName: invitation.organizationName })}</CardTitle>
         <CardDescription>
-          You&apos;ve been invited as{" "}
-          {invitation.role === "OWNER" ? "an owner" : "a staff member"}.
+          {t("invitedAs", { role: invitation.role === "OWNER" ? "an owner" : "a staff member" })}{" "}
           {mode === "signup"
-            ? " Create your account to get started."
-            : " Sign in to accept the invitation."}
+            ? t("createAccount")
+            : t("signInToAccept")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {mode === "signup" ? (
           <form onSubmit={handleSignUp} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{tAuth("email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -168,11 +170,11 @@ export function InviteForm({ token }: { token: string }) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="name">Full name</Label>
+              <Label htmlFor="name">{tAuth("fullName")}</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Jane Doe"
+                placeholder={tAuth("fullNamePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -180,11 +182,11 @@ export function InviteForm({ token }: { token: string }) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{tAuth("password")}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="At least 8 characters"
+                placeholder={tAuth("passwordHint")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -194,23 +196,23 @@ export function InviteForm({ token }: { token: string }) {
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting && <LoadingSpinner />}
-              Create account & join
+              {t("createAndJoin")}
             </Button>
             <p className="text-center text-xs text-muted-foreground">
-              Already have an account?{" "}
+              {t("hasAccount")}{" "}
               <button
                 type="button"
                 className="text-foreground underline underline-offset-2 hover:no-underline"
                 onClick={() => { setPassword(""); setMode("signin") }}
               >
-                Sign in instead
+                {t("signInInstead")}
               </button>
             </p>
           </form>
         ) : (
           <form onSubmit={handleSignIn} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{tAuth("email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -219,11 +221,11 @@ export function InviteForm({ token }: { token: string }) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{tAuth("password")}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder={tAuth("passwordPlaceholder")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -232,16 +234,16 @@ export function InviteForm({ token }: { token: string }) {
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting && <LoadingSpinner />}
-              Sign in & join
+              {t("signInAndJoin")}
             </Button>
             <p className="text-center text-xs text-muted-foreground">
-              Don&apos;t have an account?{" "}
+              {t("noAccount")}{" "}
               <button
                 type="button"
                 className="text-foreground underline underline-offset-2 hover:no-underline"
                 onClick={() => { setPassword(""); setMode("signup") }}
               >
-                Create one
+                {t("createOne")}
               </button>
             </p>
           </form>

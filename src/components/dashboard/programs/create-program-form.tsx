@@ -11,10 +11,12 @@ import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { createPassTemplate } from "@/server/org-settings-actions"
 import { PASS_TYPE_META, type PassType, type PointsCatalogItem } from "@/types/pass-types"
+import { useTranslations } from "next-intl"
 
 // ─── Step 1: Type selector ─────────────────────────────────
 
 function TypeSelector({ onSelect }: { onSelect: (type: PassType) => void }) {
+  const t = useTranslations("dashboard.createProgram")
   const types: PassType[] = [
     "STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID",
     "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID",
@@ -23,7 +25,7 @@ function TypeSelector({ onSelect }: { onSelect: (type: PassType) => void }) {
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        Choose a program type to get started.
+        {t("chooseType")}
       </p>
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         {types.map((type) => {
@@ -91,6 +93,7 @@ function StampCardForm({
   onCreated: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("dashboard.createProgram")
   const [isPending, startTransition] = useTransition()
   const {
     register,
@@ -121,7 +124,7 @@ function StampCardForm({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Stamp card program created")
+        toast.success(t("stampCardCreated"))
         reset()
         onCreated()
       }
@@ -136,22 +139,22 @@ function StampCardForm({
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
-        Back to type selection
+        {t("backToTypeSelection")}
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="stamp-name">Program Name</Label>
+          <Label htmlFor="stamp-name">{t("programName")}</Label>
           <Input
             id="stamp-name"
-            {...register("name", { required: "Program name is required" })}
-            placeholder="e.g., Coffee Loyalty, Lunch Special"
+            {...register("name", { required: t("programNameRequired") })}
+            placeholder={t("stampNamePlaceholder")}
           />
           {errors.name && (
             <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="stamp-visits">Visits Required</Label>
+          <Label htmlFor="stamp-visits">{t("visitsRequired")}</Label>
           <Input
             id="stamp-visits"
             type="number"
@@ -161,7 +164,7 @@ function StampCardForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="stamp-expiry">Reward Expiry (Days)</Label>
+          <Label htmlFor="stamp-expiry">{t("rewardExpiry")}</Label>
           <Input
             id="stamp-expiry"
             type="number"
@@ -171,13 +174,13 @@ function StampCardForm({
           />
         </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="stamp-reward">Reward Description</Label>
+          <Label htmlFor="stamp-reward">{t("rewardDescription")}</Label>
           <Input
             id="stamp-reward"
             {...register("rewardDescription", {
-              required: "Reward description is required",
+              required: t("rewardDescriptionRequired"),
             })}
-            placeholder="e.g., Free coffee or dessert"
+            placeholder={t("rewardDescriptionPlaceholder")}
           />
           {errors.rewardDescription && (
             <p className="text-xs text-destructive">
@@ -191,10 +194,10 @@ function StampCardForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              Creating...
+              {t("creating")}
             </>
           ) : (
-            "Create Stamp Card"
+            t("createStampCard")
           )}
         </Button>
       </div>
@@ -211,6 +214,7 @@ function CouponForm({
   onCreated: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("dashboard.createProgram")
   const [isPending, startTransition] = useTransition()
   const {
     register,
@@ -262,7 +266,7 @@ function CouponForm({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Coupon program created")
+        toast.success(t("couponCreated"))
         reset()
         onCreated()
       }
@@ -277,36 +281,36 @@ function CouponForm({
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
-        Back to type selection
+        {t("backToTypeSelection")}
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="coupon-name">Coupon Name</Label>
+          <Label htmlFor="coupon-name">{t("couponName")}</Label>
           <Input
             id="coupon-name"
-            {...register("name", { required: "Coupon name is required" })}
-            placeholder="e.g., Summer Special, New Customer Discount"
+            {...register("name", { required: t("couponNameRequired") })}
+            placeholder={t("couponNamePlaceholder")}
           />
           {errors.name && (
             <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="coupon-discount-type">Discount Type</Label>
+          <Label htmlFor="coupon-discount-type">{t("discountType")}</Label>
           <select
             id="coupon-discount-type"
             {...register("discountType")}
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="percentage">Percentage Off</option>
-            <option value="fixed">Fixed Amount Off</option>
-            <option value="freebie">Free Item</option>
+            <option value="percentage">{t("discountTypePercentage")}</option>
+            <option value="fixed">{t("discountTypeFixed")}</option>
+            <option value="freebie">{t("discountTypeFreebie")}</option>
           </select>
         </div>
         {discountType !== "freebie" && (
           <div className="space-y-2">
             <Label htmlFor="coupon-discount-value">
-              {discountType === "percentage" ? "Discount (%)" : "Discount ($)"}
+              {discountType === "percentage" ? t("discountPercent") : t("discountDollar")}
             </Label>
             <Input
               id="coupon-discount-value"
@@ -318,15 +322,15 @@ function CouponForm({
           </div>
         )}
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="coupon-desc">Coupon Description</Label>
+          <Label htmlFor="coupon-desc">{t("couponDescription")}</Label>
           <Input
             id="coupon-desc"
             {...register("couponDescription")}
-            placeholder="e.g., Get 20% off your next order"
+            placeholder={t("couponDescriptionPlaceholder")}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="coupon-valid-until">Valid Until (Optional)</Label>
+          <Label htmlFor="coupon-valid-until">{t("validUntilOptional")}</Label>
           <Input
             id="coupon-valid-until"
             type="date"
@@ -334,22 +338,22 @@ function CouponForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="coupon-limit">Redemption Limit</Label>
+          <Label htmlFor="coupon-limit">{t("redemptionLimit")}</Label>
           <select
             id="coupon-limit"
             {...register("redemptionLimit")}
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="single">Single Use</option>
-            <option value="unlimited">Unlimited</option>
+            <option value="single">{t("redemptionSingle")}</option>
+            <option value="unlimited">{t("redemptionUnlimited")}</option>
           </select>
         </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="coupon-terms">Terms & Conditions (Optional)</Label>
+          <Label htmlFor="coupon-terms">{t("termsOptional")}</Label>
           <Textarea
             id="coupon-terms"
             {...register("terms")}
-            placeholder="Optional terms..."
+            placeholder={t("termsPlaceholder")}
             rows={3}
           />
         </div>
@@ -359,10 +363,10 @@ function CouponForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              Creating...
+              {t("creating")}
             </>
           ) : (
-            "Create Coupon"
+            t("createCoupon")
           )}
         </Button>
       </div>
@@ -379,6 +383,7 @@ function MembershipForm({
   onCreated: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("dashboard.createProgram")
   const [isPending, startTransition] = useTransition()
   const {
     register,
@@ -420,7 +425,7 @@ function MembershipForm({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Membership program created")
+        toast.success(t("membershipCreated"))
         reset()
         onCreated()
       }
@@ -435,28 +440,28 @@ function MembershipForm({
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
-        Back to type selection
+        {t("backToTypeSelection")}
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="member-name">Program Name</Label>
+          <Label htmlFor="member-name">{t("programName")}</Label>
           <Input
             id="member-name"
-            {...register("name", { required: "Program name is required" })}
-            placeholder="e.g., VIP Club, Gold Membership"
+            {...register("name", { required: t("programNameRequired") })}
+            placeholder={t("memberProgramNamePlaceholder")}
           />
           {errors.name && (
             <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="member-tier">Membership Tier</Label>
+          <Label htmlFor="member-tier">{t("membershipTier")}</Label>
           <Input
             id="member-tier"
             {...register("membershipTier", {
-              required: "Tier name is required",
+              required: t("membershipTierRequired"),
             })}
-            placeholder="e.g., VIP, Gold, Premium"
+            placeholder={t("membershipTierPlaceholder")}
           />
           {errors.membershipTier && (
             <p className="text-xs text-destructive">
@@ -465,21 +470,21 @@ function MembershipForm({
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="member-duration">Duration</Label>
+          <Label htmlFor="member-duration">{t("duration")}</Label>
           <select
             id="member-duration"
             {...register("validDuration")}
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="lifetime">Lifetime</option>
-            <option value="custom">Custom</option>
+            <option value="monthly">{t("durationMonthly")}</option>
+            <option value="yearly">{t("durationYearly")}</option>
+            <option value="lifetime">{t("durationLifetime")}</option>
+            <option value="custom">{t("durationCustom")}</option>
           </select>
         </div>
         {validDuration === "custom" && (
           <div className="space-y-2">
-            <Label htmlFor="member-custom-days">Custom Duration (Days)</Label>
+            <Label htmlFor="member-custom-days">{t("customDurationDays")}</Label>
             <Input
               id="member-custom-days"
               type="number"
@@ -490,11 +495,11 @@ function MembershipForm({
           </div>
         )}
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="member-benefits">Benefits</Label>
+          <Label htmlFor="member-benefits">{t("benefits")}</Label>
           <Textarea
             id="member-benefits"
-            {...register("benefits", { required: "Benefits are required" })}
-            placeholder="List the perks members receive..."
+            {...register("benefits", { required: t("benefitsRequired") })}
+            placeholder={t("benefitsPlaceholder")}
             rows={3}
           />
           {errors.benefits && (
@@ -504,11 +509,11 @@ function MembershipForm({
           )}
         </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="member-terms">Terms & Conditions (Optional)</Label>
+          <Label htmlFor="member-terms">{t("termsOptional")}</Label>
           <Textarea
             id="member-terms"
             {...register("terms")}
-            placeholder="Optional terms..."
+            placeholder={t("termsPlaceholder")}
             rows={3}
           />
         </div>
@@ -518,10 +523,10 @@ function MembershipForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              Creating...
+              {t("creating")}
             </>
           ) : (
-            "Create Membership"
+            t("createMembership")
           )}
         </Button>
       </div>
@@ -551,6 +556,7 @@ function PointsForm({
   onCreated: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("dashboard.createProgram")
   const [isPending, startTransition] = useTransition()
   const [catalog, setCatalog] = useState<CatalogRow[]>([
     { id: crypto.randomUUID(), name: "", description: "", pointsCost: 50 },
@@ -593,7 +599,7 @@ function PointsForm({
       (item) => !item.name.trim() || item.pointsCost < 1
     )
     if (invalidRow) {
-      toast.error("All catalog items must have a name and a points cost of at least 1")
+      toast.error(t("catalogValidationError"))
       return
     }
 
@@ -627,7 +633,7 @@ function PointsForm({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Points program created")
+        toast.success(t("pointsProgramCreated"))
         reset()
         setCatalog([{ id: crypto.randomUUID(), name: "", description: "", pointsCost: 50 }])
         onCreated()
@@ -643,22 +649,22 @@ function PointsForm({
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
-        Back to type selection
+        {t("backToTypeSelection")}
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="points-name">Program Name</Label>
+          <Label htmlFor="points-name">{t("programName")}</Label>
           <Input
             id="points-name"
-            {...register("name", { required: "Program name is required" })}
-            placeholder="e.g., Reward Points, Loyalty Points"
+            {...register("name", { required: t("programNameRequired") })}
+            placeholder={t("pointsProgramNamePlaceholder")}
           />
           {errors.name && (
             <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="points-per-visit">Points Per Visit</Label>
+          <Label htmlFor="points-per-visit">{t("pointsPerVisit")}</Label>
           <Input
             id="points-per-visit"
             type="number"
@@ -668,7 +674,7 @@ function PointsForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="points-expiry">Reward Expiry (Days)</Label>
+          <Label htmlFor="points-expiry">{t("rewardExpiryDays")}</Label>
           <Input
             id="points-expiry"
             type="number"
@@ -682,39 +688,39 @@ function PointsForm({
       {/* Reward Catalog */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label>Reward Catalog</Label>
-          <span className="text-xs text-muted-foreground">{catalog.length}/20 items</span>
+          <Label>{t("rewardCatalog")}</Label>
+          <span className="text-xs text-muted-foreground">{t("catalogCount", { count: catalog.length })}</span>
         </div>
         <div className="space-y-2">
           {catalog.map((item, index) => (
             <div key={item.id} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] items-start rounded-md border border-border bg-muted/20 p-3">
               <div className="space-y-1">
                 <Label htmlFor={`catalog-name-${item.id}`} className="text-xs text-muted-foreground">
-                  Name <span className="text-destructive">*</span>
+                  {t("catalogName")} <span className="text-destructive">{t("catalogNameRequired")}</span>
                 </Label>
                 <Input
                   id={`catalog-name-${item.id}`}
                   value={item.name}
                   onChange={(e) => updateCatalogItem(item.id, "name", e.target.value)}
-                  placeholder="e.g., Free Coffee"
+                  placeholder={t("catalogNamePlaceholder")}
                   className="h-8 text-xs"
                 />
               </div>
               <div className="space-y-1">
                 <Label htmlFor={`catalog-desc-${item.id}`} className="text-xs text-muted-foreground">
-                  Description
+                  {t("catalogDescription")}
                 </Label>
                 <Input
                   id={`catalog-desc-${item.id}`}
                   value={item.description}
                   onChange={(e) => updateCatalogItem(item.id, "description", e.target.value)}
-                  placeholder="Optional"
+                  placeholder={t("catalogDescriptionPlaceholder")}
                   className="h-8 text-xs"
                 />
               </div>
               <div className="space-y-1">
                 <Label htmlFor={`catalog-cost-${item.id}`} className="text-xs text-muted-foreground">
-                  Points Cost <span className="text-destructive">*</span>
+                  {t("catalogPointsCost")} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id={`catalog-cost-${item.id}`}
@@ -733,7 +739,7 @@ function PointsForm({
                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
                   onClick={() => removeCatalogItem(item.id)}
                   disabled={catalog.length === 1}
-                  aria-label={`Remove catalog item ${index + 1}`}
+                  aria-label={t("removeCatalogItem", { index: index + 1 })}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -750,7 +756,7 @@ function PointsForm({
           className="w-full"
         >
           <Plus className="h-3.5 w-3.5 mr-1.5" />
-          Add Catalog Item
+          {t("addCatalogItem")}
         </Button>
       </div>
 
@@ -759,10 +765,10 @@ function PointsForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              Creating...
+              {t("creating")}
             </>
           ) : (
-            "Create Points Program"
+            t("createPointsProgram")
           )}
         </Button>
       </div>
@@ -789,6 +795,7 @@ function PrepaidForm({
   onCreated: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("dashboard.createProgram")
   const [isPending, startTransition] = useTransition()
   const {
     register,
@@ -832,7 +839,7 @@ function PrepaidForm({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Prepaid pass created")
+        toast.success(t("prepaidCreated"))
         reset()
         onCreated()
       }
@@ -847,22 +854,22 @@ function PrepaidForm({
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
-        Back to type selection
+        {t("backToTypeSelection")}
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="prepaid-name">Program Name</Label>
+          <Label htmlFor="prepaid-name">{t("programName")}</Label>
           <Input
             id="prepaid-name"
-            {...register("name", { required: "Program name is required" })}
-            placeholder="e.g., Bus Pass, Car Wash Card, Class Pack"
+            {...register("name", { required: t("programNameRequired") })}
+            placeholder={t("prepaidProgramNamePlaceholder")}
           />
           {errors.name && (
             <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="prepaid-total-uses">Total Uses</Label>
+          <Label htmlFor="prepaid-total-uses">{t("totalUses")}</Label>
           <Input
             id="prepaid-total-uses"
             type="number"
@@ -872,30 +879,30 @@ function PrepaidForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="prepaid-use-label">Use Label</Label>
+          <Label htmlFor="prepaid-use-label">{t("useLabel")}</Label>
           <Input
             id="prepaid-use-label"
-            {...register("useLabel", { required: "Use label is required" })}
-            placeholder="e.g., ride, wash, session, class"
+            {...register("useLabel", { required: t("useLabelRequired") })}
+            placeholder={t("useLabelPlaceholder")}
           />
           {errors.useLabel && (
             <p className="text-xs text-destructive">{errors.useLabel.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="prepaid-rechargeable">Rechargeable</Label>
+          <Label htmlFor="prepaid-rechargeable">{t("rechargeable")}</Label>
           <select
             id="prepaid-rechargeable"
             {...register("rechargeable", { setValueAs: (v) => v === "true" || v === true })}
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="true">Yes</option>
-            <option value="false">No</option>
+            <option value="true">{t("rechargeableYes")}</option>
+            <option value="false">{t("rechargeableNo")}</option>
           </select>
         </div>
         {rechargeable && (
           <div className="space-y-2">
-            <Label htmlFor="prepaid-recharge-amount">Recharge Amount</Label>
+            <Label htmlFor="prepaid-recharge-amount">{t("rechargeAmount")}</Label>
             <Input
               id="prepaid-recharge-amount"
               type="number"
@@ -906,7 +913,7 @@ function PrepaidForm({
           </div>
         )}
         <div className="space-y-2">
-          <Label htmlFor="prepaid-valid-until">Valid Until (Optional)</Label>
+          <Label htmlFor="prepaid-valid-until">{t("prepaidValidUntil")}</Label>
           <Input
             id="prepaid-valid-until"
             type="date"
@@ -914,11 +921,11 @@ function PrepaidForm({
           />
         </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="prepaid-terms">Terms & Conditions (Optional)</Label>
+          <Label htmlFor="prepaid-terms">{t("termsOptional")}</Label>
           <Textarea
             id="prepaid-terms"
             {...register("terms")}
-            placeholder="Optional terms..."
+            placeholder={t("termsPlaceholder")}
             rows={3}
           />
         </div>
@@ -928,10 +935,10 @@ function PrepaidForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              Creating...
+              {t("creating")}
             </>
           ) : (
-            "Create Prepaid Pass"
+            t("createPrepaid")
           )}
         </Button>
       </div>
@@ -958,6 +965,7 @@ function GiftCardForm({
   onCreated: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("dashboard.createProgram")
   const [isPending, startTransition] = useTransition()
   const {
     register,
@@ -990,7 +998,7 @@ function GiftCardForm({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Gift card created")
+        toast.success(t("giftCardCreated"))
         reset()
         onCreated()
       }
@@ -1005,22 +1013,22 @@ function GiftCardForm({
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
-        Back to type selection
+        {t("backToTypeSelection")}
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="gift-name">Card Name</Label>
+          <Label htmlFor="gift-name">{t("giftCardName")}</Label>
           <Input
             id="gift-name"
-            {...register("name", { required: "Card name is required" })}
-            placeholder="e.g., Store Gift Card, Birthday Gift"
+            {...register("name", { required: t("giftCardNameRequired") })}
+            placeholder={t("giftCardNamePlaceholder")}
           />
           {errors.name && (
             <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="gift-currency">Currency</Label>
+          <Label htmlFor="gift-currency">{t("currency")}</Label>
           <select
             id="gift-currency"
             {...register("currency")}
@@ -1034,7 +1042,7 @@ function GiftCardForm({
           </select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="gift-balance">Initial Balance</Label>
+          <Label htmlFor="gift-balance">{t("initialBalance")}</Label>
           <Input
             id="gift-balance"
             type="number"
@@ -1045,18 +1053,18 @@ function GiftCardForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="gift-partial">Partial Redemption</Label>
+          <Label htmlFor="gift-partial">{t("partialRedemption")}</Label>
           <select
             id="gift-partial"
             {...register("partialRedemption", { setValueAs: (v) => v === "true" || v === true })}
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="true">Yes</option>
-            <option value="false">No (full balance only)</option>
+            <option value="true">{t("partialRedemptionYes")}</option>
+            <option value="false">{t("partialRedemptionNo")}</option>
           </select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="gift-expiry">Expiry (Months, 0 = never)</Label>
+          <Label htmlFor="gift-expiry">{t("expiryMonths")}</Label>
           <Input
             id="gift-expiry"
             type="number"
@@ -1071,10 +1079,10 @@ function GiftCardForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              Creating...
+              {t("creating")}
             </>
           ) : (
-            "Create Gift Card"
+            t("createGiftCard")
           )}
         </Button>
       </div>
@@ -1101,6 +1109,7 @@ function TicketForm({
   onCreated: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("dashboard.createProgram")
   const [isPending, startTransition] = useTransition()
   const {
     register,
@@ -1134,7 +1143,7 @@ function TicketForm({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Event ticket created")
+        toast.success(t("ticketCreated"))
         reset()
         onCreated()
       }
@@ -1149,44 +1158,44 @@ function TicketForm({
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
-        Back to type selection
+        {t("backToTypeSelection")}
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="ticket-name">Program Name</Label>
+          <Label htmlFor="ticket-name">{t("programName")}</Label>
           <Input
             id="ticket-name"
-            {...register("name", { required: "Program name is required" })}
-            placeholder="e.g., Summer Concert 2026, Conference VIP"
+            {...register("name", { required: t("programNameRequired") })}
+            placeholder={t("ticketProgramNamePlaceholder")}
           />
           {errors.name && (
             <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="ticket-event-name">Event Name</Label>
+          <Label htmlFor="ticket-event-name">{t("eventName")}</Label>
           <Input
             id="ticket-event-name"
-            {...register("eventName", { required: "Event name is required" })}
-            placeholder="e.g., Summer Music Festival"
+            {...register("eventName", { required: t("eventNameRequired") })}
+            placeholder={t("eventNamePlaceholder")}
           />
           {errors.eventName && (
             <p className="text-xs text-destructive">{errors.eventName.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="ticket-event-date">Event Date</Label>
+          <Label htmlFor="ticket-event-date">{t("eventDate")}</Label>
           <Input
             id="ticket-event-date"
             type="date"
-            {...register("eventDate", { required: "Event date is required" })}
+            {...register("eventDate", { required: t("eventDateRequired") })}
           />
           {errors.eventDate && (
             <p className="text-xs text-destructive">{errors.eventDate.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="ticket-max-scans">Max Scans</Label>
+          <Label htmlFor="ticket-max-scans">{t("maxScans")}</Label>
           <Input
             id="ticket-max-scans"
             type="number"
@@ -1196,11 +1205,11 @@ function TicketForm({
           />
         </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="ticket-venue">Venue</Label>
+          <Label htmlFor="ticket-venue">{t("venue")}</Label>
           <Input
             id="ticket-venue"
-            {...register("eventVenue", { required: "Venue is required" })}
-            placeholder="e.g., Madison Square Garden"
+            {...register("eventVenue", { required: t("venueRequired") })}
+            placeholder={t("venuePlaceholder")}
           />
           {errors.eventVenue && (
             <p className="text-xs text-destructive">{errors.eventVenue.message}</p>
@@ -1212,10 +1221,10 @@ function TicketForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              Creating...
+              {t("creating")}
             </>
           ) : (
-            "Create Ticket"
+            t("createTicket")
           )}
         </Button>
       </div>
@@ -1244,6 +1253,7 @@ function AccessForm({
   onCreated: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("dashboard.createProgram")
   const [isPending, startTransition] = useTransition()
   const [validDays, setValidDays] = useState<string[]>([])
   const {
@@ -1300,7 +1310,7 @@ function AccessForm({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Access pass created")
+        toast.success(t("accessPassCreated"))
         reset()
         setValidDays([])
         onCreated()
@@ -1316,47 +1326,47 @@ function AccessForm({
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
-        Back to type selection
+        {t("backToTypeSelection")}
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="access-name">Program Name</Label>
+          <Label htmlFor="access-name">{t("programName")}</Label>
           <Input
             id="access-name"
-            {...register("name", { required: "Program name is required" })}
-            placeholder="e.g., Gym Access, Building Pass, Pool Entry"
+            {...register("name", { required: t("programNameRequired") })}
+            placeholder={t("accessProgramNamePlaceholder")}
           />
           {errors.name && (
             <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="access-label">Access Label</Label>
+          <Label htmlFor="access-label">{t("accessLabel")}</Label>
           <Input
             id="access-label"
-            {...register("accessLabel", { required: "Label is required" })}
-            placeholder="e.g., Gym Entry, Pool Access"
+            {...register("accessLabel", { required: t("accessLabelRequired") })}
+            placeholder={t("accessLabelPlaceholder")}
           />
           {errors.accessLabel && (
             <p className="text-xs text-destructive">{errors.accessLabel.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="access-duration">Duration</Label>
+          <Label htmlFor="access-duration">{t("duration")}</Label>
           <select
             id="access-duration"
             {...register("validDuration")}
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="lifetime">Lifetime</option>
-            <option value="custom">Custom</option>
+            <option value="monthly">{t("durationMonthly")}</option>
+            <option value="yearly">{t("durationYearly")}</option>
+            <option value="lifetime">{t("durationLifetime")}</option>
+            <option value="custom">{t("durationCustom")}</option>
           </select>
         </div>
         {validDuration === "custom" && (
           <div className="space-y-2">
-            <Label htmlFor="access-custom-days">Custom Duration (Days)</Label>
+            <Label htmlFor="access-custom-days">{t("customDurationDays")}</Label>
             <Input
               id="access-custom-days"
               type="number"
@@ -1367,7 +1377,7 @@ function AccessForm({
           </div>
         )}
         <div className="space-y-2">
-          <Label htmlFor="access-daily-limit">Daily Limit (0 = unlimited)</Label>
+          <Label htmlFor="access-daily-limit">{t("dailyLimit")}</Label>
           <Input
             id="access-daily-limit"
             type="number"
@@ -1377,7 +1387,7 @@ function AccessForm({
           />
         </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label>Valid Days (leave empty for all days)</Label>
+          <Label>{t("validDays")}</Label>
           <div className="flex flex-wrap gap-2">
             {dayOptions.map(({ value, label }) => (
               <button
@@ -1396,7 +1406,7 @@ function AccessForm({
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="access-time-start">Valid From (Optional)</Label>
+          <Label htmlFor="access-time-start">{t("validFrom")}</Label>
           <Input
             id="access-time-start"
             type="time"
@@ -1404,7 +1414,7 @@ function AccessForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="access-time-end">Valid Until (Optional)</Label>
+          <Label htmlFor="access-time-end">{t("validUntilTime")}</Label>
           <Input
             id="access-time-end"
             type="time"
@@ -1417,10 +1427,10 @@ function AccessForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              Creating...
+              {t("creating")}
             </>
           ) : (
-            "Create Access Pass"
+            t("createAccessPass")
           )}
         </Button>
       </div>
@@ -1447,6 +1457,7 @@ function TransitForm({
   onCreated: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("dashboard.createProgram")
   const [isPending, startTransition] = useTransition()
   const {
     register,
@@ -1480,7 +1491,7 @@ function TransitForm({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Transit pass created")
+        toast.success(t("transitCreated"))
         reset()
         onCreated()
       }
@@ -1495,14 +1506,14 @@ function TransitForm({
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
-        Back to type selection
+        {t("backToTypeSelection")}
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="transit-name">Program Name</Label>
+          <Label htmlFor="transit-name">{t("programName")}</Label>
           <Input
             id="transit-name"
-            {...register("name", { required: "Program name is required" })}
+            {...register("name", { required: t("programNameRequired") })}
             placeholder="e.g., City Bus Pass, Train Ticket"
           />
           {errors.name && (
@@ -1510,21 +1521,21 @@ function TransitForm({
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="transit-type">Transit Type</Label>
+          <Label htmlFor="transit-type">{t("transitType")}</Label>
           <select
             id="transit-type"
             {...register("transitType")}
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="bus">Bus</option>
-            <option value="train">Train</option>
-            <option value="ferry">Ferry</option>
-            <option value="flight">Flight</option>
-            <option value="other">Other</option>
+            <option value="bus">{t("transitTypeBus")}</option>
+            <option value="train">{t("transitTypeTrain")}</option>
+            <option value="ferry">{t("transitTypeFerry")}</option>
+            <option value="flight">{t("transitTypeFlight")}</option>
+            <option value="other">{t("transitTypeOther")}</option>
           </select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="transit-departure">Departure (Optional)</Label>
+          <Label htmlFor="transit-departure">{t("departureDateTime")}</Label>
           <Input
             id="transit-departure"
             type="datetime-local"
@@ -1532,19 +1543,19 @@ function TransitForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="transit-origin">Origin (Optional)</Label>
+          <Label htmlFor="transit-origin">{t("origin")}</Label>
           <Input
             id="transit-origin"
             {...register("originName")}
-            placeholder="e.g., Grand Central"
+            placeholder={t("originPlaceholder")}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="transit-destination">Destination (Optional)</Label>
+          <Label htmlFor="transit-destination">{t("destination")}</Label>
           <Input
             id="transit-destination"
             {...register("destinationName")}
-            placeholder="e.g., Penn Station"
+            placeholder={t("destinationPlaceholder")}
           />
         </div>
       </div>
@@ -1553,10 +1564,10 @@ function TransitForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              Creating...
+              {t("creating")}
             </>
           ) : (
-            "Create Transit Pass"
+            t("createTransit")
           )}
         </Button>
       </div>
@@ -1582,6 +1593,7 @@ function BusinessIdForm({
   onCreated: () => void
   onBack: () => void
 }) {
+  const t = useTranslations("dashboard.createProgram")
   const [isPending, startTransition] = useTransition()
   const {
     register,
@@ -1615,7 +1627,7 @@ function BusinessIdForm({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Business ID created")
+        toast.success(t("businessIdCreated"))
         reset()
         onCreated()
       }
@@ -1630,47 +1642,47 @@ function BusinessIdForm({
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
-        Back to type selection
+        {t("backToTypeSelection")}
       </button>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="bid-name">Program Name</Label>
+          <Label htmlFor="bid-name">{t("programName")}</Label>
           <Input
             id="bid-name"
-            {...register("name", { required: "Program name is required" })}
-            placeholder="e.g., Employee Badge, Student ID, Volunteer Card"
+            {...register("name", { required: t("programNameRequired") })}
+            placeholder={t("businessIdNamePlaceholder")}
           />
           {errors.name && (
             <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="bid-label">ID Label</Label>
+          <Label htmlFor="bid-label">{t("idLabel")}</Label>
           <Input
             id="bid-label"
-            {...register("idLabel", { required: "ID label is required" })}
-            placeholder="e.g., Employee ID, Student ID"
+            {...register("idLabel", { required: t("idLabelRequired") })}
+            placeholder={t("idLabelPlaceholder")}
           />
           {errors.idLabel && (
             <p className="text-xs text-destructive">{errors.idLabel.message}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="bid-duration">Valid Duration</Label>
+          <Label htmlFor="bid-duration">{t("duration")}</Label>
           <select
             id="bid-duration"
             {...register("validDuration")}
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="lifetime">Lifetime</option>
-            <option value="custom">Custom</option>
+            <option value="monthly">{t("durationMonthly")}</option>
+            <option value="yearly">{t("durationYearly")}</option>
+            <option value="lifetime">{t("durationLifetime")}</option>
+            <option value="custom">{t("durationCustom")}</option>
           </select>
         </div>
         {validDuration === "custom" && (
           <div className="space-y-2">
-            <Label htmlFor="bid-custom-days">Custom Duration (Days)</Label>
+            <Label htmlFor="bid-custom-days">{t("customDurationDays")}</Label>
             <Input
               id="bid-custom-days"
               type="number"
@@ -1686,10 +1698,10 @@ function BusinessIdForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              Creating...
+              {t("creating")}
             </>
           ) : (
-            "Create Business ID"
+            t("createBusinessId")
           )}
         </Button>
       </div>

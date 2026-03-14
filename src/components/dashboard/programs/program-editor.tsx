@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import {
   AlertTriangle,
   Archive,
@@ -164,6 +165,7 @@ export function ProgramEditor({
   organization: Organization
 }) {
   const router = useRouter()
+  const t = useTranslations("dashboard.programEditor")
   const [isPending, startTransition] = useTransition()
   const [isDangerPending, startDangerTransition] = useTransition()
   const [showWarning, setShowWarning] = useState(false)
@@ -319,7 +321,7 @@ export function ProgramEditor({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Program updated")
+        toast.success(t("programUpdated"))
         reset(data)
         setShowWarning(false)
         setResetProgress(false)
@@ -333,7 +335,7 @@ export function ProgramEditor({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Program archived")
+        toast.success(t("programArchived"))
         setShowArchiveDialog(false)
         router.refresh()
       }
@@ -346,7 +348,7 @@ export function ProgramEditor({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Program activated")
+        toast.success(t("programActivated"))
         router.refresh()
       }
     })
@@ -358,7 +360,7 @@ export function ProgramEditor({
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        toast.success("Program reactivated")
+        toast.success(t("programReactivated"))
         setShowReactivateDialog(false)
         router.refresh()
       }
@@ -374,7 +376,7 @@ export function ProgramEditor({
         }
         toast.error(String(result.error))
       } else {
-        toast.success("Program deleted")
+        toast.success(t("programDeleted"))
         setShowDeleteDialog(false)
         router.push("/dashboard/programs")
       }
@@ -387,15 +389,15 @@ export function ProgramEditor({
 
   // Build sections list based on program type
   const navSections: { id: string; label: string }[] = [
-    { id: "details", label: "Details" },
-    ...(isStampCard ? [{ id: "stamps", label: "Stamps" }] : []),
-    ...(isCoupon ? [{ id: "coupon", label: "Coupon" }] : []),
-    ...(isMembership ? [{ id: "membership", label: "Membership" }] : []),
-    ...(isPoints ? [{ id: "points", label: "Points" }] : []),
-    { id: "schedule", label: "Schedule" },
-    { id: "terms", label: "Terms" },
-    ...((isStampCard || isCoupon) ? [{ id: "prize-reveal", label: "Prize Reveal" }] : []),
-    { id: "danger", label: "Danger" },
+    { id: "details", label: t("details") },
+    ...(isStampCard ? [{ id: "stamps", label: t("stamps") }] : []),
+    ...(isCoupon ? [{ id: "coupon", label: t("coupon") }] : []),
+    ...(isMembership ? [{ id: "membership", label: t("membership") }] : []),
+    ...(isPoints ? [{ id: "points", label: t("points") }] : []),
+    { id: "schedule", label: t("schedule") },
+    { id: "terms", label: t("terms") },
+    ...((isStampCard || isCoupon) ? [{ id: "prize-reveal", label: t("prizeReveal") }] : []),
+    { id: "danger", label: t("danger") },
   ]
 
   return (
@@ -414,14 +416,14 @@ export function ProgramEditor({
           {/* ─── Section 1: Program Details ─────────────────────── */}
           <section id="details" className="scroll-mt-24 space-y-4">
             <div>
-              <h3 className="text-sm font-semibold">Program Details</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Basic information about your program.</p>
+              <h3 className="text-sm font-semibold">{t("programDetails")}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("programDetailsDesc")}</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`name-${program.id}`}>Program Name</Label>
+              <Label htmlFor={`name-${program.id}`}>{t("programName")}</Label>
               <Input
                 id={`name-${program.id}`}
-                {...register("name", { required: "Program name is required" })}
+                {...register("name", { required: t("programNameRequired") })}
                 disabled={isArchived}
               />
               {errors.name && (
@@ -436,12 +438,12 @@ export function ProgramEditor({
           {isStampCard && (
             <section id="stamps" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
               <div>
-                <h3 className="text-sm font-semibold">Stamp Configuration</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Configure visits required and reward details.</p>
+                <h3 className="text-sm font-semibold">{t("stampConfiguration")}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("stampConfigDesc")}</p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor={`visits-${program.id}`}>Visits Required</Label>
+                  <Label htmlFor={`visits-${program.id}`}>{t("visitsRequired")}</Label>
                   <Input
                     id={`visits-${program.id}`}
                     type="number"
@@ -451,13 +453,13 @@ export function ProgramEditor({
                     disabled={isArchived}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Number of visits before a customer earns a reward (3-30).
+                    {t("visitsRequiredHint")}
                   </p>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor={`expiry-${program.id}`}>
-                    Reward Expiry (Days)
+                    {t("rewardExpiry")}
                   </Label>
                   <Input
                     id={`expiry-${program.id}`}
@@ -468,23 +470,23 @@ export function ProgramEditor({
                     disabled={isArchived}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Set to 0 for rewards that never expire.
+                    {t("rewardExpiryHint")}
                   </p>
                 </div>
 
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
+                  <Label htmlFor={`reward-${program.id}`}>{t("rewardDescription")}</Label>
                   <Input
                     id={`reward-${program.id}`}
                     {...register("rewardDescription", {
-                      required: "Reward description is required",
+                      required: t("rewardDescriptionRequired"),
                     })}
-                    placeholder="e.g., Free coffee or dessert"
+                    placeholder={t("rewardDescriptionPlaceholder")}
                     disabled={isArchived || hasPrizes}
                   />
                   {hasPrizes ? (
                     <p className="text-xs text-muted-foreground">
-                      Auto-generated from prize reveal prizes. Edit prizes below to update.
+                      {t("rewardDescriptionFromPrizes")}
                     </p>
                   ) : errors.rewardDescription ? (
                     <p className="text-xs text-destructive">
@@ -500,27 +502,27 @@ export function ProgramEditor({
           {isCoupon && (
             <section id="coupon" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
               <div>
-                <h3 className="text-sm font-semibold">Coupon Configuration</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Set the discount type, value, and usage limits.</p>
+                <h3 className="text-sm font-semibold">{t("couponConfiguration")}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("couponConfigDesc")}</p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor={`discount-type-${program.id}`}>Discount Type</Label>
+                  <Label htmlFor={`discount-type-${program.id}`}>{t("discountType")}</Label>
                   <select
                     id={`discount-type-${program.id}`}
                     {...register("discountType")}
                     disabled={isArchived}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <option value="percentage">Percentage Off</option>
-                    <option value="fixed">Fixed Amount Off</option>
-                    <option value="freebie">Free Item</option>
+                    <option value="percentage">{t("discountTypePercentage")}</option>
+                    <option value="fixed">{t("discountTypeFixed")}</option>
+                    <option value="freebie">{t("discountTypeFreebie")}</option>
                   </select>
                 </div>
                 {discountType !== "freebie" && (
                   <div className="space-y-2">
                     <Label htmlFor={`discount-value-${program.id}`}>
-                      {discountType === "percentage" ? "Discount (%)" : "Discount Amount"}
+                      {discountType === "percentage" ? t("discountPercent") : t("discountAmount")}
                     </Label>
                     <Input
                       id={`discount-value-${program.id}`}
@@ -533,18 +535,18 @@ export function ProgramEditor({
                   </div>
                 )}
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor={`reward-${program.id}`}>Description</Label>
+                  <Label htmlFor={`reward-${program.id}`}>{t("couponDescription")}</Label>
                   <Input
                     id={`reward-${program.id}`}
                     {...register("rewardDescription", {
-                      required: "Description is required",
+                      required: t("couponDescriptionRequired"),
                     })}
-                    placeholder="e.g., Get 20% off your next order"
+                    placeholder={t("couponDescriptionPlaceholder")}
                     disabled={isArchived || hasPrizes}
                   />
                   {hasPrizes ? (
                     <p className="text-xs text-muted-foreground">
-                      Auto-generated from prize reveal prizes. Edit prizes below to update.
+                      {t("rewardDescriptionFromPrizes")}
                     </p>
                   ) : errors.rewardDescription ? (
                     <p className="text-xs text-destructive">
@@ -553,7 +555,7 @@ export function ProgramEditor({
                   ) : null}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor={`valid-until-${program.id}`}>Valid Until</Label>
+                  <Label htmlFor={`valid-until-${program.id}`}>{t("validUntil")}</Label>
                   <Input
                     id={`valid-until-${program.id}`}
                     type="date"
@@ -562,25 +564,25 @@ export function ProgramEditor({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor={`coupon-code-${program.id}`}>Coupon Code</Label>
+                  <Label htmlFor={`coupon-code-${program.id}`}>{t("couponCode")}</Label>
                   <Input
                     id={`coupon-code-${program.id}`}
                     {...register("couponCode")}
-                    placeholder="e.g., SAVE20"
+                    placeholder={t("couponCodePlaceholder")}
                     disabled={isArchived}
                   />
-                  <p className="text-xs text-muted-foreground">Optional. Shown on the wallet pass and card page.</p>
+                  <p className="text-xs text-muted-foreground">{t("couponCodeHint")}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor={`redemption-limit-${program.id}`}>Redemption Limit</Label>
+                  <Label htmlFor={`redemption-limit-${program.id}`}>{t("redemptionLimit")}</Label>
                   <select
                     id={`redemption-limit-${program.id}`}
                     {...register("redemptionLimit")}
                     disabled={isArchived}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <option value="single">Single Use</option>
-                    <option value="unlimited">Unlimited</option>
+                    <option value="single">{t("redemptionSingle")}</option>
+                    <option value="unlimited">{t("redemptionUnlimited")}</option>
                   </select>
                 </div>
               </div>
@@ -591,16 +593,16 @@ export function ProgramEditor({
           {isMembership && (
             <section id="membership" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
               <div>
-                <h3 className="text-sm font-semibold">Membership Configuration</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Define membership tiers, duration, and benefits.</p>
+                <h3 className="text-sm font-semibold">{t("membershipConfiguration")}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("membershipConfigDesc")}</p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor={`tier-${program.id}`}>Membership Tier</Label>
+                  <Label htmlFor={`tier-${program.id}`}>{t("membershipTier")}</Label>
                   <Input
                     id={`tier-${program.id}`}
-                    {...register("membershipTier", { required: "Tier name is required" })}
-                    placeholder="e.g., VIP, Gold, Premium"
+                    {...register("membershipTier", { required: t("membershipTierRequired") })}
+                    placeholder={t("membershipTierPlaceholder")}
                     disabled={isArchived}
                   />
                   {errors.membershipTier && (
@@ -608,22 +610,22 @@ export function ProgramEditor({
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor={`duration-${program.id}`}>Duration</Label>
+                  <Label htmlFor={`duration-${program.id}`}>{t("duration")}</Label>
                   <select
                     id={`duration-${program.id}`}
                     {...register("validDuration")}
                     disabled={isArchived}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                    <option value="lifetime">Lifetime</option>
-                    <option value="custom">Custom</option>
+                    <option value="monthly">{t("durationMonthly")}</option>
+                    <option value="yearly">{t("durationYearly")}</option>
+                    <option value="lifetime">{t("durationLifetime")}</option>
+                    <option value="custom">{t("durationCustom")}</option>
                   </select>
                 </div>
                 {validDuration === "custom" && (
                   <div className="space-y-2">
-                    <Label htmlFor={`custom-days-${program.id}`}>Custom Duration (Days)</Label>
+                    <Label htmlFor={`custom-days-${program.id}`}>{t("customDurationDays")}</Label>
                     <Input
                       id={`custom-days-${program.id}`}
                       type="number"
@@ -635,11 +637,11 @@ export function ProgramEditor({
                   </div>
                 )}
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor={`benefits-${program.id}`}>Benefits</Label>
+                  <Label htmlFor={`benefits-${program.id}`}>{t("benefits")}</Label>
                   <Textarea
                     id={`benefits-${program.id}`}
-                    {...register("benefits", { required: "Benefits are required" })}
-                    placeholder="List the perks members receive..."
+                    {...register("benefits", { required: t("benefitsRequired") })}
+                    placeholder={t("benefitsPlaceholder")}
                     rows={3}
                     disabled={isArchived}
                   />
@@ -648,11 +650,11 @@ export function ProgramEditor({
                   )}
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
+                  <Label htmlFor={`reward-${program.id}`}>{t("rewardDescription")}</Label>
                   <Input
                     id={`reward-${program.id}`}
                     {...register("rewardDescription", {
-                      required: "Reward description is required",
+                      required: t("rewardDescriptionRequired"),
                     })}
                     placeholder="e.g., VIP Member"
                     disabled={isArchived}
@@ -666,12 +668,12 @@ export function ProgramEditor({
           {isPoints && (
             <section id="points" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
               <div>
-                <h3 className="text-sm font-semibold">Points Configuration</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Set how points are earned and what they can be redeemed for.</p>
+                <h3 className="text-sm font-semibold">{t("pointsConfiguration")}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("pointsConfigDesc")}</p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor={`points-per-visit-${program.id}`}>Points Per Visit</Label>
+                  <Label htmlFor={`points-per-visit-${program.id}`}>{t("pointsPerVisit")}</Label>
                   <Input
                     id={`points-per-visit-${program.id}`}
                     type="number"
@@ -682,16 +684,16 @@ export function ProgramEditor({
                     disabled={isArchived}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Points awarded to customers each time they visit (1–100).
+                    {t("pointsPerVisitHint")}
                   </p>
                 </div>
 
                 <div className="sm:col-span-2 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label className="text-sm font-medium">Reward Catalog</Label>
+                      <Label className="text-sm font-medium">{t("rewardCatalog")}</Label>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Items customers can redeem with their points (up to 20).
+                        {t("rewardCatalogDesc")}
                       </p>
                     </div>
                     <Button
@@ -711,13 +713,13 @@ export function ProgramEditor({
                         ])
                       }
                     >
-                      Add Item
+                      {t("addItem")}
                     </Button>
                   </div>
 
                   {catalogItems.length === 0 && (
                     <p className="text-xs text-muted-foreground border border-dashed border-border rounded-md px-3 py-4 text-center">
-                      No catalog items yet. Add at least one reward for customers to redeem.
+                      {t("noCatalogItems")}
                     </p>
                   )}
 
@@ -734,12 +736,12 @@ export function ProgramEditor({
                               htmlFor={`catalog-name-${item.id}`}
                               className="text-xs text-muted-foreground"
                             >
-                              Reward Name
+                              {t("rewardName")}
                             </Label>
                             <Input
                               id={`catalog-name-${item.id}`}
                               value={item.name}
-                              placeholder="e.g., Free Coffee"
+                              placeholder={t("rewardNamePlaceholder")}
                               disabled={isArchived}
                               onChange={(e) =>
                                 setCatalogItems((prev) =>
@@ -755,7 +757,7 @@ export function ProgramEditor({
                               htmlFor={`catalog-cost-${item.id}`}
                               className="text-xs text-muted-foreground"
                             >
-                              Points Cost
+                              {t("pointsCost")}
                             </Label>
                             <Input
                               id={`catalog-cost-${item.id}`}
@@ -783,12 +785,12 @@ export function ProgramEditor({
                               htmlFor={`catalog-desc-${item.id}`}
                               className="text-xs text-muted-foreground"
                             >
-                              Description (optional)
+                              {t("descriptionOptional")}
                             </Label>
                             <Input
                               id={`catalog-desc-${item.id}`}
                               value={item.description ?? ""}
-                              placeholder="Short description..."
+                              placeholder={t("descriptionPlaceholder")}
                               disabled={isArchived}
                               onChange={(e) =>
                                 setCatalogItems((prev) =>
@@ -807,7 +809,7 @@ export function ProgramEditor({
                             size="sm"
                             className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                             disabled={isArchived}
-                            aria-label="Remove catalog item"
+                            aria-label={t("removeCatalogItem")}
                             onClick={() =>
                               setCatalogItems((prev) =>
                                 prev.filter((_, i) => i !== index)
@@ -823,11 +825,11 @@ export function ProgramEditor({
                 </div>
 
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor={`reward-${program.id}`}>Reward Description</Label>
+                  <Label htmlFor={`reward-${program.id}`}>{t("rewardDescription")}</Label>
                   <Input
                     id={`reward-${program.id}`}
                     {...register("rewardDescription", {
-                      required: "Reward description is required",
+                      required: t("rewardDescriptionRequired"),
                     })}
                     placeholder="e.g., Redeem points for free items"
                     disabled={isArchived}
@@ -845,12 +847,12 @@ export function ProgramEditor({
           {isPrepaid && (
             <section id="prepaid" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
               <div>
-                <h3 className="text-sm font-semibold">Prepaid Configuration</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Configure the number of uses and recharge options.</p>
+                <h3 className="text-sm font-semibold">{t("prepaidConfiguration")}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("prepaidConfigDesc")}</p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor={`total-uses-${program.id}`}>Total Uses</Label>
+                  <Label htmlFor={`total-uses-${program.id}`}>{t("totalUses")}</Label>
                   <Input
                     id={`total-uses-${program.id}`}
                     type="number"
@@ -859,35 +861,35 @@ export function ProgramEditor({
                     {...register("totalUses", { valueAsNumber: true, min: 1 })}
                     disabled={isArchived}
                   />
-                  <p className="text-xs text-muted-foreground">Number of uses included in this pass.</p>
+                  <p className="text-xs text-muted-foreground">{t("totalUsesHint")}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor={`use-label-${program.id}`}>Use Label</Label>
+                  <Label htmlFor={`use-label-${program.id}`}>{t("useLabel")}</Label>
                   <Input
                     id={`use-label-${program.id}`}
                     {...register("useLabel")}
-                    placeholder="e.g., ride, wash, session"
+                    placeholder={t("useLabelPlaceholder")}
                     disabled={isArchived}
                   />
-                  <p className="text-xs text-muted-foreground">What each use is called (e.g., &quot;ride&quot;, &quot;wash&quot;).</p>
+                  <p className="text-xs text-muted-foreground">{t("useLabelHint")}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor={`rechargeable-${program.id}`}>Rechargeable</Label>
+                  <Label htmlFor={`rechargeable-${program.id}`}>{t("rechargeable")}</Label>
                   <select
                     id={`rechargeable-${program.id}`}
                     {...register("rechargeable")}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isArchived}
                   >
-                    <option value="false">No — single use pass</option>
-                    <option value="true">Yes — can be recharged</option>
+                    <option value="false">{t("rechargeableNo")}</option>
+                    <option value="true">{t("rechargeableYes")}</option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor={`prepaid-valid-${program.id}`}>Valid Until (Optional)</Label>
+                  <Label htmlFor={`prepaid-valid-${program.id}`}>{t("prepaidValidUntil")}</Label>
                   <Input
                     id={`prepaid-valid-${program.id}`}
                     type="date"
@@ -902,29 +904,29 @@ export function ProgramEditor({
           {/* ─── Section 3: Schedule ────────────────────────────── */}
           <section id="schedule" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
             <div>
-              <h3 className="text-sm font-semibold">Schedule</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Control when the program is active and accepting customers.</p>
+              <h3 className="text-sm font-semibold">{t("scheduleSection")}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("scheduleDesc")}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor={`status-${program.id}`}>Status</Label>
+                <Label htmlFor={`status-${program.id}`}>{t("status")}</Label>
                 <select
                   id={`status-${program.id}`}
                   {...register("status")}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={isArchived}
                 >
-                  <option value="DRAFT">Draft</option>
-                  <option value="ACTIVE">Active</option>
-                  <option value="ARCHIVED">Archived</option>
+                  <option value="DRAFT">{t("statusDraft")}</option>
+                  <option value="ACTIVE">{t("statusActive")}</option>
+                  <option value="ARCHIVED">{t("statusArchived")}</option>
                 </select>
                 <p className="text-xs text-muted-foreground">
-                  Only active programs accept new {isStampCard ? "visits" : "customers"}.
+                  {isStampCard ? t("statusHintVisits") : t("statusHintCustomers")}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`starts-${program.id}`}>Start Date</Label>
+                <Label htmlFor={`starts-${program.id}`}>{t("startDate")}</Label>
                 <Input
                   id={`starts-${program.id}`}
                   type="date"
@@ -934,7 +936,7 @@ export function ProgramEditor({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`ends-${program.id}`}>End Date (Optional)</Label>
+                <Label htmlFor={`ends-${program.id}`}>{t("endDate")}</Label>
                 <Input
                   id={`ends-${program.id}`}
                   type="date"
@@ -942,7 +944,7 @@ export function ProgramEditor({
                   disabled={isArchived}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Leave empty for an open-ended program.
+                  {t("endDateHint")}
                 </p>
               </div>
             </div>
@@ -951,14 +953,14 @@ export function ProgramEditor({
           {/* ─── Section 4: Terms & Conditions ──────────────────── */}
           <section id="terms" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
             <div>
-              <h3 className="text-sm font-semibold">Terms & Conditions</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Optional terms displayed on the wallet pass.</p>
+              <h3 className="text-sm font-semibold">{t("termsSection")}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("termsDesc")}</p>
             </div>
             <div className="space-y-2">
               <Textarea
                 id={`terms-${program.id}`}
                 {...register("termsAndConditions")}
-                placeholder="Optional terms shown on the wallet pass..."
+                placeholder={t("termsPlaceholder")}
                 rows={4}
                 disabled={isArchived}
               />
@@ -992,12 +994,10 @@ export function ProgramEditor({
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm font-medium">
-                      Changing visits required from {programVisitsRequired} to{" "}
-                      {visitsRequired}
+                      {t("visitsChangedTitle", { from: programVisitsRequired, to: visitsRequired })}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      This will affect customers currently in a cycle. Choose how
-                      to handle existing progress:
+                      {t("visitsChangedDesc")}
                     </p>
                   </div>
                   <div className="space-y-2">
@@ -1010,8 +1010,7 @@ export function ProgramEditor({
                         className="accent-foreground"
                       />
                       <span className="text-sm">
-                        Keep existing progress -- customers retain their current
-                        visit count
+                        {t("keepProgress")}
                       </span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -1023,7 +1022,7 @@ export function ProgramEditor({
                         className="accent-foreground"
                       />
                       <span className="text-sm">
-                        Reset all progress -- all customers start fresh at 0 visits
+                        {t("resetProgress")}
                       </span>
                     </label>
                   </div>
@@ -1044,7 +1043,7 @@ export function ProgramEditor({
               >
                 <Link href={`/dashboard/programs/${program.id}/design`}>
                   <Paintbrush className="h-3.5 w-3.5" />
-                  Card Design
+                  {t("cardDesign")}
                 </Link>
               </Button>
             </div>
@@ -1052,7 +1051,7 @@ export function ProgramEditor({
             {(isDirty || showWarning) && (
               <div className="flex items-center gap-2">
                 <p className="text-xs text-warning font-medium">
-                  Unsaved changes
+                  {t("unsavedChanges")}
                 </p>
                 {showWarning && (
                   <Button
@@ -1070,10 +1069,10 @@ export function ProgramEditor({
                   size="sm"
                 >
                   {isPending
-                    ? "Saving..."
+                    ? t("saving")
                     : showWarning
-                      ? "Confirm & Save"
-                      : "Save changes"}
+                      ? t("confirmSave")
+                      : t("saveChanges")}
                 </Button>
               </div>
             )}
@@ -1081,15 +1080,15 @@ export function ProgramEditor({
 
           {/* ─── Section 6: Danger Zone ─────────────────────────── */}
           <section id="danger" className="scroll-mt-24 space-y-4 border-t border-destructive/30 pt-6">
-            <h3 className="text-sm font-semibold text-destructive">Danger Zone</h3>
+            <h3 className="text-sm font-semibold text-destructive">{t("dangerZone")}</h3>
 
             {/* Activate (DRAFT only) */}
             {isDraft && (
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
-                  <p className="text-sm font-medium">Activate program</p>
+                  <p className="text-sm font-medium">{t("activateProgram")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Make this program live so customers can start earning visits.
+                    {t("activateProgramDesc")}
                   </p>
                 </div>
                 <Button
@@ -1105,7 +1104,7 @@ export function ProgramEditor({
                   ) : (
                     <Play className="h-3.5 w-3.5" />
                   )}
-                  Activate
+                  {t("activate")}
                 </Button>
               </div>
             )}
@@ -1114,9 +1113,9 @@ export function ProgramEditor({
             {program.status === "ACTIVE" && (
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
-                  <p className="text-sm font-medium">Archive program</p>
+                  <p className="text-sm font-medium">{t("archiveProgram")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Active enrollments will be frozen and customers won&apos;t earn new visits.
+                    {t("archiveProgramDesc")}
                   </p>
                 </div>
                 <Button
@@ -1128,7 +1127,7 @@ export function ProgramEditor({
                   disabled={isDangerPending}
                 >
                   <Archive className="h-3.5 w-3.5" />
-                  Archive
+                  {t("archive")}
                 </Button>
               </div>
             )}
@@ -1137,9 +1136,9 @@ export function ProgramEditor({
             {isArchived && (
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
-                  <p className="text-sm font-medium">Reactivate program</p>
+                  <p className="text-sm font-medium">{t("reactivateProgram")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Set the program back to active and unfreeze all frozen enrollments.
+                    {t("reactivateProgramDesc")}
                   </p>
                 </div>
                 <Button
@@ -1151,7 +1150,7 @@ export function ProgramEditor({
                   disabled={isDangerPending}
                 >
                   <ArchiveRestore className="h-3.5 w-3.5" />
-                  Reactivate
+                  {t("reactivate")}
                 </Button>
               </div>
             )}
@@ -1159,9 +1158,9 @@ export function ProgramEditor({
             {/* Delete (all statuses) */}
             <div className="flex items-center justify-between gap-4 border-t border-destructive/20 pt-4">
               <div className="space-y-0.5">
-                <p className="text-sm font-medium">Delete program</p>
+                <p className="text-sm font-medium">{t("deleteProgram")}</p>
                 <p className="text-xs text-muted-foreground">
-                  Permanently delete this program, including all enrollments, visits, and rewards. This cannot be undone.
+                  {t("deleteProgramDesc")}
                 </p>
               </div>
               <Button
@@ -1177,7 +1176,7 @@ export function ProgramEditor({
                 disabled={isDangerPending}
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                Delete
+                {t("delete")}
               </Button>
             </div>
           </section>
@@ -1195,10 +1194,9 @@ export function ProgramEditor({
       <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Archive program</AlertDialogTitle>
+            <AlertDialogTitle>{t("archiveDialogTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Active enrollments will be frozen and customers won&apos;t earn new visits.
-              Earned rewards will remain valid. You can reactivate the program later.
+              {t("archiveDialogDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1208,7 +1206,7 @@ export function ProgramEditor({
               onClick={handleArchive}
               disabled={isDangerPending}
             >
-              {isDangerPending ? "Archiving..." : "Archive program"}
+              {isDangerPending ? t("archiving") : t("archiveConfirmBtn")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1218,10 +1216,9 @@ export function ProgramEditor({
       <AlertDialog open={showReactivateDialog} onOpenChange={setShowReactivateDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Reactivate program</AlertDialogTitle>
+            <AlertDialogTitle>{t("reactivateDialogTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will set the program back to active and unfreeze all frozen enrollments.
-              Customers will be able to earn visits again.
+              {t("reactivateDialogDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1231,7 +1228,7 @@ export function ProgramEditor({
               onClick={handleReactivate}
               disabled={isDangerPending}
             >
-              {isDangerPending ? "Reactivating..." : "Reactivate program"}
+              {isDangerPending ? t("reactivating") : t("reactivateConfirmBtn")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1241,27 +1238,26 @@ export function ProgramEditor({
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete program</DialogTitle>
+            <DialogTitle>{t("deleteDialogTitle")}</DialogTitle>
             <DialogDescription>
-              This action is permanent and cannot be undone. All data associated with
-              this program will be deleted.
+              {t("deleteDialogDesc")}
             </DialogDescription>
           </DialogHeader>
 
           {deleteCounts && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm space-y-1">
-              <p className="font-medium text-destructive">The following data will be deleted:</p>
+              <p className="font-medium text-destructive">{t("dataToDelete")}</p>
               <ul className="list-disc list-inside text-muted-foreground text-xs space-y-0.5">
-                <li>{deleteCounts.passInstances} pass instance{deleteCounts.passInstances !== 1 ? "s" : ""}</li>
-                <li>{deleteCounts.interactions} interaction{deleteCounts.interactions !== 1 ? "s" : ""}</li>
-                <li>{deleteCounts.rewards} reward{deleteCounts.rewards !== 1 ? "s" : ""}</li>
+                <li>{t("passInstancesCount", { count: deleteCounts.passInstances })}</li>
+                <li>{t("interactionsCount", { count: deleteCounts.interactions })}</li>
+                <li>{t("rewardsCount", { count: deleteCounts.rewards })}</li>
               </ul>
             </div>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="delete-confirm">
-              Type <span className="font-semibold">{program.name}</span> to confirm
+              {t("typeToConfirm", { name: program.name })}
             </Label>
             <Input
               id="delete-confirm"
@@ -1281,7 +1277,7 @@ export function ProgramEditor({
               onClick={handleDelete}
               disabled={deleteConfirmName !== program.name || isDangerPending}
             >
-              {isDangerPending ? "Deleting..." : "Delete program"}
+              {isDangerPending ? t("deleting") : t("deleteConfirmBtn")}
             </Button>
           </DialogFooter>
         </DialogContent>
