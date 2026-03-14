@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { AnalyticsProvider } from "@/components/analytics-provider";
+import { CookieBanner } from "@/components/cookie-banner";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
@@ -94,6 +95,7 @@ export default function RootLayout({
           <SpeedInsights />
           <Analytics />
           <Toaster richColors position="top-center" />
+          <CookieBanner />
         </ThemeProvider>
         <AnalyticsProvider />
       </body>
