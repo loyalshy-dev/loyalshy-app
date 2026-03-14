@@ -41,9 +41,10 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - `getCurrentUser()` — validate session, return user (cached per-request via React `cache()`)
 - `assertAuthenticated()` — redirects to /login if no session
 - `assertSuperAdmin()` — checks User.role === "super_admin"
-- `assertOrganizationAccess(organizationId)` — verify org membership (super admins bypass)
+- `getOrgMember(organizationId)` — returns member record for current user in org, cached per-request to deduplicate role lookups across layout/page/actions
+- `assertOrganizationAccess(organizationId)` — verify org membership via `getOrgMember()` (super admins bypass)
 - `assertOrganizationRole(organizationId, "owner")` — verify org role with hierarchy (owner > admin > member)
-- `getOrganizationForUser()` — returns organization with billing + active templates via session.activeOrganizationId (cached per-request via React `cache()`)
+- `getOrganizationForUser()` — returns lightweight organization record (no includes) via session.activeOrganizationId (cached per-request via React `cache()`)
 - `getActiveTemplates(organizationId)` — returns active PassTemplates with PassDesign
 - `getContactPassInstances(contactId, organizationId)` — returns PassInstances with PassTemplate
 
@@ -98,7 +99,8 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Messages**: `src/messages/en.json` + `src/messages/es.json` — organized by namespace (common, nav, hero, features, pricing, faq, auth, dashboard, errors, etc.)
 - **Server components**: use `getTranslations("namespace")` from `next-intl/server` (must be async)
 - **Client components**: use `useTranslations("namespace")` from `next-intl`
-- **Root layout**: wraps children in `NextIntlClientProvider` with messages from `getMessages()`, inside a Suspense boundary (required for `cacheComponents: true`)
+- **Root layout**: wraps children in `NextIntlClientProvider` with only shared namespaces (`common`, `errors`, `cookieBanner` ~1KB), inside a Suspense boundary (required for `cacheComponents: true`)
+- **Route group providers**: Each route group adds a nested `NextIntlClientProvider` with its specific namespaces — `(dashboard)` provides `dashboard`, `studio`, `serverErrors`; `(auth)` provides `auth`, `nav`; landing page provides marketing namespaces. This reduces RSC payload from ~67KB to only what's needed per route.
 - **Language switcher**: `src/components/language-switcher.tsx` — sets `locale` cookie and reloads, placed in marketing navbar and dashboard topbar
 - **Adding a new locale**: Add to `locales` array in `config.ts`, create `src/messages/{locale}.json`, add `localeNames` entry
 - **Server actions**: use `getTranslations("serverErrors")` from `next-intl/server` for error/validation messages
@@ -229,6 +231,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase SEO — Comprehensive SEO audit fixes (legal pages, structured data, LCP performance, sitemap, robots.txt, WCAG contrast, HSTS preload, fake social proof removal)
 - [x] Phase I18N — Internationalization with next-intl (English + Spanish, cookie-based locale, 78 files / ~1,300 strings, 100% coverage — marketing, auth, dashboard, studio, server actions, legal pages)
 - [x] Phase PERF — Performance optimization (WebP images, CSS hero animations, Suspense restructure, cached DAL, parallel queries, lazy-loaded dashboard dialogs, skeleton fallbacks)
+- [x] Phase PERF-2 — Deep performance pass (cached `getOrgMember()` in DAL, removed unused passTemplates include from `getOrganizationForUser()`, parallelized all sequential DB queries across dashboard pages, Vercel region `fra1` to match Neon DB, i18n message splitting by route group, DB indexes on Reward/Interaction/Contact, contacts page Suspense boundary)
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -362,8 +365,8 @@ Update the "Current Progress" section above to track what's done.
 
 | Layer | Service | Notes |
 |-------|---------|-------|
-| Compute | Vercel (Pro) | Next.js 16 native, preview deploys |
-| Database | Neon PostgreSQL | Serverless, connection pooling, DB branching |
+| Compute | Vercel (Pro) | Next.js 16 native, preview deploys, `fra1` region (Frankfurt) via `vercel.json` |
+| Database | Neon PostgreSQL | Serverless, connection pooling, DB branching, `eu-central-1` (Frankfurt) |
 | Cache / Rate Limiting | Upstash Redis | HTTP-based, serverless-safe, @upstash/ratelimit |
 | File Storage | Cloudflare R2 | Already configured (S3-compatible) |
 | Background Jobs | Trigger.dev | Already configured (9 tasks, 5 queues) |
