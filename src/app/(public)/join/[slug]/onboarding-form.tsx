@@ -9,6 +9,15 @@ import {
   Gift,
   ChevronRight,
   Bookmark,
+  Stamp,
+  Tag,
+  Users,
+  Star,
+  Wallet,
+  Ticket,
+  KeyRound,
+  Train,
+  BadgeCheck,
 } from "lucide-react"
 import { joinTemplate, requestWalletPass } from "@/server/onboarding-actions"
 import type { OrganizationPublicInfo, JoinResult, JoinRequirement } from "@/server/onboarding-actions"
@@ -27,6 +36,48 @@ function getRewardDescription(p: PublicTemplateInfo): string {
   const cfg = p.config as Record<string, unknown> | null
   if (cfg && typeof cfg.rewardDescription === "string") return cfg.rewardDescription
   return p.description ?? p.name
+}
+
+function getPassTypeIcon(passType: string) {
+  switch (passType) {
+    case "STAMP_CARD": return Stamp
+    case "COUPON": return Tag
+    case "MEMBERSHIP": return Users
+    case "POINTS": return Star
+    case "PREPAID": return Wallet
+    case "GIFT_CARD": return Gift
+    case "TICKET": return Ticket
+    case "ACCESS": return KeyRound
+    case "TRANSIT": return Train
+    case "BUSINESS_ID": return BadgeCheck
+    default: return CreditCard
+  }
+}
+
+function getProgramSubtitle(p: PublicTemplateInfo): string {
+  const reward = getRewardDescription(p)
+  switch (p.passType) {
+    case "STAMP_CARD":
+      return `${reward} after ${getVisitsRequired(p)} visits`
+    case "COUPON":
+    case "MEMBERSHIP":
+    case "BUSINESS_ID":
+      return reward
+    case "POINTS":
+      return `Earn points — ${reward}`
+    case "PREPAID":
+      return `Prepaid balance — ${reward}`
+    case "GIFT_CARD":
+      return `Gift card — ${reward}`
+    case "TICKET":
+      return reward
+    case "ACCESS":
+      return reward
+    case "TRANSIT":
+      return reward
+    default:
+      return reward
+  }
 }
 
 type Platform = "apple" | "google"
@@ -251,7 +302,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
                 {organization.name}
               </h1>
               <p className="text-muted-foreground text-[15px]">
-                Choose a loyalty program to join
+                Choose a program to join
               </p>
             </div>
           </div>
@@ -285,11 +336,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
                         {program.name}
                       </h3>
                       <p className="text-[13px] text-muted-foreground mt-0.5">
-                        {program.passType === "COUPON"
-                          ? getRewardDescription(program)
-                          : program.passType === "MEMBERSHIP"
-                            ? getRewardDescription(program)
-                            : `${getRewardDescription(program)} after ${getVisitsRequired(program)} visits`}
+                        {getProgramSubtitle(program)}
                       </p>
                     </div>
 
@@ -304,7 +351,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <CreditCard className="w-3.5 h-3.5" aria-hidden="true" />
-              Free digital loyalty card
+              Free digital wallet pass
             </div>
             <p className="text-[11px] text-muted-foreground/70">
               Powered by{" "}
@@ -354,7 +401,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               {organization.name}
             </h1>
             <p className="text-muted-foreground text-[14px]">
-              {activeProgram?.name ?? "Get your digital loyalty card"}
+              {activeProgram?.name ?? "Get your digital wallet pass"}
             </p>
           </div>
 
@@ -367,9 +414,8 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
                 color: brandColor,
               }}
             >
-              <Gift className="w-3.5 h-3.5" aria-hidden="true" />
-              {getRewardDescription(activeProgram)} after{" "}
-              {getVisitsRequired(activeProgram)} visits
+              {(() => { const Icon = getPassTypeIcon(activeProgram.passType); return <Icon className="w-3.5 h-3.5" aria-hidden="true" /> })()}
+              {getProgramSubtitle(activeProgram)}
             </div>
           )}
         </div>
@@ -569,7 +615,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <CreditCard className="w-3.5 h-3.5" aria-hidden="true" />
-            Free digital loyalty card
+            Free digital wallet pass
           </div>
           <p className="text-[11px] text-muted-foreground/70">
             Powered by{" "}
