@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { ChevronDown, RotateCcw, Wand2, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
-import type { ExtractedPalette } from "@/lib/color-extraction"
+import type { ExtractedPalette, PaletteVariation } from "@/lib/color-extraction"
 import {
   uploadProgramLogo,
   deleteProgramLogo,
@@ -172,7 +172,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
       if (paletteCacheRef.current?.url === sourceUrl) {
         palette = paletteCacheRef.current.palette
       } else {
-        const result = await extractPaletteFromLogoUrl(organizationId)
+        const result = await extractPaletteFromLogoUrl(organizationId, sourceUrl)
         if ("palette" in result && result.palette) {
           palette = result.palette
           paletteCacheRef.current = { url: sourceUrl, palette }
@@ -181,11 +181,10 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
 
       if (palette) {
         setMatchPalette(palette)
-        const s = store.getState()
-        s.setWalletField("primaryColor", palette.primarySuggestion)
-        s.setWalletField("secondaryColor", palette.secondarySuggestion)
-        s.setWalletField("textColor", palette.textColor)
-        toast.success("Card colors matched to your brand!")
+        // Auto-apply the first variation (Dark)
+        if (palette.variations.length > 0) {
+          applyVariation(palette.variations[0])
+        }
       } else {
         toast.error("Could not extract colors from your logo.")
       }
@@ -194,6 +193,15 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
     } finally {
       setIsMatching(false)
     }
+  }
+
+  function applyVariation(v: PaletteVariation) {
+    const s = store.getState()
+    s.setWalletField("primaryColor", v.primaryColor)
+    s.setWalletField("secondaryColor", v.secondaryColor)
+    s.setWalletField("textColor", v.textColor)
+    s.setWalletField("labelColor", v.labelColor)
+    s.setWalletField("autoTextColor", false)
   }
 
   return (
@@ -403,38 +411,6 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
               Extract colors from your logo and apply them to your card design.
             </div>
 
-            {/* Extracted palette dots */}
-            {matchPalette && matchPalette.colors.length > 0 && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                  marginBottom: 8,
-                  padding: "4px 8px",
-                  borderRadius: 12,
-                  backgroundColor: "var(--background)",
-                }}
-              >
-                {matchPalette.colors.slice(0, 5).map((c, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      width: 16,
-                      height: 16,
-                      borderRadius: "50%",
-                      backgroundColor: c.hex,
-                      border: "1px solid var(--border)",
-                    }}
-                    title={`${c.hex} (${c.percentage}%)`}
-                  />
-                ))}
-                <span style={{ fontSize: 10, color: "var(--muted-foreground)", marginLeft: 4 }}>
-                  {matchPalette.isMonochrome ? "Monochrome" : `${matchPalette.colors.length} colors`}
-                </span>
-              </div>
-            )}
-
             <button
               onClick={handleBrandMatch}
               disabled={isMatching}
@@ -467,6 +443,53 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
                 </>
               )}
             </button>
+
+            {/* Variation swatches */}
+            {matchPalette && matchPalette.variations.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginTop: 10 }}>
+                {matchPalette.variations.map((v) => {
+                  const primaryColor = store.getState().wallet.primaryColor
+                  const isActive = primaryColor === v.primaryColor
+                  return (
+                    <button
+                      key={v.id}
+                      onClick={() => applyVariation(v)}
+                      title={v.label}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 4,
+                        padding: 0,
+                        border: `2px solid ${isActive ? "var(--primary)" : "transparent"}`,
+                        borderRadius: 12,
+                        backgroundColor: "transparent",
+                        cursor: "pointer",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {/* Gradient swatch: primary → secondary */}
+                      <div
+                        style={{
+                          width: "100%",
+                          height: 32,
+                          borderRadius: "10px 10px 0 0",
+                          background: `linear-gradient(135deg, ${v.primaryColor} 50%, ${v.secondaryColor} 100%)`,
+                        }}
+                      />
+                      <span style={{
+                        fontSize: 9,
+                        fontWeight: isActive ? 600 : 400,
+                        color: isActive ? "var(--foreground)" : "var(--muted-foreground)",
+                        paddingBottom: 4,
+                      }}>
+                        {v.label}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </>
       )}

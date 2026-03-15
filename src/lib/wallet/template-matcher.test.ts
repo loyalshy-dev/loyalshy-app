@@ -16,6 +16,8 @@ const CAFE_PALETTE: ExtractedPalette = {
   primarySuggestion: "#3e2723",
   secondarySuggestion: "#a1887f",
   textColor: "#ffffff",
+  labelColor: "#b3bcc9",
+  variations: [],
   isMonochrome: false,
 }
 
@@ -28,6 +30,8 @@ const MONOCHROME_PALETTE: ExtractedPalette = {
   primarySuggestion: "#333333",
   secondarySuggestion: "#999999",
   textColor: "#ffffff",
+  labelColor: "#b3b3b3",
+  variations: [],
   isMonochrome: true,
 }
 
@@ -40,6 +44,8 @@ const NEON_PALETTE: ExtractedPalette = {
   primarySuggestion: "#7c4dff",
   secondarySuggestion: "#e040fb",
   textColor: "#ffffff",
+  labelColor: "#b3b0ff",
+  variations: [],
   isMonochrome: false,
 }
 

@@ -1662,25 +1662,30 @@ export async function updatePassTemplate(input: z.infer<typeof updatePassTemplat
 
 // ─── Extract Palette from Logo URL ───────────────────────────
 
-export async function extractPaletteFromLogoUrl(organizationId: string) {
+export async function extractPaletteFromLogoUrl(organizationId: string, logoUrl?: string) {
   const t = await getTranslations("serverErrors")
   await assertOrganizationRole(organizationId, "owner")
 
-  const organization = await db.organization.findUnique({
-    where: { id: organizationId },
-    select: { logo: true },
-  })
+  // Use provided logoUrl (program logo) or fall back to organization logo
+  let sourceUrl = logoUrl
+  if (!sourceUrl) {
+    const organization = await db.organization.findUnique({
+      where: { id: organizationId },
+      select: { logo: true },
+    })
+    sourceUrl = organization?.logo ?? undefined
+  }
 
-  if (!organization?.logo) return { error: t("noLogoUploaded") }
+  if (!sourceUrl) return { error: t("noLogoUploaded") }
 
   try {
     const { extractPaletteFromBuffer } = await import("@/lib/color-extraction")
     let sourceBuffer: Buffer
-    if (organization.logo.startsWith("data:")) {
-      const base64 = organization.logo.split(",")[1]
+    if (sourceUrl.startsWith("data:")) {
+      const base64 = sourceUrl.split(",")[1]
       sourceBuffer = Buffer.from(base64, "base64")
     } else {
-      const res = await fetch(organization.logo)
+      const res = await fetch(sourceUrl)
       if (!res.ok) return { error: t("failedFetchLogo") }
       sourceBuffer = Buffer.from(await res.arrayBuffer())
     }

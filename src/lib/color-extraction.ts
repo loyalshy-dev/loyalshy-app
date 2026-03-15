@@ -9,11 +9,22 @@ export type ExtractedColor = {
   percentage: number
 }
 
+export type PaletteVariation = {
+  id: string
+  label: string
+  primaryColor: string
+  secondaryColor: string
+  textColor: string
+  labelColor: string
+}
+
 export type ExtractedPalette = {
   colors: ExtractedColor[]
   primarySuggestion: string
   secondarySuggestion: string
   textColor: string
+  labelColor: string
+  variations: PaletteVariation[]
   isMonochrome: boolean
 }
 
@@ -231,6 +242,8 @@ const FALLBACK_PALETTE: ExtractedPalette = {
   primarySuggestion: "#334155",
   secondarySuggestion: "#94a3b8",
   textColor: "#ffffff",
+  labelColor: "#b3bcc9",
+  variations: [],
   isMonochrome: true,
 }
 
@@ -285,70 +298,156 @@ export async function extractPaletteFromBuffer(
     return s < 0.15
   })
 
-  // Pick primary: highest saturation with moderate lightness (0.15–0.75)
-  let primaryIdx = 0
+  // Pick brand color: highest saturation with moderate lightness (0.15–0.75)
+  // This is the logo's most vibrant color — used as secondary/accent, NOT background
+  let brandIdx = 0
   let bestSat = -1
   for (let i = 0; i < clusters.length; i++) {
     const [, s, l] = rgbToHsl(...clusters[i].centroid)
     if (l >= 0.15 && l <= 0.75 && s > bestSat) {
       bestSat = s
-      primaryIdx = i
+      brandIdx = i
     }
   }
-  // If nothing qualified (monochrome or extreme lightness), use most dominant
-  if (bestSat < 0) primaryIdx = 0
+  if (bestSat < 0) brandIdx = 0
 
-  let primaryHex = rgbToHex(...clusters[primaryIdx].centroid)
-  const primaryRgb = clusters[primaryIdx].centroid
+  const brandHex = rgbToHex(...clusters[brandIdx].centroid)
 
-  // If primary is too bright, darken it
-  const [, , pL] = rgbToHsl(...primaryRgb)
-  if (pL > 0.7) {
-    const factor = 0.6
-    primaryHex = rgbToHex(
-      Math.round(primaryRgb[0] * factor),
-      Math.round(primaryRgb[1] * factor),
-      Math.round(primaryRgb[2] * factor)
-    )
-  }
-
-  // Build colors array (with darkened primary reflected)
-  const colors: ExtractedColor[] = clusters.map((c, i) => ({
-    hex: i === primaryIdx ? primaryHex : rgbToHex(...c.centroid),
-    rgb: i === primaryIdx ? hexToRgb(primaryHex) : c.centroid,
+  // Build colors array
+  const colors: ExtractedColor[] = clusters.map((c) => ({
+    hex: rgbToHex(...c.centroid),
+    rgb: c.centroid,
     percentage: Math.round((c.count / totalCounted) * 100),
   }))
 
-  // Pick secondary: most contrasting cluster against primary
-  let secondaryIdx = 0
-  let maxContrast = -1
-  for (let i = 0; i < clusters.length; i++) {
-    if (i === primaryIdx) continue
-    const d = deltaE(hexToRgb(primaryHex), clusters[i].centroid)
-    if (d > maxContrast) {
-      maxContrast = d
-      secondaryIdx = i
-    }
+  // Primary (background): darken the brand color significantly so the logo
+  // stands out against it. Reduce lightness to 0.15–0.25 range, keep hue.
+  const [brandH, brandS] = rgbToHsl(...clusters[brandIdx].centroid)
+  const primaryHex = isMonochrome
+    ? hslToHex(0, 0, 0.12) // near-black for monochrome logos
+    : hslToHex(brandH, Math.min(brandS, 0.6), 0.18)
+
+  // Secondary (accent): the logo's actual vibrant color
+  let secondaryHex = brandHex
+
+  // If brand color is too dark, brighten it for use as accent
+  const [, , brandL] = rgbToHsl(...hexToRgb(brandHex))
+  if (brandL < 0.3) {
+    secondaryHex = hslToHex(brandH, Math.min(brandS + 0.1, 1), 0.55)
   }
 
-  let secondaryHex = colors[secondaryIdx].hex
-
   // Single-color logo: derive secondary by shifting hue
-  if (clusters.length === 1 || maxContrast < 10) {
-    const [h, s, l] = rgbToHsl(...hexToRgb(primaryHex))
+  if (clusters.length === 1) {
+    const [h, s, l] = rgbToHsl(...hexToRgb(brandHex))
     const newH = (h + 30) % 360
-    secondaryHex = hslToHex(newH, Math.min(s + 0.1, 1), Math.min(l + 0.2, 0.85))
+    secondaryHex = hslToHex(newH, Math.min(s + 0.1, 1), Math.min(l + 0.15, 0.7))
   }
 
   const textColor = computeTextColor(primaryHex)
+  const labelColor = blendLabel(textColor, primaryHex)
+
+  // ── Generate palette variations ──────────────────────────
+  const variations = buildVariations(brandHex, brandH, brandS, isMonochrome)
 
   return {
     colors,
     primarySuggestion: primaryHex,
     secondarySuggestion: secondaryHex,
     textColor,
+    labelColor,
+    variations,
     isMonochrome,
   }
+}
+
+/** Blend text color 30% toward background for softer labels */
+function blendLabel(text: string, bg: string): string {
+  const t = hexToRgb(text)
+  const b = hexToRgb(bg)
+  return rgbToHex(
+    Math.round(t[0] * 0.7 + b[0] * 0.3),
+    Math.round(t[1] * 0.7 + b[1] * 0.3),
+    Math.round(t[2] * 0.7 + b[2] * 0.3),
+  )
+}
+
+/** Build 4 palette variations from the extracted brand color */
+function buildVariations(
+  brandHex: string,
+  brandH: number,
+  brandS: number,
+  isMonochrome: boolean,
+): PaletteVariation[] {
+  // 1. Dark — dark bg derived from brand hue, vibrant accent
+  const darkBg = isMonochrome
+    ? hslToHex(0, 0, 0.12)
+    : hslToHex(brandH, Math.min(brandS, 0.6), 0.18)
+  const darkText = computeTextColor(darkBg)
+  const darkSecondary = isMonochrome
+    ? hslToHex(0, 0, 0.55)
+    : hslToHex(brandH, Math.min(brandS + 0.1, 1), 0.55)
+
+  // 2. Light — off-white bg, brand as accent
+  const lightBg = isMonochrome
+    ? "#f8f9fa"
+    : hslToHex(brandH, 0.08, 0.97)
+  const lightText = computeTextColor(lightBg)
+  const lightSecondary = isMonochrome
+    ? hslToHex(0, 0, 0.4)
+    : hslToHex(brandH, Math.min(brandS, 0.8), 0.45)
+
+  // 3. Vibrant — brand color as bg, contrasting text
+  const vibrantBg = isMonochrome
+    ? hslToHex(0, 0, 0.3)
+    : hslToHex(brandH, Math.min(brandS, 0.85), 0.42)
+  const vibrantText = computeTextColor(vibrantBg)
+  const vibrantSecondary = isMonochrome
+    ? hslToHex(0, 0, 0.75)
+    : hslToHex((brandH + 30) % 360, Math.min(brandS, 0.7), 0.65)
+
+  // 4. Muted — desaturated bg, subtle accent
+  const mutedBg = isMonochrome
+    ? hslToHex(0, 0, 0.2)
+    : hslToHex(brandH, 0.15, 0.22)
+  const mutedText = computeTextColor(mutedBg)
+  const mutedSecondary = isMonochrome
+    ? hslToHex(0, 0, 0.5)
+    : hslToHex(brandH, 0.25, 0.5)
+
+  return [
+    {
+      id: "dark",
+      label: "Dark",
+      primaryColor: darkBg,
+      secondaryColor: darkSecondary,
+      textColor: darkText,
+      labelColor: blendLabel(darkText, darkBg),
+    },
+    {
+      id: "light",
+      label: "Light",
+      primaryColor: lightBg,
+      secondaryColor: lightSecondary,
+      textColor: lightText,
+      labelColor: blendLabel(lightText, lightBg),
+    },
+    {
+      id: "vibrant",
+      label: "Vibrant",
+      primaryColor: vibrantBg,
+      secondaryColor: vibrantSecondary,
+      textColor: vibrantText,
+      labelColor: blendLabel(vibrantText, vibrantBg),
+    },
+    {
+      id: "muted",
+      label: "Muted",
+      primaryColor: mutedBg,
+      secondaryColor: mutedSecondary,
+      textColor: mutedText,
+      labelColor: blendLabel(mutedText, mutedBg),
+    },
+  ]
 }
 
 // ─── HSL → Hex ──────────────────────────────────────────────
