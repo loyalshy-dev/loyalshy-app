@@ -8,6 +8,7 @@ import { getTranslations } from "next-intl/server"
 import { db } from "@/lib/db"
 import { assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
+import { validateTemplateConfig } from "@/lib/pass-config"
 import { checkTemplateLimit, checkPassTypeAllowed } from "@/server/billing-actions"
 import { computeDesignHash, computeTextColor } from "@/lib/wallet/card-design"
 import type { PatternStyle, ProgressStyle, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
@@ -73,7 +74,7 @@ const updatePassTemplateSchema = z.object({
   startsAt: z.coerce.date().optional(),
   endsAt: z.coerce.date().nullable().optional(),
   resetProgress: z.boolean().optional(),
-  config: z.record(z.string(), z.any()).optional(),
+  config: z.record(z.string(), z.unknown()).optional(),
 })
 
 const inviteTeamMemberSchema = z.object({
@@ -149,11 +150,24 @@ const savePassDesignSchema = z.object({
   }).optional(),
 })
 
+const PASS_TYPE_ENUM = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID"] as const
+
 const createPassTemplateSchema = z.object({
   organizationId: z.string().min(1),
   name: z.string().min(1, "Template name is required").max(100),
-  passType: z.enum(["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID"]).optional().default("STAMP_CARD"),
-  config: z.record(z.string(), z.any()).optional().default({}),
+  passType: z.enum(PASS_TYPE_ENUM).optional().default("STAMP_CARD"),
+  config: z.record(z.string(), z.unknown()).optional().default({}),
+}).superRefine((data, ctx) => {
+  if (data.config && Object.keys(data.config).length > 0) {
+    const result = validateTemplateConfig(data.passType, data.config)
+    if (!result.success) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Invalid config for ${data.passType}: ${result.error}`,
+        path: ["config"],
+      })
+    }
+  }
 })
 
 // ─── Get Settings Data ──────────────────────────────────────
@@ -1632,11 +1646,19 @@ export async function updatePassTemplate(input: z.infer<typeof updatePassTemplat
 
   const template = await db.passTemplate.findUnique({
     where: { id: parsed.templateId },
-    select: { organizationId: true, config: true },
+    select: { organizationId: true, config: true, passType: true },
   })
 
   if (!template || template.organizationId !== parsed.organizationId) {
     return { error: t("templateNotFound") }
+  }
+
+  // Validate config against the template's pass type
+  if (parsed.config && Object.keys(parsed.config).length > 0) {
+    const configResult = validateTemplateConfig(template.passType, parsed.config)
+    if (!configResult.success) {
+      return { error: `Invalid config: ${configResult.error}` }
+    }
   }
 
   const updateData: Record<string, unknown> = {
