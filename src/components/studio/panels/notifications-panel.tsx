@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useStore } from "zustand"
 import { useTranslations } from "next-intl"
 import { MapPin } from "lucide-react"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
+import { AddressAutocomplete } from "@/components/studio/address-autocomplete"
 
 type Props = {
   store: CardDesignStoreApi
@@ -22,6 +23,15 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
 
   const set = store.getState().setWalletField
 
+  const handleAddressChange = useCallback(
+    (address: string, lat: number | null, lng: number | null) => {
+      set("mapAddress", address)
+      set("mapLatitude", lat)
+      set("mapLongitude", lng)
+    },
+    [set]
+  )
+
   const hasCoords = mapLatitude != null && mapLongitude != null
   const displayMessage = locationMessage || (previewPlatform === "apple"
     ? `You're near ${organizationName}`
@@ -33,24 +43,17 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
         {t("description")}
       </div>
 
-      {/* Address input */}
+      {/* Address input with autocomplete */}
       <div style={{ marginBottom: 10 }}>
         <div style={{ fontSize: 12, color: "var(--foreground)", marginBottom: 4 }}>{t("businessAddress")}</div>
-        <input
-          type="text"
+        <AddressAutocomplete
           value={mapAddress}
-          onChange={(e) => set("mapAddress", e.target.value)}
+          onChange={handleAddressChange}
           placeholder={t("addressPlaceholder")}
           maxLength={500}
-          style={{
-            width: "100%",
-            padding: "8px 10px",
-            borderRadius: 12,
-            border: "1px solid var(--border)",
-            backgroundColor: "var(--background)",
-            fontSize: 12,
-            color: "var(--foreground)",
-            outline: "none",
+          labels={{
+            searching: t("searching"),
+            noResults: t("noResults"),
           }}
         />
       </div>

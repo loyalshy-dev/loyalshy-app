@@ -357,6 +357,8 @@ export function StudioLayout({
             templateId2: state.wallet.templateId ?? "",
             businessHours: state.wallet.businessHours,
             mapAddress: state.wallet.mapAddress,
+            mapLatitude: state.wallet.mapLatitude,
+            mapLongitude: state.wallet.mapLongitude,
             socialLinks: {
               instagram: state.wallet.socialLinks.instagram ?? "",
               facebook: state.wallet.socialLinks.facebook ?? "",
