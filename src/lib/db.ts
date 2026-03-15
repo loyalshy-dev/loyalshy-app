@@ -27,7 +27,9 @@ export async function getNextMemberNumber(
 ): Promise<number> {
   const client = tx ?? db
   const result = await client.$queryRaw<[{ max: number | null }]>`
-    SELECT MAX("memberNumber") as max FROM contact WHERE "organizationId" = ${organizationId} FOR UPDATE
+    SELECT MAX("memberNumber") as max FROM (
+      SELECT "memberNumber" FROM contact WHERE "organizationId" = ${organizationId} FOR UPDATE
+    ) locked
   `
   return (result[0]?.max ?? 0) + 1
 }
