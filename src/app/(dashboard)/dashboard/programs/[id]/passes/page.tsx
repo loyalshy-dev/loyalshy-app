@@ -41,15 +41,17 @@ export default async function TemplatePasses({ params, searchParams }: Props) {
   if (!template) notFound()
 
   return (
-    <PassInstancesView
-      result={result}
-      stats={stats}
-      templateId={templateId}
-      passType={template.passType}
-      templateConfig={template.config}
-      search={search}
-      status={status}
-      page={page}
-    />
+    <Suspense>
+      <PassInstancesView
+        result={result}
+        stats={stats}
+        templateId={templateId}
+        passType={template.passType}
+        templateConfig={template.config}
+        search={search}
+        status={status}
+        page={page}
+      />
+    </Suspense>
   )
 }

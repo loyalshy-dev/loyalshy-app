@@ -567,7 +567,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   // Hero image (on object — shows as banner strip on the pass)
   const googleLogo = input.organizationLogoGoogle ?? input.organizationLogo
   const showStrip = design?.showStrip ?? false
-  const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
+  const isStampType = cardType === "STAMP" || cardType === "POINTS"
   let heroImageUrl: string | null = null
   if (showStrip) {
     const stripFiltersG = parseStripFilters(design?.editorConfig)

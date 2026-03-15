@@ -33,17 +33,19 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     })
   }
 
-  await dispatchWebhookEvent(ctx.organizationId, "test.ping", {
-    message: "This is a test webhook event from Loyalshy.",
-    timestamp: new Date().toISOString(),
-  })
-
-  // Remove test.ping if we temporarily added it
-  if (!hasTestEvent) {
-    await db.webhookEndpoint.update({
-      where: { id },
-      data: { events: endpoint.events },
+  try {
+    await dispatchWebhookEvent(ctx.organizationId, "test.ping", {
+      message: "This is a test webhook event from Loyalshy.",
+      timestamp: new Date().toISOString(),
     })
+  } finally {
+    // Remove test.ping if we temporarily added it
+    if (!hasTestEvent) {
+      await db.webhookEndpoint.update({
+        where: { id },
+        data: { events: endpoint.events },
+      })
+    }
   }
 
   return apiSuccess({ sent: true })

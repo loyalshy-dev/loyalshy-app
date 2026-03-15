@@ -114,12 +114,7 @@ export async function redeemCoupon(
 
   const config = parseCouponConfig(passInstance.passTemplate.config)
   const discountText = config ? formatCouponValue(config) : "Coupon"
-  const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
-  const isRedeemed = (instanceData.redeemed as boolean) ?? false
-
-  if (isRedeemed) {
-    return { success: false, error: t("couponAlreadyRedeemed") }
-  }
+  const isUnlimited = config?.redemptionLimit === "unlimited"
 
   // Pick a prize if minigame is configured
   let selectedPrize: string | undefined
@@ -128,14 +123,23 @@ export async function redeemCoupon(
     selectedPrize = weightedRandomPrize(mgConfig.prizes)
   }
 
-  const isUnlimited = config?.redemptionLimit === "unlimited"
-
+  try {
   await db.$transaction(async (tx) => {
+    // Re-read data inside transaction to prevent double redemption
+    const fresh = await tx.passInstance.findUnique({
+      where: { id: passInstance.id },
+      select: { data: true },
+    })
+    const freshData = (fresh?.data as Record<string, unknown>) ?? {}
+    if ((freshData.redeemed as boolean) ?? false) {
+      throw new Error("ALREADY_REDEEMED")
+    }
+
     // Mark coupon as redeemed in data JSON
     await tx.passInstance.update({
       where: { id: passInstance.id },
       data: {
-        data: { ...instanceData, redeemed: true, redeemedAt: new Date().toISOString() },
+        data: { ...freshData, redeemed: true, redeemedAt: new Date().toISOString() },
         status: isUnlimited ? "ACTIVE" : "COMPLETED",
       },
     })
@@ -175,6 +179,12 @@ export async function redeemCoupon(
       })
     }
   })
+  } catch (err) {
+    if (err instanceof Error && err.message === "ALREADY_REDEEMED") {
+      return { success: false, error: t("couponAlreadyRedeemed") }
+    }
+    throw err
+  }
 
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "COUPON_REDEEM")
 

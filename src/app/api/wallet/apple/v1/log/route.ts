@@ -5,7 +5,8 @@ import { NextResponse } from "next/server"
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    console.log("[Apple Wallet Log]", JSON.stringify(body, null, 2))
+    const entries = Array.isArray(body) ? body : [body]
+    console.log(`[Apple Wallet Log] Received ${entries.length} log entr${entries.length === 1 ? "y" : "ies"}`)
   } catch {
     console.log("[Apple Wallet Log] Failed to parse log body")
   }

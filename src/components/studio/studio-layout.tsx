@@ -17,6 +17,7 @@ import { ProgressPanel } from "./panels/progress-panel"
 import { StripPanel } from "./panels/strip-panel"
 import { DetailsPanel } from "./panels/details-panel"
 import { NotificationsPanel } from "./panels/notifications-panel"
+import { ToolSelector } from "./tools/tool-selector"
 
 import { LogoPanel } from "./panels/logo-panel"
 import { ScratchCard, SlotMachine, WheelOfFortune } from "@/components/minigames"
@@ -884,8 +885,6 @@ function CanvasControls({
 }
 
 // ─── Mobile Tool Bar ──────────────────────────────────────
-
-import { ToolSelector } from "./tools/tool-selector"
 
 function MobileToolBar({
   activeTool,

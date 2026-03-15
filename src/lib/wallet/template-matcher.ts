@@ -162,8 +162,8 @@ export function applyPaletteToTemplate(
 
   const primaryColor = palette?.primarySuggestion ?? d.primaryColor
   const secondaryColor = palette?.secondarySuggestion ?? d.secondaryColor
-  // Recompute text color against the final primary to ensure WCAG contrast
-  const textColor = palette ? computeTextColor(primaryColor) : d.textColor
+  // Use palette's textColor if available, otherwise recompute for WCAG contrast
+  const textColor = palette?.textColor ?? (palette ? computeTextColor(primaryColor) : d.textColor)
 
   // Override stamp icons to match user's vibe when brand-matching
   let stampGridConfig: StampGridConfig | undefined = d.stampGridConfig

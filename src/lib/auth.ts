@@ -13,6 +13,16 @@ function getResend() {
   return _resend
 }
 
+/** Escape HTML special characters to prevent injection */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+}
+
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,
@@ -32,7 +42,7 @@ export const auth = betterAuth({
         subject: "Reset your password",
         html: `
           <h2>Reset your password</h2>
-          <p>Hi ${user.name},</p>
+          <p>Hi ${escapeHtml(user.name ?? "")},</p>
           <p>Click the link below to reset your password. This link expires in 1 hour.</p>
           <a href="${url}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;">Reset Password</a>
           <p>If you didn't request this, you can safely ignore this email.</p>

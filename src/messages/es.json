@@ -154,61 +154,111 @@
         "label": "Tarjeta de Sellos",
         "description": "Recompensa a tus clientes tras un número de visitas. Tarjetas de sellos digitales en Apple y Google Wallet — sin más tarjetas de papel perdidas.",
         "alt": "Pase de tarjeta de sellos mostrando sellos de fidelización",
-        "useCases": ["Cafeterías", "Panaderías", "Peluquerías", "Autolavados"]
+        "useCases": [
+          "Cafeterías",
+          "Panaderías",
+          "Peluquerías",
+          "Autolavados"
+        ]
       },
       "coupon": {
         "label": "Cupón",
         "description": "Ofrece descuentos porcentuales o fijos que tus clientes pueden canjear con un toque. Rastrea canjes y establece fechas de vencimiento automáticamente.",
         "alt": "Pase de cupón digital con oferta de descuento",
-        "useCases": ["Tiendas", "Restaurantes", "E-commerce", "Promociones"]
+        "useCases": [
+          "Tiendas",
+          "Restaurantes",
+          "E-commerce",
+          "Promociones"
+        ]
       },
       "membership": {
         "label": "Membresía",
         "description": "Tarjetas de membresía digitales con beneficios por nivel. Perfectas para clubes, gimnasios y niveles de fidelización con foto opcional del titular.",
         "alt": "Pase de membresía con nivel y datos del miembro",
-        "useCases": ["Gimnasios", "Clubes", "Bibliotecas", "Coworkings"]
+        "useCases": [
+          "Gimnasios",
+          "Clubes",
+          "Bibliotecas",
+          "Coworkings"
+        ]
       },
       "points": {
         "label": "Programa de Puntos",
         "description": "Acumula puntos por visita o compra y canjea de un catálogo de recompensas personalizado. Valores y etiquetas de puntos flexibles.",
         "alt": "Pase de programa de puntos mostrando saldo de puntos",
-        "useCases": ["Cadenas retail", "Restaurantes", "Hoteles", "Aerolíneas"]
+        "useCases": [
+          "Cadenas retail",
+          "Restaurantes",
+          "Hoteles",
+          "Aerolíneas"
+        ]
       },
       "prepaid": {
         "label": "Pase Prepago",
         "description": "Pases de uso fijo que se reducen con cada uso. Recargables o de un solo uso — ideales para packs de clases, servicios y transporte.",
         "alt": "Pase prepago mostrando usos restantes",
-        "useCases": ["Estudios de yoga", "Autolavados", "Packs de clases", "Pases de bus"]
+        "useCases": [
+          "Estudios de yoga",
+          "Autolavados",
+          "Packs de clases",
+          "Pases de bus"
+        ]
       },
       "giftCard": {
         "label": "Tarjeta Regalo",
         "description": "Tarjetas regalo con seguimiento de saldo en tiempo real. Los clientes consultan su saldo desde su wallet — cargos y reembolsos incluidos.",
         "alt": "Pase de tarjeta regalo mostrando saldo actual",
-        "useCases": ["Tiendas", "Restaurantes", "Spas", "Tiendas online"]
+        "useCases": [
+          "Tiendas",
+          "Restaurantes",
+          "Spas",
+          "Tiendas online"
+        ]
       },
       "ticket": {
         "label": "Entrada de Evento",
         "description": "Entradas digitales para eventos, conciertos y conferencias. Escanea en la puerta con códigos QR — incluye fecha, lugar y asiento.",
         "alt": "Pase de entrada de evento con código QR y detalles",
-        "useCases": ["Conciertos", "Conferencias", "Festivales", "Eventos deportivos"]
+        "useCases": [
+          "Conciertos",
+          "Conferencias",
+          "Festivales",
+          "Eventos deportivos"
+        ]
       },
       "access": {
         "label": "Pase de Acceso",
         "description": "Concede o deniega acceso a instalaciones, coworkings y aparcamientos. Rastrea registros de entrada y gestiona permisos digitalmente.",
         "alt": "Pase de acceso para entrada a instalaciones",
-        "useCases": ["Coworkings", "Aparcamientos", "Oficinas", "Zonas VIP"]
+        "useCases": [
+          "Coworkings",
+          "Aparcamientos",
+          "Oficinas",
+          "Zonas VIP"
+        ]
       },
       "transit": {
         "label": "Pase de Transporte",
         "description": "Pases digitales de transporte para autobuses, trenes y ferries. Seguimiento de embarque y salida con información de ruta y zona.",
         "alt": "Pase de transporte mostrando información de ruta y zona",
-        "useCases": ["Autobuses", "Ferries", "Lanzaderas", "Transporte privado"]
+        "useCases": [
+          "Autobuses",
+          "Ferries",
+          "Lanzaderas",
+          "Transporte privado"
+        ]
       },
       "businessId": {
         "label": "ID Empresarial",
         "description": "Tarjetas de identificación digitales para empleados o contratistas. Verifica identidad al instante con escaneo QR — incluye cargo, departamento y vencimiento.",
         "alt": "Tarjeta de ID empresarial con datos del empleado",
-        "useCases": ["Empresas", "Contratistas", "Voluntarios", "Credenciales"]
+        "useCases": [
+          "Empresas",
+          "Contratistas",
+          "Voluntarios",
+          "Credenciales"
+        ]
       }
     }
   },
@@ -492,7 +542,11 @@
       "totalContacts": "Total de Contactos",
       "activePasses": "Pases Activos",
       "activityThisMonth": "Actividad Este Mes",
-      "redeemedThisMonth": "Canjeados Este Mes"
+      "redeemedThisMonth": "Canjeados Este Mes",
+      "rewardCycleProgress": "Progreso del Ciclo de Recompensas",
+      "noContacts": "Aún no hay contactos",
+      "contactCount": "{count, plural, one {# contacto} other {# contactos}}",
+      "total": "total"
     },
     "activity": {
       "title": "Actividad Reciente",
@@ -564,7 +618,10 @@
       "of": "de",
       "previousPage": "Página anterior",
       "nextPage": "Página siguiente",
-      "actions": "Acciones del cliente"
+      "actions": "Acciones del cliente",
+      "noContacts": "Aún no hay contactos",
+      "noContactsDesc": "Añade tu primer contacto para comenzar a registrar visitas y fidelizar clientes. Aparecerán aquí una vez añadidos.",
+      "resultCount": "{count, plural, one {# contacto} other {# contactos}}"
     },
     "addContact": {
       "title": "Añadir Cliente",
@@ -577,7 +634,8 @@
       "namePlaceholder": "Juan García",
       "emailPlaceholder": "juan@ejemplo.com",
       "phonePlaceholder": "+34 612 345 678",
-      "addedSuccess": "{name} añadido correctamente"
+      "addedSuccess": "{name} añadido correctamente",
+      "failedToAdd": "Error al añadir el contacto"
     },
     "programs": {
       "title": "Programas",
@@ -611,7 +669,8 @@
       "backToOverview": "Volver al resumen",
       "draftBanner": "Este programa está en modo borrador. Actívalo para empezar a emitir pases.",
       "activate": "Activar",
-      "activated": "¡Programa activado! Los contactos ya pueden recibir pases."
+      "activated": "¡Programa activado! Los contactos ya pueden recibir pases.",
+      "backToOverviewAriaLabel": "Volver al resumen"
     },
     "settings": {
       "title": "Ajustes",
@@ -700,7 +759,50 @@
       "contactDeleted": "Contacto eliminado",
       "contactUpdated": "Contacto actualizado",
       "sendPassEmail": "Enviar Email del Pase",
-      "emailSent": "Email enviado a {email}"
+      "emailSent": "Email enviado a {email}",
+      "sheetTitle": "Detalles del contacto",
+      "contactNotFound": "Contacto no encontrado",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "saveChanges": "Guardar Cambios",
+      "fullName": "Nombre Completo",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "nameRequired": "El nombre es obligatorio",
+      "failedToLoad": "Error al cargar los detalles del contacto",
+      "failedToDelete": "Error al eliminar el contacto",
+      "failedToUpdate": "Error al actualizar el contacto",
+      "failedToRedeem": "Error al canjear la recompensa",
+      "rewardRedeemed": "¡Recompensa canjeada!",
+      "failedToLoadPrograms": "Error al cargar los programas",
+      "alreadyHasPass": "El contacto ya tiene este pase",
+      "failedToIssuePass": "Error al emitir el pase",
+      "allPrograms": "Todos",
+      "enrolled": "Inscrito el {date}",
+      "noPassInstances": "Sin pases",
+      "selfRegistered": "Autoregistrado",
+      "registeredBy": "por {name}",
+      "checkIn": "Check-in",
+      "usePass": "Usar pase",
+      "visit": "Visita",
+      "couponRedeemed": "Cupón canjeado",
+      "readyToRedeem": "Listo para canjear",
+      "activeMember": "Miembro activo",
+      "suspended": "Suspendido",
+      "expired": "Expirado",
+      "expires": "Expira",
+      "checkIns": "{count, plural, one {# check-in} other {# check-ins}}",
+      "actionUsePass": "Usar Pase",
+      "actionCheckIn": "Check In",
+      "actionRedeemCoupon": "Canjear Cupón",
+      "actionRegisterVisit": "Registrar Visita",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet",
+      "stampCard": "Tarjeta de Sellos",
+      "coupon": "Cupón",
+      "membership": "Membresía",
+      "points": "Puntos",
+      "prepaidPass": "Pase Prepago"
     },
     "contactColumns": {
       "name": "Nombre",
@@ -956,7 +1058,7 @@
       "pointsConfiguration": "Configuración de Puntos",
       "pointsConfigDesc": "Configura cómo se ganan los puntos y para qué se pueden canjear.",
       "pointsPerVisit": "Puntos por Visita",
-      "pointsPerVisitHint": "Puntos otorgados a los clientes cada vez que visitan (1\u201390).",
+      "pointsPerVisitHint": "Puntos otorgados a los clientes cada vez que visitan (1–90).",
       "rewardCatalog": "Catálogo de Recompensas",
       "rewardCatalogDesc": "Artículos que los clientes pueden canjear con sus puntos (hasta 20).",
       "addItem": "Añadir Artículo",
@@ -975,8 +1077,8 @@
       "useLabelPlaceholder": "ej., viaje, lavado, sesión",
       "useLabelHint": "Cómo se llama cada uso (ej., \"viaje\", \"lavado\").",
       "rechargeable": "Recargable",
-      "rechargeableNo": "No \u2014 pase de un solo uso",
-      "rechargeableYes": "Sí \u2014 se puede recargar",
+      "rechargeableNo": "No — pase de un solo uso",
+      "rechargeableYes": "Sí — se puede recargar",
       "prepaidValidUntil": "Válido Hasta (Opcional)",
       "scheduleSection": "Horario",
       "scheduleDesc": "Controla cuándo el programa está activo y acepta clientes.",
@@ -1186,7 +1288,7 @@
       "scratchCard": "Tarjeta Rasca",
       "slotMachine": "Tragaperras",
       "wheelOfFortune": "Rueda de la Fortuna",
-      "prizeCountHint": "{count} premios \u00b7 Mostrando \"{name}\"",
+      "prizeCountHint": "{count} premios · Mostrando \"{name}\"",
       "addPrizesHint": "Añade al menos 2 premios para ver la experiencia completa",
       "saveSuccessWithUpdate": "¡Guardado! Actualizando {count} {passLabel} de wallet...",
       "saveSuccess": "¡Guardado!",
@@ -1348,7 +1450,24 @@
       "fields": "Campos y Etiquetas",
       "properties": "Propiedades",
       "closePanel": "Cerrar panel",
-      "template": "Plantilla"
+      "template": "Plantilla",
+      "textColors": "Colores de Texto",
+      "fieldValues": "Valores de Campo",
+      "labels": "Etiquetas",
+      "textContrast": "Contraste de texto",
+      "autoTextColor": "Color de texto automático",
+      "computeFromBackground": "Calcular desde el fondo",
+      "cardFields": "Campos de la Tarjeta",
+      "fieldsPanelDesc": "Configura qué campos aparecen en el pase y su estilo de texto.",
+      "cardFieldsDesc": "Elige qué campos aparecen en el pase. Haz clic en una etiqueta para renombrarla.",
+      "cardFieldsHint": "Apple: primer campo → encabezado, resto → detalles. Google: filas automáticas.",
+      "auto": "Auto",
+      "addField": "+ Añadir campo...",
+      "resetToDefaults": "Restablecer valores predeterminados",
+      "moveUp": "Mover {label} hacia arriba",
+      "moveDown": "Mover {label} hacia abajo",
+      "removeField": "Eliminar {label}",
+      "clickToRename": "Haz clic para renombrar"
     },
     "colors": {
       "instruction": "Haz clic en un color o toca un área de la vista previa para editar.",
@@ -1377,10 +1496,65 @@
       "chevron": "Chevron",
       "crosshatch": "Entrecruzado",
       "diamonds": "Diamantes",
-      "confetti": "Confeti"
+      "confetti": "Confeti",
+      "zoom": "Zoom",
+      "resetPositionZoom": "Restablecer posición y zoom",
+      "imageSection": "Imagen",
+      "presetsSection": "Preajustes",
+      "filtersSection": "Filtros",
+      "fillSection": "Relleno",
+      "colorsSection": "Colores",
+      "patternSection": "Patrón",
+      "patternColorSection": "Color del Patrón",
+      "uploading": "Subiendo...",
+      "replaceImage": "Reemplazar imagen",
+      "uploadImage": "Subir imagen",
+      "removeImage": "Eliminar",
+      "imageHint": "PNG, JPEG o WebP. Máx. 5 MB. Recortado para Apple y Google Wallet.",
+      "noStripImage": "Sin imagen de banda",
+      "opacity": "Opacidad",
+      "blackAndWhite": "Blanco y Negro",
+      "flat": "Plano",
+      "gradient": "Degradado",
+      "colorStart": "Inicio",
+      "colorEnd": "Fin",
+      "colorFlat": "Color",
+      "resetToCardColors": "Restablecer a colores de tarjeta",
+      "shapesColor": "Formas",
+      "resetToStripColor": "Restablecer al color de banda",
+      "stampGridInfo": "Cuadrícula de sellos activa — los sellos se superponen en {surface}. Los colores de los sellos se pueden editar en el panel de Progreso.",
+      "stampGridSurfaceImage": "tu imagen subida",
+      "stampGridSurfaceFlat": "un fondo sólido",
+      "stampGridSurfaceGradient": "un fondo degradado",
+      "dragToReposition": "Arrastra para reposicionar"
     },
     "logo": {
-      "usingOrgLogo": "Usando logo de la organización"
+      "usingOrgLogo": "Usando logo de la organización",
+      "programLogo": "Logo del Programa",
+      "preview": "Vista Previa",
+      "brandMatch": "Coincidencia de Marca",
+      "advanced": "Avanzado",
+      "processing": "Procesando...",
+      "replaceLogo": "Reemplazar Logo",
+      "uploadLogo": "Subir Logo",
+      "remove": "Eliminar",
+      "useOrgLogoInstead": "Usar el logo de la organización",
+      "hasProgramLogo": "Este programa tiene su propio logo.",
+      "usingOrgLogoDesc": "Usando el logo de tu organización. Sube uno diferente para este programa.",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet",
+      "appleLogoZoom": "Zoom del logo de Apple",
+      "extractColorsDesc": "Extrae colores de tu logo y aplícalos al diseño de tu tarjeta.",
+      "extracting": "Extrayendo...",
+      "reExtractColors": "Reextraer colores",
+      "matchToBrand": "Aplicar mi marca",
+      "extractError": "No se pudieron extraer los colores del logo.",
+      "extractFailed": "Error al extraer los colores de la marca. Por favor, inténtalo de nuevo.",
+      "useDifferentImage": "Usar imagen diferente para {platform}",
+      "uploadOverride": "Subir Imagen",
+      "appleLogoHint": "Rectángulo ancho (320 × 100px). Se recomienda PNG transparente.",
+      "googleLogoHint": "Cuadrado (660px). Mantén el diseño centrado con margen para el recorte circular.",
+      "resetLogoAria": "Restablecer logo de {platform} al generado automáticamente"
     },
     "notifications": {
       "description": "Cuando un cliente está cerca de tu local, su pase aparece en la pantalla de bloqueo automáticamente.",
@@ -1459,6 +1633,7 @@
     "contactLimitReached": "Has alcanzado el límite de {limit} contactos de tu plan. Mejora para añadir más.",
     "contactEmailExists": "Ya existe un contacto con el email \"{email}\".",
     "contactPhoneExists": "Ya existe un contacto con el teléfono \"{phone}\".",
+    "contactAlreadyExists": "Ya existe un contacto con estos datos.",
     "contactNotFound": "Contacto no encontrado",
     "contactNoEmail": "El contacto no tiene dirección de email",
     "programNotFound": "Programa no encontrado o no activo",

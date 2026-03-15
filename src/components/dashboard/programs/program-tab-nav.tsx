@@ -121,7 +121,7 @@ export function ProgramTabNav({
         <Link
           href="/dashboard"
           className="flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          aria-label="Back to overview"
+          aria-label={t("backToOverviewAriaLabel")}
         >
           <ArrowLeft className="size-4" />
         </Link>

@@ -154,61 +154,111 @@
         "label": "Stamp Card",
         "description": "Reward your customers after a set number of visits. Digital punch cards that live in Apple & Google Wallet — no more lost paper cards.",
         "alt": "Stamp card pass showing coffee shop loyalty stamps",
-        "useCases": ["Coffee shops", "Bakeries", "Salons", "Car washes"]
+        "useCases": [
+          "Coffee shops",
+          "Bakeries",
+          "Salons",
+          "Car washes"
+        ]
       },
       "coupon": {
         "label": "Coupon",
         "description": "Offer percentage or fixed discounts your customers can redeem in one tap. Track redemptions and set expiry dates automatically.",
         "alt": "Digital coupon pass with discount offer",
-        "useCases": ["Retail stores", "Restaurants", "E-commerce", "Promotions"]
+        "useCases": [
+          "Retail stores",
+          "Restaurants",
+          "E-commerce",
+          "Promotions"
+        ]
       },
       "membership": {
         "label": "Membership",
         "description": "Digital membership cards with tier-based benefits. Perfect for clubs, gyms, and loyalty tiers with optional holder photos.",
         "alt": "Membership card pass with tier and member details",
-        "useCases": ["Gyms", "Clubs", "Libraries", "Co-working spaces"]
+        "useCases": [
+          "Gyms",
+          "Clubs",
+          "Libraries",
+          "Co-working spaces"
+        ]
       },
       "points": {
         "label": "Points Program",
         "description": "Earn points per visit or purchase, then redeem from a custom reward catalog. Flexible point values and labels for any industry.",
         "alt": "Points program pass showing earned points balance",
-        "useCases": ["Retail chains", "Restaurants", "Hotels", "Airlines"]
+        "useCases": [
+          "Retail chains",
+          "Restaurants",
+          "Hotels",
+          "Airlines"
+        ]
       },
       "prepaid": {
         "label": "Prepaid Pass",
         "description": "Fixed-use passes that count down with each use. Rechargeable or one-time — great for class packs, service bundles, and transport.",
         "alt": "Prepaid pass showing remaining uses",
-        "useCases": ["Yoga studios", "Car washes", "Class packs", "Bus passes"]
+        "useCases": [
+          "Yoga studios",
+          "Car washes",
+          "Class packs",
+          "Bus passes"
+        ]
       },
       "giftCard": {
         "label": "Gift Card",
         "description": "Stored-value gift cards with real-time balance tracking. Customers check their balance right from their wallet — charges and refunds built in.",
         "alt": "Gift card pass showing current balance",
-        "useCases": ["Retail stores", "Restaurants", "Spas", "Online shops"]
+        "useCases": [
+          "Retail stores",
+          "Restaurants",
+          "Spas",
+          "Online shops"
+        ]
       },
       "ticket": {
         "label": "Event Ticket",
         "description": "Digital tickets for events, concerts, and conferences. Scan at the door with QR codes — includes date, venue, and seat details.",
         "alt": "Event ticket pass with QR code and event details",
-        "useCases": ["Concerts", "Conferences", "Festivals", "Sports events"]
+        "useCases": [
+          "Concerts",
+          "Conferences",
+          "Festivals",
+          "Sports events"
+        ]
       },
       "access": {
         "label": "Access Pass",
         "description": "Grant or deny access to facilities, co-working spaces, and parking areas. Track entry logs and manage permissions digitally.",
         "alt": "Access pass for facility entry",
-        "useCases": ["Co-working", "Parking", "Office buildings", "VIP areas"]
+        "useCases": [
+          "Co-working",
+          "Parking",
+          "Office buildings",
+          "VIP areas"
+        ]
       },
       "transit": {
         "label": "Transit Pass",
         "description": "Digital transit passes for buses, trains, and ferries. Board and exit tracking with route and zone information built in.",
         "alt": "Transit pass showing route and zone information",
-        "useCases": ["Bus companies", "Ferries", "Shuttles", "Private transit"]
+        "useCases": [
+          "Bus companies",
+          "Ferries",
+          "Shuttles",
+          "Private transit"
+        ]
       },
       "businessId": {
         "label": "Business ID",
         "description": "Digital employee or contractor ID cards. Verify identity on the spot with QR scan — includes role, department, and expiry.",
         "alt": "Business ID card with employee details",
-        "useCases": ["Corporations", "Contractors", "Volunteers", "Staff badges"]
+        "useCases": [
+          "Corporations",
+          "Contractors",
+          "Volunteers",
+          "Staff badges"
+        ]
       }
     }
   },
@@ -492,7 +542,11 @@
       "totalContacts": "Total Contacts",
       "activePasses": "Active Pass Instances",
       "activityThisMonth": "Activity This Month",
-      "redeemedThisMonth": "Redeemed This Month"
+      "redeemedThisMonth": "Redeemed This Month",
+      "rewardCycleProgress": "Reward Cycle Progress",
+      "noContacts": "No contacts yet",
+      "contactCount": "{count, plural, one {# contact} other {# contacts}}",
+      "total": "total"
     },
     "activity": {
       "title": "Recent Activity",
@@ -564,7 +618,10 @@
       "of": "of",
       "previousPage": "Previous page",
       "nextPage": "Next page",
-      "actions": "Customer actions"
+      "actions": "Customer actions",
+      "noContacts": "No contacts yet",
+      "noContactsDesc": "Add your first contact to start tracking visits and building loyalty. They'll appear here once added.",
+      "resultCount": "{count, plural, one {# contact} other {# contacts}}"
     },
     "addContact": {
       "title": "Add Customer",
@@ -577,7 +634,8 @@
       "namePlaceholder": "John Doe",
       "emailPlaceholder": "john@example.com",
       "phonePlaceholder": "+1 (555) 123-4567",
-      "addedSuccess": "{name} added successfully"
+      "addedSuccess": "{name} added successfully",
+      "failedToAdd": "Failed to add contact"
     },
     "programs": {
       "title": "Programs",
@@ -612,7 +670,8 @@
       "backToOverview": "Back to overview",
       "draftBanner": "This program is in draft mode. Activate it to start issuing passes.",
       "activate": "Activate",
-      "activated": "Program activated! Contacts can now receive passes."
+      "activated": "Program activated! Contacts can now receive passes.",
+      "backToOverviewAriaLabel": "Back to overview"
     },
     "settings": {
       "title": "Settings",
@@ -701,7 +760,50 @@
       "contactDeleted": "Contact deleted",
       "contactUpdated": "Contact updated",
       "sendPassEmail": "Send Pass Email",
-      "emailSent": "Email sent to {email}"
+      "emailSent": "Email sent to {email}",
+      "sheetTitle": "Contact details",
+      "contactNotFound": "Contact not found",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "saveChanges": "Save Changes",
+      "fullName": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "nameRequired": "Name is required",
+      "failedToLoad": "Failed to load contact details",
+      "failedToDelete": "Failed to delete contact",
+      "failedToUpdate": "Failed to update contact",
+      "failedToRedeem": "Failed to redeem reward",
+      "rewardRedeemed": "Reward redeemed!",
+      "failedToLoadPrograms": "Failed to load programs",
+      "alreadyHasPass": "Contact already has this pass",
+      "failedToIssuePass": "Failed to issue pass",
+      "allPrograms": "All",
+      "enrolled": "Enrolled {date}",
+      "noPassInstances": "No pass instances",
+      "selfRegistered": "Self-registered",
+      "registeredBy": "by {name}",
+      "checkIn": "Check-in",
+      "usePass": "Use pass",
+      "visit": "Visit",
+      "couponRedeemed": "Coupon redeemed",
+      "readyToRedeem": "Ready to redeem",
+      "activeMember": "Active member",
+      "suspended": "Suspended",
+      "expired": "Expired",
+      "expires": "Expires",
+      "checkIns": "{count, plural, one {# check-in} other {# check-ins}}",
+      "actionUsePass": "Use Pass",
+      "actionCheckIn": "Check In",
+      "actionRedeemCoupon": "Redeem Coupon",
+      "actionRegisterVisit": "Register Visit",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet",
+      "stampCard": "Stamp Card",
+      "coupon": "Coupon",
+      "membership": "Membership",
+      "points": "Points",
+      "prepaidPass": "Prepaid Pass"
     },
     "contactColumns": {
       "name": "Name",
@@ -970,7 +1072,7 @@
       "pointsConfiguration": "Points Configuration",
       "pointsConfigDesc": "Set how points are earned and what they can be redeemed for.",
       "pointsPerVisit": "Points Per Visit",
-      "pointsPerVisitHint": "Points awarded to customers each time they visit (1\u201390).",
+      "pointsPerVisitHint": "Points awarded to customers each time they visit (1–90).",
       "rewardCatalog": "Reward Catalog",
       "rewardCatalogDesc": "Items customers can redeem with their points (up to 20).",
       "addItem": "Add Item",
@@ -989,8 +1091,8 @@
       "useLabelPlaceholder": "e.g., ride, wash, session",
       "useLabelHint": "What each use is called (e.g., \"ride\", \"wash\").",
       "rechargeable": "Rechargeable",
-      "rechargeableNo": "No \u2014 single use pass",
-      "rechargeableYes": "Yes \u2014 can be recharged",
+      "rechargeableNo": "No — single use pass",
+      "rechargeableYes": "Yes — can be recharged",
       "prepaidValidUntil": "Valid Until (Optional)",
       "scheduleSection": "Schedule",
       "scheduleDesc": "Control when the program is active and accepting customers.",
@@ -1200,7 +1302,7 @@
       "scratchCard": "Scratch Card",
       "slotMachine": "Slot Machine",
       "wheelOfFortune": "Wheel of Fortune",
-      "prizeCountHint": "{count} prizes \u00b7 Showing \"{name}\"",
+      "prizeCountHint": "{count} prizes · Showing \"{name}\"",
       "addPrizesHint": "Add at least 2 prizes to see the full experience",
       "saveSuccessWithUpdate": "Saved! Updating {count} wallet {passLabel}...",
       "saveSuccess": "Saved!",
@@ -1362,7 +1464,24 @@
       "fields": "Fields & Labels",
       "properties": "Properties",
       "closePanel": "Close panel",
-      "template": "Template"
+      "template": "Template",
+      "textColors": "Text Colors",
+      "fieldValues": "Field Values",
+      "labels": "Labels",
+      "textContrast": "Text contrast",
+      "autoTextColor": "Auto text color",
+      "computeFromBackground": "Compute from background",
+      "cardFields": "Card Fields",
+      "fieldsPanelDesc": "Configure which fields appear on the pass and their text styling.",
+      "cardFieldsDesc": "Choose which fields appear on the pass. Click a label to rename.",
+      "cardFieldsHint": "Apple: first field → header, rest → details. Google: auto rows.",
+      "auto": "Auto",
+      "addField": "+ Add field...",
+      "resetToDefaults": "Reset to defaults",
+      "moveUp": "Move {label} up",
+      "moveDown": "Move {label} down",
+      "removeField": "Remove {label}",
+      "clickToRename": "Click to rename"
     },
     "colors": {
       "instruction": "Click a color below or tap an area on the card preview to edit.",
@@ -1391,10 +1510,65 @@
       "chevron": "Chevron",
       "crosshatch": "Crosshatch",
       "diamonds": "Diamonds",
-      "confetti": "Confetti"
+      "confetti": "Confetti",
+      "zoom": "Zoom",
+      "resetPositionZoom": "Reset position & zoom",
+      "imageSection": "Image",
+      "presetsSection": "Presets",
+      "filtersSection": "Filters",
+      "fillSection": "Fill",
+      "colorsSection": "Colors",
+      "patternSection": "Pattern",
+      "patternColorSection": "Pattern Color",
+      "uploading": "Uploading...",
+      "replaceImage": "Replace image",
+      "uploadImage": "Upload image",
+      "removeImage": "Remove",
+      "imageHint": "PNG, JPEG, or WebP. Max 5MB. Cropped for Apple & Google Wallet.",
+      "noStripImage": "No strip image",
+      "opacity": "Opacity",
+      "blackAndWhite": "Black & White",
+      "flat": "Flat",
+      "gradient": "Gradient",
+      "colorStart": "Start",
+      "colorEnd": "End",
+      "colorFlat": "Color",
+      "resetToCardColors": "Reset to card colors",
+      "shapesColor": "Shapes",
+      "resetToStripColor": "Reset to strip color",
+      "stampGridInfo": "Stamp Grid is active — stamps overlay on {surface}. Stamp colors can be edited in the Progress panel.",
+      "stampGridSurfaceImage": "your uploaded image",
+      "stampGridSurfaceFlat": "a solid background",
+      "stampGridSurfaceGradient": "a gradient background",
+      "dragToReposition": "Drag to reposition"
     },
     "logo": {
-      "usingOrgLogo": "Using organization logo"
+      "usingOrgLogo": "Using organization logo",
+      "programLogo": "Program Logo",
+      "preview": "Preview",
+      "brandMatch": "Brand Match",
+      "advanced": "Advanced",
+      "processing": "Processing...",
+      "replaceLogo": "Replace Logo",
+      "uploadLogo": "Upload Logo",
+      "remove": "Remove",
+      "useOrgLogoInstead": "Use organization logo instead",
+      "hasProgramLogo": "This program has its own logo.",
+      "usingOrgLogoDesc": "Using your organization logo. Upload a different one for this program.",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet",
+      "appleLogoZoom": "Apple logo zoom",
+      "extractColorsDesc": "Extract colors from your logo and apply them to your card design.",
+      "extracting": "Extracting...",
+      "reExtractColors": "Re-extract colors",
+      "matchToBrand": "Match to my brand",
+      "extractError": "Could not extract colors from your logo.",
+      "extractFailed": "Failed to extract brand colors. Please try again.",
+      "useDifferentImage": "Use different image for {platform}",
+      "uploadOverride": "Upload Override",
+      "appleLogoHint": "Wide rectangle (320 × 100px). Transparent PNG recommended.",
+      "googleLogoHint": "Square (660px). Keep artwork centered with margin for circle crop.",
+      "resetLogoAria": "Reset {platform} logo to auto-generated"
     },
     "notifications": {
       "description": "When a customer is near your location, their wallet pass appears on the lock screen automatically.",
@@ -1473,6 +1647,7 @@
     "contactLimitReached": "You've reached the {limit} contact limit for your plan. Upgrade to add more contacts.",
     "contactEmailExists": "A contact with email \"{email}\" already exists.",
     "contactPhoneExists": "A contact with phone \"{phone}\" already exists.",
+    "contactAlreadyExists": "A contact with these details already exists.",
     "contactNotFound": "Contact not found",
     "contactNoEmail": "Contact has no email address",
     "programNotFound": "Program not found or not active",

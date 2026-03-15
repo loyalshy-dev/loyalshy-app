@@ -187,7 +187,7 @@ export function ContactFilters({
 
         {/* Result count */}
         <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">
-          {isPending ? "..." : `${totalResults} customer${totalResults !== 1 ? "s" : ""}`}
+          {isPending ? "..." : t("resultCount", { count: totalResults })}
         </span>
       </div>
     </div>

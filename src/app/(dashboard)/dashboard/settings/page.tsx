@@ -1,4 +1,5 @@
 import { connection } from "next/server"
+import { Suspense } from "react"
 import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { getSettingsData } from "@/server/org-settings-actions"
 import { getBillingData } from "@/server/billing-actions"
@@ -46,14 +47,16 @@ export default async function SettingsPage(props: {
         </p>
       </div>
 
-      <SettingsView
-        organization={data.organization}
-        members={data.members}
-        pendingInvitations={data.pendingInvitations}
-        activeTab={activeTab}
-        billingData={billingData}
-        currentUserId={session.user.id}
-      />
+      <Suspense>
+        <SettingsView
+          organization={data.organization}
+          members={data.members}
+          pendingInvitations={data.pendingInvitations}
+          activeTab={activeTab}
+          billingData={billingData}
+          currentUserId={session.user.id}
+        />
+      </Suspense>
     </div>
   )
 }

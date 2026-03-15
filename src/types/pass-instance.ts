@@ -1,4 +1,4 @@
-import type { PassInstanceStatus, WalletProvider, TemplateStatus } from "@prisma/client"
+import type { PassInstanceStatus, WalletProvider, TemplateStatus, PassType } from "@prisma/client"
 import type { DesignCardType } from "./pass-types"
 
 // ─── Type-specific state (stored in PassInstance.data JSON) ──
@@ -108,7 +108,7 @@ export type PassInstanceSummary = {
   passInstanceId: string
   templateId: string
   templateName: string
-  passType: string
+  passType: PassType
   data: PassInstanceData
   templateConfig?: unknown
   status: PassInstanceStatus
@@ -129,7 +129,7 @@ export type PassInstanceDetail = {
   passInstanceId: string
   templateId: string
   templateName: string
-  passType: string
+  passType: PassType
   templateConfig?: unknown
   templateStatus: TemplateStatus
   data: PassInstanceData
@@ -147,7 +147,7 @@ export type PassInstanceDetail = {
 export type TemplateWithDesign = {
   id: string
   name: string
-  passType: string
+  passType: PassType
   description: string | null
   config: unknown
   status: TemplateStatus
@@ -177,7 +177,7 @@ export type TemplateWithDesign = {
 export type PublicTemplateInfo = {
   id: string
   name: string
-  passType: string
+  passType: PassType
   description: string | null
   config: unknown
   passDesign: {

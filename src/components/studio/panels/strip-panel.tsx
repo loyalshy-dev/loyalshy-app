@@ -206,7 +206,7 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
             marginBottom: 4,
           }}
         >
-          No strip image
+          {t("noStripImage")}
         </div>
       )}
 
@@ -214,7 +214,7 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
       {stripImageUrl && (
         <div style={{ marginBottom: 8 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, marginTop: 8 }}>
-            <span style={{ fontSize: 11, color: "var(--foreground)" }}>Zoom</span>
+            <span style={{ fontSize: 11, color: "var(--foreground)" }}>{t("zoom")}</span>
             <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace" }}>
               {stripImageZoom.toFixed(1)}x
             </span>
@@ -250,14 +250,14 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
                 marginTop: 6,
               }}
             >
-              Reset position &amp; zoom
+              {t("resetPositionZoom")}
             </button>
           )}
         </div>
       )}
 
       {/* Strip image upload */}
-      <SectionHeader>Image</SectionHeader>
+      <SectionHeader>{t("imageSection")}</SectionHeader>
       <input
         ref={stripFileInputRef}
         type="file"
@@ -298,7 +298,7 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
             color: "var(--foreground)",
           }}
         >
-          {isUploadingStrip ? "Uploading..." : stripImageUrl ? "Replace image" : "Upload image"}
+          {isUploadingStrip ? t("uploading") : stripImageUrl ? t("replaceImage") : t("uploadImage")}
         </button>
         {stripImageUrl && (
           <button
@@ -318,16 +318,16 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
               color: "var(--destructive)",
             }}
           >
-            Remove
+            {t("removeImage")}
           </button>
         )}
       </div>
       <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 4, marginBottom: 2 }}>
-        PNG, JPEG, or WebP. Max 5MB. Cropped for Apple &amp; Google Wallet.
+        {t("imageHint")}
       </div>
 
       {/* Preset strip images */}
-      <SectionHeader>Presets</SectionHeader>
+      <SectionHeader>{t("presetsSection")}</SectionHeader>
       <div
         style={{
           display: "grid",
@@ -423,12 +423,12 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
       {/* Image filters — always available when a strip image is uploaded */}
       {stripImageUrl && (
         <>
-          <SectionHeader>Filters</SectionHeader>
+          <SectionHeader>{t("filtersSection")}</SectionHeader>
 
           {/* Opacity slider */}
           <div style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, color: "var(--foreground)" }}>Opacity</span>
+              <span style={{ fontSize: 11, color: "var(--foreground)" }}>{t("opacity")}</span>
               <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace" }}>
                 {Math.round(stripOpacity * 100)}%
               </span>
@@ -468,13 +468,13 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
               onChange={(e) => store.getState().setWalletField("stripGrayscale", e.target.checked)}
               style={{ accentColor: "var(--primary)", width: 14, height: 14 }}
             />
-            <span style={{ fontSize: 12, color: "var(--foreground)" }}>Black &amp; White</span>
+            <span style={{ fontSize: 12, color: "var(--foreground)" }}>{t("blackAndWhite")}</span>
           </label>
         </>
       )}
 
       {/* Fill mode — flat or gradient */}
-      <SectionHeader>Fill</SectionHeader>
+      <SectionHeader>{t("fillSection")}</SectionHeader>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 4, marginBottom: 8 }}>
         {(["flat", "gradient"] as const).map((mode) => (
           <button
@@ -491,24 +491,23 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
               fontWeight: stripFill === mode ? 600 : 400,
               color: "var(--foreground)",
               textAlign: "center",
-              textTransform: "capitalize",
             }}
           >
-            {mode}
+            {mode === "flat" ? t("flat") : t("gradient")}
           </button>
         ))}
       </div>
 
       {/* Strip colors */}
-      <SectionHeader>Colors</SectionHeader>
+      <SectionHeader>{t("colorsSection")}</SectionHeader>
       <ColorRow
-        label={isFlat ? "Color" : "Start"}
+        label={isFlat ? t("colorFlat") : t("colorStart")}
         value={effectiveStripColor1}
         onChange={(v) => store.getState().setWalletField("stripColor1", v)}
       />
       {!isFlat && (
         <ColorRow
-          label="End"
+          label={t("colorEnd")}
           value={effectiveStripColor2}
           onChange={(v) => store.getState().setWalletField("stripColor2", v)}
         />
@@ -530,14 +529,14 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
             marginTop: 4,
           }}
         >
-          Reset to card colors
+          {t("resetToCardColors")}
         </button>
       )}
 
       {/* Pattern style — only show when NOT stamp grid */}
       {!isStampGrid && (
         <>
-          <SectionHeader>Pattern</SectionHeader>
+          <SectionHeader>{t("patternSection")}</SectionHeader>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 4 }}>
             {PATTERN_OPTIONS.map((opt) => (
               <button
@@ -564,9 +563,9 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
           {/* Pattern color — only when a pattern is selected */}
           {patternStyle !== "NONE" && (
             <>
-              <SectionHeader>Pattern Color</SectionHeader>
+              <SectionHeader>{t("patternColorSection")}</SectionHeader>
               <ColorRow
-                label="Shapes"
+                label={t("shapesColor")}
                 value={effectivePatternColor}
                 onChange={(v) => store.getState().setWalletField("patternColor", v)}
               />
@@ -584,7 +583,7 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
                     marginTop: 4,
                   }}
                 >
-                  Reset to strip color
+                  {t("resetToStripColor")}
                 </button>
               )}
             </>
@@ -603,7 +602,7 @@ export function StripPanel({ store, programId, forceStrip, cardType, organizatio
           }}
         >
           <div style={{ fontSize: 11, color: "var(--muted-foreground)" }}>
-            Stamp Grid is active — stamps overlay on {stripImageUrl ? "your uploaded image" : isFlat ? "a solid background" : "a gradient background"}. Stamp colors can be edited in the Progress panel.
+            {t("stampGridInfo", { surface: stripImageUrl ? t("stampGridSurfaceImage") : isFlat ? t("stampGridSurfaceFlat") : t("stampGridSurfaceGradient") })}
           </div>
         </div>
       )}
@@ -633,6 +632,7 @@ function StripCropWidget({
   onPositionChange: (pos: { x: number; y: number }) => void
   onZoomChange: (z: number) => void
 }) {
+  const t = useTranslations("studio.strip")
   const frameRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
   const isDragging = useRef(false)
@@ -739,7 +739,7 @@ function StripCropWidget({
           fontWeight: 500,
         }}
       >
-        Drag to reposition
+        {t("dragToReposition")}
       </div>
     </div>
   )

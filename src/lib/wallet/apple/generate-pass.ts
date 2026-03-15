@@ -92,7 +92,7 @@ export async function generateApplePass(
   const stripPrimary = stripFilters.stripColor1 ?? design?.primaryColor ?? input.brandColor ?? "#1a1a2e"
   const stripSecondary = stripFilters.stripColor2 ?? design?.secondaryColor ?? input.secondaryColor ?? "#ffffff"
 
-  const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
+  const isStampType = cardType === "STAMP" || cardType === "POINTS"
   if (showStrip && isStampGrid && design && isStampType) {
     // Generate stamp grid strip image dynamically for this enrollment
     const { generateStampGridImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")

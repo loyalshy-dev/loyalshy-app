@@ -45,8 +45,6 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - `assertOrganizationAccess(organizationId)` — verify org membership via `getOrgMember()` (super admins bypass)
 - `assertOrganizationRole(organizationId, "owner")` — verify org role with hierarchy (owner > admin > member)
 - `getOrganizationForUser()` — returns lightweight organization record (no includes) via session.activeOrganizationId (cached per-request via React `cache()`)
-- `getActiveTemplates(organizationId)` — returns active PassTemplates with PassDesign
-- `getContactPassInstances(contactId, organizationId)` — returns PassInstances with PassTemplate
 
 ### Organization as Tenant
 - Organization IS the Better Auth Organization — no separate Restaurant entity
@@ -69,7 +67,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Webhooks**: HMAC-SHA256 signed payloads with timestamp replay protection, delivered via Trigger.dev with 5 retries + exponential backoff, auto-disable after 10 consecutive failures
 - **Composable handler**: `apiHandler()` wraps auth → rate limit → idempotency → handler → CORS → logging
 - **Inline contact + email on POST /passes**: `contactId` OR inline `contact: { fullName, email?, phone? }` (find-or-create), `sendEmail: true` triggers pass-issued email via Trigger.dev/Resend, response always includes `walletUrls` (cardUrl, appleWalletUrl, googleWalletUrl) for embedding in venue confirmation emails
-- **Key files**: `api-auth.ts`, `api-handler.ts`, `api-rate-limit.ts`, `api-errors.ts`, `api-response.ts`, `api-cors.ts`, `api-data.ts` (shared data layer + `findOrCreateContact`, `buildWalletUrls`, `sendPassIssuedEmail`), `api-schemas.ts` (Zod), `api-serializers.ts`, `api-events.ts` (webhook dispatch), `api-openapi.ts` (OpenAPI spec + use case guides), `api-keys.ts` (key generation/validation), `api-logger.ts` (batched request logging)
+- **Key files**: `api-auth.ts`, `api-handler.ts`, `api-rate-limit.ts`, `api-errors.ts`, `api-response.ts`, `api-cors.ts`, `api-data.ts` (shared data layer + `findOrCreateContact`, `buildWalletUrls`, `sendPassIssuedEmail`), `api-schemas.ts` (Zod), `api-serializers.ts`, `api-events.ts` (webhook dispatch), `api-openapi.ts` (OpenAPI spec + use case guides), `api-keys.ts` (key generation/validation), `api-logger.ts` (fire-and-forget request logging)
 - **Server actions**: `api-key-actions.ts` (dashboard key + webhook CRUD)
 - **Docs**: `/api/v1/docs` (Scalar interactive reference with use case guides: venue ticketing, loyalty stamps, gym membership, bulk import, webhook sync), `/api/v1/openapi.json` (spec)
 - **Plan limits**: Pro (STARTER): 20 req/min, 1k/day, 2 keys, 1 webhook | Business (GROWTH): 60/min, 10k/day, 10 keys, 5 webhooks | Scale: 300/min, 100k/day, 25 keys, 10 webhooks | Enterprise: 600/min, unlimited, 50 keys, 25 webhooks
@@ -234,6 +232,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase I18N — Internationalization with next-intl (English + Spanish + French, cookie-based locale, 78 files / ~1,224 strings per locale, 100% coverage — marketing, auth, dashboard, studio, server actions, legal pages)
 - [x] Phase PERF — Performance optimization (WebP images, CSS hero animations, Suspense restructure, cached DAL, parallel queries, lazy-loaded dashboard dialogs, skeleton fallbacks)
 - [x] Phase PERF-2 — Deep performance pass (cached `getOrgMember()` in DAL, removed unused passTemplates include from `getOrganizationForUser()`, parallelized all sequential DB queries across dashboard pages, Vercel region `fra1` to match Neon DB, i18n message splitting by route group, DB indexes on Reward/Interaction/Contact, contacts page Suspense boundary)
+- [x] Phase BUGFIX — Codebase audit fixes: 44 bugs + 4 deferred items across security (auth bypass, SSRF, HTML injection, missing access checks), race conditions (double-stamp, duplicate contact, memberNumber locking via FOR UPDATE), data integrity (wrong field reads, SQL case mismatch, invalid defaults), API consistency (rate limit off-by-one, memory leak, missing requestId, webhook org filter, interactions route through domain actions, contact limit check), UI (broken strip paths, missing Suspense, zundo equality, mid-file import), i18n (hardcoded strings in 8 components), dead code cleanup, R2 storage leak, PassType union typing, sanitized Apple log endpoint
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy

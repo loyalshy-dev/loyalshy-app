@@ -5,6 +5,23 @@ import { interactionListParamsSchema, createInteractionBodySchema } from "@/lib/
 import {
   queryPassInteractions,
   queryPassInstanceDetail,
+  performStamp,
+  performCouponRedeem,
+  performCheckIn,
+  performEarnPoints,
+  performRedeemPoints,
+  performPrepaidUse,
+  performPrepaidRecharge,
+  performGiftCardCharge,
+  performGiftCardRefund,
+  performTicketScan,
+  performTicketVoid,
+  performAccessGrant,
+  performAccessDeny,
+  performTransitBoard,
+  performTransitExit,
+  performIdVerify,
+  type ActionResult,
 } from "@/lib/api-data"
 import { serializeInteraction } from "@/lib/api-serializers"
 import { apiPaginated, apiCreated } from "@/lib/api-response"
@@ -12,6 +29,34 @@ import { ValidationError, NotFoundError, UnprocessableError } from "@/lib/api-er
 import { db } from "@/lib/db"
 import type { Prisma } from "@prisma/client"
 import type { ApiContext } from "@/lib/api-auth"
+
+// Interaction types that map to domain action functions
+const DOMAIN_INTERACTION_TYPES = new Set([
+  "STAMP",
+  "COUPON_REDEEM",
+  "CHECK_IN",
+  "POINTS_EARN",
+  "POINTS_REDEEM",
+  "PREPAID_USE",
+  "PREPAID_RECHARGE",
+  "GIFT_CHARGE",
+  "GIFT_REFUND",
+  "TICKET_SCAN",
+  "TICKET_VOID",
+  "ACCESS_GRANT",
+  "ACCESS_DENY",
+  "TRANSIT_BOARD",
+  "TRANSIT_EXIT",
+  "ID_VERIFY",
+])
+
+// Log-only interaction types (no domain side effects)
+const LOG_ONLY_INTERACTION_TYPES = new Set([
+  "STATUS_CHANGE",
+  "REWARD_EARNED",
+  "REWARD_REDEEMED",
+  "NOTE",
+])
 
 export const OPTIONS = handlePreflight
 
@@ -71,6 +116,8 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     )
   }
 
+  const { type: interactionType, metadata } = parsed.data
+
   // Verify pass belongs to org and is active
   const pass = await queryPassInstanceDetail(ctx.organizationId, passId)
   if (!pass) {
@@ -83,15 +130,136 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     )
   }
 
-  // Create the interaction record
+  // ── Domain-routed types: delegate to perform* functions ──────────────────
+  if (DOMAIN_INTERACTION_TYPES.has(interactionType)) {
+    let result: ActionResult | { error: string }
+
+    switch (interactionType) {
+      case "STAMP":
+        result = await performStamp(ctx.organizationId, passId)
+        break
+      case "COUPON_REDEEM":
+        result = await performCouponRedeem(
+          ctx.organizationId,
+          passId,
+          typeof metadata?.value === "string" ? metadata.value : undefined
+        )
+        break
+      case "CHECK_IN":
+        result = await performCheckIn(ctx.organizationId, passId)
+        break
+      case "POINTS_EARN":
+        result = await performEarnPoints(
+          ctx.organizationId,
+          passId,
+          typeof metadata?.points === "number" ? metadata.points : 1
+        )
+        break
+      case "POINTS_REDEEM":
+        result = await performRedeemPoints(
+          ctx.organizationId,
+          passId,
+          typeof metadata?.points === "number" ? metadata.points : 0
+        )
+        break
+      case "PREPAID_USE":
+        result = await performPrepaidUse(
+          ctx.organizationId,
+          passId,
+          typeof metadata?.amount === "number" ? metadata.amount : 1
+        )
+        break
+      case "PREPAID_RECHARGE":
+        result = await performPrepaidRecharge(
+          ctx.organizationId,
+          passId,
+          typeof metadata?.uses === "number" ? metadata.uses : 0
+        )
+        break
+      case "GIFT_CHARGE":
+        result = await performGiftCardCharge(
+          ctx.organizationId,
+          passId,
+          typeof metadata?.amountCents === "number" ? metadata.amountCents : 0
+        )
+        break
+      case "GIFT_REFUND":
+        result = await performGiftCardRefund(
+          ctx.organizationId,
+          passId,
+          typeof metadata?.amountCents === "number" ? metadata.amountCents : 0
+        )
+        break
+      case "TICKET_SCAN":
+        result = await performTicketScan(ctx.organizationId, passId)
+        break
+      case "TICKET_VOID":
+        result = await performTicketVoid(ctx.organizationId, passId)
+        break
+      case "ACCESS_GRANT":
+        result = await performAccessGrant(ctx.organizationId, passId)
+        break
+      case "ACCESS_DENY":
+        result = await performAccessDeny(ctx.organizationId, passId)
+        break
+      case "TRANSIT_BOARD":
+        result = await performTransitBoard(ctx.organizationId, passId)
+        break
+      case "TRANSIT_EXIT":
+        result = await performTransitExit(ctx.organizationId, passId)
+        break
+      case "ID_VERIFY":
+        result = await performIdVerify(ctx.organizationId, passId)
+        break
+      default:
+        throw new UnprocessableError(`Unhandled domain interaction type: ${interactionType}`)
+    }
+
+    if ("error" in result) {
+      throw new UnprocessableError(result.error)
+    }
+
+    // Build a serialized interaction shape from the ActionResult.
+    // The perform* functions already update contact stats internally via bumpContactStats.
+    const serialized = serializeInteraction({
+      id: result.interaction.id,
+      type: result.interaction.type,
+      metadata: (metadata ?? {}) as Prisma.JsonObject,
+      createdAt: result.interaction.createdAt,
+      passInstance: {
+        id: passId,
+        status: pass.status,
+        passTemplate: {
+          name: pass.passTemplate.name,
+          passType: pass.passTemplate.passType,
+        },
+      },
+      contact: {
+        id: pass.contactId,
+        fullName: pass.contact?.fullName ?? "",
+      },
+    })
+
+    import("@/lib/api-events").then(({ dispatchWebhookEvent }) =>
+      dispatchWebhookEvent(ctx.organizationId, "interaction.created", { interaction: serialized })
+    ).catch(() => {})
+
+    return apiCreated(serialized)
+  }
+
+  // ── Log-only types: raw db.interaction.create ─────────────────────────────
+  if (!LOG_ONLY_INTERACTION_TYPES.has(interactionType)) {
+    throw new UnprocessableError(`Unknown interaction type: ${interactionType}`)
+  }
+
   const interaction = await db.interaction.create({
     data: {
       contactId: pass.contactId,
       organizationId: ctx.organizationId,
       passTemplateId: pass.passTemplate.id,
       passInstanceId: passId,
-      type: parsed.data.type,
-      metadata: (parsed.data.metadata ?? {}) as Prisma.JsonObject,
+      type: interactionType,
+      metadata: (metadata ?? {}) as Prisma.JsonObject,
     },
     select: {
       id: true,
@@ -109,7 +277,7 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     },
   })
 
-  // Update contact stats
+  // Log-only interactions still update contact stats since they represent real activity
   await db.contact.update({
     where: { id: pass.contactId },
     data: {

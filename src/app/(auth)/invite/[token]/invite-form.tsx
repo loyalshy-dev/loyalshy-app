@@ -71,7 +71,6 @@ export function InviteForm({ token }: { token: string }) {
     // Accept the invitation (link user to organization)
     const acceptResult = await acceptStaffInvitation({
       token,
-      userId: data.user.id,
     })
 
     if (acceptResult.error) {
@@ -103,7 +102,6 @@ export function InviteForm({ token }: { token: string }) {
 
     const acceptResult = await acceptStaffInvitation({
       token,
-      userId: data.user.id,
     })
 
     if (acceptResult.error) {

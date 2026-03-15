@@ -506,7 +506,23 @@ export async function uploadShowcaseStampIcon(formData: FormData) {
 
 export async function deleteShowcaseStampIcon(id: string) {
   await assertSuperAdmin()
-  // The URL is managed client-side in designData.editorConfig.stampGridConfig.customStampIconUrl
-  // Just return success — the URL will be cleared from designData on next save
+
+  const card = await db.showcaseCard.findUnique({ where: { id } })
+  if (!card) return { error: "Showcase card not found" }
+
+  const designData = card.designData as Record<string, unknown>
+  const editorConfig = (designData.editorConfig as Record<string, unknown>) ?? {}
+  const stampGridConfig = (editorConfig.stampGridConfig as Record<string, unknown>) ?? {}
+  const iconUrl = stampGridConfig.customStampIconUrl as string | null | undefined
+
+  if (iconUrl) {
+    try {
+      const { deleteFile } = await import("@/lib/storage")
+      await deleteFile(iconUrl)
+    } catch {
+      // Storage cleanup failure is non-fatal
+    }
+  }
+
   return { success: true }
 }

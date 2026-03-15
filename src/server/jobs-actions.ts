@@ -22,10 +22,10 @@ export type JobLogsResult = {
 // ─── Get Recent Job Logs ────────────────────────────────────
 
 export async function getRecentJobLogs(page = 1, perPage = 25): Promise<JobLogsResult> {
+  await assertSuperAdmin()
+
   const organization = await getOrganizationForUser()
   if (!organization) redirect("/register?step=2")
-
-  await assertSuperAdmin()
 
   const skip = (page - 1) * perPage
 

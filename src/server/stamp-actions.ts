@@ -50,6 +50,8 @@ export async function lookupPassInstanceByWalletPassId(
     return { success: false, error: "No organization found", errorType: "NOT_FOUND" }
   }
 
+  await assertOrganizationAccess(organization.id)
+
   // Reject URLs (marketing QR codes)
   if (walletPassId.startsWith("http://") || walletPassId.startsWith("https://")) {
     return {
@@ -171,7 +173,7 @@ export async function lookupPassInstanceByWalletPassId(
     where: {
       contactId: passInstance.contact.id,
       status: { in: ["ACTIVE", "SUSPENDED"] },
-      passTemplate: { status: "ACTIVE" },
+      passTemplate: { status: "ACTIVE", organizationId: organization.id },
     },
     select: {
       id: true,
@@ -537,44 +539,50 @@ export async function registerStamp(
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalVisits = (instanceData.totalVisits as number) ?? 0
 
-  // Prevent double-registration within 1 minute
-  const oneMinuteAgo = new Date(Date.now() - 60_000)
-  const recentInteraction = await db.interaction.findFirst({
-    where: {
-      passInstanceId: passInstance.id,
-      createdAt: { gte: oneMinuteAgo },
-    },
-    select: { id: true },
-  })
-
-  if (recentInteraction) {
-    return {
-      success: false,
-      error: "A stamp was already registered for this pass less than a minute ago",
-      wasRewardEarned: false,
-      newCycleVisits: currentCycleVisits,
-      newTotalInteractions: totalVisits,
-      visitsRequired,
-    }
-  }
-
-  // Calculate new counts
-  const newCycleVisits = currentCycleVisits + 1
-  const newTotalVisits = totalVisits + 1
-  const newContactTotalInteractions = passInstance.contact.totalInteractions + 1
-  const wasRewardEarned = newCycleVisits >= visitsRequired
-
-  // Pick a weighted random prize if minigame has prizes configured
+  // Run everything in a transaction (including double-stamp check)
+  let wasRewardEarned = false
   let selectedPrize: string | undefined
-  if (wasRewardEarned) {
-    const mgConfig = parseMinigameConfig(template.config)
-    if (mgConfig?.enabled && mgConfig.prizes?.length) {
-      selectedPrize = weightedRandomPrize(mgConfig.prizes)
-    }
-  }
+  let newCycleVisits = 0
+  let newTotalVisits = 0
+  let newContactTotalInteractions = 0
 
-  // Run everything in a transaction
+  try {
   await db.$transaction(async (tx) => {
+    // Re-read pass instance data inside transaction for consistency
+    const freshInstance = await tx.passInstance.findUnique({
+      where: { id: passInstance.id },
+      select: { data: true },
+    })
+    const freshData = (freshInstance?.data as Record<string, unknown>) ?? {}
+    const freshCycleVisits = (freshData.currentCycleVisits as number) ?? 0
+    const freshTotalVisits = (freshData.totalVisits as number) ?? 0
+
+    // Prevent double-registration within 1 minute
+    const oneMinuteAgo = new Date(Date.now() - 60_000)
+    const recentInteraction = await tx.interaction.findFirst({
+      where: {
+        passInstanceId: passInstance.id,
+        createdAt: { gte: oneMinuteAgo },
+      },
+      select: { id: true },
+    })
+
+    if (recentInteraction) {
+      throw new Error("DOUBLE_STAMP")
+    }
+
+    newCycleVisits = freshCycleVisits + 1
+    newTotalVisits = freshTotalVisits + 1
+    newContactTotalInteractions = passInstance.contact.totalInteractions + 1
+    wasRewardEarned = newCycleVisits >= visitsRequired
+
+    if (wasRewardEarned) {
+      const mgConfig = parseMinigameConfig(template.config)
+      if (mgConfig?.enabled && mgConfig.prizes?.length) {
+        selectedPrize = weightedRandomPrize(mgConfig.prizes)
+      }
+    }
+
     // Create Interaction record
     await tx.interaction.create({
       data: {
@@ -594,7 +602,7 @@ export async function registerStamp(
         where: { id: passInstance.id },
         data: {
           data: {
-            ...instanceData,
+            ...freshData,
             currentCycleVisits: 0,
             totalVisits: newTotalVisits,
           },
@@ -622,7 +630,7 @@ export async function registerStamp(
         where: { id: passInstance.id },
         data: {
           data: {
-            ...instanceData,
+            ...freshData,
             currentCycleVisits: newCycleVisits,
             totalVisits: newTotalVisits,
           },
@@ -639,6 +647,19 @@ export async function registerStamp(
       },
     })
   })
+  } catch (err) {
+    if (err instanceof Error && err.message === "DOUBLE_STAMP") {
+      return {
+        success: false,
+        error: "A stamp was already registered for this pass less than a minute ago",
+        wasRewardEarned: false,
+        newCycleVisits: currentCycleVisits,
+        newTotalInteractions: totalVisits,
+        visitsRequired,
+      }
+    }
+    throw err
+  }
 
   // Dispatch wallet pass update via Trigger.dev
   if (passInstance.walletProvider !== "NONE") {

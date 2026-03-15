@@ -68,9 +68,6 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
   const result = await createContact(ctx.organizationId, parsed.data)
 
   if (!result.success) {
-    if (result.duplicateField) {
-      throw new ConflictError(result.error)
-    }
     throw new ConflictError(result.error)
   }
 

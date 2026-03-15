@@ -499,11 +499,11 @@ export function ContextPanel({ store, passType, organizationId, organizationName
   const tStrip = useTranslations("studio.strip")
 
   const STRIP_PRESETS: { id: string; src: string; label: string }[] = [
-    { id: "burger", src: "/strips/burger.webp", label: tStrip("burger") },
-    { id: "coffee", src: "/strips/coffee.webp", label: tStrip("coffeeBeans") },
-    { id: "pizza", src: "/strips/pizza.webp", label: tStrip("pizza") },
-    { id: "club", src: "/strips/club.webp", label: tStrip("club") },
-    { id: "gym", src: "/strips/gym.webp", label: tStrip("gym") },
+    { id: "burger", src: "/strip-images/burger.webp", label: tStrip("burger") },
+    { id: "coffee", src: "/strip-images/caffe-beans.webp", label: tStrip("coffeeBeans") },
+    { id: "pizza", src: "/strip-images/pizza.webp", label: tStrip("pizza") },
+    { id: "club", src: "/strip-images/club.webp", label: tStrip("club") },
+    { id: "gym", src: "/strip-images/gym.jpg", label: tStrip("gym") },
   ]
 
   const TOOL_LABELS: Record<StudioTool, string> = {
@@ -1158,11 +1158,11 @@ function StripControls({
 }) {
   const tStrip = useTranslations("studio.strip")
   const STRIP_PRESETS: { id: string; src: string; label: string }[] = [
-    { id: "burger", src: "/strips/burger.webp", label: tStrip("burger") },
-    { id: "coffee", src: "/strips/coffee.webp", label: tStrip("coffeeBeans") },
-    { id: "pizza", src: "/strips/pizza.webp", label: tStrip("pizza") },
-    { id: "club", src: "/strips/club.webp", label: tStrip("club") },
-    { id: "gym", src: "/strips/gym.webp", label: tStrip("gym") },
+    { id: "burger", src: "/strip-images/burger.webp", label: tStrip("burger") },
+    { id: "coffee", src: "/strip-images/caffe-beans.webp", label: tStrip("coffeeBeans") },
+    { id: "pizza", src: "/strip-images/pizza.webp", label: tStrip("pizza") },
+    { id: "club", src: "/strip-images/club.webp", label: tStrip("club") },
+    { id: "gym", src: "/strip-images/gym.jpg", label: tStrip("gym") },
   ]
 
   const fileRef = useRef<HTMLInputElement>(null)

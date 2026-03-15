@@ -67,6 +67,17 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
   let contactId = parsed.data.contactId
   let contactCreated = false
 
+  // Check contact limit before potential contact creation
+  if (!contactId && parsed.data.contact) {
+    const { checkContactLimit } = await import("@/server/billing-actions")
+    const limitCheck = await checkContactLimit(ctx.organizationId)
+    if (!limitCheck.allowed) {
+      throw new UnprocessableError(
+        `Contact limit reached (${limitCheck.limit}). Upgrade your plan to add more contacts.`
+      )
+    }
+  }
+
   // Resolve contact: inline creation or existing contactId
   if (!contactId && parsed.data.contact) {
     const contactResult = await findOrCreateContact(

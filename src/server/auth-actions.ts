@@ -5,7 +5,7 @@ import crypto from "crypto"
 import { addDays } from "date-fns"
 import { headers } from "next/headers"
 import { db } from "@/lib/db"
-import { assertOrganizationRole } from "@/lib/dal"
+import { assertOrganizationRole, assertAuthenticated } from "@/lib/dal"
 import { publicFormLimiter } from "@/lib/rate-limit"
 
 // ─── Schemas ────────────────────────────────────────────────
@@ -177,11 +177,11 @@ export async function validateInvitationToken(token: string) {
 
 const acceptInvitationSchema = z.object({
   token: z.string().min(1),
-  userId: z.string().min(1),
 })
 
 export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitationSchema>) {
   const parsed = acceptInvitationSchema.parse(input)
+  const session = await assertAuthenticated()
 
   const invitation = await db.staffInvitation.findUnique({
     where: { token: parsed.token },
@@ -191,13 +191,8 @@ export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitati
     return { error: "Invalid or expired invitation" }
   }
 
-  // Verify the accepting user's email matches the invitation email
-  const user = await db.user.findUnique({
-    where: { id: parsed.userId },
-    select: { email: true },
-  })
-
-  if (!user || user.email.toLowerCase() !== invitation.email.toLowerCase()) {
+  // Verify the authenticated user's email matches the invitation email
+  if (session.user.email.toLowerCase() !== invitation.email.toLowerCase()) {
     return { error: "This invitation was sent to a different email address" }
   }
 
@@ -209,7 +204,7 @@ export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitati
     }),
     db.member.create({
       data: {
-        userId: parsed.userId,
+        userId: session.user.id,
         organizationId: invitation.organizationId,
         role: invitation.role === "OWNER" ? "owner" : "member",
       },

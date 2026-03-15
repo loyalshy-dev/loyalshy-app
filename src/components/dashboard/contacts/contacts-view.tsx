@@ -51,7 +51,7 @@ export function ContactsView({
     setDetailSheetOpen(true)
   }
 
-  function handleDelete(contact: ContactRow) {
+  function handleView(contact: ContactRow) {
     setDetailContactId(contact.id)
     setDetailSheetOpen(true)
   }
@@ -100,7 +100,7 @@ export function ContactsView({
             order={order}
             onViewDetail={handleViewDetail}
             onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={handleView}
           />
         </>
       )}

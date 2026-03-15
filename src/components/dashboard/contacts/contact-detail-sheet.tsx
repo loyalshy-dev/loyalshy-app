@@ -198,14 +198,14 @@ function getRendererProps(passInstance: PassInstanceDetail) {
   }
 }
 
-function getProgressText(passInstance: PassInstanceDetail): string {
+function getProgressText(passInstance: PassInstanceDetail, t: (key: string) => string): string {
   const data = passInstance.data as Record<string, unknown> | null ?? {}
   const stampConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
   switch (passInstance.passType) {
     case "COUPON":
-      return passInstance.status === "COMPLETED" ? "Coupon redeemed" : "Ready to redeem"
+      return passInstance.status === "COMPLETED" ? t("couponRedeemed") : t("readyToRedeem")
     case "MEMBERSHIP":
-      return passInstance.status === "SUSPENDED" ? "Suspended" : passInstance.status === "EXPIRED" ? "Expired" : "Active member"
+      return passInstance.status === "SUSPENDED" ? t("suspended") : passInstance.status === "EXPIRED" ? t("expired") : t("activeMember")
     case "POINTS": {
       const balance = (data as { pointsBalance?: number }).pointsBalance ?? 0
       return `${balance} pts`
@@ -288,7 +288,7 @@ export function ContactDetailSheet({
         setIsLoading(false)
       })
       .catch(() => {
-        toast.error("Failed to load customer details")
+        toast.error(t("failedToLoad"))
         setIsLoading(false)
       })
   }, [contactId, open])
@@ -303,7 +303,7 @@ export function ContactDetailSheet({
         onOpenChange(false)
         onContactDeleted()
       } else {
-        toast.error(result.error ?? "Failed to delete customer")
+        toast.error(result.error ?? t("failedToDelete"))
       }
     })
   }
@@ -314,10 +314,10 @@ export function ContactDetailSheet({
       const result = await redeemReward(rewardId)
       setRedeemingRewardId(null)
       if (!result.success) {
-        toast.error(result.error ?? "Failed to redeem reward")
+        toast.error(result.error ?? t("failedToRedeem"))
         return
       }
-      toast.success("Reward redeemed!")
+      toast.success(t("rewardRedeemed"))
       // Refresh detail
       if (contactId) {
         const updated = await getContactDetail(contactId)
@@ -338,7 +338,7 @@ export function ContactDetailSheet({
         .map((t) => ({ id: t.id, name: t.name, passType: t.passType }))
       setAvailableTemplates(available)
     } catch {
-      toast.error("Failed to load programs")
+      toast.error(t("failedToLoadPrograms"))
       setIssuePassOpen(false)
     } finally {
       setIsLoadingTemplates(false)
@@ -356,10 +356,10 @@ export function ContactDetailSheet({
         const updated = await getContactDetail(contactId)
         if (updated) setDetail(updated)
       } else if (result.success && result.skippedCount > 0) {
-        toast.info("Contact already has this pass")
+        toast.info(t("alreadyHasPass"))
         setIssuePassOpen(false)
       } else {
-        toast.error(result.error ?? "Failed to issue pass")
+        toast.error(result.error ?? t("failedToIssuePass"))
       }
     })
   }
@@ -405,7 +405,7 @@ export function ContactDetailSheet({
           {isLoading ? (
             <>
               <SheetHeader className="sr-only">
-                <SheetTitle>Contact details</SheetTitle>
+                <SheetTitle>{t("sheetTitle")}</SheetTitle>
               </SheetHeader>
               <DetailSkeleton />
             </>
@@ -576,7 +576,7 @@ export function ContactDetailSheet({
                                   <p className="text-[11px] text-muted-foreground">
                                     {meta?.shortLabel ?? pi.passType}
                                     {" · "}
-                                    {getProgressText(pi)}
+                                    {getProgressText(pi, t)}
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
@@ -611,7 +611,7 @@ export function ContactDetailSheet({
                                 : "bg-transparent text-muted-foreground border-border hover:border-brand/30"
                             }`}
                           >
-                            All
+                            {t("allPrograms")}
                           </button>
                           {visitTemplates.map((name) => (
                             <button
@@ -651,7 +651,7 @@ export function ContactDetailSheet({
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-[13px] font-medium">
-                                  {visit.passType === "MEMBERSHIP" ? "Check-in" : visit.passType === "PREPAID" ? "Use pass" : "Visit"}
+                                  {visit.passType === "MEMBERSHIP" ? t("checkIn") : visit.passType === "PREPAID" ? t("usePass") : t("visit")}
                                   {!visitTemplateFilter && visitTemplates.length > 1 && (
                                     <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
                                       {visit.templateName}
@@ -660,8 +660,8 @@ export function ContactDetailSheet({
                                 </p>
                                 <p className="text-[11px] text-muted-foreground">
                                   {visit.registeredBy
-                                    ? `by ${visit.registeredBy}`
-                                    : "Self-registered"}
+                                    ? t("registeredBy", { name: visit.registeredBy })
+                                    : t("selfRegistered")}
                                 </p>
                               </div>
                               <span className="text-[11px] text-muted-foreground shrink-0">
@@ -690,7 +690,7 @@ export function ContactDetailSheet({
                                 : "bg-transparent text-muted-foreground border-border hover:border-brand/30"
                             }`}
                           >
-                            All
+                            {t("allPrograms")}
                           </button>
                           {rewardTemplates.map((name) => (
                             <button
@@ -786,10 +786,10 @@ export function ContactDetailSheet({
                     : primaryPassType === "COUPON" ? Ticket
                     : primaryPassType === "POINTS" ? Coins
                     : Stamp
-                  const actionLabel = primaryPassType === "PREPAID" ? "Use Pass"
-                    : primaryPassType === "MEMBERSHIP" ? "Check In"
-                    : primaryPassType === "COUPON" ? "Redeem Coupon"
-                    : "Register Visit"
+                  const actionLabel = primaryPassType === "PREPAID" ? t("actionUsePass")
+                    : primaryPassType === "MEMBERSHIP" ? t("actionCheckIn")
+                    : primaryPassType === "COUPON" ? t("actionRedeemCoupon")
+                    : t("actionRegisterVisit")
                   return (
                     <Button
                       size="sm"
@@ -827,10 +827,10 @@ export function ContactDetailSheet({
           ) : (
             <>
               <SheetHeader className="sr-only">
-                <SheetTitle>Contact details</SheetTitle>
+                <SheetTitle>{t("sheetTitle")}</SheetTitle>
               </SheetHeader>
               <div className="flex items-center justify-center flex-1 text-[13px] text-muted-foreground">
-                Contact not found
+                {t("contactNotFound")}
               </div>
             </>
           )}
@@ -866,7 +866,7 @@ export function ContactDetailSheet({
               onClick={() => setShowDeleteDialog(false)}
               className="text-[13px]"
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -880,7 +880,7 @@ export function ContactDetailSheet({
               ) : (
                 <Trash2 className="size-3.5" />
               )}
-              Delete
+              {t("delete")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -906,12 +906,13 @@ function PassInstanceCard({
   passInstance: PassInstanceDetail
   statusConfig: Record<string, { label: string; className: string }>
 }) {
+  const t = useTranslations("dashboard.contactDetail")
   const TypeIcon = passTypeIcons[passInstance.passType] ?? Stamp
   const statusCfg = statusConfig[passInstance.status] ?? statusConfig.CANCELLED
   const isInactive = passInstance.status !== "ACTIVE"
   const design = buildWalletDesign(passInstance)
-  const walletLabel = passInstance.walletProvider === "APPLE" ? "Apple Wallet"
-    : passInstance.walletProvider === "GOOGLE" ? "Google Wallet"
+  const walletLabel = passInstance.walletProvider === "APPLE" ? t("appleWallet")
+    : passInstance.walletProvider === "GOOGLE" ? t("googleWallet")
     : null
 
   // Extract type-specific data from the data JSON
@@ -973,14 +974,14 @@ function PassInstanceCard({
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                {getProgressText(passInstance)}
+                {getProgressText(passInstance, t)}
               </p>
             </div>
           )}
 
           {passInstance.passType === "COUPON" && (
             <p className="text-[11px] text-muted-foreground">
-              {passInstance.status === "COMPLETED" ? "Coupon redeemed" : "Ready to redeem"}
+              {passInstance.status === "COMPLETED" ? t("couponRedeemed") : t("readyToRedeem")}
             </p>
           )}
 
@@ -988,17 +989,17 @@ function PassInstanceCard({
             <div className="space-y-0.5">
               {passInstance.expiresAt && (
                 <p className="text-[11px] text-muted-foreground">
-                  {passInstance.status === "EXPIRED" ? "Expired" : "Expires"} {format(new Date(passInstance.expiresAt), "MMM d, yyyy")}
+                  {passInstance.status === "EXPIRED" ? t("expired") : t("expires")} {format(new Date(passInstance.expiresAt), "MMM d, yyyy")}
                 </p>
               )}
               {passInstance.status === "SUSPENDED" && passInstance.suspendedAt && (
                 <p className="text-[11px] text-warning">
-                  Suspended {format(new Date(passInstance.suspendedAt), "MMM d, yyyy")}
+                  {t("suspended")} {format(new Date(passInstance.suspendedAt), "MMM d, yyyy")}
                 </p>
               )}
               {passInstance.status === "ACTIVE" && (
                 <p className="text-[11px] text-muted-foreground">
-                  {membershipData.totalCheckIns ?? 0} check-in{(membershipData.totalCheckIns ?? 0) !== 1 ? "s" : ""}
+                  {t("checkIns", { count: membershipData.totalCheckIns ?? 0 })}
                 </p>
               )}
             </div>
@@ -1054,7 +1055,7 @@ function PassInstanceCard({
               </span>
             )}
             <span className="text-[10px] text-muted-foreground">
-              {walletLabel && "·"} Enrolled {format(new Date(passInstance.issuedAt), "MMM d, yyyy")}
+              {walletLabel && "·"} {t("enrolled", { date: format(new Date(passInstance.issuedAt), "MMM d, yyyy") })}
             </span>
           </div>
         </div>
@@ -1070,10 +1071,11 @@ function PassInstanceProgressSection({
   passInstances: PassInstanceDetail[]
   statusConfig: Record<string, { label: string; className: string }>
 }) {
+  const t = useTranslations("dashboard.contactDetail")
   if (passInstances.length === 0) {
     return (
       <div className="flex flex-col items-center py-6">
-        <p className="text-[12px] text-muted-foreground">No pass instances</p>
+        <p className="text-[12px] text-muted-foreground">{t("noPassInstances")}</p>
       </div>
     )
   }
@@ -1140,7 +1142,7 @@ function EditContactDialog({
         if (result.duplicateField) {
           setError(result.duplicateField, { message: result.error })
         } else {
-          toast.error(result.error ?? "Failed to update customer")
+          toast.error(result.error ?? t("failedToUpdate"))
         }
         return
       }
@@ -1163,12 +1165,12 @@ function EditContactDialog({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="edit-fullName" className="text-[13px]">
-              Full Name <span className="text-destructive">*</span>
+              {t("fullName")} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="edit-fullName"
               className="h-9 text-[13px]"
-              {...register("fullName", { required: "Name is required" })}
+              {...register("fullName", { required: t("nameRequired") })}
             />
             {errors.fullName && (
               <p className="flex items-center gap-1 text-[11px] text-destructive">
@@ -1179,7 +1181,7 @@ function EditContactDialog({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="edit-email" className="text-[13px]">
-              Email
+              {t("email")}
             </Label>
             <Input
               id="edit-email"
@@ -1196,7 +1198,7 @@ function EditContactDialog({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="edit-phone" className="text-[13px]">
-              Phone
+              {t("phone")}
             </Label>
             <Input
               id="edit-phone"
@@ -1219,11 +1221,11 @@ function EditContactDialog({
               onClick={() => onOpenChange(false)}
               className="text-[13px]"
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" size="sm" disabled={isUpdating} className="gap-1.5 text-[13px]">
               {isUpdating && <Loader2 className="size-3.5 animate-spin" />}
-              Save Changes
+              {t("saveChanges")}
             </Button>
           </DialogFooter>
         </form>

@@ -164,37 +164,3 @@ export const getOrganizationForUser = cache(async () => {
   return organization
 })
 
-/**
- * Returns all ACTIVE templates for an organization with their designs.
- */
-export async function getActiveTemplates(organizationId: string) {
-  return db.passTemplate.findMany({
-    where: { organizationId, status: "ACTIVE" },
-    include: { passDesign: true },
-    orderBy: { createdAt: "asc" },
-  })
-}
-
-/**
- * Returns all pass instances for a contact in an organization, with template info.
- */
-export async function getContactPassInstances(contactId: string, organizationId: string) {
-  return db.passInstance.findMany({
-    where: {
-      contactId,
-      passTemplate: { organizationId },
-    },
-    include: {
-      passTemplate: {
-        select: {
-          id: true,
-          name: true,
-          passType: true,
-          config: true,
-          status: true,
-        },
-      },
-    },
-    orderBy: { issuedAt: "asc" },
-  })
-}

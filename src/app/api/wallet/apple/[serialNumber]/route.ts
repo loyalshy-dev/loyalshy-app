@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { verifyCardSignature } from "@/lib/card-access"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ serialNumber: string }> }
 ) {
   const { serialNumber } = await params
+
+  // Verify HMAC signature
+  const url = new URL(request.url)
+  const sig = url.searchParams.get("sig")
+  if (!sig || !verifyCardSignature(serialNumber, sig)) {
+    return NextResponse.json({ error: "Access denied" }, { status: 403 })
+  }
 
   // Query PassInstance by walletPassSerialNumber
   const passInstance = await db.passInstance.findUnique({

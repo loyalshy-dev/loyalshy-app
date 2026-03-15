@@ -59,6 +59,14 @@ function checkMemoryRateLimit(
   windowMs: number
 ): RateLimitResult {
   const now = Date.now()
+
+  // Evict expired entries when map grows too large
+  if (memoryStore.size > 10_000) {
+    for (const [k, v] of memoryStore) {
+      if (now > v.resetAt) memoryStore.delete(k)
+    }
+  }
+
   const entry = memoryStore.get(key)
 
   if (!entry || now > entry.resetAt) {
@@ -144,7 +152,7 @@ export async function checkApiRateLimit(
     60_000
   )
 
-  if (minuteResult.remaining < 0) {
+  if (minuteResult.remaining <= 0) {
     throw new RateLimitError(
       Math.max(1, minuteResult.reset - Math.ceil(Date.now() / 1000))
     )
@@ -156,7 +164,7 @@ export async function checkApiRateLimit(
       dailyLimit,
       86_400_000
     )
-    if (dailyResult.remaining < 0) {
+    if (dailyResult.remaining <= 0) {
       throw new RateLimitError(
         Math.max(1, dailyResult.reset - Math.ceil(Date.now() / 1000))
       )

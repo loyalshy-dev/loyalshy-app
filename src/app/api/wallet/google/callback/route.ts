@@ -5,22 +5,22 @@ import { NextResponse } from "next/server"
  *
  * Callback endpoint for Google Wallet status updates.
  * Google Wallet can send notifications when a pass is saved or deleted.
- *
- * For now, we log the callback payload. Full processing
- * will be implemented in Phase 3.4 (Trigger.dev background jobs).
  */
 export async function POST(request: Request) {
   try {
+    const contentType = request.headers.get("content-type") ?? ""
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json({ status: "error", message: "Invalid content type" }, { status: 400 })
+    }
+
     const body = await request.json()
 
-    console.log(
-      "[Google Wallet Callback]",
-      JSON.stringify(body, null, 2)
-    )
+    // Basic payload shape validation
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ status: "error", message: "Invalid payload" }, { status: 400 })
+    }
 
-    // TODO Phase 3.4: Process callback events
-    // - Pass saved: update customer.walletPassType to GOOGLE
-    // - Pass deleted: clear customer wallet fields
+    // TODO: Process callback events (pass saved/deleted)
 
     return NextResponse.json({ status: "ok" })
   } catch {

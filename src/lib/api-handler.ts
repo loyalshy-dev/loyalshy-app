@@ -96,6 +96,29 @@ function withApiHeaders(
   return response
 }
 
+// ─── Inject requestId into JSON response meta ─────────────
+
+async function injectRequestId(
+  response: NextResponse,
+  requestId: string
+): Promise<NextResponse> {
+  // Only process JSON responses with 2xx status
+  if (response.status < 200 || response.status >= 300) return response
+  const ct = response.headers.get("content-type") ?? ""
+  if (!ct.includes("json")) return response
+
+  try {
+    const body = await response.clone().json()
+    if (body && typeof body === "object" && "meta" in body) {
+      body.meta = { requestId, ...body.meta }
+      return NextResponse.json(body, { status: response.status })
+    }
+  } catch {
+    // Not parseable JSON — return as-is
+  }
+  return response
+}
+
 // ─── Composable Route Handler ──────────────────────────────
 
 /**
@@ -146,17 +169,20 @@ export function apiHandler(
       // Execute handler
       const response = await handler(req, ctx)
 
+      // Inject requestId into the response body meta
+      const enrichedResponse = await injectRequestId(response, requestId)
+
       // Store idempotent response
       if (idempotencyKey) {
         await storeIdempotentResponse(
           ctx.organizationId,
           idempotencyKey,
-          response
+          enrichedResponse
         )
       }
 
       const finalResponse = withCorsHeaders(
-        withApiHeaders(response, requestId, rateLimit, idempotencyKey ?? undefined)
+        withApiHeaders(enrichedResponse, requestId, rateLimit, idempotencyKey ?? undefined)
       )
 
       // Log request (fire-and-forget)

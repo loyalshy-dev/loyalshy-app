@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import { computeTextColor, getFieldConfig } from "@/lib/wallet/card-design"
 import { blendColors } from "@/lib/wallet/apple/colors"
@@ -38,6 +39,7 @@ type Props = {
 }
 
 export function FieldsPanel({ store, passType }: Props) {
+  const t = useTranslations("studio.panels")
   const primaryColor = useStore(store, (s) => s.wallet.primaryColor)
   const textColor = useStore(store, (s) => s.wallet.textColor)
   const labelColor = useStore(store, (s) => s.wallet.labelColor)
@@ -60,15 +62,15 @@ export function FieldsPanel({ store, passType }: Props) {
   return (
     <div>
       <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 12 }}>
-        Configure which fields appear on the pass and their text styling.
+        {t("fieldsPanelDesc")}
       </div>
 
       {/* ── Text & Label Colors ── */}
-      <SectionHeader>Text Colors</SectionHeader>
+      <SectionHeader>{t("textColors")}</SectionHeader>
 
       {/* Text color row */}
       <ColorRow
-        label="Field Values"
+        label={t("fieldValues")}
         color={textColor}
         onChange={(v) => {
           store.getState().setWalletField("textColor", v)
@@ -79,7 +81,7 @@ export function FieldsPanel({ store, passType }: Props) {
       {/* Label color row (Apple only) */}
       {!isGoogle && (
         <ColorRow
-          label="Labels"
+          label={t("labels")}
           color={labelColor ?? blendColors(textColor, primaryColor, 0.3)}
           onChange={(v) => store.getState().setWalletField("labelColor", v)}
           onReset={labelColor ? () => store.getState().setWalletField("labelColor", null) : undefined}
@@ -100,7 +102,7 @@ export function FieldsPanel({ store, passType }: Props) {
         }}
       >
         <span style={{ fontSize: 11, color: "var(--muted-foreground)" }}>
-          Text contrast
+          {t("textContrast")}
         </span>
         <span
           style={{
@@ -129,8 +131,8 @@ export function FieldsPanel({ store, passType }: Props) {
         }}
       >
         <div>
-          <div style={{ fontSize: 12, color: "var(--foreground)" }}>Auto text color</div>
-          <div style={{ fontSize: 11, color: "var(--muted-foreground)" }}>Compute from background</div>
+          <div style={{ fontSize: 12, color: "var(--foreground)" }}>{t("autoTextColor")}</div>
+          <div style={{ fontSize: 11, color: "var(--muted-foreground)" }}>{t("computeFromBackground")}</div>
         </div>
         <button
           onClick={handleAutoTextToggle}
@@ -180,6 +182,7 @@ function ColorRow({
   onChange: (v: string) => void
   onReset?: () => void
 }) {
+  const t = useTranslations("studio.panels")
   return (
     <div
       style={{
@@ -242,7 +245,7 @@ function ColorRow({
             flexShrink: 0,
           }}
         >
-          Auto
+          {t("auto")}
         </button>
       )}
     </div>
@@ -272,6 +275,7 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
 // ─── Card Fields Section ────────────────────────────────────
 
 function CardFieldsSection({ store, passType }: { store: CardDesignStoreApi; passType: string }) {
+  const t = useTranslations("studio.panels")
   const rawFields = useStore(store, (s) => s.wallet.fields)
   const rawFieldLabels = useStore(store, (s) => s.wallet.fieldLabels)
   const rawHeader = useStore(store, (s) => s.wallet.headerFields)
@@ -351,12 +355,12 @@ function CardFieldsSection({ store, passType }: { store: CardDesignStoreApi; pas
 
   return (
     <>
-      <SectionHeader>Card Fields</SectionHeader>
+      <SectionHeader>{t("cardFields")}</SectionHeader>
       <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 6 }}>
-        Choose which fields appear on the pass. Click a label to rename.
+        {t("cardFieldsDesc")}
       </div>
       <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginBottom: 10, lineHeight: 1.4 }}>
-        Apple: first field → header, rest → details. Google: auto rows.
+        {t("cardFieldsHint")}
       </div>
 
       {/* Field list */}
@@ -406,7 +410,7 @@ function CardFieldsSection({ store, passType }: { store: CardDesignStoreApi; pas
             ) : (
               <span
                 style={{ flex: 1, color: "var(--foreground)", cursor: "text", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                title="Click to rename"
+                title={t("clickToRename")}
                 onClick={() => startEdit(id)}
               >
                 {getDisplayLabel(id)}
@@ -428,7 +432,7 @@ function CardFieldsSection({ store, passType }: { store: CardDesignStoreApi; pas
                 fontSize: 11,
                 lineHeight: 1,
               }}
-              aria-label={`Move ${getDisplayLabel(id)} up`}
+              aria-label={t("moveUp", { label: getDisplayLabel(id) })}
             >
               ↑
             </button>
@@ -444,14 +448,14 @@ function CardFieldsSection({ store, passType }: { store: CardDesignStoreApi; pas
                 fontSize: 11,
                 lineHeight: 1,
               }}
-              aria-label={`Move ${getDisplayLabel(id)} down`}
+              aria-label={t("moveDown", { label: getDisplayLabel(id) })}
             >
               ↓
             </button>
             <button
               onClick={() => removeField(id)}
               style={{ padding: "0 3px", border: "none", background: "none", color: "var(--muted-foreground)", cursor: "pointer", fontSize: 12, lineHeight: 1 }}
-              aria-label={`Remove ${getDisplayLabel(id)}`}
+              aria-label={t("removeField", { label: getDisplayLabel(id) })}
             >
               ×
             </button>
@@ -476,7 +480,7 @@ function CardFieldsSection({ store, passType }: { store: CardDesignStoreApi; pas
             marginBottom: 6,
           }}
         >
-          <option value="">+ Add field...</option>
+          <option value="">{t("addField")}</option>
           {available.map((f) => (
             <option key={f.id} value={f.id}>{fieldLabels[f.id] ?? f.label}</option>
           ))}
@@ -500,7 +504,7 @@ function CardFieldsSection({ store, passType }: { store: CardDesignStoreApi; pas
           padding: 0,
         }}
       >
-        Reset to defaults
+        {t("resetToDefaults")}
       </button>
     </>
   )

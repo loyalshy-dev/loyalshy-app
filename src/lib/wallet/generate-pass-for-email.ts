@@ -72,7 +72,7 @@ export async function generateApplePassForEmail(
 
   const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
-  const totalInteractions = (instanceData.totalInteractions as number) ?? 0
+  const totalInteractions = (instanceData.totalVisits as number) ?? (instanceData.totalInteractions as number) ?? 0
   const pointsBalance = (instanceData.pointsBalance as number) ?? 0
   const remainingUses = (instanceData.remainingUses as number) ?? 0
 

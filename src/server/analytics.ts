@@ -385,7 +385,7 @@ export async function getRewardDistribution(
   // This is specific to STAMP_CARD — reads currentCycleVisits from passInstance.data
   // For now, we query pass instances and extract cycle visits from data JSON
   const instanceWhere: Record<string, unknown> = {
-    passTemplate: { organizationId },
+    passTemplate: { organizationId, passType: "STAMP_CARD" },
     status: "ACTIVE",
   }
 

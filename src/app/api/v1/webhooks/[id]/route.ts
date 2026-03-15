@@ -93,7 +93,7 @@ export const PATCH = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
   }
 
   const updated = await db.webhookEndpoint.update({
-    where: { id },
+    where: { id, organizationId: ctx.organizationId },
     data: updateData,
     select: {
       id: true,
@@ -126,7 +126,7 @@ export const DELETE = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     throw new NotFoundError(`Webhook endpoint with ID ${id} was not found.`)
   }
 
-  await db.webhookEndpoint.delete({ where: { id } })
+  await db.webhookEndpoint.delete({ where: { id, organizationId: ctx.organizationId } })
 
   return apiNoContent()
 })

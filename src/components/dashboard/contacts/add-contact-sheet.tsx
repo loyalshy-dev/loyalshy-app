@@ -61,7 +61,7 @@ export function AddContactSheet({ open, onOpenChange }: AddContactSheetProps) {
         if (result.duplicateField) {
           setError(result.duplicateField, { message: result.error })
         } else {
-          toast.error(result.error ?? "Failed to add customer")
+          toast.error(result.error ?? t("failedToAdd"))
         }
         return
       }

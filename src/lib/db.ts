@@ -18,11 +18,16 @@ function getPrismaClient(): PrismaClient {
 
 /**
  * Get the next sequential member number for an organization.
- * Uses a raw query with row-level locking to avoid race conditions.
+ * Uses FOR UPDATE to lock rows and prevent race conditions.
+ * Pass a transaction client (`tx`) when called inside a $transaction.
  */
-export async function getNextMemberNumber(organizationId: string): Promise<number> {
-  const result = await db.$queryRaw<[{ max: number | null }]>`
-    SELECT MAX("memberNumber") as max FROM contact WHERE "organizationId" = ${organizationId}
+export async function getNextMemberNumber(
+  organizationId: string,
+  tx?: Pick<PrismaClient, "$queryRaw">
+): Promise<number> {
+  const client = tx ?? db
+  const result = await client.$queryRaw<[{ max: number | null }]>`
+    SELECT MAX("memberNumber") as max FROM contact WHERE "organizationId" = ${organizationId} FOR UPDATE
   `
   return (result[0]?.max ?? 0) + 1
 }

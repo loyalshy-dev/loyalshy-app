@@ -424,105 +424,111 @@ export async function addContact(
   const cleanEmail = parsed.data.email ? sanitizeText(parsed.data.email, 255) || null : null
   const cleanPhone = parsed.data.phone ? sanitizeText(parsed.data.phone, 30) || null : null
 
-  // Duplicate detection (exclude soft-deleted)
-  if (cleanEmail) {
-    const existing = await db.contact.findFirst({
-      where: { organizationId, email: cleanEmail, deletedAt: null },
-      select: { id: true },
-    })
-    if (existing) {
-      return {
-        success: false,
-        error: t("contactEmailExists", { email: cleanEmail }),
-        duplicateField: "email",
+  // Wrap duplicate check + create in a transaction to prevent race conditions
+  try {
+    const contact = await db.$transaction(async (tx) => {
+      // Duplicate detection (exclude soft-deleted)
+      if (cleanEmail) {
+        const existing = await tx.contact.findFirst({
+          where: { organizationId, email: cleanEmail, deletedAt: null },
+          select: { id: true },
+        })
+        if (existing) {
+          throw Object.assign(new Error(t("contactEmailExists", { email: cleanEmail })), { duplicateField: "email" as const })
+        }
       }
-    }
-  }
 
-  if (cleanPhone) {
-    const existing = await db.contact.findFirst({
-      where: { organizationId, phone: cleanPhone, deletedAt: null },
-      select: { id: true },
-    })
-    if (existing) {
-      return {
-        success: false,
-        error: t("contactPhoneExists", { phone: cleanPhone }),
-        duplicateField: "phone",
+      if (cleanPhone) {
+        const existing = await tx.contact.findFirst({
+          where: { organizationId, phone: cleanPhone, deletedAt: null },
+          select: { id: true },
+        })
+        if (existing) {
+          throw Object.assign(new Error(t("contactPhoneExists", { phone: cleanPhone })), { duplicateField: "phone" as const })
+        }
       }
-    }
-  }
 
-  // Create contact and auto-issue passes for all active templates
-  const memberNumber = await getNextMemberNumber(organizationId)
-  const contact = await db.contact.create({
-    data: {
-      organizationId,
-      fullName,
-      email: cleanEmail,
-      phone: cleanPhone,
-      memberNumber,
-    },
-    select: { id: true },
-  })
-
-  // Fetch all active pass templates for this organization
-  const activeTemplates = await db.passTemplate.findMany({
-    where: { organizationId, status: "ACTIVE" },
-    select: { id: true, passType: true, config: true },
-  })
-
-  // Auto-issue pass instances for all active templates
-  if (activeTemplates.length > 0) {
-    await db.passInstance.createMany({
-      data: activeTemplates.map((template) => ({
-        contactId: contact.id,
-        passTemplateId: template.id,
-      })),
-    })
-
-    // Auto-create rewards for COUPON templates
-    const couponTemplates = activeTemplates.filter((t) => t.passType === "COUPON")
-    if (couponTemplates.length > 0) {
-      // Fetch the newly created pass instances for coupon templates
-      const couponInstances = await db.passInstance.findMany({
-        where: {
-          contactId: contact.id,
-          passTemplateId: { in: couponTemplates.map((t) => t.id) },
+      const memberNumber = await getNextMemberNumber(organizationId, tx)
+      const newContact = await tx.contact.create({
+        data: {
+          organizationId,
+          fullName,
+          email: cleanEmail,
+          phone: cleanPhone,
+          memberNumber,
         },
-        select: { id: true, passTemplateId: true },
+        select: { id: true },
       })
 
-      for (const instance of couponInstances) {
-        const template = couponTemplates.find((t) => t.id === instance.passTemplateId)
-        if (!template) continue
+      // Fetch all active pass templates for this organization
+      const activeTemplates = await tx.passTemplate.findMany({
+        where: { organizationId, status: "ACTIVE" },
+        select: { id: true, passType: true, config: true },
+      })
 
-        const couponConfig = parseCouponConfig(template.config)
-        const rewardExpiryDays = (template.config as Record<string, unknown>)?.rewardExpiryDays as number | undefined
-        const expiresAt = couponConfig?.validUntil
-          ? new Date(couponConfig.validUntil)
-          : rewardExpiryDays && rewardExpiryDays > 0
-            ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
-            : new Date(Date.now() + 365 * 86_400_000) // default 1 year
-
-        await db.reward.create({
-          data: {
-            contactId: contact.id,
-            organizationId,
+      // Auto-issue pass instances for all active templates
+      if (activeTemplates.length > 0) {
+        await tx.passInstance.createMany({
+          data: activeTemplates.map((template) => ({
+            contactId: newContact.id,
             passTemplateId: template.id,
-            passInstanceId: instance.id,
-            status: "AVAILABLE",
-            expiresAt,
-          },
+          })),
         })
+
+        // Auto-create rewards for COUPON templates
+        const couponTemplates = activeTemplates.filter((ct) => ct.passType === "COUPON")
+        if (couponTemplates.length > 0) {
+          const couponInstances = await tx.passInstance.findMany({
+            where: {
+              contactId: newContact.id,
+              passTemplateId: { in: couponTemplates.map((ct) => ct.id) },
+            },
+            select: { id: true, passTemplateId: true },
+          })
+
+          for (const instance of couponInstances) {
+            const tmpl = couponTemplates.find((ct) => ct.id === instance.passTemplateId)
+            if (!tmpl) continue
+
+            const couponConfig = parseCouponConfig(tmpl.config)
+            const rewardExpiryDays = (tmpl.config as Record<string, unknown>)?.rewardExpiryDays as number | undefined
+            const expiresAt = couponConfig?.validUntil
+              ? new Date(couponConfig.validUntil)
+              : rewardExpiryDays && rewardExpiryDays > 0
+                ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
+                : new Date(Date.now() + 365 * 86_400_000)
+
+            await tx.reward.create({
+              data: {
+                contactId: newContact.id,
+                organizationId,
+                passTemplateId: tmpl.id,
+                passInstanceId: instance.id,
+                status: "AVAILABLE",
+                expiresAt,
+              },
+            })
+          }
+        }
       }
+
+      return newContact
+    })
+
+    revalidatePath("/dashboard/contacts")
+    revalidatePath("/dashboard")
+
+    return { success: true, contactId: contact.id }
+  } catch (err) {
+    if (err instanceof Error && "duplicateField" in err) {
+      return { success: false, error: err.message, duplicateField: (err as unknown as { duplicateField: "email" | "phone" }).duplicateField }
     }
+    // Prisma unique constraint violation (P2002) — race condition fallback
+    if (err && typeof err === "object" && "code" in err && (err as { code: string }).code === "P2002") {
+      return { success: false, error: t("contactAlreadyExists") }
+    }
+    throw err
   }
-
-  revalidatePath("/dashboard/contacts")
-  revalidatePath("/dashboard")
-
-  return { success: true, contactId: contact.id }
 }
 
 // ─── Update Contact ────────────────────────────────────────

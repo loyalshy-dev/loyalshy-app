@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/lib/auth"
+import { headers } from "next/headers"
 
 type GooglePlaceSuggestion = {
   placePrediction: {
@@ -40,6 +42,12 @@ type NominatimResult = {
 const REFERER = process.env.BETTER_AUTH_URL || "https://www.loyalshy.com"
 
 export async function GET(request: NextRequest) {
+  // Require authenticated session
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   const { searchParams } = request.nextUrl
   const query = searchParams.get("q")
   const placeId = searchParams.get("placeId")

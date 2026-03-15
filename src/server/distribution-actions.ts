@@ -9,6 +9,7 @@ import {
   assertAuthenticated,
   getOrganizationForUser,
   assertOrganizationRole,
+  assertOrganizationAccess,
 } from "@/lib/dal"
 import { buildCardUrl } from "@/lib/card-access"
 import { buildPassIssuedEmailHtml, getEmailFrom, buildWalletDownloadUrl } from "@/lib/email-templates"
@@ -287,43 +288,48 @@ export async function issuePassToContacts(
       instanceDataObj.pointsBalance = 0
     }
 
-    const passInstance = await db.passInstance.create({
-      data: {
-        contactId: contact.id,
-        passTemplateId: template.id,
-        walletPassId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data: instanceDataObj as any,
-        ...(expiresAt ? { expiresAt } : {}),
-      },
-      select: { id: true },
-    })
-
-    // Auto-create coupon reward
-    if (template.passType === "COUPON") {
-      const couponConfig = parseCouponConfig(template.config)
-      const couponExpiresAt = couponConfig?.validUntil
-        ? new Date(couponConfig.validUntil)
-        : rewardExpiryDays > 0
-          ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
-          : new Date(Date.now() + 365 * 86_400_000)
-
-      const mgConfig = parseMinigameConfig(template.config)
-      const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
-      const selectedPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
-
-      await db.reward.create({
+    // Atomic creation of pass instance + coupon reward
+    const passInstance = await db.$transaction(async (tx) => {
+      const pi = await tx.passInstance.create({
         data: {
           contactId: contact.id,
-          organizationId: organization.id,
           passTemplateId: template.id,
-          passInstanceId: passInstance.id,
-          status: "AVAILABLE",
-          expiresAt: couponExpiresAt,
-          ...(selectedPrize ? { description: selectedPrize, revealedAt: null } : {}),
+          walletPassId,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data: instanceDataObj as any,
+          ...(expiresAt ? { expiresAt } : {}),
         },
+        select: { id: true },
       })
-    }
+
+      // Auto-create coupon reward
+      if (template.passType === "COUPON") {
+        const couponConfig = parseCouponConfig(template.config)
+        const couponExpiresAt = couponConfig?.validUntil
+          ? new Date(couponConfig.validUntil)
+          : rewardExpiryDays > 0
+            ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
+            : new Date(Date.now() + 365 * 86_400_000)
+
+        const mgConfig = parseMinigameConfig(template.config)
+        const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
+        const selectedPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
+
+        await tx.reward.create({
+          data: {
+            contactId: contact.id,
+            organizationId: organization.id,
+            passTemplateId: template.id,
+            passInstanceId: pi.id,
+            status: "AVAILABLE",
+            expiresAt: couponExpiresAt,
+            ...(selectedPrize ? { description: selectedPrize, revealedAt: null } : {}),
+          },
+        })
+      }
+
+      return pi
+    })
 
     // Send email notification if contact has email
     if (contact.email) {
@@ -481,9 +487,9 @@ export async function createContactAndIssuePass(
     }
   }
 
-  const contact = existingContact ?? await (async () => {
-    const memberNumber = await getNextMemberNumber(organization.id)
-    return db.contact.create({
+  const contact = existingContact ?? await db.$transaction(async (tx) => {
+    const memberNumber = await getNextMemberNumber(organization.id, tx)
+    return tx.contact.create({
       data: {
         organizationId: organization.id,
         fullName: cleanName,
@@ -493,7 +499,7 @@ export async function createContactAndIssuePass(
       },
       select: { id: true, fullName: true, email: true },
     })
-  })()
+  })
 
   // Issue pass via existing action
   const issueResult = await issuePassToContacts(templateId, [contact.id])
@@ -615,18 +621,20 @@ export async function bulkImportAndIssue(
         })
       }
 
-      // Create contact if not found
+      // Create contact if not found (use transaction for atomic memberNumber)
       if (!contact) {
-        const memberNumber = await getNextMemberNumber(organization.id)
-        contact = await db.contact.create({
-          data: {
-            organizationId: organization.id,
-            fullName,
-            email: cleanEmail,
-            phone: cleanPhone,
-            memberNumber,
-          },
-          select: { id: true, fullName: true, email: true },
+        contact = await db.$transaction(async (tx) => {
+          const memberNumber = await getNextMemberNumber(organization.id, tx)
+          return tx.contact.create({
+            data: {
+              organizationId: organization.id,
+              fullName,
+              email: cleanEmail,
+              phone: cleanPhone,
+              memberNumber,
+            },
+            select: { id: true, fullName: true, email: true },
+          })
         })
         createdCount++
       }
@@ -833,15 +841,17 @@ export async function getDistributionStats(
   const organization = await getOrganizationForUser()
   if (!organization) return { totalIssued: 0, issuedThisWeek: 0, eligibleContacts: 0 }
 
+  await assertOrganizationAccess(organization.id)
+
   const weekAgo = new Date()
   weekAgo.setDate(weekAgo.getDate() - 7)
 
   const [totalIssued, issuedThisWeek, eligibleContacts] = await Promise.all([
     db.passInstance.count({
-      where: { passTemplateId: templateId },
+      where: { passTemplateId: templateId, passTemplate: { organizationId: organization.id } },
     }),
     db.passInstance.count({
-      where: { passTemplateId: templateId, createdAt: { gte: weekAgo } },
+      where: { passTemplateId: templateId, passTemplate: { organizationId: organization.id }, createdAt: { gte: weekAgo } },
     }),
     db.contact.count({
       where: {
@@ -898,6 +908,8 @@ export async function sendPassEmail(
   if (!organization) {
     return { success: false, error: t("noOrganization") }
   }
+
+  await assertOrganizationAccess(organization.id)
 
   const passInstance = await db.passInstance.findFirst({
     where: {

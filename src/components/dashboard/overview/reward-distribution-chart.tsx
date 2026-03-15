@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import type { RewardDistributionItem } from "@/server/analytics"
 import { Card } from "@/components/ui/card"
@@ -22,13 +23,14 @@ function CustomTooltip({
   }[]
   label?: string
 }) {
+  const t = useTranslations("dashboard.overview")
   if (!active || !payload?.length) return null
   const data = payload[0]
   return (
     <div className="rounded-md border border-border bg-popover px-3 py-2 shadow-md">
       <p className="text-xs text-muted-foreground">{data.payload.name}</p>
       <p className="text-sm font-medium">
-        {data.value} customer{data.value !== 1 ? "s" : ""}
+        {t("contactCount", { count: data.value })}
       </p>
     </div>
   )
@@ -46,6 +48,7 @@ export function RewardDistributionChart({
   visitsRequired,
   programName,
 }: RewardDistributionChartProps) {
+  const t = useTranslations("dashboard.overview")
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
@@ -59,7 +62,7 @@ export function RewardDistributionChart({
   return (
     <Card className="p-5">
       <h3 className="text-[13px] font-medium text-muted-foreground mb-4">
-        Reward Cycle Progress
+        {t("rewardCycleProgress")}
         {programName && (
           <span className="ml-1 text-muted-foreground/60">
             ({programName})
@@ -68,7 +71,7 @@ export function RewardDistributionChart({
       </h3>
       {totalCustomers === 0 ? (
         <div className="flex items-center justify-center h-50 text-sm text-muted-foreground">
-          No customers yet
+          {t("noContacts")}
         </div>
       ) : (
         <div className="h-50 relative">
@@ -102,7 +105,7 @@ export function RewardDistributionChart({
                 {totalCustomers}
               </span>
               <br />
-              <span className="text-[11px] text-muted-foreground">total</span>
+              <span className="text-[11px] text-muted-foreground">{t("total")}</span>
             </div>
           </div>
         </div>

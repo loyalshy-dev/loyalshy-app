@@ -197,7 +197,7 @@ const DEFAULT_CONFIG: ProgramConfigState = {
   redemptionLimit: "single",
   membershipTier: "Member",
   benefits: "",
-  validDuration: "1_year",
+  validDuration: "yearly",
   customDurationDays: 365,
   autoRenew: false,
   pointsPerVisit: 1,
@@ -389,7 +389,8 @@ export function createCardDesignStore() {
       {
         limit: 50,
         equality: (pastState, currentState) =>
-          pastState.wallet === currentState.wallet,
+          pastState.wallet === currentState.wallet &&
+          pastState.programConfig === currentState.programConfig,
       }
     )
   )

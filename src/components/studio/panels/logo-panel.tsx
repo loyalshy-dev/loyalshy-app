@@ -187,10 +187,10 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
           applyVariation(palette.variations[0])
         }
       } else {
-        toast.error("Could not extract colors from your logo.")
+        toast.error(t("extractError"))
       }
     } catch {
-      toast.error("Failed to extract brand colors. Please try again.")
+      toast.error(t("extractFailed"))
     } finally {
       setIsMatching(false)
     }
@@ -208,7 +208,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
   return (
     <div>
       {/* ─── Main upload ─────────────────────────────────── */}
-      <SectionHeader>Program Logo</SectionHeader>
+      <SectionHeader>{t("programLogo")}</SectionHeader>
 
       <input
         ref={mainInputRef}
@@ -238,7 +238,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
             color: "var(--foreground)",
           }}
         >
-          {uploading ? "Processing..." : hasProgramLogo ? "Replace Logo" : "Upload Logo"}
+          {uploading ? t("processing") : hasProgramLogo ? t("replaceLogo") : t("uploadLogo")}
         </button>
         {hasProgramLogo && (
           <button
@@ -253,7 +253,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
               color: "var(--destructive)",
             }}
           >
-            Remove
+            {t("remove")}
           </button>
         )}
       </div>
@@ -274,7 +274,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
             color: "var(--muted-foreground)",
           }}
         >
-          Use organization logo instead
+          {t("useOrgLogoInstead")}
         </button>
       )}
 
@@ -289,14 +289,14 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
         }}
       >
         {hasProgramLogo
-          ? "This program has its own logo."
-          : "Using your organization logo. Upload a different one for this program."}
+          ? t("hasProgramLogo")
+          : t("usingOrgLogoDesc")}
       </div>
 
       {/* ─── Platform previews + zoom ────────────────────── */}
       {hasLogo && (
         <>
-          <SectionHeader>Preview</SectionHeader>
+          <SectionHeader>{t("preview")}</SectionHeader>
           <div
             style={{
               display: "flex",
@@ -337,7 +337,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
                 )}
               </div>
               <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 4 }}>
-                Apple Wallet
+                {t("appleWallet")}
               </div>
             </div>
 
@@ -372,7 +372,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
                 )}
               </div>
               <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginTop: 4 }}>
-                Google Wallet
+                {t("googleWallet")}
               </div>
             </div>
           </div>
@@ -381,7 +381,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
           {logoAppleUrl && (
             <div style={{ marginTop: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                <span style={{ fontSize: 11, color: "var(--foreground)" }}>Apple logo zoom</span>
+                <span style={{ fontSize: 11, color: "var(--foreground)" }}>{t("appleLogoZoom")}</span>
                 <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace" }}>
                   {logoAppleZoom.toFixed(1)}x
                 </span>
@@ -412,7 +412,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
           />
 
           {/* ─── Brand Match ─────────────────────────────── */}
-          <SectionHeader>Brand Match</SectionHeader>
+          <SectionHeader>{t("brandMatch")}</SectionHeader>
           <div
             style={{
               padding: 10,
@@ -422,7 +422,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
             }}
           >
             <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 8 }}>
-              Extract colors from your logo and apply them to your card design.
+              {t("extractColorsDesc")}
             </div>
 
             <button
@@ -448,12 +448,12 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
               {isMatching ? (
                 <>
                   <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
-                  Extracting...
+                  {t("extracting")}
                 </>
               ) : (
                 <>
                   <Wand2 size={13} />
-                  {matchPalette ? "Re-extract colors" : "Match to my brand"}
+                  {matchPalette ? t("reExtractColors") : t("matchToBrand")}
                 </>
               )}
             </button>
@@ -511,7 +511,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
       {/* ─── Platform override (collapsed) ───────────────── */}
       {hasLogo && hasProgramLogo && (
         <>
-          <SectionHeader>Advanced</SectionHeader>
+          <SectionHeader>{t("advanced")}</SectionHeader>
 
           <input
             ref={overrideInputRef}
@@ -557,7 +557,7 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
                       color: "var(--muted-foreground)",
                     }}
                   />
-                  Use different image for {label}
+                  {t("useDifferentImage", { platform: label })}
                 </button>
 
                 {isOpen && (
@@ -577,12 +577,12 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
                           color: "var(--foreground)",
                         }}
                       >
-                        {isUploading ? "Processing..." : "Upload Override"}
+                        {isUploading ? t("processing") : t("uploadOverride")}
                       </button>
                       <button
                         onClick={() => handleReset(platform)}
                         disabled={isUploading}
-                        aria-label={`Reset ${label} logo to auto-generated`}
+                        aria-label={t("resetLogoAria", { platform: label })}
                         title="Regenerate from source"
                         style={{
                           padding: "6px 8px",
@@ -606,8 +606,8 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
                       }}
                     >
                       {platform === "apple"
-                        ? "Wide rectangle (320 \u00d7 100px). Transparent PNG recommended."
-                        : "Square (660px). Keep artwork centered with margin for circle crop."}
+                        ? t("appleLogoHint")
+                        : t("googleLogoHint")}
                     </div>
                   </div>
                 )}
