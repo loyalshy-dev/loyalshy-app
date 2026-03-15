@@ -106,7 +106,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Server actions**: use `getTranslations("serverErrors")` from `next-intl/server` for error/validation messages
 - **Studio panels**: all use `useTranslations("studio.*")` — panels, colors, strip, notifications, details, prize, avatar, template, canvas
 - **Coverage**: 100% — 78 files, ~1,300 strings across marketing, auth, dashboard, studio, server actions, and legal pages
-- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, walletPreview, testimonials, pricing, faq, closingCta, footer, cookieBanner, auth.login, auth.register, auth.forgotPassword, auth.invite, auth.error, dashboard.nav, dashboard.overview, dashboard.activity, dashboard.topContacts, dashboard.programsSummary, dashboard.contacts, dashboard.addContact, dashboard.contactDetail, dashboard.contactColumns, dashboard.contactTable, dashboard.programs, dashboard.passInstances, dashboard.distribution, dashboard.programSettings, dashboard.programEditor, dashboard.settings, dashboard.settingsForms, dashboard.registerVisit, dashboard.shell, dashboard.rewards, dashboard.jobsHistory, dashboard.onboarding, dashboard.status, dashboard.chart, errors, privacy, terms, cookies, studio.panels, studio.colors, studio.strip, studio.logo, studio.notifications, studio.details, studio.prize, studio.avatar, studio.template, studio.canvas, serverErrors
+- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, passTypesCarousel, walletPreview, testimonials, pricing, faq, closingCta, footer, cookieBanner, auth.login, auth.register, auth.forgotPassword, auth.invite, auth.error, dashboard.nav, dashboard.overview, dashboard.activity, dashboard.topContacts, dashboard.programsSummary, dashboard.contacts, dashboard.addContact, dashboard.contactDetail, dashboard.contactColumns, dashboard.contactTable, dashboard.programs, dashboard.passInstances, dashboard.distribution, dashboard.programSettings, dashboard.programEditor, dashboard.settings, dashboard.settingsForms, dashboard.registerVisit, dashboard.shell, dashboard.rewards, dashboard.jobsHistory, dashboard.onboarding, dashboard.status, dashboard.chart, errors, privacy, terms, cookies, studio.panels, studio.colors, studio.strip, studio.logo, studio.notifications, studio.details, studio.prize, studio.avatar, studio.template, studio.canvas, serverErrors
 
 ### Prisma v7 Rules
 - Use `prisma.config.ts` for configuration (datasource URL lives here, NOT in schema.prisma)
@@ -156,8 +156,9 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
       /contacts     → Contact table, columns (stacked type icons), filters, detail sheet (passes/visits/rewards tabs, issue pass), empty state
       /programs     → Program list view, tab nav, pass instances, settings
     /admin/showcase → Showcase card management + studio adapter
-    /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, motion animations)
+    /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, pass types carousel, motion animations)
       motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn) — used below-fold only; Hero/SocialProof use CSS animations
+      pass-types-carousel.tsx → Auto-playing carousel showcasing all 10 pass types with screenshots, descriptions, and use case tags
     /wallet         → Wallet pass components
   /i18n             → Internationalization config
     config.ts       → Locale definitions (en, es, fr)
