@@ -15,6 +15,7 @@ import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePoint
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import type { TemplateListItem } from "@/server/template-actions"
+import type { PassType as PlanPassType } from "@/lib/plans"
 
 
 function getTypeSubtitle(program: TemplateListItem): string {
@@ -59,6 +60,7 @@ type TemplatesListViewProps = {
   organizationName: string
   organizationLogo: string | null
   isOwner: boolean
+  allowedPassTypes?: PlanPassType[]
 }
 
 export function TemplatesListView({
@@ -67,6 +69,7 @@ export function TemplatesListView({
   organizationName,
   organizationLogo,
   isOwner,
+  allowedPassTypes,
 }: TemplatesListViewProps) {
   const t = useTranslations("dashboard.programs")
   const router = useRouter()
@@ -136,6 +139,7 @@ export function TemplatesListView({
           <div className="p-6">
             <CreateProgramForm
               organizationId={organizationId}
+              allowedPassTypes={allowedPassTypes}
               onCreated={() => {
                 setShowCreate(false)
                 router.refresh()

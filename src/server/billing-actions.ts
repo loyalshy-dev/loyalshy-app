@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db"
 import { assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
-import { stripe, PLANS, getPlanLimits, isActiveSubscription, type PlanId } from "@/lib/stripe"
+import { stripe, PLANS, getPlanLimits, isPassTypeAllowed, isActiveSubscription, type PlanId } from "@/lib/stripe"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -247,6 +247,15 @@ export async function checkTemplateLimit(organizationId: string): Promise<{
     limit: programLimit,
     approaching: programLimit !== Infinity && current >= programLimit * 0.8,
   }
+}
+
+export async function checkPassTypeAllowed(organizationId: string, passType: string): Promise<boolean> {
+  const organization = await db.organization.findUnique({
+    where: { id: organizationId },
+    select: { plan: true },
+  })
+  if (!organization) return false
+  return isPassTypeAllowed(organization.plan as PlanId, passType)
 }
 
 export async function checkStaffLimit(organizationId: string): Promise<{

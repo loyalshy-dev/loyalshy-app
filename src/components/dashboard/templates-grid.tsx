@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import type { TemplateListItem } from "@/server/template-actions"
+import type { PassType as PlanPassType } from "@/lib/plans"
 
 
 function getTypeSubtitle(template: TemplateListItem): string {
@@ -76,6 +77,7 @@ type TemplatesGridViewProps = {
   organizationName: string
   organizationLogo: string | null
   isOwner: boolean
+  allowedPassTypes?: PlanPassType[]
 }
 
 export function TemplatesGridView({
@@ -84,6 +86,7 @@ export function TemplatesGridView({
   organizationName,
   organizationLogo,
   isOwner,
+  allowedPassTypes,
 }: TemplatesGridViewProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -167,6 +170,7 @@ export function TemplatesGridView({
           <div className="p-6">
             <CreateProgramForm
               organizationId={organizationId}
+              allowedPassTypes={allowedPassTypes}
               onCreated={() => {
                 setShowCreate(false)
                 router.refresh()

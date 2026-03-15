@@ -143,6 +143,75 @@
       "description": "Chiffrement de niveau entreprise, authentification sécurisée et conforme au RGPD. Les données de tes clients restent les tiennes."
     }
   },
+  "passTypesCarousel": {
+    "sectionLabel": "Types de pass",
+    "title": "Une plateforme, dix types de pass",
+    "subtitle": "Des cartes de tampons aux pass de transport — crée exactement le pass numérique dont ton entreprise a besoin.",
+    "prev": "Type de pass précédent",
+    "next": "Type de pass suivant",
+    "types": {
+      "stampCard": {
+        "label": "Carte à Tampons",
+        "description": "Récompense tes clients après un certain nombre de visites. Des cartes de tampons numériques dans Apple et Google Wallet — fini les cartes papier perdues.",
+        "alt": "Pass carte à tampons montrant des tampons de fidélité",
+        "useCases": ["Cafés", "Boulangeries", "Salons", "Stations de lavage"]
+      },
+      "coupon": {
+        "label": "Coupon",
+        "description": "Propose des réductions en pourcentage ou en montant fixe que tes clients peuvent utiliser en un clic. Suivi des échanges et dates d'expiration automatiques.",
+        "alt": "Pass coupon numérique avec offre de réduction",
+        "useCases": ["Magasins", "Restaurants", "E-commerce", "Promotions"]
+      },
+      "membership": {
+        "label": "Adhésion",
+        "description": "Cartes de membre numériques avec avantages par niveau. Parfaites pour les clubs, salles de sport et niveaux de fidélité avec photo optionnelle du titulaire.",
+        "alt": "Pass adhésion avec niveau et détails du membre",
+        "useCases": ["Salles de sport", "Clubs", "Bibliothèques", "Espaces de coworking"]
+      },
+      "points": {
+        "label": "Programme de Points",
+        "description": "Accumule des points par visite ou achat, puis échange-les dans un catalogue de récompenses personnalisé. Valeurs et libellés de points flexibles.",
+        "alt": "Pass programme de points montrant le solde de points",
+        "useCases": ["Chaînes de magasins", "Restaurants", "Hôtels", "Compagnies aériennes"]
+      },
+      "prepaid": {
+        "label": "Pass Prépayé",
+        "description": "Pass à utilisation limitée qui se décomptent à chaque usage. Rechargeables ou à usage unique — parfaits pour les packs de cours, services et transport.",
+        "alt": "Pass prépayé montrant les utilisations restantes",
+        "useCases": ["Studios de yoga", "Stations de lavage", "Packs de cours", "Pass de bus"]
+      },
+      "giftCard": {
+        "label": "Carte Cadeau",
+        "description": "Cartes cadeaux avec suivi du solde en temps réel. Les clients consultent leur solde depuis leur portefeuille — charges et remboursements intégrés.",
+        "alt": "Pass carte cadeau montrant le solde actuel",
+        "useCases": ["Magasins", "Restaurants", "Spas", "Boutiques en ligne"]
+      },
+      "ticket": {
+        "label": "Billet d'Événement",
+        "description": "Billets numériques pour événements, concerts et conférences. Scan à l'entrée avec codes QR — inclut date, lieu et place.",
+        "alt": "Pass billet d'événement avec code QR et détails",
+        "useCases": ["Concerts", "Conférences", "Festivals", "Événements sportifs"]
+      },
+      "access": {
+        "label": "Pass d'Accès",
+        "description": "Accorde ou refuse l'accès aux installations, espaces de coworking et parkings. Suivi des entrées et gestion des permissions numériquement.",
+        "alt": "Pass d'accès pour entrée aux installations",
+        "useCases": ["Coworkings", "Parkings", "Immeubles de bureaux", "Zones VIP"]
+      },
+      "transit": {
+        "label": "Pass de Transport",
+        "description": "Pass de transport numériques pour bus, trains et ferries. Suivi d'embarquement et de sortie avec informations de ligne et de zone.",
+        "alt": "Pass de transport montrant les informations de ligne et zone",
+        "useCases": ["Compagnies de bus", "Ferries", "Navettes", "Transport privé"]
+      },
+      "businessId": {
+        "label": "Badge Professionnel",
+        "description": "Badges d'identification numériques pour employés ou prestataires. Vérifie l'identité sur place par scan QR — inclut poste, département et expiration.",
+        "alt": "Badge professionnel avec détails de l'employé",
+        "useCases": ["Entreprises", "Prestataires", "Bénévoles", "Badges du personnel"]
+      }
+    }
+  },
   "walletPreview": {
     "badge1": "Compatible Apple & Google Wallet",
     "badge2": "Mise à jour automatique à chaque visite",
@@ -222,7 +291,7 @@
       "description": "Essaie Loyalshy avec tes premiers clients",
       "features": {
         "contacts": "Jusqu'à 50 contacts",
-        "programs": "1 programme de carte tampons",
+        "programs": "1 programme (carte tampons ou coupon)",
         "staff": "1 membre d'équipe",
         "wallet": "Passes Apple & Google Wallet",
         "studio": "Studio de design de cartes",
@@ -262,7 +331,7 @@
       },
       "freePlan": {
         "question": "Y a-t-il un plan gratuit ?",
-        "answer": "Oui ! Notre plan Gratuit te permet de démarrer avec jusqu'à 50 contacts et 1 programme de carte tampons. Aucune carte bancaire requise, gratuit pour toujours. Passe à la version supérieure quand tu veux."
+        "answer": "Oui ! Notre plan Gratuit te permet de démarrer avec jusqu'à 50 contacts et 1 programme — choisis entre carte tampons ou coupon. Aucune carte bancaire requise, gratuit pour toujours. Passe à la version supérieure quand tu veux."
       },
       "cancel": {
         "question": "Comment résilier ?",
@@ -564,6 +633,8 @@
       "uploadLogoDescription": "Personnalisez vos passes avec le logo de votre organisation",
       "customizeCard": "Personnalisez votre carte de fidélité",
       "customizeCardDescription": "Définissez le nombre de visites requises, la description de la récompense et l'expiration",
+      "createFirstProgram": "Créez votre premier programme",
+      "createFirstProgramDescription": "Choisissez entre carte tampons ou coupon pour récompenser vos clients",
       "printQr": "Imprimez votre QR code",
       "printQrDescription": "Téléchargez et affichez votre QR code à votre comptoir",
       "firstContact": "Enregistrez votre premier contact",
@@ -965,6 +1036,7 @@
     },
     "createProgram": {
       "chooseType": "Choisissez un type de programme pour commencer.",
+      "upgrade": "Pro",
       "backToTypeSelection": "Retour à la sélection du type",
       "programName": "Nom du programme",
       "programNameRequired": "Le nom du programme est requis",
@@ -1322,7 +1394,9 @@
       "apple": "Apple :",
       "google": "Google :",
       "wallet": "Wallet",
-      "googleWallet": "Google Wallet"
+      "googleWallet": "Google Wallet",
+      "searching": "Recherche d'adresses…",
+      "noResults": "Aucune adresse trouvée. Essayez une recherche plus précise."
     },
     "details": {
       "description": "Détails au verso du pass. Ceux-ci apparaissent lorsque le client touche la carte pour plus d'informations.",
@@ -1390,6 +1464,7 @@
     "invalidFileType": "Le fichier doit être au format PNG, JPEG ou WebP",
     "invalidFileTypeSvg": "Le fichier doit être au format PNG, JPEG, WebP ou SVG",
     "templateLimitReached": "Limite de modèles atteinte ({limit}). Passez à un plan supérieur pour créer plus de modèles.",
+    "passTypeNotAllowed": "Ce type de pass n'est pas disponible avec votre plan actuel. Passez à un plan supérieur pour débloquer les 10 types de pass.",
     "templateNotFound": "Modèle de pass introuvable",
     "templateAlreadyArchived": "Le modèle est déjà archivé",
     "templateAlreadyActive": "Le modèle est déjà actif",

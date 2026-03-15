@@ -94,9 +94,9 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 
 ### i18n Rules (next-intl)
 - **No URL-based locale routing** — locale is determined by `locale` cookie, then `Accept-Language` header, then default `en`
-- **Locales**: `en` (default), `es` (Spanish — first target market is Spain)
+- **Locales**: `en` (default), `es` (Spanish — first target market is Spain), `fr` (French)
 - **Config**: `src/i18n/config.ts` (locale definitions), `src/i18n/request.ts` (server-side detection via `getRequestConfig`)
-- **Messages**: `src/messages/en.json` + `src/messages/es.json` — organized by namespace (common, nav, hero, features, pricing, faq, auth, dashboard, errors, etc.)
+- **Messages**: `src/messages/en.json` + `src/messages/es.json` + `src/messages/fr.json` — organized by namespace (common, nav, hero, features, pricing, faq, auth, dashboard, errors, etc.)
 - **Server components**: use `getTranslations("namespace")` from `next-intl/server` (must be async)
 - **Client components**: use `useTranslations("namespace")` from `next-intl`
 - **Root layout**: wraps children in `NextIntlClientProvider` with only shared namespaces (`common`, `errors`, `cookieBanner` ~1KB), inside a Suspense boundary (required for `cacheComponents: true`)
@@ -131,7 +131,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
         /programs/[id]/settings   → Status management + delete (owner)
         /contacts             → Contact management
         /rewards              → Cross-program rewards (not in sidebar)
-        /settings             → General, Team, Billing, API (owner, all plans), Jobs (owner)
+        /settings             → General, Team, Billing, API (owner, all plans)
     /(studio)       → Redirects to /programs/[id]/design (studio now embedded)
     /(admin-studio) → Full-page showcase card studio (own layout, super_admin only)
       /admin/showcase/[id]/studio → Showcase card editor
@@ -160,9 +160,9 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
       motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn) — used below-fold only; Hero/SocialProof use CSS animations
     /wallet         → Wallet pass components
   /i18n             → Internationalization config
-    config.ts       → Locale definitions (en, es)
+    config.ts       → Locale definitions (en, es, fr)
     request.ts      → Server-side locale detection (cookie → Accept-Language → default)
-  /messages         → Translation JSON files (en.json, es.json)
+  /messages         → Translation JSON files (en.json, es.json, fr.json)
   /lib              → Utilities, db client, auth config, DAL
     /stores         → Zustand stores (card-design-store.ts)
     /wallet         → Wallet pass generation (Apple + Google)
@@ -230,7 +230,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase PRICING — New pricing model (Free tier on landing page, Pro €29, Business €49, Scale €99, no 14-day trial)
 - [x] Phase ONBOARDING — Simplified registration (2 steps: signup + org name → dashboard), FREE plan in Prisma enum + plans.ts, no trial/Stripe at signup, programs usage tracking in billing
 - [x] Phase SEO — Comprehensive SEO audit fixes (legal pages, structured data, LCP performance, sitemap, robots.txt, WCAG contrast, HSTS preload, fake social proof removal)
-- [x] Phase I18N — Internationalization with next-intl (English + Spanish, cookie-based locale, 78 files / ~1,300 strings, 100% coverage — marketing, auth, dashboard, studio, server actions, legal pages)
+- [x] Phase I18N — Internationalization with next-intl (English + Spanish + French, cookie-based locale, 78 files / ~1,224 strings per locale, 100% coverage — marketing, auth, dashboard, studio, server actions, legal pages)
 - [x] Phase PERF — Performance optimization (WebP images, CSS hero animations, Suspense restructure, cached DAL, parallel queries, lazy-loaded dashboard dialogs, skeleton fallbacks)
 - [x] Phase PERF-2 — Deep performance pass (cached `getOrgMember()` in DAL, removed unused passTemplates include from `getOrganizationForUser()`, parallelized all sequential DB queries across dashboard pages, Vercel region `fra1` to match Neon DB, i18n message splitting by route group, DB indexes on Reward/Interaction/Contact, contacts page Suspense boundary)
 - [ ] Phase 6.1 — Production deployment
@@ -310,13 +310,13 @@ Update the "Current Progress" section above to track what's done.
 
 | Display Name | PlanId (DB) | Monthly | Annual | Contacts | Staff | Programs |
 |---|---|---|---|---|---|---|
-| Free | FREE | €0 | €0 | 50 | 1 | 1 (stamp only) |
+| Free | FREE | €0 | €0 | 50 | 1 | 1 (stamp card or coupon) |
 | Pro | STARTER | €29 | €24 | 500 | 2 | 2 |
 | Business | GROWTH | €49 | €39 | 2,500 | 5 | 5 |
 | Scale | SCALE | €99 | €79 | Unlimited | 25 | Unlimited |
 | Enterprise | ENTERPRISE | Custom | Custom | Unlimited | Unlimited | Unlimited |
 
-**Important:** PlanId values (`FREE`, `STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, API rate limiting, and throughout the codebase. Display names ("Free", "Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc. Free users have no Stripe customer — Stripe customer is created on-demand at first paid checkout. Subscription cancellation downgrades to FREE.
+**Important:** PlanId values (`FREE`, `STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, API rate limiting, and throughout the codebase. Display names ("Free", "Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc. Free users have no Stripe customer — Stripe customer is created on-demand at first paid checkout. Subscription cancellation downgrades to FREE. Free plan allows only STAMP_CARD and COUPON pass types (`allowedPassTypes` in plans.ts); paid plans allow all 10. No default program is created at signup — users choose their first program type from the dashboard.
 
 ## Dashboard Navigation
 
@@ -337,7 +337,7 @@ Update the "Current Progress" section above to track what's done.
 - Team (members, invitations)
 - Billing (Stripe subscription)
 - API (API keys + webhook endpoints — all plans, owner only)
-- Jobs (background jobs — separate page)
+- Jobs (background jobs — super_admin only, hidden from UI, accessible via direct URL)
 
 **Note:** `/dashboard/rewards` still works (command palette, direct URL) but is not in sidebar. `/dashboard/programs/[id]/studio` redirects to `/dashboard/programs/[id]/design`.
 

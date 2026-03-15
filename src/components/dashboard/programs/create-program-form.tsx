@@ -3,19 +3,27 @@
 import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react"
+import { ArrowLeft, Loader2, Lock, Plus, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
 import { createPassTemplate } from "@/server/org-settings-actions"
 import { PASS_TYPE_META, type PassType, type PointsCatalogItem } from "@/types/pass-types"
 import { useTranslations } from "next-intl"
+import type { PassType as PlanPassType } from "@/lib/plans"
 
 // ─── Step 1: Type selector ─────────────────────────────────
 
-function TypeSelector({ onSelect }: { onSelect: (type: PassType) => void }) {
+function TypeSelector({
+  onSelect,
+  allowedPassTypes,
+}: {
+  onSelect: (type: PassType) => void
+  allowedPassTypes?: PlanPassType[]
+}) {
   const t = useTranslations("dashboard.createProgram")
   const types: PassType[] = [
     "STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID",
@@ -31,15 +39,29 @@ function TypeSelector({ onSelect }: { onSelect: (type: PassType) => void }) {
         {types.map((type) => {
           const meta = PASS_TYPE_META[type]
           const Icon = meta.icon
+          const isLocked = allowedPassTypes && !allowedPassTypes.includes(type as PlanPassType)
           return (
             <Card asChild key={type}>
             <button
               type="button"
-              onClick={() => onSelect(type)}
-              className="flex flex-col items-start gap-2 p-4 text-left transition-all hover:bg-muted/30 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => !isLocked && onSelect(type)}
+              disabled={isLocked}
+              className={`flex flex-col items-start gap-2 p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                isLocked
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-muted/30 hover:shadow-md"
+              }`}
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand/10">
-                <Icon className="h-4.5 w-4.5 text-brand" />
+              <div className="flex items-center justify-between w-full">
+                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${isLocked ? "bg-muted" : "bg-brand/10"}`}>
+                  <Icon className={`h-4.5 w-4.5 ${isLocked ? "text-muted-foreground" : "text-brand"}`} />
+                </div>
+                {isLocked && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1 text-muted-foreground">
+                    <Lock className="h-2.5 w-2.5" />
+                    {t("upgrade")}
+                  </Badge>
+                )}
               </div>
               <div>
                 <p className="text-sm font-semibold">{meta.label}</p>
@@ -1714,14 +1736,16 @@ function BusinessIdForm({
 export function CreateProgramForm({
   organizationId,
   onCreated,
+  allowedPassTypes,
 }: {
   organizationId: string
   onCreated: () => void
+  allowedPassTypes?: PlanPassType[]
 }) {
   const [selectedType, setSelectedType] = useState<PassType | null>(null)
 
   if (!selectedType) {
-    return <TypeSelector onSelect={setSelectedType} />
+    return <TypeSelector onSelect={setSelectedType} allowedPassTypes={allowedPassTypes} />
   }
 
   const formProps = {

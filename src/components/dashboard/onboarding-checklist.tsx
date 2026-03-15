@@ -49,11 +49,11 @@ export function OnboardingChecklist({
       icon: Image,
     },
     {
-      id: "loyalty",
-      label: t("customizeCard"),
-      description: t("customizeCardDescription"),
-      completed: data.hasCustomTemplate,
-      href: "/dashboard/settings?tab=loyalty",
+      id: "program",
+      label: t("createFirstProgram"),
+      description: t("createFirstProgramDescription"),
+      completed: data.hasProgram,
+      href: "/dashboard/programs",
       icon: Gift,
     },
     {

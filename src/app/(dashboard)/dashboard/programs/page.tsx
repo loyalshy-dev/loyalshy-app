@@ -5,6 +5,7 @@ import { getOrganizationForUser, getOrgMember } from "@/lib/dal"
 import { getTemplatesList } from "@/server/template-actions"
 import { TemplatesGridView } from "@/components/dashboard/templates-grid"
 import { Skeleton } from "@/components/ui/skeleton"
+import { getAllowedPassTypes, type PlanId } from "@/lib/plans"
 
 export default async function ProgramsPage() {
   await connection()
@@ -43,6 +44,7 @@ async function ProgramsSection() {
   ])
 
   const isOwner = member?.role === "owner"
+  const allowedPassTypes = getAllowedPassTypes(organization.plan as PlanId)
 
   return (
     <TemplatesGridView
@@ -51,6 +53,7 @@ async function ProgramsSection() {
       organizationName={organization.name}
       organizationLogo={organization.logoApple ?? organization.logo ?? null}
       isOwner={isOwner}
+      allowedPassTypes={allowedPassTypes}
     />
   )
 }

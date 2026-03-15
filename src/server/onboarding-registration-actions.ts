@@ -77,9 +77,9 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
     const name = sanitizeText(parsed.name, 100)
     const slug = await generateUniqueSlug(name)
 
-    // Create Organization + PassTemplate + PassDesign + Member in a transaction
+    // Create Organization + Member in a transaction
     const result = await db.$transaction(async (tx) => {
-      // 1. Create organization — free tier starts as STARTER/ACTIVE with no Stripe customer
+      // 1. Create organization — free tier starts as FREE/ACTIVE with no Stripe customer
       const organization = await tx.organization.create({
         data: {
           name,
@@ -96,29 +96,6 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
           userId: session.user.id,
           organizationId: organization.id,
           role: "owner",
-        },
-      })
-
-      // 3. Create default stamp card pass template
-      const passTemplate = await tx.passTemplate.create({
-        data: {
-          organizationId: organization.id,
-          name: "Stamp Card",
-          passType: "STAMP_CARD",
-          config: {
-            visitsRequired: 10,
-            rewardDescription: "Free reward",
-            rewardExpiryDays: 90,
-          },
-          status: "ACTIVE",
-        },
-      })
-
-      // 4. Create default pass design linked to the pass template
-      await tx.passDesign.create({
-        data: {
-          passTemplateId: passTemplate.id,
-          cardType: "STAMP",
         },
       })
 
@@ -154,7 +131,7 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
 
 export type OnboardingChecklistData = {
   hasLogo: boolean
-  hasCustomTemplate: boolean
+  hasProgram: boolean
   hasQrPrinted: boolean
   hasContact: boolean
   hasStaff: boolean
@@ -168,7 +145,7 @@ export async function getOnboardingChecklist(organizationId: string): Promise<On
   if (userOrgId !== organizationId) {
     return {
       hasLogo: false,
-      hasCustomTemplate: false,
+      hasProgram: false,
       hasQrPrinted: false,
       hasContact: false,
       hasStaff: false,
@@ -189,7 +166,7 @@ export async function getOnboardingChecklist(organizationId: string): Promise<On
   if (!organization) {
     return {
       hasLogo: false,
-      hasCustomTemplate: false,
+      hasProgram: false,
       hasQrPrinted: false,
       hasContact: false,
       hasStaff: false,
@@ -199,16 +176,10 @@ export async function getOnboardingChecklist(organizationId: string): Promise<On
 
   const settings = (organization.settings as Record<string, unknown>) ?? {}
 
-  // Check pass template customization
-  const template = await db.passTemplate.findFirst({
+  // Check if user has created at least one program
+  const programCount = await db.passTemplate.count({
     where: { organizationId },
-    select: { config: true },
   })
-
-  const templateConfig = (template?.config as Record<string, unknown>) ?? {}
-  const hasCustomTemplate =
-    (templateConfig.stampsRequired !== 10) ||
-    (templateConfig.rewardDescription !== "Free reward")
 
   // Check staff count (members on the organization)
   const memberCount = await db.member.count({
@@ -217,7 +188,7 @@ export async function getOnboardingChecklist(organizationId: string): Promise<On
 
   return {
     hasLogo: !!organization.logo,
-    hasCustomTemplate,
+    hasProgram: programCount > 0,
     hasQrPrinted: settings.qrPrinted === true,
     hasContact: organization._count.contacts > 0,
     hasStaff: memberCount > 1,

@@ -2,6 +2,13 @@
 
 export type PlanId = "FREE" | "STARTER" | "GROWTH" | "SCALE" | "ENTERPRISE"
 
+export type PassType = "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "PREPAID" | "GIFT_CARD" | "TICKET" | "ACCESS" | "TRANSIT" | "BUSINESS_ID"
+
+export const ALL_PASS_TYPES: PassType[] = [
+  "STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID",
+  "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID",
+]
+
 export type PlanDefinition = {
   id: PlanId
   name: string
@@ -11,6 +18,7 @@ export type PlanDefinition = {
   customerLimit: number
   staffLimit: number
   programLimit: number
+  allowedPassTypes: PassType[] // which pass types this plan can create
   features: string[]
   apiAccess: boolean
   apiRateLimit: number // requests per minute (0 for no access)
@@ -29,9 +37,10 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     customerLimit: 50,
     staffLimit: 1,
     programLimit: 1,
+    allowedPassTypes: ["STAMP_CARD", "COUPON"],
     features: [
       "Up to 50 contacts",
-      "1 stamp card program",
+      "1 program (stamp card or coupon)",
       "1 staff member",
       "Apple & Google Wallet",
       "Card design studio",
@@ -51,6 +60,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     customerLimit: 500,
     staffLimit: 2,
     programLimit: 2,
+    allowedPassTypes: ALL_PASS_TYPES,
     features: [
       "Up to 500 contacts",
       "2 staff members",
@@ -76,6 +86,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     customerLimit: 2_500,
     staffLimit: 5,
     programLimit: 5,
+    allowedPassTypes: ALL_PASS_TYPES,
     features: [
       "Up to 2,500 contacts",
       "5 staff members",
@@ -101,6 +112,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     customerLimit: Infinity,
     staffLimit: 25,
     programLimit: Infinity,
+    allowedPassTypes: ALL_PASS_TYPES,
     features: [
       "Unlimited contacts",
       "25 staff members",
@@ -127,6 +139,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     customerLimit: Infinity,
     staffLimit: Infinity,
     programLimit: Infinity,
+    allowedPassTypes: ALL_PASS_TYPES,
     features: [
       "Everything in Scale",
       "Unlimited staff members",
@@ -157,6 +170,14 @@ export function getPlanLimits(plan: PlanId) {
     staffLimit: PLANS[plan].staffLimit,
     programLimit: PLANS[plan].programLimit,
   }
+}
+
+export function getAllowedPassTypes(plan: PlanId): PassType[] {
+  return PLANS[plan].allowedPassTypes
+}
+
+export function isPassTypeAllowed(plan: PlanId, passType: string): boolean {
+  return PLANS[plan].allowedPassTypes.includes(passType as PassType)
 }
 
 /** Returns true if the subscription is in a state that allows feature usage */

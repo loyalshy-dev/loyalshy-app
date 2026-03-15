@@ -143,6 +143,75 @@
       "description": "Cifrado de nivel empresarial, autenticación segura y preparado para RGPD. Los datos de tus clientes son tuyos."
     }
   },
+  "passTypesCarousel": {
+    "sectionLabel": "Tipos de pase",
+    "title": "Una plataforma, diez tipos de pase",
+    "subtitle": "Desde tarjetas de sellos hasta pases de transporte — crea el pase digital exacto que tu negocio necesita.",
+    "prev": "Tipo de pase anterior",
+    "next": "Siguiente tipo de pase",
+    "types": {
+      "stampCard": {
+        "label": "Tarjeta de Sellos",
+        "description": "Recompensa a tus clientes tras un número de visitas. Tarjetas de sellos digitales en Apple y Google Wallet — sin más tarjetas de papel perdidas.",
+        "alt": "Pase de tarjeta de sellos mostrando sellos de fidelización",
+        "useCases": ["Cafeterías", "Panaderías", "Peluquerías", "Autolavados"]
+      },
+      "coupon": {
+        "label": "Cupón",
+        "description": "Ofrece descuentos porcentuales o fijos que tus clientes pueden canjear con un toque. Rastrea canjes y establece fechas de vencimiento automáticamente.",
+        "alt": "Pase de cupón digital con oferta de descuento",
+        "useCases": ["Tiendas", "Restaurantes", "E-commerce", "Promociones"]
+      },
+      "membership": {
+        "label": "Membresía",
+        "description": "Tarjetas de membresía digitales con beneficios por nivel. Perfectas para clubes, gimnasios y niveles de fidelización con foto opcional del titular.",
+        "alt": "Pase de membresía con nivel y datos del miembro",
+        "useCases": ["Gimnasios", "Clubes", "Bibliotecas", "Coworkings"]
+      },
+      "points": {
+        "label": "Programa de Puntos",
+        "description": "Acumula puntos por visita o compra y canjea de un catálogo de recompensas personalizado. Valores y etiquetas de puntos flexibles.",
+        "alt": "Pase de programa de puntos mostrando saldo de puntos",
+        "useCases": ["Cadenas retail", "Restaurantes", "Hoteles", "Aerolíneas"]
+      },
+      "prepaid": {
+        "label": "Pase Prepago",
+        "description": "Pases de uso fijo que se reducen con cada uso. Recargables o de un solo uso — ideales para packs de clases, servicios y transporte.",
+        "alt": "Pase prepago mostrando usos restantes",
+        "useCases": ["Estudios de yoga", "Autolavados", "Packs de clases", "Pases de bus"]
+      },
+      "giftCard": {
+        "label": "Tarjeta Regalo",
+        "description": "Tarjetas regalo con seguimiento de saldo en tiempo real. Los clientes consultan su saldo desde su wallet — cargos y reembolsos incluidos.",
+        "alt": "Pase de tarjeta regalo mostrando saldo actual",
+        "useCases": ["Tiendas", "Restaurantes", "Spas", "Tiendas online"]
+      },
+      "ticket": {
+        "label": "Entrada de Evento",
+        "description": "Entradas digitales para eventos, conciertos y conferencias. Escanea en la puerta con códigos QR — incluye fecha, lugar y asiento.",
+        "alt": "Pase de entrada de evento con código QR y detalles",
+        "useCases": ["Conciertos", "Conferencias", "Festivales", "Eventos deportivos"]
+      },
+      "access": {
+        "label": "Pase de Acceso",
+        "description": "Concede o deniega acceso a instalaciones, coworkings y aparcamientos. Rastrea registros de entrada y gestiona permisos digitalmente.",
+        "alt": "Pase de acceso para entrada a instalaciones",
+        "useCases": ["Coworkings", "Aparcamientos", "Oficinas", "Zonas VIP"]
+      },
+      "transit": {
+        "label": "Pase de Transporte",
+        "description": "Pases digitales de transporte para autobuses, trenes y ferries. Seguimiento de embarque y salida con información de ruta y zona.",
+        "alt": "Pase de transporte mostrando información de ruta y zona",
+        "useCases": ["Autobuses", "Ferries", "Lanzaderas", "Transporte privado"]
+      },
+      "businessId": {
+        "label": "ID Empresarial",
+        "description": "Tarjetas de identificación digitales para empleados o contratistas. Verifica identidad al instante con escaneo QR — incluye cargo, departamento y vencimiento.",
+        "alt": "Tarjeta de ID empresarial con datos del empleado",
+        "useCases": ["Empresas", "Contratistas", "Voluntarios", "Credenciales"]
+      }
+    }
+  },
   "walletPreview": {
     "badge1": "Compatible con Apple y Google Wallet",
     "badge2": "Se actualiza automáticamente en cada visita",
@@ -222,7 +291,7 @@
       "description": "Prueba Loyalshy con tus primeros clientes",
       "features": {
         "contacts": "Hasta 50 contactos",
-        "programs": "1 programa de sellos",
+        "programs": "1 programa (sellos o cupón)",
         "staff": "1 miembro del equipo",
         "wallet": "Pases de Apple y Google Wallet",
         "studio": "Estudio de diseño de tarjetas",
@@ -262,7 +331,7 @@
       },
       "freePlan": {
         "question": "¿Hay un plan gratuito?",
-        "answer": "¡Sí! Nuestro plan Gratis te permite empezar con hasta 50 contactos y 1 programa de sellos. Sin tarjeta de crédito, gratis para siempre. Mejora cuando necesites más."
+        "answer": "¡Sí! Nuestro plan Gratis te permite empezar con hasta 50 contactos y 1 programa — elige entre sellos o cupón. Sin tarjeta de crédito, gratis para siempre. Mejora cuando necesites más."
       },
       "cancel": {
         "question": "¿Cómo cancelo?",
@@ -580,6 +649,8 @@
       "uploadLogoDescription": "Personaliza tus pases con el logo de tu organización",
       "customizeCard": "Personaliza tu tarjeta",
       "customizeCardDescription": "Configura visitas requeridas, descripción de recompensa y caducidad",
+      "createFirstProgram": "Crea tu primer programa",
+      "createFirstProgramDescription": "Elige entre sellos o cupón para empezar a recompensar clientes",
       "printQr": "Imprime tu código QR",
       "printQrDescription": "Descarga y muestra tu código QR en tu mostrador",
       "firstContact": "Registra tu primer contacto",
@@ -968,6 +1039,7 @@
     },
     "createProgram": {
       "chooseType": "Elige un tipo de programa para empezar.",
+      "upgrade": "Pro",
       "backToTypeSelection": "Volver a selección de tipo",
       "programName": "Nombre del Programa",
       "programNameRequired": "El nombre del programa es obligatorio",
@@ -1325,7 +1397,9 @@
       "apple": "Apple:",
       "google": "Google:",
       "wallet": "Wallet",
-      "googleWallet": "Google Wallet"
+      "googleWallet": "Google Wallet",
+      "searching": "Buscando direcciones…",
+      "noResults": "No se encontraron direcciones. Intenta una búsqueda más específica."
     },
     "details": {
       "description": "Detalles del reverso del pase. Aparecen cuando el cliente toca la tarjeta para más información.",
@@ -1393,6 +1467,7 @@
     "invalidFileType": "El archivo debe ser PNG, JPEG o WebP",
     "invalidFileTypeSvg": "El archivo debe ser PNG, JPEG, WebP o SVG",
     "templateLimitReached": "Límite de plantillas alcanzado ({limit}). Mejora tu plan para crear más.",
+    "passTypeNotAllowed": "Este tipo de pase no está disponible en tu plan actual. Mejora para desbloquear los 10 tipos de pase.",
     "templateNotFound": "Plantilla de pase no encontrada",
     "templateAlreadyArchived": "La plantilla ya está archivada",
     "templateAlreadyActive": "La plantilla ya está activa",

@@ -8,7 +8,7 @@ import { getTranslations } from "next-intl/server"
 import { db } from "@/lib/db"
 import { assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
-import { checkTemplateLimit } from "@/server/billing-actions"
+import { checkTemplateLimit, checkPassTypeAllowed } from "@/server/billing-actions"
 import { computeDesignHash, computeTextColor } from "@/lib/wallet/card-design"
 import type { PatternStyle, ProgressStyle, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
 import type { DesignCardType } from "@/types/pass-types"
@@ -99,6 +99,8 @@ const savePassDesignSchema = z.object({
   templateId2: z.string().max(50).nullable().optional(),
   businessHours: z.string().max(1000).optional().default(""),
   mapAddress: z.string().max(500).optional().default(""),
+  mapLatitude: z.number().min(-90).max(90).nullable().optional(),
+  mapLongitude: z.number().min(-180).max(180).nullable().optional(),
   socialLinks: z.object({
     instagram: z.string().max(200).optional().default(""),
     facebook: z.string().max(200).optional().default(""),
@@ -348,6 +350,12 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
   const templateCheck = await checkTemplateLimit(parsed.organizationId)
   if (!templateCheck.allowed) {
     return { error: t("templateLimitReached", { limit: templateCheck.limit }) }
+  }
+
+  // Enforce allowed pass types for current plan
+  const typeAllowed = await checkPassTypeAllowed(parsed.organizationId, parsed.passType)
+  if (!typeAllowed) {
+    return { error: t("passTypeNotAllowed") }
   }
 
   // Map pass type to default card type
@@ -877,11 +885,21 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     },
   })
 
-  // Geocode address if changed
+  // Update coordinates: use client-provided coords (from autocomplete) or fall back to server geocoding
   const newMapAddress = parsed.mapAddress || null
   const oldMapAddress = existingDesign?.mapAddress ?? null
-  if (newMapAddress !== oldMapAddress) {
+  const clientLat = parsed.mapLatitude ?? null
+  const clientLng = parsed.mapLongitude ?? null
+
+  if (clientLat != null && clientLng != null) {
+    // Client provided coordinates from place autocomplete — use directly
+    await db.passDesign.update({
+      where: { passTemplateId: parsed.templateId },
+      data: { mapLatitude: clientLat, mapLongitude: clientLng },
+    })
+  } else if (newMapAddress !== oldMapAddress) {
     if (newMapAddress) {
+      // Fall back to server-side geocoding
       try {
         const { geocodeAddress } = await import("@/lib/geocoding")
         const coords = await geocodeAddress(newMapAddress)
