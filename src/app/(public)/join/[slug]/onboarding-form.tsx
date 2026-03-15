@@ -8,7 +8,7 @@ import {
   ArrowLeft,
   Gift,
   ChevronRight,
-  Bookmark,
+  Globe,
   Stamp,
   Tag,
   Users,
@@ -70,13 +70,31 @@ function getProgramSubtitle(p: PublicTemplateInfo): string {
     case "GIFT_CARD":
       return `Gift card — ${reward}`
     case "TICKET":
-      return reward
     case "ACCESS":
-      return reward
     case "TRANSIT":
       return reward
     default:
       return reward
+  }
+}
+
+/** Pass types where showing the reward/info badge on the join form makes sense */
+function shouldShowInfoBadge(passType: string): boolean {
+  switch (passType) {
+    case "STAMP_CARD":
+    case "COUPON":
+    case "POINTS":
+    case "PREPAID":
+    case "GIFT_CARD":
+    case "MEMBERSHIP":
+      return true
+    case "TICKET":
+    case "ACCESS":
+    case "TRANSIT":
+    case "BUSINESS_ID":
+      return false
+    default:
+      return false
   }
 }
 
@@ -126,7 +144,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [name, setName] = useState("")
-  const [loadingLabel, setLoadingLabel] = useState("Creating your card...")
+  const [loadingLabel, setLoadingLabel] = useState("Creating your pass...")
 
   useEffect(() => {
     const detected = detectPlatform()
@@ -180,7 +198,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
     }
 
     if (!requireEmailOnly && !email && !phone) {
-      setError("Please provide an email or phone number so we can find your card next time.")
+      setError("Please enter your email or phone number — we use it to find your pass.")
       return
     }
 
@@ -190,8 +208,8 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
     }
 
     startTransition(async () => {
-      // Step 1: Create pass instance
-      setLoadingLabel("Creating your card...")
+      // Step 1: Find or create pass instance
+      setLoadingLabel("Setting up your pass...")
       const joinRes = await joinTemplate(formData)
 
       if (!joinRes.success) {
@@ -200,7 +218,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
       }
 
       // Step 2: Generate wallet pass
-      setLoadingLabel("Adding to wallet...")
+      setLoadingLabel(joinRes.isReturning ? "Updating wallet pass..." : "Adding to wallet...")
       const walletRes = await requestWalletPass(
         joinRes.passInstanceId!,
         organization.slug,
@@ -254,7 +272,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
     }
 
     if (!requireEmailOnly && !email && !phone) {
-      setError("Please provide an email or phone number so we can find your card next time.")
+      setError("Please enter your email or phone number — we use it to find your pass.")
       return
     }
 
@@ -264,12 +282,16 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
     }
 
     startTransition(async () => {
-      setLoadingLabel("Creating your card...")
+      setLoadingLabel("Setting up your pass...")
       const res = await joinTemplate(formData)
 
       if (!res.success) {
         setError(res.error ?? "Something went wrong")
         return
+      }
+
+      if (res.isReturning) {
+        setLoadingLabel("Welcome back! Loading your pass...")
       }
 
       if (res.cardUrl) {
@@ -405,8 +427,8 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
             </p>
           </div>
 
-          {/* Reward info */}
-          {activeProgram && (
+          {/* Info badge — only for types where it adds value */}
+          {activeProgram && shouldShowInfoBadge(activeProgram.passType) && (
             <div
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium"
               style={{
@@ -463,7 +485,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               {requireEmailOnly ? (
                 <span className="text-destructive">*</span>
               ) : (
-                <span className="text-muted-foreground font-normal">(email or phone required)</span>
+                <span className="text-muted-foreground font-normal">*</span>
               )}
             </label>
             <input
@@ -475,6 +497,11 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               placeholder="john@example.com"
               className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
             />
+            {!requireEmailOnly && (
+              <p className="text-[11px] text-muted-foreground">
+                Used to identify your pass — enter the same email next time to access it
+              </p>
+            )}
           </div>
 
           {/* Phone */}
@@ -482,14 +509,14 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
             <div className="space-y-1.5">
               <label htmlFor="phone" className="text-[13px] font-medium text-foreground">
                 Phone{" "}
-                <span className="text-muted-foreground font-normal">(if no email)</span>
+                <span className="text-muted-foreground font-normal">(alternative to email)</span>
               </label>
               <input
                 id="phone"
                 name="phone"
                 type="tel"
                 autoComplete="tel"
-                placeholder="+1 (555) 123-4567"
+                placeholder="+34 612 345 678"
                 className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
               />
             </div>
@@ -575,7 +602,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
             </button>
           )}
 
-          {/* Continue without wallet — text link */}
+          {/* Web-only pass — skip wallet, get a shareable link */}
           {!isPending && (
             <button
               type="button"
@@ -589,8 +616,8 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               }}
               className="flex w-full items-center justify-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Bookmark className="w-3.5 h-3.5" aria-hidden="true" />
-              Continue without wallet
+              <Globe className="w-3.5 h-3.5" aria-hidden="true" />
+              Get web pass instead
             </button>
           )}
         </form>
