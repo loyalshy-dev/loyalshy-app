@@ -725,7 +725,7 @@ function SearchStep({
 }) {
   const t = useTranslations("dashboard.registerVisit")
   return (
-    <>
+    <div className="flex flex-col h-full">
       <DialogHeader className="p-4 pb-0">
         <DialogTitle className="text-base">{t("title")}</DialogTitle>
       </DialogHeader>
@@ -760,7 +760,7 @@ function SearchStep({
         </div>
       </div>
 
-      <ScrollArea className="max-h-[50vh] min-h-30">
+      <ScrollArea className="flex-1 max-h-[50vh] min-h-30">
         <div className="px-4 pb-4">
           {!query.trim() ? (
             <div className="flex flex-col items-center gap-2 py-10 text-center">
@@ -847,7 +847,7 @@ function SearchStep({
           )}
         </div>
       </ScrollArea>
-    </>
+    </div>
   )
 }
 

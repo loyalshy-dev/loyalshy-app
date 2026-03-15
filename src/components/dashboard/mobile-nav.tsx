@@ -41,7 +41,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
           )}
         >
           <LayoutGrid
-            className={cn("size-5", isOverviewActive() && "text-brand")}
+            className={cn("size-5", isOverviewActive() && "text-foreground")}
             strokeWidth={isOverviewActive() ? 2 : 1.5}
           />
           <span className="text-[10px] font-medium">{t("overview")}</span>
@@ -55,7 +55,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
           )}
         >
           <Users
-            className={cn("size-5", isContactsActive() && "text-brand")}
+            className={cn("size-5", isContactsActive() && "text-foreground")}
             strokeWidth={isContactsActive() ? 2 : 1.5}
           />
           <span className="text-[10px] font-medium">{t("contacts")}</span>
@@ -66,12 +66,12 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
           <button
             type="button"
             onClick={onOpenRegisterVisit}
-            className="flex items-center justify-center size-12 -mt-4 rounded-full bg-brand text-brand-foreground shadow-lg shadow-brand/25 active:scale-95 transition-transform"
+            className="flex items-center justify-center size-12 -mt-4 rounded-full bg-foreground text-background shadow-lg shadow-foreground/15 active:scale-95 transition-transform"
             aria-label={t("registerInteraction")}
           >
             <Plus className="size-6" strokeWidth={2.5} />
           </button>
-          <span className="text-[10px] font-medium text-brand mt-0.5">
+          <span className="text-[10px] font-medium text-foreground mt-0.5">
             {t("action")}
           </span>
         </div>
@@ -84,7 +84,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
           )}
         >
           <Layers
-            className={cn("size-5", isProgramsActive() && "text-brand")}
+            className={cn("size-5", isProgramsActive() && "text-foreground")}
             strokeWidth={isProgramsActive() ? 2 : 1.5}
           />
           <span className="text-[10px] font-medium">{t("programs")}</span>
