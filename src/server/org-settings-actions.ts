@@ -1910,3 +1910,52 @@ export async function resendInvitation(organizationId: string, invitationId: str
   revalidatePath("/dashboard/settings")
   return { success: true }
 }
+
+// ─── Media Library (uploaded logos + strip images) ────────────
+
+export type MediaLibraryItem = {
+  url: string
+  type: "logo" | "strip"
+  programName: string | null
+}
+
+export async function getOrgMediaLibrary(organizationId: string) {
+  await assertOrganizationRole(organizationId, "owner")
+
+  const [org, designs] = await Promise.all([
+    db.organization.findUnique({
+      where: { id: organizationId },
+      select: { logo: true, logoApple: true, logoGoogle: true },
+    }),
+    db.passDesign.findMany({
+      where: { passTemplate: { organizationId } },
+      select: {
+        logoUrl: true,
+        stripImageUrl: true,
+        passTemplate: { select: { name: true } },
+      },
+    }),
+  ])
+
+  const seen = new Set<string>()
+  const items: MediaLibraryItem[] = []
+
+  function add(url: string | null | undefined, type: "logo" | "strip", programName: string | null) {
+    if (!url || seen.has(url)) return
+    seen.add(url)
+    items.push({ url, type, programName })
+  }
+
+  // Organization logos
+  add(org?.logo, "logo", null)
+  add(org?.logoApple, "logo", null)
+  add(org?.logoGoogle, "logo", null)
+
+  // Per-program media
+  for (const d of designs) {
+    add(d.logoUrl, "logo", d.passTemplate.name)
+    add(d.stripImageUrl, "strip", d.passTemplate.name)
+  }
+
+  return { items }
+}

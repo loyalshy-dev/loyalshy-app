@@ -512,7 +512,7 @@ export function StudioLayout({
       case "progress":
         return <ProgressPanel store={store} programId={templateId} visitsRequired={programConfig.stampsRequired} />
       case "strip":
-        return <StripPanel store={store} programId={templateId} forceStrip={cardType === "STAMP" || cardType === "POINTS"} />
+        return <StripPanel store={store} programId={templateId} forceStrip={cardType === "STAMP" || cardType === "POINTS"} organizationId={organizationId} />
       case "logo":
         return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} organizationLogoApple={organizationLogoApple} organizationLogoGoogle={organizationLogoGoogle} templateId={templateId} />
       case "notifications":

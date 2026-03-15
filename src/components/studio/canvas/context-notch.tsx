@@ -721,7 +721,7 @@ export function ContextPanel({ store, passType, organizationId, organizationName
           <ProgressPanel store={store} programId={templateId} visitsRequired={stampsRequired} />
         )}
         {mode === "tool" && activeTool === "strip" && (
-          <StripPanel store={store} programId={templateId} forceStrip={hasProgress} cardType={cardType} />
+          <StripPanel store={store} programId={templateId} forceStrip={hasProgress} cardType={cardType} organizationId={organizationId} />
         )}
         {mode === "tool" && activeTool === "logo" && (
           <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} organizationLogoApple={organizationLogoApple} organizationLogoGoogle={organizationLogoGoogle} templateId={templateId} />

@@ -17,6 +17,7 @@ const CAFE_PALETTE: ExtractedPalette = {
   secondarySuggestion: "#a1887f",
   textColor: "#ffffff",
   labelColor: "#b3bcc9",
+  logoBgColor: null,
   variations: [],
   isMonochrome: false,
 }
@@ -31,6 +32,7 @@ const MONOCHROME_PALETTE: ExtractedPalette = {
   secondarySuggestion: "#999999",
   textColor: "#ffffff",
   labelColor: "#b3b3b3",
+  logoBgColor: null,
   variations: [],
   isMonochrome: true,
 }
@@ -45,6 +47,7 @@ const NEON_PALETTE: ExtractedPalette = {
   secondarySuggestion: "#e040fb",
   textColor: "#ffffff",
   labelColor: "#b3b0ff",
+  logoBgColor: null,
   variations: [],
   isMonochrome: false,
 }

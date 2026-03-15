@@ -7,6 +7,7 @@ import { ChevronDown, RotateCcw, Wand2, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import type { ExtractedPalette, PaletteVariation } from "@/lib/color-extraction"
+import { MediaGallery } from "./media-gallery"
 import {
   uploadProgramLogo,
   deleteProgramLogo,
@@ -396,6 +397,19 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
               />
             </div>
           )}
+
+          {/* ─── Uploaded logos gallery ────────────────────── */}
+          <MediaGallery
+            organizationId={organizationId}
+            type="logo"
+            currentUrl={programLogoUrl ?? null}
+            onSelect={(url) => {
+              const s = store.getState()
+              s.setWalletField("programLogoUrl", url)
+              s.setWalletField("logoAppleUrl", url)
+              s.setWalletField("logoGoogleUrl", url)
+            }}
+          />
 
           {/* ─── Brand Match ─────────────────────────────── */}
           <SectionHeader>Brand Match</SectionHeader>

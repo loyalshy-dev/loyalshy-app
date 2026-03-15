@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import type { PatternStyle } from "@/lib/wallet/card-design"
 import { uploadStripImage, deleteStripImage } from "@/server/org-settings-actions"
+import { MediaGallery } from "./media-gallery"
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
@@ -67,11 +68,13 @@ type Props = {
   forceStrip?: boolean
   /** Card type for type-specific options (e.g., holder photo for BUSINESS_ID) */
   cardType?: string
+  /** Organization ID for media gallery (optional — gallery hidden when omitted) */
+  organizationId?: string
   onUploadStrip?: (formData: FormData) => Promise<{ success?: boolean; originalUrl?: string; appleUrl?: string; googleUrl?: string; error?: string }>
   onDeleteStrip?: (id: string) => Promise<{ success?: boolean; error?: string }>
 }
 
-export function StripPanel({ store, programId, forceStrip, cardType, onUploadStrip, onDeleteStrip }: Props) {
+export function StripPanel({ store, programId, forceStrip, cardType, organizationId, onUploadStrip, onDeleteStrip }: Props) {
   const t = useTranslations("studio.strip")
 
   const PRESET_STRIP_IMAGES: { id: string; src: string; label: string }[] = [
@@ -402,6 +405,20 @@ export function StripPanel({ store, programId, forceStrip, cardType, onUploadStr
           )
         })}
       </div>
+
+      {/* Uploaded strip images from other programs */}
+      {organizationId && (
+        <MediaGallery
+          organizationId={organizationId}
+          type="strip"
+          currentUrl={stripImageUrl}
+          onSelect={(url) => {
+            store.getState().setWalletField("stripImageUrl", url)
+            store.getState().setWalletField("stripImagePosition", { x: 0.5, y: 0.5 })
+            store.getState().setWalletField("stripImageZoom", 1)
+          }}
+        />
+      )}
 
       {/* Image filters — always available when a strip image is uploaded */}
       {stripImageUrl && (

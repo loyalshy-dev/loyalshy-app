@@ -24,6 +24,8 @@ export type ExtractedPalette = {
   secondarySuggestion: string
   textColor: string
   labelColor: string
+  /** Detected solid background color of the logo, or null if transparent */
+  logoBgColor: string | null
   variations: PaletteVariation[]
   isMonochrome: boolean
 }
@@ -243,6 +245,7 @@ const FALLBACK_PALETTE: ExtractedPalette = {
   secondarySuggestion: "#94a3b8",
   textColor: "#ffffff",
   labelColor: "#b3bcc9",
+  logoBgColor: null,
   variations: [],
   isMonochrome: true,
 }
@@ -261,21 +264,56 @@ export async function extractPaletteFromBuffer(
 
   const pixels: Pixel[] = []
   const totalPixels = info.width * info.height
+  const { width, height } = info
 
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i]
-    const g = data[i + 1]
-    const b = data[i + 2]
-    const a = data[i + 3]
+  // Collect edge pixels separately to detect logo background color
+  const edgePixels: Pixel[] = []
+  let edgeTransparentCount = 0
+  let edgeTotalCount = 0
 
-    // Filter out transparent pixels
-    if (a < 128) continue
-    // Filter out near-white
-    if (r > 240 && g > 240 && b > 240) continue
-    // Filter out near-black
-    if (r < 15 && g < 15 && b < 15) continue
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4
+      const r = data[i]
+      const g = data[i + 1]
+      const b = data[i + 2]
+      const a = data[i + 3]
 
-    pixels.push([r, g, b])
+      const isEdge = y === 0 || y === height - 1 || x === 0 || x === width - 1
+      if (isEdge) {
+        edgeTotalCount++
+        if (a < 128) {
+          edgeTransparentCount++
+        } else {
+          edgePixels.push([r, g, b])
+        }
+      }
+
+      // Filter out transparent pixels
+      if (a < 128) continue
+      // Filter out near-white
+      if (r > 240 && g > 240 && b > 240) continue
+      // Filter out near-black
+      if (r < 15 && g < 15 && b < 15) continue
+
+      pixels.push([r, g, b])
+    }
+  }
+
+  // Detect solid logo background: if most edge pixels are opaque and similar color
+  let logoBgHex: string | null = null
+  const edgeHasTransparentBg = edgeTotalCount > 0 && edgeTransparentCount / edgeTotalCount > 0.5
+  if (!edgeHasTransparentBg && edgePixels.length >= 4) {
+    // Find median edge color
+    const edgeClusters = kMeansClustering(edgePixels, 2, 10)
+    if (edgeClusters.length > 0) {
+      edgeClusters.sort((a, b) => b.count - a.count)
+      const dominantEdge = edgeClusters[0]
+      // If 60%+ of edge pixels match the dominant color, it's a solid background
+      if (dominantEdge.count / edgePixels.length >= 0.6) {
+        logoBgHex = rgbToHex(...dominantEdge.centroid)
+      }
+    }
   }
 
   // Edge case: >90% transparent or filtered out
@@ -347,14 +385,15 @@ export async function extractPaletteFromBuffer(
   const labelColor = blendLabel(textColor, primaryHex)
 
   // ── Generate palette variations ──────────────────────────
-  const variations = buildVariations(brandHex, brandH, brandS, isMonochrome)
+  const variations = buildVariations(brandHex, brandH, brandS, isMonochrome, logoBgHex)
 
   return {
     colors,
-    primarySuggestion: primaryHex,
+    primarySuggestion: logoBgHex ?? primaryHex,
     secondarySuggestion: secondaryHex,
-    textColor,
-    labelColor,
+    textColor: computeTextColor(logoBgHex ?? primaryHex),
+    labelColor: blendLabel(computeTextColor(logoBgHex ?? primaryHex), logoBgHex ?? primaryHex),
+    logoBgColor: logoBgHex,
     variations,
     isMonochrome,
   }
@@ -371,13 +410,33 @@ function blendLabel(text: string, bg: string): string {
   )
 }
 
-/** Build 4 palette variations from the extracted brand color */
+/** Build palette variations from the extracted brand color */
 function buildVariations(
   brandHex: string,
   brandH: number,
   brandS: number,
   isMonochrome: boolean,
+  logoBgHex: string | null,
 ): PaletteVariation[] {
+  const variations: PaletteVariation[] = []
+
+  // 0. Brand — uses logo's actual background color (only when detected)
+  if (logoBgHex) {
+    const bgText = computeTextColor(logoBgHex)
+    const [bgH, bgS] = rgbToHsl(...hexToRgb(logoBgHex))
+    const bgSecondary = isMonochrome
+      ? hslToHex(0, 0, 0.55)
+      : hslToHex(bgH, Math.min(bgS + 0.15, 1), 0.55)
+    variations.push({
+      id: "brand",
+      label: "Brand",
+      primaryColor: logoBgHex,
+      secondaryColor: bgSecondary,
+      textColor: bgText,
+      labelColor: blendLabel(bgText, logoBgHex),
+    })
+  }
+
   // 1. Dark — dark bg derived from brand hue, vibrant accent
   const darkBg = isMonochrome
     ? hslToHex(0, 0, 0.12)
@@ -386,6 +445,14 @@ function buildVariations(
   const darkSecondary = isMonochrome
     ? hslToHex(0, 0, 0.55)
     : hslToHex(brandH, Math.min(brandS + 0.1, 1), 0.55)
+  variations.push({
+    id: "dark",
+    label: "Dark",
+    primaryColor: darkBg,
+    secondaryColor: darkSecondary,
+    textColor: darkText,
+    labelColor: blendLabel(darkText, darkBg),
+  })
 
   // 2. Light — off-white bg, brand as accent
   const lightBg = isMonochrome
@@ -395,6 +462,14 @@ function buildVariations(
   const lightSecondary = isMonochrome
     ? hslToHex(0, 0, 0.4)
     : hslToHex(brandH, Math.min(brandS, 0.8), 0.45)
+  variations.push({
+    id: "light",
+    label: "Light",
+    primaryColor: lightBg,
+    secondaryColor: lightSecondary,
+    textColor: lightText,
+    labelColor: blendLabel(lightText, lightBg),
+  })
 
   // 3. Vibrant — brand color as bg, contrasting text
   const vibrantBg = isMonochrome
@@ -404,6 +479,14 @@ function buildVariations(
   const vibrantSecondary = isMonochrome
     ? hslToHex(0, 0, 0.75)
     : hslToHex((brandH + 30) % 360, Math.min(brandS, 0.7), 0.65)
+  variations.push({
+    id: "vibrant",
+    label: "Vibrant",
+    primaryColor: vibrantBg,
+    secondaryColor: vibrantSecondary,
+    textColor: vibrantText,
+    labelColor: blendLabel(vibrantText, vibrantBg),
+  })
 
   // 4. Muted — desaturated bg, subtle accent
   const mutedBg = isMonochrome
@@ -413,41 +496,16 @@ function buildVariations(
   const mutedSecondary = isMonochrome
     ? hslToHex(0, 0, 0.5)
     : hslToHex(brandH, 0.25, 0.5)
+  variations.push({
+    id: "muted",
+    label: "Muted",
+    primaryColor: mutedBg,
+    secondaryColor: mutedSecondary,
+    textColor: mutedText,
+    labelColor: blendLabel(mutedText, mutedBg),
+  })
 
-  return [
-    {
-      id: "dark",
-      label: "Dark",
-      primaryColor: darkBg,
-      secondaryColor: darkSecondary,
-      textColor: darkText,
-      labelColor: blendLabel(darkText, darkBg),
-    },
-    {
-      id: "light",
-      label: "Light",
-      primaryColor: lightBg,
-      secondaryColor: lightSecondary,
-      textColor: lightText,
-      labelColor: blendLabel(lightText, lightBg),
-    },
-    {
-      id: "vibrant",
-      label: "Vibrant",
-      primaryColor: vibrantBg,
-      secondaryColor: vibrantSecondary,
-      textColor: vibrantText,
-      labelColor: blendLabel(vibrantText, vibrantBg),
-    },
-    {
-      id: "muted",
-      label: "Muted",
-      primaryColor: mutedBg,
-      secondaryColor: mutedSecondary,
-      textColor: mutedText,
-      labelColor: blendLabel(mutedText, mutedBg),
-    },
-  ]
+  return variations
 }
 
 // ─── HSL → Hex ──────────────────────────────────────────────
