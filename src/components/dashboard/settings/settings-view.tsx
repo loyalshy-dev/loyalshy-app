@@ -3,8 +3,7 @@
 import type React from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
-import Link from "next/link"
-import { Building2, Users, CreditCard, Activity, Key } from "lucide-react"
+import { Building2, Users, CreditCard, Key } from "lucide-react"
 import { GeneralSettingsForm } from "./general-settings-form"
 import { TeamManagement } from "./team-management"
 import { BillingSettings } from "./billing-settings"
@@ -129,14 +128,6 @@ export function SettingsView({
             </button>
           )
         })}
-        {/* Jobs — separate page, styled as a tab link */}
-        <Link
-          href="/dashboard/settings/jobs"
-          className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border transition-colors -mb-px whitespace-nowrap"
-        >
-          <Activity className="h-4 w-4" />
-          {t("jobs")}
-        </Link>
       </div>
 
       {/* Tab Content */}

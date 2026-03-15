@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
-import { assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
+import { assertSuperAdmin, getOrganizationForUser } from "@/lib/dal"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -25,7 +25,7 @@ export async function getRecentJobLogs(page = 1, perPage = 25): Promise<JobLogsR
   const organization = await getOrganizationForUser()
   if (!organization) redirect("/register?step=2")
 
-  await assertOrganizationRole(organization.id, "owner")
+  await assertSuperAdmin()
 
   const skip = (page - 1) * perPage
 

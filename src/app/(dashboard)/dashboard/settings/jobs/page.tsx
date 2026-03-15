@@ -1,19 +1,17 @@
 import { connection } from "next/server"
-import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
+import { assertSuperAdmin, getOrganizationForUser } from "@/lib/dal"
 import { redirect } from "next/navigation"
 import { getRecentJobLogs } from "@/server/jobs-actions"
 import { JobsHistory } from "@/components/dashboard/settings/jobs-history"
 
 export default async function JobsPage() {
   await connection()
-  await assertAuthenticated()
+  await assertSuperAdmin()
 
   const organization = await getOrganizationForUser()
   if (!organization) {
     redirect("/dashboard")
   }
-
-  await assertOrganizationRole(organization.id, "owner")
 
   const { logs, total } = await getRecentJobLogs()
 
