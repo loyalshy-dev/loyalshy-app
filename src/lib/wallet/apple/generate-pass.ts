@@ -7,7 +7,6 @@ import { getIconBuffers } from "./icons"
 import {
   PASS_TYPE_IDENTIFIER,
   TEAM_IDENTIFIER,
-  ORGANIZATION_NAME,
   WEB_SERVICE_BASE_URL,
 } from "./constants"
 import type { CardDesignData, CardType } from "../card-design"
@@ -222,7 +221,7 @@ export async function generateApplePass(
     formatVersion: 1,
     passTypeIdentifier: PASS_TYPE_IDENTIFIER,
     teamIdentifier: TEAM_IDENTIFIER,
-    organizationName: ORGANIZATION_NAME,
+    organizationName: input.organizationName,
     serialNumber: input.serialNumber,
     description: passDescription,
     authenticationToken: input.authenticationToken,
