@@ -34,6 +34,7 @@ export default async function ProgramDistributionPage(props: {
         id: true,
         name: true,
         passType: true,
+        joinMode: true,
         config: true,
         passDesign: {
           select: {
@@ -75,6 +76,8 @@ export default async function ProgramDistributionPage(props: {
   const joinPath = `/join/${organization.slug}?program=${program.id}`
   const joinUrl = origin ? `${origin}${joinPath}` : joinPath
 
+  const isOpen = program.joinMode === "OPEN"
+
   return (
     <div className="space-y-6">
       <DistributionStats
@@ -82,53 +85,80 @@ export default async function ProgramDistributionPage(props: {
         issuedThisWeek={issuedThisWeek}
         eligibleContacts={eligibleContacts}
       />
-      {/* Advisory */}
-      <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-        <div className="text-[13px] text-muted-foreground space-y-1">
-          <p>
-            <strong className="text-foreground">Preventing duplicate passes:</strong>{" "}
-            QR codes and links are self-service — contacts identify themselves by email or phone.
-            For tighter control, use <strong>Direct Issue</strong> or <strong>CSV Import</strong> to personally create and deliver passes via email.
-          </p>
-          <p>
-            You can also require email (instead of email or phone) in{" "}
-            <a href="/dashboard/settings" className="underline underline-offset-4 hover:text-foreground">
-              Settings &rarr; General &rarr; Public Join Form
-            </a>.
-          </p>
+
+      {/* Invite-only banner */}
+      {!isOpen && (
+        <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div className="text-[13px] text-muted-foreground space-y-1">
+            <p>
+              <strong className="text-foreground">This program is invite-only.</strong>{" "}
+              Contacts cannot self-join via QR code or link. Use <strong>Direct Issue</strong> or <strong>CSV Import</strong> below to issue passes.
+            </p>
+            <p>
+              You can change this in{" "}
+              <a href={`/dashboard/programs/${program.id}/settings`} className="underline underline-offset-4 hover:text-foreground">
+                Program Settings
+              </a>.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Advisory (open mode only) */}
+      {isOpen && (
+        <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <div className="text-[13px] text-muted-foreground space-y-1">
+            <p>
+              <strong className="text-foreground">Preventing duplicate passes:</strong>{" "}
+              QR codes and links are self-service — contacts identify themselves by email or phone.
+              For tighter control, use <strong>Direct Issue</strong> or <strong>CSV Import</strong> to personally create and deliver passes via email.
+            </p>
+            <p>
+              You can also require email (instead of email or phone) in{" "}
+              <a href="/dashboard/settings" className="underline underline-offset-4 hover:text-foreground">
+                Settings &rarr; General &rarr; Public Join Form
+              </a>.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <QrCodeDisplay
-          organization={{
-            name: organization.name,
-            slug: organization.slug,
-            logo: organization.logo,
-            logoApple: organization.logoApple ?? null,
-            logoGoogle: organization.logoGoogle ?? null,
-            brandColor: organization.brandColor,
-          }}
-          templates={[
-            {
-              id: program.id,
-              name: program.name,
-              passType: program.passType,
-              templateConfig: program.config,
-              rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
-              visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
-              cardDesign: program.passDesign ?? null,
-            },
-          ]}
-          joinUrl={joinUrl}
-        />
-        <div className="space-y-6">
-          <ShareLinkSection
+        {/* QR code + share link only for OPEN programs */}
+        {isOpen && (
+          <QrCodeDisplay
+            organization={{
+              name: organization.name,
+              slug: organization.slug,
+              logo: organization.logo,
+              logoApple: organization.logoApple ?? null,
+              logoGoogle: organization.logoGoogle ?? null,
+              brandColor: organization.brandColor,
+            }}
+            templates={[
+              {
+                id: program.id,
+                name: program.name,
+                passType: program.passType,
+                templateConfig: program.config,
+                rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
+                visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
+                cardDesign: program.passDesign ?? null,
+              },
+            ]}
             joinUrl={joinUrl}
-            templateName={program.name}
-            organizationName={organization.name}
           />
+        )}
+        <div className="space-y-6">
+          {isOpen && (
+            <ShareLinkSection
+              joinUrl={joinUrl}
+              templateName={program.name}
+              organizationName={organization.name}
+            />
+          )}
           <DirectIssueSection
             templateId={program.id}
             templateName={program.name}

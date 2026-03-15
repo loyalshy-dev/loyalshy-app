@@ -24,6 +24,7 @@ export default async function ProgramSettingsPage(props: {
       id: true,
       name: true,
       passType: true,
+      joinMode: true,
       status: true,
     },
   })

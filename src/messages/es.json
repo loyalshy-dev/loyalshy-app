@@ -880,7 +880,14 @@
       "deleteConfirm": "¿Estás seguro? Esto eliminará permanentemente este programa, todos los pases y todos los datos de interacción.",
       "typeToConfirm": "Escribe \"{name}\" para confirmar",
       "programDeleted": "Programa eliminado",
-      "statusUpdated": "Estado del programa actualizado"
+      "statusUpdated": "Estado del programa actualizado",
+      "joinMode": "Modo de acceso",
+      "joinModeDescription": "Controla cómo los contactos pueden obtener un pase para este programa.",
+      "joinModeOpen": "Abierto",
+      "joinModeOpenDescription": "Cualquiera puede unirse escaneando un código QR o usando un enlace.",
+      "joinModeInviteOnly": "Solo por invitación",
+      "joinModeInviteOnlyDescription": "Solo tú puedes emitir pases mediante emisión directa o importación CSV.",
+      "joinModeUpdated": "Modo de acceso actualizado"
     },
     "settingsForms": {
       "logo": "Logo",

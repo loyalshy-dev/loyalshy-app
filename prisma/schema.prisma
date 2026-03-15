@@ -62,6 +62,13 @@ enum TemplateStatus {
   @@map("template_status")
 }
 
+enum JoinMode {
+  OPEN        @map("open")
+  INVITE_ONLY @map("invite_only")
+
+  @@map("join_mode")
+}
+
 enum PassInstanceStatus {
   ACTIVE    @map("active")
   COMPLETED @map("completed")
@@ -360,6 +367,7 @@ model PassTemplate {
   name               String
   description        String?        @db.Text
   passType           PassType
+  joinMode           JoinMode       @default(OPEN)
   status             TemplateStatus @default(DRAFT)
   startsAt           DateTime       @default(now())
   endsAt             DateTime?

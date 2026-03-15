@@ -20,6 +20,7 @@ export type TemplateWithDesign = {
   id: string
   name: string
   passType: string
+  joinMode: string
   config: unknown
   termsAndConditions: string | null
   status: string
@@ -228,6 +229,7 @@ export async function getSettingsData() {
     id: t.id,
     name: t.name,
     passType: t.passType,
+    joinMode: t.joinMode,
     config: t.config,
     termsAndConditions: t.termsAndConditions,
     status: t.status,
@@ -381,11 +383,16 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
   }
   const defaultCardType = (PASS_TO_CARD[parsed.passType] ?? "STAMP") as "STAMP"
 
+  // Default join mode: OPEN for self-service types, INVITE_ONLY for org-issued types
+  const INVITE_ONLY_TYPES = new Set(["TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID", "GIFT_CARD", "PREPAID"])
+  const defaultJoinMode = INVITE_ONLY_TYPES.has(parsed.passType) ? "INVITE_ONLY" : "OPEN"
+
   const template = await db.passTemplate.create({
     data: {
       organizationId: parsed.organizationId,
       name: sanitizeText(parsed.name, 100),
       passType: parsed.passType,
+      joinMode: defaultJoinMode as "OPEN",
       config: JSON.parse(JSON.stringify(parsed.config ?? {})),
       status: "DRAFT",
       passDesign: {
@@ -485,6 +492,34 @@ export async function archivePassTemplate(organizationId: string, templateId: st
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard/programs")
   revalidatePath("/dashboard")
+  return { success: true }
+}
+
+// ─── Update Template Join Mode ──────────────────────────────
+
+export async function updateTemplateJoinMode(
+  organizationId: string,
+  templateId: string,
+  joinMode: "OPEN" | "INVITE_ONLY"
+): Promise<{ success: true } | { error: string }> {
+  await assertOrganizationRole(organizationId, "owner")
+
+  const template = await db.passTemplate.findFirst({
+    where: { id: templateId, organizationId },
+    select: { id: true },
+  })
+
+  if (!template) {
+    return { error: "Template not found" }
+  }
+
+  await db.passTemplate.update({
+    where: { id: templateId },
+    data: { joinMode },
+  })
+
+  revalidatePath(`/dashboard/programs/${templateId}/settings`)
+  revalidatePath(`/dashboard/programs/${templateId}/distribution`)
   return { success: true }
 }
 

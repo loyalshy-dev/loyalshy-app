@@ -100,7 +100,7 @@ export async function getOrganizationBySlug(
       secondaryColor: true,
       settings: true,
       passTemplates: {
-        where: { status: "ACTIVE" },
+        where: { status: "ACTIVE", joinMode: "OPEN" },
         select: {
           id: true,
           name: true,
@@ -399,11 +399,16 @@ export async function joinTemplate(
       organizationId: organization.id,
       status: "ACTIVE",
     },
-    select: { id: true, passType: true, config: true },
+    select: { id: true, passType: true, config: true, joinMode: true },
   })
 
   if (!template) {
     return { success: false, error: "No active pass template found" }
+  }
+
+  // Reject self-join for invite-only programs
+  if (template.joinMode === "INVITE_ONLY") {
+    return { success: false, error: "This program is invite-only. Please contact the business to get a pass." }
   }
 
   const templateConfig = (template.config as Record<string, unknown>) ?? {}

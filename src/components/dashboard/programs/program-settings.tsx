@@ -10,6 +10,8 @@ import {
   Loader2,
   Play,
   Trash2,
+  Globe,
+  Lock,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -38,6 +40,7 @@ import {
   activateTemplate as activateProgram,
   reactivateTemplate as reactivateProgram,
   deleteTemplate as deleteProgram,
+  updateTemplateJoinMode,
 } from "@/server/org-settings-actions"
 import type { TemplateDeleteCounts } from "@/server/org-settings-actions"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
@@ -49,6 +52,7 @@ type ProgramSettingsProps = {
     id: string
     name: string
     passType: string
+    joinMode: string
     status: string
   }
   organizationId: string
@@ -65,10 +69,27 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
   const [deleteConfirmName, setDeleteConfirmName] = useState("")
   const [deleteCounts, setDeleteCounts] = useState<TemplateDeleteCounts | null>(null)
 
+  const [joinMode, setJoinMode] = useState(program.joinMode)
+  const [isJoinModePending, startJoinModeTransition] = useTransition()
+
   const isArchived = program.status === "ARCHIVED"
   const isDraft = program.status === "DRAFT"
   const programType = (program.passType ?? "STAMP_CARD") as PassType
   const typeMeta = PASS_TYPE_META[programType]
+
+  function handleJoinModeChange(mode: "OPEN" | "INVITE_ONLY") {
+    setJoinMode(mode)
+    startJoinModeTransition(async () => {
+      const result = await updateTemplateJoinMode(organizationId, program.id, mode)
+      if ("error" in result) {
+        toast.error(String(result.error))
+        setJoinMode(program.joinMode) // revert
+      } else {
+        toast.success(t("joinModeUpdated"))
+        router.refresh()
+      }
+    })
+  }
 
   function handleArchive() {
     startDangerTransition(async () => {
@@ -151,6 +172,55 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
             </p>
           </div>
         </Card>
+      </section>
+
+      {/* Join Mode */}
+      <section className="space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold">{t("joinMode")}</h3>
+          <p className="text-[13px] text-muted-foreground mt-1">
+            {t("joinModeDescription")}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            disabled={isJoinModePending}
+            onClick={() => handleJoinModeChange("OPEN")}
+            className={`flex items-start gap-3 rounded-lg border p-4 text-left transition-colors ${
+              joinMode === "OPEN"
+                ? "border-foreground/30 bg-accent/50"
+                : "border-border hover:bg-accent/30"
+            } ${isJoinModePending ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            <Globe className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">{t("joinModeOpen")}</p>
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
+                {t("joinModeOpenDescription")}
+              </p>
+            </div>
+          </button>
+          <button
+            type="button"
+            disabled={isJoinModePending}
+            onClick={() => handleJoinModeChange("INVITE_ONLY")}
+            className={`flex items-start gap-3 rounded-lg border p-4 text-left transition-colors ${
+              joinMode === "INVITE_ONLY"
+                ? "border-foreground/30 bg-accent/50"
+                : "border-border hover:bg-accent/30"
+            } ${isJoinModePending ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            <Lock className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">{t("joinModeInviteOnly")}</p>
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
+                {t("joinModeInviteOnlyDescription")}
+              </p>
+            </div>
+          </button>
+        </div>
       </section>
 
       {/* Danger Zone */}

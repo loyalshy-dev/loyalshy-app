@@ -167,6 +167,7 @@ export type ApiTemplate = {
   name: string
   description: string | null
   passType: string
+  joinMode: string
   status: string
   config: unknown
   startsAt: string
@@ -180,6 +181,7 @@ export function serializeTemplate(template: {
   name: string
   description: string | null
   passType: string
+  joinMode: string
   status: string
   config: unknown
   startsAt: DateLike
@@ -192,6 +194,7 @@ export function serializeTemplate(template: {
     name: template.name,
     description: template.description,
     passType: template.passType,
+    joinMode: template.joinMode,
     status: template.status,
     config: template.config,
     startsAt: toISO(template.startsAt)!,
@@ -219,6 +222,7 @@ export function serializeTemplateDetail(
     name: string
     description: string | null
     passType: string
+    joinMode: string
     status: string
     config: unknown
     startsAt: DateLike

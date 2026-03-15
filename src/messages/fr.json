@@ -864,7 +864,14 @@
       "deleteConfirm": "Êtes-vous sûr(e) ? Cela supprimera définitivement ce programme, tous les passes et toutes les données d'interaction.",
       "typeToConfirm": "Tapez « {name} » pour confirmer",
       "programDeleted": "Programme supprimé",
-      "statusUpdated": "Statut du programme mis à jour"
+      "statusUpdated": "Statut du programme mis à jour",
+      "joinMode": "Mode d'accès",
+      "joinModeDescription": "Contrôlez comment les contacts peuvent obtenir un pass pour ce programme.",
+      "joinModeOpen": "Ouvert",
+      "joinModeOpenDescription": "Tout le monde peut s'inscrire via un code QR ou un lien partageable.",
+      "joinModeInviteOnly": "Sur invitation",
+      "joinModeInviteOnlyDescription": "Seul vous pouvez émettre des passes via émission directe ou import CSV.",
+      "joinModeUpdated": "Mode d'accès mis à jour"
     },
     "settingsForms": {
       "logo": "Logo",
