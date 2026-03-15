@@ -17,6 +17,7 @@ export function PanelShell({ activeTool, onClose, children }: PanelShellProps) {
   const PANEL_TITLES: Record<StudioTool, string> = {
     program: t("programSettings"),
     colors: t("colors"),
+    fields: t("fields"),
     progress: t("progressStyle"),
     strip: t("stripImage"),
     logo: t("logo"),

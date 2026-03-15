@@ -12,6 +12,7 @@ import { ContextPanel, FloatingToolMenu } from "./canvas/context-notch"
 import { PanelShell } from "./panels/panel-shell"
 import { ProgramPanel } from "./panels/program-panel"
 import { ColorsPanel } from "./panels/colors-panel"
+import { FieldsPanel } from "./panels/fields-panel"
 import { ProgressPanel } from "./panels/progress-panel"
 import { StripPanel } from "./panels/strip-panel"
 import { DetailsPanel } from "./panels/details-panel"
@@ -506,6 +507,8 @@ export function StudioLayout({
         return <ProgramPanel store={store} passType={passType} />
       case "colors":
         return <ColorsPanel store={store} />
+      case "fields":
+        return <FieldsPanel store={store} passType={passType} />
       case "progress":
         return <ProgressPanel store={store} programId={templateId} visitsRequired={programConfig.stampsRequired} />
       case "strip":

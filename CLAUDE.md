@@ -361,7 +361,7 @@ Update the "Current Progress" section above to track what's done.
 - `--brand` CSS variable for per-organization theming (default: `oklch(0.55 0.2 265)`)
 - OKLCH color space throughout — all tokens in `globals.css` `:root` / `.dark`
 - `TooltipProvider` wraps via `SidebarProvider` (NOT root layout)
-- **Studio editor** — Figma/Canva-inspired canvas-first layout: floating vertical icon toolbar (left edge), floating rounded context panel (slides in from left), full-width canvas with card preview. Sidebar panels are only used on mobile. Desktop uses `FloatingToolMenu` + `ContextPanel` from `context-notch.tsx`. Full-rounded (pill) styling on all interactive controls.
+- **Studio editor** — Figma/Canva-inspired canvas-first layout: floating vertical icon toolbar with hover tooltips (left edge), floating rounded context panel (slides in from left), full-width canvas with card preview. Sidebar panels are only used on mobile. Desktop uses `FloatingToolMenu` + `ContextPanel` from `context-notch.tsx`. Clicking card elements (strip, fields, logo, etc.) opens the same tool panel as the toolbar — no duplicate zone-specific controls. Dedicated "Fields & Labels" panel combines text/label color controls with field management (add/remove/reorder/rename). Full-rounded (pill) styling on all interactive controls.
 
 ## Deployment Infrastructure
 

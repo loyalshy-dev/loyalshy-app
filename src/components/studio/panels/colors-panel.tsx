@@ -43,8 +43,6 @@ export function ColorsPanel({ store }: Props) {
   const ZONE_CONFIG: { zone: ColorZone; label: string; description: string }[] = [
     { zone: "background", label: t("background"), description: t("bgDescription") },
     { zone: "strip", label: t("stripAccent"), description: t("stripDescription") },
-    { zone: "text", label: t("fieldValues"), description: t("fieldDescription") },
-    { zone: "labels", label: t("labels"), description: t("labelDescription") },
   ]
   const primaryColor = useStore(store, (s) => s.wallet.primaryColor)
   const secondaryColor = useStore(store, (s) => s.wallet.secondaryColor)

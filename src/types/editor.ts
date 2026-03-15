@@ -7,6 +7,7 @@ export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID" | "GIF
 export type StudioTool =
   | "program"
   | "colors"
+  | "fields"
   | "progress"
   | "strip"
   | "logo"

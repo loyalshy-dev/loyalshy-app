@@ -1,13 +1,13 @@
 "use client"
 
 import {
-
   Palette,
   BarChart3,
   ImagePlus,
   CircleUserRound,
   FileText,
   SlidersHorizontal,
+  TextCursorInput,
 } from "lucide-react"
 import type { StudioTool } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
@@ -27,6 +27,7 @@ type ToolItem = {
 const TOOLS: ToolItem[] = [
   { id: "program", label: "Program", icon: <SlidersHorizontal size={18} /> },
   { id: "colors", label: "Colors", icon: <Palette size={18} /> },
+  { id: "fields", label: "Fields", icon: <TextCursorInput size={18} /> },
   { id: "progress", label: "Progress", icon: <BarChart3 size={18} /> },
   { id: "strip", label: "Strip", icon: <ImagePlus size={18} /> },
   { id: "logo", label: "Logo", icon: <CircleUserRound size={18} /> },

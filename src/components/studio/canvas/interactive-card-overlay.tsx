@@ -131,23 +131,27 @@ function InteractiveLayer({
         return
       }
 
-      // Check if a [data-color-zone] element was clicked
+      // Check if a [data-color-zone] element was clicked — open corresponding tool
       const zoneEl = target.closest<HTMLElement>("[data-color-zone]")
       if (zoneEl) {
         const zone = zoneEl.dataset.colorZone as ColorZone
-        const resolved = zone === "labels" && isGoogle ? "text" : zone
-        state.setSelectedColorZone(resolved === selectedZone ? null : resolved)
+        // Map zone to tool: text/labels → fields, progress → progress
+        const tool = zone === "text" || zone === "labels" ? "fields" : zone === "progress" ? "progress" : "colors"
+        state.setSelectedColorZone(null)
+        state.setActiveTool(state.ui.activeTool === tool ? null : tool)
         return
       }
 
-      // Check strip zone
+      // Check strip zone — open strip tool
       if (isInStrip(e.clientY)) {
-        state.setSelectedColorZone(selectedZone === "strip" ? null : "strip")
+        state.setSelectedColorZone(null)
+        state.setActiveTool(state.ui.activeTool === "strip" ? null : "strip")
         return
       }
 
-      // Background
-      state.setSelectedColorZone(selectedZone === "background" ? null : "background")
+      // Background — open colors tool
+      state.setSelectedColorZone(null)
+      state.setActiveTool(state.ui.activeTool === "colors" ? null : "colors")
     },
     [store, selectedZone, isGoogle, isInStrip],
   )

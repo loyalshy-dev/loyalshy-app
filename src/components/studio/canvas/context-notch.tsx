@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import type { ColorZone, StudioTool } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
-import { Wand2, Loader2, SlidersHorizontal, Palette, BarChart3, ImagePlus, Image, Bell, FileText, Gift, UserCircle } from "lucide-react"
+import { Wand2, Loader2, SlidersHorizontal, Palette, BarChart3, ImagePlus, Image, Bell, FileText, Gift, UserCircle, TextCursorInput } from "lucide-react"
 import { toast } from "sonner"
 import { computeTextColor, getFieldConfig, type ProgressStyle, type StampGridConfig } from "@/lib/wallet/card-design"
 import { STAMP_ICONS, REWARD_ICONS } from "@/lib/wallet/stamp-icons"
@@ -22,6 +22,7 @@ import {
 import type { ExtractedPalette } from "@/lib/color-extraction"
 import { ProgramPanel } from "../panels/program-panel"
 import { ColorsPanel } from "../panels/colors-panel"
+import { FieldsPanel } from "../panels/fields-panel"
 import { ProgressPanel } from "../panels/progress-panel"
 import { StripPanel } from "../panels/strip-panel"
 import { LogoPanel } from "../panels/logo-panel"
@@ -374,10 +375,12 @@ type ToolMenuItem = {
 export function FloatingToolMenu({ store, cardType }: { store: CardDesignStoreApi; cardType?: CardType }) {
   const tPanels = useTranslations("studio.panels")
   const activeTool = useStore(store, (s) => s.ui.activeTool)
+  const [hoveredId, setHoveredId] = useState<StudioTool | null>(null)
 
   const TOOL_MENU_ITEMS: ToolMenuItem[] = [
     { id: "program", label: tPanels("programSettings"), icon: <SlidersHorizontal size={18} /> },
     { id: "colors", label: tPanels("colors"), icon: <Palette size={18} /> },
+    { id: "fields", label: tPanels("fields"), icon: <TextCursorInput size={18} /> },
     { id: "progress", label: tPanels("progressStyle"), icon: <BarChart3 size={18} /> },
     { id: "strip", label: tPanels("stripImage"), icon: <ImagePlus size={18} /> },
     { id: "logo", label: tPanels("logo"), icon: <Image size={18} /> },
@@ -401,10 +404,8 @@ export function FloatingToolMenu({ store, cardType }: { store: CardDesignStoreAp
   function handleClick(id: StudioTool) {
     const state = store.getState()
     if (activeTool === id) {
-      // Toggle off
       state.setActiveTool(null)
     } else {
-      // Clear zone selection, open this tool
       if (selectedZone) state.setSelectedColorZone(null)
       state.setActiveTool(id)
     }
@@ -426,34 +427,66 @@ export function FloatingToolMenu({ store, cardType }: { store: CardDesignStoreAp
         border: "1px solid var(--border)",
         boxShadow: "0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.05)",
       }}
+      onMouseLeave={() => setHoveredId(null)}
     >
       {items.map((item) => {
         const isActive = activeTool === item.id
+        const isHovered = hoveredId === item.id
         return (
-          <button
-            key={item.id}
-            onClick={() => handleClick(item.id)}
-            aria-label={item.label}
-            aria-pressed={isActive}
-            title={item.label}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 14,
-              border: "none",
-              backgroundColor: isActive ? "var(--primary)" : "transparent",
-              color: isActive ? "var(--primary-foreground)" : "var(--muted-foreground)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.15s ease",
-            }}
-          >
-            {item.icon}
-          </button>
+          <div key={item.id} style={{ position: "relative" }}>
+            <button
+              onClick={() => handleClick(item.id)}
+              onMouseEnter={() => setHoveredId(item.id)}
+              aria-label={item.label}
+              aria-pressed={isActive}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 14,
+                border: "none",
+                backgroundColor: isActive ? "var(--primary)" : isHovered ? "var(--accent)" : "transparent",
+                color: isActive ? "var(--primary-foreground)" : "var(--muted-foreground)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.15s ease",
+              }}
+            >
+              {item.icon}
+            </button>
+            {/* Tooltip to the right */}
+            {isHovered && !isActive && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: "calc(100% + 10px)",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  padding: "5px 10px",
+                  borderRadius: 8,
+                  backgroundColor: "var(--foreground)",
+                  color: "var(--background)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                  pointerEvents: "none",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                  animation: "toolTipIn 0.12s ease-out",
+                }}
+              >
+                {item.label}
+              </div>
+            )}
+          </div>
         )
       })}
+      <style>{`
+        @keyframes toolTipIn {
+          from { opacity: 0; transform: translateY(-50%) translateX(-4px); }
+          to { opacity: 1; transform: translateY(-50%) translateX(0); }
+        }
+      `}</style>
     </div>
   )
 }
@@ -476,6 +509,7 @@ export function ContextPanel({ store, passType, organizationId, organizationName
   const TOOL_LABELS: Record<StudioTool, string> = {
     program: tPanels("programSettings"),
     colors: tPanels("colors"),
+    fields: tPanels("fields"),
     progress: tPanels("progressStyle"),
     strip: tPanels("stripImage"),
     logo: tPanels("logo"),
@@ -679,6 +713,9 @@ export function ContextPanel({ store, passType, organizationId, organizationName
         )}
         {mode === "tool" && activeTool === "colors" && (
           <ColorsPanel store={store} />
+        )}
+        {mode === "tool" && activeTool === "fields" && (
+          <FieldsPanel store={store} passType={passType} />
         )}
         {mode === "tool" && activeTool === "progress" && hasProgress && (
           <ProgressPanel store={store} programId={templateId} visitsRequired={stampsRequired} />
