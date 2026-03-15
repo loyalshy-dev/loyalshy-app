@@ -188,6 +188,19 @@ export function DirectIssueSection({
         </p>
       </div>
 
+      {eligibleCount === 0 && selectedContacts.length === 0 && !results && (
+        <div className="flex items-start gap-2 rounded-lg bg-muted/50 p-3">
+          <AlertCircle className="size-3.5 text-muted-foreground mt-0.5 shrink-0" />
+          <p className="text-[12px] text-muted-foreground">
+            No eligible contacts yet. Add contacts from the{" "}
+            <a href="/dashboard/contacts" className="underline underline-offset-4 hover:text-foreground">
+              Contacts
+            </a>{" "}
+            page, or use <strong>CSV Import</strong> below to add them in bulk.
+          </p>
+        </div>
+      )}
+
       {/* Contact picker */}
       <div className="space-y-2">
         <Popover open={open} onOpenChange={setOpen}>

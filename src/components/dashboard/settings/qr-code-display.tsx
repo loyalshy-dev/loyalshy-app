@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect, useCallback } from "react"
-import Image from "next/image"
+import { useState, useRef } from "react"
 import QRCode from "qrcode"
 import {
   Download,
@@ -9,6 +8,7 @@ import {
   Smartphone,
 } from "lucide-react"
 import { TemplateCardPreview } from "@/components/template-card-preview"
+import { StyledQrCode, renderStyledQr } from "@/components/styled-qr-code"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/pass-config"
@@ -117,24 +117,9 @@ export function QrCodeDisplay({
     organization.brandColor ??
     "#1a1a2e"
 
-  const [qrSvg, setQrSvg] = useState<string>("")
   const [selectedSize, setSelectedSize] = useState<string>("table-tent")
   const [downloading, setDownloading] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  const generateQrSvg = useCallback(async () => {
-    const svg = await QRCode.toString(joinUrl, {
-      type: "svg",
-      errorCorrectionLevel: "M",
-      margin: 1,
-      color: { dark: "#000000", light: "#ffffff" },
-    })
-    setQrSvg(svg)
-  }, [joinUrl])
-
-  useEffect(() => {
-    generateQrSvg()
-  }, [generateQrSvg])
 
   async function downloadPng() {
     setDownloading(true)
@@ -170,18 +155,17 @@ export function QrCodeDisplay({
         barHeight + nameFontSize + Math.round(canvas.height * 0.03)
       )
 
-      const qrDataUrl = await QRCode.toDataURL(joinUrl, {
-        width: preset.qrSize,
-        margin: 2,
-        errorCorrectionLevel: "M",
-        color: { dark: "#000000", light: "#ffffff" },
-      })
+      const qr = QRCode.create(joinUrl, { errorCorrectionLevel: "H" })
+      const styledSvg = renderStyledQr(qr.modules, preset.qrSize, organization.name.charAt(0).toUpperCase(), { bg: posterAccentColor, fg: "#ffffff" })
+      const svgBlob = new Blob([styledSvg], { type: "image/svg+xml" })
+      const svgUrl = URL.createObjectURL(svgBlob)
 
       const qrImage = new window.Image()
       await new Promise<void>((resolve) => {
         qrImage.onload = () => resolve()
-        qrImage.src = qrDataUrl
+        qrImage.src = svgUrl
       })
+      URL.revokeObjectURL(svgUrl)
 
       const qrDrawSize = Math.min(preset.qrSize, canvas.width * 0.75)
       const qrX = (canvas.width - qrDrawSize) / 2
@@ -238,10 +222,9 @@ export function QrCodeDisplay({
         <h3 className="text-sm font-medium">QR code & print</h3>
       </div>
 
-      {/* Mobile: controls first, preview second. Desktop: side by side */}
-      <div className="flex flex-col-reverse lg:flex-row gap-5">
+      <div className="space-y-5">
         {/* QR Preview */}
-        <div className="flex-1 flex justify-center">
+        <div className="flex justify-center">
           <div
             className="w-full max-w-xs rounded-2xl overflow-hidden shadow-md bg-card"
             style={{ borderTopColor: accentColor, borderTopWidth: 4 }}
@@ -250,25 +233,12 @@ export function QrCodeDisplay({
 
             <div className="flex flex-col items-center gap-4 px-5 py-5">
               {/* QR code */}
-              <div className="relative">
-                <div
-                  className="w-44 h-44 rounded-xl bg-background p-3 shadow-sm border border-border"
-                  dangerouslySetInnerHTML={{ __html: qrSvg }}
-                />
-                {(organization.logoGoogle ?? organization.logo) && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-background border-2 border-background shadow-sm">
-                      <Image
-                        src={(organization.logoGoogle ?? organization.logo)!}
-                        alt=""
-                        width={40}
-                        height={40}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
+              <StyledQrCode
+                value={joinUrl}
+                size={176}
+                logoText={organization.name.charAt(0).toUpperCase()}
+                bgColor={accentColor}
+              />
 
               {/* Info */}
               <div className="text-center space-y-0.5">
@@ -307,18 +277,17 @@ export function QrCodeDisplay({
         </div>
 
         {/* Download controls */}
-        <div className="flex-1 space-y-4">
-          {/* Size presets */}
+        <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-[13px] font-medium text-muted-foreground">
               Print size
             </label>
-            <div className="grid gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {SIZE_PRESETS.map((preset) => (
                 <button
                   key={preset.id}
                   onClick={() => setSelectedSize(preset.id)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg border text-sm transition-colors ${
+                  className={`flex flex-col items-center gap-0.5 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
                     selectedSize === preset.id
                       ? "border-foreground bg-foreground/5"
                       : "border-border hover:border-foreground/30"

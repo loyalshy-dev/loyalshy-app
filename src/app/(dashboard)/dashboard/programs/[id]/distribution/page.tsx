@@ -82,44 +82,6 @@ export default async function ProgramDistributionPage(props: {
         issuedThisWeek={issuedThisWeek}
         eligibleContacts={eligibleContacts}
       />
-      <ShareLinkSection
-        joinUrl={joinUrl}
-        templateName={program.name}
-        organizationName={organization.name}
-      />
-      <QrCodeDisplay
-        organization={{
-          name: organization.name,
-          slug: organization.slug,
-          logo: organization.logo,
-          logoApple: organization.logoApple ?? null,
-          logoGoogle: organization.logoGoogle ?? null,
-          brandColor: organization.brandColor,
-        }}
-        templates={[
-          {
-            id: program.id,
-            name: program.name,
-            passType: program.passType,
-            templateConfig: program.config,
-            rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
-            visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
-            cardDesign: program.passDesign ?? null,
-          },
-        ]}
-        joinUrl={joinUrl}
-      />
-      <DirectIssueSection
-        templateId={program.id}
-        templateName={program.name}
-        passType={program.passType}
-        eligibleCount={eligibleContacts}
-      />
-      <CsvImportSection
-        templateId={program.id}
-        templateName={program.name}
-      />
-
       {/* Advisory */}
       <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
@@ -127,7 +89,7 @@ export default async function ProgramDistributionPage(props: {
           <p>
             <strong className="text-foreground">Preventing duplicate passes:</strong>{" "}
             QR codes and links are self-service — contacts identify themselves by email or phone.
-            For tighter control, use <strong>Direct Issue</strong> or <strong>CSV Import</strong> above to personally create and deliver passes via email.
+            For tighter control, use <strong>Direct Issue</strong> or <strong>CSV Import</strong> to personally create and deliver passes via email.
           </p>
           <p>
             You can also require email (instead of email or phone) in{" "}
@@ -137,6 +99,49 @@ export default async function ProgramDistributionPage(props: {
           </p>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <QrCodeDisplay
+          organization={{
+            name: organization.name,
+            slug: organization.slug,
+            logo: organization.logo,
+            logoApple: organization.logoApple ?? null,
+            logoGoogle: organization.logoGoogle ?? null,
+            brandColor: organization.brandColor,
+          }}
+          templates={[
+            {
+              id: program.id,
+              name: program.name,
+              passType: program.passType,
+              templateConfig: program.config,
+              rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
+              visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
+              cardDesign: program.passDesign ?? null,
+            },
+          ]}
+          joinUrl={joinUrl}
+        />
+        <div className="space-y-6">
+          <ShareLinkSection
+            joinUrl={joinUrl}
+            templateName={program.name}
+            organizationName={organization.name}
+          />
+          <DirectIssueSection
+            templateId={program.id}
+            templateName={program.name}
+            passType={program.passType}
+            eligibleCount={eligibleContacts}
+          />
+          <CsvImportSection
+            templateId={program.id}
+            templateName={program.name}
+          />
+        </div>
+      </div>
+
     </div>
   )
 }
