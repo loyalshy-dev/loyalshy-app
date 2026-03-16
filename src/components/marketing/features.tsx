@@ -40,7 +40,7 @@ function FeatureCard({
         }}
       />
 
-      <div className={`flex ${isLarge ? "flex-row items-start gap-5" : "flex-col gap-4"}`}>
+      <div className="flex flex-col gap-4">
         {/* Icon */}
         <div
           className="flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 group-hover:bg-[oklch(0.55_0.2_265/0.08)]"
