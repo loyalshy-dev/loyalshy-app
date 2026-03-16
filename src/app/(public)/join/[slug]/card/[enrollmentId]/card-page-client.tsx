@@ -142,7 +142,12 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
 
   if (showMinigame) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center p-4 bg-background">
+      <div
+      className="min-h-dvh flex flex-col items-center justify-center p-4"
+      style={{
+        background: `linear-gradient(to bottom, color-mix(in oklch, ${brandColor} 6%, var(--background)) 0%, var(--background) 60%)`,
+      }}
+    >
         <div className="w-full max-w-md space-y-4">
           <div className="text-center space-y-1">
             <h1 className="text-xl font-semibold tracking-tight">
@@ -174,7 +179,12 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center p-4 bg-background">
+    <div
+      className="min-h-dvh flex flex-col items-center justify-center p-4"
+      style={{
+        background: `linear-gradient(to bottom, color-mix(in oklch, ${brandColor} 6%, var(--background)) 0%, var(--background) 60%)`,
+      }}
+    >
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-1">

@@ -303,7 +303,12 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
   // --- Program selection screen (multi-program only) ---
   if (step === "program-select") {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center p-4 bg-background">
+      <div
+        className="min-h-dvh flex flex-col items-center justify-center p-4"
+        style={{
+          background: `linear-gradient(to bottom, color-mix(in oklch, ${brandColor} 6%, var(--background)) 0%, var(--background) 60%)`,
+        }}
+      >
         <div className="w-full max-w-md space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
@@ -387,7 +392,13 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
 
   // --- Form screen ---
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center p-4 bg-background" style={{ fontFamily: webFont }}>
+    <div
+      className="min-h-dvh flex flex-col items-center justify-center p-4"
+      style={{
+        fontFamily: webFont,
+        background: `linear-gradient(to bottom, color-mix(in oklch, ${brandColor} 6%, var(--background)) 0%, var(--background) 60%)`,
+      }}
+    >
       <div className="w-full max-w-md space-y-6">
         {/* Back button for multi-program */}
         {hasMultiplePrograms && (
