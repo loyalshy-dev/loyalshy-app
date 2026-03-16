@@ -173,11 +173,7 @@ export function WalletStack() {
     >
       <div
         className="relative h-full w-full"
-        style={
-          reducedMotion
-            ? undefined
-            : { animation: "hero-float 4s ease-in-out infinite" }
-        }
+        style={undefined}
       >
         <div
           role="group"
@@ -217,12 +213,6 @@ export function WalletStack() {
         </div>
       </div>
 
-      <style>{`
-        @keyframes hero-float {
-          0%, 100% { transform: translateY(0px) rotate(-1deg); }
-          50%       { transform: translateY(-14px) rotate(-1deg); }
-        }
-      `}</style>
     </div>
   )
 }

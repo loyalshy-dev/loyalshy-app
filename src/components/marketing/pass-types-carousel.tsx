@@ -173,7 +173,6 @@ export function PassTypesCarousel() {
                 background: "var(--mk-surface)",
                 transform: "perspective(1200px) rotateY(-3deg) rotateX(2deg)",
                 boxShadow: "0 12px 40px oklch(0 0 0 / 0.10), 0 4px 12px oklch(0 0 0 / 0.06)",
-                animation: "mk-float 3s ease-in-out infinite",
               }}
             >
               <Image

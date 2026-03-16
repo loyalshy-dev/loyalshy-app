@@ -151,11 +151,7 @@ export function PhoneMockupInteractive() {
         }}
       >
         <div
-          style={
-            reducedMotion
-              ? undefined
-              : { animation: "phone-float 5s ease-in-out infinite" }
-          }
+          style={undefined}
         >
           <div
             className="relative"
@@ -265,12 +261,6 @@ export function PhoneMockupInteractive() {
           </div>
         </div>
 
-        <style>{`
-          @keyframes phone-float {
-            0%, 100% { transform: translateY(0px); }
-            50%       { transform: translateY(-10px); }
-          }
-        `}</style>
       </div>
     </div>
   )
