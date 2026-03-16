@@ -49,6 +49,7 @@ export type WalletPassDesign = {
   secondaryFields?: string[] | null // legacy — use `fields` instead
   fields?: string[] | null  // unified ordered field list (null = default). Apple: first 2 → header, rest → secondary. Google: auto 1-3-2.
   fieldLabels?: Record<string, string> | null // custom label overrides per field ID
+  showPrimaryField?: boolean // show primary field on Apple strip (default true)
 }
 
 type WalletPassRendererProps = {
@@ -191,13 +192,20 @@ export function WalletPassRenderer({
       : null)
     ?? fieldConfig.defaultFields
   const appleSplit = splitFieldsForApple(unifiedFields)
+  // When showPrimaryField is on (and not stamp type), second field from the list becomes the primary overlay
+  const useDynamicPrimary = design.showStrip && !isStampType && design.showPrimaryField !== false && appleSplit.secondary.length > 0
   const layout = {
     ...defaultLayout,
     apple: {
       header: appleSplit.header,
-      // For stamp types with strip image, progress is baked in — no primary text field needed
-      primary: (isStampType && design.showStrip) ? [] : defaultLayout.apple.primary,
-      secondary: appleSplit.secondary,
+      primary: isStampType && design.showStrip
+        ? []
+        : useDynamicPrimary
+          ? [appleSplit.secondary[0]]
+          : [],
+      secondary: useDynamicPrimary
+        ? appleSplit.secondary.slice(1)
+        : appleSplit.secondary,
       auxiliary: appleSplit.auxiliary,
     },
   }
@@ -585,6 +593,58 @@ export function WalletPassRenderer({
     </div>
   ) : null
 
+  // Primary field overlay on strip (non-stamp types, when showPrimaryField is enabled)
+  const showPrimaryOnStrip = useStrip && !isStampType && design.showPrimaryField !== false && primaryFields.length > 0
+  const primaryOverlay = showPrimaryOnStrip ? (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        flexDirection: "column",
+        zIndex: 2,
+        padding: "12px 16px",
+        textShadow: "0 2px 6px rgba(0,0,0,0.5)",
+        pointerEvents: "none",
+      }}
+    >
+      {primaryFields.map((f, i) => (
+        <div key={i} style={{ pointerEvents: "auto", textAlign: "left", width: "100%" }}>
+          <div
+            data-color-zone="text"
+            style={{
+              fontSize: 46,
+              fontWeight: 400,
+              letterSpacing: "0.02em",
+              lineHeight: 1.2,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {f.value}
+          </div>
+          <div
+            data-color-zone="text"
+            style={{
+              fontSize: 16,
+              fontWeight: 300,
+              color: design.textColor,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              marginTop: -2,
+              textShadow: "none",
+            }}
+          >
+            {f.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : null
+
   // ─── Section: Strip Image ───
   const stripSection = useStrip ? (() => {
     const sc1 = design.stripColor1 ?? design.primaryColor
@@ -658,6 +718,9 @@ export function WalletPassRenderer({
         {/* Progress text overlay on strip (non-stamp-grid STAMP/POINTS) */}
         {progressOverlay}
 
+        {/* Primary field overlay on strip (non-stamp types, e.g. Discount: Free item) */}
+        {primaryOverlay}
+
         {/* Holder photo overlay (Business ID, Membership, Access) */}
         {showHolderPhoto && (cardType === "BUSINESS_ID" || cardType === "TIER" || cardType === "ACCESS") && (
           <div
@@ -707,8 +770,9 @@ export function WalletPassRenderer({
 
   const bannerSection = null
 
-  // Fallback for non-strip: render below header
-  const primarySection = !useStrip ? (
+  // When show on strip is off: primary fields merge into secondary row (not a big standalone section)
+  const primaryHiddenFromStrip = useStrip && !isStampType && design.showPrimaryField === false
+  const primarySection = (!useStrip && primaryFields.length > 0) ? (
     <div style={{ padding: primaryPadding }}>
       {primaryFields.map((f, i) => (
         <div key={i}>
@@ -746,10 +810,14 @@ export function WalletPassRenderer({
   ) : null
 
   // ─── Section: Secondary Fields ───
+  // When primary is hidden from strip, prepend primary fields into the secondary row
+  const mergedSecondaryFields = primaryHiddenFromStrip
+    ? [...primaryFields, ...secondaryFields]
+    : secondaryFields
   const secondarySection = (
     <div style={{ padding: useStrip ? "2px 16px" : "8px 16px" }}>
       <FieldSection
-        fields={secondaryFields}
+        fields={mergedSecondaryFields}
         textColor={design.textColor}
         labelColor={design.labelColor}
         format={format}

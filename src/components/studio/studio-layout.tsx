@@ -311,6 +311,7 @@ export function StudioLayout({
     secondaryFields: wallet.secondaryFields,
     fields: wallet.fields,
     fieldLabels: wallet.fieldLabels,
+    showPrimaryField: wallet.showPrimaryField,
   }
 
   // Temporal (undo/redo)
@@ -393,6 +394,7 @@ export function StudioLayout({
             fields: state.wallet.fields,
             fieldLabels: state.wallet.fieldLabels,
             locationMessage: state.wallet.locationMessage || "",
+            showPrimaryField: state.wallet.showPrimaryField,
           })
         )
       }

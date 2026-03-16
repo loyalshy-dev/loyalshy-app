@@ -44,6 +44,8 @@ export function FieldsPanel({ store, passType }: Props) {
   const textColor = useStore(store, (s) => s.wallet.textColor)
   const labelColor = useStore(store, (s) => s.wallet.labelColor)
   const autoTextColor = useStore(store, (s) => s.wallet.autoTextColor)
+  const showStrip = useStore(store, (s) => s.wallet.showStrip)
+  const showPrimaryField = useStore(store, (s) => s.wallet.showPrimaryField)
   const previewFormat = useStore(store, (s) => s.ui.previewFormat)
 
   const isGoogle = previewFormat === "google"
@@ -162,6 +164,37 @@ export function FieldsPanel({ store, passType }: Props) {
           />
         </button>
       </div>
+
+      {/* ── Show Primary Field on Strip (Apple only) ── */}
+      {showStrip && !isGoogle && (
+        <>
+          <SectionHeader>{t("primaryFieldSection")}</SectionHeader>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "10px 12px",
+              borderRadius: 14,
+              border: `1.5px solid ${showPrimaryField ? "var(--primary)" : "var(--border)"}`,
+              backgroundColor: showPrimaryField ? "var(--accent)" : "transparent",
+              cursor: "pointer",
+              marginBottom: 4,
+            }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>{t("showPrimaryField")}</span>
+            <input
+              type="checkbox"
+              checked={showPrimaryField}
+              onChange={(e) => store.getState().setWalletField("showPrimaryField", e.target.checked)}
+              style={{ accentColor: "var(--primary)", width: 16, height: 16 }}
+            />
+          </label>
+          <div style={{ fontSize: 10, color: "var(--muted-foreground)", marginBottom: 12, lineHeight: 1.4 }}>
+            {t("showPrimaryFieldHint")}
+          </div>
+        </>
+      )}
 
       {/* ── Card Fields ── */}
       <CardFieldsSection store={store} passType={passType} />

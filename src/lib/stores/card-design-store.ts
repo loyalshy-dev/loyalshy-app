@@ -68,6 +68,7 @@ export type WalletState = {
   holderPhotoUrl: string | null // uploaded holder avatar image URL
   fields: string[] | null  // unified ordered field list (null = default)
   fieldLabels: Record<string, string> | null // custom label overrides per field ID (null = use defaults)
+  showPrimaryField: boolean // show primary field on Apple Wallet strip (default true)
 }
 
 // ─── Program Config Slice (PassTemplate.config JSON) ──────
@@ -291,6 +292,7 @@ export function createCardDesignStore() {
           secondaryFields: null,
           fields: null,
           fieldLabels: null,
+          showPrimaryField: true,
         },
         programConfig: { ...DEFAULT_CONFIG },
         ui: {

@@ -78,6 +78,7 @@ export default async function ProgramDesignPage(props: {
         secondaryFields: stripFilters.secondaryFields,
         fields: stripFilters.fields,
         fieldLabels: stripFilters.fieldLabels,
+        showPrimaryField: stripFilters.showPrimaryField,
         useStampGrid,
         generatedStripApple: passDesign.generatedStripApple ?? null,
         generatedStripGoogle: passDesign.generatedStripGoogle ?? null,

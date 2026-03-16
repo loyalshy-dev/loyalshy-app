@@ -360,11 +360,18 @@ export async function generateApplePass(
       : null)
     ?? fieldConfig.defaultFields
   const appleSplit = splitFieldsForApple(unifiedFields)
+  // When showPrimaryField is on (and not stamp type), second field from the list becomes the primary overlay
+  const useDynamicPrimary = showStrip && !isStampType && stripFilters.showPrimaryField && appleSplit.secondary.length > 0
   const appleLayout = {
     header: appleSplit.header,
-    // When a strip image is visible, skip primary fields — they overlay the strip on Apple Wallet
-    primary: showStrip ? [] : layout.apple.primary,
-    secondary: appleSplit.secondary,
+    primary: isStampType
+      ? []
+      : useDynamicPrimary
+        ? [appleSplit.secondary[0]]
+        : [],
+    secondary: useDynamicPrimary
+      ? appleSplit.secondary.slice(1)
+      : appleSplit.secondary,
     auxiliary: appleSplit.auxiliary,
   }
 

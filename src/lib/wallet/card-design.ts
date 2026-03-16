@@ -89,6 +89,7 @@ export type StripFilters = {
   fields: string[] | null  // unified ordered field list (null = use default)
   locationMessage: string | null  // custom lock screen / notification message (null = default)
   fieldLabels: Record<string, string> | null  // custom label overrides (null = use defaults)
+  showPrimaryField: boolean  // show primary field on Apple Wallet (overlays strip image when true)
 }
 
 // ─── Per-type Field Config ─────────────────────────────────
@@ -254,7 +255,7 @@ export const DEFAULT_HEADER_FIELDS = FIELD_CONFIG_MAP.STAMP_CARD.defaultHeader
 export const DEFAULT_SECONDARY_FIELDS = FIELD_CONFIG_MAP.STAMP_CARD.defaultSecondary
 
 export function parseStripFilters(editorConfig: unknown): StripFilters {
-  if (!editorConfig || typeof editorConfig !== "object") return { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient", patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1, labelColor: null, stampFilledColor: null, logoAppleZoom: 1, logoGoogleZoom: 1, headerFields: null, secondaryFields: null, fields: null, locationMessage: null, fieldLabels: null }
+  if (!editorConfig || typeof editorConfig !== "object") return { stripOpacity: 1, stripGrayscale: false, useStampGrid: false, stripColor1: null, stripColor2: null, stripFill: "gradient", patternColor: null, stripImagePosition: { x: 0.5, y: 0.5 }, stripImageZoom: 1, labelColor: null, stampFilledColor: null, logoAppleZoom: 1, logoGoogleZoom: 1, headerFields: null, secondaryFields: null, fields: null, locationMessage: null, fieldLabels: null, showPrimaryField: true }
   const obj = editorConfig as Record<string, unknown>
   const rawPos = obj.stripImagePosition
   let posX = 0.5
@@ -287,6 +288,7 @@ export function parseStripFilters(editorConfig: unknown): StripFilters {
     fieldLabels: obj.fieldLabels && typeof obj.fieldLabels === "object" && !Array.isArray(obj.fieldLabels)
       ? obj.fieldLabels as Record<string, string>
       : null,
+    showPrimaryField: typeof obj.showPrimaryField === "boolean" ? obj.showPrimaryField : true,
   }
 }
 

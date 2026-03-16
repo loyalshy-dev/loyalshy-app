@@ -70,5 +70,6 @@ export function buildWalletPassDesign(
     secondaryFields: sf.secondaryFields ?? null,
     fields: sf.fields ?? null,
     fieldLabels: sf.fieldLabels ?? null,
+    showPrimaryField: sf.showPrimaryField,
   }
 }
