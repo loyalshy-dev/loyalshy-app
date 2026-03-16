@@ -143,11 +143,10 @@ export function PhoneMockupInteractive() {
   return (
     <div className="flex items-center justify-center">
       <div
-        className="origin-top scale-[0.78] sm:scale-[0.9] lg:scale-100"
+        className="origin-top scale-[0.78] sm:scale-[0.9] lg:scale-100 mb-[calc(-80px*0.78)] sm:mb-[calc(-80px*0.9)] lg:mb-[-80px]"
         style={{
           width: PHONE_W,
           height: PHONE_H,
-          marginBottom: "-80px",
         }}
       >
         <div

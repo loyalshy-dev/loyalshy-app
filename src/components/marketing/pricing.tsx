@@ -61,7 +61,7 @@ function BillingToggle({
       >
         {t("annual")}
         <span
-          className="absolute -top-2.5 -right-12 rounded-full px-2 py-0.5 text-[10px] font-bold whitespace-nowrap"
+          className="absolute -top-2.5 -right-8 sm:-right-12 rounded-full px-2 py-0.5 text-[10px] font-bold whitespace-nowrap"
           style={{
             background: "oklch(0.55 0.17 155 / 0.12)",
             color: "oklch(0.45 0.17 155)",

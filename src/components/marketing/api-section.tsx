@@ -35,8 +35,8 @@ function CodePreview({ t }: { t: (key: string) => string }) {
       </div>
 
       {/* Code content */}
-      <div className="p-5 overflow-x-auto">
-        <pre className="text-[13px] leading-[1.7] font-mono">
+      <div className="relative p-5 overflow-x-auto">
+        <pre className="text-[12px] sm:text-[13px] leading-[1.7] font-mono">
           <code>
             <Line color="comment">{"// Issue a stamp card pass"}</Line>
             <Line color="keyword">{"const"}</Line>{" "}
@@ -103,6 +103,14 @@ function CodePreview({ t }: { t: (key: string) => string }) {
             {"});"}
           </code>
         </pre>
+        {/* Scroll fade hint */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 sm:hidden"
+          style={{
+            background: "linear-gradient(to right, transparent, oklch(0.13 0.005 285))",
+          }}
+        />
       </div>
 
       {/* Response hint */}

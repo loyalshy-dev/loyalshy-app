@@ -129,7 +129,7 @@ export function PassTypesCarousel() {
         <FadeIn delay={0.15}>
           <div
             ref={scrollRef}
-            className="flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-6 px-6 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center"
+            className="relative flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-6 px-6 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center scroll-smooth snap-x snap-mandatory sm:snap-none"
           >
             {PASS_TYPES.map((type, i) => {
               const Icon = type.icon
@@ -139,7 +139,7 @@ export function PassTypesCarousel() {
                   key={type.id}
                   type="button"
                   onClick={() => goTo(i)}
-                  className="flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200"
+                  className="flex shrink-0 snap-start items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200"
                   style={
                     isActive
                       ? { background: "var(--mk-text)", color: "var(--mk-bg)" }
