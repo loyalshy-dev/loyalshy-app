@@ -66,7 +66,7 @@ export function MarketingNavbar() {
             alt={tCommon("loyalshy")}
             width={160}
             height={44}
-            className="h-8 w-auto dark:invert"
+            className="h-14 w-auto dark:invert"
             priority
           />
         </Link>
