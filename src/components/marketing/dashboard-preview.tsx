@@ -66,7 +66,18 @@ export function FeatureShowcase() {
   const activeFeature = FEATURES.find((f) => f.id === activeTab) ?? FEATURES[0]
 
   return (
-    <section className="py-20 sm:py-28" style={{ background: "var(--mk-bg)" }}>
+    <section className="relative py-20 sm:py-28 overflow-hidden" style={{ background: "var(--mk-bg)" }}>
+      {/* Gradient mesh background */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: `
+            radial-gradient(ellipse 60% 40% at 50% 30%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 50% at 80% 60%, oklch(0.55 0.17 155 / 0.03) 0%, transparent 70%)
+          `,
+        }}
+      />
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         {/* Section heading */}
         <FadeIn>
@@ -94,7 +105,7 @@ export function FeatureShowcase() {
               background: "var(--mk-card)",
               border: "1px solid var(--mk-border)",
               boxShadow:
-                "0 20px 60px oklch(0 0 0 / 0.08), 0 0 0 1px oklch(0 0 0 / 0.03)",
+                "0 24px 80px oklch(0 0 0 / 0.10), 0 8px 24px oklch(0 0 0 / 0.06), 0 0 0 1px oklch(0 0 0 / 0.03)",
             }}
           >
             {/* Browser bar */}
