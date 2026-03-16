@@ -14,20 +14,17 @@ function FeatureCard({
   icon: React.ElementType
   title: string
   description: string
-  size: "hero" | "large" | "small"
+  size: "large" | "small"
 }) {
-  const isHero = size === "hero"
-  const isLarge = size === "large" || isHero
+  const isLarge = size === "large"
 
   return (
     <div
       className={`group relative flex flex-col gap-4 p-6 rounded-2xl hover:-translate-y-1 transition-all duration-250 ${
         isLarge ? "sm:col-span-2" : ""
-      } ${isHero ? "lg:col-span-4" : ""}`}
+      }`}
       style={{
-        background: isHero
-          ? "linear-gradient(135deg, oklch(0.55 0.2 265 / 0.06), oklch(0.55 0.17 155 / 0.04))"
-          : "var(--mk-card)",
+        background: "var(--mk-card)",
         border: "1px solid var(--mk-border)",
         boxShadow: "0 1px 3px oklch(0 0 0 / 0.06), 0 4px 16px oklch(0 0 0 / 0.04)",
         backdropFilter: "blur(8px)",
@@ -48,21 +45,21 @@ function FeatureCard({
         <div
           className="flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 group-hover:bg-[oklch(0.55_0.2_265/0.08)]"
           style={{
-            background: isHero ? "oklch(0.55 0.2 265 / 0.08)" : "var(--mk-surface)",
+            background: "var(--mk-surface)",
             border: "1px solid var(--mk-border)",
           }}
         >
           <Icon
             className="size-5 transition-colors duration-200 group-hover:text-[oklch(0.55_0.2_265)]"
             strokeWidth={1.5}
-            style={{ color: isHero ? "oklch(0.55 0.2 265)" : "var(--mk-text-muted)" }}
+            style={{ color: "var(--mk-text-muted)" }}
           />
         </div>
 
         {/* Text */}
         <div className="space-y-2">
           <h3
-            className={`font-semibold ${isHero ? "text-[17px]" : "text-[15px]"}`}
+            className="text-[15px] font-semibold"
             style={{ color: "var(--mk-text)", letterSpacing: "-0.01em" }}
           >
             {title}
@@ -85,12 +82,6 @@ export async function Features() {
   const t = await getTranslations("features")
 
   const features = [
-    {
-      icon: Zap,
-      title: t("passTypes.title"),
-      description: t("passTypes.description"),
-      size: "hero" as const,
-    },
     {
       icon: Smartphone,
       title: t("appleWallet.title"),
@@ -126,6 +117,12 @@ export async function Features() {
       title: t("team.title"),
       description: t("team.description"),
       size: "small" as const,
+    },
+    {
+      icon: Zap,
+      title: t("passTypes.title"),
+      description: t("passTypes.description"),
+      size: "large" as const,
     },
     {
       icon: Shield,
