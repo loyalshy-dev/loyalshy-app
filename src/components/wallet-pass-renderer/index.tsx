@@ -73,7 +73,8 @@ type WalletPassRendererProps = {
   style?: React.CSSProperties
   qrValue?: string // When provided, renders a real QR code instead of placeholder
   // Coupon-specific
-  discountText?: string      // e.g. "20% OFF", "$5 off", "Free item"
+  discountText?: string      // e.g. "20% OFF", "$5 off", or coupon description for freebies
+  discountLabel?: string     // override label (e.g. "OFFER" for freebies, default "DISCOUNT")
   couponCode?: string        // coupon code to display
   validUntil?: string        // expiry date string
   // Membership-specific
@@ -150,6 +151,7 @@ export function WalletPassRenderer({
   style: styleProp,
   qrValue,
   discountText,
+  discountLabel,
   couponCode,
   validUntil,
   tierName,
@@ -266,7 +268,7 @@ export function WalletPassRenderer({
         break
       // Coupon fields
       case "discount":
-        resolved = { label: lbl("DISCOUNT"), value: discountText ?? rewardDescription }
+        resolved = { label: lbl(discountLabel ?? "DISCOUNT"), value: discountText ?? rewardDescription }
         break
       case "validUntil":
         resolved = { label: lbl("VALID UNTIL"), value: validUntil ?? "—" }

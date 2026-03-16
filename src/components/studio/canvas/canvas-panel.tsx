@@ -96,12 +96,15 @@ export function CanvasPanel({
   const couponPreview = useMemo(() => {
     if (passType !== "COUPON") return {}
     const config = parseCouponConfig(templateConfig)
-    const discountText = config ? formatCouponValue(config) : rewardDescription
+    const discountText = config?.discountType === "freebie"
+      ? (config.couponDescription || "Free item")
+      : config ? formatCouponValue(config) : rewardDescription
     const validUntil = config?.validUntil
       ? new Date(config.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
       : t("noExpiry")
     const couponCode = config?.couponCode ?? undefined
-    return { discountText, validUntil, couponCode }
+    const discountLabel = config?.discountType === "freebie" ? "OFFER" : undefined
+    return { discountText, discountLabel, validUntil, couponCode }
   }, [passType, templateConfig, rewardDescription])
 
   // Membership-specific preview data
@@ -213,6 +216,7 @@ export function CanvasPanel({
                 hasReward={previewState === "completed"}
                 // Coupon props
                 discountText={previewState === "redeemed" ? "Redeemed" : couponPreview.discountText}
+                discountLabel={couponPreview.discountLabel}
                 couponCode={couponPreview.couponCode}
                 validUntil={couponPreview.validUntil}
                 // Membership props

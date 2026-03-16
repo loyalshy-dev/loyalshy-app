@@ -311,7 +311,9 @@ export async function generateApplePass(
     registeredAt: { key: "registeredAt", label: lbl("registeredAt", "REGISTERED"), value: registeredAtShort },
     customerName: { key: "customerName", label: lbl("customerName", "NAME"), value: input.customerName },
     // COUPON fields
-    discount: { key: "discount", label: lbl("discount", "DISCOUNT"), value: couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription },
+    discount: couponConfig?.discountType === "freebie"
+      ? { key: "discount", label: lbl("discount", "OFFER"), value: couponConfig.couponDescription || "Free item" }
+      : { key: "discount", label: lbl("discount", "DISCOUNT"), value: couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription },
     validUntil: { key: "validUntil", label: lbl("validUntil", "VALID UNTIL"), value: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
     couponCode: { key: "couponCode", label: lbl("couponCode", "CODE"), value: couponConfig?.couponCode ?? "" },
     // TIER/MEMBERSHIP fields

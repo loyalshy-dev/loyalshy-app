@@ -77,8 +77,11 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
   const couponConfig = data.template.passType === "COUPON" ? parseCouponConfig(data.template.config) : null
   const isRedeemed = data.template.passType === "COUPON" && data.passInstanceStatus === "COMPLETED"
   const discountText = couponConfig
-    ? (isRedeemed ? `${formatCouponValue(couponConfig)} (Redeemed)` : formatCouponValue(couponConfig))
+    ? couponConfig.discountType === "freebie"
+      ? (isRedeemed ? `${couponConfig.couponDescription || "Free item"} (Redeemed)` : (couponConfig.couponDescription || "Free item"))
+      : (isRedeemed ? `${formatCouponValue(couponConfig)} (Redeemed)` : formatCouponValue(couponConfig))
     : undefined
+  const discountLabel = couponConfig?.discountType === "freebie" ? "OFFER" : undefined
   const couponCode = couponConfig?.couponCode ?? undefined
   const validUntil = couponConfig?.validUntil
     ? new Date(couponConfig.validUntil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
@@ -221,6 +224,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
             hasReward={data.hasAvailableReward}
             qrValue={data.walletPassId ?? undefined}
             discountText={discountText}
+            discountLabel={discountLabel}
             couponCode={couponCode}
             validUntil={validUntil}
             tierName={tierName}

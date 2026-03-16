@@ -94,7 +94,12 @@ function buildTypeProps(passType: string, config: unknown) {
     case "COUPON": {
       const c = parseCouponConfig(config)
       if (c) {
-        props.discountText = formatCouponValue(c)
+        if (c.discountType === "freebie") {
+          props.discountText = c.couponDescription || "Free item"
+          props.discountLabel = "OFFER"
+        } else {
+          props.discountText = formatCouponValue(c)
+        }
         props.couponCode = c.couponCode ?? undefined
         props.validUntil = c.validUntil
           ? new Date(c.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
