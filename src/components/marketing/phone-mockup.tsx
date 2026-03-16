@@ -14,7 +14,7 @@ const CARD_PEEK = 64
 const EXPAND_TOP = STATUS_BAR_H + 4
 
 const PHONE_CARD_W = SCREEN_W - 16
-const PHONE_CARD_H = Math.round(PHONE_CARD_W * (11 / 8))
+const PHONE_CARD_H = Math.round(PHONE_CARD_W * (477 / 426)) // match actual image ratio
 
 /* ─── Card images ─────────────────────────────────────────────────── */
 
@@ -205,7 +205,7 @@ export function PhoneMockupInteractive() {
                       tabIndex={isExpanded && !isThisExpanded ? -1 : 0}
                       aria-expanded={isThisExpanded}
                       aria-label={`${card.alt}. ${isThisExpanded ? "Press Escape or Back to collapse." : "Tap to expand."}`}
-                      className="absolute left-0 right-0 px-2 outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-inset"
+                      className="absolute left-1/2 -translate-x-1/2 outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-inset"
                       style={{
                         transform: `translateY(${y}px)`,
                         opacity,
@@ -229,8 +229,8 @@ export function PhoneMockupInteractive() {
                         alt={card.alt}
                         width={PHONE_CARD_W}
                         height={PHONE_CARD_H}
-                        className="w-full h-auto rounded-xl"
-                        style={{ objectFit: "cover" }}
+                        className="rounded-xl"
+                        style={{ width: PHONE_CARD_W, height: "auto" }}
                       />
                     </div>
                   )
