@@ -1,52 +1,7 @@
-import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Star } from "lucide-react"
 import { getTranslations } from "next-intl/server"
-
-/* ─── Floating pass cards ─────────────────────────────────────────── */
-
-const HERO_PASSES = [
-  { src: "/pass-types/stamp.webp", alt: "Stamp card pass", rotate: -6, x: 0, y: 0, z: 3 },
-  { src: "/pass-types/coupon.webp", alt: "Coupon pass", rotate: 4, x: 80, y: -30, z: 2 },
-  { src: "/pass-types/ticket.webp", alt: "Ticket pass", rotate: -3, x: 40, y: 60, z: 1 },
-] as const
-
-function HeroPassStack({ screenshotAlt }: { screenshotAlt: string }) {
-  return (
-    <div
-      className="relative"
-      style={{ width: 320, height: 400 }}
-      aria-label={screenshotAlt}
-    >
-      {HERO_PASSES.map((pass) => (
-        <div
-          key={pass.src}
-          className="absolute"
-          style={{
-            left: pass.x,
-            top: pass.y,
-            zIndex: pass.z,
-            transform: `rotate(${pass.rotate}deg)`,
-            animation: `mk-float ${3 + pass.z * 0.5}s ease-in-out infinite`,
-            animationDelay: `${pass.z * -0.8}s`,
-          }}
-        >
-          <Image
-            src={pass.src}
-            alt={pass.alt}
-            width={213}
-            height={238}
-            className="rounded-2xl"
-            style={{
-              boxShadow: `0 ${8 + pass.z * 4}px ${24 + pass.z * 12}px oklch(0 0 0 / ${0.08 + pass.z * 0.03})`,
-            }}
-            priority
-          />
-        </div>
-      ))}
-    </div>
-  )
-}
+import { WalletStack } from "./wallet-stack"
 
 /* ─── Hero ────────────────────────────────────────────────────────── */
 
@@ -137,13 +92,13 @@ export async function Hero() {
             </div>
           </div>
 
-          {/* Right: Floating pass card images */}
+          {/* Right: Wallet stack */}
           <div
             className="hero-fade-in mt-16 flex justify-center lg:mt-0 lg:justify-end"
             style={{ animationDelay: "200ms" }}
           >
             <div className="relative">
-              {/* Glow behind cards */}
+              {/* Glow behind wallet stack */}
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 -z-10 scale-150 rounded-full blur-3xl"
@@ -151,7 +106,7 @@ export async function Hero() {
                   background: "radial-gradient(circle, oklch(0.55 0.2 265 / 0.1) 0%, transparent 70%)",
                 }}
               />
-              <HeroPassStack screenshotAlt={t("screenshotAlt")} />
+              <WalletStack />
             </div>
           </div>
         </div>

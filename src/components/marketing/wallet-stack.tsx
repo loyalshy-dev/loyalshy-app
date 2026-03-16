@@ -1,9 +1,15 @@
 "use client"
 
+import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { MARKETING_CARDS, MARKETING_CARD_DESIGNS, type MarketingCard } from "./wallet-card-data"
-import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
-import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
+
+/* ─── Card image data ─────────────────────────────────────────────── */
+
+const CARD_IMAGES = [
+  { src: "/pass-types/stamp.webp", alt: "Stamp card pass", shadow: "oklch(0.45 0.15 265)" },
+  { src: "/pass-types/coupon.webp", alt: "Coupon pass", shadow: "oklch(0.50 0.12 155)" },
+  { src: "/pass-types/ticket.webp", alt: "Ticket pass", shadow: "oklch(0.45 0.10 75)" },
+] as const
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
 
@@ -14,9 +20,7 @@ function getCardTransform(
   total: number,
   compact: boolean,
 ) {
-  // Position relative to active card
   const offset = (index - activeIndex + total) % total
-  // Map to visual order: 0 = front, 1..4 = behind
   const depth = offset === 0 ? 0 : offset
 
   const spreadX = compact ? 8 : 12
@@ -41,7 +45,7 @@ function getCardTransform(
   }
 }
 
-/* ─── Single loyalty card ──────────────────────────────────────────── */
+/* ─── Single card (image-based) ───────────────────────────────────── */
 
 function LoyaltyCard({
   index,
@@ -53,8 +57,6 @@ function LoyaltyCard({
   onLeave,
   cardW,
   cardH,
-  cards,
-  designs,
 }: {
   index: number
   style: React.CSSProperties
@@ -65,25 +67,24 @@ function LoyaltyCard({
   onLeave: () => void
   cardW: number
   cardH: number
-  cards: MarketingCard[]
-  designs: WalletPassDesign[]
 }) {
-  const card = cards[index]
-  const design = designs[index]
+  const card = CARD_IMAGES[index]
 
   return (
     <div
       role="img"
-      aria-label={`${card.businessName} loyalty card`}
-      className="absolute left-0 top-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      aria-label={card.alt}
+      className="absolute left-0 top-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-2xl overflow-hidden"
       style={{
         ...style,
+        width: cardW,
+        height: cardH,
         transition: "transform 250ms ease-out, box-shadow 250ms ease-out, filter 250ms ease-out",
         filter: isHovered && !isActive
-          ? `drop-shadow(0 8px 24px ${design.primaryColor}88)`
+          ? `drop-shadow(0 8px 24px ${card.shadow} / 0.5)`
           : isActive
-            ? `drop-shadow(0 16px 48px ${design.primaryColor}66)`
-            : `drop-shadow(0 4px 12px ${design.primaryColor}44)`,
+            ? `drop-shadow(0 16px 48px ${card.shadow} / 0.4)`
+            : `drop-shadow(0 4px 12px ${card.shadow} / 0.25)`,
       }}
       tabIndex={isActive ? -1 : 0}
       onClick={onClick}
@@ -96,23 +97,13 @@ function LoyaltyCard({
         }
       }}
     >
-      <WalletPassRenderer
-        design={design}
-        compact
+      <Image
+        src={card.src}
+        alt={card.alt}
         width={cardW}
         height={cardH}
-        format="apple"
-        organizationName={card.businessName}
-        currentVisits={card.currentVisits}
-        totalVisits={card.totalVisits}
-        rewardDescription={card.rewardDescription}
-        customerName={card.customerName}
-        memberSince={card.memberSince}
-        discountText={card.discountText}
-        couponCode={card.couponCode}
-        validUntil={card.validUntil}
-        tierName={card.tierName}
-        benefits={card.benefits}
+        className="w-full h-full object-cover"
+        priority
       />
     </div>
   )
@@ -120,14 +111,8 @@ function LoyaltyCard({
 
 /* ─── Stack component ──────────────────────────────────────────────── */
 
-type WalletStackProps = {
-  cards?: MarketingCard[]
-  designs?: WalletPassDesign[]
-}
-
-export function WalletStack({ cards: propCards, designs: propDesigns }: WalletStackProps = {}) {
-  const cards = propCards ?? MARKETING_CARDS
-  const designs = propDesigns ?? MARKETING_CARD_DESIGNS
+export function WalletStack() {
+  const total = CARD_IMAGES.length
   const [activeIndex, setActiveIndex] = useState(0)
   const [hoveredIndex, setHoveredIndex] = useState(-1)
   const [reducedMotion, setReducedMotion] = useState(false)
@@ -135,7 +120,6 @@ export function WalletStack({ cards: propCards, designs: propDesigns }: WalletSt
   const interactedRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Detect prefers-reduced-motion
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
     setReducedMotion(mq.matches)
@@ -144,7 +128,6 @@ export function WalletStack({ cards: propCards, designs: propDesigns }: WalletSt
     return () => mq.removeEventListener("change", handler)
   }, [])
 
-  // Detect compact viewport
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)")
     setCompact(mq.matches)
@@ -153,25 +136,23 @@ export function WalletStack({ cards: propCards, designs: propDesigns }: WalletSt
     return () => mq.removeEventListener("change", handler)
   }, [])
 
-  // Auto-cycle every 3.5s when user hasn't interacted
   useEffect(() => {
     if (reducedMotion) return
 
     timerRef.current = setInterval(() => {
       if (!interactedRef.current) {
-        setActiveIndex((prev) => (prev + 1) % cards.length)
+        setActiveIndex((prev) => (prev + 1) % total)
       }
     }, 3500)
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [reducedMotion, cards.length])
+  }, [reducedMotion, total])
 
   const handleCardClick = useCallback((index: number) => {
     interactedRef.current = true
     setActiveIndex(index)
-    // Resume auto-cycle after 8s of inactivity
     if (timerRef.current) clearInterval(timerRef.current)
     const resumeTimer = setTimeout(() => {
       interactedRef.current = false
@@ -179,7 +160,6 @@ export function WalletStack({ cards: propCards, designs: propDesigns }: WalletSt
     return () => clearTimeout(resumeTimer)
   }, [])
 
-  // Responsive card dimensions (8:11 ratio)
   const cardW = compact ? 220 : 260
   const cardH = Math.round(cardW * (11 / 8))
 
@@ -187,12 +167,10 @@ export function WalletStack({ cards: propCards, designs: propDesigns }: WalletSt
     <div
       className="relative"
       style={{
-        // Enough space for the fanned cards
         width: compact ? 280 : 340,
         height: compact ? cardH + 30 : cardH + 40,
       }}
     >
-      {/* Float animation wrapper */}
       <div
         className="relative h-full w-full"
         style={
@@ -203,15 +181,13 @@ export function WalletStack({ cards: propCards, designs: propDesigns }: WalletSt
       >
         <div
           role="group"
-          aria-label={`Interactive stack of ${cards.length} example loyalty cards from different businesses. Click a card to bring it to front.`}
+          aria-label={`Interactive stack of ${total} example pass cards. Click a card to bring it to front.`}
           className="relative h-full w-full"
         >
-          {/* Render back-to-front: cards further back first so front card paints last */}
-          {[...cards.keys()]
+          {[...Array(total).keys()]
             .sort((a, b) => {
-              const depthA = ((a - activeIndex + cards.length) % cards.length) || 0
-              const depthB = ((b - activeIndex + cards.length) % cards.length) || 0
-              // Higher depth = further back = render first
+              const depthA = ((a - activeIndex + total) % total) || 0
+              const depthB = ((b - activeIndex + total) % total) || 0
               return depthB - depthA
             })
             .map((i) => {
@@ -219,7 +195,7 @@ export function WalletStack({ cards: propCards, designs: propDesigns }: WalletSt
                 i,
                 activeIndex,
                 hoveredIndex,
-                cards.length,
+                total,
                 compact,
               )
 
@@ -235,15 +211,12 @@ export function WalletStack({ cards: propCards, designs: propDesigns }: WalletSt
                   onLeave={() => setHoveredIndex(-1)}
                   cardW={cardW}
                   cardH={cardH}
-                  cards={cards}
-                  designs={designs}
                 />
               )
             })}
         </div>
       </div>
 
-      {/* Keyframe for float animation */}
       <style>{`
         @keyframes hero-float {
           0%, 100% { transform: translateY(0px) rotate(-1deg); }

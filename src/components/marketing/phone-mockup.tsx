@@ -1,25 +1,28 @@
 "use client"
 
+import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { MARKETING_CARDS, MARKETING_CARD_DESIGNS, type MarketingCard } from "./wallet-card-data"
-import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
-import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 
 /* ─── Constants ────────────────────────────────────────────────────── */
 
 const PHONE_W = 280
 const PHONE_H = 542
-const SCREEN_INSET = 14 // frame border width on each side
-const SCREEN_W = PHONE_W - SCREEN_INSET * 2 // 252
+const SCREEN_INSET = 14
+const SCREEN_W = PHONE_W - SCREEN_INSET * 2
 const STATUS_BAR_H = 48
 const CARD_PEEK = 64
-const VISIBLE_CARDS = 4 // show 4 of 5 cards in stacked view
 const EXPAND_TOP = STATUS_BAR_H + 4
 
-/* ─── Card dimensions inside phone ─────────────────────────────────── */
+const PHONE_CARD_W = SCREEN_W - 16
+const PHONE_CARD_H = Math.round(PHONE_CARD_W * (11 / 8))
 
-const PHONE_CARD_W = SCREEN_W - 16 // 236 (px-2 = 8px each side)
-const PHONE_CARD_H = Math.round(PHONE_CARD_W * (11 / 8)) // ~325
+/* ─── Card images ─────────────────────────────────────────────────── */
+
+const CARD_IMAGES = [
+  { src: "/pass-types/stamp.webp", alt: "Stamp card pass" },
+  { src: "/pass-types/coupon.webp", alt: "Coupon pass" },
+  { src: "/pass-types/ticket.webp", alt: "Ticket pass" },
+] as const
 
 /* ─── Status bar icons ─────────────────────────────────────────────── */
 
@@ -32,20 +35,17 @@ function StatusBar() {
     >
       <span className="text-[12px] font-semibold text-white">9:41</span>
       <div className="flex items-center gap-1.5">
-        {/* Signal bars */}
         <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
           <rect x="0" y="8" width="3" height="4" rx="0.5" fill="white" />
           <rect x="4.5" y="5" width="3" height="7" rx="0.5" fill="white" />
           <rect x="9" y="2" width="3" height="10" rx="0.5" fill="white" />
           <rect x="13.5" y="0" width="2.5" height="12" rx="0.5" fill="white" fillOpacity="0.35" />
         </svg>
-        {/* WiFi */}
         <svg width="14" height="12" viewBox="0 0 14 12" fill="white">
           <path d="M7 3.5a7.5 7.5 0 0 0-5.2 2.1l1.1 1.1A5.8 5.8 0 0 1 7 5.2a5.8 5.8 0 0 1 4.1 1.5l1.1-1.1A7.5 7.5 0 0 0 7 3.5z" fillOpacity="0.5" />
           <path d="M7 6.5a4.5 4.5 0 0 0-3.1 1.2l1.1 1.1A2.8 2.8 0 0 1 7 8.2a2.8 2.8 0 0 1 2-.6l1.1-1.1A4.5 4.5 0 0 0 7 6.5z" fillOpacity="0.75" />
           <circle cx="7" cy="10.5" r="1.2" />
         </svg>
-        {/* Battery */}
         <svg width="24" height="12" viewBox="0 0 24 12" fill="none">
           <rect x="0.5" y="1" width="20" height="10" rx="2" stroke="white" strokeOpacity="0.4" />
           <rect x="1.5" y="2" width="18" height="8" rx="1" fill="white" />
@@ -68,66 +68,38 @@ function DynamicIsland() {
   )
 }
 
-/* ─── Side buttons ─────────────────────────────────────────────────── */
+/* ─── Side buttons ──────────────────────────────────────────────────── */
 
 function SideButtons() {
   return (
     <>
-      {/* Volume up */}
       <div
         className="absolute rounded-sm"
-        style={{
-          left: -3,
-          top: 120,
-          width: 3,
-          height: 28,
-          background: "oklch(0.22 0.005 285)",
-        }}
+        style={{ left: -3, top: 120, width: 3, height: 28, background: "oklch(0.22 0.005 285)" }}
         aria-hidden="true"
       />
-      {/* Volume down */}
       <div
         className="absolute rounded-sm"
-        style={{
-          left: -3,
-          top: 158,
-          width: 3,
-          height: 28,
-          background: "oklch(0.22 0.005 285)",
-        }}
+        style={{ left: -3, top: 158, width: 3, height: 28, background: "oklch(0.22 0.005 285)" }}
         aria-hidden="true"
       />
-      {/* Power */}
       <div
         className="absolute rounded-sm"
-        style={{
-          right: -3,
-          top: 140,
-          width: 3,
-          height: 36,
-          background: "oklch(0.22 0.005 285)",
-        }}
+        style={{ right: -3, top: 140, width: 3, height: 36, background: "oklch(0.22 0.005 285)" }}
         aria-hidden="true"
       />
     </>
   )
 }
 
-/* ─── Main phone mockup ───────────────────────────────────────────── */
+/* ─── Main phone mockup ────────────────────────────────────────────── */
 
-type PhoneMockupProps = {
-  cards?: MarketingCard[]
-  designs?: WalletPassDesign[]
-}
-
-export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns }: PhoneMockupProps = {}) {
-  const allCards = propCards ?? MARKETING_CARDS
-  const allDesigns = propDesigns ?? MARKETING_CARD_DESIGNS
+export function PhoneMockupInteractive() {
+  const visibleCount = CARD_IMAGES.length
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
   const [reducedMotion, setReducedMotion] = useState(false)
   const backRef = useRef<HTMLButtonElement>(null)
 
-  // Detect prefers-reduced-motion
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
     setReducedMotion(mq.matches)
@@ -136,7 +108,6 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
     return () => mq.removeEventListener("change", handler)
   }, [])
 
-  // Escape key closes expanded card
   useEffect(() => {
     if (expandedIndex === null) return
     const handler = (e: KeyboardEvent) => {
@@ -146,10 +117,8 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
     return () => document.removeEventListener("keydown", handler)
   }, [expandedIndex])
 
-  // Auto-focus back button on expand
   useEffect(() => {
     if (expandedIndex !== null) {
-      // Small delay to let the transition start before focus
       const t = setTimeout(() => backRef.current?.focus(), 50)
       return () => clearTimeout(t)
     }
@@ -164,31 +133,22 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
   }, [])
 
   const isExpanded = expandedIndex !== null
-
-  // Screen area height (inside phone frame, below status bar)
   const screenContentH = PHONE_H - SCREEN_INSET * 2 - STATUS_BAR_H
 
-  // Transition style
   const transition = reducedMotion
     ? "none"
     : "transform 350ms cubic-bezier(0.32, 0, 0.15, 1), opacity 250ms ease, border-radius 350ms ease"
 
-  // Only show first VISIBLE_CARDS in the stacked view
-  const visibleCards = allCards.slice(0, VISIBLE_CARDS)
-
   return (
     <div className="flex items-center justify-center">
-      {/* Responsive scaling */}
       <div
         className="origin-top scale-[0.78] sm:scale-[0.9] lg:scale-100"
         style={{
           width: PHONE_W,
           height: PHONE_H,
-          // Reserve space for scaled-down versions
           marginBottom: "-80px",
         }}
       >
-        {/* Float animation wrapper */}
         <div
           style={
             reducedMotion
@@ -196,7 +156,6 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
               : { animation: "phone-float 5s ease-in-out infinite" }
           }
         >
-          {/* Phone outer frame */}
           <div
             className="relative"
             style={{
@@ -211,7 +170,6 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
           >
             <SideButtons />
 
-            {/* Screen */}
             <div
               className="absolute overflow-hidden"
               style={{
@@ -226,27 +184,18 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
               <DynamicIsland />
               <StatusBar />
 
-              {/* Wallet card area */}
               <div
                 role="group"
                 aria-label="Interactive wallet cards — tap a card to expand it"
                 className="relative"
-                style={{
-                  height: screenContentH,
-                  overflow: "hidden",
-                }}
+                style={{ height: screenContentH, overflow: "hidden" }}
               >
-                {visibleCards.map((card, i) => {
-                  const design = allDesigns[i]
+                {CARD_IMAGES.map((card, i) => {
                   const isThisExpanded = expandedIndex === i
                   const someOtherExpanded = isExpanded && !isThisExpanded
 
-                  // Stacked position: each card offset by CARD_PEEK
                   const stackY = i * CARD_PEEK
-                  // Expanded: fill the screen area starting from top
-                  const expandY = 0
-
-                  const y = isThisExpanded ? expandY : someOtherExpanded ? screenContentH + 20 : stackY
+                  const y = isThisExpanded ? 0 : someOtherExpanded ? screenContentH + 20 : stackY
                   const opacity = someOtherExpanded ? 0 : 1
 
                   return (
@@ -255,14 +204,13 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
                       role="button"
                       tabIndex={isExpanded && !isThisExpanded ? -1 : 0}
                       aria-expanded={isThisExpanded}
-                      aria-label={`${card.businessName} loyalty card. ${isThisExpanded ? "Press Escape or Back to collapse." : "Tap to expand."}`}
+                      aria-label={`${card.alt}. ${isThisExpanded ? "Press Escape or Back to collapse." : "Tap to expand."}`}
                       className="absolute left-0 right-0 px-2 outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-inset"
                       style={{
                         transform: `translateY(${y}px)`,
                         opacity,
                         transition,
                         zIndex: isThisExpanded ? 20 : i + 1,
-                        borderRadius: isThisExpanded ? 0 : undefined,
                       }}
                       onClick={() => {
                         if (isThisExpanded) return
@@ -276,29 +224,18 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
                         }
                       }}
                     >
-                      <WalletPassRenderer
-                        design={design}
-                        compact
+                      <Image
+                        src={card.src}
+                        alt={card.alt}
                         width={PHONE_CARD_W}
                         height={PHONE_CARD_H}
-                        format="apple"
-                        organizationName={card.businessName}
-                        currentVisits={card.currentVisits}
-                        totalVisits={card.totalVisits}
-                        rewardDescription={card.rewardDescription}
-                        customerName={card.customerName}
-                        memberSince={card.memberSince}
-                        discountText={card.discountText}
-                        couponCode={card.couponCode}
-                        validUntil={card.validUntil}
-                        tierName={card.tierName}
-                        benefits={card.benefits}
+                        className="w-full h-auto rounded-xl"
+                        style={{ objectFit: "cover" }}
                       />
                     </div>
                   )
                 })}
 
-                {/* Back button (visible only when expanded) */}
                 {isExpanded && (
                   <button
                     ref={backRef}
@@ -326,7 +263,6 @@ export function PhoneMockupInteractive({ cards: propCards, designs: propDesigns 
           </div>
         </div>
 
-        {/* Keyframe for float animation */}
         <style>{`
           @keyframes phone-float {
             0%, 100% { transform: translateY(0px); }
