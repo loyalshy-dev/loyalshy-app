@@ -119,6 +119,7 @@ export default async function LandingPage() {
         <MarketingNavbar />
         <main>
           <Hero />
+          <TryDemo />
           <SocialProof />
           <FeatureShowcase />
           <HowItWorks />
@@ -128,7 +129,6 @@ export default async function LandingPage() {
           {/* <Testimonials /> */}
           <Pricing />
           <FAQ />
-          <TryDemo />
           <ClosingCTA />
         </main>
         <MarketingFooter />
