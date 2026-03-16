@@ -169,11 +169,7 @@ export function PassTypesCarousel() {
             {/* Screenshot — all stacked, crossfade on switch */}
             <div
               className="relative overflow-hidden rounded-xl"
-              style={{
-                background: "var(--mk-surface)",
-                border: "1px solid var(--mk-border)",
-                boxShadow: "0 4px 16px oklch(0 0 0 / 0.06)",
-              }}
+ 
             >
               {PASS_TYPES.map((type, i) => (
                 <Image
@@ -255,7 +251,7 @@ export function PassTypesCarousel() {
                   type="button"
                   onClick={prev}
                   aria-label={t("prev")}
-                  className="flex size-9 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[var(--mk-surface)]"
+                  className="flex size-9 items-center justify-center rounded-full transition-colors duration-150 hover:bg-(--mk-surface)"
                   style={{ border: "1px solid var(--mk-border)", color: "var(--mk-text-muted)" }}
                 >
                   <ChevronLeft className="size-4" />
@@ -270,7 +266,7 @@ export function PassTypesCarousel() {
                   type="button"
                   onClick={next}
                   aria-label={t("next")}
-                  className="flex size-9 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[var(--mk-surface)]"
+                  className="flex size-9 items-center justify-center rounded-full transition-colors duration-150 hover:bg-(--mk-surface)"
                   style={{ border: "1px solid var(--mk-border)", color: "var(--mk-text-muted)" }}
                 >
                   <ChevronRight className="size-4" />
