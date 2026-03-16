@@ -64,14 +64,12 @@ export async function TryDemo() {
           >
             {/* Card preview */}
             <Image
-              src="/pass-types/stamp.webp"
+              src="/pass-types/coupon.webp"
               alt={t("cardPreviewAlt")}
-              width={213}
-              height={238}
+              width={283}
+              height={308}
               className="rounded-2xl"
-              style={{
-                boxShadow: "0 8px 32px oklch(0 0 0 / 0.12)",
-              }}
+
             />
 
             {/* Wallet buttons */}
