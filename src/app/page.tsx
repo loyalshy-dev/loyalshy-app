@@ -12,6 +12,7 @@ import { Testimonials } from "@/components/marketing/testimonials"
 import { Pricing } from "@/components/marketing/pricing"
 import { FAQ } from "@/components/marketing/faq"
 import { ClosingCTA } from "@/components/marketing/closing-cta"
+import { TryDemo } from "@/components/marketing/try-demo"
 import { SocialProof } from "@/components/marketing/social-proof"
 import { MarketingFooter } from "@/components/marketing/footer"
 
@@ -101,7 +102,7 @@ function JsonLd() {
 const MARKETING_NAMESPACES = [
   "common", "nav", "hero", "socialProof", "featureShowcase", "howItWorks",
   "features", "passTypesCarousel", "walletPreview", "testimonials", "pricing",
-  "faq", "closingCta", "footer",
+  "faq", "tryDemo", "closingCta", "footer",
 ] as const
 
 export default async function LandingPage() {
@@ -127,6 +128,7 @@ export default async function LandingPage() {
           {/* <Testimonials /> */}
           <Pricing />
           <FAQ />
+          <TryDemo />
           <ClosingCTA />
         </main>
         <MarketingFooter />

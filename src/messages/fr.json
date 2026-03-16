@@ -408,6 +408,16 @@
       }
     }
   },
+  "tryDemo": {
+    "sectionLabel": "Essaie par toi-même",
+    "title": "Ajoute un pass à ton wallet",
+    "subtitle": "Découvre l'expérience de tes clients. Scanne le QR code ou appuie sur un bouton pour ajouter une carte de fidélité de démo à ton Apple ou Google Wallet.",
+    "addToAppleWallet": "Ajouter à Apple Wallet",
+    "addToGoogleWallet": "Ajouter à Google Wallet",
+    "cardPreviewAlt": "Aperçu de la carte de démo",
+    "or": "ou visite le lien ci-dessous",
+    "openJoinPage": "Ouvrir la page du pass de démo"
+  },
   "closingCta": {
     "title1": "Prêt à développer ta",
     "titleHighlight": "clientèle fidèle",

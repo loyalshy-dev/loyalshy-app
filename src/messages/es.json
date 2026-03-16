@@ -408,6 +408,16 @@
       }
     }
   },
+  "tryDemo": {
+    "sectionLabel": "Pruébalo tú mismo",
+    "title": "Añade un pase a tu wallet",
+    "subtitle": "Descubre cómo lo ven tus clientes. Escanea el código QR o pulsa un botón para añadir una tarjeta de fidelización de prueba a tu Apple o Google Wallet.",
+    "addToAppleWallet": "Añadir a Apple Wallet",
+    "addToGoogleWallet": "Añadir a Google Wallet",
+    "cardPreviewAlt": "Vista previa de la tarjeta de prueba",
+    "or": "o visita el enlace",
+    "openJoinPage": "Abrir página del pase de prueba"
+  },
   "closingCta": {
     "title1": "¿Listo para aumentar tus",
     "titleHighlight": "clientes recurrentes",
