@@ -793,7 +793,7 @@ export function ContactDetailSheet({
                   return (
                     <Button
                       size="sm"
-                      className="gap-1.5 text-[13px] h-9 flex-1 min-w-[120px]"
+                      className="gap-1.5 text-[13px] h-9 flex-1 min-w-30"
                       onClick={() => {
                         onOpenChange(false)
                         onRegisterVisit(detail.id, detail.fullName)
@@ -807,7 +807,7 @@ export function ContactDetailSheet({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 text-[13px] h-9 flex-1 min-w-[80px]"
+                  className="gap-1.5 text-[13px] h-9 flex-1 min-w-20"
                   onClick={() => setIsEditing(true)}
                 >
                   <Pencil className="size-3.5" />
@@ -1251,7 +1251,7 @@ function DetailSkeleton() {
         <div className="h-5 w-28 rounded-full bg-muted" />
       </div>
       <div className="flex justify-center">
-        <div className="size-[120px] rounded-full bg-muted" />
+        <div className="size-30 rounded-full bg-muted" />
       </div>
       <div className="grid grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (

@@ -92,7 +92,7 @@ function DashboardShellSkeleton() {
   return (
     <div className="flex h-dvh">
       {/* Sidebar skeleton */}
-      <div className="hidden md:flex w-[var(--sidebar-width,16rem)] flex-col border-r bg-sidebar">
+      <div className="hidden md:flex w-(--sidebar-width,16rem) flex-col border-r bg-sidebar">
         <div className="p-4 space-y-4">
           <div className="h-8 w-32 rounded-md bg-muted animate-pulse" />
           <div className="space-y-2">

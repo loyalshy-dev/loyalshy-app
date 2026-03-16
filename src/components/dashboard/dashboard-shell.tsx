@@ -117,7 +117,7 @@ export function DashboardShell({
           </div>
         )}
 
-        <main className="flex-1 overflow-y-auto pb-[72px] md:pb-0">
+        <main className="flex-1 overflow-y-auto pb-18 md:pb-0">
           {showSubscriptionGate ? (
             <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted mb-4">

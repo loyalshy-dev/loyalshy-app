@@ -36,7 +36,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
         <Link
           href="/dashboard"
           className={cn(
-            "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] rounded-md transition-colors",
+            "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-11 rounded-md transition-colors",
             isOverviewActive() ? "text-foreground" : "text-muted-foreground"
           )}
         >
@@ -50,7 +50,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
         <Link
           href="/dashboard/contacts"
           className={cn(
-            "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] rounded-md transition-colors",
+            "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-11 rounded-md transition-colors",
             isContactsActive() ? "text-foreground" : "text-muted-foreground"
           )}
         >
@@ -79,7 +79,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
         <Link
           href="/dashboard/programs"
           className={cn(
-            "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] rounded-md transition-colors",
+            "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-11 rounded-md transition-colors",
             isProgramsActive() ? "text-foreground" : "text-muted-foreground"
           )}
         >
@@ -93,7 +93,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
         <button
           type="button"
           onClick={onOpenMore}
-          className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] rounded-md transition-colors text-muted-foreground"
+          className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-11 rounded-md transition-colors text-muted-foreground"
         >
           <MoreHorizontal className="size-5" strokeWidth={1.5} />
           <span className="text-[10px] font-medium">{t("more")}</span>

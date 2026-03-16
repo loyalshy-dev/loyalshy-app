@@ -70,14 +70,14 @@ export async function Hero() {
       {/* Subtle gradient orbs */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 size-[800px] rounded-full"
+        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 size-200 rounded-full"
         style={{
           background: "radial-gradient(circle, oklch(0.55 0.2 265 / 0.06) 0%, transparent 70%)",
         }}
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-20 -right-40 size-[600px] rounded-full"
+        className="pointer-events-none absolute top-20 -right-40 size-150 rounded-full"
         style={{
           background: "radial-gradient(circle, oklch(0.55 0.17 155 / 0.04) 0%, transparent 70%)",
         }}
@@ -127,11 +127,11 @@ export async function Hero() {
         {/* CTAs */}
         <div className="hero-fade-in" style={{ animationDelay: "300ms" }}>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link href="/register" className="mk-btn-primary !py-3.5 !px-8 !text-[15px] gap-2">
+            <Link href="/register" className="mk-btn-primary py-3.5! px-8! text-[15px]! gap-2">
               {tCommon("getStartedFree")}
               <ArrowRight className="size-4" />
             </Link>
-            <Link href="#features" className="mk-btn-ghost !py-3.5 !px-8 !text-[15px]">
+            <Link href="#features" className="mk-btn-ghost py-3.5! px-8! text-[15px]!">
               {t("seeHowItWorks")}
             </Link>
           </div>

@@ -94,7 +94,7 @@ export default async function AuthLayout({
         }}
       />
       {/* Brand glow behind the card */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[600px] rounded-full bg-brand/[0.06] blur-[120px] dark:bg-brand/[0.1]" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-125 w-150 rounded-full bg-brand/6 blur-[120px] dark:bg-brand/10" />
 
       <div className="relative z-10 w-full max-w-xl">
         <Suspense>

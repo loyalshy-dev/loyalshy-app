@@ -14,7 +14,7 @@ export async function SocialProof() {
     >
       <div className="hero-fade-in" style={{ animationDelay: "400ms" }}>
         <p
-          className="text-center text-[13px] font-medium uppercase tracking-[0.1em]"
+          className="text-center text-[13px] font-medium uppercase tracking-widest"
           style={{ color: "var(--mk-text-dimmed)" }}
         >
           {t("headline")}

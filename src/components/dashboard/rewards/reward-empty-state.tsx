@@ -11,7 +11,7 @@ export function RewardEmptyState() {
       </div>
       <div>
         <p className="text-[15px] font-medium">{t("noRewards")}</p>
-        <p className="text-[13px] text-muted-foreground mt-1 max-w-[280px]">
+        <p className="text-[13px] text-muted-foreground mt-1 max-w-70">
           {t("noRewardsDescription")}
         </p>
       </div>
