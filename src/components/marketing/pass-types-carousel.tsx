@@ -166,7 +166,7 @@ export function PassTypesCarousel() {
               boxShadow: "0 20px 60px oklch(0 0 0 / 0.06)",
             }}
           >
-            {/* Screenshot */}
+            {/* Screenshot — all stacked, crossfade on switch */}
             <div
               className="relative overflow-hidden rounded-xl"
               style={{
@@ -175,15 +175,24 @@ export function PassTypesCarousel() {
                 boxShadow: "0 4px 16px oklch(0 0 0 / 0.06)",
               }}
             >
-              <Image
-                key={current.id}
-                src={`/pass-types/${current.id}.webp`}
-                alt={t(`types.${current.id}.alt`)}
-                width={800}
-                height={600}
-                className="w-full h-auto"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
+              {PASS_TYPES.map((type, i) => (
+                <Image
+                  key={type.id}
+                  src={`/pass-types/${type.id}.webp`}
+                  alt={t(`types.${type.id}.alt`)}
+                  width={800}
+                  height={600}
+                  className="w-full h-auto transition-opacity duration-300 ease-out"
+                  style={{
+                    opacity: active === i ? 1 : 0,
+                    position: active === i ? "relative" : "absolute",
+                    top: 0,
+                    left: 0,
+                  }}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  loading="lazy"
+                />
+              ))}
             </div>
 
             {/* Info */}
