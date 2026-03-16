@@ -909,7 +909,17 @@
       "csvFormat": "CSV must include a 'name' column. Optional: 'email', 'phone'.",
       "importing": "Importing...",
       "imported": "{count} contacts imported",
-      "importFailed": "Import failed"
+      "importFailed": "Import failed",
+      "joinMode": "Access Mode",
+      "joinModeDescription": "Control how contacts can get a pass for this program.",
+      "joinModeOpen": "Open",
+      "joinModeOpenDescription": "Anyone can self-join via QR code or shareable link.",
+      "joinModeInviteOnly": "Invite Only",
+      "joinModeInviteOnlyDescription": "Only you can issue passes via Direct Issue or CSV Import.",
+      "joinModeUpdated": "Access mode updated",
+      "duplicateNote": "QR codes and links are self-service — contacts identify themselves by email or phone. For tighter control, use Direct Issue or CSV Import.",
+      "duplicateNoteSettings": "You can also require email (instead of email or phone) in {link}.",
+      "duplicateNoteSettingsLink": "Settings > General > Public Join Form"
     },
     "programSettings": {
       "title": "Settings",
@@ -926,14 +936,7 @@
       "deleteConfirm": "Are you sure? This will permanently delete this program, all passes, and all interaction data.",
       "typeToConfirm": "Type \"{name}\" to confirm",
       "programDeleted": "Program deleted",
-      "statusUpdated": "Program status updated",
-      "joinMode": "Join Mode",
-      "joinModeDescription": "Control how contacts can get a pass for this program.",
-      "joinModeOpen": "Open",
-      "joinModeOpenDescription": "Anyone can self-join via QR code or shareable link.",
-      "joinModeInviteOnly": "Invite Only",
-      "joinModeInviteOnlyDescription": "Only you can issue passes via Direct Issue or CSV Import.",
-      "joinModeUpdated": "Join mode updated"
+      "statusUpdated": "Program status updated"
     },
     "settingsForms": {
       "logo": "Logo",

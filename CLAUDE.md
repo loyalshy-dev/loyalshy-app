@@ -189,7 +189,7 @@ STAMP_CARD, COUPON, MEMBERSHIP, POINTS, PREPAID, GIFT_CARD, TICKET, ACCESS, TRAN
 ### Join Mode (per PassTemplate)
 - **OPEN** (default for STAMP_CARD, COUPON, POINTS, MEMBERSHIP): contacts self-join via QR code or shareable link on `/join/[slug]`
 - **INVITE_ONLY** (default for TICKET, ACCESS, TRANSIT, BUSINESS_ID, GIFT_CARD, PREPAID): passes issued by org only (Direct Issue, CSV Import, API). Public join page filters out INVITE_ONLY templates; `joinTemplate` server action rejects them server-side.
-- Owners can override the default per program in Program Settings.
+- Owners can override the default per program in the Distribution tab.
 
 ### Interaction Types
 STAMP, COUPON_REDEEM, CHECK_IN, POINTS_EARN, POINTS_REDEEM, PREPAID_USE, PREPAID_RECHARGE, GIFT_CHARGE, GIFT_REFUND, TICKET_SCAN, TICKET_VOID, ACCESS_GRANT, ACCESS_DENY, TRANSIT_BOARD, TRANSIT_EXIT, ID_VERIFY, STATUS_CHANGE, REWARD_EARNED, REWARD_REDEEMED, NOTE
@@ -331,7 +331,7 @@ Update the "Current Progress" section above to track what's done.
 - `/dashboard/programs/[id]` — program overview with stat cards (layout provides tab nav)
 - `/dashboard/programs/[id]/passes` — type-aware pass instances with stat cards, progress columns, status filters, row actions, issue pass sheet, edit contact, send pass email
 - `/dashboard/programs/[id]/design` — canvas-first card design studio with floating icon toolbar + floating context panel (owner only)
-- `/dashboard/programs/[id]/distribution` — Distribution: QR/NFC self-service link, direct issue to contacts, bulk CSV import (owner only)
+- `/dashboard/programs/[id]/distribution` — Distribution: join mode toggle, QR/NFC self-service link, direct issue to contacts, bulk CSV import (owner only)
 - `/dashboard/programs/[id]/settings` — status management (activate/archive/reactivate) + delete (owner only)
 
 ### Settings (account-level only)

@@ -892,7 +892,17 @@
       "csvFormat": "Le CSV doit inclure une colonne « name ». Optionnel : « email », « phone ».",
       "importing": "Import en cours...",
       "imported": "{count} contacts importés",
-      "importFailed": "Échec de l'import"
+      "importFailed": "Échec de l'import",
+      "joinMode": "Mode d'accès",
+      "joinModeDescription": "Contrôlez comment les contacts peuvent obtenir un pass pour ce programme.",
+      "joinModeOpen": "Ouvert",
+      "joinModeOpenDescription": "Tout le monde peut s'inscrire via un code QR ou un lien partageable.",
+      "joinModeInviteOnly": "Sur invitation",
+      "joinModeInviteOnlyDescription": "Seul vous pouvez émettre des passes via émission directe ou import CSV.",
+      "joinModeUpdated": "Mode d'accès mis à jour",
+      "duplicateNote": "Les codes QR et les liens sont en libre-service — les contacts s'identifient par email ou téléphone. Pour plus de contrôle, utilisez l'émission directe ou l'import CSV.",
+      "duplicateNoteSettings": "Vous pouvez aussi exiger l'email (au lieu de l'email ou téléphone) dans {link}.",
+      "duplicateNoteSettingsLink": "Paramètres > Général > Formulaire public"
     },
     "programSettings": {
       "title": "Paramètres",
@@ -909,14 +919,7 @@
       "deleteConfirm": "Êtes-vous sûr(e) ? Cela supprimera définitivement ce programme, tous les passes et toutes les données d'interaction.",
       "typeToConfirm": "Tapez « {name} » pour confirmer",
       "programDeleted": "Programme supprimé",
-      "statusUpdated": "Statut du programme mis à jour",
-      "joinMode": "Mode d'accès",
-      "joinModeDescription": "Contrôlez comment les contacts peuvent obtenir un pass pour ce programme.",
-      "joinModeOpen": "Ouvert",
-      "joinModeOpenDescription": "Tout le monde peut s'inscrire via un code QR ou un lien partageable.",
-      "joinModeInviteOnly": "Sur invitation",
-      "joinModeInviteOnlyDescription": "Seul vous pouvez émettre des passes via émission directe ou import CSV.",
-      "joinModeUpdated": "Mode d'accès mis à jour"
+      "statusUpdated": "Statut du programme mis à jour"
     },
     "settingsForms": {
       "logo": "Logo",
