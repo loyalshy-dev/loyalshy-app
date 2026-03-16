@@ -1,25 +1,5 @@
 import { getTranslations } from "next-intl/server"
 
-/* ─── Stat counter ───────────────────────────────────────────────── */
-
-function StatCounter({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <span
-        className="mk-gradient-text text-2xl font-bold tracking-tight sm:text-3xl"
-      >
-        {value}
-      </span>
-      <span
-        className="text-[13px] font-medium"
-        style={{ color: "var(--mk-text-dimmed)" }}
-      >
-        {label}
-      </span>
-    </div>
-  )
-}
-
 /* ─── Trust badge ────────────────────────────────────────────────── */
 
 function TrustBadge({ label }: { label: string }) {
@@ -48,7 +28,7 @@ export async function SocialProof() {
 
   return (
     <section
-      className="relative py-12 sm:py-16"
+      className="relative py-10 sm:py-12"
       style={{
         background: "var(--mk-bg)",
         borderTop: "1px solid var(--mk-border)",
@@ -56,24 +36,19 @@ export async function SocialProof() {
       }}
     >
       <div className="mx-auto max-w-5xl px-6 lg:px-8">
-        {/* Stat counters */}
-        <div className="hero-fade-in flex flex-wrap items-center justify-center gap-10 sm:gap-16" style={{ animationDelay: "400ms" }}>
-          <StatCounter value={t("stat1Value")} label={t("stat1Label")} />
-          <div
-            className="hidden sm:block h-8 w-px"
-            style={{ background: "var(--mk-border)" }}
-          />
-          <StatCounter value={t("stat2Value")} label={t("stat2Label")} />
-          <div
-            className="hidden sm:block h-8 w-px"
-            style={{ background: "var(--mk-border)" }}
-          />
-          <StatCounter value={t("stat3Value")} label={t("stat3Label")} />
+        {/* Headline */}
+        <div className="hero-fade-in" style={{ animationDelay: "400ms" }}>
+          <p
+            className="text-center text-[13px] font-medium uppercase tracking-widest mb-6"
+            style={{ color: "var(--mk-text-dimmed)" }}
+          >
+            {t("headline")}
+          </p>
         </div>
 
         {/* Trust badges */}
         <div
-          className="hero-fade-in mt-8 flex flex-wrap items-center justify-center gap-3"
+          className="hero-fade-in flex flex-wrap items-center justify-center gap-3"
           style={{ animationDelay: "500ms" }}
         >
           <TrustBadge label={t("appleWallet")} />
