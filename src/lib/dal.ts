@@ -58,12 +58,38 @@ export async function assertAuthenticated(): Promise<AuthSession> {
   return session
 }
 
-export async function assertSuperAdmin(): Promise<AuthSession> {
+// ─── Admin Role Hierarchy ──────────────────────────────────
+
+const ADMIN_ROLE_HIERARCHY: Record<string, number> = {
+  ADMIN_SUPPORT: 1,
+  ADMIN_BILLING: 2,
+  ADMIN_OPS: 3,
+  SUPER_ADMIN: 4,
+}
+
+/**
+ * Verifies the user has at least the specified admin role level.
+ * Hierarchy: ADMIN_SUPPORT < ADMIN_BILLING < ADMIN_OPS < SUPER_ADMIN
+ */
+export async function assertAdminRole(
+  minRole: "ADMIN_SUPPORT" | "ADMIN_BILLING" | "ADMIN_OPS" | "SUPER_ADMIN"
+): Promise<AuthSession> {
   const session = await assertAuthenticated()
-  if (session.user.role !== "SUPER_ADMIN") {
+  const userLevel = ADMIN_ROLE_HIERARCHY[session.user.role] ?? 0
+  const requiredLevel = ADMIN_ROLE_HIERARCHY[minRole] ?? 0
+  if (userLevel < requiredLevel) {
     redirect("/dashboard")
   }
   return session
+}
+
+/** Returns true if the role is any admin-tier role */
+export function isAdminRole(role: string): boolean {
+  return role in ADMIN_ROLE_HIERARCHY
+}
+
+export async function assertSuperAdmin(): Promise<AuthSession> {
+  return assertAdminRole("SUPER_ADMIN")
 }
 
 /**
@@ -73,8 +99,8 @@ export async function assertSuperAdmin(): Promise<AuthSession> {
 export const getOrgMember = cache(async (organizationId: string): Promise<OrgMember | null> => {
   const session = await assertAuthenticated()
 
-  // Super admins always get owner-level access
-  if (session.user.role === "SUPER_ADMIN") {
+  // Admin-tier roles always get owner-level access
+  if (isAdminRole(session.user.role)) {
     return {
       id: "super_admin",
       organizationId,

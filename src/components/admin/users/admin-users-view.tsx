@@ -15,7 +15,7 @@ type AdminUsersViewProps = {
     sort: string
     order: "asc" | "desc"
     page: number
-    filter: "all" | "banned" | "super_admin"
+    filter: "all" | "banned" | "super_admin" | "admins"
   }
 }
 

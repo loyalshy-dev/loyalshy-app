@@ -14,6 +14,7 @@ import {
   UserCog,
 } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import { authClient } from "@/lib/auth-client"
 import type { AdminUserRow, AdminUserSession } from "@/server/admin-actions"
 import {
@@ -22,6 +23,7 @@ import {
   adminSetRole,
   adminRevokeAllSessions,
   adminGetUserSessions,
+  adminImpersonateUser,
 } from "@/server/admin-actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -41,6 +43,21 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
+
+const ROLE_LABELS: Record<string, string> = {
+  USER: "user",
+  ADMIN_SUPPORT: "adminSupport",
+  ADMIN_BILLING: "adminBilling",
+  ADMIN_OPS: "adminOps",
+  SUPER_ADMIN: "superAdmin",
+}
+
+const ROLE_COLORS: Record<string, string> = {
+  SUPER_ADMIN: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  ADMIN_OPS: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  ADMIN_BILLING: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  ADMIN_SUPPORT: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+}
 
 function getInitials(name: string) {
   return name
@@ -63,6 +80,8 @@ export function AdminUserDetailSheet({
   onOpenChange,
 }: AdminUserDetailSheetProps) {
   const router = useRouter()
+  const t = useTranslations("admin.users")
+  const tRoles = useTranslations("admin.roles")
   const [sessions, setSessions] = useState<AdminUserSession[]>([])
   const [sessionsLoading, setSessionsLoading] = useState(false)
   const [banDialogOpen, setBanDialogOpen] = useState(false)
@@ -91,7 +110,7 @@ export function AdminUserDetailSheet({
       if (result.error) {
         toast.error(result.error)
       } else {
-        toast.success(`${user!.name} has been banned.`)
+        toast.success(t("bannedUser", { name: user!.name }))
         setBanDialogOpen(false)
         setBanReason("")
         router.refresh()
@@ -108,7 +127,7 @@ export function AdminUserDetailSheet({
       if (result.error) {
         toast.error(result.error)
       } else {
-        toast.success(`${user!.name} has been unbanned.`)
+        toast.success(t("unbannedUser", { name: user!.name }))
         router.refresh()
       }
     })
@@ -125,7 +144,8 @@ export function AdminUserDetailSheet({
       if (result.error) {
         toast.error(result.error)
       } else {
-        toast.success(`Role updated to ${newRole === "SUPER_ADMIN" ? "Super Admin" : "User"}.`)
+        const roleKey = ROLE_LABELS[newRole] ?? "user"
+        toast.success(t("roleUpdated", { role: tRoles(roleKey) }))
         setRoleDialogOpen(false)
         router.refresh()
       }
@@ -141,7 +161,7 @@ export function AdminUserDetailSheet({
       if (result.error) {
         toast.error(result.error)
       } else {
-        toast.success("All sessions revoked.")
+        toast.success(t("sessionsRevoked"))
         setSessions([])
       }
     })
@@ -149,12 +169,21 @@ export function AdminUserDetailSheet({
 
   async function handleImpersonate() {
     try {
+      // Log impersonation server-side first
+      const formData = new FormData()
+      formData.set("userId", user!.id)
+      await adminImpersonateUser(formData)
+
+      // Then perform client-side impersonation via Better Auth
       await authClient.admin.impersonateUser({ userId: user!.id })
       window.location.href = "/dashboard"
     } catch {
-      toast.error("Failed to impersonate user.")
+      toast.error(t("failedImpersonate"))
     }
   }
+
+  const roleKey = ROLE_LABELS[user.role] ?? "user"
+  const roleColor = ROLE_COLORS[user.role] ?? "bg-muted text-muted-foreground"
 
   return (
     <>
@@ -182,13 +211,9 @@ export function AdminUserDetailSheet({
               <div className="flex items-center gap-2 mt-3">
                 <Badge
                   variant="outline"
-                  className={`text-[11px] ${
-                    user.role === "SUPER_ADMIN"
-                      ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                      : "bg-muted text-muted-foreground"
-                  }`}
+                  className={`text-[11px] ${roleColor}`}
                 >
-                  {user.role === "SUPER_ADMIN" ? "Super Admin" : "User"}
+                  {tRoles(roleKey)}
                 </Badge>
                 <Badge
                   variant="outline"
@@ -207,7 +232,7 @@ export function AdminUserDetailSheet({
             <div className="px-6 pb-4 grid grid-cols-2 gap-4">
               <div>
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                  Created
+                  {t("created")}
                 </p>
                 <p className="text-sm mt-0.5">
                   {format(new Date(user.createdAt), "MMM d, yyyy")}
@@ -215,15 +240,15 @@ export function AdminUserDetailSheet({
               </div>
               <div>
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                  Email Verified
+                  {t("emailVerified")}
                 </p>
                 <p className="text-sm mt-0.5">
-                  {user.emailVerified ? "Yes" : "No"}
+                  {user.emailVerified ? t("yes") : t("no")}
                 </p>
               </div>
               <div className="col-span-2">
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                  Organization
+                  {t("organization")}
                 </p>
                 <p className="text-sm mt-0.5">
                   {user.organizationName ?? "\u2014"}
@@ -232,7 +257,7 @@ export function AdminUserDetailSheet({
               {user.banned && user.banReason && (
                 <div className="col-span-2">
                   <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                    Ban Reason
+                    {t("banReason")}
                   </p>
                   <p className="text-sm mt-0.5 text-destructive">
                     {user.banReason}
@@ -245,7 +270,7 @@ export function AdminUserDetailSheet({
             <div className="px-6 pb-6">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                  Active Sessions
+                  {t("activeSessions")}
                 </p>
                 {sessions.length > 0 && (
                   <Badge variant="outline" className="text-[11px]">
@@ -256,11 +281,11 @@ export function AdminUserDetailSheet({
               {sessionsLoading ? (
                 <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
                   <Loader2 className="size-3.5 animate-spin" />
-                  Loading sessions...
+                  {t("loadingSessions")}
                 </div>
               ) : sessions.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-2">
-                  No active sessions.
+                  {t("noActiveSessions")}
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -274,10 +299,10 @@ export function AdminUserDetailSheet({
                         <p className="text-[13px] truncate">
                           {s.userAgent
                             ? s.userAgent.slice(0, 60) + (s.userAgent.length > 60 ? "..." : "")
-                            : "Unknown device"}
+                            : t("unknownDevice")}
                         </p>
                         <p className="text-[11px] text-muted-foreground">
-                          {s.ipAddress ?? "Unknown IP"} &middot;{" "}
+                          {s.ipAddress ?? t("unknownIp")} &middot;{" "}
                           {formatDistanceToNow(new Date(s.createdAt), {
                             addSuffix: true,
                           })}
@@ -300,7 +325,7 @@ export function AdminUserDetailSheet({
                 disabled={isPending}
               >
                 <ShieldOff className="size-3.5" />
-                Unban
+                {t("unban")}
               </Button>
             ) : (
               <Button
@@ -310,7 +335,7 @@ export function AdminUserDetailSheet({
                 disabled={isPending}
               >
                 <Ban className="size-3.5" />
-                Ban
+                {t("ban")}
               </Button>
             )}
             <Button
@@ -320,7 +345,7 @@ export function AdminUserDetailSheet({
               disabled={isPending}
             >
               <Shield className="size-3.5" />
-              {user.role === "SUPER_ADMIN" ? "Demote to User" : "Promote to Admin"}
+              {user.role === "SUPER_ADMIN" ? t("demoteToUser") : t("promoteToAdmin")}
             </Button>
             <Button
               variant="outline"
@@ -329,7 +354,7 @@ export function AdminUserDetailSheet({
               disabled={isPending || sessions.length === 0}
             >
               <KeyRound className="size-3.5" />
-              Revoke Sessions
+              {t("revokeSessions")}
             </Button>
             <Button
               variant="outline"
@@ -337,7 +362,7 @@ export function AdminUserDetailSheet({
               onClick={handleImpersonate}
             >
               <UserCog className="size-3.5" />
-              Impersonate
+              {t("impersonate")}
             </Button>
           </div>
         </SheetContent>
@@ -347,13 +372,13 @@ export function AdminUserDetailSheet({
       <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Ban {user.name}?</DialogTitle>
+            <DialogTitle>{t("banDialogTitle", { name: user.name })}</DialogTitle>
             <DialogDescription>
-              This will prevent the user from signing in. You can unban them later.
+              {t("banDialogDescription")}
             </DialogDescription>
           </DialogHeader>
           <Textarea
-            placeholder="Reason for ban (optional)"
+            placeholder={t("banReasonPlaceholder")}
             value={banReason}
             onChange={(e) => setBanReason(e.target.value)}
             rows={3}
@@ -363,7 +388,7 @@ export function AdminUserDetailSheet({
               variant="outline"
               onClick={() => setBanDialogOpen(false)}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -371,7 +396,7 @@ export function AdminUserDetailSheet({
               disabled={isPending}
             >
               {isPending && <Loader2 className="size-3.5 animate-spin" />}
-              Ban User
+              {t("banUser")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -381,11 +406,11 @@ export function AdminUserDetailSheet({
       <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Change Role</DialogTitle>
+            <DialogTitle>{t("roleDialogTitle")}</DialogTitle>
             <DialogDescription>
               {user.role === "SUPER_ADMIN"
-                ? `Demote ${user.name} from Super Admin to regular User?`
-                : `Promote ${user.name} to Super Admin? They will have full platform access.`}
+                ? t("roleDialogDemote", { name: user.name })
+                : t("roleDialogPromote", { name: user.name })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -393,11 +418,11 @@ export function AdminUserDetailSheet({
               variant="outline"
               onClick={() => setRoleDialogOpen(false)}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button onClick={handleSetRole} disabled={isPending}>
               {isPending && <Loader2 className="size-3.5 animate-spin" />}
-              {user.role === "SUPER_ADMIN" ? "Demote to User" : "Promote to Admin"}
+              {user.role === "SUPER_ADMIN" ? t("demoteToUser") : t("promoteToAdmin")}
             </Button>
           </DialogFooter>
         </DialogContent>

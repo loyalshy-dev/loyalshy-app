@@ -53,10 +53,20 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - After org creation in onboarding, `activeOrganizationId` must be set on the session via `db.session.updateMany()`
 
 ### Role System
-- `User.role` = **global only**: `USER` (default) or `SUPER_ADMIN`
+- `User.role` = **global only**: `USER` | `ADMIN_SUPPORT` | `ADMIN_BILLING` | `ADMIN_OPS` | `SUPER_ADMIN`
+- **Admin role hierarchy**: `ADMIN_SUPPORT` (read-only + impersonate) < `ADMIN_BILLING` (+ billing controls) < `ADMIN_OPS` (+ bans, bulk ops, GDPR) < `SUPER_ADMIN` (everything)
 - Organization-level roles (`OWNER`, `STAFF`) = Better Auth **organization membership** roles
 - NEVER put OWNER/STAFF in User.role
-- **Super admin plan bypass**: `SUPER_ADMIN` users bypass all org plan limits (program count, pass types, contact count, staff count) in `billing-actions.ts` — limits are tenant-scoped but super admins are unrestricted for testing/admin purposes
+- **Admin plan bypass**: All admin-tier roles (`isAdminRole()`) bypass org plan limits in `billing-actions.ts`
+- **Admin safety guards**: Cannot ban self, cannot change own role, cannot demote last SUPER_ADMIN, cannot ban/revoke users with equal or higher admin role
+- **DAL**: `assertAdminRole(minRole)` checks hierarchy, `assertSuperAdmin()` = `assertAdminRole("SUPER_ADMIN")`, `isAdminRole(role)` returns true for any admin tier
+
+### Admin Audit Logging
+- **Model**: `AdminAuditLog` with `AdminAction` enum (15 action types), indexed by adminId, targetType, action, createdAt
+- **Utility**: `logAdminAction()` in `src/lib/admin-audit.ts` — fire-and-forget, captures IP + user agent from headers
+- **Coverage**: All admin mutations (ban, unban, role change, session revoke, impersonation start) are logged with target email as label
+- **Note**: Impersonation END is not logged — during impersonation the session belongs to the impersonated user, so admin auth checks fail. Only the START is logged (the security-critical event).
+- **Viewer**: `/admin/audit-log` page with action type, target type, and search filters
 
 ### Public REST API
 - **Auth**: Bearer token (`lsk_live_` prefix), SHA-256 hashed storage, org-scoped
@@ -105,7 +115,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Server actions**: use `getTranslations("serverErrors")` from `next-intl/server` for error/validation messages
 - **Studio panels**: all use `useTranslations("studio.*")` — panels, colors, strip, notifications, details, prize, avatar, template, canvas
 - **Coverage**: 100% — 78 files, ~1,300 strings across marketing, auth, dashboard, studio, server actions, and legal pages
-- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, apiSection, passTypesCarousel, walletPreview, testimonials, pricing, faq, tryDemo, closingCta, footer, cookieBanner, auth.login, auth.register, auth.forgotPassword, auth.invite, auth.error, dashboard.nav, dashboard.overview, dashboard.activity, dashboard.topContacts, dashboard.programsSummary, dashboard.contacts, dashboard.addContact, dashboard.contactDetail, dashboard.contactColumns, dashboard.contactTable, dashboard.programs, dashboard.passInstances, dashboard.distribution, dashboard.programSettings, dashboard.programEditor, dashboard.settings, dashboard.settingsForms, dashboard.registerVisit, dashboard.shell, dashboard.rewards, dashboard.jobsHistory, dashboard.onboarding, dashboard.status, dashboard.chart, errors, privacy, terms, cookies, studio.panels, studio.colors, studio.strip, studio.logo, studio.notifications, studio.details, studio.prize, studio.avatar, studio.template, studio.canvas, serverErrors
+- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, apiSection, passTypesCarousel, walletPreview, testimonials, pricing, faq, tryDemo, closingCta, footer, cookieBanner, auth.login, auth.register, auth.forgotPassword, auth.invite, auth.error, dashboard.nav, dashboard.overview, dashboard.activity, dashboard.topContacts, dashboard.programsSummary, dashboard.contacts, dashboard.addContact, dashboard.contactDetail, dashboard.contactColumns, dashboard.contactTable, dashboard.programs, dashboard.passInstances, dashboard.distribution, dashboard.programSettings, dashboard.programEditor, dashboard.settings, dashboard.settingsForms, dashboard.registerVisit, dashboard.shell, dashboard.rewards, dashboard.jobsHistory, dashboard.onboarding, dashboard.status, dashboard.chart, errors, privacy, terms, cookies, studio.panels, studio.colors, studio.strip, studio.logo, studio.notifications, studio.details, studio.prize, studio.avatar, studio.template, studio.canvas, serverErrors, admin (admin.nav, admin.overview, admin.users, admin.organizations, admin.auditLog, admin.roles, admin.impersonation, admin.common)
 
 ### Prisma v7 Rules
 - Use `prisma.config.ts` for configuration (datasource URL lives here, NOT in schema.prisma)
@@ -237,6 +247,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase PERF-2 — Deep performance pass (cached `getOrgMember()` in DAL, removed unused passTemplates include from `getOrganizationForUser()`, parallelized all sequential DB queries across dashboard pages, Vercel region `fra1` to match Neon DB, i18n message splitting by route group, DB indexes on Reward/Interaction/Contact, contacts page Suspense boundary)
 - [x] Phase BUGFIX — Codebase audit fixes: 44 bugs + 5 deferred items across security (auth bypass, SSRF, HTML injection, missing access checks), race conditions (double-stamp, duplicate contact, memberNumber locking via FOR UPDATE), data integrity (wrong field reads, SQL case mismatch, invalid defaults), API consistency (rate limit off-by-one, memory leak, missing requestId, webhook org filter, interactions route through domain actions, contact limit check), UI (broken strip paths, missing Suspense, zundo equality, mid-file import), i18n (hardcoded strings in 8 components), dead code cleanup, R2 storage leak, PassType union typing, sanitized Apple log endpoint, config z.any() replaced with type-specific Zod validation
 - [x] Phase REDESIGN — Landing page redesign: asymmetric hero with WalletStack (pass-type images), social proof trust badges (no fake stats), gradient mesh backgrounds on all sections, features bento grid with uniform card layout and equal heights, pass types carousel (flat screenshots, smooth crossfade), feature showcase (smooth crossfade), how-it-works connecting line + perspective screenshots, wallet preview with PhoneMockupInteractive (pass-type images), pricing with stronger highlight + pill buttons, closing CTA with oversized heading, dark mode marketing CSS variables, testimonials removed (fake data), footer CSS variable background, Try Demo section (env-gated via NEXT_PUBLIC_DEMO_JOIN_URL, wallet buttons + join page link), admin showcase system removed (unused, -2080 lines), raw SQL enum fix in reward-actions.ts
+- [x] Phase ADMIN-1 — Admin panel upgrade Phase 1: tiered admin roles (ADMIN_SUPPORT/BILLING/OPS/SUPER_ADMIN), AdminAuditLog model + audit trail on all admin mutations, assertAdminRole() DAL with hierarchy, server-side impersonation logging, audit log viewer page with filters, admin i18n namespace (~183 keys × 3 locales), safety guards (self-protection, last admin, role hierarchy enforcement), Better Auth admin plugin updated with all roles
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -344,10 +355,11 @@ Update the "Current Progress" section above to track what's done.
 
 **Note:** `/dashboard/rewards` still works (command palette, direct URL) but is not in sidebar. `/dashboard/programs/[id]/studio` redirects to `/dashboard/programs/[id]/design`.
 
-### Admin Panel (super_admin only)
-- `/admin` — overview stats
-- `/admin/users` — user management
-- `/admin/organizations` — organization management
+### Admin Panel (any admin role — layout guards via `assertAdminRole("ADMIN_SUPPORT")`)
+- `/admin` — overview stats (platform KPIs, MRR, plan/subscription breakdown)
+- `/admin/users` — user management (search, filters: all/banned/admins/super_admins, ban/unban, role change, impersonation, session revoke)
+- `/admin/organizations` — organization management (search, subscription status filters, detail sheet with team/stats/Stripe link)
+- `/admin/audit-log` — immutable audit trail of all admin actions (action/target type filters, search by target)
 ## Design Direction
 
 - **Linear/Vercel aesthetic** — NOT generic shadcn defaults. Premium, refined, professional.

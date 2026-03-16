@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { assertOrganizationRole, getOrganizationForUser, getCurrentUser } from "@/lib/dal"
+import { assertOrganizationRole, getOrganizationForUser, getCurrentUser, isAdminRole } from "@/lib/dal"
 import { stripe, PLANS, getPlanLimits, isPassTypeAllowed, isActiveSubscription, type PlanId } from "@/lib/stripe"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -198,7 +198,7 @@ export async function checkContactLimit(organizationId: string): Promise<{
 }> {
   // Super admins bypass plan restrictions
   const currentUser = await getCurrentUser()
-  if (currentUser?.user.role === "SUPER_ADMIN") {
+  if (isAdminRole(currentUser?.user.role ?? "")) {
     const current = await db.contact.count({ where: { organizationId } })
     return { allowed: true, current, limit: Infinity, approaching: false }
   }
@@ -233,7 +233,7 @@ export async function checkTemplateLimit(organizationId: string): Promise<{
 }> {
   // Super admins bypass plan restrictions
   const currentUser = await getCurrentUser()
-  if (currentUser?.user.role === "SUPER_ADMIN") {
+  if (isAdminRole(currentUser?.user.role ?? "")) {
     const current = await db.passTemplate.count({
       where: { organizationId, status: "ACTIVE" },
     })
@@ -268,7 +268,7 @@ export async function checkTemplateLimit(organizationId: string): Promise<{
 export async function checkPassTypeAllowed(organizationId: string, passType: string): Promise<boolean> {
   // Super admins bypass plan restrictions
   const currentUser = await getCurrentUser()
-  if (currentUser?.user.role === "SUPER_ADMIN") return true
+  if (isAdminRole(currentUser?.user.role ?? "")) return true
 
   const organization = await db.organization.findUnique({
     where: { id: organizationId },
@@ -286,7 +286,7 @@ export async function checkStaffLimit(organizationId: string): Promise<{
 }> {
   // Super admins bypass plan restrictions
   const currentUser = await getCurrentUser()
-  if (currentUser?.user.role === "SUPER_ADMIN") {
+  if (isAdminRole(currentUser?.user.role ?? "")) {
     const current = await db.member.count({ where: { organizationId } })
     return { allowed: true, current, limit: Infinity, approaching: false }
   }

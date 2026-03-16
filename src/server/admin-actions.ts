@@ -4,7 +4,8 @@ import { headers } from "next/headers"
 import { z } from "zod"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
-import { assertSuperAdmin } from "@/lib/dal"
+import { assertAdminRole, isAdminRole } from "@/lib/dal"
+import { logAdminAction } from "@/lib/admin-audit"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -99,6 +100,30 @@ export type AdminOrganizationDetail = {
   }[]
 }
 
+export type AdminAuditLogRow = {
+  id: string
+  action: string
+  targetType: string
+  targetId: string
+  targetLabel: string | null
+  metadata: unknown
+  reason: string | null
+  ipAddress: string | null
+  createdAt: Date
+  admin: {
+    id: string
+    name: string
+    email: string
+    image: string | null
+  }
+}
+
+export type AdminAuditLogsResult = {
+  logs: AdminAuditLogRow[]
+  total: number
+  pageCount: number
+}
+
 // ─── Validation Schemas ────────────────────────────────────
 
 const banUserSchema = z.object({
@@ -112,10 +137,14 @@ const unbanUserSchema = z.object({
 
 const setRoleSchema = z.object({
   userId: z.string().min(1),
-  role: z.enum(["USER", "SUPER_ADMIN"]),
+  role: z.enum(["USER", "ADMIN_SUPPORT", "ADMIN_BILLING", "ADMIN_OPS", "SUPER_ADMIN"]),
 })
 
 const revokeSessionsSchema = z.object({
+  userId: z.string().min(1),
+})
+
+const impersonateSchema = z.object({
   userId: z.string().min(1),
 })
 
@@ -131,7 +160,7 @@ const PLAN_MONTHLY_PRICE: Record<string, number> = {
 // ─── Platform Stats ────────────────────────────────────────
 
 export async function getAdminPlatformStats(): Promise<AdminPlatformStats> {
-  await assertSuperAdmin()
+  await assertAdminRole("ADMIN_SUPPORT")
 
   const monthStart = new Date()
   monthStart.setDate(1)
@@ -206,11 +235,11 @@ type GetAdminUsersOpts = {
   search: string
   sort: string
   order: "asc" | "desc"
-  filter: "all" | "banned" | "super_admin"
+  filter: "all" | "banned" | "super_admin" | "admins"
 }
 
 export async function getAdminUsers(opts: GetAdminUsersOpts): Promise<AdminUsersResult> {
-  await assertSuperAdmin()
+  await assertAdminRole("ADMIN_SUPPORT")
 
   const { page, perPage, search, sort, order, filter } = opts
 
@@ -227,6 +256,8 @@ export async function getAdminUsers(opts: GetAdminUsersOpts): Promise<AdminUsers
     where.banned = true
   } else if (filter === "super_admin") {
     where.role = "SUPER_ADMIN"
+  } else if (filter === "admins") {
+    where.role = { in: ["ADMIN_SUPPORT", "ADMIN_BILLING", "ADMIN_OPS", "SUPER_ADMIN"] }
   }
 
   const allowedSorts = ["name", "email", "createdAt", "role"]
@@ -271,7 +302,7 @@ type GetAdminOrganizationsOpts = {
 }
 
 export async function getAdminOrganizations(opts: GetAdminOrganizationsOpts): Promise<AdminOrganizationsResult> {
-  await assertSuperAdmin()
+  await assertAdminRole("ADMIN_SUPPORT")
 
   const { page, perPage, search, sort, order, filter } = opts
 
@@ -330,7 +361,7 @@ export async function getAdminOrganizations(opts: GetAdminOrganizationsOpts): Pr
 // ─── Organization Detail ─────────────────────────────────────
 
 export async function getAdminOrganizationDetail(id: string): Promise<AdminOrganizationDetail | null> {
-  await assertSuperAdmin()
+  await assertAdminRole("ADMIN_SUPPORT")
 
   const organization = await db.organization.findUnique({
     where: { id },
@@ -382,7 +413,7 @@ export async function getAdminOrganizationDetail(id: string): Promise<AdminOrgan
 // ─── User Actions ──────────────────────────────────────────
 
 export async function adminBanUser(formData: FormData) {
-  await assertSuperAdmin()
+  const session = await assertAdminRole("ADMIN_OPS")
 
   const parsed = banUserSchema.safeParse({
     userId: formData.get("userId"),
@@ -395,11 +426,40 @@ export async function adminBanUser(formData: FormData) {
 
   const { userId, banReason } = parsed.data
 
+  // Self-protection: cannot ban yourself
+  if (userId === session.user.id) {
+    return { error: "You cannot ban yourself." }
+  }
+
+  // Look up target for audit label + role protection
+  const target = await db.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true, role: true },
+  })
+
+  // Cannot ban a user with equal or higher admin role
+  if (target && isAdminRole(target.role)) {
+    const ROLE_LEVEL: Record<string, number> = { ADMIN_SUPPORT: 1, ADMIN_BILLING: 2, ADMIN_OPS: 3, SUPER_ADMIN: 4 }
+    if ((ROLE_LEVEL[target.role] ?? 0) >= (ROLE_LEVEL[session.user.role] ?? 0)) {
+      return { error: "Cannot ban a user with equal or higher admin privileges." }
+    }
+  }
+
   try {
     await auth.api.banUser({
       body: { userId, banReason },
       headers: await headers(),
     })
+
+    await logAdminAction({
+      adminId: session.user.id,
+      action: "USER_BANNED",
+      targetType: "user",
+      targetId: userId,
+      targetLabel: target?.email ?? undefined,
+      reason: banReason,
+    })
+
     return { success: true }
   } catch {
     return { error: "Failed to ban user." }
@@ -407,7 +467,7 @@ export async function adminBanUser(formData: FormData) {
 }
 
 export async function adminUnbanUser(formData: FormData) {
-  await assertSuperAdmin()
+  const session = await assertAdminRole("ADMIN_OPS")
 
   const parsed = unbanUserSchema.safeParse({
     userId: formData.get("userId"),
@@ -417,11 +477,27 @@ export async function adminUnbanUser(formData: FormData) {
     return { error: "Invalid input." }
   }
 
+  const { userId } = parsed.data
+
+  const target = await db.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true },
+  })
+
   try {
     await auth.api.unbanUser({
-      body: { userId: parsed.data.userId },
+      body: { userId },
       headers: await headers(),
     })
+
+    await logAdminAction({
+      adminId: session.user.id,
+      action: "USER_UNBANNED",
+      targetType: "user",
+      targetId: userId,
+      targetLabel: target?.email ?? undefined,
+    })
+
     return { success: true }
   } catch {
     return { error: "Failed to unban user." }
@@ -429,7 +505,7 @@ export async function adminUnbanUser(formData: FormData) {
 }
 
 export async function adminSetRole(formData: FormData) {
-  await assertSuperAdmin()
+  const session = await assertAdminRole("SUPER_ADMIN")
 
   const parsed = setRoleSchema.safeParse({
     userId: formData.get("userId"),
@@ -442,11 +518,43 @@ export async function adminSetRole(formData: FormData) {
 
   const { userId, role } = parsed.data
 
-  try {
-    await auth.api.setRole({
-      body: { userId, role },
-      headers: await headers(),
+  // Self-protection: cannot change own role
+  if (userId === session.user.id) {
+    return { error: "You cannot change your own role." }
+  }
+
+  // Single query for target info (used for audit log + guards)
+  const target = await db.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true, role: true },
+  })
+
+  // Last super admin protection
+  if (role !== "SUPER_ADMIN" && target?.role === "SUPER_ADMIN") {
+    const superAdminCount = await db.user.count({
+      where: { role: "SUPER_ADMIN" },
     })
+    if (superAdminCount <= 1) {
+      return { error: "Cannot demote the last Super Admin." }
+    }
+  }
+
+  try {
+    // Use direct DB update — Better Auth's setRole doesn't know all custom admin roles
+    await db.user.update({
+      where: { id: userId },
+      data: { role },
+    })
+
+    await logAdminAction({
+      adminId: session.user.id,
+      action: "USER_ROLE_CHANGED",
+      targetType: "user",
+      targetId: userId,
+      targetLabel: target?.email ?? undefined,
+      metadata: { oldRole: target?.role, newRole: role },
+    })
+
     return { success: true }
   } catch {
     return { error: "Failed to update role." }
@@ -454,7 +562,7 @@ export async function adminSetRole(formData: FormData) {
 }
 
 export async function adminRevokeAllSessions(formData: FormData) {
-  await assertSuperAdmin()
+  const session = await assertAdminRole("ADMIN_OPS")
 
   const parsed = revokeSessionsSchema.safeParse({
     userId: formData.get("userId"),
@@ -464,11 +572,40 @@ export async function adminRevokeAllSessions(formData: FormData) {
     return { error: "Invalid input." }
   }
 
+  const { userId } = parsed.data
+
+  // Self-protection: cannot revoke your own sessions
+  if (userId === session.user.id) {
+    return { error: "You cannot revoke your own sessions." }
+  }
+
+  const target = await db.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true, role: true },
+  })
+
+  // Cannot revoke sessions of a user with equal or higher admin role
+  if (target && isAdminRole(target.role)) {
+    const ROLE_LEVEL: Record<string, number> = { ADMIN_SUPPORT: 1, ADMIN_BILLING: 2, ADMIN_OPS: 3, SUPER_ADMIN: 4 }
+    if ((ROLE_LEVEL[target.role] ?? 0) >= (ROLE_LEVEL[session.user.role] ?? 0)) {
+      return { error: "Cannot revoke sessions of a user with equal or higher admin privileges." }
+    }
+  }
+
   try {
     await auth.api.revokeUserSessions({
-      body: { userId: parsed.data.userId },
+      body: { userId },
       headers: await headers(),
     })
+
+    await logAdminAction({
+      adminId: session.user.id,
+      action: "USER_SESSIONS_REVOKED",
+      targetType: "user",
+      targetId: userId,
+      targetLabel: target?.email ?? undefined,
+    })
+
     return { success: true }
   } catch {
     return { error: "Failed to revoke sessions." }
@@ -476,7 +613,7 @@ export async function adminRevokeAllSessions(formData: FormData) {
 }
 
 export async function adminGetUserSessions(userId: string): Promise<AdminUserSession[]> {
-  await assertSuperAdmin()
+  await assertAdminRole("ADMIN_SUPPORT")
 
   try {
     const result = await auth.api.listUserSessions({
@@ -496,3 +633,106 @@ export async function adminGetUserSessions(userId: string): Promise<AdminUserSes
     return []
   }
 }
+
+// ─── Impersonation (server-side for audit logging) ──────────
+
+export async function adminImpersonateUser(formData: FormData) {
+  const session = await assertAdminRole("ADMIN_SUPPORT")
+
+  const parsed = impersonateSchema.safeParse({
+    userId: formData.get("userId"),
+  })
+
+  if (!parsed.success) {
+    return { error: "Invalid input." }
+  }
+
+  const { userId } = parsed.data
+
+  const target = await db.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true },
+  })
+
+  await logAdminAction({
+    adminId: session.user.id,
+    action: "USER_IMPERSONATED",
+    targetType: "user",
+    targetId: userId,
+    targetLabel: target?.email ?? undefined,
+  })
+
+  return { success: true }
+}
+
+// Note: adminStopImpersonating is not implementable because during impersonation
+// the session belongs to the impersonated user (role: USER), so assertAdminRole
+// would fail. Impersonation end is handled by Better Auth client-side.
+// The impersonation START is logged, which is the security-critical event.
+
+// ─── Audit Log Query ────────────────────────────────────────
+
+type GetAdminAuditLogsOpts = {
+  page: number
+  perPage: number
+  search: string
+  action: string
+  targetType: string
+}
+
+export async function getAdminAuditLogs(opts: GetAdminAuditLogsOpts): Promise<AdminAuditLogsResult> {
+  await assertAdminRole("ADMIN_SUPPORT")
+
+  const { page, perPage, search, action, targetType } = opts
+
+  const where: Record<string, unknown> = {}
+
+  if (search) {
+    where.OR = [
+      { targetLabel: { contains: search, mode: "insensitive" } },
+      { targetId: { contains: search, mode: "insensitive" } },
+      { reason: { contains: search, mode: "insensitive" } },
+    ]
+  }
+
+  if (action && action !== "all") {
+    where.action = action
+  }
+
+  if (targetType && targetType !== "all") {
+    where.targetType = targetType
+  }
+
+  const [logs, total] = await Promise.all([
+    db.adminAuditLog.findMany({
+      where,
+      include: {
+        admin: {
+          select: { id: true, name: true, email: true, image: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * perPage,
+      take: perPage,
+    }),
+    db.adminAuditLog.count({ where }),
+  ])
+
+  return {
+    logs: logs.map((l) => ({
+      id: l.id,
+      action: l.action,
+      targetType: l.targetType,
+      targetId: l.targetId,
+      targetLabel: l.targetLabel,
+      metadata: l.metadata,
+      reason: l.reason,
+      ipAddress: l.ipAddress,
+      createdAt: l.createdAt,
+      admin: l.admin,
+    })),
+    total,
+    pageCount: Math.ceil(total / perPage),
+  }
+}
+

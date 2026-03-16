@@ -15,6 +15,7 @@ const breadcrumbLabels: Record<string, string> = {
   admin: "Admin",
   users: "Users",
   organizations: "Organizations",
+  "audit-log": "Audit Log",
 }
 
 export function AdminTopbar() {

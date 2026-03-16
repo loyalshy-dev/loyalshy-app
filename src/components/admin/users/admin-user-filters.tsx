@@ -3,12 +3,13 @@
 import { useCallback, useRef, useTransition } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Search, X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 
 type AdminUserFiltersProps = {
   search: string
-  filter: "all" | "banned" | "super_admin"
+  filter: "all" | "banned" | "super_admin" | "admins"
   total: number
 }
 
@@ -18,6 +19,7 @@ export function AdminUserFilters({ search, filter, total }: AdminUserFiltersProp
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const t = useTranslations("admin.users")
 
   function updateParams(updates: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString())
@@ -44,7 +46,7 @@ export function AdminUserFilters({ search, filter, total }: AdminUserFiltersProp
     [searchParams, pathname]
   )
 
-  function handleFilter(value: "all" | "banned" | "super_admin") {
+  function handleFilter(value: "all" | "banned" | "super_admin" | "admins") {
     updateParams({ filter: value === filter ? null : value === "all" ? null : value })
   }
 
@@ -61,7 +63,7 @@ export function AdminUserFilters({ search, filter, total }: AdminUserFiltersProp
       <div className="relative w-full sm:w-64">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
         <Input
-          placeholder="Search users..."
+          placeholder={t("searchPlaceholder")}
           defaultValue={search}
           onChange={(e) => handleSearch(e.target.value)}
           className="pl-8 h-8 text-[13px]"
@@ -71,9 +73,10 @@ export function AdminUserFilters({ search, filter, total }: AdminUserFiltersProp
       <div className="flex items-center gap-1.5">
         {(
           [
-            { value: "all", label: "All" },
-            { value: "banned", label: "Banned" },
-            { value: "super_admin", label: "Super Admins" },
+            { value: "all", label: t("filterAll") },
+            { value: "banned", label: t("filterBanned") },
+            { value: "admins", label: t("filterAdmins") },
+            { value: "super_admin", label: t("filterSuperAdmin") },
           ] as const
         ).map((f) => (
           <button key={f.value} onClick={() => handleFilter(f.value)}>

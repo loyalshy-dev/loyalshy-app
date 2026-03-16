@@ -18,10 +18,11 @@ import {
   ShieldAlert,
   ShieldCheck,
   UserCog,
-  UserX,
 } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import { authClient } from "@/lib/auth-client"
+import { adminImpersonateUser } from "@/server/admin-actions"
 import type { AdminUserRow } from "@/server/admin-actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -41,6 +42,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+
+const ROLE_LABELS: Record<string, string> = {
+  USER: "user",
+  ADMIN_SUPPORT: "adminSupport",
+  ADMIN_BILLING: "adminBilling",
+  ADMIN_OPS: "adminOps",
+  SUPER_ADMIN: "superAdmin",
+}
+
+const ROLE_COLORS: Record<string, string> = {
+  SUPER_ADMIN: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  ADMIN_OPS: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  ADMIN_BILLING: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  ADMIN_SUPPORT: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+}
 
 function getInitials(name: string) {
   return name
@@ -72,6 +88,8 @@ export function AdminUserTable({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
+  const t = useTranslations("admin.users")
+  const tRoles = useTranslations("admin.roles")
 
   function updateParams(updates: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString())
@@ -98,10 +116,16 @@ export function AdminUserTable({
 
   async function handleImpersonate(userId: string) {
     try {
+      // Log impersonation server-side first
+      const formData = new FormData()
+      formData.set("userId", userId)
+      await adminImpersonateUser(formData)
+
+      // Then perform client-side impersonation via Better Auth
       await authClient.admin.impersonateUser({ userId })
       window.location.href = "/dashboard"
     } catch {
-      toast.error("Failed to impersonate user.")
+      toast.error(t("failedImpersonate"))
     }
   }
 
@@ -113,7 +137,7 @@ export function AdminUserTable({
           className="flex items-center gap-1 hover:text-foreground"
           onClick={() => handleSort("name")}
         >
-          User
+          {t("columnUser")}
           <ArrowUpDown className="size-3" />
         </button>
       ),
@@ -139,26 +163,24 @@ export function AdminUserTable({
     },
     {
       accessorKey: "role",
-      header: "Role",
+      header: t("columnRole"),
       cell: ({ row }) => {
         const role = row.original.role
+        const roleKey = ROLE_LABELS[role] ?? "user"
+        const colorClass = ROLE_COLORS[role] ?? "bg-muted text-muted-foreground"
         return (
           <Badge
             variant="outline"
-            className={`text-[11px] ${
-              role === "SUPER_ADMIN"
-                ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                : "bg-muted text-muted-foreground"
-            }`}
+            className={`text-[11px] ${colorClass}`}
           >
-            {role === "SUPER_ADMIN" ? "Super Admin" : "User"}
+            {tRoles(roleKey)}
           </Badge>
         )
       },
     },
     {
       accessorKey: "banned",
-      header: "Status",
+      header: t("columnStatus"),
       cell: ({ row }) => {
         const banned = row.original.banned
         return (
@@ -177,7 +199,7 @@ export function AdminUserTable({
     },
     {
       accessorKey: "organizationName",
-      header: "Organization",
+      header: t("columnOrganization"),
       cell: ({ row }) => (
         <span className="text-[13px] text-muted-foreground">
           {row.original.organizationName ?? "\u2014"}
@@ -191,7 +213,7 @@ export function AdminUserTable({
           className="flex items-center gap-1 hover:text-foreground"
           onClick={() => handleSort("createdAt")}
         >
-          Created
+          {t("columnCreated")}
           <ArrowUpDown className="size-3" />
         </button>
       ),
@@ -222,17 +244,17 @@ export function AdminUserTable({
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => onSelectUser(u.id)}>
                 <Eye className="size-4" />
-                View Details
+                {t("viewDetails")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleImpersonate(u.id)}>
                 <UserCog className="size-4" />
-                Impersonate
+                {t("impersonate")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {u.banned ? (
                 <DropdownMenuItem onClick={() => onSelectUser(u.id)}>
                   <ShieldCheck className="size-4" />
-                  Unban User
+                  {t("unbanUser")}
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem
@@ -240,7 +262,7 @@ export function AdminUserTable({
                   className="text-destructive focus:text-destructive"
                 >
                   <ShieldAlert className="size-4" />
-                  Ban User
+                  {t("banUser")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -290,7 +312,7 @@ export function AdminUserTable({
                   colSpan={columns.length}
                   className="h-32 text-center text-sm text-muted-foreground"
                 >
-                  No users found.
+                  {t("noUsersFound")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -319,7 +341,7 @@ export function AdminUserTable({
       {pageCount > 1 && (
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            Page {page} of {pageCount}
+            {t("pageOf", { page, pageCount })}
           </span>
           <div className="flex items-center gap-1">
             <Button

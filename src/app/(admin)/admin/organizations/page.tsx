@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { connection } from "next/server"
-import { assertSuperAdmin } from "@/lib/dal"
+import { assertAdminRole } from "@/lib/dal"
 import { getAdminOrganizations } from "@/server/admin-actions"
 import { AdminOrganizationsView } from "@/components/admin/organizations/admin-organizations-view"
 
@@ -10,7 +10,7 @@ async function OrganizationsContent({
   searchParams: Promise<Record<string, string | undefined>>
 }) {
   await connection()
-  await assertSuperAdmin()
+  await assertAdminRole("ADMIN_SUPPORT")
 
   const params = await searchParams
   const search = typeof params.search === "string" ? params.search : ""

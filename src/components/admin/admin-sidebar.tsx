@@ -9,9 +9,11 @@ import {
   ChevronLeft,
   LogOut,
   LayoutDashboard,
+  ScrollText,
   Shield,
   Users,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { authClient } from "@/lib/auth-client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -34,14 +36,9 @@ type AdminSidebarProps = {
     email: string
     image: string | null
     organizationId: string | null
+    role: string
   }
 }
-
-const navItems = [
-  { label: "Overview", href: "/admin", icon: BarChart3 },
-  { label: "Users", href: "/admin/users", icon: Users },
-  { label: "Organizations", href: "/admin/organizations", icon: Building2 },
-]
 
 function getInitials(name: string) {
   return name
@@ -56,6 +53,14 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [collapsed, setCollapsed] = useState(false)
+  const t = useTranslations("admin")
+
+  const navItems = [
+    { label: t("nav.overview"), href: "/admin", icon: BarChart3 },
+    { label: t("nav.users"), href: "/admin/users", icon: Users },
+    { label: t("nav.organizations"), href: "/admin/organizations", icon: Building2 },
+    { label: t("nav.auditLog"), href: "/admin/audit-log", icon: ScrollText },
+  ]
 
   function isActive(href: string) {
     if (href === "/admin") return pathname === "/admin"
@@ -88,7 +93,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
         </div>
         {!collapsed && (
           <span className="text-sm font-semibold text-sidebar-primary truncate">
-            Admin Panel
+            {t("common.adminPanel")}
           </span>
         )}
       </div>
@@ -190,7 +195,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard">
                     <LayoutDashboard className="size-4" />
-                    Back to Dashboard
+                    {t("common.backToDashboard")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -198,7 +203,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             )}
             <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
               <LogOut className="size-4" />
-              Sign out
+              {t("common.signOut")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

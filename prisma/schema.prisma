@@ -14,10 +14,33 @@ datasource db {
 // ─── Enums ───────────────────────────────────────────────────
 
 enum UserRole {
-  USER        @map("user")
-  SUPER_ADMIN @map("super_admin")
+  USER           @map("user")
+  ADMIN_SUPPORT  @map("admin_support")
+  ADMIN_BILLING  @map("admin_billing")
+  ADMIN_OPS      @map("admin_ops")
+  SUPER_ADMIN    @map("super_admin")
 
   @@map("user_role")
+}
+
+enum AdminAction {
+  USER_BANNED              @map("user_banned")
+  USER_UNBANNED            @map("user_unbanned")
+  USER_ROLE_CHANGED        @map("user_role_changed")
+  USER_SESSIONS_REVOKED    @map("user_sessions_revoked")
+  USER_IMPERSONATED        @map("user_impersonated")
+  USER_IMPERSONATION_ENDED @map("user_impersonation_ended")
+  USER_DATA_EXPORTED       @map("user_data_exported")
+  USER_DELETED             @map("user_deleted")
+  ORG_PLAN_CHANGED         @map("org_plan_changed")
+  ORG_STATUS_CHANGED       @map("org_status_changed")
+  ORG_DELETED              @map("org_deleted")
+  CONTACTS_PURGED          @map("contacts_purged")
+  BULK_BAN                 @map("bulk_ban")
+  BULK_STATUS_CHANGE       @map("bulk_status_change")
+  BULK_EXPORT              @map("bulk_export")
+
+  @@map("admin_action")
 }
 
 enum SubscriptionStatus {
@@ -231,6 +254,7 @@ model User {
   performedInteractions Interaction[] @relation("PerformedBy")
   redeemedRewards       Reward[]      @relation("RedeemedBy")
   createdApiKeys        ApiKey[]      @relation("CreatedApiKeys")
+  adminAuditLogs        AdminAuditLog[] @relation("AdminAuditLogs")
 
   @@map("user")
 }
@@ -693,4 +717,28 @@ model ApiRequestLog {
   @@index([organizationId, createdAt])
   @@index([apiKeyId, createdAt])
   @@map("api_request_log")
+}
+
+// ─── Admin Audit Log ──────────────────────────────────────────
+
+model AdminAuditLog {
+  id          String      @id @default(dbgenerated("uuidv7()::text"))
+  adminId     String
+  action      AdminAction
+  targetType  String
+  targetId    String
+  targetLabel String?
+  metadata    Json        @default("{}")
+  ipAddress   String?
+  userAgent   String?
+  reason      String?     @db.Text
+  createdAt   DateTime    @default(now())
+
+  admin User @relation("AdminAuditLogs", fields: [adminId], references: [id])
+
+  @@index([adminId, createdAt])
+  @@index([targetType, targetId])
+  @@index([action, createdAt])
+  @@index([createdAt])
+  @@map("admin_audit_log")
 }

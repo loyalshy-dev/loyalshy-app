@@ -1,5 +1,5 @@
 import { connection } from "next/server"
-import { assertSuperAdmin } from "@/lib/dal"
+import { assertAdminRole } from "@/lib/dal"
 import { getAdminPlatformStats } from "@/server/admin-actions"
 import { AdminStatCards } from "@/components/admin/overview/admin-stat-cards"
 import { SubscriptionBreakdown } from "@/components/admin/overview/subscription-breakdown"
@@ -7,7 +7,7 @@ import { PlanBreakdown } from "@/components/admin/overview/plan-breakdown"
 
 export default async function AdminOverviewPage() {
   await connection()
-  await assertSuperAdmin()
+  await assertAdminRole("ADMIN_SUPPORT")
 
   const stats = await getAdminPlatformStats()
 

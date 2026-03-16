@@ -11,6 +11,7 @@ type AdminShellProps = {
     email: string
     image: string | null
     organizationId: string | null
+    role: string
   }
   children: React.ReactNode
 }

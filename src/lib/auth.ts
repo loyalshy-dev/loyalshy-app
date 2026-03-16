@@ -95,9 +95,12 @@ export const auth = betterAuth({
     }),
     admin({
       defaultRole: "USER",
-      adminRoles: ["SUPER_ADMIN"],
+      adminRoles: ["SUPER_ADMIN", "ADMIN_OPS", "ADMIN_BILLING", "ADMIN_SUPPORT"],
       roles: {
         USER: userAc,
+        ADMIN_SUPPORT: adminAc,
+        ADMIN_BILLING: adminAc,
+        ADMIN_OPS: adminAc,
         SUPER_ADMIN: adminAc,
       },
     }),
