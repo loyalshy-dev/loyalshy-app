@@ -124,7 +124,7 @@ export default async function LandingPage() {
           <WalletPreview />
           <Features />
           <PassTypesCarousel />
-          <Testimonials />
+          {/* <Testimonials /> */}
           <Pricing />
           <FAQ />
           <ClosingCTA />
