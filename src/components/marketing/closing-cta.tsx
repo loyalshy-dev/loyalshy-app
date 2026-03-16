@@ -9,17 +9,18 @@ export async function ClosingCTA() {
 
   return (
     <section
-      className="relative isolate overflow-hidden py-24 sm:py-32"
+      className="relative isolate overflow-hidden py-28 sm:py-36"
       style={{ background: "var(--mk-bg)" }}
     >
-      {/* Gradient background */}
+      {/* Gradient mesh background — strongest on the page */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background: `
-            radial-gradient(ellipse 50% 80% at 20% 50%, oklch(0.55 0.2 265 / 0.06) 0%, transparent 70%),
-            radial-gradient(ellipse 50% 80% at 80% 50%, oklch(0.55 0.17 155 / 0.05) 0%, transparent 70%)
+            radial-gradient(ellipse 60% 70% at 30% 50%, oklch(0.55 0.2 265 / 0.08) 0%, transparent 70%),
+            radial-gradient(ellipse 50% 60% at 70% 40%, oklch(0.55 0.17 155 / 0.06) 0%, transparent 70%),
+            radial-gradient(ellipse 80% 40% at 50% 80%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%)
           `,
         }}
       />
@@ -30,21 +31,22 @@ export async function ClosingCTA() {
         className="absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            "linear-gradient(90deg, transparent, oklch(0.55 0.2 265 / 0.15), oklch(0.55 0.17 155 / 0.15), transparent)",
+            "linear-gradient(90deg, transparent, oklch(0.55 0.2 265 / 0.2), oklch(0.55 0.17 155 / 0.2), transparent)",
         }}
       />
 
-      <div className="mx-auto max-w-2xl px-6 text-center lg:px-8">
+      <div className="mx-auto max-w-3xl px-6 text-center lg:px-8">
         <FadeIn>
+          {/* Biggest heading on the page */}
           <h2
-            className="text-3xl font-bold sm:text-[2.5rem]"
-            style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
+            className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.05]"
+            style={{ color: "var(--mk-text)", letterSpacing: "-0.045em" }}
           >
             {t("title1")}{" "}
             <span className="mk-gradient-text">{t("titleHighlight")}</span>?
           </h2>
           <p
-            className="mt-5 text-[16px] leading-relaxed"
+            className="mt-6 text-[17px] leading-relaxed mx-auto max-w-xl"
             style={{ color: "var(--mk-text-muted)" }}
           >
             {t("subtitle")}
@@ -52,12 +54,12 @@ export async function ClosingCTA() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/register"
-              className="mk-btn-primary !py-3.5 !px-8 !text-[15px] gap-2"
+              className="mk-btn-primary py-4! px-10! text-[16px]! gap-2"
             >
               {tCommon("getStartedFree")}
               <ArrowRight className="size-4" />
             </Link>
-            <Link href="#pricing" className="mk-btn-ghost !py-3.5 !px-8 !text-[15px]">
+            <Link href="#pricing" className="mk-btn-ghost py-4! px-10! text-[16px]!">
               {t("viewPricing")}
             </Link>
           </div>
