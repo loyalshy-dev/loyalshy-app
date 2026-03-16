@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useStore } from "zustand"
+import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 
 // ─── Shared field components ─────────────────────────────────
@@ -278,6 +279,7 @@ function StampCardFields({ store }: { store: CardDesignStoreApi }) {
 }
 
 function CouponFields({ store }: { store: CardDesignStoreApi }) {
+  const t = useTranslations("dashboard.programEditor")
   const discountType = useStore(store, (s) => s.programConfig.discountType)
   const discountValue = useStore(store, (s) => s.programConfig.discountValue)
   const couponCode = useStore(store, (s) => s.programConfig.couponCode)
@@ -288,22 +290,20 @@ function CouponFields({ store }: { store: CardDesignStoreApi }) {
 
   return (
     <>
-      <SectionHeader>Coupon</SectionHeader>
+      <SectionHeader>{t("couponConfiguration")}</SectionHeader>
       <SelectInput
-        label="Discount type"
+        label={t("discountType")}
         value={discountType}
         onChange={(v) => set("discountType", v)}
         options={[
-          { value: "percentage", label: "Percentage" },
-          { value: "fixed", label: "Fixed amount" },
-          { value: "freeItem", label: "Free item" },
-          { value: "buyOneGetOne", label: "Buy one get one" },
-          { value: "custom", label: "Custom" },
+          { value: "percentage", label: t("discountTypePercentage") },
+          { value: "fixed", label: t("discountTypeFixed") },
+          { value: "freebie", label: t("discountTypeFreebie") },
         ]}
       />
       {(discountType === "percentage" || discountType === "fixed") && (
         <NumberInput
-          label={discountType === "percentage" ? "Discount %" : "Discount amount"}
+          label={discountType === "percentage" ? t("discountPercent") : t("discountAmount")}
           value={discountValue}
           onChange={(v) => set("discountValue", Math.max(0, v))}
           min={0}
@@ -311,33 +311,33 @@ function CouponFields({ store }: { store: CardDesignStoreApi }) {
         />
       )}
       <TextInput
-        label="Coupon code"
+        label={t("couponCode")}
         value={couponCode}
         onChange={(v) => set("couponCode", v)}
-        placeholder="SAVE10"
+        placeholder={t("couponCodePlaceholder")}
         maxLength={50}
       />
       <TextInput
-        label="Description"
+        label={t("couponDescription")}
         value={couponDescription}
         onChange={(v) => set("couponDescription", v)}
-        placeholder="10% off your next purchase"
+        placeholder={t("couponDescriptionPlaceholder")}
         maxLength={200}
       />
       <TextInput
-        label="Valid until"
+        label={t("validUntil")}
         value={validUntil}
         onChange={(v) => set("validUntil", v)}
         placeholder=""
         type="date"
       />
       <SelectInput
-        label="Redemption limit"
+        label={t("redemptionLimit")}
         value={redemptionLimit}
         onChange={(v) => set("redemptionLimit", v)}
         options={[
-          { value: "single", label: "Single use" },
-          { value: "unlimited", label: "Unlimited" },
+          { value: "single", label: t("redemptionSingle") },
+          { value: "unlimited", label: t("redemptionUnlimited") },
         ]}
       />
     </>
