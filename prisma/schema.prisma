@@ -616,17 +616,6 @@ model AnalyticsSnapshot {
   @@map("analytics_snapshot")
 }
 
-model ShowcaseCard {
-  id         String   @id @default(dbgenerated("uuidv7()::text"))
-  designData Json     @default("{}")
-  metadata   Json     @default("{}")
-  sortOrder  Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@map("showcase_card")
-}
-
 // ─── API & Webhooks ─────────────────────────────────────────
 
 model ApiKey {

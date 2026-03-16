@@ -49,7 +49,6 @@ export function createMockDb() {
     analyticsSnapshot: createMockModel(),
     deviceRegistration: createMockModel(),
     webhookEvent: createMockModel(),
-    showcaseCard: createMockModel(),
     invitation: createMockModel(),
     session: createMockModel(),
     account: createMockModel(),
