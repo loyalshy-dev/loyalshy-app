@@ -50,7 +50,7 @@ export function MarketingNavbar() {
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-200",
         scrolled
-          ? "border-b border-[var(--mk-border)] bg-[var(--mk-bg)]/80 backdrop-blur-lg"
+          ? "border-b border-(--mk-border) bg-(--mk-bg)/80 backdrop-blur-lg"
           : "border-b border-transparent bg-transparent"
       )}
     >
@@ -82,7 +82,7 @@ export function MarketingNavbar() {
               href={link.href}
               className={cn(
                 "rounded-md px-5 py-2.5 text-base font-medium transition-colors duration-150",
-                "hover:text-[var(--mk-text)]",
+                "hover:text-(--mk-text)",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               )}
               style={{ color: "var(--mk-text-muted)" }}
@@ -104,7 +104,7 @@ export function MarketingNavbar() {
           </Link>
           <Link
             href="/register"
-            className="mk-btn-primary !py-3 !px-8 !text-base"
+            className="mk-btn-primary py-3! px-8! text-base!"
           >
             {tCommon("getStarted")}
           </Link>
@@ -203,7 +203,7 @@ export function MarketingNavbar() {
               <Link
                 href="/register"
                 onClick={() => setMobileOpen(false)}
-                className="mk-btn-primary w-full text-center !text-[13px]"
+                className="mk-btn-primary w-full text-center text-[13px]!"
               >
                 {tCommon("getStarted")}
               </Link>
