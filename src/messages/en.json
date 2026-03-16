@@ -418,6 +418,29 @@
     "or": "or visit the link below",
     "openJoinPage": "Open demo pass page"
   },
+  "apiSection": {
+    "sectionLabel": "Developer API",
+    "title": "Build on top of Loyalshy",
+    "subtitle": "Automate pass creation from your booking system, POS, or any backend. Full REST API with real-time webhooks.",
+    "features": {
+      "restApi": {
+        "title": "Full REST API",
+        "description": "Create passes, manage contacts, and track interactions. Bearer token auth, idempotent requests, and bulk operations included."
+      },
+      "webhooks": {
+        "title": "Real-time Webhooks",
+        "description": "Get notified when passes are issued, stamps are earned, or rewards are claimed. HMAC-signed with automatic retries."
+      },
+      "docs": {
+        "title": "Interactive Documentation",
+        "description": "OpenAPI 3.1 spec with an interactive explorer. Try endpoints directly from the browser with your API key."
+      }
+    },
+    "exploreDocsLink": "Explore API Documentation",
+    "codePreview": {
+      "filename": "issue-pass.ts"
+    }
+  },
   "closingCta": {
     "title1": "Ready to grow your",
     "titleHighlight": "repeat business",

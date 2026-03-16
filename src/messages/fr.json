@@ -418,6 +418,29 @@
     "or": "ou visite le lien ci-dessous",
     "openJoinPage": "Ouvrir la page du pass de démo"
   },
+  "apiSection": {
+    "sectionLabel": "API développeur",
+    "title": "Construis sur Loyalshy",
+    "subtitle": "Automatise la création de passes depuis ton système de réservation, ta caisse ou n'importe quel backend. API REST complète avec webhooks en temps réel.",
+    "features": {
+      "restApi": {
+        "title": "API REST complète",
+        "description": "Crée des passes, gère les contacts et enregistre les interactions. Authentification Bearer, requêtes idempotentes et opérations en masse incluses."
+      },
+      "webhooks": {
+        "title": "Webhooks en temps réel",
+        "description": "Reçois des notifications quand des passes sont émis, des tampons accumulés ou des récompenses réclamées. Signés HMAC avec réessais automatiques."
+      },
+      "docs": {
+        "title": "Documentation interactive",
+        "description": "Spécification OpenAPI 3.1 avec explorateur interactif. Teste les endpoints directement depuis le navigateur avec ta clé API."
+      }
+    },
+    "exploreDocsLink": "Explorer la documentation API",
+    "codePreview": {
+      "filename": "issue-pass.ts"
+    }
+  },
   "closingCta": {
     "title1": "Prêt à développer ta",
     "titleHighlight": "clientèle fidèle",

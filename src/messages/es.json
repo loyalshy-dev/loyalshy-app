@@ -418,6 +418,29 @@
     "or": "o visita el enlace",
     "openJoinPage": "Abrir página del pase de prueba"
   },
+  "apiSection": {
+    "sectionLabel": "API para desarrolladores",
+    "title": "Construye sobre Loyalshy",
+    "subtitle": "Automatiza la creación de pases desde tu sistema de reservas, TPV o cualquier backend. API REST completa con webhooks en tiempo real.",
+    "features": {
+      "restApi": {
+        "title": "API REST completa",
+        "description": "Crea pases, gestiona contactos y registra interacciones. Autenticación Bearer, peticiones idempotentes y operaciones masivas incluidas."
+      },
+      "webhooks": {
+        "title": "Webhooks en tiempo real",
+        "description": "Recibe notificaciones cuando se emiten pases, se acumulan sellos o se canjean recompensas. Firmados con HMAC y reintentos automáticos."
+      },
+      "docs": {
+        "title": "Documentación interactiva",
+        "description": "Especificación OpenAPI 3.1 con explorador interactivo. Prueba los endpoints directamente desde el navegador con tu clave API."
+      }
+    },
+    "exploreDocsLink": "Explorar documentación de la API",
+    "codePreview": {
+      "filename": "issue-pass.ts"
+    }
+  },
   "closingCta": {
     "title1": "¿Listo para aumentar tus",
     "titleHighlight": "clientes recurrentes",
