@@ -134,7 +134,7 @@ function FreePlanCard() {
         asChild
         variant="outline"
         size="lg"
-        className="w-full mb-6 text-[14px] font-medium"
+        className="w-full mb-6 text-[14px] font-medium rounded-full"
       >
         <Link href="/register">{tc("getStarted")}</Link>
       </Button>
@@ -211,9 +211,9 @@ function PlanCard({
           ? "1px solid oklch(0.55 0.2 265 / 0.3)"
           : "1px solid var(--mk-border)",
         boxShadow: highlighted
-          ? "0 0 0 1px oklch(0.55 0.2 265 / 0.1), 0 16px 48px oklch(0 0 0 / 0.08), 0 0 80px oklch(0.55 0.2 265 / 0.04)"
+          ? "0 0 0 1px oklch(0.55 0.2 265 / 0.15), 0 20px 60px oklch(0 0 0 / 0.10), 0 0 100px oklch(0.55 0.2 265 / 0.06)"
           : "0 1px 3px oklch(0 0 0 / 0.04)",
-        transform: highlighted ? "scale(1.02)" : "scale(1)",
+        transform: highlighted ? "scale(1.04)" : "scale(1)",
       }}
     >
       {highlighted && (
@@ -286,7 +286,7 @@ function PlanCard({
           asChild
           variant="outline"
           size="lg"
-          className="w-full mb-6 text-[14px] font-medium"
+          className="w-full mb-6 text-[14px] font-medium rounded-full"
         >
           <Link href="/register">{tc("getStarted")}</Link>
         </Button>
@@ -351,13 +351,15 @@ export function Pricing() {
       className="relative py-24 sm:py-32 px-4 sm:px-6 overflow-hidden"
       style={{ background: "var(--mk-surface)" }}
     >
-      {/* Subtle bg gradient */}
+      {/* Gradient mesh */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 20%, oklch(0.55 0.2 265 / 0.03), transparent 70%)",
+          background: `
+            radial-gradient(ellipse 60% 50% at 50% 20%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 40% at 20% 80%, oklch(0.55 0.17 155 / 0.03) 0%, transparent 70%)
+          `,
         }}
       />
 
@@ -419,7 +421,13 @@ export function Pricing() {
         {/* Enterprise */}
         <FadeIn delay={0.4}>
           <div
-            className="mk-card-glass mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-7 py-6"
+            className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-7 py-6 rounded-2xl"
+            style={{
+              background: "var(--mk-card)",
+              border: "1px solid transparent",
+              backgroundClip: "padding-box",
+              boxShadow: "0 0 0 1px oklch(0.55 0.2 265 / 0.15), 0 4px 16px oklch(0 0 0 / 0.06)",
+            }}
           >
             <div>
               <p
@@ -439,7 +447,7 @@ export function Pricing() {
               asChild
               variant="outline"
               size="sm"
-              className="shrink-0 text-[14px] font-medium"
+              className="shrink-0 text-[14px] font-medium rounded-full"
             >
               <Link href="mailto:sales@loyalshy.com">{tc("contactSales")}</Link>
             </Button>
