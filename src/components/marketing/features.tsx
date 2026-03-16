@@ -14,15 +14,24 @@ function FeatureCard({
   icon: React.ElementType
   title: string
   description: string
-  size: "large" | "small"
+  size: "hero" | "large" | "small"
 }) {
-  const isLarge = size === "large"
+  const isHero = size === "hero"
+  const isLarge = size === "large" || isHero
 
   return (
     <div
-      className={`group relative mk-card-glass flex flex-col gap-4 p-6 hover:-translate-y-1 ${
+      className={`group relative flex flex-col gap-4 p-6 rounded-2xl hover:-translate-y-1 transition-all duration-250 ${
         isLarge ? "sm:col-span-2" : ""
-      }`}
+      } ${isHero ? "lg:col-span-4" : ""}`}
+      style={{
+        background: isHero
+          ? "linear-gradient(135deg, oklch(0.55 0.2 265 / 0.06), oklch(0.55 0.17 155 / 0.04))"
+          : "var(--mk-card)",
+        border: "1px solid var(--mk-border)",
+        boxShadow: "0 1px 3px oklch(0 0 0 / 0.06), 0 4px 16px oklch(0 0 0 / 0.04)",
+        backdropFilter: "blur(8px)",
+      }}
     >
       {/* Top accent on hover */}
       <div
@@ -39,21 +48,21 @@ function FeatureCard({
         <div
           className="flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 group-hover:bg-[oklch(0.55_0.2_265/0.08)]"
           style={{
-            background: "var(--mk-surface)",
+            background: isHero ? "oklch(0.55 0.2 265 / 0.08)" : "var(--mk-surface)",
             border: "1px solid var(--mk-border)",
           }}
         >
           <Icon
             className="size-5 transition-colors duration-200 group-hover:text-[oklch(0.55_0.2_265)]"
             strokeWidth={1.5}
-            style={{ color: "var(--mk-text-muted)" }}
+            style={{ color: isHero ? "oklch(0.55 0.2 265)" : "var(--mk-text-muted)" }}
           />
         </div>
 
         {/* Text */}
         <div className="space-y-2">
           <h3
-            className="text-[15px] font-semibold"
+            className={`font-semibold ${isHero ? "text-[17px]" : "text-[15px]"}`}
             style={{ color: "var(--mk-text)", letterSpacing: "-0.01em" }}
           >
             {title}
@@ -76,6 +85,12 @@ export async function Features() {
   const t = await getTranslations("features")
 
   const features = [
+    {
+      icon: Zap,
+      title: t("passTypes.title"),
+      description: t("passTypes.description"),
+      size: "hero" as const,
+    },
     {
       icon: Smartphone,
       title: t("appleWallet.title"),
@@ -113,25 +128,31 @@ export async function Features() {
       size: "small" as const,
     },
     {
-      icon: Zap,
-      title: t("passTypes.title"),
-      description: t("passTypes.description"),
-      size: "large" as const,
-    },
-    {
       icon: Shield,
       title: t("security.title"),
       description: t("security.description"),
-      size: "small" as const,
+      size: "large" as const,
     },
   ]
 
   return (
     <section
       id="features"
-      className="py-24 sm:py-32"
+      className="relative py-24 sm:py-32 overflow-hidden"
       style={{ background: "var(--mk-surface)" }}
     >
+      {/* Gradient mesh */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: `
+            radial-gradient(ellipse 50% 60% at 20% 40%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%),
+            radial-gradient(ellipse 50% 50% at 80% 60%, oklch(0.55 0.17 155 / 0.03) 0%, transparent 70%)
+          `,
+        }}
+      />
+
       <div className="mx-auto max-w-5xl px-6 lg:px-8">
         <FadeIn>
           <div className="mx-auto max-w-2xl text-center mb-14 sm:mb-16">
@@ -142,8 +163,8 @@ export async function Features() {
               {t("sectionLabel")}
             </p>
             <h2
-              className="text-3xl sm:text-[2.5rem] font-bold"
-              style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
+              className="text-3xl sm:text-[2.75rem] font-bold"
+              style={{ color: "var(--mk-text)", letterSpacing: "-0.035em" }}
             >
               {t("title")}
             </h2>
