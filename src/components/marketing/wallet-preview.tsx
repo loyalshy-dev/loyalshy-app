@@ -1,8 +1,8 @@
 import { QrCode, RefreshCw, Wallet } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
 import { FadeIn } from "./motion"
+import { PhoneMockupInteractive } from "./phone-mockup"
 
 export async function WalletPreview() {
   const t = await getTranslations("walletPreview")
@@ -16,22 +16,36 @@ export async function WalletPreview() {
   return (
     <section
       id="customer-view"
-      className="py-24 sm:py-32"
+      className="relative py-24 sm:py-32 overflow-hidden"
       style={{ background: "var(--mk-bg)" }}
     >
+      {/* Gradient mesh */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: `
+            radial-gradient(ellipse 50% 60% at 70% 40%, oklch(0.55 0.2 265 / 0.05) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 40% at 30% 60%, oklch(0.55 0.17 155 / 0.04) 0%, transparent 70%)
+          `,
+        }}
+      />
+
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-2 lg:items-center lg:gap-x-20">
-          {/* Phone mockup */}
+          {/* Interactive phone mockup */}
           <FadeIn direction="right" delay={0.2} className="flex justify-center lg:order-last">
-            <Image
-              src="/wallet-card.webp"
-              alt="Digital wallet pass showing a loyalty stamp card in Apple Wallet"
-              width={280}
-              height={606}
-              className="drop-shadow-2xl"
-              style={{ borderRadius: 44 }}
-              priority
-            />
+            <div className="relative">
+              {/* Glow behind phone */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 -z-10 scale-125 rounded-full blur-3xl"
+                style={{
+                  background: "radial-gradient(circle, oklch(0.55 0.2 265 / 0.08) 0%, transparent 70%)",
+                }}
+              />
+              <PhoneMockupInteractive />
+            </div>
           </FadeIn>
 
           {/* Text column */}
@@ -43,8 +57,8 @@ export async function WalletPreview() {
               {t("sectionLabel")}
             </p>
             <h2
-              className="mt-3 text-3xl font-bold sm:text-[2.5rem]"
-              style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
+              className="mt-3 text-3xl font-bold sm:text-[2.75rem]"
+              style={{ color: "var(--mk-text)", letterSpacing: "-0.035em" }}
             >
               {t("title")}
             </h2>
