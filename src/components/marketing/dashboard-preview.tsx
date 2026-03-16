@@ -126,19 +126,27 @@ export function FeatureShowcase() {
               </div>
             </div>
 
-            {/* Screenshot area — only render active image to avoid loading all 6 */}
+            {/* Screenshot area — all images stacked, only active one visible */}
             <div className="relative overflow-hidden" style={{ minHeight: 320 }}>
-              <Image
-                key={activeTab}
-                src={activeFeature.image}
-                alt={activeFeature.alt}
-                width={1920}
-                height={1080}
-                className="w-full h-auto"
-                sizes="(max-width: 1280px) 100vw, 1280px"
-                priority={activeTab === "dashboard"}
-                loading={activeTab === "dashboard" ? "eager" : "lazy"}
-              />
+              {FEATURES.map((feature) => (
+                <Image
+                  key={feature.id}
+                  src={feature.image}
+                  alt={feature.alt}
+                  width={1920}
+                  height={1080}
+                  className="w-full h-auto transition-opacity duration-300 ease-out"
+                  style={{
+                    opacity: activeTab === feature.id ? 1 : 0,
+                    position: activeTab === feature.id ? "relative" : "absolute",
+                    top: 0,
+                    left: 0,
+                  }}
+                  sizes="(max-width: 1280px) 100vw, 1280px"
+                  priority={feature.id === "dashboard"}
+                  loading={feature.id === "dashboard" ? "eager" : "lazy"}
+                />
+              ))}
             </div>
           </div>
         </ScaleIn>
