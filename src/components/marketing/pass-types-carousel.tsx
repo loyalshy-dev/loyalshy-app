@@ -88,7 +88,18 @@ export function PassTypesCarousel() {
   const current = PASS_TYPES[active]
 
   return (
-    <section className="py-24 sm:py-32" style={{ background: "var(--mk-surface)" }}>
+    <section className="relative py-24 sm:py-32 overflow-hidden" style={{ background: "var(--mk-surface)" }}>
+      {/* Gradient mesh */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: `
+            radial-gradient(ellipse 50% 50% at 30% 50%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 60% at 70% 30%, oklch(0.55 0.17 155 / 0.03) 0%, transparent 70%)
+          `,
+        }}
+      />
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         {/* Heading */}
         <FadeIn>
@@ -155,8 +166,16 @@ export function PassTypesCarousel() {
               boxShadow: "0 20px 60px oklch(0 0 0 / 0.06)",
             }}
           >
-            {/* Screenshot */}
-            <div className="relative overflow-hidden rounded-xl" style={{ background: "var(--mk-surface)" }}>
+            {/* Screenshot with perspective tilt */}
+            <div
+              className="relative overflow-hidden rounded-xl"
+              style={{
+                background: "var(--mk-surface)",
+                transform: "perspective(1200px) rotateY(-3deg) rotateX(2deg)",
+                boxShadow: "0 12px 40px oklch(0 0 0 / 0.10), 0 4px 12px oklch(0 0 0 / 0.06)",
+                animation: "mk-float 3s ease-in-out infinite",
+              }}
+            >
               <Image
                 key={current.id}
                 src={`/pass-types/${current.id}.webp`}
