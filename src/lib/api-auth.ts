@@ -54,7 +54,7 @@ export async function authenticateApiRequest(
   const planDef = PLANS[result.organization.plan as PlanId]
   if (!planDef?.apiAccess) {
     throw new ForbiddenError(
-      "Your current plan does not include API access. Please upgrade to Growth or higher."
+      "Your current plan does not include API access."
     )
   }
 

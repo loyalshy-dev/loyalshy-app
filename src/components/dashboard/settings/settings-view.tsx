@@ -81,7 +81,7 @@ export function SettingsView({
     { id: "billing", label: t("billing"), icon: CreditCard },
   ]
 
-  // Build tabs list — include API tab only for Growth+ plans
+  // Build tabs list — include API tab if plan allows API access
   const plan = PLANS[organization.plan as PlanId]
   const tabs = plan?.apiAccess
     ? [...baseTabs, { id: "api" as Tab, label: t("api"), icon: Key }]

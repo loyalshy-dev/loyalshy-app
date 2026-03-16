@@ -70,7 +70,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Key files**: `api-auth.ts`, `api-handler.ts`, `api-rate-limit.ts`, `api-errors.ts`, `api-response.ts`, `api-cors.ts`, `api-data.ts` (shared data layer + `findOrCreateContact`, `buildWalletUrls`, `sendPassIssuedEmail`), `api-schemas.ts` (Zod), `api-serializers.ts`, `api-events.ts` (webhook dispatch), `api-openapi.ts` (OpenAPI spec + use case guides), `api-keys.ts` (key generation/validation), `api-logger.ts` (fire-and-forget request logging)
 - **Server actions**: `api-key-actions.ts` (dashboard key + webhook CRUD)
 - **Docs**: `/api/v1/docs` (Scalar interactive reference with use case guides: venue ticketing, loyalty stamps, gym membership, bulk import, webhook sync), `/api/v1/openapi.json` (spec)
-- **Plan limits**: Pro (STARTER): 20 req/min, 1k/day, 2 keys, 1 webhook | Business (GROWTH): 60/min, 10k/day, 10 keys, 5 webhooks | Scale: 300/min, 100k/day, 25 keys, 10 webhooks | Enterprise: 600/min, unlimited, 50 keys, 25 webhooks
+- **Plan limits**: Free: 5 req/min, 100/day, 1 key, 1 webhook | Pro (STARTER): 20 req/min, 1k/day, 2 keys, 1 webhook | Business (GROWTH): 60/min, 10k/day, 10 keys, 5 webhooks | Scale: 300/min, 100k/day, 25 keys, 10 webhooks | Enterprise: 600/min, unlimited, 50 keys, 25 webhooks
 
 ### Next.js 16 Rules
 - Use `proxy.ts` NOT `middleware.ts`
@@ -189,6 +189,11 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 ### Pass Types (10)
 STAMP_CARD, COUPON, MEMBERSHIP, POINTS, PREPAID, GIFT_CARD, TICKET, ACCESS, TRANSIT, BUSINESS_ID
 
+### Join Mode (per PassTemplate)
+- **OPEN** (default for STAMP_CARD, COUPON, POINTS, MEMBERSHIP): contacts self-join via QR code or shareable link on `/join/[slug]`
+- **INVITE_ONLY** (default for TICKET, ACCESS, TRANSIT, BUSINESS_ID, GIFT_CARD, PREPAID): passes issued by org only (Direct Issue, CSV Import, API). Public join page filters out INVITE_ONLY templates; `joinTemplate` server action rejects them server-side.
+- Owners can override the default per program in Program Settings.
+
 ### Interaction Types
 STAMP, COUPON_REDEEM, CHECK_IN, POINTS_EARN, POINTS_REDEEM, PREPAID_USE, PREPAID_RECHARGE, GIFT_CHARGE, GIFT_REFUND, TICKET_SCAN, TICKET_VOID, ACCESS_GRANT, ACCESS_DENY, TRANSIT_BOARD, TRANSIT_EXIT, ID_VERIFY, STATUS_CHANGE, REWARD_EARNED, REWARD_REDEEMED, NOTE
 
@@ -265,7 +270,7 @@ Update the "Current Progress" section above to track what's done.
 7. Invitation (Better Auth's org invite — separate from StaffInvitation)
 
 **Application (15):**
-8. PassTemplate (passType: 10 types, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
+8. PassTemplate (passType: 10 types, joinMode: OPEN/INVITE_ONLY, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
 9. PassInstance (pivot: Contact × PassTemplate — wallet pass, status, data JSON for type-specific state)
 10. Contact (end user — identity + denormalized totalInteractions + sequential memberNumber per org)
 11. Interaction (type discriminator, metadata JSON, linked to PassInstance)
@@ -316,7 +321,7 @@ Update the "Current Progress" section above to track what's done.
 | Scale | SCALE | €99 | €79 | Unlimited | 25 | Unlimited |
 | Enterprise | ENTERPRISE | Custom | Custom | Unlimited | Unlimited | Unlimited |
 
-**Important:** PlanId values (`FREE`, `STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, API rate limiting, and throughout the codebase. Display names ("Free", "Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc. Free users have no Stripe customer — Stripe customer is created on-demand at first paid checkout. Subscription cancellation downgrades to FREE. Free plan allows only STAMP_CARD and COUPON pass types (`allowedPassTypes` in plans.ts); paid plans allow all 10. No default program is created at signup — users choose their first program type from the dashboard.
+**Important:** PlanId values (`FREE`, `STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, API rate limiting, and throughout the codebase. Display names ("Free", "Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc. Free users have no Stripe customer — Stripe customer is created on-demand at first paid checkout. Subscription cancellation downgrades to FREE. Free plan allows only STAMP_CARD and COUPON pass types (`allowedPassTypes` in plans.ts); paid plans allow all 10. No default program is created at signup — users choose their first program type from the dashboard. All plans include API access — Free plan has tight limits (5 req/min, 100/day, 1 key, 1 webhook) for testing and evaluation.
 
 ## Dashboard Navigation
 

@@ -46,6 +46,7 @@ Rate limits are per-organization and depend on your plan:
 
 | Plan | Requests/min | Requests/day |
 |------|-------------|-------------|
+| Free | 5 | 100 |
 | Starter | 20 | 1,000 |
 | Growth | 60 | 10,000 |
 | Scale | 300 | 100,000 |
