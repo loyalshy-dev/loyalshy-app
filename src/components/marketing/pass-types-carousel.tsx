@@ -166,13 +166,13 @@ export function PassTypesCarousel() {
               boxShadow: "0 20px 60px oklch(0 0 0 / 0.06)",
             }}
           >
-            {/* Screenshot with perspective tilt */}
+            {/* Screenshot */}
             <div
               className="relative overflow-hidden rounded-xl"
               style={{
                 background: "var(--mk-surface)",
-                transform: "perspective(1200px) rotateY(-3deg) rotateX(2deg)",
-                boxShadow: "0 12px 40px oklch(0 0 0 / 0.10), 0 4px 12px oklch(0 0 0 / 0.06)",
+                border: "1px solid var(--mk-border)",
+                boxShadow: "0 4px 16px oklch(0 0 0 / 0.06)",
               }}
             >
               <Image
