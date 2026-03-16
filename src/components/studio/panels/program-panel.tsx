@@ -375,10 +375,8 @@ function MembershipFields({ store }: { store: CardDesignStoreApi }) {
         value={validDuration}
         onChange={(v) => set("validDuration", v)}
         options={[
-          { value: "30_days", label: "30 days" },
-          { value: "90_days", label: "90 days" },
-          { value: "6_months", label: "6 months" },
-          { value: "1_year", label: "1 year" },
+          { value: "monthly", label: "Monthly" },
+          { value: "yearly", label: "Yearly" },
           { value: "lifetime", label: "Lifetime" },
           { value: "custom", label: "Custom" },
         ]}

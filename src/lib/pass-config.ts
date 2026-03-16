@@ -20,7 +20,7 @@ import type {
 export const stampCardConfigSchema = z.object({
   stampsRequired: z.number().int().min(2).max(50),
   rewardDescription: z.string().min(1).max(200),
-  rewardExpiryDays: z.number().int().min(1).max(365),
+  rewardExpiryDays: z.number().int().min(0).max(365),
   minigame: z
     .object({
       enabled: z.boolean(),
