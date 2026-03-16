@@ -104,7 +104,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Server actions**: use `getTranslations("serverErrors")` from `next-intl/server` for error/validation messages
 - **Studio panels**: all use `useTranslations("studio.*")` — panels, colors, strip, notifications, details, prize, avatar, template, canvas
 - **Coverage**: 100% — 78 files, ~1,300 strings across marketing, auth, dashboard, studio, server actions, and legal pages
-- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, passTypesCarousel, walletPreview, testimonials, pricing, faq, closingCta, footer, cookieBanner, auth.login, auth.register, auth.forgotPassword, auth.invite, auth.error, dashboard.nav, dashboard.overview, dashboard.activity, dashboard.topContacts, dashboard.programsSummary, dashboard.contacts, dashboard.addContact, dashboard.contactDetail, dashboard.contactColumns, dashboard.contactTable, dashboard.programs, dashboard.passInstances, dashboard.distribution, dashboard.programSettings, dashboard.programEditor, dashboard.settings, dashboard.settingsForms, dashboard.registerVisit, dashboard.shell, dashboard.rewards, dashboard.jobsHistory, dashboard.onboarding, dashboard.status, dashboard.chart, errors, privacy, terms, cookies, studio.panels, studio.colors, studio.strip, studio.logo, studio.notifications, studio.details, studio.prize, studio.avatar, studio.template, studio.canvas, serverErrors
+- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, passTypesCarousel, walletPreview, testimonials, pricing, faq, tryDemo, closingCta, footer, cookieBanner, auth.login, auth.register, auth.forgotPassword, auth.invite, auth.error, dashboard.nav, dashboard.overview, dashboard.activity, dashboard.topContacts, dashboard.programsSummary, dashboard.contacts, dashboard.addContact, dashboard.contactDetail, dashboard.contactColumns, dashboard.contactTable, dashboard.programs, dashboard.passInstances, dashboard.distribution, dashboard.programSettings, dashboard.programEditor, dashboard.settings, dashboard.settingsForms, dashboard.registerVisit, dashboard.shell, dashboard.rewards, dashboard.jobsHistory, dashboard.onboarding, dashboard.status, dashboard.chart, errors, privacy, terms, cookies, studio.panels, studio.colors, studio.strip, studio.logo, studio.notifications, studio.details, studio.prize, studio.avatar, studio.template, studio.canvas, serverErrors
 
 ### Prisma v7 Rules
 - Use `prisma.config.ts` for configuration (datasource URL lives here, NOT in schema.prisma)
@@ -131,8 +131,6 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
         /rewards              → Cross-program rewards (not in sidebar)
         /settings             → General, Team, Billing, API (owner, all plans)
     /(studio)       → Redirects to /programs/[id]/design (studio now embedded)
-    /(admin-studio) → Full-page showcase card studio (own layout, super_admin only)
-      /admin/showcase/[id]/studio → Showcase card editor
     /(public)       → Landing, pricing, QR scan, card view pages
     /api            → API routes
       /api/v1       → Public REST API (Bearer token auth)
@@ -153,7 +151,6 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
       /overview     → Analytics: stat cards, activity chart, busiest days, recent activity, top contacts, programs summary, skeletons
       /contacts     → Contact table, columns (stacked type icons), filters, detail sheet (passes/visits/rewards tabs, issue pass), empty state
       /programs     → Program list view, tab nav, pass instances, settings
-    /admin/showcase → Showcase card management + studio adapter
     /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, pass types carousel, motion animations)
       motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn) — used below-fold only; Hero/SocialProof use CSS animations
       pass-types-carousel.tsx → Auto-playing carousel showcasing all 10 pass types with screenshots, descriptions, and use case tags
@@ -203,7 +200,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 
 **Original phases (completed):**
 - **Phase 0–5** — Foundation, Dashboard, Business Logic, Wallet, Billing, Polish
-- **Phase 7–11** — Multi-program, Navigation, Studio, Program Types, Admin Showcase
+- **Phase 7–11** — Multi-program, Navigation, Studio, Program Types
 
 **Rewrite phases:**
 - **Phase P1** — Schema & Core Data Layer (new Prisma schema, types, DAL)
@@ -270,7 +267,7 @@ Update the "Current Progress" section above to track what's done.
 6. Member (userId + organizationId + role)
 7. Invitation (Better Auth's org invite — separate from StaffInvitation)
 
-**Application (15):**
+**Application (14):**
 8. PassTemplate (passType: 10 types, joinMode: OPEN/INVITE_ONLY, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
 9. PassInstance (pivot: Contact × PassTemplate — wallet pass, status, data JSON for type-specific state)
 10. Contact (end user — identity + denormalized totalInteractions + sequential memberNumber per org)
@@ -281,11 +278,10 @@ Update the "Current Progress" section above to track what's done.
 15. StaffInvitation (custom invite flow with tokens — NOT Better Auth's Invitation)
 16. DeviceRegistration (Apple Wallet push, linked to PassInstance)
 17. AnalyticsSnapshot (pre-computed daily metrics)
-18. ShowcaseCard (marketing landing page card examples; `designData` JSON + `metadata` JSON + `sortOrder`)
-19. ApiKey (org-scoped, SHA-256 hashed key, prefix for display, scopes, expiry, revocation)
-20. WebhookEndpoint (org-scoped, HMAC secret, event subscriptions, auto-disable on failures)
-21. WebhookDelivery (delivery log per endpoint, status code, response body, attempts)
-22. ApiRequestLog (batched request logging — method, path, status, latency, API key)
+18. ApiKey (org-scoped, SHA-256 hashed key, prefix for display, scopes, expiry, revocation)
+19. WebhookEndpoint (org-scoped, HMAC secret, event subscriptions, auto-disable on failures)
+20. WebhookDelivery (delivery log per endpoint, status code, response body, attempts)
+21. ApiRequestLog (batched request logging — method, path, status, latency, API key)
 
 ## Quality Checklist (Verify After Each Phase)
 
@@ -351,9 +347,6 @@ Update the "Current Progress" section above to track what's done.
 - `/admin` — overview stats
 - `/admin/users` — user management
 - `/admin/organizations` — organization management
-- `/admin/showcase` — marketing showcase card management (up to 5 cards)
-- `/admin/showcase/[id]/studio` — full-page card design editor for showcase cards (own layout, `(admin-studio)` route group)
-
 ## Design Direction
 
 - **Linear/Vercel aesthetic** — NOT generic shadcn defaults. Premium, refined, professional.
@@ -451,8 +444,7 @@ Think: Figma.com, Framer.com, Linear's marketing site (not app).
 **Layout**
 - BREAK THE GRID intentionally in hero — overlapping elements, off-axis
 - Bento grid for features (not equal card rows)
-- Wallet pass previews: tilted 3-12deg, layered with drop shadows
-  Use real ShowcaseCard data — not static mockups
+- Wallet pass previews: static WebP images from /public/pass-types/ in WalletStack and PhoneMockup
 - Generous section padding (clamp-based vertical rhythm)
 - Full-bleed sections with contained content
 
@@ -493,7 +485,7 @@ Before touching any file:
 3. Identify which section you're redesigning
 4. Describe: what Figma-ism you're bringing to this section
 5. List new translation keys before writing JSX
-6. Use ShowcaseCard real data for pass previews — never fake mockups
+6. Use static WebP images from /public/pass-types/ for pass previews
 
 ### Agent Workflow for Dashboard Work  
 Before touching any file:
