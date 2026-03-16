@@ -238,6 +238,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase PERF — Performance optimization (WebP images, CSS hero animations, Suspense restructure, cached DAL, parallel queries, lazy-loaded dashboard dialogs, skeleton fallbacks)
 - [x] Phase PERF-2 — Deep performance pass (cached `getOrgMember()` in DAL, removed unused passTemplates include from `getOrganizationForUser()`, parallelized all sequential DB queries across dashboard pages, Vercel region `fra1` to match Neon DB, i18n message splitting by route group, DB indexes on Reward/Interaction/Contact, contacts page Suspense boundary)
 - [x] Phase BUGFIX — Codebase audit fixes: 44 bugs + 5 deferred items across security (auth bypass, SSRF, HTML injection, missing access checks), race conditions (double-stamp, duplicate contact, memberNumber locking via FOR UPDATE), data integrity (wrong field reads, SQL case mismatch, invalid defaults), API consistency (rate limit off-by-one, memory leak, missing requestId, webhook org filter, interactions route through domain actions, contact limit check), UI (broken strip paths, missing Suspense, zundo equality, mid-file import), i18n (hardcoded strings in 8 components), dead code cleanup, R2 storage leak, PassType union typing, sanitized Apple log endpoint, config z.any() replaced with type-specific Zod validation
+- [x] Phase REDESIGN — Landing page redesign: asymmetric hero with WalletStack (pass-type images), social proof trust badges (no fake stats), gradient mesh backgrounds on all sections, features bento grid with uniform card layout and equal heights, pass types carousel (flat screenshots), how-it-works connecting line + perspective screenshots, wallet preview with PhoneMockupInteractive (pass-type images), pricing with stronger highlight + pill buttons, closing CTA with oversized heading, dark mode marketing CSS variables, testimonials removed (fake data), footer CSS variable background
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -392,3 +393,111 @@ See `.env.example` for full list. Key vars: DATABASE_URL, DATABASE_URL_UNPOOLED,
 ## Detailed File References
 
 For file-by-file reference of each feature area (dashboard, contacts, interactions, rewards, settings, billing, wallet, onboarding, errors, mobile, security, testing, performance), see **`docs/file-references.md`**.
+
+
+
+## Surface-Specific Design Directions
+
+### Dashboard — Linear/Vercel Aesthetic
+Premium dev-tool energy. Calm, data-dense, trustworthy.
+
+**Typography**
+- Geist font, 13px body (established)
+- Tight tracking on headings (-0.03em)
+- Muted labels, high-contrast values — data always wins
+
+**Color**
+- 2-3 surface levels in dark mode (not flat black)
+- `--brand` as accent only — never as background
+- Status colors: semantic only (green=active, amber=warning, red=error)
+- Borders: 1px, subtle — define space without weight
+
+**Components**
+- shadcn as base, always reskinned toward Linear density
+- Tables: compact rows, hover highlight, no heavy borders
+- Stat cards: number-first, label secondary, trend indicator
+- Sidebar: already established — don't touch the token system
+
+**Motion**
+- Functional only: skeleton → content fade, sheet slide-in
+- NO decorative animations inside dashboard
+- Transitions: 150ms ease-out max
+
+**Feel**
+- Every pixel earns its place
+- Information density over whitespace
+- A developer would feel at home here
+
+---
+
+### Landing Page — Figma/Design-Tool Aesthetic
+Creative-tool energy. Expressive, layered, craft-forward.
+Think: Figma.com, Framer.com, Linear's marketing site (not app).
+
+**Typography**
+- Geist for body/UI elements (consistency with brand)
+- Display headings: oversized, variable weight, fluid sizing
+  clamp(2.5rem, 6vw, 5rem) — scale with viewport
+- Tracking: very tight on large display (-0.04em to -0.06em)
+- Mix weights dramatically: 800 headline → 400 body in same section
+
+**Color**
+- Light mode primary — bright, airy, confident
+- Dark sections as punctuation (not entire page)
+- `--brand` oklch(0.55 0.2 265) as hero accent
+- Gradient meshes, not flat fills — subtle oklch-based gradients
+- Glass morphism on feature cards: backdrop-blur + translucent bg
+
+**Layout**
+- BREAK THE GRID intentionally in hero — overlapping elements, off-axis
+- Bento grid for features (not equal card rows)
+- Wallet pass previews: tilted 3-12deg, layered with drop shadows
+  Use real ShowcaseCard data — not static mockups
+- Generous section padding (clamp-based vertical rhythm)
+- Full-bleed sections with contained content
+
+**Motion (motion 12.x)**
+- Hero: CSS animations (established pattern — keep it)
+- Use existing FadeIn/Stagger/ScaleIn from motion.tsx below fold
+- Pass previews: subtle float animation (translateY 0→-8px, 3s ease-in-out infinite)
+- Feature section: staggered reveal as cards enter viewport
+- Pricing: scale-in on recommended plan
+- NO scroll-jacking, NO heavy JS animations in hero
+
+**Components**
+- Buttons: pill shape (rounded-full) — different from dashboard's sharp buttons
+- Feature cards: glass morphism + subtle inner border (1px rgba white)
+- Pricing recommended plan: elevated with shadow + brand glow, not just a border
+- Pass type carousel: already exists — enhance don't replace
+
+**The Figma Feel Specifics**
+- Sections feel like crafted frames, not stacked divs
+- Use layering: elements overlap section boundaries
+- Wallet passes feel like real objects (perspective transform, multi-layer shadow)
+- Color pops feel intentional, not random
+- A designer would screenshot this for inspiration
+
+---
+
+### Shared Rules (Both Surfaces)
+- OKLCH color space — extend globals.css tokens, never replace
+- i18n 100% coverage — every string in /messages/{en,es,fr}.json
+- Geist as the connective tissue between both aesthetics
+- `--brand` variable is sacred — same value everywhere
+- Mobile responsive — test at 375px
+
+### Agent Workflow for Landing Page Work
+Before touching any file:
+1. Read /src/components/marketing/ — understand what exists
+2. Read globals.css — know the token system
+3. Identify which section you're redesigning
+4. Describe: what Figma-ism you're bringing to this section
+5. List new translation keys before writing JSX
+6. Use ShowcaseCard real data for pass previews — never fake mockups
+
+### Agent Workflow for Dashboard Work  
+Before touching any file:
+1. Read the specific dashboard component(s) affected
+2. Check if shadcn component exists — extend it, don't rebuild
+3. No new motion unless it's functional (loading → loaded)
+4. Verify DAL auth call exists in any new Server Component
