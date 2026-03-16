@@ -20,7 +20,7 @@ function FeatureCard({
 
   return (
     <div
-      className={`group relative flex flex-col gap-4 p-6 rounded-2xl hover:-translate-y-1 transition-all duration-250 ${
+      className={`group relative flex flex-col gap-4 p-6 rounded-2xl hover:-translate-y-1 transition-all duration-250 h-full ${
         isLarge ? "sm:col-span-2" : ""
       }`}
       style={{
@@ -179,7 +179,7 @@ export async function Features() {
           stagger={0.07}
         >
           {features.map((feature) => (
-            <StaggerItem key={feature.title}>
+            <StaggerItem key={feature.title} className="h-full">
               <FeatureCard
                 icon={feature.icon}
                 title={feature.title}
