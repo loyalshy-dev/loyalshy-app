@@ -42,7 +42,7 @@ export async function MarketingFooter() {
     <footer
       aria-label="Site footer"
       style={{
-        background: "oklch(0.13 0.005 285)",
+        background: "var(--mk-footer-bg)",
         color: "oklch(0.55 0.008 285)",
       }}
     >
