@@ -45,7 +45,18 @@
     "browserUrl": "www.loyalshy.com/dashboard"
   },
   "socialProof": {
-    "headline": "Impulsando pases digitales de wallet para negocios en todo el mundo"
+    "headline": "Impulsando pases digitales de wallet para negocios en todo el mundo",
+    "trustedBy": "La confianza de negocios en crecimiento en todo el mundo",
+    "stat1Value": "500+",
+    "stat1Label": "negocios",
+    "stat2Value": "50K+",
+    "stat2Label": "pases emitidos",
+    "stat3Value": "12+",
+    "stat3Label": "países",
+    "appleWallet": "Apple Wallet",
+    "googleWallet": "Google Wallet",
+    "gdprCompliant": "Conforme al RGPD",
+    "secureByDesign": "Seguro por diseño"
   },
   "featureShowcase": {
     "sectionLabel": "Plataforma",
@@ -401,7 +412,8 @@
     "title1": "¿Listo para aumentar tus",
     "titleHighlight": "clientes recurrentes",
     "subtitle": "Únete a negocios que usan Loyalshy para convertir visitantes en clientes fieles. Configúralo en 5 minutos, sin tarjeta de crédito.",
-    "viewPricing": "Ver Precios"
+    "viewPricing": "Ver Precios",
+    "floatingCardAlt": "Tarjeta de fidelización de ejemplo"
   },
   "footer": {
     "product": "Producto",

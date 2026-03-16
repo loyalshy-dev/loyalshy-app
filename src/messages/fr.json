@@ -45,7 +45,18 @@
     "browserUrl": "www.loyalshy.com/dashboard"
   },
   "socialProof": {
-    "headline": "Des passes de portefeuille digital pour les entreprises du monde entier"
+    "headline": "Des passes de portefeuille digital pour les entreprises du monde entier",
+    "trustedBy": "La confiance des entreprises en croissance dans le monde entier",
+    "stat1Value": "500+",
+    "stat1Label": "entreprises",
+    "stat2Value": "50K+",
+    "stat2Label": "passes émis",
+    "stat3Value": "12+",
+    "stat3Label": "pays",
+    "appleWallet": "Apple Wallet",
+    "googleWallet": "Google Wallet",
+    "gdprCompliant": "Conforme au RGPD",
+    "secureByDesign": "Sécurisé par conception"
   },
   "featureShowcase": {
     "sectionLabel": "Plateforme",
@@ -401,7 +412,8 @@
     "title1": "Prêt à développer ta",
     "titleHighlight": "clientèle fidèle",
     "subtitle": "Rejoins les entreprises qui utilisent Loyalshy pour transformer les visiteurs occasionnels en habitués fidèles. Mise en place en 5 minutes, aucune carte bancaire requise.",
-    "viewPricing": "Voir les tarifs"
+    "viewPricing": "Voir les tarifs",
+    "floatingCardAlt": "Exemple de carte de fidélité"
   },
   "footer": {
     "product": "Produit",

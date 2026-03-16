@@ -45,7 +45,18 @@
     "browserUrl": "www.loyalshy.com/dashboard"
   },
   "socialProof": {
-    "headline": "Powering digital wallet passes for businesses worldwide"
+    "headline": "Powering digital wallet passes for businesses worldwide",
+    "trustedBy": "Trusted by growing businesses worldwide",
+    "stat1Value": "500+",
+    "stat1Label": "businesses",
+    "stat2Value": "50K+",
+    "stat2Label": "passes issued",
+    "stat3Value": "12+",
+    "stat3Label": "countries",
+    "appleWallet": "Apple Wallet",
+    "googleWallet": "Google Wallet",
+    "gdprCompliant": "GDPR Compliant",
+    "secureByDesign": "Secure by Design"
   },
   "featureShowcase": {
     "sectionLabel": "Platform",
@@ -401,7 +412,8 @@
     "title1": "Ready to grow your",
     "titleHighlight": "repeat business",
     "subtitle": "Join businesses using Loyalshy to turn first-time visitors into loyal regulars. Set up in 5 minutes, no credit card required.",
-    "viewPricing": "View Pricing"
+    "viewPricing": "View Pricing",
+    "floatingCardAlt": "Example loyalty card"
   },
   "footer": {
     "product": "Product",

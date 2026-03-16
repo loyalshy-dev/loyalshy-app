@@ -263,6 +263,26 @@
     --mk-text-dimmed: oklch(0.50 0.008 285);
     --mk-brand-purple: oklch(0.55 0.2 265);
     --mk-brand-green: oklch(0.55 0.17 155);
+    --mk-footer-bg: oklch(0.13 0.005 285);
+    --mk-glass-bg: oklch(1 0 0 / 0.6);
+    --mk-glass-border: oklch(1 0 0 / 0.15);
+  }
+
+  /* — Custom Properties (Dark) — */
+  .dark {
+    --mk-bg: oklch(0.12 0.005 285);
+    --mk-surface: oklch(0.15 0.006 285);
+    --mk-card: oklch(0.18 0.007 285);
+    --mk-border: oklch(0.25 0.008 285);
+    --mk-border-hover: oklch(0.35 0.01 285);
+    --mk-text: oklch(0.95 0 0);
+    --mk-text-muted: oklch(0.65 0.01 285);
+    --mk-text-dimmed: oklch(0.55 0.008 285);
+    --mk-brand-purple: oklch(0.6 0.22 265);
+    --mk-brand-green: oklch(0.6 0.18 155);
+    --mk-footer-bg: oklch(0.1 0.004 285);
+    --mk-glass-bg: oklch(1 0 0 / 0.05);
+    --mk-glass-border: oklch(1 0 0 / 0.08);
   }
 
   /* — Gradient Text — */
@@ -362,6 +382,11 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes mk-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 @keyframes mk-marquee {
