@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
+import { assertOrganizationRole, getOrganizationForUser, getCurrentUser } from "@/lib/dal"
 import { stripe, PLANS, getPlanLimits, isPassTypeAllowed, isActiveSubscription, type PlanId } from "@/lib/stripe"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -196,6 +196,13 @@ export async function checkContactLimit(organizationId: string): Promise<{
   limit: number
   approaching: boolean
 }> {
+  // Super admins bypass plan restrictions
+  const currentUser = await getCurrentUser()
+  if (currentUser?.user.role === "SUPER_ADMIN") {
+    const current = await db.contact.count({ where: { organizationId } })
+    return { allowed: true, current, limit: Infinity, approaching: false }
+  }
+
   const organization = await db.organization.findUnique({
     where: { id: organizationId },
     select: { plan: true, subscriptionStatus: true },
@@ -224,6 +231,15 @@ export async function checkTemplateLimit(organizationId: string): Promise<{
   limit: number
   approaching: boolean
 }> {
+  // Super admins bypass plan restrictions
+  const currentUser = await getCurrentUser()
+  if (currentUser?.user.role === "SUPER_ADMIN") {
+    const current = await db.passTemplate.count({
+      where: { organizationId, status: "ACTIVE" },
+    })
+    return { allowed: true, current, limit: Infinity, approaching: false }
+  }
+
   const organization = await db.organization.findUnique({
     where: { id: organizationId },
     select: { plan: true, subscriptionStatus: true },
@@ -250,6 +266,10 @@ export async function checkTemplateLimit(organizationId: string): Promise<{
 }
 
 export async function checkPassTypeAllowed(organizationId: string, passType: string): Promise<boolean> {
+  // Super admins bypass plan restrictions
+  const currentUser = await getCurrentUser()
+  if (currentUser?.user.role === "SUPER_ADMIN") return true
+
   const organization = await db.organization.findUnique({
     where: { id: organizationId },
     select: { plan: true },
@@ -264,6 +284,13 @@ export async function checkStaffLimit(organizationId: string): Promise<{
   limit: number
   approaching: boolean
 }> {
+  // Super admins bypass plan restrictions
+  const currentUser = await getCurrentUser()
+  if (currentUser?.user.role === "SUPER_ADMIN") {
+    const current = await db.member.count({ where: { organizationId } })
+    return { allowed: true, current, limit: Infinity, approaching: false }
+  }
+
   const organization = await db.organization.findUnique({
     where: { id: organizationId },
     select: { plan: true, subscriptionStatus: true },

@@ -56,6 +56,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - `User.role` = **global only**: `USER` (default) or `SUPER_ADMIN`
 - Organization-level roles (`OWNER`, `STAFF`) = Better Auth **organization membership** roles
 - NEVER put OWNER/STAFF in User.role
+- **Super admin plan bypass**: `SUPER_ADMIN` users bypass all org plan limits (program count, pass types, contact count, staff count) in `billing-actions.ts` — limits are tenant-scoped but super admins are unrestricted for testing/admin purposes
 
 ### Public REST API
 - **Auth**: Bearer token (`lsk_live_` prefix), SHA-256 hashed storage, org-scoped
