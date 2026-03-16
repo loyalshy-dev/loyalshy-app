@@ -112,6 +112,7 @@ export async function issueAppleWalletPass(
       organizationName: organization.name,
       organizationLogo: cardDesign.logoUrl ?? organization.logo,
       organizationLogoApple: cardDesign.logoAppleUrl ?? organization.logoApple,
+      organizationLogoGoogle: cardDesign.logoGoogleUrl ?? organization.logoGoogle,
       brandColor: organization.brandColor,
       secondaryColor: organization.secondaryColor,
       rewardDescription: (templateConfig.rewardDescription as string) ?? "Free reward",

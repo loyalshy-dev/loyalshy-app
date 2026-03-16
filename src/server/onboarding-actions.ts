@@ -793,6 +793,7 @@ async function issuePassForInstance(
         organizationName: organization.name,
         organizationLogo: cardDesign?.logoUrl ?? organization.logo,
         organizationLogoApple: cardDesign?.logoAppleUrl ?? organization.logoApple,
+        organizationLogoGoogle: cardDesign?.logoGoogleUrl ?? organization.logoGoogle,
         brandColor: organization.brandColor,
         secondaryColor: organization.secondaryColor,
         rewardDescription: template.rewardDescription,

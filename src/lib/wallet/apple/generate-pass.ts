@@ -28,6 +28,7 @@ export type PassGenerationInput = {
   organizationName: string
   organizationLogo: string | null
   organizationLogoApple: string | null
+  organizationLogoGoogle: string | null
   brandColor: string | null
   secondaryColor: string | null
   rewardDescription: string
@@ -185,7 +186,7 @@ export async function generateApplePass(
     }
   }
 
-  const icons = await getIconBuffers(input.organizationLogoApple ?? input.organizationLogo, stripImageUrl, stripFilters.logoAppleZoom)
+  const icons = await getIconBuffers(input.organizationLogoGoogle ?? input.organizationLogoApple ?? input.organizationLogo, stripImageUrl, stripFilters.logoAppleZoom)
 
   // If we have a dynamically generated stamp grid buffer, inject it directly
   if (stampGridStripBuffer) {
@@ -361,8 +362,8 @@ export async function generateApplePass(
   const appleSplit = splitFieldsForApple(unifiedFields)
   const appleLayout = {
     header: appleSplit.header,
-    // For stamp types, progress is baked into the strip image — no primary text field
-    primary: (isStampType && showStrip) ? [] : layout.apple.primary,
+    // When a strip image is visible, skip primary fields — they overlay the strip on Apple Wallet
+    primary: showStrip ? [] : layout.apple.primary,
     secondary: appleSplit.secondary,
     auxiliary: appleSplit.auxiliary,
   }

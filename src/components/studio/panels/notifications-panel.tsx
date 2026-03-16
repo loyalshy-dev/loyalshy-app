@@ -19,9 +19,18 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
   const mapLatitude = useStore(store, (s) => s.wallet.mapLatitude)
   const mapLongitude = useStore(store, (s) => s.wallet.mapLongitude)
   const locationMessage = useStore(store, (s) => s.wallet.locationMessage)
+  const logoGoogleUrl = useStore(store, (s) => s.wallet.logoGoogleUrl)
+  const logoAppleUrl = useStore(store, (s) => s.wallet.logoAppleUrl)
+  const primaryColor = useStore(store, (s) => s.wallet.primaryColor)
+  const stripImageUrl = useStore(store, (s) => s.wallet.stripImageUrl)
+  const generatedStripApple = useStore(store, (s) => s.wallet.generatedStripApple)
   const [previewPlatform, setPreviewPlatform] = useState<"apple" | "google">("apple")
 
   const set = store.getState().setWalletField
+
+  // Use the wallet logo URLs (which reflect what actually appears on the pass)
+  const effectiveLogo = logoGoogleUrl ?? logoAppleUrl ?? organizationLogo
+  const effectiveStrip = stripImageUrl ?? generatedStripApple
 
   const handleAddressChange = useCallback(
     (address: string, lat: number | null, lng: number | null) => {
@@ -160,13 +169,15 @@ export function NotificationsPanel({ store, organizationName, organizationLogo }
           {previewPlatform === "apple" ? (
             <AppleNotificationPreview
               organizationName={organizationName}
-              organizationLogo={organizationLogo}
+              organizationLogo={effectiveLogo}
               message={displayMessage}
+              cardColor={primaryColor}
+              stripImage={effectiveStrip}
             />
           ) : (
             <GoogleNotificationPreview
               organizationName={organizationName}
-              organizationLogo={organizationLogo}
+              organizationLogo={effectiveLogo}
               message={displayMessage}
             />
           )}
@@ -200,81 +211,140 @@ function AppleNotificationPreview({
   organizationName,
   organizationLogo,
   message,
+  cardColor,
+  stripImage,
 }: {
   organizationName: string
   organizationLogo: string | null
   message: string
+  cardColor: string
+  stripImage: string | null
 }) {
-  const t = useTranslations("studio.notifications")
-  const now = new Date()
-  const timeStr = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
-
   return (
     <div
       style={{
-        borderRadius: 16,
+        borderRadius: 20,
         overflow: "hidden",
-        backgroundColor: "#f2f2f7",
+        backgroundColor: "rgba(40, 40, 40, 0.85)",
+        backdropFilter: "blur(30px)",
+        WebkitBackdropFilter: "blur(30px)",
         fontFamily: "-apple-system, 'SF Pro Text', system-ui, sans-serif",
+        padding: "12px",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
       }}
     >
-      {/* Lock screen time */}
-      <div style={{ textAlign: "center", padding: "14px 0 10px" }}>
-        <div style={{ fontSize: 42, fontWeight: 700, color: "#1c1c1e", letterSpacing: "-0.02em", lineHeight: 1 }}>
-          {timeStr}
+      {/* Large app icon — rounded square like real iOS */}
+      {organizationLogo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={organizationLogo}
+          alt=""
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 12,
+            objectFit: "cover",
+            flexShrink: 0,
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 12,
+            background: "linear-gradient(135deg, #007AFF, #5856D6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>W</span>
         </div>
-        <div style={{ fontSize: 13, color: "#636366", marginTop: 2, fontWeight: 500 }}>
-          {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+      )}
+
+      {/* Title + message */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: "#fff",
+            lineHeight: 1.25,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {organizationName}
+        </div>
+        <div
+          style={{
+            fontSize: 15,
+            color: "rgba(255,255,255,0.75)",
+            lineHeight: 1.25,
+            marginTop: 2,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {message}
         </div>
       </div>
 
-      {/* Notification banner */}
-      <div style={{ padding: "0 10px 10px" }}>
-        <div
-          style={{
-            backgroundColor: "rgba(255,255,255,0.85)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            borderRadius: 14,
-            padding: "10px 12px",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-          }}
-        >
-          {/* App icon + title + time */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            {organizationLogo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={organizationLogo}
-                alt=""
-                style={{ width: 20, height: 20, borderRadius: 5, objectFit: "cover" }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 5,
-                  background: "linear-gradient(135deg, #007AFF, #5856D6)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#fff" }}>W</span>
-              </div>
-            )}
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#1c1c1e", flex: 1 }}>
-              {t("wallet")}
-            </span>
-            <span style={{ fontSize: 11, color: "#8e8e93" }}>now</span>
-          </div>
-
-          {/* Notification body */}
-          <div style={{ fontSize: 13, color: "#1c1c1e", lineHeight: 1.35 }}>
-            <span style={{ fontWeight: 600 }}>{organizationName}</span>
-            <span style={{ color: "#3a3a3c" }}> — {message}</span>
-          </div>
+      {/* Mini card thumbnail on the right */}
+      <div
+        style={{
+          width: 48,
+          height: 56,
+          borderRadius: 6,
+          overflow: "hidden",
+          flexShrink: 0,
+          backgroundColor: cardColor,
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+        }}
+      >
+        {/* Mini strip area */}
+        {stripImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={stripImage}
+            alt=""
+            style={{
+              width: "100%",
+              height: 24,
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <div style={{ width: "100%", height: 24, backgroundColor: "rgba(0,0,0,0.15)" }} />
+        )}
+        {/* Mini logo on the card */}
+        {organizationLogo && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={organizationLogo}
+            alt=""
+            style={{
+              width: 14,
+              height: 14,
+              borderRadius: 2,
+              objectFit: "cover",
+              position: "absolute",
+              top: 3,
+              left: 3,
+            }}
+          />
+        )}
+        {/* Bottom area hint */}
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 16, height: 16, borderRadius: 2, backgroundColor: "rgba(0,0,0,0.12)" }} />
         </div>
       </div>
     </div>
