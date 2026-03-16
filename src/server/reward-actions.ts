@@ -222,7 +222,7 @@ export async function getRewardStats(templateId?: string): Promise<RewardStats> 
   >`SELECT AVG(EXTRACT(EPOCH FROM ("redeemedAt" - "earnedAt")) / 86400)::float AS avg_days
     FROM reward
     WHERE "organizationId" = ${organizationId}
-      AND status = 'REDEEMED'
+      AND status = 'redeemed'
       AND "redeemedAt" IS NOT NULL
       ${templateFilter}`
 
