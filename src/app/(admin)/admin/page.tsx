@@ -4,6 +4,8 @@ import { getAdminPlatformStats } from "@/server/admin-actions"
 import { AdminStatCards } from "@/components/admin/overview/admin-stat-cards"
 import { SubscriptionBreakdown } from "@/components/admin/overview/subscription-breakdown"
 import { PlanBreakdown } from "@/components/admin/overview/plan-breakdown"
+import { PassTypeBreakdown } from "@/components/admin/overview/pass-type-breakdown"
+import { RecentSignups } from "@/components/admin/overview/recent-signups"
 
 export default async function AdminOverviewPage() {
   await connection()
@@ -24,6 +26,9 @@ export default async function AdminOverviewPage() {
         totalUsers={stats.totalUsers}
         totalOrganizations={stats.totalOrganizations}
         totalContacts={stats.totalContacts}
+        totalPassInstances={stats.totalPassInstances}
+        totalInteractions={stats.totalInteractions}
+        totalRewards={stats.totalRewards}
         estimatedMrr={stats.estimatedMrr}
         newUsersThisMonth={stats.newUsersThisMonth}
         newOrganizationsThisMonth={stats.newOrganizationsThisMonth}
@@ -33,6 +38,11 @@ export default async function AdminOverviewPage() {
       <div className="grid gap-4 sm:grid-cols-2">
         <SubscriptionBreakdown data={stats.subscriptionBreakdown} />
         <PlanBreakdown data={stats.planBreakdown} />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <PassTypeBreakdown data={stats.passTypeBreakdown} />
+        <RecentSignups users={stats.recentSignups} />
       </div>
     </div>
   )

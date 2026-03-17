@@ -13,6 +13,7 @@ export type AdminPlatformStats = {
   totalUsers: number
   totalOrganizations: number
   totalContacts: number
+  totalPassInstances: number
   totalInteractions: number
   totalRewards: number
   newUsersThisMonth: number
@@ -21,6 +22,8 @@ export type AdminPlatformStats = {
   estimatedMrr: number
   subscriptionBreakdown: { status: string; count: number }[]
   planBreakdown: { plan: string; count: number }[]
+  passTypeBreakdown: { passType: string; count: number }[]
+  recentSignups: { id: string; name: string; email: string; createdAt: Date }[]
 }
 
 export type AdminUserRow = {
@@ -170,16 +173,20 @@ export async function getAdminPlatformStats(): Promise<AdminPlatformStats> {
     totalUsers,
     totalOrganizations,
     totalContacts,
+    totalPassInstances,
     totalInteractions,
     totalRewards,
     newUsersThisMonth,
     newOrganizationsThisMonth,
     subscriptionGroups,
     planGroups,
+    passTypeGroups,
+    recentSignups,
   ] = await Promise.all([
     db.user.count(),
     db.organization.count(),
     db.contact.count(),
+    db.passInstance.count(),
     db.interaction.count(),
     db.reward.count(),
     db.user.count({ where: { createdAt: { gte: monthStart } } }),
@@ -191,6 +198,15 @@ export async function getAdminPlatformStats(): Promise<AdminPlatformStats> {
     db.organization.groupBy({
       by: ["plan"],
       _count: { id: true },
+    }),
+    db.passTemplate.groupBy({
+      by: ["passType"],
+      _count: { id: true },
+    }),
+    db.user.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { id: true, name: true, email: true, createdAt: true },
     }),
   ])
 
@@ -204,6 +220,10 @@ export async function getAdminPlatformStats(): Promise<AdminPlatformStats> {
     count: g._count.id,
   }))
 
+  const passTypeBreakdown = passTypeGroups
+    .map((g) => ({ passType: g.passType, count: g._count.id }))
+    .sort((a, b) => b.count - a.count)
+
   const activeSubscriptions = subscriptionBreakdown
     .filter((s) => s.status === "ACTIVE" || s.status === "TRIALING")
     .reduce((sum, s) => sum + s.count, 0)
@@ -216,6 +236,7 @@ export async function getAdminPlatformStats(): Promise<AdminPlatformStats> {
     totalUsers,
     totalOrganizations,
     totalContacts,
+    totalPassInstances,
     totalInteractions,
     totalRewards,
     newUsersThisMonth,
@@ -224,6 +245,8 @@ export async function getAdminPlatformStats(): Promise<AdminPlatformStats> {
     estimatedMrr,
     subscriptionBreakdown,
     planBreakdown,
+    passTypeBreakdown,
+    recentSignups,
   }
 }
 
