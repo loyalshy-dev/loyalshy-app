@@ -186,7 +186,7 @@ export async function generateApplePass(
     }
   }
 
-  const icons = await getIconBuffers(input.organizationLogoGoogle ?? input.organizationLogoApple ?? input.organizationLogo, stripImageUrl, stripFilters.logoAppleZoom)
+  const icons = await getIconBuffers(input.organizationLogoApple ?? input.organizationLogo, stripImageUrl, stripFilters.logoAppleZoom)
 
   // If we have a dynamically generated stamp grid buffer, inject it directly
   if (stampGridStripBuffer) {
