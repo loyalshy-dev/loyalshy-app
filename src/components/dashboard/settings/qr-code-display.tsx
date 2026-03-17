@@ -112,6 +112,13 @@ export function QrCodeDisplay({
       }
     : null
 
+  // Resolve logo for QR center — prefer program Google logo > org Google logo > org general logo
+  const qrLogoUrl =
+    activeTemplateDesign?.logoGoogleUrl ??
+    organization.logoGoogle ??
+    activeTemplateDesign?.logoUrl ??
+    organization.logo
+
   const accentColor =
     activeTemplateDesign?.primaryColor ??
     organization.brandColor ??
@@ -156,6 +163,7 @@ export function QrCodeDisplay({
       )
 
       const qr = QRCode.create(joinUrl, { errorCorrectionLevel: "H" })
+      // Render QR without image logo for canvas (external images taint canvas via SVG)
       const styledSvg = renderStyledQr(qr.modules, preset.qrSize, organization.name.charAt(0).toUpperCase(), { bg: posterAccentColor, fg: "#ffffff" })
       const svgBlob = new Blob([styledSvg], { type: "image/svg+xml" })
       const svgUrl = URL.createObjectURL(svgBlob)
@@ -171,6 +179,37 @@ export function QrCodeDisplay({
       const qrX = (canvas.width - qrDrawSize) / 2
       const qrY = barHeight + nameFontSize + Math.round(canvas.height * 0.06)
       ctx.drawImage(qrImage, qrX, qrY, qrDrawSize, qrDrawSize)
+
+      // Draw logo image on top of QR center
+      if (qrLogoUrl) {
+        try {
+          const logoImg = new window.Image()
+          logoImg.crossOrigin = "anonymous"
+          await new Promise<void>((resolve, reject) => {
+            logoImg.onload = () => resolve()
+            logoImg.onerror = () => reject()
+            logoImg.src = qrLogoUrl
+          })
+          const logoSize = qrDrawSize * 0.18 * 2 // matches centerModules ratio
+          const logoCenterX = qrX + qrDrawSize / 2
+          const logoCenterY = qrY + qrDrawSize / 2
+          const logoRadius = logoSize / 2
+
+          // Draw circular clipped logo
+          ctx.save()
+          ctx.beginPath()
+          ctx.arc(logoCenterX, logoCenterY, logoRadius + 2, 0, Math.PI * 2)
+          ctx.fillStyle = posterAccentColor
+          ctx.fill()
+          ctx.beginPath()
+          ctx.arc(logoCenterX, logoCenterY, logoRadius, 0, Math.PI * 2)
+          ctx.clip()
+          ctx.drawImage(logoImg, logoCenterX - logoRadius, logoCenterY - logoRadius, logoSize, logoSize)
+          ctx.restore()
+        } catch {
+          // Logo failed to load — text fallback already rendered in SVG
+        }
+      }
 
       const subFontSize = Math.round(canvas.width * 0.035)
       ctx.fillStyle = "#666666"
@@ -237,6 +276,7 @@ export function QrCodeDisplay({
                 value={joinUrl}
                 size={176}
                 logoText={organization.name.charAt(0).toUpperCase()}
+                logoUrl={qrLogoUrl}
                 bgColor={accentColor}
               />
 

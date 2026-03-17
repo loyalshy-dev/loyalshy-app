@@ -104,9 +104,9 @@ export function JoinModeToggle({
           <p className="text-[12px] text-muted-foreground leading-relaxed">
             {t("duplicateNote")}{" "}
             {t.rich("duplicateNoteSettings", {
-              link: () => (
+              link: (chunks) => (
                 <a href="/dashboard/settings" className="underline underline-offset-4 hover:text-foreground">
-                  {t("duplicateNoteSettingsLink")}
+                  {chunks}
                 </a>
               ),
             })}

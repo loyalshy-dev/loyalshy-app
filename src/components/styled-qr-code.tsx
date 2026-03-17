@@ -7,6 +7,7 @@ type StyledQrCodeProps = {
   value: string
   size?: number
   logoText?: string
+  logoUrl?: string | null
   bgColor?: string
   fgColor?: string
   className?: string
@@ -16,6 +17,7 @@ export function StyledQrCode({
   value,
   size = 200,
   logoText,
+  logoUrl,
   bgColor,
   fgColor,
   className,
@@ -28,11 +30,11 @@ export function StyledQrCode({
     try {
       // Use "H" (30%) error correction to survive the center logo clearing
       const qr = QRCode.create(value, { errorCorrectionLevel: "H" })
-      return renderStyledQr(qr.modules, size, logoText, colors)
+      return renderStyledQr(qr.modules, size, logoText, colors, logoUrl ?? undefined)
     } catch {
       return null
     }
-  }, [value, size, logoText, colors])
+  }, [value, size, logoText, logoUrl, colors])
 
   if (!svgContent) return null
 
@@ -48,7 +50,8 @@ export function renderStyledQr(
   modules: { size: number; data: Uint8Array },
   size: number,
   logoText?: string,
-  colors?: { bg: string; fg: string }
+  colors?: { bg: string; fg: string },
+  logoUrl?: string
 ): string {
   const bg = colors?.bg ?? "var(--foreground)"
   const fg = colors?.fg ?? "var(--background)"
@@ -132,12 +135,24 @@ export function renderStyledQr(
   const centerY = size / 2
   const logoBgRadius = centerModules * cellSize * 0.42
 
-  const logoSvg = logoText
-    ? [
-        `<circle cx="${centerX.toFixed(2)}" cy="${centerY.toFixed(2)}" r="${logoBgRadius.toFixed(2)}" fill="${bg}"/>`,
-        `<text x="${centerX.toFixed(2)}" y="${(centerY + logoBgRadius * 0.35).toFixed(2)}" text-anchor="middle" fill="${fg}" font-size="${(logoBgRadius * 0.85).toFixed(2)}" font-weight="700" font-family="-apple-system, 'Segoe UI', system-ui, sans-serif">${escapeXml(logoText)}</text>`,
-      ].join("")
-    : ""
+  let logoSvg = ""
+  if (logoUrl) {
+    // Image logo with circular clip
+    const imgSize = logoBgRadius * 2
+    const imgX = centerX - logoBgRadius
+    const imgY = centerY - logoBgRadius
+    logoSvg = [
+      `<defs><clipPath id="logo-clip"><circle cx="${centerX.toFixed(2)}" cy="${centerY.toFixed(2)}" r="${logoBgRadius.toFixed(2)}"/></clipPath></defs>`,
+      `<circle cx="${centerX.toFixed(2)}" cy="${centerY.toFixed(2)}" r="${(logoBgRadius + 1).toFixed(2)}" fill="${bg}"/>`,
+      `<image href="${escapeXml(logoUrl)}" x="${imgX.toFixed(2)}" y="${imgY.toFixed(2)}" width="${imgSize.toFixed(2)}" height="${imgSize.toFixed(2)}" clip-path="url(#logo-clip)" preserveAspectRatio="xMidYMid slice"/>`,
+    ].join("")
+  } else if (logoText) {
+    // Fallback: text logo (first letter)
+    logoSvg = [
+      `<circle cx="${centerX.toFixed(2)}" cy="${centerY.toFixed(2)}" r="${logoBgRadius.toFixed(2)}" fill="${bg}"/>`,
+      `<text x="${centerX.toFixed(2)}" y="${(centerY + logoBgRadius * 0.35).toFixed(2)}" text-anchor="middle" fill="${fg}" font-size="${(logoBgRadius * 0.85).toFixed(2)}" font-weight="700" font-family="-apple-system, 'Segoe UI', system-ui, sans-serif">${escapeXml(logoText)}</text>`,
+    ].join("")
+  }
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">`,
