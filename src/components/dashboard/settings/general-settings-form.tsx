@@ -1,14 +1,14 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { Globe, Phone, MapPin, Shield, Info } from "lucide-react"
+import { Globe, Phone, MapPin } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { updateOrganizationProfile, updateJoinRequirement } from "@/server/org-settings-actions"
+import { updateOrganizationProfile } from "@/server/org-settings-actions"
 import { Card } from "@/components/ui/card"
 
 const TIMEZONES = [
@@ -41,8 +41,6 @@ type ProfileForm = {
   timezone: string
 }
 
-type JoinRequirement = "email_or_phone" | "email_only"
-
 type Organization = {
   id: string
   name: string
@@ -54,18 +52,12 @@ type Organization = {
   phone: string | null
   website: string | null
   timezone: string
-  settings: Record<string, unknown>
 }
 
 export function GeneralSettingsForm({ organization }: { organization: Organization }) {
   const t = useTranslations("dashboard.settingsForms")
   const tSettings = useTranslations("dashboard.settings")
   const [isPending, startTransition] = useTransition()
-  const [isJoinPending, startJoinTransition] = useTransition()
-  const [joinRequirement, setJoinRequirement] = useState<JoinRequirement>(
-    (organization.settings?.joinRequirement as JoinRequirement) ?? "email_or_phone"
-  )
-
   const {
     register,
     handleSubmit,
@@ -90,22 +82,6 @@ export function GeneralSettingsForm({ organization }: { organization: Organizati
         toast.error(String(result.error))
       } else {
         toast.success(t("saved"))
-      }
-    })
-  }
-
-  function handleJoinRequirementChange(value: JoinRequirement) {
-    setJoinRequirement(value)
-    startJoinTransition(async () => {
-      const result = await updateJoinRequirement({
-        organizationId: organization.id,
-        joinRequirement: value,
-      })
-      if (!result.success) {
-        toast.error(result.error ?? "Failed to update setting")
-        setJoinRequirement(joinRequirement) // revert
-      } else {
-        toast.success("Join form setting updated")
       }
     })
   }
@@ -212,66 +188,6 @@ export function GeneralSettingsForm({ organization }: { organization: Organizati
         </div>
       </form>
 
-      {/* Join Form Settings — separate from the profile form */}
-      <Card>
-        <div className="border-b border-border px-6 py-4">
-          <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold">Public Join Form</h2>
-          </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Control what information is required when contacts join via QR code or link.
-          </p>
-        </div>
-        <div className="p-6 space-y-4">
-          <div className="space-y-3">
-            <Label className="text-[13px]">Contact identification requirement</Label>
-            <div className="space-y-2">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="joinRequirement"
-                  value="email_or_phone"
-                  checked={joinRequirement === "email_or_phone"}
-                  onChange={() => handleJoinRequirementChange("email_or_phone")}
-                  disabled={isJoinPending}
-                  className="mt-0.5"
-                />
-                <div>
-                  <span className="text-[13px] font-medium">Email or phone</span>
-                  <p className="text-[12px] text-muted-foreground">
-                    Contacts must provide at least an email or phone number. Lower friction, but allows different identifiers per visit.
-                  </p>
-                </div>
-              </label>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="joinRequirement"
-                  value="email_only"
-                  checked={joinRequirement === "email_only"}
-                  onChange={() => handleJoinRequirementChange("email_only")}
-                  disabled={isJoinPending}
-                  className="mt-0.5"
-                />
-                <div>
-                  <span className="text-[13px] font-medium">Email required</span>
-                  <p className="text-[12px] text-muted-foreground">
-                    Contacts must provide an email address. Stronger deduplication and allows you to send pass notifications.
-                  </p>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2 rounded-lg bg-muted/50 p-3">
-            <Info className="size-3.5 text-muted-foreground mt-0.5 shrink-0" />
-            <p className="text-[12px] text-muted-foreground">
-              For maximum control, use <strong>Direct Issue</strong> in the Distribution tab to personally create and deliver passes to specific contacts via email.
-            </p>
-          </div>
-        </div>
-      </Card>
     </div>
   )
 }

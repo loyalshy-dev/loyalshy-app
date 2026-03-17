@@ -21,9 +21,9 @@ import {
   BadgeCheck,
 } from "lucide-react"
 import { joinTemplate, requestWalletPass } from "@/server/onboarding-actions"
-import type { OrganizationPublicInfo, JoinResult, JoinRequirement } from "@/server/onboarding-actions"
+import type { OrganizationPublicInfo, JoinResult } from "@/server/onboarding-actions"
 import type { PublicTemplateInfo } from "@/types/pass-instance"
-import { computeTextColor } from "@/lib/wallet/card-design"
+
 import { TemplateCardPreview } from "@/components/template-card-preview"
 import { Card } from "@/components/ui/card"
 
@@ -157,23 +157,10 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
     }
   }, [])
 
-  const joinReq: JoinRequirement = organization.joinRequirement ?? "email_or_phone"
-  const requireEmailOnly = joinReq === "email_only"
-
   const activeProgram = selectedProgram ?? programs[0]
   const design = activeProgram?.passDesign
   const brandColor = design?.primaryColor ?? organization.brandColor ?? "oklch(0.55 0.2 265)"
-  const textOnBrand = design?.textColor ?? computeTextColor(
-    /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : "#4F46E5"
-  )
 
-  const isColorDark = (() => {
-    const m = brandColor.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/)
-    if (!m) return false
-    const [r, g, b] = [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)]
-    return (r * 299 + g * 587 + b * 114) / 1000 < 60
-  })()
-  const badgeMix = isColorDark ? 20 : 12
 
   const fontFamilyCss: Record<string, string> = {
     SANS: "inherit",
@@ -198,20 +185,6 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
   // Combined: create pass + generate wallet + open wallet — one tap
   function handleSubmitAndAddToWallet(formData: FormData, chosenPlatform: Platform) {
     setError(null)
-
-    const email = (formData.get("email") as string)?.trim() ?? ""
-    const phone = (formData.get("phone") as string)?.trim() ?? ""
-
-    if (requireEmailOnly && !email) {
-      setError(t("emailRequired"))
-      return
-    }
-
-    if (!requireEmailOnly && !email && !phone) {
-      setError(t("emailOrPhoneRequired"))
-      return
-    }
-
     formData.set("organizationSlug", organization.slug)
     if (selectedProgram) {
       formData.set("templateId", selectedProgram.id)
@@ -272,20 +245,6 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
   // Submit without wallet — just create pass and go to card page
   function handleSubmitWithoutWallet(formData: FormData) {
     setError(null)
-
-    const email = (formData.get("email") as string)?.trim() ?? ""
-    const phone = (formData.get("phone") as string)?.trim() ?? ""
-
-    if (requireEmailOnly && !email) {
-      setError(t("emailRequired"))
-      return
-    }
-
-    if (!requireEmailOnly && !email && !phone) {
-      setError(t("emailOrPhoneRequired"))
-      return
-    }
-
     formData.set("organizationSlug", organization.slug)
     if (selectedProgram) {
       formData.set("templateId", selectedProgram.id)
@@ -408,7 +367,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
         background: `linear-gradient(to bottom, color-mix(in oklch, ${brandColor} 6%, var(--background)) 0%, var(--background) 60%)`,
       }}
     >
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-[320px] space-y-5">
         {/* Back button for multi-program */}
         {hasMultiplePrograms && (
           <button
@@ -424,52 +383,36 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
           </button>
         )}
 
-        {/* Header */}
-        <div className="text-center space-y-4">
-          {(organization.logoGoogle ?? organization.logo) && (
-            <div className="mx-auto w-16 h-16 rounded-2xl overflow-hidden bg-muted">
-              <Image
-                src={(organization.logoGoogle ?? organization.logo)!}
-                alt={organization.name}
-                width={64}
-                height={64}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+        {/* Card preview — hero position */}
+        {activeProgram && (
+          <TemplateCardPreview
+            template={activeProgram}
+            organizationName={organization.name}
+            logoUrl={organization.logo}
+            logoAppleUrl={organization.logoApple}
+            logoGoogleUrl={organization.logoGoogle}
+            customerName={name.trim() || undefined}
+            currentVisits={0}
+          />
+        )}
 
-          <div className="space-y-1">
-            <h1 className="text-xl font-semibold tracking-tight">
-              {organization.name}
-            </h1>
-            <p className="text-muted-foreground text-[14px]">
-              {activeProgram?.name ?? t("getYourPass")}
-            </p>
-          </div>
-
-          {/* Info badge — only for types where it adds value */}
+        {/* Info badge + custom message */}
+        <div className="text-center space-y-3">
           {activeProgram && shouldShowInfoBadge(activeProgram.passType) && (
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium"
-              style={{
-                backgroundColor: `color-mix(in oklch, ${brandColor} ${badgeMix}%, transparent)`,
-                color: brandColor,
-              }}
-            >
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium bg-muted text-muted-foreground">
               {(() => { const Icon = getPassTypeIcon(activeProgram.passType); return <Icon className="w-3.5 h-3.5" aria-hidden="true" /> })()}
               {getProgramSubtitle(activeProgram, t)}
             </div>
           )}
-        </div>
 
-        {/* Custom message */}
-        {design?.customMessage && (
-          <div className="rounded-lg bg-muted/50 px-4 py-3">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {design.customMessage}
-            </p>
-          </div>
-        )}
+          {design?.customMessage && (
+            <div className="rounded-lg bg-muted/50 px-4 py-3 text-left">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {design.customMessage}
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Form — fields first, card preview after */}
         <form
@@ -495,49 +438,25 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               placeholder={t("namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
+              className="flex h-10 w-full rounded-full border border-input bg-background px-4 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
             />
           </div>
 
           {/* Email */}
           <div className="space-y-1.5">
             <label htmlFor="email" className="text-[13px] font-medium text-foreground">
-              {t("email")}{" "}
-              {requireEmailOnly && <span className="text-destructive">*</span>}
+              {t("email")} <span className="text-destructive">*</span>
             </label>
             <input
               id="email"
               name="email"
               type="email"
-              required={requireEmailOnly}
+              required
               autoComplete="email"
               placeholder={t("emailPlaceholder")}
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
+              className="flex h-10 w-full rounded-full border border-input bg-background px-4 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
             />
-            {!requireEmailOnly && (
-              <p className="text-[11px] text-muted-foreground">
-                {t("emailHint")}
-              </p>
-            )}
           </div>
-
-          {/* Phone */}
-          {!requireEmailOnly && (
-            <div className="space-y-1.5">
-              <label htmlFor="phone" className="text-[13px] font-medium text-foreground">
-                {t("phone")}{" "}
-                <span className="text-muted-foreground font-normal">{t("phoneAlt")}</span>
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                placeholder={t("phonePlaceholder")}
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
-              />
-            </div>
-          )}
 
           {/* Error */}
           {error && (
@@ -553,45 +472,43 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
               <span className="text-sm text-muted-foreground">{loadingLabel}</span>
             </div>
           ) : showBothPlatforms ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const formData = getFormData()
-                    if (formData) handleSubmitAndAddToWallet(formData, "apple")
-                  }}
-                  disabled={isPending}
-                  className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Add to Apple Wallet"
-                >
-                  <Image
-                    src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg"
-                    alt="Add to Apple Wallet"
-                    width={156}
-                    height={48}
-                    className="h-12 w-auto"
-                  />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const formData = getFormData()
-                    if (formData) handleSubmitAndAddToWallet(formData, "google")
-                  }}
-                  disabled={isPending}
-                  className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Add to Google Wallet"
-                >
-                  <Image
-                    src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg"
-                    alt="Add to Google Wallet"
-                    width={176}
-                    height={48}
-                    className="h-12 w-auto"
-                  />
-                </button>
-              </div>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const formData = getFormData()
+                  if (formData) handleSubmitAndAddToWallet(formData, "apple")
+                }}
+                disabled={isPending}
+                className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Add to Apple Wallet"
+              >
+                <Image
+                  src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg"
+                  alt="Add to Apple Wallet"
+                  width={156}
+                  height={48}
+                  className="h-12 w-auto"
+                />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const formData = getFormData()
+                  if (formData) handleSubmitAndAddToWallet(formData, "google")
+                }}
+                disabled={isPending}
+                className="transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Add to Google Wallet"
+              >
+                <Image
+                  src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg"
+                  alt="Add to Google Wallet"
+                  width={176}
+                  height={48}
+                  className="h-12 w-auto"
+                />
+              </button>
             </div>
           ) : (
             <button
@@ -629,22 +546,6 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
             </button>
           )}
         </form>
-
-        {/* Card preview — below the form, visible but not blocking */}
-        {activeProgram && !isPending && (
-          <div className="flex justify-center pt-2">
-            <TemplateCardPreview
-              template={activeProgram}
-              organizationName={organization.name}
-              logoUrl={organization.logo}
-              logoAppleUrl={organization.logoApple}
-              logoGoogleUrl={organization.logoGoogle}
-              compact
-              customerName={name.trim() || undefined}
-              currentVisits={0}
-            />
-          </div>
-        )}
 
         {/* Footer */}
         <div className="text-center space-y-2">

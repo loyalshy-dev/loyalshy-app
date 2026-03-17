@@ -17,8 +17,6 @@ import type { MinigameConfig } from "@/types/pass-types"
 
 // ─── Types ──────────────────────────────────────────────────
 
-export type JoinRequirement = "email_or_phone" | "email_only"
-
 export type OrganizationPublicInfo = {
   id: string
   name: string
@@ -28,7 +26,6 @@ export type OrganizationPublicInfo = {
   logoGoogle: string | null
   brandColor: string | null
   secondaryColor: string | null
-  joinRequirement: JoinRequirement
   templates: PublicTemplateInfo[]
 }
 
@@ -58,23 +55,10 @@ export type JoinResult = {
 
 const joinSchema = z.object({
   fullName: z.string().min(1, "Name is required").max(100),
-  email: z
-    .string()
-    .email("Invalid email")
-    .max(255)
-    .optional()
-    .or(z.literal("")),
-  phone: z
-    .string()
-    .max(30)
-    .optional()
-    .or(z.literal("")),
+  email: z.string().email("Invalid email").max(255).min(1, "Email is required"),
   organizationSlug: z.string().min(1),
   templateId: z.string().min(1),
-}).refine(
-  (data) => (data.email && data.email.length > 0) || (data.phone && data.phone.length > 0),
-  { message: "Email or phone number is required", path: ["email"] }
-)
+})
 
 const passRequestSchema = z.object({
   passInstanceId: z.string().min(1),
@@ -98,7 +82,6 @@ export async function getOrganizationBySlug(
       logoGoogle: true,
       brandColor: true,
       secondaryColor: true,
-      settings: true,
       passTemplates: {
         where: { status: "ACTIVE", joinMode: "OPEN" },
         select: {
@@ -147,7 +130,6 @@ export async function getOrganizationBySlug(
     logoGoogle: organization.logoGoogle ?? null,
     brandColor: organization.brandColor,
     secondaryColor: organization.secondaryColor,
-    joinRequirement: (((organization.settings as Record<string, unknown>) ?? {}).joinRequirement as JoinRequirement) ?? "email_or_phone",
     templates: organization.passTemplates.map((t) => {
       return {
         id: t.id,
@@ -356,7 +338,6 @@ export async function joinTemplate(
   const raw = {
     fullName: formData.get("fullName") as string,
     email: formData.get("email") as string,
-    phone: formData.get("phone") as string,
     organizationSlug: formData.get("organizationSlug") as string,
     templateId: formData.get("templateId") as string,
   }
@@ -371,25 +352,20 @@ export async function joinTemplate(
 
   const { organizationSlug, templateId } = parsed.data
   const fullName = sanitizeText(parsed.data.fullName, 100)
-  const cleanEmail = parsed.data.email ? sanitizeText(parsed.data.email, 255) || null : null
-  const cleanPhone = parsed.data.phone ? sanitizeText(parsed.data.phone, 30) || null : null
+  const cleanEmail = sanitizeText(parsed.data.email, 255)
+
+  if (!cleanEmail) {
+    return { success: false, error: "Valid email address is required." }
+  }
 
   // Fetch organization
   const organization = await db.organization.findUnique({
     where: { slug: organizationSlug },
-    select: { id: true, settings: true },
+    select: { id: true },
   })
 
   if (!organization) {
     return { success: false, error: "Organization not found" }
-  }
-
-  // Enforce org-level join requirement setting
-  const orgSettings = (organization.settings as Record<string, unknown>) ?? {}
-  const joinRequirement = (orgSettings.joinRequirement as string) ?? "email_or_phone"
-
-  if (joinRequirement === "email_only" && !cleanEmail) {
-    return { success: false, error: "Email address is required to join this program." }
   }
 
   // Fetch the specific template
@@ -415,43 +391,17 @@ export async function joinTemplate(
   const rewardExpiryDays = (templateConfig.rewardExpiryDays as number) ?? 90
 
   // ── Find or create contact ──
-  let contact: {
-    id: string
-    fullName: string
-    createdAt: Date
-    email: string | null
-  } | null = null
-
-  if (cleanEmail) {
-    contact = await db.contact.findUnique({
-      where: {
-        organizationId_email: { organizationId: organization.id, email: cleanEmail },
-      },
-      select: {
-        id: true,
-        fullName: true,
-        createdAt: true,
-        email: true,
-      },
-    })
-  }
-
-  if (!contact && cleanPhone) {
-    contact = await db.contact.findUnique({
-      where: {
-        organizationId_phone: {
-          organizationId: organization.id,
-          phone: cleanPhone,
-        },
-      },
-      select: {
-        id: true,
-        fullName: true,
-        createdAt: true,
-        email: true,
-      },
-    })
-  }
+  let contact = await db.contact.findUnique({
+    where: {
+      organizationId_email: { organizationId: organization.id, email: cleanEmail },
+    },
+    select: {
+      id: true,
+      fullName: true,
+      createdAt: true,
+      email: true,
+    },
+  })
 
   const isReturningContact = !!contact
 
@@ -463,7 +413,6 @@ export async function joinTemplate(
         organizationId: organization.id,
         fullName,
         email: cleanEmail,
-        phone: cleanPhone,
         memberNumber,
       },
       select: {
