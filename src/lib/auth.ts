@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
-import { organization, admin } from "better-auth/plugins"
+import { organization, admin, emailOTP } from "better-auth/plugins"
 import { adminAc, userAc } from "better-auth/plugins/admin/access"
 import { nextCookies } from "better-auth/next-js"
 import { Resend } from "resend"
@@ -102,6 +102,34 @@ export const auth = betterAuth({
         ADMIN_BILLING: adminAc,
         ADMIN_OPS: adminAc,
         SUPER_ADMIN: adminAc,
+      },
+    }),
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 600, // 10 minutes
+      storeOTP: "hashed",
+      sendVerificationOnSignUp: true,
+      sendVerificationOTP: async ({ email, otp, type }) => {
+        const subjectMap = {
+          "email-verification": "Verify your email",
+          "sign-in": "Your sign-in code",
+          "forget-password": "Your password reset code",
+        } as const
+        await getResend().emails.send({
+          from: "Loyalshy <noreply@loyalshy.com>",
+          to: email,
+          subject: `${subjectMap[type]} — ${otp}`,
+          html: `
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">
+              <h2 style="margin:0 0 8px;font-size:20px;font-weight:600;color:#171717;">Your verification code</h2>
+              <p style="margin:0 0 24px;font-size:14px;color:#6b7280;">Enter this code to ${type === "email-verification" ? "verify your email" : type === "sign-in" ? "sign in" : "reset your password"}.</p>
+              <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:20px;text-align:center;margin:0 0 24px;">
+                <span style="font-size:32px;font-weight:700;letter-spacing:8px;color:#171717;">${otp}</span>
+              </div>
+              <p style="margin:0;font-size:13px;color:#9ca3af;">This code expires in 10 minutes. If you didn't request this, you can safely ignore this email.</p>
+            </div>
+          `,
+        })
       },
     }),
     nextCookies(),

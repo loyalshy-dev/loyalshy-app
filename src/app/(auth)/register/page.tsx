@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
@@ -17,12 +17,18 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp"
 import { toast } from "sonner"
 import { createOrganization } from "@/server/onboarding-registration-actions"
 import {
   Check,
   ChevronRight,
   Loader2,
+  Mail,
   Store,
 } from "lucide-react"
 
@@ -32,17 +38,56 @@ export default function RegisterPage() {
   const t = useTranslations("auth.register")
   const searchParams = useSearchParams()
   const stepParam = searchParams.get("step")
-  const [currentStep, setCurrentStep] = useState(stepParam === "2" ? 2 : 1)
+
+  // Google OAuth callback lands on ?step=org → jump to org step (email already verified)
+  // ?step=2 for backwards compat also jumps to org
+  const initialStep = stepParam === "org" || stepParam === "3" || stepParam === "2" ? 3 : 1
+  const [currentStep, setCurrentStep] = useState(initialStep)
+  const [registeredEmail, setRegisteredEmail] = useState("")
 
   const STEPS = [
     { number: 1, label: t("stepAccount"), icon: Check },
-    { number: 2, label: t("stepOrganization"), icon: Store },
+    { number: 2, label: t("stepVerify"), icon: Mail },
+    { number: 3, label: t("stepOrganization"), icon: Store },
   ] as const
 
-  // Sync step from URL (for Google OAuth callback to ?step=2)
+  // Recover state from session on mount/refresh — handles:
+  // 1. Page refresh mid-onboarding (email state lost)
+  // 2. Returning unverified user (should land on verify step)
+  // 3. Google OAuth callback (already verified → org step)
+  const session = authClient.useSession()
+  const hasRecovered = useRef(false)
   useEffect(() => {
-    if (stepParam === "2") setCurrentStep(2)
+    if (hasRecovered.current || !session.data?.user) return
+    hasRecovered.current = true
+
+    const { email, emailVerified } = session.data.user
+    setRegisteredEmail(email)
+
+    if (emailVerified) {
+      // Already verified (Google user, or verified before refresh) → org step
+      setCurrentStep(3)
+    } else if (currentStep === 1) {
+      // Authenticated but unverified — resume at verify step
+      setCurrentStep(2)
+    }
+  }, [session.data, currentStep])
+
+  // Sync step from URL (for Google OAuth callback)
+  useEffect(() => {
+    if (stepParam === "org" || stepParam === "3" || stepParam === "2") {
+      setCurrentStep(3)
+    }
   }, [stepParam])
+
+  const handleAccountCreated = useCallback((email: string) => {
+    setRegisteredEmail(email)
+    setCurrentStep(2)
+  }, [])
+
+  const handleEmailVerified = useCallback(() => {
+    setCurrentStep(3)
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -79,31 +124,24 @@ export default function RegisterPage() {
       )}
 
       {/* Step content */}
-      {currentStep === 1 && <AccountStep onNext={() => setCurrentStep(2)} />}
-      {currentStep === 2 && <OrganizationStep />}
+      {currentStep === 1 && <AccountStep onNext={handleAccountCreated} />}
+      {currentStep === 2 && (
+        <VerifyEmailStep email={registeredEmail} onVerified={handleEmailVerified} />
+      )}
+      {currentStep === 3 && <OrganizationStep />}
     </div>
   )
 }
 
 // ─── Step 1: Account ────────────────────────────────────────
 
-function AccountStep({ onNext }: { onNext: () => void }) {
+function AccountStep({ onNext }: { onNext: (email: string) => void }) {
   const t = useTranslations("auth.register")
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
-  const onNextRef = useRef(onNext)
-  onNextRef.current = onNext
-
-  // Check if user is already authenticated
-  const session = authClient.useSession()
-  useEffect(() => {
-    if (session.data?.user) {
-      onNextRef.current()
-    }
-  }, [session.data])
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
@@ -121,15 +159,16 @@ function AccountStep({ onNext }: { onNext: () => void }) {
       return
     }
 
+    // emailOTP plugin with sendVerificationOnSignUp: true sends the OTP automatically
     toast.success(t("accountCreated"))
-    onNext()
+    onNext(email)
   }
 
   async function handleGoogleSignUp() {
     setIsGoogleLoading(true)
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/register?step=2",
+      callbackURL: "/register?step=org",
     })
   }
 
@@ -214,7 +253,126 @@ function AccountStep({ onNext }: { onNext: () => void }) {
   )
 }
 
-// ─── Step 2: Organization Name ──────────────────────────────
+// ─── Step 2: Verify Email ───────────────────────────────────
+
+function VerifyEmailStep({
+  email,
+  onVerified,
+}: {
+  email: string
+  onVerified: () => void
+}) {
+  const t = useTranslations("auth.register")
+  const [otp, setOtp] = useState("")
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [isResending, setIsResending] = useState(false)
+  const [cooldown, setCooldown] = useState(0)
+
+  // Cooldown timer for resend
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const timer = setTimeout(() => setCooldown((c) => c - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [cooldown])
+
+  async function handleVerify(code: string) {
+    if (code.length !== 6) return
+    setIsVerifying(true)
+
+    const { error } = await authClient.emailOtp.verifyEmail({
+      email,
+      otp: code,
+    })
+
+    if (error) {
+      toast.error(error.message || t("verifyFailed"))
+      setOtp("")
+      setIsVerifying(false)
+      return
+    }
+
+    toast.success(t("verifySuccess"))
+    onVerified()
+  }
+
+  async function handleResend() {
+    setIsResending(true)
+
+    const { error } = await authClient.emailOtp.sendVerificationOtp({
+      email,
+      type: "email-verification",
+    })
+
+    if (error) {
+      toast.error(error.message || t("resendFailed"))
+    } else {
+      toast.success(t("resendSuccess"))
+      setCooldown(60)
+    }
+    setIsResending(false)
+  }
+
+  return (
+    <Card className="max-w-md mx-auto">
+      <CardHeader className="text-center">
+        <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10">
+          <Mail className="size-5 text-primary" />
+        </div>
+        <CardTitle className="text-xl font-bold">{t("verifyTitle")}</CardTitle>
+        <CardDescription>
+          {t("verifySubtitle", { email })}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex justify-center">
+          <InputOTP
+            maxLength={6}
+            value={otp}
+            onChange={(value) => {
+              setOtp(value)
+              if (value.length === 6) handleVerify(value)
+            }}
+            disabled={isVerifying}
+          >
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+        </div>
+
+        {isVerifying && (
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            {t("verifying")}
+          </div>
+        )}
+
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">
+            {t("noCode")}{" "}
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={isResending || cooldown > 0}
+              className="font-medium text-foreground hover:underline disabled:opacity-50 disabled:no-underline"
+            >
+              {cooldown > 0
+                ? t("resendCooldown", { seconds: cooldown })
+                : t("resend")}
+            </button>
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ─── Step 3: Organization Name ──────────────────────────────
 
 function OrganizationStep() {
   const t = useTranslations("auth.register")

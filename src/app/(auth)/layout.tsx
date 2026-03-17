@@ -55,7 +55,7 @@ async function AuthLayoutInner({
     const pathname = headerList.get("x-pathname") || ""
 
     if (pathname && !pathname.startsWith("/register") && !pathname.startsWith("/reset-password")) {
-      redirect("/register?step=2")
+      redirect("/register?step=org")
     }
   }
 

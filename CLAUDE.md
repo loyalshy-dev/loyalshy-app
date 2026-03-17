@@ -12,7 +12,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 | React | 19.2 | View Transitions, useEffectEvent |
 | Prisma ORM | 7.4 | Rust-free TS client, `prisma.config.ts` |
 | PostgreSQL | 18 | `uuidv7()` for all PKs |
-| Better Auth | 1.4.x | Replaces NextAuth — Prisma adapter, org plugin |
+| Better Auth | 1.4.x | Replaces NextAuth — Prisma adapter, org plugin, emailOTP plugin |
 | Stripe | 20.x (node) / 8.x (stripe-js) | API version 2026-01-28.clover |
 | Trigger.dev | 4.x (v4 GA) | Warm machine reuse, queues defined in code |
 | Tailwind CSS | 4.2 | CSS-native `@theme`, no tailwind.config.js |
@@ -240,7 +240,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase API-4 — Webhooks (HMAC-SHA256 signed delivery via Trigger.dev, endpoint CRUD API, test ping, secret rotation, auto-disable, event dispatch on mutations)
 - [x] Phase API-5 — API Dashboard UI (API keys section, webhook management section, server actions for CRUD, settings tab with plan gating)
 - [x] Phase PRICING — New pricing model (Free tier on landing page, Pro €29, Business €49, Scale €99, no 14-day trial)
-- [x] Phase ONBOARDING — Simplified registration (2 steps: signup + org name → dashboard), FREE plan in Prisma enum + plans.ts, no trial/Stripe at signup, programs usage tracking in billing
+- [x] Phase ONBOARDING — Simplified registration (3 steps: signup + email OTP verification + org name → dashboard), emailOTP plugin (6-digit, 10min expiry, hashed storage, 3 attempts max), Google OAuth skips verify step, session recovery on page refresh, FREE plan in Prisma enum + plans.ts, no trial/Stripe at signup, programs usage tracking in billing
 - [x] Phase SEO — Comprehensive SEO audit fixes (legal pages, structured data, LCP performance, sitemap, robots.txt, WCAG contrast, HSTS preload, fake social proof removal)
 - [x] Phase I18N — Internationalization with next-intl (English + Spanish + French, cookie-based locale, 78 files / ~1,224 strings per locale, 100% coverage — marketing, auth, dashboard, studio, server actions, legal pages)
 - [x] Phase PERF — Performance optimization (WebP images, CSS hero animations, Suspense restructure, cached DAL, parallel queries, lazy-loaded dashboard dialogs, skeleton fallbacks)
@@ -311,8 +311,8 @@ Update the "Current Progress" section above to track what's done.
 
 ## Key Auth Files
 
-- `src/lib/auth.ts` — Better Auth server config (Prisma adapter, plugins, email sending, trustedOrigins)
-- `src/lib/auth-client.ts` — Client-side auth (createAuthClient + org/admin plugins, baseURL uses window.location.origin in browser)
+- `src/lib/auth.ts` — Better Auth server config (Prisma adapter, plugins: org, admin, emailOTP; email sending, trustedOrigins)
+- `src/lib/auth-client.ts` — Client-side auth (createAuthClient + org/admin/emailOTP plugins, baseURL uses window.location.origin in browser)
 - `src/app/api/auth/[...all]/route.ts` — API route handler (toNextJsHandler)
 - `src/lib/dal.ts` — Data Access Layer (REAL security boundary)
 - `proxy.ts` — Optimistic cookie redirect (UX only)
