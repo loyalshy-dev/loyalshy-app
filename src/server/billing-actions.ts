@@ -45,7 +45,7 @@ export async function getBillingData(): Promise<BillingData | { error: string }>
     // Count usage metrics in parallel
     const [contactCount, memberCount, programCount] = await Promise.all([
       db.contact.count({
-        where: { organizationId: organization.id },
+        where: { organizationId: organization.id, deletedAt: null },
       }),
       db.member.count({
         where: { organizationId: organization.id },
@@ -199,7 +199,7 @@ export async function checkContactLimit(organizationId: string): Promise<{
   // Super admins bypass plan restrictions
   const currentUser = await getCurrentUser()
   if (isAdminRole(currentUser?.user.role ?? "")) {
-    const current = await db.contact.count({ where: { organizationId } })
+    const current = await db.contact.count({ where: { organizationId, deletedAt: null } })
     return { allowed: true, current, limit: Infinity, approaching: false }
   }
 
@@ -215,7 +215,7 @@ export async function checkContactLimit(organizationId: string): Promise<{
 
   const plan = organization.plan as PlanId
   const { customerLimit } = getPlanLimits(plan)
-  const current = await db.contact.count({ where: { organizationId } })
+  const current = await db.contact.count({ where: { organizationId, deletedAt: null } })
 
   return {
     allowed: current < customerLimit,

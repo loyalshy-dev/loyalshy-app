@@ -254,7 +254,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">{t("contactsLabel")}</p>
                   <p className="text-sm font-semibold">
-                    {usage.contacts.toLocaleString()} / {usage.contactLimit === Infinity ? "Unlimited" : usage.contactLimit.toLocaleString()}
+                    {usage.contacts.toLocaleString()} / {usage.contactLimit === Infinity ? t("unlimited") : usage.contactLimit.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -273,11 +273,12 @@ export function BillingSettings({ data }: { data: BillingData }) {
                     />
                   </div>
                   {usage.contactPercent >= 80 && usage.contactPercent < 100 && (
-                    <p className="text-[10px] text-amber-600 mt-1">Approaching limit</p>
+                    <p className="text-[10px] text-amber-600 mt-1">{t("approachingLimit")}</p>
                   )}
                   {usage.contactPercent >= 100 && (
-                    <p className="text-[10px] text-red-600 mt-1">Limit reached — upgrade to add more</p>
+                    <p className="text-[10px] text-red-600 mt-1">{t("contactLimitReached")}</p>
                   )}
+                  <p className="text-[10px] text-muted-foreground mt-1">{t("contactsHint")}</p>
                 </div>
               )}
             </div>
@@ -289,7 +290,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">{t("teamMembersLabel")}</p>
                   <p className="text-sm font-semibold">
-                    {usage.staff} / {usage.staffLimit === Infinity ? "Unlimited" : usage.staffLimit}
+                    {usage.staff} / {usage.staffLimit === Infinity ? t("unlimited") : usage.staffLimit}
                   </p>
                 </div>
               </div>
@@ -308,10 +309,10 @@ export function BillingSettings({ data }: { data: BillingData }) {
                     />
                   </div>
                   {usage.staffPercent >= 80 && usage.staffPercent < 100 && (
-                    <p className="text-[10px] text-amber-600 mt-1">Approaching limit</p>
+                    <p className="text-[10px] text-amber-600 mt-1">{t("approachingLimit")}</p>
                   )}
                   {usage.staffPercent >= 100 && (
-                    <p className="text-[10px] text-red-600 mt-1">Limit reached — upgrade to add more</p>
+                    <p className="text-[10px] text-red-600 mt-1">{t("staffLimitReached")}</p>
                   )}
                 </div>
               )}
@@ -324,7 +325,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">{t("programsLabel")}</p>
                   <p className="text-sm font-semibold">
-                    {usage.programs} / {usage.programLimit === Infinity ? "Unlimited" : usage.programLimit}
+                    {usage.programs} / {usage.programLimit === Infinity ? t("unlimited") : usage.programLimit}
                   </p>
                 </div>
               </div>
@@ -343,10 +344,10 @@ export function BillingSettings({ data }: { data: BillingData }) {
                     />
                   </div>
                   {usage.programPercent >= 80 && usage.programPercent < 100 && (
-                    <p className="text-[10px] text-amber-600 mt-1">Approaching limit</p>
+                    <p className="text-[10px] text-amber-600 mt-1">{t("approachingLimit")}</p>
                   )}
                   {usage.programPercent >= 100 && (
-                    <p className="text-[10px] text-red-600 mt-1">Limit reached — upgrade to add more</p>
+                    <p className="text-[10px] text-red-600 mt-1">{t("programLimitReached")}</p>
                   )}
                 </div>
               )}

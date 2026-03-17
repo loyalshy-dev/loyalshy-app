@@ -525,6 +525,7 @@
     },
     "register": {
       "stepAccount": "Account",
+      "stepVerify": "Verify",
       "stepOrganization": "Organization",
       "title": "Create an account",
       "subtitle": "Get started with Loyalshy for free",
@@ -551,7 +552,17 @@
       "accountCreated": "Account created!",
       "allSet": "You're all set!",
       "createFailed": "Failed to create account",
-      "genericError": "Something went wrong. Please try again."
+      "genericError": "Something went wrong. Please try again.",
+      "verifyTitle": "Check your email",
+      "verifySubtitle": "We sent a 6-digit code to {email}",
+      "verifying": "Verifying...",
+      "verifySuccess": "Email verified!",
+      "verifyFailed": "Invalid code. Please try again.",
+      "noCode": "Didn't receive a code?",
+      "resend": "Resend code",
+      "resendCooldown": "Resend in {seconds}s",
+      "resendSuccess": "Code sent!",
+      "resendFailed": "Failed to resend code"
     },
     "forgotPassword": {
       "title": "Forgot your password?",
@@ -961,8 +972,7 @@
       "joinModeInviteOnlyDescription": "Only you can issue passes via Direct Issue or CSV Import.",
       "joinModeUpdated": "Access mode updated",
       "duplicateNote": "QR codes and links are self-service — contacts identify themselves by email or phone. For tighter control, use Direct Issue or CSV Import.",
-      "duplicateNoteSettings": "You can also require email (instead of email or phone) in {link}.",
-      "duplicateNoteSettingsLink": "Settings > General > Public Join Form"
+      "duplicateNoteSettings": "You can also require email (instead of email or phone) in <link>Settings > General > Public Join Form</link>."
     },
     "programSettings": {
       "title": "Settings",
@@ -1049,6 +1059,11 @@
       "plansSection": "Plans",
       "plansDescription": "Choose the plan that fits your business.",
       "contactsLabel": "Contacts",
+      "contactsHint": "Contacts count toward your limit until deleted. Remove inactive contacts to free up space.",
+      "approachingLimit": "Approaching limit",
+      "contactLimitReached": "Limit reached — delete unused contacts or upgrade",
+      "staffLimitReached": "Limit reached — upgrade to add more",
+      "programLimitReached": "Limit reached — upgrade to add more",
       "teamMembersLabel": "Team Members",
       "programsLabel": "Programs"
     },
@@ -1802,7 +1817,7 @@
     "unknownError": "Unknown error",
     "nameRequired": "Name is required",
     "invalidEmail": "Invalid email",
-    "contactLimitReached": "You've reached the {limit} contact limit for your plan. Upgrade to add more contacts.",
+    "contactLimitReached": "You've reached the {limit} contact limit for your plan. Delete unused contacts or upgrade to add more.",
     "contactEmailExists": "A contact with email \"{email}\" already exists.",
     "contactPhoneExists": "A contact with phone \"{phone}\" already exists.",
     "contactAlreadyExists": "A contact with these details already exists.",

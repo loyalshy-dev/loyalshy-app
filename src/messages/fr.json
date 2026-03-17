@@ -525,6 +525,7 @@
     },
     "register": {
       "stepAccount": "Compte",
+      "stepVerify": "Vérifier",
       "stepOrganization": "Organisation",
       "title": "Créer un compte",
       "subtitle": "Commencez avec Loyalshy gratuitement",
@@ -551,7 +552,17 @@
       "accountCreated": "Compte créé !",
       "allSet": "Tout est prêt !",
       "createFailed": "Échec de la création du compte",
-      "genericError": "Une erreur est survenue. Veuillez réessayer."
+      "genericError": "Une erreur est survenue. Veuillez réessayer.",
+      "verifyTitle": "Vérifiez votre e-mail",
+      "verifySubtitle": "Nous avons envoyé un code à 6 chiffres à {email}",
+      "verifying": "Vérification...",
+      "verifySuccess": "E-mail vérifié !",
+      "verifyFailed": "Code invalide. Veuillez réessayer.",
+      "noCode": "Vous n'avez pas reçu de code ?",
+      "resend": "Renvoyer le code",
+      "resendCooldown": "Renvoyer dans {seconds}s",
+      "resendSuccess": "Code envoyé !",
+      "resendFailed": "Échec de l'envoi du code"
     },
     "forgotPassword": {
       "title": "Mot de passe oublié ?",
@@ -944,8 +955,7 @@
       "joinModeInviteOnlyDescription": "Seul vous pouvez émettre des passes via émission directe ou import CSV.",
       "joinModeUpdated": "Mode d'accès mis à jour",
       "duplicateNote": "Les codes QR et les liens sont en libre-service — les contacts s'identifient par email ou téléphone. Pour plus de contrôle, utilisez l'émission directe ou l'import CSV.",
-      "duplicateNoteSettings": "Vous pouvez aussi exiger l'email (au lieu de l'email ou téléphone) dans {link}.",
-      "duplicateNoteSettingsLink": "Paramètres > Général > Formulaire public"
+      "duplicateNoteSettings": "Vous pouvez aussi exiger l'email (au lieu de l'email ou téléphone) dans <link>Paramètres > Général > Formulaire public</link>."
     },
     "programSettings": {
       "title": "Paramètres",
@@ -1032,6 +1042,12 @@
       "plansSection": "Plans",
       "plansDescription": "Choisissez le plan qui correspond à votre entreprise.",
       "contactsLabel": "Contacts",
+      "contactsHint": "Les contacts comptent dans votre limite jusqu'à leur suppression. Supprimez les contacts inactifs pour libérer de l'espace.",
+      "approachingLimit": "Proche de la limite",
+      "contactLimitReached": "Limite atteinte — supprimez des contacts inutilisés ou passez à un plan supérieur",
+      "staffLimitReached": "Limite atteinte — passez à un plan supérieur pour en ajouter",
+      "programLimitReached": "Limite atteinte — passez à un plan supérieur pour en ajouter",
+      "unlimited": "Illimité",
       "teamMembersLabel": "Membres d'équipe",
       "programsLabel": "Programmes"
     },
@@ -1785,7 +1801,7 @@
     "unknownError": "Erreur inconnue",
     "nameRequired": "Le nom est requis",
     "invalidEmail": "E-mail invalide",
-    "contactLimitReached": "Vous avez atteint la limite de {limit} contacts pour votre plan. Passez à un plan supérieur pour ajouter plus de contacts.",
+    "contactLimitReached": "Vous avez atteint la limite de {limit} contacts pour votre plan. Supprimez des contacts inutilisés ou passez à un plan supérieur.",
     "contactEmailExists": "Un contact avec l'e-mail « {email} » existe déjà.",
     "contactPhoneExists": "Un contact avec le téléphone « {phone} » existe déjà.",
     "contactAlreadyExists": "Un contact avec ces coordonnées existe déjà.",
