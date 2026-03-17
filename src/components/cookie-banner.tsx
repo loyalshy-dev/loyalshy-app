@@ -59,8 +59,11 @@ export function CookieBanner() {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={accept}
-            className="rounded-lg px-4 py-2 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
-            style={{ background: "var(--mk-text, hsl(var(--foreground)))" }}
+            className="rounded-lg px-4 py-2 text-[13px] font-medium transition-opacity hover:opacity-90"
+            style={{
+              background: "var(--mk-text, hsl(var(--foreground)))",
+              color: "var(--mk-card, hsl(var(--card)))",
+            }}
           >
             {t("accept")}
           </button>
