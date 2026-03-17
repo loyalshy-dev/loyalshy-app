@@ -360,6 +360,49 @@
         "branding": "Includes \"Powered by Loyalshy\" on passes"
       }
     },
+    "starter": {
+      "name": "Pro",
+      "description": "For small businesses ready to grow",
+      "features": {
+        "contacts": "Up to 500 contacts",
+        "staff": "2 staff members",
+        "programs": "Up to 2 programs",
+        "passTypes": "All 10 pass types",
+        "wallet": "Apple & Google Wallet passes",
+        "studio": "Card design studio",
+        "analytics": "Dashboard analytics",
+        "api": "API access (20 req/min)"
+      }
+    },
+    "growth": {
+      "name": "Business",
+      "description": "For growing businesses with multiple programs",
+      "features": {
+        "contacts": "Up to 2,500 contacts",
+        "staff": "5 staff members",
+        "programs": "Up to 5 programs",
+        "passTypes": "All 10 pass types",
+        "brandColors": "Custom brand colors on passes",
+        "bulkImport": "Bulk CSV import",
+        "support": "Priority email support",
+        "api": "API access (60 req/min)"
+      }
+    },
+    "scale": {
+      "name": "Scale",
+      "description": "For serious loyalty programs at scale",
+      "features": {
+        "contacts": "Unlimited contacts",
+        "staff": "25 staff members",
+        "programs": "Unlimited programs",
+        "passTypes": "All 10 pass types",
+        "brandColors": "Custom brand colors on passes",
+        "bulkImport": "Bulk CSV import",
+        "webhooks": "Webhook events",
+        "onboarding": "Dedicated onboarding call",
+        "api": "API access (300 req/min)"
+      }
+    },
     "enterprise": {
       "name": "Enterprise",
       "description": "Custom plan for large teams",

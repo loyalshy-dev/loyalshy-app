@@ -360,6 +360,49 @@
         "branding": "Incluye \"Powered by Loyalshy\" en los pases"
       }
     },
+    "starter": {
+      "name": "Pro",
+      "description": "Para pequeños negocios listos para crecer",
+      "features": {
+        "contacts": "Hasta 500 contactos",
+        "staff": "2 miembros del equipo",
+        "programs": "Hasta 2 programas",
+        "passTypes": "Los 10 tipos de pases",
+        "wallet": "Pases de Apple y Google Wallet",
+        "studio": "Estudio de diseño de tarjetas",
+        "analytics": "Analíticas del panel",
+        "api": "Acceso API (20 pet/min)"
+      }
+    },
+    "growth": {
+      "name": "Business",
+      "description": "Para negocios en crecimiento con múltiples programas",
+      "features": {
+        "contacts": "Hasta 2.500 contactos",
+        "staff": "5 miembros del equipo",
+        "programs": "Hasta 5 programas",
+        "passTypes": "Los 10 tipos de pases",
+        "brandColors": "Colores de marca en los pases",
+        "bulkImport": "Importación masiva CSV",
+        "support": "Soporte prioritario por email",
+        "api": "Acceso API (60 pet/min)"
+      }
+    },
+    "scale": {
+      "name": "Scale",
+      "description": "Para programas de fidelización a gran escala",
+      "features": {
+        "contacts": "Contactos ilimitados",
+        "staff": "25 miembros del equipo",
+        "programs": "Programas ilimitados",
+        "passTypes": "Los 10 tipos de pases",
+        "brandColors": "Colores de marca en los pases",
+        "bulkImport": "Importación masiva CSV",
+        "webhooks": "Eventos webhook",
+        "onboarding": "Llamada de onboarding dedicada",
+        "api": "Acceso API (300 pet/min)"
+      }
+    },
     "enterprise": {
       "name": "Enterprise",
       "description": "Plan personalizado para grandes equipos",

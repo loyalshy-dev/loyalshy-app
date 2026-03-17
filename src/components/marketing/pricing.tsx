@@ -185,6 +185,12 @@ type PlanCardProps = {
   period: BillingPeriod
 }
 
+const PLAN_KEY_MAP: Record<string, string> = {
+  STARTER: "starter",
+  GROWTH: "growth",
+  SCALE: "scale",
+}
+
 function PlanCard({
   planKey,
   highlighted = false,
@@ -193,6 +199,7 @@ function PlanCard({
   const t = useTranslations("pricing")
   const tc = useTranslations("common")
   const plan = PLANS[planKey]
+  const tKey = PLAN_KEY_MAP[planKey]
   const price = period === "annual" ? plan.annualPrice : plan.price
 
   const contactsLabel =
@@ -201,6 +208,10 @@ function PlanCard({
       : `${t("upTo")} ${plan.customerLimit} ${t("contacts")}`
 
   const staffLabel = t("staffMembers", { count: plan.staffLimit })
+
+  const features = Object.values(
+    t.raw(`${tKey}.features`) as Record<string, string>
+  )
 
   return (
     <div
@@ -238,13 +249,13 @@ function PlanCard({
           className="text-[13px] font-semibold uppercase tracking-widest mb-1"
           style={{ color: "var(--mk-text-dimmed)" }}
         >
-          {plan.name}
+          {t(`${tKey}.name`)}
         </p>
         <p
           className="text-[14px]"
           style={{ color: "var(--mk-text-muted)" }}
         >
-          {plan.description}
+          {t(`${tKey}.description`)}
         </p>
       </div>
 
@@ -298,7 +309,7 @@ function PlanCard({
       />
 
       <ul className="flex flex-col gap-3">
-        {plan.features.map((feature) => (
+        {features.map((feature) => (
           <li key={feature} className="flex items-start gap-3">
             <div
               className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"

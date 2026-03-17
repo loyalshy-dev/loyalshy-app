@@ -360,6 +360,49 @@
         "branding": "Inclut « Propulsé par Loyalshy » sur les passes"
       }
     },
+    "starter": {
+      "name": "Pro",
+      "description": "Pour les petites entreprises prêtes à grandir",
+      "features": {
+        "contacts": "Jusqu'à 500 contacts",
+        "staff": "2 membres d'équipe",
+        "programs": "Jusqu'à 2 programmes",
+        "passTypes": "Les 10 types de passes",
+        "wallet": "Passes Apple & Google Wallet",
+        "studio": "Studio de design de cartes",
+        "analytics": "Analytiques du tableau de bord",
+        "api": "Accès API (20 req/min)"
+      }
+    },
+    "growth": {
+      "name": "Business",
+      "description": "Pour les entreprises en croissance avec plusieurs programmes",
+      "features": {
+        "contacts": "Jusqu'à 2 500 contacts",
+        "staff": "5 membres d'équipe",
+        "programs": "Jusqu'à 5 programmes",
+        "passTypes": "Les 10 types de passes",
+        "brandColors": "Couleurs de marque sur les passes",
+        "bulkImport": "Importation CSV en masse",
+        "support": "Support email prioritaire",
+        "api": "Accès API (60 req/min)"
+      }
+    },
+    "scale": {
+      "name": "Scale",
+      "description": "Pour les programmes de fidélité à grande échelle",
+      "features": {
+        "contacts": "Contacts illimités",
+        "staff": "25 membres d'équipe",
+        "programs": "Programmes illimités",
+        "passTypes": "Les 10 types de passes",
+        "brandColors": "Couleurs de marque sur les passes",
+        "bulkImport": "Importation CSV en masse",
+        "webhooks": "Événements webhook",
+        "onboarding": "Appel d'onboarding dédié",
+        "api": "Accès API (300 req/min)"
+      }
+    },
     "enterprise": {
       "name": "Entreprise",
       "description": "Offre personnalisée pour les grandes équipes",
