@@ -1,5 +1,7 @@
 import { connection } from "next/server"
 import { notFound } from "next/navigation"
+import { NextIntlClientProvider } from "next-intl"
+import { getMessages } from "next-intl/server"
 import { getOrganizationBySlug } from "@/server/onboarding-actions"
 import { OnboardingForm } from "./onboarding-form"
 import type { Metadata } from "next"
@@ -17,22 +19,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: "Not Found" }
   }
 
-  const firstTemplate = org.templates[0]
-  const title = `Join ${org.name}`
-  const description = firstTemplate
-    ? `Get your digital pass for ${org.name}.`
-    : `Get your digital pass for ${org.name}.`
-
   return {
-    title,
-    description,
+    title: `Join ${org.name}`,
+    description: `Get your digital pass for ${org.name}.`,
     openGraph: {
-      title,
-      description,
+      title: `Join ${org.name}`,
+      description: `Get your digital pass for ${org.name}.`,
       type: "website",
     },
   }
 }
+
+const JOIN_NAMESPACES = ["common", "join"] as const
 
 export default async function JoinPage({ params, searchParams }: PageProps) {
   await connection()
@@ -44,5 +42,15 @@ export default async function JoinPage({ params, searchParams }: PageProps) {
     notFound()
   }
 
-  return <OnboardingForm organization={org} preselectedTemplateId={program} />
+  const messages = await getMessages()
+  const joinMessages: Record<string, unknown> = {}
+  for (const ns of JOIN_NAMESPACES) {
+    if (ns in messages) joinMessages[ns] = messages[ns as keyof typeof messages]
+  }
+
+  return (
+    <NextIntlClientProvider messages={joinMessages}>
+      <OnboardingForm organization={org} preselectedTemplateId={program} />
+    </NextIntlClientProvider>
+  )
 }

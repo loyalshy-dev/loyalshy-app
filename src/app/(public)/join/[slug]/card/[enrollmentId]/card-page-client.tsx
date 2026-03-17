@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition, useCallback } from "react"
 import { Loader2, Bookmark, CheckCircle2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { requestWalletPass, revealPrize } from "@/server/onboarding-actions"
 import type { PassInstanceCardData } from "@/server/onboarding-actions"
 import { computeTextColor } from "@/lib/wallet/card-design"
@@ -43,6 +44,7 @@ type CardPageClientProps = {
 }
 
 export function CardPageClient({ data, passInstanceId, organizationSlug, signature }: CardPageClientProps) {
+  const t = useTranslations("join.card")
   const [platform, setPlatform] = useState<Platform>("apple")
   const [showBothPlatforms, setShowBothPlatforms] = useState(false)
   const [isRequestingPass, startPassTransition] = useTransition()
@@ -116,7 +118,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
       const res = await requestWalletPass(passInstanceId, organizationSlug, chosenPlatform)
 
       if (!res.success) {
-        setError(res.error ?? "Failed to generate wallet pass")
+        setError(res.error ?? t("walletFailed"))
         return
       }
 
@@ -132,7 +134,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
         const url = URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url
-        a.download = "loyalty-card.pkpass"
+        a.download = `${organizationSlug}-pass.pkpass`
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
@@ -154,7 +156,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
         <div className="w-full max-w-md space-y-4">
           <div className="text-center space-y-1">
             <h1 className="text-xl font-semibold tracking-tight">
-              You earned a reward!
+              {t("rewardEarned")}
             </h1>
             <p className="text-muted-foreground text-sm">
               {data.organization.name} — {data.template.name}
@@ -192,7 +194,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
         {/* Header */}
         <div className="text-center space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">
-            {data.contactName}'s Card
+            {t("title", { name: data.contactName })}
           </h1>
           <p className="text-muted-foreground text-sm">
             {data.organization.name} — {data.template.name}
@@ -203,7 +205,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
         {isRedeemed && (
           <div className="flex items-center justify-center gap-2 rounded-lg bg-success/10 border border-success/20 px-4 py-3 text-sm font-medium text-success">
             <CheckCircle2 className="size-4" />
-            This coupon has been redeemed
+            {t("couponRedeemed")}
           </div>
         )}
 
@@ -251,7 +253,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
 
           {success ? (
             <p className="text-center text-sm text-muted-foreground">
-              Pass added! Check your Wallet app.
+              {t("passAdded")}
             </p>
           ) : showBothPlatforms ? (
             <div className="grid grid-cols-2 gap-3">
@@ -266,7 +268,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
                 ) : (
                   <>
                     <AppleIcon className="w-5 h-5" aria-hidden="true" />
-                    Apple Wallet
+                    {t("appleWallet")}
                   </>
                 )}
               </button>
@@ -281,7 +283,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
                 ) : (
                   <>
                     <GoogleWalletIcon className="w-5 h-5" aria-hidden="true" />
-                    Google Wallet
+                    {t("googleWallet")}
                   </>
                 )}
               </button>
@@ -296,7 +298,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
               {isRequestingPass ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
-                  Adding to wallet...
+                  {t("addingToWallet")}
                 </>
               ) : (
                 <>
@@ -305,7 +307,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
                   ) : (
                     <GoogleWalletIcon className="w-5 h-5" aria-hidden="true" />
                   )}
-                  Add to {platform === "apple" ? "Apple" : "Google"} Wallet
+                  {t("addToWallet", { platform: platform === "apple" ? "Apple" : "Google" })}
                 </>
               )}
             </button>
@@ -315,7 +317,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
         {/* Bookmark hint */}
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <Bookmark className="w-3.5 h-3.5" aria-hidden="true" />
-          Bookmark this page to access your card anytime
+          {t("bookmarkHint")}
         </div>
 
         {/* Footer */}

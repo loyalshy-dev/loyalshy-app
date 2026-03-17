@@ -1,5 +1,7 @@
 import { connection } from "next/server"
 import { notFound } from "next/navigation"
+import { NextIntlClientProvider } from "next-intl"
+import { getMessages } from "next-intl/server"
 import { verifyCardSignature } from "@/lib/card-access"
 import { getPassInstanceCardData } from "@/server/onboarding-actions"
 import { CardPageClient } from "./card-page-client"
@@ -23,6 +25,8 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   }
 }
 
+const JOIN_NAMESPACES = ["common", "join"] as const
+
 export default async function CardPage({ params, searchParams }: PageProps) {
   await connection()
   const { slug, enrollmentId } = await params
@@ -39,12 +43,20 @@ export default async function CardPage({ params, searchParams }: PageProps) {
     notFound()
   }
 
+  const messages = await getMessages()
+  const joinMessages: Record<string, unknown> = {}
+  for (const ns of JOIN_NAMESPACES) {
+    if (ns in messages) joinMessages[ns] = messages[ns as keyof typeof messages]
+  }
+
   return (
-    <CardPageClient
-      data={data}
-      passInstanceId={enrollmentId}
-      organizationSlug={slug}
-      signature={sig}
-    />
+    <NextIntlClientProvider messages={joinMessages}>
+      <CardPageClient
+        data={data}
+        passInstanceId={enrollmentId}
+        organizationSlug={slug}
+        signature={sig}
+      />
+    </NextIntlClientProvider>
   )
 }

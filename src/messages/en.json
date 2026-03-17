@@ -2020,5 +2020,44 @@
       "previous": "Previous page",
       "next": "Next page"
     }
+  },
+  "join": {
+    "chooseProgram": "Choose a program to join",
+    "freePass": "Free digital wallet pass",
+    "poweredBy": "Powered by {brand}",
+    "chooseDifferent": "Choose a different program",
+    "getYourPass": "Get your digital wallet pass",
+    "yourName": "Your name",
+    "email": "Email",
+    "phone": "Phone",
+    "phoneAlt": "(alternative to email)",
+    "emailHint": "Used to identify your pass — enter the same email next time to access it",
+    "namePlaceholder": "John Doe",
+    "emailPlaceholder": "john@example.com",
+    "phonePlaceholder": "+34 612 345 678",
+    "webPassInstead": "Get web pass instead",
+    "settingUp": "Setting up your pass...",
+    "addingToWallet": "Adding to wallet...",
+    "updatingWallet": "Updating wallet pass...",
+    "welcomeBack": "Welcome back! Loading your pass...",
+    "emailRequired": "Email address is required to join this program.",
+    "emailOrPhoneRequired": "Please enter your email or phone number — we use it to find your pass.",
+    "somethingWentWrong": "Something went wrong",
+    "stampSubtitle": "{reward} after {visits} visits",
+    "pointsSubtitle": "Earn points — {reward}",
+    "prepaidSubtitle": "Prepaid balance — {reward}",
+    "giftCardSubtitle": "Gift card — {reward}",
+    "card": {
+      "title": "{name}'s Card",
+      "rewardEarned": "You earned a reward!",
+      "couponRedeemed": "This coupon has been redeemed",
+      "passAdded": "Pass added! Check your Wallet app.",
+      "addToWallet": "Add to {platform} Wallet",
+      "addingToWallet": "Adding to wallet...",
+      "bookmarkHint": "Bookmark this page to access your card anytime",
+      "walletFailed": "Failed to generate wallet pass",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet"
+    }
   }
 }

@@ -2016,5 +2016,44 @@
       "previous": "Página anterior",
       "next": "Página siguiente"
     }
+  },
+  "join": {
+    "chooseProgram": "Elige un programa para unirte",
+    "freePass": "Pase digital gratuito",
+    "poweredBy": "Con tecnología de {brand}",
+    "chooseDifferent": "Elegir otro programa",
+    "getYourPass": "Obtén tu pase digital",
+    "yourName": "Tu nombre",
+    "email": "Email",
+    "phone": "Teléfono",
+    "phoneAlt": "(alternativa al email)",
+    "emailHint": "Se usa para identificar tu pase — introduce el mismo email la próxima vez para acceder",
+    "namePlaceholder": "Juan García",
+    "emailPlaceholder": "juan@ejemplo.com",
+    "phonePlaceholder": "+34 612 345 678",
+    "webPassInstead": "Obtener pase web",
+    "settingUp": "Preparando tu pase...",
+    "addingToWallet": "Añadiendo a la cartera...",
+    "updatingWallet": "Actualizando pase...",
+    "welcomeBack": "¡Bienvenido de nuevo! Cargando tu pase...",
+    "emailRequired": "El email es obligatorio para unirte a este programa.",
+    "emailOrPhoneRequired": "Introduce tu email o teléfono — lo usamos para encontrar tu pase.",
+    "somethingWentWrong": "Algo salió mal",
+    "stampSubtitle": "{reward} después de {visits} visitas",
+    "pointsSubtitle": "Gana puntos — {reward}",
+    "prepaidSubtitle": "Saldo prepago — {reward}",
+    "giftCardSubtitle": "Tarjeta regalo — {reward}",
+    "card": {
+      "title": "Tarjeta de {name}",
+      "rewardEarned": "¡Has ganado una recompensa!",
+      "couponRedeemed": "Este cupón ha sido canjeado",
+      "passAdded": "¡Pase añadido! Comprueba tu app Wallet.",
+      "addToWallet": "Añadir a {platform} Wallet",
+      "addingToWallet": "Añadiendo a la cartera...",
+      "bookmarkHint": "Guarda esta página en marcadores para acceder a tu tarjeta en cualquier momento",
+      "walletFailed": "No se pudo generar el pase",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet"
+    }
   }
 }

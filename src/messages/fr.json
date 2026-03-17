@@ -2004,5 +2004,44 @@
       "previous": "Page précédente",
       "next": "Page suivante"
     }
+  },
+  "join": {
+    "chooseProgram": "Choisissez un programme",
+    "freePass": "Pass numérique gratuit",
+    "poweredBy": "Propulsé par {brand}",
+    "chooseDifferent": "Choisir un autre programme",
+    "getYourPass": "Obtenez votre pass numérique",
+    "yourName": "Votre nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "phoneAlt": "(alternative à l'email)",
+    "emailHint": "Utilisé pour identifier votre pass — entrez le même email la prochaine fois",
+    "namePlaceholder": "Jean Dupont",
+    "emailPlaceholder": "jean@exemple.com",
+    "phonePlaceholder": "+33 6 12 34 56 78",
+    "webPassInstead": "Obtenir un pass web",
+    "settingUp": "Préparation de votre pass...",
+    "addingToWallet": "Ajout au portefeuille...",
+    "updatingWallet": "Mise à jour du pass...",
+    "welcomeBack": "Bienvenue ! Chargement de votre pass...",
+    "emailRequired": "L'email est requis pour rejoindre ce programme.",
+    "emailOrPhoneRequired": "Veuillez entrer votre email ou téléphone — nous l'utilisons pour retrouver votre pass.",
+    "somethingWentWrong": "Une erreur est survenue",
+    "stampSubtitle": "{reward} après {visits} visites",
+    "pointsSubtitle": "Gagnez des points — {reward}",
+    "prepaidSubtitle": "Solde prépayé — {reward}",
+    "giftCardSubtitle": "Carte cadeau — {reward}",
+    "card": {
+      "title": "Carte de {name}",
+      "rewardEarned": "Vous avez gagné une récompense !",
+      "couponRedeemed": "Ce coupon a été utilisé",
+      "passAdded": "Pass ajouté ! Vérifiez votre app Wallet.",
+      "addToWallet": "Ajouter à {platform} Wallet",
+      "addingToWallet": "Ajout au portefeuille...",
+      "bookmarkHint": "Ajoutez cette page en favori pour accéder à votre carte à tout moment",
+      "walletFailed": "Impossible de générer le pass",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet"
+    }
   }
 }
