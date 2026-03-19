@@ -148,8 +148,18 @@ export function RegisterVisitDialog({
   const autoDismissRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Check camera availability once on mount
+  // On mobile browsers, hasCamera() often returns false before permission is granted,
+  // so we default to true on mobile/touch devices and let the permission prompt appear on use
   useEffect(() => {
     let cancelled = false
+    const isMobileOrTouch = typeof window !== "undefined" && (
+      "ontouchstart" in window || navigator.maxTouchPoints > 0
+    )
+    if (isMobileOrTouch) {
+      // Assume camera exists on mobile — permission prompt will appear when scanning
+      setHasCamera(true)
+      return
+    }
     import("qr-scanner").then((mod) => {
       mod.default.hasCamera().then((result) => {
         if (!cancelled) setHasCamera(result)
@@ -739,7 +749,7 @@ function SearchStep({
               placeholder="Search by name, email, or phone..."
               value={query}
               onChange={(e) => onSearch(e.target.value)}
-              className="pl-9 h-10 text-[13px]"
+              className="pl-9 h-10 text-[16px] md:text-[13px]"
               autoFocus
             />
             {isSearching && (

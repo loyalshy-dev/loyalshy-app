@@ -102,15 +102,15 @@ export function useQrScanner({
   }, [enabled, startScanner])
 
   const restart = useCallback(() => {
+    // Fully destroy existing scanner to release camera before retrying
     if (scannerRef.current) {
-      // Resume existing scanner
-      scannerRef.current.start().catch(() => {
-        // If resume fails, restart from scratch
-        startScanner()
-      })
-    } else {
-      startScanner()
+      scannerRef.current.destroy()
+      scannerRef.current = null
     }
+    // Small delay lets the browser fully release the camera before re-acquiring
+    setTimeout(() => {
+      startScanner()
+    }, 300)
   }, [startScanner])
 
   return {
