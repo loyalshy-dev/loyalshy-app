@@ -511,7 +511,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
   const livePreview = formatProgressValue(4, visitsRequired, progressStyle, false)
 
   function updateStampGridConfig(patch: Partial<StampGridConfig>) {
-    store.getState().setWalletField("stampGridConfig", { ...stampGridConfig, ...patch })
+    store.getState().patchStampGridConfig(patch)
   }
 
   function handleStyleSelect(id: "STAMP_GRID" | ProgressStyle) {

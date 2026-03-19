@@ -161,6 +161,9 @@ type CardDesignStore = {
 
   // Wallet actions
   setWalletField: <K extends keyof WalletState>(key: K, value: WalletState[K]) => void
+  patchStampGridConfig: (patch: Partial<StampGridConfig>) => void
+  patchSocialLinks: (patch: Partial<SocialLinks>) => void
+  patchFieldLabels: (fieldId: string, newLabel: string | null) => void
 
   // Program config actions
   setConfigField: <K extends keyof ProgramConfigState>(key: K, value: ProgramConfigState[K]) => void
@@ -311,6 +314,30 @@ export function createCardDesignStore() {
         setWalletField: (key, value) =>
           set((state) => {
             ;(state.wallet as Record<string, unknown>)[key] = value
+            state.ui.isDirty = true
+          }),
+
+        patchStampGridConfig: (patch) =>
+          set((state) => {
+            Object.assign(state.wallet.stampGridConfig, patch)
+            state.ui.isDirty = true
+          }),
+
+        patchSocialLinks: (patch) =>
+          set((state) => {
+            Object.assign(state.wallet.socialLinks, patch)
+            state.ui.isDirty = true
+          }),
+
+        patchFieldLabels: (fieldId, newLabel) =>
+          set((state) => {
+            if (newLabel) {
+              state.wallet.fieldLabels = { ...(state.wallet.fieldLabels ?? {}), [fieldId]: newLabel }
+            } else {
+              const updated = { ...(state.wallet.fieldLabels ?? {}) }
+              delete updated[fieldId]
+              state.wallet.fieldLabels = Object.keys(updated).length > 0 ? updated : null
+            }
             state.ui.isDirty = true
           }),
 

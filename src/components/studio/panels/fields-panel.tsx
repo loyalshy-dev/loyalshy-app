@@ -333,13 +333,7 @@ function CardFieldsSection({ store, passType }: { store: CardDesignStoreApi; pas
   }
 
   function handleLabelChange(fieldId: string, newLabel: string) {
-    const updated = { ...fieldLabels }
-    if (!newLabel) {
-      delete updated[fieldId]
-    } else {
-      updated[fieldId] = newLabel
-    }
-    setWallet("fieldLabels", Object.keys(updated).length > 0 ? updated : null)
+    store.getState().patchFieldLabels(fieldId, newLabel || null)
   }
 
   function getDefaultLabel(id: string) {

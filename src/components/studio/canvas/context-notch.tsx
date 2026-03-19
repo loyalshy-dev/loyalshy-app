@@ -902,13 +902,7 @@ function FieldsControls({
   }
 
   function handleLabelChange(fieldId: string, newLabel: string) {
-    const updated = { ...fieldLabels }
-    if (!newLabel) {
-      delete updated[fieldId]
-    } else {
-      updated[fieldId] = newLabel
-    }
-    store.getState().setWalletField("fieldLabels", Object.keys(updated).length > 0 ? updated : null)
+    store.getState().patchFieldLabels(fieldId, newLabel || null)
   }
 
   function getDefaultLabel(id: string) {
@@ -1451,7 +1445,7 @@ function ProgressControls({
   }
 
   function updateGrid(patch: Partial<StampGridConfig>) {
-    store.getState().setWalletField("stampGridConfig", { ...stampGridConfig, ...patch })
+    store.getState().patchStampGridConfig(patch)
   }
 
   function toggleSection(id: string) {

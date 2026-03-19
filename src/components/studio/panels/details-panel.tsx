@@ -100,28 +100,28 @@ export function DetailsPanel({ store }: Props) {
       <TextInput
         label={t("instagram")}
         value={socialLinks.instagram ?? ""}
-        onChange={(v) => set("socialLinks", { ...socialLinks, instagram: v || undefined })}
+        onChange={(v) => store.getState().patchSocialLinks({ instagram: v || undefined })}
         placeholder={t("handlePlaceholder")}
         maxLength={200}
       />
       <TextInput
         label={t("facebook")}
         value={socialLinks.facebook ?? ""}
-        onChange={(v) => set("socialLinks", { ...socialLinks, facebook: v || undefined })}
+        onChange={(v) => store.getState().patchSocialLinks({ facebook: v || undefined })}
         placeholder={t("facebookPlaceholder")}
         maxLength={200}
       />
       <TextInput
         label={t("tiktok")}
         value={socialLinks.tiktok ?? ""}
-        onChange={(v) => set("socialLinks", { ...socialLinks, tiktok: v || undefined })}
+        onChange={(v) => store.getState().patchSocialLinks({ tiktok: v || undefined })}
         placeholder={t("handlePlaceholder")}
         maxLength={200}
       />
       <TextInput
         label={t("twitter")}
         value={socialLinks.x ?? ""}
-        onChange={(v) => set("socialLinks", { ...socialLinks, x: v || undefined })}
+        onChange={(v) => store.getState().patchSocialLinks({ x: v || undefined })}
         placeholder={t("handlePlaceholder")}
         maxLength={200}
       />
