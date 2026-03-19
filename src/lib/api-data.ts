@@ -259,6 +259,9 @@ export async function createContact(
             ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
             : new Date(Date.now() + 365 * 86_400_000)
 
+        const mgConfig = parseMinigameConfig(template.config)
+        const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
+        const selectedPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
         await db.reward.create({
           data: {
             contactId: contact.id,
@@ -267,6 +270,7 @@ export async function createContact(
             passInstanceId: instance.id,
             status: "AVAILABLE",
             expiresAt,
+            ...(selectedPrize ? { description: selectedPrize, revealedAt: null } : {}),
           },
         })
       }
@@ -1128,7 +1132,22 @@ export async function performCouponRedeem(organizationId: string, passInstanceId
 
   const txResult = await db.$transaction(async (tx) => {
     await tx.passInstance.update({ where: { id: pi.id }, data: { data: { ...data, redeemed: true, redeemedAt: new Date().toISOString() } as Prisma.JsonObject, status: isUnlimited ? "ACTIVE" : "COMPLETED" } })
-    const interaction = await tx.interaction.create({ data: { contactId: pi.contactId, organizationId, passTemplateId: pi.passTemplate.id, passInstanceId: pi.id, type: "COUPON_REDEEM", metadata: { discountText } as Prisma.JsonObject }, select: { id: true, type: true, createdAt: true } })
+
+    // Mark existing AVAILABLE reward as redeemed (created at issue time)
+    const existingReward = await tx.reward.findFirst({
+      where: { passInstanceId: pi.id, status: "AVAILABLE" },
+      select: { id: true, description: true },
+    })
+    let selectedPrize: string | undefined
+    if (existingReward) {
+      selectedPrize = existingReward.description ?? undefined
+      await tx.reward.update({
+        where: { id: existingReward.id },
+        data: { status: "REDEEMED", redeemedAt: new Date(), ...(existingReward.description ? { revealedAt: new Date() } : {}) },
+      })
+    }
+
+    const interaction = await tx.interaction.create({ data: { contactId: pi.contactId, organizationId, passTemplateId: pi.passTemplate.id, passInstanceId: pi.id, type: "COUPON_REDEEM", metadata: { discountText, ...(selectedPrize ? { selectedPrize } : {}) } as Prisma.JsonObject }, select: { id: true, type: true, createdAt: true } })
     await bumpContactStats(pi.contactId, tx)
     return interaction
   })

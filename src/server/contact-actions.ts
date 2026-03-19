@@ -7,7 +7,7 @@ import { getTranslations } from "next-intl/server"
 import { db, getNextMemberNumber } from "@/lib/db"
 import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
 import { sanitizeText } from "@/lib/sanitize"
-import { parseCouponConfig } from "@/lib/pass-config"
+import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 import type { Prisma } from "@prisma/client"
 import type { PassInstanceDetail } from "@/types/pass-instance"
 
@@ -509,6 +509,9 @@ export async function addContact(
                 ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
                 : new Date(Date.now() + 365 * 86_400_000)
 
+            const mgConfig = parseMinigameConfig(tmpl.config)
+            const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
+            const selectedPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
             await tx.reward.create({
               data: {
                 contactId: newContact.id,
@@ -517,6 +520,7 @@ export async function addContact(
                 passInstanceId: instance.id,
                 status: "AVAILABLE",
                 expiresAt,
+                ...(selectedPrize ? { description: selectedPrize, revealedAt: null } : {}),
               },
             })
           }

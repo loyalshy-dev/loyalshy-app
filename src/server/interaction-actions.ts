@@ -18,7 +18,7 @@ import {
   getOrganizationForUser,
   assertOrganizationAccess,
 } from "@/lib/dal"
-import { parseCouponConfig, parsePointsConfig, parsePrepaidConfig, formatCouponValue } from "@/lib/pass-config"
+import { parseCouponConfig, parsePointsConfig, parsePrepaidConfig, formatCouponValue, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 
 // NOTE: stamp-actions exports (searchContactsForStamp, registerStamp, lookupPassInstanceByWalletPassId)
 // must be imported directly from "@/server/stamp-actions" — Turbopack does not support
@@ -175,15 +175,39 @@ export async function redeemCoupon(
       },
     })
 
-    // For unlimited coupons, reissue a fresh pass instance
+    // For unlimited coupons, reissue a fresh pass instance with a new Reward
     if (isUnlimited) {
-      await tx.passInstance.create({
+      const newPi = await tx.passInstance.create({
         data: {
           contactId: passInstance.contact.id,
           passTemplateId: passInstance.passTemplate.id,
           walletProvider: "NONE",
           status: "ACTIVE",
           data: { redeemed: false },
+        },
+      })
+
+      const couponConfig2 = parseCouponConfig(passInstance.passTemplate.config)
+      const rewardExpiryDays = (passInstance.passTemplate.config as Record<string, unknown>)?.rewardExpiryDays as number | undefined
+      const newExpiresAt = couponConfig2?.validUntil
+        ? new Date(couponConfig2.validUntil)
+        : rewardExpiryDays && rewardExpiryDays > 0
+          ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
+          : new Date(Date.now() + 365 * 86_400_000)
+
+      const mgConfig = parseMinigameConfig(passInstance.passTemplate.config)
+      const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
+      const newPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
+
+      await tx.reward.create({
+        data: {
+          contactId: passInstance.contact.id,
+          organizationId: organization.id,
+          passTemplateId: passInstance.passTemplate.id,
+          passInstanceId: newPi.id,
+          status: "AVAILABLE",
+          expiresAt: newExpiresAt,
+          ...(newPrize ? { description: newPrize, revealedAt: null } : {}),
         },
       })
     }
