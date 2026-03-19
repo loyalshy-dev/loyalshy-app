@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import dynamic from "next/dynamic"
 import { AlertTriangle, Clock, Lock, X } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -71,6 +72,8 @@ export function DashboardShell({
   }
 
   const showSubscriptionGate = organization?.subscriptionStatus === "CANCELED"
+  const pathname = usePathname()
+  const isStudioPage = pathname.endsWith("/design")
 
   return (
     <SidebarProvider>
@@ -117,7 +120,7 @@ export function DashboardShell({
           </div>
         )}
 
-        <main className="flex-1 overflow-y-auto pb-18 md:pb-0">
+        <main className={`flex-1 overflow-y-auto md:pb-0 ${isStudioPage ? "pb-0" : "pb-18"}`}>
           {showSubscriptionGate ? (
             <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted mb-4">
@@ -143,11 +146,13 @@ export function DashboardShell({
           )}
         </main>
 
-        {/* Mobile bottom nav */}
-        <MobileNav
-          onOpenRegisterVisit={handleRegisterVisit}
-          onOpenMore={() => setCommandOpen(true)}
-        />
+        {/* Mobile bottom nav — hidden on studio/design page (has its own toolbar) */}
+        {!isStudioPage && (
+          <MobileNav
+            onOpenRegisterVisit={handleRegisterVisit}
+            onOpenMore={() => setCommandOpen(true)}
+          />
+        )}
 
         {/* Command palette */}
         <CommandPalette
