@@ -587,9 +587,9 @@ export async function requestWalletPass(
       walletProvider: true,
       status: true,
       rewards: {
-        where: { status: "AVAILABLE" },
-        select: { id: true },
-        take: 1,
+        where: { status: { in: ["AVAILABLE", "REDEEMED"] } },
+        select: { id: true, revealedAt: true, description: true },
+        take: 5,
       },
       contact: {
         select: {
@@ -662,6 +662,9 @@ export async function requestWalletPass(
       walletPassSerialNumber: passInstance.walletPassSerialNumber,
       walletProvider: passInstance.walletProvider,
       hasAvailableReward: passInstance.rewards.length > 0,
+      hasUnrevealedPrize: passInstance.rewards.some(
+        (r) => r.revealedAt === null && r.description != null
+      ),
     },
     organization,
     {
@@ -698,6 +701,7 @@ type InstancePassData = {
   walletPassSerialNumber: string | null
   walletProvider: string
   hasAvailableReward: boolean
+  hasUnrevealedPrize?: boolean
 }
 
 async function issuePassForInstance(
@@ -761,6 +765,9 @@ async function issuePassForInstance(
         programConfig: template.config,
         pointsBalance: instance.pointsBalance ?? 0,
         remainingUses: instance.remainingUses ?? 0,
+        hasUnrevealedPrize: instance.hasUnrevealedPrize ?? false,
+        passInstanceId: instance.passInstanceId,
+        organizationSlug: organization.slug,
       })
 
       // Store wallet fields on PassInstance

@@ -67,9 +67,9 @@ export async function issueAppleWalletPass(
         },
       },
       rewards: {
-        where: { status: "AVAILABLE" },
-        select: { id: true },
-        take: 1,
+        where: { status: { in: ["AVAILABLE", "REDEEMED"] } },
+        select: { id: true, revealedAt: true, description: true },
+        take: 5,
       },
     },
   })
@@ -90,6 +90,9 @@ export async function issueAppleWalletPass(
   const serialNumber = passInstance.walletPassSerialNumber ?? randomUUID()
   const walletPassId = passInstance.walletPassId ?? randomUUID()
   const hasAvailableReward = passInstance.rewards.length > 0
+  const hasUnrevealedPrize = passInstance.rewards.some(
+    (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt === null && r.description != null
+  )
 
   // Resolve card design from the template's passDesign
   const cardDesign = resolveCardDesign(
@@ -132,6 +135,9 @@ export async function issueAppleWalletPass(
       accessTotalGranted: (instanceData.totalGranted as number) ?? 0,
       transitIsBoarded: (instanceData.isBoarded as boolean) ?? false,
       businessIdVerifications: (instanceData.totalVerifications as number) ?? 0,
+      hasUnrevealedPrize,
+      passInstanceId: passInstance.id,
+      organizationSlug: organization.slug,
     })
 
     // Update pass instance with wallet pass fields
