@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useTransition, useCallback } from "react"
-import { Loader2, Bookmark, CheckCircle2 } from "lucide-react"
+import { Loader2, Bookmark, CheckCircle2, Gift } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { requestWalletPass, revealPrize } from "@/server/onboarding-actions"
 import type { PassInstanceCardData } from "@/server/onboarding-actions"
@@ -201,6 +201,14 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
           </p>
         </div>
 
+        {/* Reward earned banner */}
+        {data.hasAvailableReward && data.earnedRewardDescription && !isRedeemed && (
+          <div className="flex items-center justify-center gap-2 rounded-lg bg-success/10 border border-success/20 px-4 py-3 text-sm font-medium text-success">
+            <Gift className="size-4" />
+            {data.earnedRewardDescription}
+          </div>
+        )}
+
         {/* Redeemed banner */}
         {isRedeemed && (
           <div className="flex items-center justify-center gap-2 rounded-lg bg-success/10 border border-success/20 px-4 py-3 text-sm font-medium text-success">
@@ -222,7 +230,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
             customerName={data.contactName}
             currentVisits={data.currentCycleVisits}
             totalVisits={data.template.visitsRequired}
-            rewardDescription={data.template.rewardDescription}
+            rewardDescription={data.earnedRewardDescription ?? data.template.rewardDescription}
             hasReward={data.hasAvailableReward}
             qrValue={data.walletPassId ?? undefined}
             discountText={discountText}

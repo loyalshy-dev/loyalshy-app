@@ -194,7 +194,7 @@ function getRendererProps(passInstance: PassInstanceDetail) {
   return {
     currentVisits: currentCycleVisits,
     totalVisits: visitsRequired,
-    rewardDescription: getWalletRewardText(passInstance.templateConfig, rewardDescription),
+    rewardDescription: passInstance.rewardDescription ?? getWalletRewardText(passInstance.templateConfig, rewardDescription),
   }
 }
 
@@ -937,6 +937,7 @@ function PassInstanceCard({
               logoUrl={passInstance.passDesign?.logoUrl}
               logoAppleUrl={passInstance.passDesign?.logoAppleUrl}
               logoGoogleUrl={passInstance.passDesign?.logoGoogleUrl}
+              hasReward={passInstance.hasAvailableReward}
               {...getRendererProps(passInstance)}
               compact
               width={72}

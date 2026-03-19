@@ -140,6 +140,8 @@ export type PassInstanceDetail = {
   suspendedAt: Date | null
   revokedAt: Date | null
   passDesign: PassInstanceDesign
+  hasAvailableReward: boolean
+  rewardDescription: string | null
 }
 
 // ─── Template with PassDesign (for settings) ─────────────────

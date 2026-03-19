@@ -287,6 +287,12 @@ export async function getContactDetail(
               },
             },
           },
+          rewards: {
+            where: { status: "AVAILABLE" },
+            select: { id: true, description: true },
+            take: 1,
+            orderBy: { earnedAt: "desc" },
+          },
         },
         orderBy: { issuedAt: "asc" },
       },
@@ -318,39 +324,44 @@ export async function getContactDetail(
 
   if (!contact) return null
 
-  const passInstances: PassInstanceDetail[] = contact.passInstances.map((pi) => ({
-    passInstanceId: pi.id,
-    templateId: pi.passTemplate.id,
-    templateName: pi.passTemplate.name,
-    passType: pi.passTemplate.passType,
-    templateStatus: pi.passTemplate.status,
-    data: pi.data as import("@/types/pass-instance").PassInstanceData,
-    templateConfig: pi.passTemplate.config,
-    status: pi.status,
-    walletProvider: pi.walletProvider,
-    issuedAt: pi.issuedAt,
-    suspendedAt: pi.suspendedAt,
-    expiresAt: pi.expiresAt,
-    revokedAt: pi.revokedAt,
-    passDesign: pi.passTemplate.passDesign
-      ? {
-          cardType: pi.passTemplate.passDesign.cardType,
-          primaryColor: pi.passTemplate.passDesign.primaryColor,
-          secondaryColor: pi.passTemplate.passDesign.secondaryColor,
-          textColor: pi.passTemplate.passDesign.textColor,
-          showStrip: pi.passTemplate.passDesign.showStrip,
-          patternStyle: pi.passTemplate.passDesign.patternStyle,
-          progressStyle: pi.passTemplate.passDesign.progressStyle,
-          labelFormat: pi.passTemplate.passDesign.labelFormat,
-          customProgressLabel: pi.passTemplate.passDesign.customProgressLabel,
-          stripImageUrl: pi.passTemplate.passDesign.stripImageUrl,
-          editorConfig: pi.passTemplate.passDesign.editorConfig,
-          logoUrl: pi.passTemplate.passDesign.logoUrl,
-          logoAppleUrl: pi.passTemplate.passDesign.logoAppleUrl,
-          logoGoogleUrl: pi.passTemplate.passDesign.logoGoogleUrl,
-        }
-      : null,
-  }))
+  const passInstances: PassInstanceDetail[] = contact.passInstances.map((pi) => {
+    const availableReward = pi.rewards[0] ?? null
+    return {
+      passInstanceId: pi.id,
+      templateId: pi.passTemplate.id,
+      templateName: pi.passTemplate.name,
+      passType: pi.passTemplate.passType,
+      templateStatus: pi.passTemplate.status,
+      data: pi.data as import("@/types/pass-instance").PassInstanceData,
+      templateConfig: pi.passTemplate.config,
+      status: pi.status,
+      walletProvider: pi.walletProvider,
+      issuedAt: pi.issuedAt,
+      suspendedAt: pi.suspendedAt,
+      expiresAt: pi.expiresAt,
+      revokedAt: pi.revokedAt,
+      hasAvailableReward: !!availableReward,
+      rewardDescription: availableReward?.description ?? null,
+      passDesign: pi.passTemplate.passDesign
+        ? {
+            cardType: pi.passTemplate.passDesign.cardType,
+            primaryColor: pi.passTemplate.passDesign.primaryColor,
+            secondaryColor: pi.passTemplate.passDesign.secondaryColor,
+            textColor: pi.passTemplate.passDesign.textColor,
+            showStrip: pi.passTemplate.passDesign.showStrip,
+            patternStyle: pi.passTemplate.passDesign.patternStyle,
+            progressStyle: pi.passTemplate.passDesign.progressStyle,
+            labelFormat: pi.passTemplate.passDesign.labelFormat,
+            customProgressLabel: pi.passTemplate.passDesign.customProgressLabel,
+            stripImageUrl: pi.passTemplate.passDesign.stripImageUrl,
+            editorConfig: pi.passTemplate.passDesign.editorConfig,
+            logoUrl: pi.passTemplate.passDesign.logoUrl,
+            logoAppleUrl: pi.passTemplate.passDesign.logoAppleUrl,
+            logoGoogleUrl: pi.passTemplate.passDesign.logoGoogleUrl,
+          }
+        : null,
+    }
+  })
 
   return {
     id: contact.id,

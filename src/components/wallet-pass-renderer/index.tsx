@@ -1245,7 +1245,7 @@ function StampGridOverlay({
       >
         {Array.from({ length: totalSlots }, (_, i) => {
           const isRewardSlot = i === totalVisits - 1
-          const isFilled = i < currentVisits
+          const isFilled = hasReward || i < currentVisits
 
           if (isRewardSlot) {
             const rewardPaths = useUniformIcon ? getStampIconPaths(stampIcon) : getRewardIconPaths(rewardIconId)

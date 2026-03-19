@@ -172,6 +172,7 @@ export type PassInstanceCardData = {
   currentCycleVisits: number
   totalInteractions: number
   hasAvailableReward: boolean
+  earnedRewardDescription: string | null
   remainingUses: number
   passInstanceStatus: "ACTIVE" | "COMPLETED" | "SUSPENDED" | "EXPIRED" | "REVOKED" | "VOIDED"
   organization: {
@@ -274,6 +275,10 @@ export async function getPassInstanceCardData(
     (r) => r.revealedAt === null && r.description != null
   )
 
+  // Find the most recent available reward description (for display after reveal)
+  const availableReward = passInstance.rewards.find((r) => r.status === "AVAILABLE")
+  const earnedRewardDescription = availableReward?.description ?? null
+
   const mgConfig = parseMinigameConfig(passInstance.passTemplate.config)
 
   return {
@@ -285,6 +290,7 @@ export async function getPassInstanceCardData(
     totalInteractions,
     remainingUses,
     hasAvailableReward: passInstance.rewards.some((r) => r.status === "AVAILABLE"),
+    earnedRewardDescription,
     passInstanceStatus: passInstance.status,
     organization: passInstance.passTemplate.organization,
     template: {
