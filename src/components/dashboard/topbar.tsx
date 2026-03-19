@@ -46,21 +46,22 @@ export function Topbar({
     distribution: tPrograms("distribution"),
   }
 
+  const filteredSegments = segments.filter((segment) => !uuidRegex.test(segment))
+  const lastSegment = filteredSegments[filteredSegments.length - 1]
+  const currentPageLabel = lastSegment ? (breadcrumbLabels[lastSegment] ?? lastSegment) : ""
+
   return (
     <header className="flex items-center justify-between gap-4 h-14 px-4 lg:px-6 border-b border-border bg-background/80 backdrop-blur-sm shrink-0">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-1 data-[orientation=vertical]:h-4" />
 
-        {/* Breadcrumbs */}
-        <Breadcrumb>
+        {/* Breadcrumbs — hidden on mobile, bottom nav handles navigation */}
+        <Breadcrumb className="hidden sm:block">
           <BreadcrumbList>
-            {segments
-              .filter((segment) => !uuidRegex.test(segment))
-              .map((segment, i, filtered) => {
-                const isLast = i === filtered.length - 1
+            {filteredSegments.map((segment, i) => {
+                const isLast = i === filteredSegments.length - 1
                 const label = breadcrumbLabels[segment] ?? segment
-                // Build href from original segments up to this segment's position
                 const originalIndex = segments.indexOf(segment)
                 const href = "/" + segments.slice(0, originalIndex + 1).join("/")
 
@@ -86,6 +87,11 @@ export function Topbar({
               })}
           </BreadcrumbList>
         </Breadcrumb>
+
+        {/* Page title only on mobile */}
+        <span className="sm:hidden text-[13px] font-medium truncate">
+          {currentPageLabel}
+        </span>
       </div>
 
       <div className="flex items-center gap-2">
