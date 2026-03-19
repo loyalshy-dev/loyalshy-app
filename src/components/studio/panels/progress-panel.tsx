@@ -96,32 +96,62 @@ function ColorRow({
   label,
   value,
   onChange,
+  palette,
 }: {
   label: string
   value: string
   onChange: (v: string) => void
+  palette?: string[]
 }) {
+  // Deduplicate palette and exclude the current value
+  const swatches = palette
+    ? [...new Set(palette)].filter((c) => c.toLowerCase() !== value.toLowerCase())
+    : []
+
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 8,
-      }}
-    >
-      <span style={{ fontSize: 12, color: "var(--foreground)" }}>{label}</span>
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace" }}>
-          {value.toUpperCase()}
-        </span>
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ width: 28, height: 28, border: "1px solid var(--border)", borderRadius: 8, cursor: "pointer", padding: 1 }}
-        />
+    <div style={{ marginBottom: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: 12, color: "var(--foreground)" }}>{label}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 11, color: "var(--muted-foreground)", fontFamily: "monospace" }}>
+            {value.toUpperCase()}
+          </span>
+          <input
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            style={{ width: 28, height: 28, border: "1px solid var(--border)", borderRadius: 8, cursor: "pointer", padding: 1 }}
+          />
+        </div>
       </div>
+      {swatches.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
+          <span style={{ fontSize: 10, color: "var(--muted-foreground)", marginRight: 2 }}>Card</span>
+          {swatches.map((color) => (
+            <button
+              key={color}
+              onClick={() => onChange(color)}
+              aria-label={`Use color ${color}`}
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: "50%",
+                backgroundColor: color,
+                border: "1.5px solid var(--border)",
+                cursor: "pointer",
+                padding: 0,
+                flexShrink: 0,
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -503,6 +533,16 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
   const secondaryColor = wallet.secondaryColor
   const effectiveStampColor = stampFilledColor ?? stripColor2 ?? secondaryColor
 
+  // Card palette for quick-pick swatches in color rows
+  const cardPalette = [
+    wallet.primaryColor,
+    wallet.secondaryColor,
+    wallet.stripColor1,
+    wallet.stripColor2,
+    wallet.textColor,
+    wallet.patternColor,
+  ].filter((c): c is string => c != null && c !== "transparent")
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const rewardFileInputRef = useRef<HTMLInputElement>(null)
   const emptyFileInputRef = useRef<HTMLInputElement>(null)
@@ -703,7 +743,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <ColorRow label="Background" value={stampFilledColor} onChange={(v) => store.getState().setWalletField("stampFilledColor", v)} />
+                <ColorRow label="Background" value={stampFilledColor} onChange={(v) => store.getState().setWalletField("stampFilledColor", v)} palette={cardPalette} />
                 <ResetLink label="Reset to secondary color" onClick={() => store.getState().setWalletField("stampFilledColor", null)} />
               </div>
             )}
@@ -761,6 +801,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                   label="Stroke"
                   value={stampGridConfig.emptySlotColor ?? wallet.textColor}
                   onChange={(v) => updateStampGridConfig({ emptySlotColor: v })}
+                  palette={cardPalette}
                 />
                 {stampGridConfig.emptySlotColor && (
                   <ResetLink label="Reset to text color" onClick={() => updateStampGridConfig({ emptySlotColor: null })} />
@@ -772,6 +813,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                 label="Background"
                 value={stampGridConfig.emptySlotBg ?? wallet.stripColor1 ?? wallet.primaryColor}
                 onChange={(v) => updateStampGridConfig({ emptySlotBg: v })}
+                palette={cardPalette}
               />
             )}
             <TransparentCheckbox
@@ -787,6 +829,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                   label="Number Color"
                   value={stampGridConfig.emptyNumberColor ?? wallet.textColor}
                   onChange={(v) => updateStampGridConfig({ emptyNumberColor: v })}
+                  palette={cardPalette}
                 />
                 {stampGridConfig.emptyNumberColor && (
                   <ResetLink label="Reset to text color" onClick={() => updateStampGridConfig({ emptyNumberColor: null })} />
@@ -855,6 +898,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
               label="Stroke"
               value={stampGridConfig.rewardSlotColor ?? wallet.stripColor1 ?? wallet.primaryColor}
               onChange={(v) => updateStampGridConfig({ rewardSlotColor: v })}
+              palette={cardPalette}
             />
             {stampGridConfig.rewardSlotColor && (
               <ResetLink label="Reset to default" onClick={() => updateStampGridConfig({ rewardSlotColor: null })} />
@@ -864,6 +908,7 @@ export function ProgressPanel({ store, programId, visitsRequired, onUploadStampI
                 label="Background"
                 value={stampGridConfig.rewardSlotBg ?? effectiveStampColor}
                 onChange={(v) => updateStampGridConfig({ rewardSlotBg: v })}
+                palette={cardPalette}
               />
             )}
             <TransparentCheckbox
