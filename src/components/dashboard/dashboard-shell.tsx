@@ -80,14 +80,17 @@ export function DashboardShell({
       <AppSidebar user={user} organization={organization} orgRole={orgRole} />
 
       <SidebarInset className="min-w-0">
-        <Topbar
-          onOpenCommandPalette={() => setCommandOpen(true)}
-          onOpenRegisterVisit={handleRegisterVisit}
-        />
+        {/* Hide topbar on mobile when in studio/design to maximize canvas space */}
+        <div className={isStudioPage ? "hidden md:block" : ""}>
+          <Topbar
+            onOpenCommandPalette={() => setCommandOpen(true)}
+            onOpenRegisterVisit={handleRegisterVisit}
+          />
+        </div>
 
-        {/* Subscription banners */}
+        {/* Subscription banners — hidden on mobile for studio */}
         {showTrialBanner && (
-          <div className="flex items-center justify-between gap-3 border-b border-amber-500/20 bg-amber-500/5 px-4 lg:px-6 py-2.5">
+          <div className={`flex items-center justify-between gap-3 border-b border-amber-500/20 bg-amber-500/5 px-4 lg:px-6 py-2.5${isStudioPage ? " hidden md:flex" : ""}`}>
             <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
               <Clock className="h-3.5 w-3.5 shrink-0" />
               <span>
@@ -104,7 +107,7 @@ export function DashboardShell({
         )}
 
         {showPastDueBanner && (
-          <div className="flex items-center justify-between gap-3 border-b border-red-500/20 bg-red-500/5 px-4 lg:px-6 py-2.5">
+          <div className={`flex items-center justify-between gap-3 border-b border-red-500/20 bg-red-500/5 px-4 lg:px-6 py-2.5${isStudioPage ? " hidden md:flex" : ""}`}>
             <div className="flex items-center gap-2 text-sm text-red-700 dark:text-red-400">
               <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
               <span>
@@ -140,7 +143,7 @@ export function DashboardShell({
               </Button>
             </div>
           ) : (
-            <div className="w-full px-4 lg:px-6 py-6">
+            <div className={isStudioPage ? "w-full px-0 py-0 md:px-4 lg:px-6 md:py-6" : "w-full px-4 lg:px-6 py-6"}>
               {children}
             </div>
           )}

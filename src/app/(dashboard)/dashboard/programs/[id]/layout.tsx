@@ -37,7 +37,7 @@ async function ProgramLayoutInner({
   const isOwner = member?.role === "owner"
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <ProgramTabNav
         templateId={program.id}
         templateName={program.name}

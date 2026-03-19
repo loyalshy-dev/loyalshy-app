@@ -30,12 +30,10 @@ export function PanelShell({ activeTool, onClose, children }: PanelShellProps) {
   return (
     <div
       style={{
-        width: 300,
-        borderLeft: "1px solid var(--border)",
-        backgroundColor: "var(--background)",
         display: "flex",
         flexDirection: "column",
-        flexShrink: 0,
+        flex: 1,
+        minHeight: 0,
         overflowY: "auto",
       }}
     >

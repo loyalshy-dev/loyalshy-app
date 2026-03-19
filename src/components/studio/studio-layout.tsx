@@ -9,7 +9,6 @@ import { useStoreWithEqualityFn } from "zustand/traditional"
 import { StudioToolbar } from "./studio-toolbar"
 import { CanvasPanel } from "./canvas/canvas-panel"
 import { ContextPanel, FloatingToolMenu } from "./canvas/context-notch"
-import { PanelShell } from "./panels/panel-shell"
 import { ProgramPanel } from "./panels/program-panel"
 import { ColorsPanel } from "./panels/colors-panel"
 import { FieldsPanel } from "./panels/fields-panel"
@@ -17,16 +16,16 @@ import { ProgressPanel } from "./panels/progress-panel"
 import { StripPanel } from "./panels/strip-panel"
 import { DetailsPanel } from "./panels/details-panel"
 import { NotificationsPanel } from "./panels/notifications-panel"
-import { ToolSelector } from "./tools/tool-selector"
-
 import { LogoPanel } from "./panels/logo-panel"
+import { PrizeRevealPanel } from "./panels/prize-reveal-panel"
+import { AvatarPanel } from "./panels/avatar-panel"
 import { ScratchCard, SlotMachine, WheelOfFortune } from "@/components/minigames"
 import { savePassDesign as saveCardDesign, updatePassTemplate, updateMinigameConfig } from "@/server/org-settings-actions"
 import type { StudioTool, PreviewFormat } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 import type { ProgramConfigState } from "@/lib/stores/card-design-store"
-import { Save, Smartphone, Tablet, Palette, BarChart3, ImagePlus, MoreHorizontal, SlidersHorizontal, Undo2, Redo2 } from "lucide-react"
+import { Save, Smartphone, Tablet, Palette, BarChart3, ImagePlus, SlidersHorizontal, Undo2, Redo2, TextCursorInput, CircleUserRound, FileText, Bell, Gift, Camera } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 /** Map PassType → CardType for visual rendering */
@@ -523,6 +522,10 @@ export function StudioLayout({
         return <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
       case "details":
         return <DetailsPanel store={store} />
+      case "prize":
+        return <PrizeRevealPanel store={store} />
+      case "avatar":
+        return <AvatarPanel store={store} programId={templateId} />
       default:
         return null
     }
@@ -654,40 +657,34 @@ export function StudioLayout({
             )}
           </div>
 
-          {/* Mobile: panel overlay (bottom sheet style) */}
-          {ui.activeTool && isMobile && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                maxHeight: "60dvh",
-                backgroundColor: "var(--background)",
-                borderTop: "1px solid var(--border)",
-                borderRadius: "12px 12px 0 0",
-                overflow: "auto",
-                zIndex: 20,
-                boxShadow: "0 -4px 20px rgba(0,0,0,0.15)",
-              }}
+          {/* Mobile: bottom sheet panel */}
+          {isMobile && (
+            <MobileBottomSheet
+              isOpen={!!ui.activeTool}
+              activeTool={ui.activeTool}
+              onClose={() => store.getState().setActiveTool(null)}
             >
-              <PanelShell
-                title=""
-                activeTool={ui.activeTool}
-                onClose={() => store.getState().setActiveTool(null)}
-              >
-                {renderMobilePanel()}
-              </PanelShell>
-            </div>
+              {renderMobilePanel()}
+            </MobileBottomSheet>
           )}
         </div>
 
-        {/* Mobile: Bottom tool bar */}
+        {/* Mobile: Bottom tool bar + controls */}
         {isMobile && (
           <MobileToolBar
             activeTool={ui.activeTool}
             onToolSelect={(tool) => store.getState().setActiveTool(tool)}
             cardType={cardType}
+            passType={passType}
+            isDirty={isDirty}
+            isSaving={ui.isSaving}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            previewFormat={ui.previewFormat}
+            onUndo={() => temporalStore.getState().undo()}
+            onRedo={() => temporalStore.getState().redo()}
+            onSave={handleSave}
+            onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
           />
         )}
       </>
@@ -887,123 +884,401 @@ function CanvasControls({
   )
 }
 
-// ─── Mobile Tool Bar ──────────────────────────────────────
+// ─── Mobile Bottom Sheet ──────────────────────────────────
+
+function MobileBottomSheet({
+  isOpen,
+  activeTool,
+  onClose,
+  children,
+}: {
+  isOpen: boolean
+  activeTool: StudioTool | null
+  onClose: () => void
+  children: React.ReactNode
+}) {
+  const t = useTranslations("studio.panels")
+  const [translateY, setTranslateY] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const startY = useRef(0)
+  const sheetRef = useRef<HTMLDivElement>(null)
+
+  const PANEL_TITLES: Record<StudioTool, string> = {
+    program: t("programSettings"),
+    colors: t("colors"),
+    fields: t("fields"),
+    progress: t("progressStyle"),
+    strip: t("stripImage"),
+    logo: t("logo"),
+    prize: t("prizeReveal"),
+    avatar: t("holderPhoto"),
+    notifications: t("notifications"),
+    details: t("backOfPass"),
+  }
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    startY.current = e.touches[0].clientY
+    setIsDragging(true)
+  }, [])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging) return
+    const delta = e.touches[0].clientY - startY.current
+    if (delta > 0) {
+      setTranslateY(delta)
+    }
+  }, [isDragging])
+
+  const handleTouchEnd = useCallback(() => {
+    setIsDragging(false)
+    if (translateY > 80) {
+      onClose()
+    }
+    setTranslateY(0)
+  }, [translateY, onClose])
+
+  if (!isOpen) return null
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "rgba(0,0,0,0.25)",
+          zIndex: 19,
+          animation: "sheetBackdropIn 0.2s ease",
+        }}
+      />
+
+      {/* Sheet */}
+      <div
+        ref={sheetRef}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          maxHeight: "55dvh",
+          transform: `translateY(${translateY}px)`,
+          transition: isDragging ? "none" : "transform 0.3s cubic-bezier(0.2, 0, 0, 1)",
+          backgroundColor: "var(--background)",
+          borderRadius: "16px 16px 0 0",
+          zIndex: 20,
+          boxShadow: "0 -8px 32px rgba(0,0,0,0.18)",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          animation: isDragging ? "none" : "sheetSlideIn 0.3s cubic-bezier(0.2, 0, 0, 1)",
+        }}
+      >
+        {/* Drag handle */}
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "10px 0 4px",
+            cursor: "grab",
+            touchAction: "none",
+          }}
+        >
+          <div
+            style={{
+              width: 36,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: "var(--muted-foreground)",
+              opacity: 0.3,
+            }}
+          />
+        </div>
+
+        {/* Header */}
+        <div
+          style={{
+            padding: "4px 16px 10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ fontSize: 14, fontWeight: 600 }}>
+            {activeTool ? PANEL_TITLES[activeTool] : ""}
+          </span>
+          <button
+            onClick={onClose}
+            style={{
+              width: 28,
+              height: 28,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 9999,
+              border: "none",
+              backgroundColor: "var(--muted)",
+              color: "var(--muted-foreground)",
+              cursor: "pointer",
+            }}
+            aria-label={t("closePanel")}
+          >
+            <span style={{ fontSize: 14, lineHeight: 1 }}>✕</span>
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, backgroundColor: "var(--border)", flexShrink: 0 }} />
+
+        {/* Content */}
+        <div style={{ flex: 1, overflowY: "auto", padding: 16 }}>
+          {children}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes sheetSlideIn {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+        @keyframes sheetBackdropIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
+    </>
+  )
+}
+
+// ─── Mobile Tool Bar (Canva-style) ──────────────────────────
 
 function MobileToolBar({
   activeTool,
   onToolSelect,
   cardType,
+  passType,
+  isDirty,
+  isSaving,
+  canUndo,
+  canRedo,
+  previewFormat,
+  onUndo,
+  onRedo,
+  onSave,
+  onPreviewFormatChange,
 }: {
   activeTool: StudioTool | null
   onToolSelect: (tool: StudioTool | null) => void
   cardType?: CardType
+  passType: string
+  isDirty: boolean
+  isSaving: boolean
+  canUndo: boolean
+  canRedo: boolean
+  previewFormat: PreviewFormat
+  onUndo: () => void
+  onRedo: () => void
+  onSave: () => void
+  onPreviewFormatChange: (fmt: PreviewFormat) => void
 }) {
   const t = useTranslations("dashboard.studio")
-  const MOBILE_QUICK_TOOLS: { id: StudioTool; label: string; icon: React.ReactNode }[] = [
-    { id: "program", label: t("program"), icon: <SlidersHorizontal size={18} /> },
-    { id: "colors", label: t("colors"), icon: <Palette size={18} /> },
-    { id: "progress", label: t("progress"), icon: <BarChart3 size={18} /> },
-    { id: "strip", label: t("strip"), icon: <ImagePlus size={18} /> },
+
+  const ALL_TOOLS: { id: StudioTool; label: string; icon: React.ReactNode; condition?: boolean }[] = [
+    { id: "program", label: t("program"), icon: <SlidersHorizontal size={20} /> },
+    { id: "colors", label: t("colors"), icon: <Palette size={20} /> },
+    { id: "fields", label: t("fields"), icon: <TextCursorInput size={20} /> },
+    { id: "progress", label: t("progress"), icon: <BarChart3 size={20} />, condition: cardType === "STAMP" },
+    { id: "strip", label: t("strip"), icon: <ImagePlus size={20} /> },
+    { id: "logo", label: t("logo"), icon: <CircleUserRound size={20} /> },
+    { id: "details", label: t("details"), icon: <FileText size={20} /> },
+    { id: "notifications", label: t("notifications"), icon: <Bell size={20} /> },
+    { id: "prize", label: t("prize"), icon: <Gift size={20} />, condition: passType === "STAMP_CARD" || passType === "COUPON" },
+    { id: "avatar", label: t("avatar"), icon: <Camera size={20} />, condition: passType === "MEMBERSHIP" || passType === "ACCESS" || passType === "BUSINESS_ID" },
   ]
-  const [showMore, setShowMore] = useState(false)
-  const filteredQuickTools = cardType && cardType !== "STAMP"
-    ? MOBILE_QUICK_TOOLS.filter((t) => t.id !== "progress")
-    : MOBILE_QUICK_TOOLS
+
+  const visibleTools = ALL_TOOLS.filter((tool) => tool.condition === undefined || tool.condition)
 
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
         borderTop: "1px solid var(--border)",
         backgroundColor: "var(--background)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        flexShrink: 0,
       }}
     >
-      {filteredQuickTools.map((tool) => {
-        const isActive = activeTool === tool.id
-        return (
-          <button
-            key={tool.id}
-            onClick={() => onToolSelect(tool.id)}
-            aria-label={tool.label}
-            aria-pressed={isActive}
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 2,
-              padding: "8px 4px",
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-              color: isActive ? "var(--primary)" : "var(--muted-foreground)",
-              fontSize: 10,
-              fontWeight: isActive ? 600 : 400,
-              minHeight: 48,
-            }}
-          >
-            {tool.icon}
-            <span>{tool.label}</span>
-          </button>
-        )
-      })}
-      <button
-        onClick={() => setShowMore(!showMore)}
-        aria-label={t("moreTools")}
+      {/* Action row: undo/redo + format toggle + save */}
+      <div
         style={{
-          flex: 1,
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          gap: 2,
-          padding: "8px 4px",
-          border: "none",
-          background: "none",
-          cursor: "pointer",
-          color: showMore ? "var(--primary)" : "var(--muted-foreground)",
-          fontSize: 10,
-          fontWeight: showMore ? 600 : 400,
-          minHeight: 48,
+          gap: 6,
+          padding: "6px 12px",
+          borderBottom: "1px solid var(--border)",
         }}
       >
-        <MoreHorizontal size={18} />
-        <span>{t("more")}</span>
-      </button>
-
-      {showMore && (
-        <>
-          <div
-            onClick={() => setShowMore(false)}
-            style={{ position: "fixed", inset: 0, zIndex: 29 }}
-          />
-          <div
+        {/* Undo / Redo */}
+        <div style={{ display: "flex", gap: 2 }}>
+          <button
+            onClick={onUndo}
+            disabled={!canUndo}
+            aria-label={t("undo")}
             style={{
-              position: "fixed",
-              bottom: "calc(48px + env(safe-area-inset-bottom, 0px))",
-              right: 0,
-              backgroundColor: "var(--background)",
-              border: "1px solid var(--border)",
-              borderRadius: "12px 0 0 0",
-              padding: "8px 0",
-              zIndex: 30,
-              boxShadow: "0 -2px 10px rgba(0,0,0,0.1)",
-              maxHeight: "50dvh",
-              overflow: "auto",
+              width: 32,
+              height: 32,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 8,
+              border: "none",
+              background: "none",
+              color: canUndo ? "var(--foreground)" : "var(--muted-foreground)",
+              cursor: canUndo ? "pointer" : "default",
+              opacity: canUndo ? 1 : 0.35,
             }}
           >
-            <ToolSelector
-              activeTool={activeTool}
-              onToolSelect={(tool) => {
-                onToolSelect(tool)
-                setShowMore(false)
+            <Undo2 size={16} />
+          </button>
+          <button
+            onClick={onRedo}
+            disabled={!canRedo}
+            aria-label={t("redo")}
+            style={{
+              width: 32,
+              height: 32,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 8,
+              border: "none",
+              background: "none",
+              color: canRedo ? "var(--foreground)" : "var(--muted-foreground)",
+              cursor: canRedo ? "pointer" : "default",
+              opacity: canRedo ? 1 : 0.35,
+            }}
+          >
+            <Redo2 size={16} />
+          </button>
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        {/* Format toggle */}
+        <div
+          style={{
+            display: "flex",
+            gap: 2,
+            padding: 2,
+            borderRadius: 9999,
+            backgroundColor: "var(--muted)",
+          }}
+        >
+          {(["apple", "google"] as PreviewFormat[]).map((fmt) => (
+            <button
+              key={fmt}
+              onClick={() => onPreviewFormatChange(fmt)}
+              style={{
+                padding: "4px 10px",
+                borderRadius: 9999,
+                border: "none",
+                background: previewFormat === fmt ? "var(--background)" : "none",
+                color: previewFormat === fmt ? "var(--foreground)" : "var(--muted-foreground)",
+                cursor: "pointer",
+                fontSize: 11,
+                fontWeight: previewFormat === fmt ? 600 : 400,
+                boxShadow: previewFormat === fmt ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
+                display: "flex",
+                alignItems: "center",
+                gap: 3,
               }}
-              cardType={cardType}
-            />
-          </div>
-        </>
-      )}
+            >
+              {fmt === "apple" && <Smartphone size={12} />}
+              {fmt === "google" && <Tablet size={12} />}
+              {fmt.charAt(0).toUpperCase() + fmt.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Save button */}
+        <button
+          onClick={onSave}
+          disabled={isSaving || !isDirty}
+          aria-label={t("saveDesign")}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            padding: "5px 14px",
+            borderRadius: 9999,
+            border: "none",
+            backgroundColor: isDirty ? "var(--primary)" : "var(--muted)",
+            color: isDirty ? "var(--primary-foreground)" : "var(--muted-foreground)",
+            cursor: isDirty && !isSaving ? "pointer" : "default",
+            fontSize: 12,
+            fontWeight: 500,
+            opacity: isSaving ? 0.7 : 1,
+          }}
+        >
+          <Save size={13} />
+          {isSaving ? t("saving") : isDirty ? t("save") : t("saved")}
+        </button>
+      </div>
+
+      {/* Tool row: horizontally scrollable Canva-style */}
+      <div
+        data-studio-tools
+        style={{
+          display: "flex",
+          overflowX: "auto",
+          gap: 2,
+          padding: "6px 8px",
+          WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
+      >
+        {visibleTools.map((tool) => {
+          const isActive = activeTool === tool.id
+          return (
+            <button
+              key={tool.id}
+              onClick={() => onToolSelect(isActive ? null : tool.id)}
+              aria-label={tool.label}
+              aria-pressed={isActive}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 3,
+                padding: "8px 12px",
+                minWidth: 56,
+                border: "none",
+                borderRadius: 12,
+                background: isActive ? "var(--primary)" : "none",
+                color: isActive ? "var(--primary-foreground)" : "var(--muted-foreground)",
+                cursor: "pointer",
+                flexShrink: 0,
+                transition: "background-color 0.15s, color 0.15s",
+              }}
+            >
+              {tool.icon}
+              <span style={{ fontSize: 10, fontWeight: 500, whiteSpace: "nowrap" }}>
+                {tool.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Hide scrollbar on tool row */}
+      <style>{`
+        [data-studio-tools]::-webkit-scrollbar { display: none; }
+      `}</style>
     </div>
   )
 }

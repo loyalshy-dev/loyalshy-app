@@ -114,8 +114,10 @@ export function ProgramTabNav({
 
   const cfg = statusConfig[templateStatus] ?? statusConfig.DRAFT
 
+  const isDesignPage = pathname.endsWith("/design")
+
   return (
-    <div className="space-y-4">
+    <div className={cn("space-y-4", isDesignPage && "hidden md:block")}>
       {/* Back + Header */}
       <div className="flex items-center gap-3">
         <Link
