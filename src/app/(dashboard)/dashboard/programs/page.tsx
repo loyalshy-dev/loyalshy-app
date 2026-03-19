@@ -1,11 +1,11 @@
 import { Suspense } from "react"
 import { connection } from "next/server"
 import { redirect } from "next/navigation"
-import { getOrganizationForUser, getOrgMember } from "@/lib/dal"
+import { getOrganizationForUser, getOrgMember, getCurrentUser, isAdminRole } from "@/lib/dal"
 import { getTemplatesList } from "@/server/template-actions"
 import { TemplatesGridView } from "@/components/dashboard/templates-grid"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getAllowedPassTypes, type PlanId } from "@/lib/plans"
+import { getAllowedPassTypes, ALL_PASS_TYPES, type PlanId } from "@/lib/plans"
 
 export default async function ProgramsPage() {
   await connection()
@@ -37,14 +37,18 @@ async function ProgramsSection() {
     redirect("/register?step=2")
   }
 
-  // Run templates fetch and member lookup in parallel (getOrgMember is cached per-request)
-  const [templates, member] = await Promise.all([
+  // Run templates fetch, member lookup, and user check in parallel (getOrgMember and getCurrentUser are cached per-request)
+  const [templates, member, currentUser] = await Promise.all([
     getTemplatesList(),
     getOrgMember(organization.id),
+    getCurrentUser(),
   ])
 
   const isOwner = member?.role === "owner"
-  const allowedPassTypes = getAllowedPassTypes(organization.plan as PlanId)
+  // Admin-tier roles bypass plan pass type restrictions
+  const allowedPassTypes = isAdminRole(currentUser?.user.role ?? "")
+    ? ALL_PASS_TYPES
+    : getAllowedPassTypes(organization.plan as PlanId)
 
   return (
     <TemplatesGridView
