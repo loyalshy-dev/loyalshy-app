@@ -18,7 +18,7 @@ import {
   getOrganizationForUser,
   assertOrganizationAccess,
 } from "@/lib/dal"
-import { parseCouponConfig, parsePointsConfig, parsePrepaidConfig, parseMinigameConfig, formatCouponValue, weightedRandomPrize } from "@/lib/pass-config"
+import { parseCouponConfig, parsePointsConfig, parsePrepaidConfig, formatCouponValue } from "@/lib/pass-config"
 
 // NOTE: stamp-actions exports (searchContactsForStamp, registerStamp, lookupPassInstanceByWalletPassId)
 // must be imported directly from "@/server/stamp-actions" — Turbopack does not support
@@ -116,12 +116,8 @@ export async function redeemCoupon(
   const discountText = config ? formatCouponValue(config) : "Coupon"
   const isUnlimited = config?.redemptionLimit === "unlimited"
 
-  // Pick a prize if minigame is configured
+  // Find existing reward for this pass instance (created at issue time)
   let selectedPrize: string | undefined
-  const mgConfig = parseMinigameConfig(passInstance.passTemplate.config)
-  if (mgConfig?.enabled && mgConfig.prizes?.length) {
-    selectedPrize = weightedRandomPrize(mgConfig.prizes)
-  }
 
   try {
   await db.$transaction(async (tx) => {
@@ -143,6 +139,19 @@ export async function redeemCoupon(
         status: isUnlimited ? "ACTIVE" : "COMPLETED",
       },
     })
+
+    // Mark existing reward as redeemed (created at issue time with prize description)
+    const existingReward = await tx.reward.findFirst({
+      where: { passInstanceId: passInstance.id, status: "AVAILABLE" },
+      select: { id: true, description: true },
+    })
+    if (existingReward) {
+      selectedPrize = existingReward.description ?? undefined
+      await tx.reward.update({
+        where: { id: existingReward.id },
+        data: { status: "REDEEMED", redeemedAt: new Date(), revealedAt: existingReward.description ? new Date() : undefined },
+      })
+    }
 
     // Log interaction
     await tx.interaction.create({

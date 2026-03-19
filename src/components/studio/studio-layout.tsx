@@ -62,6 +62,7 @@ function buildConfigPayload(passType: string, pc: ProgramConfigState): Record<st
         couponDescription: pc.couponDescription || undefined,
         validUntil: pc.validUntil || undefined,
         redemptionLimit: pc.redemptionLimit,
+        rewardDescription: pc.rewardDescription || undefined,
         terms: pc.terms || undefined,
       }
     case "MEMBERSHIP":

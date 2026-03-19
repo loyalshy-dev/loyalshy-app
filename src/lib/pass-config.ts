@@ -43,6 +43,7 @@ export const couponConfigSchema = z.object({
   couponDescription: z.string().max(200).optional(),
   validUntil: z.string().optional(),
   redemptionLimit: z.enum(["single", "unlimited"]),
+  rewardDescription: z.string().max(200).optional(),
   terms: z.string().max(5000).optional(),
   minigame: z
     .object({
