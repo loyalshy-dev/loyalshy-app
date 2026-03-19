@@ -1061,7 +1061,11 @@
         "interactionCreated": "Interacción creada",
         "rewardEarned": "Recompensa ganada",
         "rewardRedeemed": "Recompensa canjeada"
-      }
+      },
+      "statusTrial": "Prueba",
+      "statusActive": "Activo",
+      "statusPastDue": "Pago Atrasado",
+      "statusCanceled": "Cancelado"
     },
     "registerVisit": {
       "title": "Registrar Interacción",
