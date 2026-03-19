@@ -25,6 +25,7 @@ export function useQrScanner({
   const [isStarting, setIsStarting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasCamera, setHasCamera] = useState<boolean | null>(null)
+  const hasStartedRef = useRef(false)
 
   // Keep callback ref fresh without re-triggering effect
   onScanRef.current = onScan
@@ -76,6 +77,7 @@ export function useQrScanner({
 
       scannerRef.current = scanner
       await scanner.start()
+      hasStartedRef.current = true
       setIsStarting(false)
     } catch (err) {
       setIsStarting(false)
@@ -90,13 +92,25 @@ export function useQrScanner({
   // Start/stop scanner based on enabled flag
   useEffect(() => {
     if (enabled) {
-      startScanner()
+      if (hasStartedRef.current && scannerRef.current) {
+        // Resume existing scanner instead of creating a new one
+        scannerRef.current.start().catch(() => startScanner())
+      } else {
+        startScanner()
+      }
+    } else {
+      // Pause instead of destroying — keeps the camera session alive for fast resume
+      if (scannerRef.current) {
+        scannerRef.current.pause()
+      }
     }
 
+    // Only destroy on full unmount
     return () => {
       if (scannerRef.current) {
         scannerRef.current.destroy()
         scannerRef.current = null
+        hasStartedRef.current = false
       }
     }
   }, [enabled, startScanner])
@@ -106,6 +120,7 @@ export function useQrScanner({
     if (scannerRef.current) {
       scannerRef.current.destroy()
       scannerRef.current = null
+      hasStartedRef.current = false
     }
     // Small delay lets the browser fully release the camera before re-acquiring
     setTimeout(() => {

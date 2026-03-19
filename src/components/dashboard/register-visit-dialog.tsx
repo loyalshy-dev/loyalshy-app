@@ -143,20 +143,21 @@ export function RegisterVisitDialog({
   const [isScanLooking, setIsScanLooking] = useState(false)
   const [hasCamera, setHasCamera] = useState<boolean | null>(null)
   const [wasScanned, setWasScanned] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoDismissRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Check camera availability once on mount
-  // On mobile browsers, hasCamera() often returns false before permission is granted,
-  // so we default to true on mobile/touch devices and let the permission prompt appear on use
+  // Detect mobile/touch devices once on mount
+  // On mobile: assume camera exists (permission prompt appears on use), auto-start camera in search
+  // On desktop: async check via qr-scanner, camera is opt-in via scan button
   useEffect(() => {
     let cancelled = false
     const isMobileOrTouch = typeof window !== "undefined" && (
       "ontouchstart" in window || navigator.maxTouchPoints > 0
     )
     if (isMobileOrTouch) {
-      // Assume camera exists on mobile — permission prompt will appear when scanning
+      setIsMobile(true)
       setHasCamera(true)
       return
     }
@@ -574,8 +575,9 @@ export function RegisterVisitDialog({
   function handleBack() {
     if (step === "program") {
       if (wasScanned) {
-        // Return to scan mode
-        setScanMode(true)
+        // On mobile: return to combined view (camera auto-resumes)
+        // On desktop: return to scan mode
+        if (!isMobile) setScanMode(true)
         setStep("search")
         setSelectedCustomer(null)
         setSelectedPassInstance(null)
@@ -587,9 +589,8 @@ export function RegisterVisitDialog({
       }
     } else if (step === "confirm") {
       if (wasScanned) {
-        // Return to scan mode
         setWasScanned(false)
-        setScanMode(true)
+        if (!isMobile) setScanMode(true)
         setStep("search")
         setSelectedCustomer(null)
         setSelectedPassInstance(null)
@@ -618,6 +619,23 @@ export function RegisterVisitDialog({
       onOpenChange(v)
     }}>
       <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden max-md:h-[85dvh] max-md:mt-auto max-md:mb-0 max-md:rounded-b-none">
+        {step === "search" && isMobile && hasCamera && !scanMode && (
+          <MobileSearchStep
+            query={query}
+            results={results}
+            isSearching={isSearching}
+            searchInputRef={searchInputRef}
+            onSearch={handleSearch}
+            onSelect={handleSelectCustomer}
+            onScan={handleScanResult}
+            isScanProcessing={isScanLooking}
+            scanError={scanError}
+            onScanRetry={() => {
+              setScanError(null)
+              setIsScanLooking(false)
+            }}
+          />
+        )}
         {step === "search" && scanMode && (
           <div className="flex flex-col">
             <DialogHeader className="p-4 pb-0">
@@ -642,7 +660,7 @@ export function RegisterVisitDialog({
             </div>
           </div>
         )}
-        {step === "search" && !scanMode && (
+        {step === "search" && !scanMode && !(isMobile && hasCamera) && (
           <SearchStep
             query={query}
             results={results}
@@ -857,6 +875,135 @@ function SearchStep({
           )}
         </div>
       </ScrollArea>
+    </div>
+  )
+}
+
+// ─── Mobile Search Step (Camera + Search Combined) ─────────
+
+function MobileSearchStep({
+  query,
+  results,
+  isSearching,
+  searchInputRef,
+  onSearch,
+  onSelect,
+  onScan,
+  isScanProcessing,
+  scanError,
+  onScanRetry,
+}: {
+  query: string
+  results: InteractionSearchResult[]
+  isSearching: boolean
+  searchInputRef: React.RefObject<HTMLInputElement | null>
+  onSearch: (value: string) => void
+  onSelect: (customer: InteractionSearchResult) => void
+  onScan: (data: string) => void
+  isScanProcessing: boolean
+  scanError: string | null
+  onScanRetry: () => void
+}) {
+  const t = useTranslations("dashboard.registerVisit")
+  const isActivelySearching = query.trim().length > 0
+
+  return (
+    <div className="flex flex-col h-full">
+      <DialogHeader className="p-4 pb-0">
+        <DialogTitle className="text-base">{t("title")}</DialogTitle>
+      </DialogHeader>
+
+      {/* Camera viewfinder — collapses when searching */}
+      <div className={`pt-3 transition-all duration-200 ${isActivelySearching ? "h-0 overflow-hidden opacity-0" : "opacity-100"}`}>
+        <QrScannerView
+          onScan={onScan}
+          isProcessing={isScanProcessing}
+          error={scanError}
+          onRetry={onScanRetry}
+          enabled={!isActivelySearching}
+          compact
+        />
+      </div>
+
+      {/* Search input */}
+      <div className="p-4 pb-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
+            ref={searchInputRef}
+            placeholder="Search by name, email, or phone..."
+            value={query}
+            onChange={(e) => onSearch(e.target.value)}
+            className="pl-9 h-10 text-[16px] md:text-[13px]"
+          />
+          {isSearching && (
+            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground animate-spin" />
+          )}
+        </div>
+      </div>
+
+      {/* Search results — only shown when actively searching */}
+      {isActivelySearching && (
+        <ScrollArea className="flex-1 max-h-[40vh] min-h-20">
+          <div className="px-4 pb-4">
+            {results.length === 0 && !isSearching ? (
+              <div className="flex flex-col items-center gap-2 py-8 text-center">
+                <Search className="size-6 text-muted-foreground/40" />
+                <p className="text-[13px] text-muted-foreground">
+                  No customers found for &ldquo;{query}&rdquo;
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {results.map((customer) => {
+                  const activePassInstances = customer.passInstances.filter(
+                    (e) => e.status === "ACTIVE"
+                  )
+                  const primary = activePassInstances[0]
+
+                  return (
+                    <button
+                      key={customer.id}
+                      type="button"
+                      className="flex items-center gap-3 w-full rounded-lg px-3 py-3 min-h-12 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      onClick={() => onSelect(customer)}
+                    >
+                      <div
+                        className="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-medium text-white"
+                        style={{ backgroundColor: getAvatarColor(customer.fullName) }}
+                      >
+                        {getInitials(customer.fullName)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-medium truncate">
+                          {customer.fullName}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {customer.email ?? customer.phone ?? "No contact info"}
+                        </p>
+                      </div>
+                      {primary && (
+                        <p className="text-[11px] text-muted-foreground truncate max-w-25 shrink-0">
+                          {activePassInstances.length > 1
+                            ? `${activePassInstances.length} programs`
+                            : primary.templateName}
+                        </p>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      )}
+
+      {/* Hint when not searching */}
+      {!isActivelySearching && !scanError && (
+        <p className="text-[12px] text-muted-foreground text-center pb-4">
+          Scan a QR code or search by name
+        </p>
+      )}
     </div>
   )
 }

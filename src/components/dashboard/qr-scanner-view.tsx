@@ -1,23 +1,29 @@
 "use client"
 
-import { Loader2, AlertCircle, Search, RotateCcw } from "lucide-react"
+import { Loader2, AlertCircle, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useQrScanner } from "@/hooks/use-qr-scanner"
 
 type QrScannerViewProps = {
   onScan: (data: string) => void
-  onBack: () => void
   isProcessing: boolean
   error: string | null
   onRetry: () => void
+  /** Controls whether the scanner is actively scanning. Defaults to true. */
+  enabled?: boolean
+  /** Compact mode hides helper text and back link — used in combined mobile layout. */
+  compact?: boolean
+  onBack?: () => void
 }
 
 export function QrScannerView({
   onScan,
-  onBack,
   isProcessing,
   error: scanError,
   onRetry,
+  enabled = true,
+  compact = false,
+  onBack,
 }: QrScannerViewProps) {
   const {
     videoRef,
@@ -26,7 +32,7 @@ export function QrScannerView({
     restart,
   } = useQrScanner({
     onScan,
-    enabled: true,
+    enabled,
   })
 
   const displayError = cameraError || scanError
@@ -41,9 +47,9 @@ export function QrScannerView({
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 px-4 pb-4">
+    <div className={`flex flex-col items-center ${compact ? "gap-2" : "gap-3"} px-4 ${compact ? "pb-2" : "pb-4"}`}>
       {/* Camera viewport */}
-      <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-black">
+      <div className={`relative w-full ${compact ? "aspect-video" : "aspect-4/3"} rounded-xl overflow-hidden bg-black`}>
         <video
           ref={videoRef}
           className="absolute inset-0 w-full h-full object-cover"
@@ -59,6 +65,13 @@ export function QrScannerView({
           </div>
         )}
 
+        {/* Paused overlay (enabled=false but no error) */}
+        {!enabled && !cameraError && !isStarting && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+            <p className="text-[12px] text-white/60">Scanner paused</p>
+          </div>
+        )}
+
         {/* Processing overlay */}
         {isProcessing && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/60 backdrop-blur-sm">
@@ -68,10 +81,9 @@ export function QrScannerView({
         )}
 
         {/* Scan frame overlay (only when camera is active and not processing) */}
-        {!isStarting && !cameraError && !isProcessing && (
+        {enabled && !isStarting && !cameraError && !isProcessing && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            {/* Dimmed corners */}
-            <div className="relative size-48 max-w-[70%] max-h-[70%]">
+            <div className={`relative ${compact ? "size-32" : "size-48"} max-w-[70%] max-h-[70%]`}>
               {/* Corner brackets */}
               <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-brand rounded-tl" />
               <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-brand rounded-tr" />
@@ -96,45 +108,36 @@ export function QrScannerView({
             <p className="text-[12px] text-destructive leading-relaxed">
               {displayError}
             </p>
-            <div className="flex gap-2 mt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-[11px] gap-1.5"
-                onClick={handleRetry}
-              >
-                <RotateCcw className="size-3" />
-                Try again
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-[11px] gap-1.5"
-                onClick={onBack}
-              >
-                <Search className="size-3" />
-                Search by name
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-[11px] gap-1.5 mt-2"
+              onClick={handleRetry}
+            >
+              <RotateCcw className="size-3" />
+              Try again
+            </Button>
           </div>
         </div>
       )}
 
-      {/* Helper text */}
-      {!displayError && (
+      {/* Helper text — only in standalone (non-compact) mode */}
+      {!compact && !displayError && (
         <p className="text-[12px] text-muted-foreground text-center">
           Point camera at the QR code on the wallet pass
         </p>
       )}
 
-      {/* Back link */}
-      <button
-        type="button"
-        className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
-        onClick={onBack}
-      >
-        or search by name instead
-      </button>
+      {/* Back link — only in standalone (non-compact) mode */}
+      {!compact && onBack && (
+        <button
+          type="button"
+          className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+          onClick={onBack}
+        >
+          or search by name instead
+        </button>
+      )}
     </div>
   )
 }
