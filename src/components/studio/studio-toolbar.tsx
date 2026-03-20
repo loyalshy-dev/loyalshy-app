@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Undo2, Redo2, Save, Smartphone, Tablet } from "lucide-react"
+import { ArrowLeft, Undo2, Redo2, Save, Download, Smartphone, Tablet } from "lucide-react"
 import type { PreviewFormat } from "@/types/editor"
 import { useTranslations } from "next-intl"
 
@@ -10,10 +10,12 @@ type StudioToolbarProps = {
   programId: string
   isDirty: boolean
   isSaving: boolean
+  isDownloading: boolean
   canUndo: boolean
   canRedo: boolean
   previewFormat: PreviewFormat
   onSave: () => void
+  onDownload: () => void
   onUndo: () => void
   onRedo: () => void
   onPreviewFormatChange: (format: PreviewFormat) => void
@@ -26,10 +28,12 @@ export function StudioToolbar({
   programId,
   isDirty,
   isSaving,
+  isDownloading,
   canUndo,
   canRedo,
   previewFormat,
   onSave,
+  onDownload,
   onUndo,
   onRedo,
   onPreviewFormatChange,
@@ -147,6 +151,24 @@ export function StudioToolbar({
 
       {/* Divider */}
       <div style={{ width: 1, height: 24, backgroundColor: "var(--border)" }} />
+
+      {/* Download PNG button */}
+      <button
+        onClick={onDownload}
+        disabled={isDownloading}
+        style={{
+          padding: 6,
+          borderRadius: 6,
+          border: "none",
+          background: "none",
+          color: "var(--muted-foreground)",
+          cursor: isDownloading ? "default" : "pointer",
+          opacity: isDownloading ? 0.4 : 1,
+        }}
+        aria-label={t("downloadPng")}
+      >
+        <Download size={16} />
+      </button>
 
       {/* Save button */}
       <button

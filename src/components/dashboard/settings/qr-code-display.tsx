@@ -89,6 +89,8 @@ type QrCodeDisplayProps = {
   joinUrl: string
 }
 
+type DownloadMode = "qr-only" | "poster"
+
 export function QrCodeDisplay({
   organization,
   templates,
@@ -125,10 +127,107 @@ export function QrCodeDisplay({
     "#1a1a2e"
 
   const [selectedSize, setSelectedSize] = useState<string>("table-tent")
+  const [downloadMode, setDownloadMode] = useState<DownloadMode>("qr-only")
   const [downloading, setDownloading] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  async function downloadPng() {
+  /**
+   * Fetch a logo image through same-origin proxy to avoid CORS taint.
+   * Returns the loaded Image or null on failure.
+   */
+  async function loadLogoImage(url: string): Promise<HTMLImageElement | null> {
+    try {
+      const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(url)}`
+      const img = new window.Image()
+      img.crossOrigin = "anonymous"
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = () => reject()
+        img.src = proxyUrl
+      })
+      return img
+    } catch {
+      return null
+    }
+  }
+
+  async function downloadQrOnly() {
+    setDownloading(true)
+    try {
+      const qrSize = 1024
+      const canvas = canvasRef.current
+      if (!canvas) return
+
+      canvas.width = qrSize
+      canvas.height = qrSize
+
+      const ctx = canvas.getContext("2d")
+      if (!ctx) return
+
+      // Render styled QR as SVG, then draw to canvas
+      const posterAccentColor =
+        activeTemplateDesign?.primaryColor ?? organization.brandColor ?? "#1a1a2e"
+
+      const qr = QRCode.create(joinUrl, { errorCorrectionLevel: "H" })
+      const styledSvg = renderStyledQr(
+        qr.modules,
+        qrSize,
+        organization.name.charAt(0).toUpperCase(),
+        { bg: posterAccentColor, fg: "#ffffff" }
+      )
+      const svgBlob = new Blob([styledSvg], { type: "image/svg+xml" })
+      const svgUrl = URL.createObjectURL(svgBlob)
+
+      const qrImage = new window.Image()
+      await new Promise<void>((resolve) => {
+        qrImage.onload = () => resolve()
+        qrImage.src = svgUrl
+      })
+      URL.revokeObjectURL(svgUrl)
+
+      // Transparent background
+      ctx.clearRect(0, 0, qrSize, qrSize)
+      ctx.drawImage(qrImage, 0, 0, qrSize, qrSize)
+
+      // Draw logo on center
+      if (qrLogoUrl) {
+        const logoImg = await loadLogoImage(qrLogoUrl)
+        if (logoImg) {
+          const moduleCount = qr.modules.size
+          const cellSize = qrSize / (moduleCount + 5) // padding=2.5 each side
+          const centerModules = Math.ceil(moduleCount * 0.18)
+          const logoBgRadius = centerModules * cellSize * 0.42
+          const centerXY = qrSize / 2
+          const logoSize = logoBgRadius * 2
+
+          ctx.save()
+          ctx.beginPath()
+          ctx.arc(centerXY, centerXY, logoBgRadius + 1, 0, Math.PI * 2)
+          ctx.fillStyle = posterAccentColor
+          ctx.fill()
+          ctx.beginPath()
+          ctx.arc(centerXY, centerXY, logoBgRadius, 0, Math.PI * 2)
+          ctx.clip()
+          ctx.drawImage(logoImg, centerXY - logoBgRadius, centerXY - logoBgRadius, logoSize, logoSize)
+          ctx.restore()
+        }
+      }
+
+      const suffix = activeTemplate
+        ? `${activeTemplate.name.toLowerCase().replace(/\s+/g, "-")}-qr`
+        : "qr"
+      const link = document.createElement("a")
+      link.download = `${organization.slug}-${suffix}.png`
+      link.href = canvas.toDataURL("image/png", 1.0)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  async function downloadPoster() {
     setDownloading(true)
 
     try {
@@ -163,7 +262,7 @@ export function QrCodeDisplay({
       )
 
       const qr = QRCode.create(joinUrl, { errorCorrectionLevel: "H" })
-      // Render QR without image logo for canvas (external images taint canvas via SVG)
+      // Render QR without image logo for SVG (external images taint canvas via SVG)
       const styledSvg = renderStyledQr(qr.modules, preset.qrSize, organization.name.charAt(0).toUpperCase(), { bg: posterAccentColor, fg: "#ffffff" })
       const svgBlob = new Blob([styledSvg], { type: "image/svg+xml" })
       const svgUrl = URL.createObjectURL(svgBlob)
@@ -180,22 +279,19 @@ export function QrCodeDisplay({
       const qrY = barHeight + nameFontSize + Math.round(canvas.height * 0.06)
       ctx.drawImage(qrImage, qrX, qrY, qrDrawSize, qrDrawSize)
 
-      // Draw logo image on top of QR center
+      // Draw logo image on top of QR center via same-origin proxy
       if (qrLogoUrl) {
-        try {
-          const logoImg = new window.Image()
-          logoImg.crossOrigin = "anonymous"
-          await new Promise<void>((resolve, reject) => {
-            logoImg.onload = () => resolve()
-            logoImg.onerror = () => reject()
-            logoImg.src = qrLogoUrl
-          })
-          const logoSize = qrDrawSize * 0.18 * 2 // matches centerModules ratio
+        const logoImg = await loadLogoImage(qrLogoUrl)
+        if (logoImg) {
+          const moduleCount = qr.modules.size
+          const cellSize = preset.qrSize / (moduleCount + 5)
+          const centerModules = Math.ceil(moduleCount * 0.18)
+          const logoBgRadius = centerModules * cellSize * 0.42
+          const logoSize = logoBgRadius * 2 * (qrDrawSize / preset.qrSize)
           const logoCenterX = qrX + qrDrawSize / 2
           const logoCenterY = qrY + qrDrawSize / 2
           const logoRadius = logoSize / 2
 
-          // Draw circular clipped logo
           ctx.save()
           ctx.beginPath()
           ctx.arc(logoCenterX, logoCenterY, logoRadius + 2, 0, Math.PI * 2)
@@ -206,8 +302,6 @@ export function QrCodeDisplay({
           ctx.clip()
           ctx.drawImage(logoImg, logoCenterX - logoRadius, logoCenterY - logoRadius, logoSize, logoSize)
           ctx.restore()
-        } catch {
-          // Logo failed to load — text fallback already rendered in SVG
         }
       }
 
@@ -249,6 +343,14 @@ export function QrCodeDisplay({
       document.body.removeChild(link)
     } finally {
       setDownloading(false)
+    }
+  }
+
+  function handleDownload() {
+    if (downloadMode === "qr-only") {
+      downloadQrOnly()
+    } else {
+      downloadPoster()
     }
   }
 
@@ -318,37 +420,68 @@ export function QrCodeDisplay({
 
         {/* Download controls */}
         <div className="space-y-4">
+          {/* Download mode toggle */}
           <div className="space-y-2">
             <label className="text-[13px] font-medium text-muted-foreground">
-              Print size
+              Download format
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              {SIZE_PRESETS.map((preset) => (
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { id: "qr-only" as const, label: "QR Code Only", description: "Transparent PNG" },
+                { id: "poster" as const, label: "Print Poster", description: "With text & branding" },
+              ]).map((mode) => (
                 <button
-                  key={preset.id}
-                  onClick={() => setSelectedSize(preset.id)}
+                  key={mode.id}
+                  onClick={() => setDownloadMode(mode.id)}
                   className={`flex flex-col items-center gap-0.5 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
-                    selectedSize === preset.id
+                    downloadMode === mode.id
                       ? "border-foreground bg-foreground/5"
                       : "border-border hover:border-foreground/30"
                   }`}
                 >
-                  <span className="font-medium">{preset.label}</span>
+                  <span className="font-medium">{mode.label}</span>
                   <span className="text-xs text-muted-foreground">
-                    {preset.description}
+                    {mode.description}
                   </span>
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Print size selector — only shown for poster mode */}
+          {downloadMode === "poster" && (
+            <div className="space-y-2">
+              <label className="text-[13px] font-medium text-muted-foreground">
+                Print size
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {SIZE_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => setSelectedSize(preset.id)}
+                    className={`flex flex-col items-center gap-0.5 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
+                      selectedSize === preset.id
+                        ? "border-foreground bg-foreground/5"
+                        : "border-border hover:border-foreground/30"
+                    }`}
+                  >
+                    <span className="font-medium">{preset.label}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {preset.description}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <Button
-            onClick={downloadPng}
+            onClick={handleDownload}
             disabled={downloading}
             className="w-full gap-2"
           >
             <Download className="size-4" />
-            {downloading ? "Generating..." : "Download PNG"}
+            {downloading ? "Generating..." : downloadMode === "qr-only" ? "Download QR Code" : "Download Poster"}
           </Button>
 
           {/* NFC note */}

@@ -7,7 +7,7 @@ import type { CardDesignStoreApi, WalletState } from "@/lib/stores/card-design-s
 import { useStore } from "zustand"
 import { useStoreWithEqualityFn } from "zustand/traditional"
 import { StudioToolbar } from "./studio-toolbar"
-import { CanvasPanel } from "./canvas/canvas-panel"
+import { CanvasPanel, type CanvasPanelHandle } from "./canvas/canvas-panel"
 import { ContextPanel, FloatingToolMenu } from "./canvas/context-notch"
 import { ProgramPanel } from "./panels/program-panel"
 import { ColorsPanel } from "./panels/colors-panel"
@@ -25,7 +25,7 @@ import type { StudioTool, PreviewFormat } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 import type { ProgramConfigState } from "@/lib/stores/card-design-store"
-import { Save, Smartphone, Tablet, Palette, BarChart3, ImagePlus, SlidersHorizontal, Undo2, Redo2, TextCursorInput, CircleUserRound, FileText, Bell, Gift, Camera } from "lucide-react"
+import { Save, Download, Smartphone, Tablet, Palette, BarChart3, ImagePlus, SlidersHorizontal, Undo2, Redo2, TextCursorInput, CircleUserRound, FileText, Bell, Gift, Camera } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 /** Map PassType → CardType for visual rendering */
@@ -501,6 +501,58 @@ export function StudioLayout({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [handleSave, temporalStore, store])
 
+  // ─── Canvas ref + download handler ──────────────────────
+
+  const canvasRef = useRef<CanvasPanelHandle>(null)
+  const [isDownloading, setIsDownloading] = useState(false)
+
+  const handleDownload = useCallback(async () => {
+    const el = canvasRef.current?.getCardElement()
+    if (!el) return
+
+    setIsDownloading(true)
+
+    // Swap cross-origin image srcs to same-origin proxy to avoid CORS errors
+    const images = el.querySelectorAll("img")
+    const originals = new Map<HTMLImageElement, string>()
+    for (const img of images) {
+      const src = img.src
+      if (src && !src.startsWith(window.location.origin) && !src.startsWith("data:")) {
+        originals.set(img, src)
+        img.src = `/api/image-proxy?url=${encodeURIComponent(src)}`
+      }
+    }
+    // Wait for proxied images to load
+    await Promise.all(
+      [...originals.keys()].map(
+        (img) => img.complete ? Promise.resolve() : new Promise<void>((r) => { img.onload = img.onerror = () => r() })
+      )
+    )
+
+    try {
+      const { toPng } = await import("html-to-image")
+      const dataUrl = await toPng(el, {
+        pixelRatio: 3,
+        backgroundColor: undefined, // transparent
+      })
+
+      const link = document.createElement("a")
+      link.download = `card-design-${store.getState().ui.previewFormat}.png`
+      link.href = dataUrl
+      link.click()
+
+      toast.success(tStudioRef.current?.("downloadSuccess") ?? "Downloaded!")
+    } catch {
+      toast.error(tStudioRef.current?.("downloadFailed") ?? "Failed to download")
+    } finally {
+      // Restore original image sources
+      for (const [img, src] of originals) {
+        img.src = src
+      }
+      setIsDownloading(false)
+    }
+  }, [store])
+
   // ─── Mobile panel routing ──────────────────────────────
 
   function renderMobilePanel() {
@@ -606,6 +658,7 @@ export function StudioLayout({
             )}
 
             <CanvasPanel
+              ref={canvasRef}
               design={design}
               format={ui.previewFormat}
               deviceFrame="minimal"
@@ -648,11 +701,13 @@ export function StudioLayout({
                 onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
                 isDirty={isDirty}
                 isSaving={ui.isSaving}
+                isDownloading={isDownloading}
                 canUndo={canUndo}
                 canRedo={canRedo}
                 onUndo={() => temporalStore.getState().undo()}
                 onRedo={() => temporalStore.getState().redo()}
                 onSave={handleSave}
+                onDownload={handleDownload}
               />
             )}
           </div>
@@ -678,12 +733,14 @@ export function StudioLayout({
             passType={passType}
             isDirty={isDirty}
             isSaving={ui.isSaving}
+            isDownloading={isDownloading}
             canUndo={canUndo}
             canRedo={canRedo}
             previewFormat={ui.previewFormat}
             onUndo={() => temporalStore.getState().undo()}
             onRedo={() => temporalStore.getState().redo()}
             onSave={handleSave}
+            onDownload={handleDownload}
             onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
           />
         )}
@@ -706,10 +763,12 @@ export function StudioLayout({
         embedded={false}
         isDirty={isDirty}
         isSaving={ui.isSaving}
+        isDownloading={isDownloading}
         canUndo={canUndo}
         canRedo={canRedo}
         previewFormat={ui.previewFormat}
         onSave={handleSave}
+        onDownload={handleDownload}
         onUndo={() => temporalStore.getState().undo()}
         onRedo={() => temporalStore.getState().redo()}
         onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
@@ -740,21 +799,25 @@ function CanvasControls({
   onPreviewFormatChange,
   isDirty,
   isSaving,
+  isDownloading,
   canUndo,
   canRedo,
   onUndo,
   onRedo,
   onSave,
+  onDownload,
 }: {
   previewFormat: PreviewFormat
   onPreviewFormatChange: (fmt: PreviewFormat) => void
   isDirty: boolean
   isSaving: boolean
+  isDownloading: boolean
   canUndo: boolean
   canRedo: boolean
   onUndo: () => void
   onRedo: () => void
   onSave: () => void
+  onDownload: () => void
 }) {
   const t = useTranslations("dashboard.studio")
   return (
@@ -855,6 +918,29 @@ function CanvasControls({
           </button>
         ))}
       </div>
+
+      {/* Download PNG button */}
+      <button
+        onClick={onDownload}
+        disabled={isDownloading}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 32,
+          height: 32,
+          borderRadius: 9999,
+          border: "1px solid var(--border)",
+          backgroundColor: "var(--background)",
+          color: "var(--muted-foreground)",
+          cursor: isDownloading ? "default" : "pointer",
+          opacity: isDownloading ? 0.5 : 1,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        }}
+        aria-label={t("downloadPng")}
+      >
+        <Download size={14} />
+      </button>
 
       {/* Save button */}
       <button
@@ -1063,12 +1149,14 @@ function MobileToolBar({
   passType,
   isDirty,
   isSaving,
+  isDownloading,
   canUndo,
   canRedo,
   previewFormat,
   onUndo,
   onRedo,
   onSave,
+  onDownload,
   onPreviewFormatChange,
 }: {
   activeTool: StudioTool | null
@@ -1077,12 +1165,14 @@ function MobileToolBar({
   passType: string
   isDirty: boolean
   isSaving: boolean
+  isDownloading: boolean
   canUndo: boolean
   canRedo: boolean
   previewFormat: PreviewFormat
   onUndo: () => void
   onRedo: () => void
   onSave: () => void
+  onDownload: () => void
   onPreviewFormatChange: (fmt: PreviewFormat) => void
 }) {
   const t = useTranslations("dashboard.studio")
@@ -1202,6 +1292,28 @@ function MobileToolBar({
             </button>
           ))}
         </div>
+
+        {/* Download PNG button */}
+        <button
+          onClick={onDownload}
+          disabled={isDownloading}
+          aria-label={t("downloadPng")}
+          style={{
+            width: 32,
+            height: 32,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 8,
+            border: "none",
+            background: "none",
+            color: "var(--muted-foreground)",
+            cursor: isDownloading ? "default" : "pointer",
+            opacity: isDownloading ? 0.35 : 1,
+          }}
+        >
+          <Download size={16} />
+        </button>
 
         {/* Save button */}
         <button

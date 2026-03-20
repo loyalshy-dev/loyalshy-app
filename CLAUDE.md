@@ -31,6 +31,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 | zundo | ~2.x | Undo/redo temporal middleware for zustand |
 | next-themes | 0.4.x | Light/dark mode with system preference detection |
 | motion | 12.x | Scroll-triggered animations for marketing landing page (FadeIn, Stagger, ScaleIn) |
+| html-to-image | 1.11.x | DOM-to-PNG export for card design download (transparent bg, 3x resolution) |
 | next-intl | 4.8.x | i18n — cookie-based locale detection, no URL prefix routing |
 
 ## Critical Architecture Rules
@@ -154,6 +155,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
         /webhooks, /webhooks/[id], /webhooks/[id]/test, /webhooks/[id]/rotate-secret
         /openapi.json → OpenAPI 3.1 spec
         /docs         → Interactive API reference (Scalar)
+      /api/image-proxy → Same-origin proxy for R2 images (CORS bypass for PNG export)
   /components       → Reusable UI components
     /ui             → Shadcn components
     /card-renderer  → Shared CardRenderer used across all surfaces

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useImperativeHandle, forwardRef } from "react"
 import { useTranslations } from "next-intl"
 import type { PreviewFormat, DeviceFrame } from "@/types/editor"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
@@ -37,7 +37,11 @@ type CanvasPanelProps = {
   store?: CardDesignStoreApi
 }
 
-export function CanvasPanel({
+export type CanvasPanelHandle = {
+  getCardElement: () => HTMLDivElement | null
+}
+
+export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(function CanvasPanel({
   design,
   format,
   deviceFrame,
@@ -55,7 +59,12 @@ export function CanvasPanel({
   customMessage,
   holderPhotoUrl,
   store,
-}: CanvasPanelProps) {
+}, ref) {
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  useImperativeHandle(ref, () => ({
+    getCardElement: () => cardRef.current,
+  }))
   const t = useTranslations("studio.canvas")
 
   const STAMP_PREVIEW_STATES: PreviewStateOption[] = [
@@ -202,6 +211,7 @@ export function CanvasPanel({
                 cardHeight={format === "apple" ? 450 : 480}
                 isFlipped={isFlipped}
               >
+              <div ref={cardRef}>
               <WalletPassRenderer
                 design={design}
                 format={format}
@@ -251,6 +261,7 @@ export function CanvasPanel({
                 holderPhotoPosition={businessIdConfig?.holderPhotoPosition ?? membershipConfig?.holderPhotoPosition ?? accessConfig?.holderPhotoPosition}
                 holderPhotoUrl={holderPhotoUrl}
               />
+              </div>
               </InteractiveCardWrapper>
             </DeviceFrameWrapper>
           </div>
@@ -311,7 +322,7 @@ export function CanvasPanel({
       </button>
     </div>
   )
-}
+})
 
 // ─── Back of Pass View ──────────────────────────────────────
 
