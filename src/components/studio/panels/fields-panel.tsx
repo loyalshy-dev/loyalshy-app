@@ -166,7 +166,7 @@ export function FieldsPanel({ store, passType }: Props) {
       </div>
 
       {/* ── Show Primary Field on Strip (Apple only) ── */}
-      {showStrip && !isGoogle && (
+      {showStrip && !isGoogle && passType !== "STAMP_CARD" && (
         <>
           <SectionHeader>{t("primaryFieldSection")}</SectionHeader>
           <label
