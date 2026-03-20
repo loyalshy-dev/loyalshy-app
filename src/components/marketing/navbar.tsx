@@ -31,9 +31,9 @@ export function MarketingNavbar() {
   const [mobileOpen, setMobileOpen] = React.useState(false)
 
   const NAV_LINKS: NavLink[] = [
-    { label: t("features"), href: "#features" },
-    { label: t("pricing"), href: "#pricing" },
-    { label: t("faq"), href: "#faq" },
+    { label: t("features"), href: "/#features" },
+    { label: t("pricing"), href: "/#pricing" },
+    { label: t("faq"), href: "/#faq" },
     { label: tCommon("contact"), href: "/contact" },
   ]
 
