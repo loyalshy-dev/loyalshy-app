@@ -181,19 +181,23 @@ export function StudioLayout({
   useEffect(() => { tStudioRef.current = tStudio }, [tStudio])
 
   const cardType = passTypeToCardType(passType)
-  // Create store once per mount
+  // Create store once per mount — recreate when switching programs so
+  // logos, strip images and config from one program don't leak to another
   const storeRef = useRef<CardDesignStoreApi | null>(null)
-  if (!storeRef.current) {
+  const prevTemplateIdRef = useRef<string>(templateId)
+  if (!storeRef.current || prevTemplateIdRef.current !== templateId) {
     storeRef.current = createCardDesignStore()
+    prevTemplateIdRef.current = templateId
   }
   const store = storeRef.current
 
-  // Hydrate from server data on mount only — never re-hydrate after
-  // revalidatePath (e.g. from strip upload) to avoid overwriting unsaved changes
-  const hydratedRef = useRef(false)
+  // Hydrate from server data on mount or when the program changes — never
+  // re-hydrate after revalidatePath (e.g. from strip upload) to avoid
+  // overwriting unsaved changes
+  const hydratedTemplateRef = useRef<string | null>(null)
   useEffect(() => {
-    if (hydratedRef.current) return
-    hydratedRef.current = true
+    if (hydratedTemplateRef.current === templateId) return
+    hydratedTemplateRef.current = templateId
     if (walletData) {
       store.getState().hydrate(walletData as Partial<WalletState>)
     }
@@ -273,7 +277,7 @@ export function StudioLayout({
     })
     // Mark clean after setting logos and config since it's not a user change
     store.getState().markClean()
-  }, [walletData, organizationLogo, organizationLogoApple, organizationLogoGoogle, store, templateConfig, templateName, templateStartsAt, templateEndsAt])
+  }, [walletData, organizationLogo, organizationLogoApple, organizationLogoGoogle, store, templateId, templateConfig, templateName, templateStartsAt, templateEndsAt, cardType])
 
   // ─── Selectors ────────────────────────────────────────
 
