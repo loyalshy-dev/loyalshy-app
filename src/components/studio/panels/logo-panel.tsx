@@ -398,19 +398,6 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
             </div>
           )}
 
-          {/* ─── Uploaded logos gallery ────────────────────── */}
-          <MediaGallery
-            organizationId={organizationId}
-            type="logo"
-            currentUrl={programLogoUrl ?? null}
-            onSelect={(url) => {
-              const s = store.getState()
-              s.setWalletField("programLogoUrl", url)
-              s.setWalletField("logoAppleUrl", url)
-              s.setWalletField("logoGoogleUrl", url)
-            }}
-          />
-
           {/* ─── Brand Match ─────────────────────────────── */}
           <SectionHeader>{t("brandMatch")}</SectionHeader>
           <div
@@ -507,6 +494,19 @@ export function LogoPanel({ store, organizationId, organizationName, organizatio
           </div>
         </>
       )}
+
+      {/* ─── Uploaded logos gallery ────────────────────── */}
+      <MediaGallery
+        organizationId={organizationId}
+        type="logo"
+        currentUrl={programLogoUrl ?? null}
+        onSelect={(url) => {
+          const s = store.getState()
+          s.setWalletField("programLogoUrl", url)
+          s.setWalletField("logoAppleUrl", url)
+          s.setWalletField("logoGoogleUrl", url)
+        }}
+      />
 
       {/* ─── Platform override (collapsed) ───────────────── */}
       {hasLogo && hasProgramLogo && (
