@@ -20,9 +20,9 @@ const PHONE_CARD_H = Math.round(PHONE_CARD_W * (477 / 426)) // match actual imag
 /* ─── Card images ─────────────────────────────────────────────────── */
 
 const CARD_IMAGES = [
-  { src: "/pass-types/stamp.webp", alt: "Stamp card pass" },
-  { src: "/pass-types/coupon.webp", alt: "Coupon pass" },
-  { src: "/pass-types/ticket.webp", alt: "Ticket pass" },
+  { src: "/pass-types/stamp-apple.webp", alt: "Stamp card — Apple Wallet" },
+  { src: "/pass-types/coupon-apple.webp", alt: "Coupon — Apple Wallet" },
+  { src: "/pass-types/ticket-apple.webp", alt: "Ticket — Apple Wallet" },
 ] as const
 
 /* ─── Status bar icons ─────────────────────────────────────────────── */

@@ -20,16 +20,16 @@ import { useTranslations } from "next-intl"
 import { FadeIn } from "./motion"
 
 const PASS_TYPES = [
-  { id: "stampCard", icon: Stamp },
-  { id: "coupon", icon: Ticket },
-  { id: "membership", icon: Crown },
-  { id: "points", icon: Coins },
-  { id: "prepaid", icon: CreditCard },
-  { id: "giftCard", icon: Gift },
-  { id: "ticket", icon: CalendarDays },
-  { id: "access", icon: ShieldCheck },
-  { id: "transit", icon: Bus },
-  { id: "businessId", icon: BadgeCheck },
+  { id: "stampCard", icon: Stamp, image: "/pass-types/stamp-apple.webp" },
+  { id: "coupon", icon: Ticket, image: "/pass-types/coupon-google.webp" },
+  { id: "membership", icon: Crown, image: "/pass-types/memebership-apple.webp" },
+  { id: "points", icon: Coins, image: null },
+  { id: "prepaid", icon: CreditCard, image: null },
+  { id: "giftCard", icon: Gift, image: null },
+  { id: "ticket", icon: CalendarDays, image: "/pass-types/ticket-google.webp" },
+  { id: "access", icon: ShieldCheck, image: null },
+  { id: "transit", icon: Bus, image: null },
+  { id: "businessId", icon: BadgeCheck, image: null },
 ] as const
 
 export function PassTypesCarousel() {
@@ -172,22 +172,48 @@ export function PassTypesCarousel() {
  
             >
               {PASS_TYPES.map((type, i) => (
-                <Image
-                  key={type.id}
-                  src={`/pass-types/${type.id}.webp`}
-                  alt={t(`types.${type.id}.alt`)}
-                  width={800}
-                  height={600}
-                  className="w-full h-auto transition-opacity duration-300 ease-out"
-                  style={{
-                    opacity: active === i ? 1 : 0,
-                    position: active === i ? "relative" : "absolute",
-                    top: 0,
-                    left: 0,
-                  }}
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  loading="lazy"
-                />
+                type.image ? (
+                  <Image
+                    key={type.id}
+                    src={type.image}
+                    alt={t(`types.${type.id}.alt`)}
+                    width={800}
+                    height={600}
+                    className="w-full h-auto transition-opacity duration-300 ease-out"
+                    style={{
+                      opacity: active === i ? 1 : 0,
+                      position: active === i ? "relative" : "absolute",
+                      top: 0,
+                      left: 0,
+                    }}
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div
+                    key={type.id}
+                    className="flex flex-col items-center justify-center gap-3 aspect-[4/3] w-full rounded-xl transition-opacity duration-300 ease-out"
+                    style={{
+                      opacity: active === i ? 1 : 0,
+                      position: active === i ? "relative" : "absolute",
+                      top: 0,
+                      left: 0,
+                      background: "var(--mk-surface, oklch(0.95 0.005 265))",
+                      border: "1px dashed var(--mk-border, oklch(0.85 0.01 265))",
+                    }}
+                  >
+                    {(() => {
+                      const Icon = type.icon
+                      return <Icon className="size-12" style={{ color: "var(--mk-text-muted)" }} strokeWidth={1} />
+                    })()}
+                    <span className="text-sm font-medium" style={{ color: "var(--mk-text-muted)" }}>
+                      {t(`types.${type.id}.label`)}
+                    </span>
+                    <span className="text-xs" style={{ color: "var(--mk-text-muted)", opacity: 0.6 }}>
+                      Coming soon
+                    </span>
+                  </div>
+                )
               ))}
             </div>
 

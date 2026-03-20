@@ -6,9 +6,10 @@ import { useCallback, useEffect, useRef, useState } from "react"
 /* ─── Card image data ─────────────────────────────────────────────── */
 
 const CARD_IMAGES = [
-  { src: "/pass-types/stamp.webp", alt: "Stamp card pass", shadow: "oklch(0.45 0.15 265)" },
-  { src: "/pass-types/coupon.webp", alt: "Coupon pass", shadow: "oklch(0.50 0.12 155)" },
-  { src: "/pass-types/ticket.webp", alt: "Ticket pass", shadow: "oklch(0.45 0.10 75)" },
+  { src: "/pass-types/stamp-apple.webp", alt: "Stamp card — Apple Wallet", shadow: "oklch(0.45 0.15 265)" },
+  { src: "/pass-types/coupon-google.webp", alt: "Coupon — Google Wallet", shadow: "oklch(0.50 0.12 155)" },
+  { src: "/pass-types/ticket-apple.webp", alt: "Ticket — Apple Wallet", shadow: "oklch(0.45 0.10 75)" },
+  { src: "/pass-types/memebership-google.webp", alt: "Membership — Google Wallet", shadow: "oklch(0.48 0.14 200)" },
 ] as const
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
@@ -102,7 +103,7 @@ function LoyaltyCard({
         alt={card.alt}
         width={cardW}
         height={cardH}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain"
         priority
       />
     </div>
@@ -161,7 +162,7 @@ export function WalletStack() {
   }, [])
 
   const cardW = compact ? 220 : 260
-  const cardH = Math.round(cardW * (11 / 8))
+  const cardH = Math.round(cardW * (1455 / 960)) // match tallest image ratio (Google 960×1455)
 
   return (
     <div
