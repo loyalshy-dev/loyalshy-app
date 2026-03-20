@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, CheckCircle2 } from "lucide-react"
+import { Loader2, CheckCircle2, ArrowRight } from "lucide-react"
 import { submitContactForm } from "@/server/contact-form-actions"
 import type { ContactFormInput } from "@/server/contact-form-actions"
 
@@ -70,12 +70,15 @@ export function ContactForm() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div
-          className="mb-6 flex size-16 items-center justify-center rounded-full"
-          style={{ background: "oklch(0.58 0.16 145 / 0.1)" }}
+          className="mb-6 flex size-14 items-center justify-center rounded-2xl"
+          style={{
+            background: "oklch(0.55 0.2 265 / 0.08)",
+            border: "1px solid oklch(0.55 0.2 265 / 0.12)",
+          }}
         >
           <CheckCircle2
-            className="size-8"
-            style={{ color: "oklch(0.58 0.16 145)" }}
+            className="size-7"
+            style={{ color: "oklch(0.55 0.2 265)" }}
           />
         </div>
         <h2
@@ -85,7 +88,7 @@ export function ContactForm() {
           {t("successTitle")}
         </h2>
         <p
-          className="mt-3 max-w-md text-[15px] leading-relaxed"
+          className="mt-3 max-w-sm text-[15px] leading-relaxed"
           style={{ color: "var(--mk-text-muted)" }}
         >
           {t("successMessage")}
@@ -95,17 +98,13 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Name + Email row */}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Name + Email */}
       <div className="grid gap-5 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label
-            htmlFor="name"
-            className="text-[13px] font-medium"
-            style={{ color: "var(--mk-text)" }}
-          >
-            {t("nameLabel")} <span style={{ color: "oklch(0.65 0.2 25)" }}>*</span>
-          </Label>
+        <FormField
+          label={t("nameLabel")}
+          required
+        >
           <Input
             id="name"
             type="text"
@@ -114,24 +113,15 @@ export function ContactForm() {
             placeholder={t("namePlaceholder")}
             required
             maxLength={100}
-            className="h-11 rounded-lg border text-[14px]"
-            style={{
-              background: "var(--mk-surface, var(--mk-bg))",
-              borderColor: "var(--mk-border)",
-              color: "var(--mk-text)",
-            }}
+            className="mk-input"
             aria-required="true"
           />
-        </div>
+        </FormField>
 
-        <div className="space-y-2">
-          <Label
-            htmlFor="email"
-            className="text-[13px] font-medium"
-            style={{ color: "var(--mk-text)" }}
-          >
-            {t("emailLabel")} <span style={{ color: "oklch(0.65 0.2 25)" }}>*</span>
-          </Label>
+        <FormField
+          label={t("emailLabel")}
+          required
+        >
           <Input
             id="email"
             type="email"
@@ -140,37 +130,20 @@ export function ContactForm() {
             placeholder={t("emailPlaceholder")}
             required
             maxLength={255}
-            className="h-11 rounded-lg border text-[14px]"
-            style={{
-              background: "var(--mk-surface, var(--mk-bg))",
-              borderColor: "var(--mk-border)",
-              color: "var(--mk-text)",
-            }}
+            className="mk-input"
             aria-required="true"
           />
-        </div>
+        </FormField>
       </div>
 
-      {/* Inquiry type + Company row */}
+      {/* Inquiry type + Company */}
       <div className="grid gap-5 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label
-            htmlFor="inquiryType"
-            className="text-[13px] font-medium"
-            style={{ color: "var(--mk-text)" }}
-          >
-            {t("inquiryTypeLabel")} <span style={{ color: "oklch(0.65 0.2 25)" }}>*</span>
-          </Label>
+        <FormField
+          label={t("inquiryTypeLabel")}
+          required
+        >
           <Select value={inquiryType} onValueChange={setInquiryType}>
-            <SelectTrigger
-              id="inquiryType"
-              className="h-11 rounded-lg border text-[14px]"
-              style={{
-                background: "var(--mk-surface, var(--mk-bg))",
-                borderColor: "var(--mk-border)",
-                color: "var(--mk-text)",
-              }}
-            >
+            <SelectTrigger className="mk-input">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -181,16 +154,9 @@ export function ContactForm() {
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </FormField>
 
-        <div className="space-y-2">
-          <Label
-            htmlFor="company"
-            className="text-[13px] font-medium"
-            style={{ color: "var(--mk-text)" }}
-          >
-            {t("companyLabel")}
-          </Label>
+        <FormField label={t("companyLabel")}>
           <Input
             id="company"
             type="text"
@@ -198,25 +164,17 @@ export function ContactForm() {
             onChange={(e) => setCompany(e.target.value)}
             placeholder={t("companyPlaceholder")}
             maxLength={100}
-            className="h-11 rounded-lg border text-[14px]"
-            style={{
-              background: "var(--mk-surface, var(--mk-bg))",
-              borderColor: "var(--mk-border)",
-              color: "var(--mk-text)",
-            }}
+            className="mk-input"
           />
-        </div>
+        </FormField>
       </div>
 
       {/* Message */}
-      <div className="space-y-2">
-        <Label
-          htmlFor="message"
-          className="text-[13px] font-medium"
-          style={{ color: "var(--mk-text)" }}
-        >
-          {t("messageLabel")} <span style={{ color: "oklch(0.65 0.2 25)" }}>*</span>
-        </Label>
+      <FormField
+        label={t("messageLabel")}
+        required
+        hint={t("messageHint")}
+      >
         <Textarea
           id="message"
           value={message}
@@ -226,23 +184,12 @@ export function ContactForm() {
           minLength={10}
           maxLength={5000}
           rows={5}
-          className="rounded-lg border text-[14px] leading-relaxed resize-none"
-          style={{
-            background: "var(--mk-surface, var(--mk-bg))",
-            borderColor: "var(--mk-border)",
-            color: "var(--mk-text)",
-          }}
+          className="mk-input resize-none leading-relaxed"
           aria-required="true"
         />
-        <p
-          className="text-[12px]"
-          style={{ color: "var(--mk-text-dimmed)" }}
-        >
-          {t("messageHint")}
-        </p>
-      </div>
+      </FormField>
 
-      {/* Honeypot — invisible to real users, bots may fill it */}
+      {/* Honeypot */}
       <div
         className="overflow-hidden opacity-0 h-0 w-0 absolute"
         aria-hidden="true"
@@ -262,7 +209,7 @@ export function ContactForm() {
       <Button
         type="submit"
         disabled={isLoading}
-        className="mk-btn-primary h-12 w-full rounded-full text-[15px]! font-medium"
+        className="mk-btn-primary w-full h-12 rounded-full text-[15px]! font-medium gap-2"
       >
         {isLoading ? (
           <>
@@ -270,7 +217,10 @@ export function ContactForm() {
             {tCommon("loading")}
           </>
         ) : (
-          t("submitButton")
+          <>
+            {t("submitButton")}
+            <ArrowRight className="size-4" />
+          </>
         )}
       </Button>
 
@@ -281,5 +231,41 @@ export function ContactForm() {
         {t("privacyNote")}
       </p>
     </form>
+  )
+}
+
+/* ─── Reusable field wrapper ──────────────────────────────────────── */
+
+function FormField({
+  label,
+  required,
+  hint,
+  children,
+}: {
+  label: string
+  required?: boolean
+  hint?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-2">
+      <Label
+        className="text-[13px] font-medium"
+        style={{ color: "var(--mk-text)" }}
+      >
+        {label}
+        {required && (
+          <span className="ml-0.5" style={{ color: "oklch(0.55 0.2 265)" }}>
+            *
+          </span>
+        )}
+      </Label>
+      {children}
+      {hint && (
+        <p className="text-[12px]" style={{ color: "var(--mk-text-dimmed)" }}>
+          {hint}
+        </p>
+      )}
+    </div>
   )
 }

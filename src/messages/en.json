@@ -2067,6 +2067,7 @@
     }
   },
   "contact": {
+    "sectionLabel": "Contact",
     "pageTitle": "Get in touch",
     "pageSubtitle": "Have a question about our platform, need help with your account, or interested in our Enterprise plan? We'd love to hear from you.",
     "nameLabel": "Name",

@@ -2050,6 +2050,7 @@
     }
   },
   "contact": {
+    "sectionLabel": "Contact",
     "pageTitle": "Contactez-nous",
     "pageSubtitle": "Vous avez une question sur notre plateforme, besoin d'aide avec votre compte ou intéressé par notre plan Enterprise ? Nous serions ravis de vous entendre.",
     "nameLabel": "Nom",

@@ -2066,6 +2066,7 @@
     }
   },
   "contact": {
+    "sectionLabel": "Contacto",
     "pageTitle": "Contáctanos",
     "pageSubtitle": "¿Tienes alguna pregunta sobre nuestra plataforma, necesitas ayuda con tu cuenta o te interesa nuestro plan Enterprise? Nos encantaría saber de ti.",
     "nameLabel": "Nombre",

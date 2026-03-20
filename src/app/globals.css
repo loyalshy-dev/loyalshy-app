@@ -351,6 +351,26 @@
     background: oklch(0 0 0 / 0.03);
   }
 
+  /* — Marketing Input — */
+  .mk-input {
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--mk-border);
+    background: var(--mk-surface);
+    color: var(--mk-text);
+    font-size: 0.875rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .mk-input:focus,
+  .mk-input:focus-within {
+    border-color: oklch(0.55 0.2 265 / 0.5);
+    box-shadow: 0 0 0 3px oklch(0.55 0.2 265 / 0.08);
+    outline: none;
+  }
+  .mk-input::placeholder {
+    color: var(--mk-text-dimmed);
+  }
+
   /* — Carousel — */
   .mk-carousel-track {
     display: flex;
