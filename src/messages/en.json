@@ -489,6 +489,7 @@
     "titleHighlight": "repeat business",
     "subtitle": "Join businesses using Loyalshy to turn first-time visitors into loyal regulars. Set up in 5 minutes, no credit card required.",
     "viewPricing": "View Pricing",
+    "talkToUs": "Talk to us →",
     "floatingCardAlt": "Example loyalty card"
   },
   "footer": {
@@ -1484,7 +1485,10 @@
       "saveSuccess": "Saved!",
       "saveFailed": "Failed to save",
       "walletPass": "pass",
-      "walletPasses": "passes"
+      "walletPasses": "passes",
+      "downloadPng": "Download card as PNG",
+      "downloadSuccess": "Card downloaded!",
+      "downloadFailed": "Failed to download card"
     }
   },
   "errors": {
@@ -1844,6 +1848,8 @@
     "onlyArchivedReactivate": "Only archived templates can be reactivated",
     "templateNameMismatch": "Template name does not match",
     "validationFailed": "Validation failed: {issues}",
+    "rateLimitExceeded": "Too many requests. Please try again later.",
+    "contactFormFailed": "Failed to send your message. Please try again or email us directly.",
     "invalidDesignData": "Invalid design data",
     "missingFields": "Missing required fields",
     "noLogoUploaded": "No logo uploaded",
@@ -2058,6 +2064,49 @@
       "walletFailed": "Failed to generate wallet pass",
       "appleWallet": "Apple Wallet",
       "googleWallet": "Google Wallet"
+    }
+  },
+  "contact": {
+    "pageTitle": "Get in touch",
+    "pageSubtitle": "Have a question about our platform, need help with your account, or interested in our Enterprise plan? We'd love to hear from you.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your full name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@company.com",
+    "inquiryTypeLabel": "Inquiry type",
+    "inquiryTypes": {
+      "general": "General inquiry",
+      "sales": "Sales / Enterprise",
+      "partnership": "Partnership",
+      "support": "Support"
+    },
+    "companyLabel": "Company (optional)",
+    "companyPlaceholder": "Your company name",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Tell us how we can help...",
+    "messageHint": "Minimum 10 characters",
+    "submitButton": "Send message",
+    "privacyNote": "By submitting this form, you agree to our Privacy Policy. We'll respond within 1-2 business days.",
+    "successTitle": "Message sent!",
+    "successMessage": "Thanks for reaching out. We've sent a confirmation to your email and will get back to you within 1-2 business days.",
+    "directEmail": "Prefer email?",
+    "highlights": {
+      "general": {
+        "title": "General inquiries",
+        "description": "Questions about our platform, features, or how Loyalshy can help your business."
+      },
+      "sales": {
+        "title": "Sales & Enterprise",
+        "description": "Custom plans, volume pricing, dedicated support, and tailored solutions for your organization."
+      },
+      "partnership": {
+        "title": "Partnerships",
+        "description": "Integration opportunities, reseller programs, and strategic collaborations."
+      },
+      "support": {
+        "title": "Technical support",
+        "description": "Help with your account, API integration, wallet pass issues, or billing questions."
+      }
     }
   }
 }

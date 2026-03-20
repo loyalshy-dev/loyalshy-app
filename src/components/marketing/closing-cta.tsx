@@ -62,6 +62,13 @@ export async function ClosingCTA() {
             <Link href="#pricing" className="mk-btn-ghost py-4! px-10! text-[16px]!">
               {t("viewPricing")}
             </Link>
+            <Link
+              href="/contact"
+              className="text-[15px] font-medium transition-opacity hover:opacity-70"
+              style={{ color: "var(--mk-text-muted)" }}
+            >
+              {t("talkToUs")}
+            </Link>
           </div>
         </FadeIn>
       </div>

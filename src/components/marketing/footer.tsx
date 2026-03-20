@@ -25,7 +25,7 @@ export async function MarketingFooter() {
     {
       heading: t("company"),
       links: [
-        { label: tCommon("contact"), href: "mailto:hello@loyalshy.com" },
+        { label: tCommon("contact"), href: "/contact" },
       ],
     },
     {

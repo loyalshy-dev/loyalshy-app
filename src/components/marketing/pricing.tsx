@@ -460,7 +460,7 @@ export function Pricing() {
               size="sm"
               className="shrink-0 text-[14px] font-medium rounded-full"
             >
-              <Link href="mailto:sales@loyalshy.com">{tc("contactSales")}</Link>
+              <Link href="/contact?type=sales">{tc("contactSales")}</Link>
             </Button>
           </div>
         </FadeIn>

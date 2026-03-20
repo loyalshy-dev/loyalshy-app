@@ -489,6 +489,7 @@
     "titleHighlight": "clientes recurrentes",
     "subtitle": "Únete a negocios que usan Loyalshy para convertir visitantes en clientes fieles. Configúralo en 5 minutos, sin tarjeta de crédito.",
     "viewPricing": "Ver Precios",
+    "talkToUs": "Habla con nosotros →",
     "floatingCardAlt": "Tarjeta de fidelización de ejemplo"
   },
   "footer": {
@@ -1033,7 +1034,6 @@
       "contactsUsed": "{used} de {limit} contactos",
       "programsUsed": "{used} de {limit} programas",
       "staffUsed": "{used} de {limit} miembros del equipo",
-      "unlimited": "Ilimitado",
       "webhooks": "Webhooks",
       "webhooksDescription": "Recibe notificaciones en tiempo real cuando ocurran eventos.",
       "addWebhook": "Añadir Webhook",
@@ -1484,7 +1484,10 @@
       "saveSuccess": "¡Guardado!",
       "saveFailed": "Error al guardar",
       "walletPass": "pase",
-      "walletPasses": "pases"
+      "walletPasses": "pases",
+      "downloadPng": "Descargar tarjeta como PNG",
+      "downloadSuccess": "¡Tarjeta descargada!",
+      "downloadFailed": "Error al descargar la tarjeta"
     }
   },
   "errors": {
@@ -1844,6 +1847,8 @@
     "onlyArchivedReactivate": "Solo las plantillas archivadas se pueden reactivar",
     "templateNameMismatch": "El nombre de la plantilla no coincide",
     "validationFailed": "Error de validación: {issues}",
+    "rateLimitExceeded": "Demasiadas solicitudes. Por favor, inténtalo de nuevo más tarde.",
+    "contactFormFailed": "No se pudo enviar tu mensaje. Inténtalo de nuevo o envíanos un email directamente.",
     "invalidDesignData": "Datos de diseño no válidos",
     "missingFields": "Faltan campos obligatorios",
     "noLogoUploaded": "No se ha subido logo",
@@ -2058,6 +2063,49 @@
       "walletFailed": "No se pudo generar el pase",
       "appleWallet": "Apple Wallet",
       "googleWallet": "Google Wallet"
+    }
+  },
+  "contact": {
+    "pageTitle": "Contáctanos",
+    "pageSubtitle": "¿Tienes alguna pregunta sobre nuestra plataforma, necesitas ayuda con tu cuenta o te interesa nuestro plan Enterprise? Nos encantaría saber de ti.",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "Tu nombre completo",
+    "emailLabel": "Email",
+    "emailPlaceholder": "tu@empresa.com",
+    "inquiryTypeLabel": "Tipo de consulta",
+    "inquiryTypes": {
+      "general": "Consulta general",
+      "sales": "Ventas / Enterprise",
+      "partnership": "Colaboración",
+      "support": "Soporte"
+    },
+    "companyLabel": "Empresa (opcional)",
+    "companyPlaceholder": "Nombre de tu empresa",
+    "messageLabel": "Mensaje",
+    "messagePlaceholder": "Cuéntanos cómo podemos ayudarte...",
+    "messageHint": "Mínimo 10 caracteres",
+    "submitButton": "Enviar mensaje",
+    "privacyNote": "Al enviar este formulario, aceptas nuestra Política de Privacidad. Responderemos en 1-2 días hábiles.",
+    "successTitle": "¡Mensaje enviado!",
+    "successMessage": "Gracias por contactarnos. Hemos enviado una confirmación a tu email y te responderemos en 1-2 días hábiles.",
+    "directEmail": "¿Prefieres email?",
+    "highlights": {
+      "general": {
+        "title": "Consultas generales",
+        "description": "Preguntas sobre nuestra plataforma, funcionalidades o cómo Loyalshy puede ayudar a tu negocio."
+      },
+      "sales": {
+        "title": "Ventas y Enterprise",
+        "description": "Planes personalizados, precios por volumen, soporte dedicado y soluciones adaptadas a tu organización."
+      },
+      "partnership": {
+        "title": "Colaboraciones",
+        "description": "Oportunidades de integración, programas de revendedor y colaboraciones estratégicas."
+      },
+      "support": {
+        "title": "Soporte técnico",
+        "description": "Ayuda con tu cuenta, integración de API, problemas con pases o preguntas de facturación."
+      }
     }
   }
 }

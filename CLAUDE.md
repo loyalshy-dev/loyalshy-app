@@ -115,8 +115,8 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Server actions**: use `getTranslations("serverErrors")` from `next-intl/server` for error/validation messages
 - **Studio panels**: all use `useTranslations("studio.*")` — panels, colors, strip, notifications, details, prize, avatar, template, canvas
 - **Public join pages**: `/join/[slug]` and `/join/[slug]/card/[id]` wrap in local `NextIntlClientProvider` with `common` + `join` namespaces (same pattern as landing page)
-- **Coverage**: 100% — 80 files, ~1,330 strings across marketing, auth, dashboard, studio, server actions, legal pages, and public join/card pages
-- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, apiSection, passTypesCarousel, walletPreview, testimonials, pricing, faq, tryDemo, closingCta, footer, cookieBanner, auth.login, auth.register, auth.forgotPassword, auth.invite, auth.error, dashboard.nav, dashboard.overview, dashboard.activity, dashboard.topContacts, dashboard.programsSummary, dashboard.contacts, dashboard.addContact, dashboard.contactDetail, dashboard.contactColumns, dashboard.contactTable, dashboard.programs, dashboard.passInstances, dashboard.distribution, dashboard.programSettings, dashboard.programEditor, dashboard.settings, dashboard.settingsForms, dashboard.registerVisit, dashboard.shell, dashboard.rewards, dashboard.jobsHistory, dashboard.onboarding, dashboard.status, dashboard.chart, errors, privacy, terms, cookies, studio.panels, studio.colors, studio.strip, studio.logo, studio.notifications, studio.details, studio.prize, studio.avatar, studio.template, studio.canvas, serverErrors, admin (admin.nav, admin.overview, admin.users, admin.organizations, admin.auditLog, admin.roles, admin.impersonation, admin.common), join (join.card)
+- **Coverage**: 100% — 82 files, ~1,370 strings across marketing, auth, dashboard, studio, server actions, legal pages, public join/card pages, and contact form
+- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, apiSection, passTypesCarousel, walletPreview, testimonials, pricing, faq, tryDemo, closingCta, footer, cookieBanner, auth.login, auth.register, auth.forgotPassword, auth.invite, auth.error, dashboard.nav, dashboard.overview, dashboard.activity, dashboard.topContacts, dashboard.programsSummary, dashboard.contacts, dashboard.addContact, dashboard.contactDetail, dashboard.contactColumns, dashboard.contactTable, dashboard.programs, dashboard.passInstances, dashboard.distribution, dashboard.programSettings, dashboard.programEditor, dashboard.settings, dashboard.settingsForms, dashboard.registerVisit, dashboard.shell, dashboard.rewards, dashboard.jobsHistory, dashboard.onboarding, dashboard.status, dashboard.chart, errors, privacy, terms, cookies, studio.panels, studio.colors, studio.strip, studio.logo, studio.notifications, studio.details, studio.prize, studio.avatar, studio.template, studio.canvas, serverErrors, admin (admin.nav, admin.overview, admin.users, admin.organizations, admin.auditLog, admin.roles, admin.impersonation, admin.common), join (join.card), contact
 
 ### Prisma v7 Rules
 - Use `prisma.config.ts` for configuration (datasource URL lives here, NOT in schema.prisma)
@@ -143,7 +143,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
         /rewards              → Cross-program rewards (not in sidebar)
         /settings             → General, Team, Billing, API (owner, all plans)
     /(studio)       → Redirects to /programs/[id]/design (studio now embedded)
-    /(public)       → Landing, pricing, QR scan, card view pages
+    /(public)       → Landing, pricing, QR scan, card view, contact pages
     /api            → API routes
       /api/v1       → Public REST API (Bearer token auth)
         /contacts, /contacts/[id], /contacts/bulk
@@ -165,6 +165,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
       /programs     → Program list view, tab nav, pass instances, settings
     /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, pass types carousel, motion animations)
       motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn) — used below-fold only; Hero/SocialProof use CSS animations
+      contact-form.tsx → Contact form client component (Zod validation, honeypot, inquiry type pre-selection from URL params)
       pass-types-carousel.tsx → Auto-playing carousel showcasing all 10 pass types with screenshots, descriptions, and use case tags
     /wallet         → Wallet pass components
   /i18n             → Internationalization config
@@ -249,6 +250,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase BUGFIX — Codebase audit fixes: 44 bugs + 5 deferred items across security (auth bypass, SSRF, HTML injection, missing access checks), race conditions (double-stamp, duplicate contact, memberNumber locking via FOR UPDATE), data integrity (wrong field reads, SQL case mismatch, invalid defaults), API consistency (rate limit off-by-one, memory leak, missing requestId, webhook org filter, interactions route through domain actions, contact limit check), UI (broken strip paths, missing Suspense, zundo equality, mid-file import), i18n (hardcoded strings in 8 components), dead code cleanup, R2 storage leak, PassType union typing, sanitized Apple log endpoint, config z.any() replaced with type-specific Zod validation
 - [x] Phase REDESIGN — Landing page redesign: asymmetric hero with WalletStack (pass-type images), social proof trust badges (no fake stats), gradient mesh backgrounds on all sections, features bento grid with uniform card layout and equal heights, pass types carousel (flat screenshots, smooth crossfade), feature showcase (smooth crossfade), how-it-works connecting line + perspective screenshots, wallet preview with PhoneMockupInteractive (pass-type images), pricing with stronger highlight + pill buttons, closing CTA with oversized heading, dark mode marketing CSS variables, testimonials removed (fake data), footer CSS variable background, Try Demo section (env-gated via NEXT_PUBLIC_DEMO_JOIN_URL, wallet buttons + join page link), admin showcase system removed (unused, -2080 lines), raw SQL enum fix in reward-actions.ts
 - [x] Phase ADMIN-1 — Admin panel upgrade Phase 1: tiered admin roles (ADMIN_SUPPORT/BILLING/OPS/SUPER_ADMIN), AdminAuditLog model + audit trail on all admin mutations, assertAdminRole() DAL with hierarchy, server-side impersonation logging, audit log viewer page with filters, admin i18n namespace (~183 keys × 3 locales), safety guards (self-protection, last admin, role hierarchy enforcement), Better Auth admin plugin updated with all roles
+- [x] Phase CONTACT — Contact form: `/contact` public page with Zod-validated server action, Resend email (team notification + sender confirmation), Upstash Redis rate limiting (3/hr per IP with in-memory fallback), honeypot spam protection, inquiry type routing (general/sales/partnership/support), URL param pre-selection (`?type=sales` from Enterprise pricing CTA), i18n `contact` namespace (~38 keys × 3 locales), navbar/footer/pricing/closing CTA links updated, email header injection protection
 - [ ] Phase 6.1 — Production deployment
 
 ## Conversation Strategy
@@ -392,6 +394,7 @@ Update the "Current Progress" section above to track what's done.
 | DNS / CDN | Cloudflare | Free tier, pairs with R2 |
 
 For full deployment guide, checklist, and cost estimate, see **`docs/deployment-stack.md`**.
+For email setup (Cloudflare Email Routing + Gmail + Resend SMTP), see **`docs/email-setup.md`**.
 
 ## Environment Variables
 

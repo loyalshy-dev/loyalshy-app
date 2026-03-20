@@ -34,6 +34,7 @@ export function MarketingNavbar() {
     { label: t("features"), href: "#features" },
     { label: t("pricing"), href: "#pricing" },
     { label: t("faq"), href: "#faq" },
+    { label: tCommon("contact"), href: "/contact" },
   ]
 
   React.useEffect(() => {
