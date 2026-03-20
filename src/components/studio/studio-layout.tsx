@@ -522,17 +522,40 @@ export function StudioLayout({
     // Allow React to flush the zone-active class removal
     await new Promise((r) => requestAnimationFrame(r))
 
-    // Swap cross-origin image srcs to same-origin proxy to avoid CORS errors
+    // Convert cross-origin images to inline data URIs via same-origin proxy.
+    // html-to-image has a module-level cache keyed by URL *without* query params,
+    // so all proxy requests (/api/image-proxy?url=...) share one cache key and
+    // return stale data from previous programs. Converting to data URIs up front
+    // bypasses this cache entirely.
     const images = el.querySelectorAll("img")
     const originals = new Map<HTMLImageElement, string>()
     for (const img of images) {
       const src = img.src
       if (src && !src.startsWith(window.location.origin) && !src.startsWith("data:")) {
         originals.set(img, src)
-        img.src = `/api/image-proxy?url=${encodeURIComponent(src)}`
       }
     }
-    // Wait for proxied images to load
+    // Fetch each image through the proxy and convert to data URI
+    await Promise.all(
+      [...originals.entries()].map(async ([img, src]) => {
+        try {
+          const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(src)}`
+          const res = await fetch(proxyUrl)
+          if (!res.ok) throw new Error(`Proxy fetch failed: ${res.status}`)
+          const blob = await res.blob()
+          const dataUri = await new Promise<string>((resolve) => {
+            const reader = new FileReader()
+            reader.onloadend = () => resolve(reader.result as string)
+            reader.readAsDataURL(blob)
+          })
+          img.src = dataUri
+        } catch {
+          // If proxy fails, try setting proxy URL directly as fallback
+          img.src = `/api/image-proxy?url=${encodeURIComponent(src)}`
+        }
+      })
+    )
+    // Wait for all images to finish loading their new sources
     await Promise.all(
       [...originals.keys()].map(
         (img) => img.complete ? Promise.resolve() : new Promise<void>((r) => { img.onload = img.onerror = () => r() })
@@ -544,6 +567,7 @@ export function StudioLayout({
       const dataUrl = await toPng(el, {
         pixelRatio: 3,
         backgroundColor: undefined, // transparent
+        includeQueryParams: true, // prevent cache key collisions in html-to-image
       })
 
       const link = document.createElement("a")
