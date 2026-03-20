@@ -512,6 +512,15 @@ export function StudioLayout({
 
     setIsDownloading(true)
 
+    // Clear interactive overlay styles before capture so indigo highlights
+    // (zone-active outlines / backgrounds) don't bleed into the PNG export
+    const prevZone = store.getState().ui.selectedColorZone
+    const prevTool = store.getState().ui.activeTool
+    store.getState().setSelectedColorZone(null)
+    store.getState().setActiveTool(null)
+    // Allow React to flush the zone-active class removal
+    await new Promise((r) => requestAnimationFrame(r))
+
     // Swap cross-origin image srcs to same-origin proxy to avoid CORS errors
     const images = el.querySelectorAll("img")
     const originals = new Map<HTMLImageElement, string>()
@@ -549,6 +558,9 @@ export function StudioLayout({
       for (const [img, src] of originals) {
         img.src = src
       }
+      // Restore interactive overlay state
+      if (prevZone) store.getState().setSelectedColorZone(prevZone)
+      if (prevTool) store.getState().setActiveTool(prevTool)
       setIsDownloading(false)
     }
   }, [store])
