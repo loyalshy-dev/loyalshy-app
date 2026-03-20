@@ -55,8 +55,8 @@ export default async function ContactPage() {
               }}
             />
 
-            {/* Geometric canvas shapes */}
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+            {/* Geometric canvas shapes — desktop only */}
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden hidden lg:block">
               {/* Top-left angular block */}
               <div
                 className="absolute -left-20 -top-12 h-72 w-64 rotate-12 rounded-3xl"
