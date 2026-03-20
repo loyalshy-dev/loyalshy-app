@@ -1081,7 +1081,7 @@ export async function uploadStripImage(formData: FormData) {
     update: { stripImageUrl: originalUrl, stripImageApple: appleUrl, stripImageGoogle: googleUrl },
   })
 
-  revalidatePath("/dashboard/settings")
+  revalidatePath(`/dashboard/programs/${templateId}`)
   return { success: true, originalUrl, appleUrl, googleUrl }
 }
 

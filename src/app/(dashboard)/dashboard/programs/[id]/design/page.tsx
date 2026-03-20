@@ -102,6 +102,7 @@ export default async function ProgramDesignPage(props: {
 
   return (
     <StudioLayout
+      key={programId}
       templateId={programId}
       templateName={program.name}
       passType={program.passType}
