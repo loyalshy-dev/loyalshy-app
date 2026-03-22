@@ -4,7 +4,8 @@ import { connection } from "next/server"
 import { headers } from "next/headers"
 import type { Metadata } from "next"
 import { NextIntlClientProvider } from "next-intl"
-import { getMessages } from "next-intl/server"
+import Link from "next/link"
+import { getMessages, getTranslations } from "next-intl/server"
 import { getCurrentUser } from "@/lib/dal"
 import { db } from "@/lib/db"
 
@@ -67,7 +68,10 @@ export default async function AuthLayout({
 }: {
   children: React.ReactNode
 }) {
-  const messages = await getMessages()
+  const [messages, t] = await Promise.all([
+    getMessages(),
+    getTranslations("auth"),
+  ])
   const authMessages: Record<string, unknown> = {}
   for (const ns of AUTH_NAMESPACES) {
     if (ns in messages) authMessages[ns] = messages[ns as keyof typeof messages]
@@ -100,6 +104,24 @@ export default async function AuthLayout({
         <Suspense>
           <AuthLayoutInner>{children}</AuthLayoutInner>
         </Suspense>
+
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          {t.rich("legalConsent", {
+            terms: (chunks) => (
+              <Link href="/terms" className="underline hover:text-foreground">
+                {chunks}
+              </Link>
+            ),
+            privacy: (chunks) => (
+              <Link href="/privacy" className="underline hover:text-foreground">
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
+        <p className="mt-2 text-center text-xs text-muted-foreground/60">
+          {t("brandTagline")}
+        </p>
       </div>
     </div>
     </NextIntlClientProvider>
