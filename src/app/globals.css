@@ -281,8 +281,8 @@
     --mk-brand-purple: oklch(0.6 0.22 265);
     --mk-brand-green: oklch(0.6 0.18 155);
     --mk-footer-bg: oklch(0.1 0.004 285);
-    --mk-glass-bg: oklch(1 0 0 / 0.05);
-    --mk-glass-border: oklch(1 0 0 / 0.08);
+    --mk-glass-bg: oklch(1 0 0 / 0.06);
+    --mk-glass-border: oklch(1 0 0 / 0.10);
   }
 
   /* — Gradient Text — */
@@ -295,16 +295,28 @@
 
   /* — Card — */
   .mk-card-glass {
-    background: var(--mk-card);
-    border: 1px solid var(--mk-border);
+    background: var(--mk-glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--mk-glass-border);
     border-radius: 1rem;
-    box-shadow: 0 1px 3px oklch(0 0 0 / 0.06), 0 4px 16px oklch(0 0 0 / 0.04);
+    box-shadow: 0 20px 40px -10px oklch(0.55 0.2 265 / 0.06);
     transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
   }
   .mk-card-glass:hover {
     border-color: var(--mk-border-hover);
-    box-shadow: 0 2px 6px oklch(0 0 0 / 0.08), 0 8px 24px oklch(0 0 0 / 0.06);
+    box-shadow: 0 20px 40px -10px oklch(0.55 0.2 265 / 0.10);
   }
+
+  /* — Mesh background utility — */
+  .mk-mesh-bg {
+    background-image: radial-gradient(at 0% 0%, oklch(0.55 0.2 265 / 0.05) 0px, transparent 50%),
+                       radial-gradient(at 100% 100%, oklch(0.55 0.17 155 / 0.05) 0px, transparent 50%);
+  }
+
+  /* — Fluid heading sizes — */
+  .mk-clamp-h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+  .mk-clamp-h2 { font-size: clamp(2rem, 5vw, 3rem); }
 
   /* — Primary Button (dark, Figma-style: border-radius morph + translate) — */
   .mk-btn-primary {

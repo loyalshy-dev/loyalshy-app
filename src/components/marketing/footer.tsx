@@ -88,7 +88,7 @@ export async function MarketingFooter() {
                       {...(link.external
                         ? { target: "_blank", rel: "noopener noreferrer" }
                         : {})}
-                      className="text-[14px] transition-colors duration-150 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      className="text-[14px] transition-colors duration-150 hover:text-[oklch(0.55_0.17_155)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                       style={{ color: "oklch(0.55 0.008 285)" }}
                     >
                       {link.label}

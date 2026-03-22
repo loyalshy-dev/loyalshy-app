@@ -149,9 +149,9 @@
       "title": "10 Tipos de Pases",
       "description": "Sellos, cupones, membresías, puntos, prepago, tarjetas regalo, entradas, accesos, tránsito e identificaciones."
     },
-    "security": {
-      "title": "Seguro y Privado",
-      "description": "Cifrado de nivel empresarial, autenticación segura y preparado para RGPD. Los datos de tus clientes son tuyos."
+    "pushNotifications": {
+      "title": "Notificaciones Push",
+      "description": "Envía actualizaciones en tiempo real a las pantallas de bloqueo de tus clientes. Anuncia ofertas, recuerda pases por vencer e impulsa la interacción."
     }
   },
   "passTypesCarousel": {
@@ -524,6 +524,8 @@
       "signUp": "Regístrate",
       "invalidCredentials": "Email o contraseña incorrectos"
     },
+    "legalConsent": "Al continuar, aceptas nuestros <terms>Términos de Servicio</terms> y nuestra <privacy>Política de Privacidad</privacy>.",
+    "brandTagline": "Diseñado con precisión para el curador digital.",
     "register": {
       "stepAccount": "Cuenta",
       "stepVerify": "Verificar",

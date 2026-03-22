@@ -1,7 +1,15 @@
 import Image from "next/image"
 import { Building2, QrCode, Smartphone } from "lucide-react"
 import { getTranslations } from "next-intl/server"
-import { FadeIn, Stagger, StaggerItem } from "./motion"
+import { Stagger, StaggerItem } from "./motion"
+
+/* ─── Icon colors per step ───────────────────────────────────────── */
+
+const STEP_ICON_STYLES = [
+  { bg: "oklch(0.55 0.2 265)", shadow: "oklch(0.55 0.2 265 / 0.2)" },
+  { bg: "oklch(0.55 0.17 155)", shadow: "oklch(0.55 0.17 155 / 0.2)" },
+  { bg: "oklch(0.2 0.005 285)", shadow: "oklch(0 0 0 / 0.2)" },
+]
 
 /* ─── Section ─────────────────────────────────────────────────────── */
 
@@ -38,71 +46,59 @@ export async function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="relative py-24 sm:py-32 overflow-hidden"
+      className="relative py-32 overflow-hidden mk-mesh-bg"
       style={{ background: "var(--mk-surface)" }}
     >
-      {/* Gradient mesh */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background: `
-            radial-gradient(ellipse 60% 40% at 40% 30%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%),
-            radial-gradient(ellipse 40% 50% at 70% 70%, oklch(0.55 0.17 155 / 0.03) 0%, transparent 70%)
-          `,
-        }}
-      />
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <Stagger className="grid grid-cols-1 gap-12 md:grid-cols-3" stagger={0.15}>
+          {steps.map((step, i) => {
+            const Icon = step.icon
+            const iconStyle = STEP_ICON_STYLES[i]
+            return (
+              <StaggerItem key={step.number}>
+                <div className="group relative">
+                  {/* Oversized faded step number */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute -top-10 -left-6 text-[9rem] font-black leading-none select-none pointer-events-none"
+                    style={{ color: "oklch(0.55 0.2 265 / 0.04)" }}
+                  >
+                    {step.number}
+                  </span>
 
-      <div className="mx-auto max-w-6xl px-6 lg:px-8">
-        <FadeIn>
-          <div className="mx-auto max-w-2xl text-center mb-16 sm:mb-20">
-            <p
-              className="text-[13px] font-medium uppercase tracking-widest mb-3"
-              style={{ color: "var(--mk-brand-purple)" }}
-            >
-              {t("sectionLabel")}
-            </p>
-            <h2
-              className="text-3xl sm:text-[2.75rem] font-bold"
-              style={{ color: "var(--mk-text)", letterSpacing: "-0.035em" }}
-            >
-              {t("title")}
-            </h2>
-            <p
-              className="mt-4 text-[16px] leading-relaxed"
-              style={{ color: "var(--mk-text-muted)" }}
-            >
-              {t("subtitle")}
-            </p>
-          </div>
-        </FadeIn>
-
-        {/* Steps with connecting line */}
-        <div className="relative">
-          {/* Horizontal connecting line (desktop only) */}
-          <div
-            aria-hidden="true"
-            className="absolute top-[140px] left-[16.6%] right-[16.6%] hidden md:block"
-            style={{
-              height: 1,
-              background: "linear-gradient(90deg, transparent, var(--mk-border), var(--mk-border), transparent)",
-            }}
-          />
-
-          <Stagger className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-6" stagger={0.15}>
-            {steps.map((step) => {
-              const Icon = step.icon
-              return (
-                <StaggerItem key={step.number}>
-                  <div className="group relative">
-                    {/* Screenshot with perspective tilt */}
+                  <div className="relative z-10 flex flex-col gap-6">
+                    {/* Icon box */}
                     <div
-                      className="mb-6 rounded-xl overflow-hidden"
+                      className="flex size-14 items-center justify-center rounded-2xl text-white"
+                      style={{
+                        background: iconStyle.bg,
+                        boxShadow: `0 8px 24px ${iconStyle.shadow}`,
+                      }}
+                    >
+                      <Icon className="size-6" strokeWidth={1.5} />
+                    </div>
+
+                    {/* Title + description */}
+                    <h3
+                      className="text-2xl font-bold tracking-tight"
+                      style={{ color: "var(--mk-text)" }}
+                    >
+                      {step.title}
+                    </h3>
+                    <p
+                      className="text-base leading-relaxed"
+                      style={{ color: "var(--mk-text-muted)" }}
+                    >
+                      {step.description}
+                    </p>
+
+                    {/* Screenshot with hover lift */}
+                    <div
+                      className="mt-4 rounded-xl overflow-hidden transition-transform duration-500 group-hover:-translate-y-2"
                       style={{
                         border: "1px solid var(--mk-border)",
-                        boxShadow: "0 8px 32px oklch(0 0 0 / 0.08), 0 2px 8px oklch(0 0 0 / 0.04)",
-                        transform: "perspective(1000px) rotateY(-2deg) rotateX(1deg)",
-                        transition: "transform 0.3s ease-out",
+                        boxShadow: "0 8px 32px oklch(0 0 0 / 0.08)",
+                        transform: i === 1 ? "rotate(-2deg)" : i === 0 ? "rotate(2deg)" : undefined,
                       }}
                     >
                       <Image
@@ -114,51 +110,12 @@ export async function HowItWorks() {
                         loading="lazy"
                       />
                     </div>
-
-                    {/* Step number + icon */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <span
-                        className="text-[32px] font-extrabold leading-none"
-                        style={{
-                          color: "oklch(0.55 0.2 265 / 0.12)",
-                          letterSpacing: "-0.02em",
-                        }}
-                      >
-                        {step.number}
-                      </span>
-                      <div
-                        className="flex size-9 items-center justify-center rounded-lg"
-                        style={{
-                          background: "oklch(0.55 0.2 265 / 0.06)",
-                          border: "1px solid oklch(0.55 0.2 265 / 0.1)",
-                        }}
-                      >
-                        <Icon
-                          className="size-4"
-                          strokeWidth={1.5}
-                          style={{ color: "oklch(0.55 0.2 265)" }}
-                        />
-                      </div>
-                    </div>
-
-                    <h3
-                      className="text-[16px] font-semibold mb-2"
-                      style={{ color: "var(--mk-text)", letterSpacing: "-0.01em" }}
-                    >
-                      {step.title}
-                    </h3>
-                    <p
-                      className="text-[15px] leading-relaxed"
-                      style={{ color: "var(--mk-text-muted)" }}
-                    >
-                      {step.description}
-                    </p>
                   </div>
-                </StaggerItem>
-              )
-            })}
-          </Stagger>
-        </div>
+                </div>
+              </StaggerItem>
+            )
+          })}
+        </Stagger>
       </div>
     </section>
   )

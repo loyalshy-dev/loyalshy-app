@@ -26,58 +26,32 @@ export function FAQ() {
   return (
     <section
       id="faq"
-      className="py-24 sm:py-32 px-4 sm:px-6"
-      style={{ background: "var(--mk-surface)" }}
+      className="py-32 px-4 sm:px-6"
+      style={{ background: "var(--mk-bg)" }}
     >
       <div className="mx-auto max-w-3xl">
         <FadeIn>
-          <div className="text-center mb-14">
-            <p
-              className="mb-3 inline-flex items-center rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.08em] uppercase"
-              style={{
-                border: "1px solid var(--mk-border)",
-                background: "var(--mk-card)",
-                color: "var(--mk-text-dimmed)",
-              }}
-            >
-              {t("sectionLabel")}
-            </p>
+          <div className="text-center mb-16">
             <h2
-              className="text-3xl sm:text-[2.5rem] font-bold mb-4"
-              style={{
-                color: "var(--mk-text)",
-                letterSpacing: "-0.03em",
-              }}
+              className="mk-clamp-h2 font-black tracking-tight"
+              style={{ color: "var(--mk-text)" }}
             >
               {t("title")}
             </h2>
-            <p
-              className="text-[16px]"
-              style={{ color: "var(--mk-text-muted)" }}
-            >
-              {t("subtitle")}
-            </p>
           </div>
         </FadeIn>
 
         <FadeIn delay={0.1}>
-          <div className="mk-card-glass overflow-hidden">
-            <Accordion type="single" collapsible className="w-full">
-              {FAQ_ITEM_KEYS.map((key, i) => (
+          <div className="flex flex-col gap-4">
+            <Accordion type="single" collapsible className="w-full flex flex-col gap-4">
+              {FAQ_ITEM_KEYS.map((key) => (
                 <AccordionItem
                   key={key}
                   value={key}
-                  className="border-b-0 px-6"
-                  style={
-                    i < FAQ_ITEM_KEYS.length - 1
-                      ? {
-                          borderBottom: "1px solid var(--mk-border)",
-                        }
-                      : undefined
-                  }
+                  className="mk-card-glass px-6 rounded-2xl! border-b-0"
                 >
                   <AccordionTrigger
-                    className="text-[15px] font-medium hover:no-underline py-5 gap-6"
+                    className="text-[15px] font-bold hover:no-underline py-5 gap-6"
                     style={{ color: "var(--mk-text)" }}
                   >
                     {t(`items.${key}.question`)}

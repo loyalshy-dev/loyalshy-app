@@ -5,18 +5,18 @@ import { getTranslations } from "next-intl/server"
 function TrustBadge({ label }: { label: string }) {
   return (
     <div
-      className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[12px] font-medium"
-      style={{
-        background: "var(--mk-surface)",
-        border: "1px solid var(--mk-border)",
-        color: "var(--mk-text-muted)",
-      }}
+      className="inline-flex items-center gap-3 rounded-full px-6 py-3 mk-card-glass border-none!"
     >
-      <div
-        className="size-1.5 rounded-full"
+      <span
+        className="size-2 rounded-full"
         style={{ background: "var(--mk-brand-green)" }}
       />
-      {label}
+      <span
+        className="text-xs font-bold uppercase tracking-widest"
+        style={{ color: "var(--mk-text-muted)" }}
+      >
+        {label}
+      </span>
     </div>
   )
 }
@@ -28,27 +28,13 @@ export async function SocialProof() {
 
   return (
     <section
-      className="relative py-10 sm:py-12"
-      style={{
-        background: "var(--mk-bg)",
-        borderTop: "1px solid var(--mk-border)",
-        borderBottom: "1px solid var(--mk-border)",
-      }}
+      className="relative py-12"
+      style={{ background: "var(--mk-surface)" }}
     >
-      <div className="mx-auto max-w-5xl px-6 lg:px-8">
-        {/* Headline */}
-        <div className="hero-fade-in" style={{ animationDelay: "400ms" }}>
-          <p
-            className="text-center text-[13px] font-medium uppercase tracking-widest mb-6"
-            style={{ color: "var(--mk-text-dimmed)" }}
-          >
-            {t("headline")}
-          </p>
-        </div>
-
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Trust badges */}
         <div
-          className="hero-fade-in flex flex-wrap items-center justify-center gap-3"
+          className="hero-fade-in flex flex-wrap items-center justify-center gap-6"
           style={{ animationDelay: "500ms" }}
         >
           <TrustBadge label={t("appleWallet")} />

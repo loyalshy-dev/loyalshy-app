@@ -359,21 +359,9 @@ export function Pricing() {
   return (
     <section
       id="pricing"
-      className="relative py-24 sm:py-32 px-4 sm:px-6 overflow-hidden"
+      className="relative py-32 px-4 sm:px-6 overflow-hidden mk-mesh-bg"
       style={{ background: "var(--mk-surface)" }}
     >
-      {/* Gradient mesh */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background: `
-            radial-gradient(ellipse 60% 50% at 50% 20%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%),
-            radial-gradient(ellipse 40% 40% at 20% 80%, oklch(0.55 0.17 155 / 0.03) 0%, transparent 70%)
-          `,
-        }}
-      />
-
       <div className="relative mx-auto max-w-6xl">
         <FadeIn>
           <div className="text-center mb-10">
@@ -388,11 +376,8 @@ export function Pricing() {
               {t("sectionLabel")}
             </p>
             <h2
-              className="text-3xl sm:text-[2.5rem] font-bold mb-4"
-              style={{
-                color: "var(--mk-text)",
-                letterSpacing: "-0.03em",
-              }}
+              className="mk-clamp-h2 font-black tracking-tight mb-4"
+              style={{ color: "var(--mk-text)" }}
             >
               {t("title")}
             </h2>

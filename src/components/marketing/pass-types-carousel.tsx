@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
+// Icons used for placeholder cards when screenshots not available
 import { useTranslations } from "next-intl"
 import { FadeIn } from "./motion"
 
@@ -88,84 +89,43 @@ export function PassTypesCarousel() {
   const current = PASS_TYPES[active]
 
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden" style={{ background: "var(--mk-surface)" }}>
-      {/* Gradient mesh */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background: `
-            radial-gradient(ellipse 50% 50% at 30% 50%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%),
-            radial-gradient(ellipse 40% 60% at 70% 30%, oklch(0.55 0.17 155 / 0.03) 0%, transparent 70%)
-          `,
-        }}
-      />
-      <div className="mx-auto max-w-6xl px-6 lg:px-8">
-        {/* Heading */}
-        <FadeIn>
-          <div className="mx-auto max-w-2xl text-center mb-12">
-            <p
-              className="text-[13px] font-medium uppercase tracking-widest mb-3"
-              style={{ color: "var(--mk-brand-purple)" }}
-            >
-              {t("sectionLabel")}
-            </p>
-            <h2
-              className="text-3xl sm:text-[2.5rem] font-bold"
-              style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
-            >
-              {t("title")}
-            </h2>
-            <p
-              className="mt-4 text-[16px] leading-relaxed"
-              style={{ color: "var(--mk-text-muted)" }}
-            >
-              {t("subtitle")}
-            </p>
-          </div>
-        </FadeIn>
-
+    <section className="relative py-32 overflow-hidden" style={{ background: "var(--mk-bg)" }}>
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Scrollable pill bar */}
         <FadeIn delay={0.15}>
-          <div
-            ref={scrollRef}
-            className="relative flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-6 px-6 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center scroll-smooth snap-x snap-mandatory sm:snap-none"
-          >
-            {PASS_TYPES.map((type, i) => {
-              const Icon = type.icon
-              const isActive = active === i
-              return (
-                <button
-                  key={type.id}
-                  type="button"
-                  onClick={() => goTo(i)}
-                  className="flex shrink-0 snap-start items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-200"
-                  style={
-                    isActive
-                      ? { background: "var(--mk-text)", color: "var(--mk-bg)" }
-                      : { background: "transparent", color: "var(--mk-text-muted)" }
-                  }
-                >
-                  <Icon className="size-3.5" strokeWidth={1.5} />
-                  <span className="whitespace-nowrap">
-                    {t(`types.${type.id}.label`)}
-                  </span>
-                </button>
-              )
-            })}
+          <div className="flex flex-wrap justify-center gap-2 mb-16">
+            <div
+              ref={scrollRef}
+              className="relative flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-6 px-6 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center scroll-smooth snap-x snap-mandatory sm:snap-none"
+            >
+              {PASS_TYPES.map((type, i) => {
+                const isActive = active === i
+                return (
+                  <button
+                    key={type.id}
+                    type="button"
+                    onClick={() => goTo(i)}
+                    className="shrink-0 snap-start rounded-full px-6 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200"
+                    style={
+                      isActive
+                        ? { background: "var(--mk-brand-purple)", color: "oklch(0.99 0 0)" }
+                        : { color: "var(--mk-text-muted)" }
+                    }
+                  >
+                    <span className="whitespace-nowrap">
+                      {t(`types.${type.id}.label`)}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </FadeIn>
 
-        {/* Card */}
+        {/* Glass container card */}
         <FadeIn delay={0.25}>
-          <div
-            className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center rounded-2xl p-6 sm:p-10"
-            style={{
-              background: "var(--mk-card)",
-              border: "1px solid var(--mk-border)",
-              boxShadow: "0 20px 60px oklch(0 0 0 / 0.06)",
-            }}
-          >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mk-card-glass p-12 rounded-[3rem]">
+
             {/* Screenshot — all stacked, crossfade on switch */}
             <div
               className="relative overflow-hidden rounded-xl"
@@ -218,35 +178,16 @@ export function PassTypesCarousel() {
             </div>
 
             {/* Info */}
-            <div className="flex flex-col gap-5">
-              <div className="flex items-center gap-3">
-                {(() => {
-                  const Icon = current.icon
-                  return (
-                    <div
-                      className="flex size-11 items-center justify-center rounded-xl"
-                      style={{
-                        background: "oklch(0.55 0.2 265 / 0.08)",
-                      }}
-                    >
-                      <Icon
-                        className="size-5"
-                        strokeWidth={1.5}
-                        style={{ color: "var(--mk-brand-purple)" }}
-                      />
-                    </div>
-                  )
-                })()}
-                <h3
-                  className="text-xl sm:text-2xl font-bold"
-                  style={{ color: "var(--mk-text)", letterSpacing: "-0.02em" }}
-                >
-                  {t(`types.${current.id}.label`)}
-                </h3>
-              </div>
+            <div className="flex flex-col gap-6">
+              <h3
+                className="text-3xl font-black tracking-tight"
+                style={{ color: "var(--mk-text)" }}
+              >
+                {t(`types.${current.id}.label`)}
+              </h3>
 
               <p
-                className="text-[15px] leading-relaxed"
+                className="text-lg leading-relaxed"
                 style={{ color: "var(--mk-text-muted)" }}
               >
                 {t(`types.${current.id}.description`)}

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { BarChart3, CreditCard, Palette, QrCode, Smartphone, Users } from "lucide-react"
+import { BarChart3, CreditCard, Palette, QrCode, Smartphone, Users } from "lucide-react" // icons kept for feature data
 import { useTranslations } from "next-intl"
 import { FadeIn, ScaleIn } from "./motion"
 
@@ -66,64 +66,89 @@ export function FeatureShowcase() {
   const activeFeature = FEATURES.find((f) => f.id === activeTab) ?? FEATURES[0]
 
   return (
-    <section className="relative py-20 sm:py-28 overflow-hidden" style={{ background: "var(--mk-bg)" }}>
-      {/* Gradient mesh background */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background: `
-            radial-gradient(ellipse 60% 40% at 50% 30%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%),
-            radial-gradient(ellipse 40% 50% at 80% 60%, oklch(0.55 0.17 155 / 0.03) 0%, transparent 70%)
-          `,
-        }}
-      />
+    <section className="relative py-24 overflow-hidden" style={{ background: "var(--mk-bg)" }}>
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         {/* Section heading */}
         <FadeIn>
-          <div className="mx-auto max-w-2xl text-center mb-10">
+          <div className="mx-auto max-w-2xl text-center mb-16">
             <p
-              className="text-[13px] font-medium uppercase tracking-widest mb-3"
+              className="text-[13px] font-black uppercase tracking-[0.2em] mb-4"
               style={{ color: "var(--mk-brand-purple)" }}
             >
               {t("sectionLabel")}
             </p>
             <h2
-              className="text-3xl sm:text-[2.5rem] font-bold"
-              style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
+              className="mk-clamp-h2 font-black tracking-tight"
+              style={{ color: "var(--mk-text)" }}
             >
               {t("title")}
             </h2>
           </div>
         </FadeIn>
 
-        {/* Browser mockup with active screenshot */}
+        {/* Browser mockup with tabs inside chrome */}
         <ScaleIn>
           <div
-            className="relative mx-auto max-w-5xl rounded-xl overflow-hidden"
+            className="relative mx-auto rounded-2xl overflow-hidden"
             style={{
               background: "var(--mk-card)",
               border: "1px solid var(--mk-border)",
               boxShadow:
-                "0 24px 80px oklch(0 0 0 / 0.10), 0 8px 24px oklch(0 0 0 / 0.06), 0 0 0 1px oklch(0 0 0 / 0.03)",
+                "0 24px 80px oklch(0 0 0 / 0.10), 0 8px 24px oklch(0 0 0 / 0.06)",
             }}
           >
-            {/* Browser bar */}
+            {/* Browser chrome bar */}
             <div
-              className="flex items-center gap-2 px-4 py-2.5"
-              style={{ borderBottom: "1px solid var(--mk-border)" }}
+              className="flex items-center gap-4 px-4 py-3"
+              style={{
+                background: "var(--mk-surface)",
+                borderBottom: "1px solid var(--mk-border)",
+              }}
             >
               <div className="flex gap-1.5">
-                <div className="size-2.5 rounded-full" style={{ background: "oklch(0.65 0.2 25)" }} />
-                <div className="size-2.5 rounded-full" style={{ background: "oklch(0.80 0.15 95)" }} />
-                <div className="size-2.5 rounded-full" style={{ background: "oklch(0.65 0.18 145)" }} />
+                <div className="size-3 rounded-full" style={{ background: "oklch(0.65 0.2 25)" }} />
+                <div className="size-3 rounded-full" style={{ background: "oklch(0.80 0.15 95)" }} />
+                <div className="size-3 rounded-full" style={{ background: "oklch(0.65 0.18 145)" }} />
               </div>
-              <div
-                className="mx-auto rounded-md px-4 py-1 text-[11px]"
-                style={{ background: "var(--mk-surface)", color: "var(--mk-text-dimmed)", border: "1px solid var(--mk-border)" }}
-              >
-                {t("browserUrl")}
+              <div className="flex-1 flex justify-center">
+                <div
+                  className="rounded-md px-4 py-1 text-[11px] w-full max-w-sm text-center"
+                  style={{
+                    background: "var(--mk-card)",
+                    color: "var(--mk-text-dimmed)",
+                  }}
+                >
+                  {t("browserUrl")}
+                </div>
               </div>
+            </div>
+
+            {/* Tabs inside the mockup */}
+            <div
+              className="flex overflow-x-auto"
+              style={{
+                background: "var(--mk-surface)",
+                borderBottom: "1px solid var(--mk-border)",
+              }}
+            >
+              {FEATURES.map((feature) => {
+                const isActive = activeTab === feature.id
+                return (
+                  <button
+                    key={feature.id}
+                    type="button"
+                    onClick={() => setActiveTab(feature.id)}
+                    className="px-6 py-4 text-xs font-bold whitespace-nowrap transition-all"
+                    style={{
+                      borderBottom: isActive ? "2px solid var(--mk-brand-purple)" : "2px solid transparent",
+                      color: isActive ? "var(--mk-brand-purple)" : "var(--mk-text-dimmed)",
+                      background: isActive ? "var(--mk-card)" : "transparent",
+                    }}
+                  >
+                    {feature.label}
+                  </button>
+                )
+              })}
             </div>
 
             {/* Screenshot area — all images stacked, only active one visible */}
@@ -150,50 +175,6 @@ export function FeatureShowcase() {
             </div>
           </div>
         </ScaleIn>
-
-        {/* Tab bar */}
-        <FadeIn delay={0.2}>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
-            {FEATURES.map((feature) => {
-              const Icon = feature.icon
-              const isActive = activeTab === feature.id
-              return (
-                <button
-                  key={feature.id}
-                  type="button"
-                  onClick={() => setActiveTab(feature.id)}
-                  className="flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-medium transition-all duration-200"
-                  style={
-                    isActive
-                      ? {
-                          background: "var(--mk-text)",
-                          color: "var(--mk-bg)",
-                        }
-                      : {
-                          background: "transparent",
-                          color: "var(--mk-text-muted)",
-                          border: "1px solid transparent",
-                        }
-                  }
-                >
-                  <Icon className="size-4" strokeWidth={1.5} />
-                  <span className="hidden sm:inline">{feature.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        </FadeIn>
-
-        {/* Description */}
-        <FadeIn delay={0.3}>
-          <p
-            key={activeTab}
-            className="mt-5 mx-auto max-w-xl text-center text-[16px] leading-relaxed"
-            style={{ color: "var(--mk-text-muted)" }}
-          >
-            {activeFeature.description}
-          </p>
-        </FadeIn>
       </div>
     </section>
   )

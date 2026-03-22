@@ -149,9 +149,9 @@
       "title": "10 types de passes",
       "description": "Cartes tampons, coupons, abonnements, points, prépayés, cartes cadeaux, billets, passes d'accès, transit et badges professionnels."
     },
-    "security": {
-      "title": "Sécurisé et privé",
-      "description": "Chiffrement de niveau entreprise, authentification sécurisée et conforme au RGPD. Les données de tes clients restent les tiennes."
+    "pushNotifications": {
+      "title": "Notifications Push",
+      "description": "Envoyez des mises à jour en temps réel sur l'écran de verrouillage de vos clients. Annoncez des offres, rappelez les passes expirants et stimulez l'engagement."
     }
   },
   "passTypesCarousel": {
@@ -524,6 +524,8 @@
       "signUp": "S'inscrire",
       "invalidCredentials": "E-mail ou mot de passe invalide"
     },
+    "legalConsent": "En continuant, vous acceptez nos <terms>Conditions d'utilisation</terms> et notre <privacy>Politique de confidentialité</privacy>.",
+    "brandTagline": "Conçu avec précision pour le curateur digital.",
     "register": {
       "stepAccount": "Compte",
       "stepVerify": "Vérifier",

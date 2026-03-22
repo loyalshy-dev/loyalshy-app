@@ -1,7 +1,7 @@
 import type React from "react"
-import { Smartphone, Wallet, BarChart3, Users, Palette, QrCode, Zap, Shield } from "lucide-react"
+import { Smartphone, Wallet, BarChart3, Users, Palette, QrCode, Zap, Bell } from "lucide-react"
 import { getTranslations } from "next-intl/server"
-import { FadeIn, Stagger, StaggerItem } from "./motion"
+import { Stagger, StaggerItem } from "./motion"
 
 /* ─── Bento card ──────────────────────────────────────────────────── */
 
@@ -20,52 +20,38 @@ function FeatureCard({
 
   return (
     <div
-      className={`group relative flex flex-col gap-4 p-6 rounded-2xl hover:-translate-y-1 transition-all duration-250 h-full ${
+      className={`group relative flex flex-col gap-4 p-8 hover:-translate-y-1 transition-all duration-250 h-full mk-card-glass overflow-hidden ${
         isLarge ? "sm:col-span-2" : ""
       }`}
-      style={{
-        background: "var(--mk-card)",
-        border: "1px solid var(--mk-border)",
-        boxShadow: "0 1px 3px oklch(0 0 0 / 0.06), 0 4px 16px oklch(0 0 0 / 0.04)",
-        backdropFilter: "blur(8px)",
-      }}
     >
-      {/* Top accent on hover */}
+      {/* Top accent on hover — thicker gradient line */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px rounded-t-2xl opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+        className="absolute inset-x-0 top-0 h-0.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
         style={{
           background:
-            "linear-gradient(90deg, transparent, oklch(0.55 0.2 265 / 0.4), transparent)",
+            "linear-gradient(90deg, var(--mk-brand-purple), var(--mk-brand-green))",
         }}
       />
 
       <div className="flex flex-col gap-4">
         {/* Icon */}
-        <div
-          className="flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 group-hover:bg-[oklch(0.55_0.2_265/0.08)]"
-          style={{
-            background: "var(--mk-surface)",
-            border: "1px solid var(--mk-border)",
-          }}
-        >
-          <Icon
-            className="size-5 transition-colors duration-200 group-hover:text-[oklch(0.55_0.2_265)]"
-            strokeWidth={1.5}
-            style={{ color: "var(--mk-text-muted)" }}
-          />
-        </div>
+        <Icon
+          className="size-7 transition-colors duration-200 group-hover:text-[oklch(0.55_0.2_265)]"
+          strokeWidth={1.5}
+          style={{ color: "var(--mk-text-muted)" }}
+        />
 
         {/* Text */}
         <div className="space-y-2">
           <h3
-            className="text-[15px] font-semibold"
-            style={{ color: "var(--mk-text)", letterSpacing: "-0.01em" }}
+            className="text-xl font-bold tracking-tight"
+            style={{ color: "var(--mk-text)" }}
           >
             {title}
           </h3>
           <p
-            className="text-[14px] leading-relaxed"
+            className="text-sm leading-relaxed"
             style={{ color: "var(--mk-text-muted)" }}
           >
             {description}
@@ -125,9 +111,9 @@ export async function Features() {
       size: "large" as const,
     },
     {
-      icon: Shield,
-      title: t("security.title"),
-      description: t("security.description"),
+      icon: Bell,
+      title: t("pushNotifications.title"),
+      description: t("pushNotifications.description"),
       size: "large" as const,
     },
   ]
@@ -135,47 +121,12 @@ export async function Features() {
   return (
     <section
       id="features"
-      className="relative py-24 sm:py-32 overflow-hidden"
-      style={{ background: "var(--mk-surface)" }}
+      className="relative py-32 overflow-hidden"
+      style={{ background: "var(--mk-bg)" }}
     >
-      {/* Gradient mesh */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background: `
-            radial-gradient(ellipse 50% 60% at 20% 40%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%),
-            radial-gradient(ellipse 50% 50% at 80% 60%, oklch(0.55 0.17 155 / 0.03) 0%, transparent 70%)
-          `,
-        }}
-      />
-
-      <div className="mx-auto max-w-5xl px-6 lg:px-8">
-        <FadeIn>
-          <div className="mx-auto max-w-2xl text-center mb-14 sm:mb-16">
-            <p
-              className="text-[13px] font-medium uppercase tracking-widest mb-3"
-              style={{ color: "var(--mk-brand-purple)" }}
-            >
-              {t("sectionLabel")}
-            </p>
-            <h2
-              className="text-3xl sm:text-[2.75rem] font-bold"
-              style={{ color: "var(--mk-text)", letterSpacing: "-0.035em" }}
-            >
-              {t("title")}
-            </h2>
-            <p
-              className="mt-4 text-[16px] leading-relaxed"
-              style={{ color: "var(--mk-text-muted)" }}
-            >
-              {t("subtitle")}
-            </p>
-          </div>
-        </FadeIn>
-
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <Stagger
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4 md:grid-rows-2"
           stagger={0.07}
         >
           {features.map((feature) => (

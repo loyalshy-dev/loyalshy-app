@@ -149,9 +149,9 @@
       "title": "10 Pass Types",
       "description": "Stamp cards, coupons, memberships, points, prepaid, gift cards, tickets, access passes, transit, and business IDs."
     },
-    "security": {
-      "title": "Secure & Private",
-      "description": "Enterprise-grade encryption, secure auth, and GDPR-ready. Your customer data stays yours."
+    "pushNotifications": {
+      "title": "Push Notifications",
+      "description": "Send real-time updates to your customers' lock screens. Announce offers, remind about expiring passes, and drive engagement."
     }
   },
   "passTypesCarousel": {
@@ -524,6 +524,8 @@
       "signUp": "Sign up",
       "invalidCredentials": "Invalid email or password"
     },
+    "legalConsent": "By continuing, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
+    "brandTagline": "Built with precision for the digital curator.",
     "register": {
       "stepAccount": "Account",
       "stepVerify": "Verify",

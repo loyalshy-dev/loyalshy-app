@@ -144,57 +144,6 @@ function Line({
   return <span style={{ color: colors[color] }}>{children}</span>
 }
 
-/* ─── Feature item (left side) ───────────────────────────────────── */
-
-function FeatureItem({
-  icon: Icon,
-  title,
-  description,
-  isLast,
-}: {
-  icon: React.ElementType
-  title: string
-  description: string
-  isLast?: boolean
-}) {
-  return (
-    <div
-      className={`py-6 ${!isLast ? "" : ""}`}
-      style={!isLast ? { borderBottom: "1px solid var(--mk-border)" } : undefined}
-    >
-      <div className="flex items-start gap-3.5">
-        <div
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg mt-0.5"
-          style={{
-            background: "oklch(0.55 0.2 265 / 0.06)",
-            border: "1px solid oklch(0.55 0.2 265 / 0.1)",
-          }}
-        >
-          <Icon
-            className="size-4"
-            strokeWidth={1.5}
-            style={{ color: "oklch(0.55 0.2 265)" }}
-          />
-        </div>
-        <div>
-          <h3
-            className="text-[15px] font-semibold mb-1"
-            style={{ color: "var(--mk-text)", letterSpacing: "-0.01em" }}
-          >
-            {title}
-          </h3>
-          <p
-            className="text-[14px] leading-relaxed"
-            style={{ color: "var(--mk-text-muted)" }}
-          >
-            {description}
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 /* ─── Section ─────────────────────────────────────────────────────── */
 
 export async function ApiSection() {
@@ -220,62 +169,49 @@ export async function ApiSection() {
 
   return (
     <section
-      className="relative py-24 sm:py-32 overflow-hidden"
-      style={{ background: "var(--mk-bg)" }}
+      className="relative py-32 overflow-hidden"
+      style={{ background: "oklch(0.1 0.005 285)", color: "oklch(0.95 0 0)" }}
     >
-      {/* Gradient mesh */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background: `
-            radial-gradient(ellipse 50% 60% at 70% 40%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%),
-            radial-gradient(ellipse 40% 50% at 30% 60%, oklch(0.55 0.17 155 / 0.03) 0%, transparent 70%)
-          `,
-        }}
-      />
-
-      <div className="mx-auto max-w-6xl px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <FadeIn>
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 items-start">
+          <div className="grid grid-cols-1 gap-24 lg:grid-cols-2 items-center">
             {/* Left — heading + feature items */}
-            <div>
+            <div className="flex flex-col gap-8">
               <p
-                className="text-[13px] font-medium uppercase tracking-widest mb-3"
-                style={{ color: "var(--mk-brand-purple)" }}
+                className="text-[13px] font-black uppercase tracking-[0.2em]"
+                style={{ color: "var(--mk-brand-green)" }}
               >
                 {t("sectionLabel")}
               </p>
               <h2
-                className="text-3xl sm:text-[2.75rem] font-bold leading-[1.1] mb-2"
-                style={{ color: "var(--mk-text)", letterSpacing: "-0.035em" }}
+                className="mk-clamp-h2 font-black tracking-tight leading-tight"
               >
                 {t("title")}
               </h2>
               <p
-                className="text-[16px] leading-relaxed mb-4"
-                style={{ color: "var(--mk-text-muted)" }}
+                className="text-lg leading-relaxed"
+                style={{ color: "oklch(0.6 0.01 285)" }}
               >
                 {t("subtitle")}
               </p>
 
-              <div>
-                {features.map((feature, i) => (
-                  <FeatureItem
-                    key={feature.title}
-                    icon={feature.icon}
-                    title={feature.title}
-                    description={feature.description}
-                    isLast={i === features.length - 1}
-                  />
-                ))}
+              <div className="flex flex-col gap-4">
+                {features.map((feature) => {
+                  const Icon = feature.icon
+                  return (
+                    <div key={feature.title} className="flex items-center gap-4">
+                      <Icon className="size-5" style={{ color: "var(--mk-brand-green)" }} strokeWidth={1.5} />
+                      <span className="text-sm font-bold">{feature.title}</span>
+                    </div>
+                  )
+                })}
               </div>
 
-              <div className="mt-6">
+              <div>
                 <Link
                   href="/api/v1/docs"
-                  className="inline-flex items-center gap-2 text-[14px] font-medium transition-colors hover:opacity-80"
-                  style={{ color: "var(--mk-brand-purple)" }}
+                  className="inline-flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
+                  style={{ color: "var(--mk-brand-green)" }}
                 >
                   {t("exploreDocsLink")}
                   <ArrowRight className="size-3.5" />
@@ -283,9 +219,17 @@ export async function ApiSection() {
               </div>
             </div>
 
-            {/* Right — code preview */}
-            <div className="lg:mt-8">
-              <CodePreview t={(key: string) => t(key)} />
+            {/* Right — code preview with purple glow */}
+            <div className="relative">
+              {/* Purple glow behind code */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-20 rounded-full blur-[100px]"
+                style={{ background: "oklch(0.55 0.2 265 / 0.2)" }}
+              />
+              <div className="relative">
+                <CodePreview t={(key: string) => t(key)} />
+              </div>
             </div>
           </div>
         </FadeIn>
