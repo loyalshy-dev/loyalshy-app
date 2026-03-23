@@ -463,28 +463,33 @@ export function WalletPassRenderer({
 
       {/* Right side: Header fields (Apple Wallet style — right-aligned) */}
       {isApple && headerFields.length > 0 && (
-        <div style={{ textAlign: "right", flexShrink: 0 }}>
-          {headerFields.map((f, i) => (
-            <div key={i}>
-              <div
-                data-color-zone="labels"
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  lineHeight: 1,
-                  color: design.labelColor ?? design.textColor,
-                  opacity: design.labelColor ? 1 : 0.6,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                {f.label}
+        <div style={{ textAlign: "right", flexShrink: 0, maxWidth: "55%" }}>
+          {headerFields.map((f, i) => {
+            const baseSize = isTicket ? 18 : 22
+            const len = f.value.length
+            const headerValueSize = len <= 8 ? baseSize : len <= 14 ? Math.max(baseSize - 4, 14) : Math.max(baseSize - 8, 11)
+            return (
+              <div key={i}>
+                <div
+                  data-color-zone="labels"
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    color: design.labelColor ?? design.textColor,
+                    opacity: design.labelColor ? 1 : 0.6,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  {f.label}
+                </div>
+                <div data-color-zone="text" style={{ fontSize: headerValueSize, fontWeight: 300, lineHeight: 1.1 }}>
+                  {f.value}
+                </div>
               </div>
-              <div data-color-zone="text" style={{ fontSize: isTicket ? 18 : 22, fontWeight: 300, lineHeight: 1.1 }}>
-                {f.value}
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -740,38 +745,42 @@ export function WalletPassRenderer({
   const primaryHiddenFromStrip = useStrip && !isStampType && design.showPrimaryField === false
   const primarySection = (!useStrip && primaryFields.length > 0) ? (
     <div style={{ padding: primaryPadding }}>
-      {primaryFields.map((f, i) => (
-        <div key={i}>
-          <div
-            data-color-zone="labels"
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: design.labelColor ?? undefined,
-              opacity: design.labelColor ? 1 : 0.6,
-              textTransform: "uppercase",
-              letterSpacing: "0.04em",
-              marginBottom: 0,
-            }}
-          >
-            {f.label}
+      {primaryFields.map((f, i) => {
+        const len = f.value.length
+        const dynPrimarySize = len <= 8 ? primaryFontSize : len <= 14 ? Math.max(primaryFontSize - 4, 16) : Math.max(primaryFontSize - 8, 12)
+        return (
+          <div key={i}>
+            <div
+              data-color-zone="labels"
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: design.labelColor ?? undefined,
+                opacity: design.labelColor ? 1 : 0.6,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+                marginBottom: 0,
+              }}
+            >
+              {f.label}
+            </div>
+            <div
+              data-color-zone="text"
+              style={{
+                fontSize: dynPrimarySize,
+                fontWeight: 700,
+                letterSpacing: design.progressStyle === "NUMBERS" ? "0.02em" : "0.08em",
+                lineHeight: 1.2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {f.value}
+            </div>
           </div>
-          <div
-            data-color-zone="text"
-            style={{
-              fontSize: primaryFontSize,
-              fontWeight: 700,
-              letterSpacing: design.progressStyle === "NUMBERS" ? "0.02em" : "0.08em",
-              lineHeight: 1.2,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {f.value}
-          </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   ) : null
 
