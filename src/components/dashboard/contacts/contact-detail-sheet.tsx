@@ -62,7 +62,7 @@ import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import type { PassInstanceDetail } from "@/types/pass-instance"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
-import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText, parseMembershipConfig } from "@/lib/pass-config"
+import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText, parseMembershipConfig, parseBusinessCardConfig } from "@/lib/pass-config"
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -137,6 +137,19 @@ function getRendererProps(passInstance: PassInstanceDetail) {
       showHolderPhoto: config?.showHolderPhoto,
       holderPhotoPosition: config?.holderPhotoPosition,
       holderPhotoUrl: instanceHolderPhoto,
+    }
+  }
+  if (passInstance.passType === "BUSINESS_CARD") {
+    const config = parseBusinessCardConfig(passInstance.templateConfig)
+    return {
+      currentVisits: 0,
+      totalVisits: 0,
+      rewardDescription: "",
+      contactName: config?.contactName,
+      jobTitle: config?.jobTitle,
+      contactPhone: config?.phone,
+      contactEmail: config?.email,
+      contactWebsite: config?.website,
     }
   }
   const cycleData = data as { currentCycleVisits?: number }

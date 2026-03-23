@@ -36,6 +36,7 @@ function passTypeToCardType(passType: string): CardType {
     case "POINTS": return "POINTS"
     case "GIFT_CARD": return "GIFT_CARD"
     case "TICKET": return "TICKET"
+    case "BUSINESS_CARD": return "GENERIC"
     default: return "STAMP"
   }
 }
@@ -90,6 +91,17 @@ function buildConfigPayload(passType: string, pc: ProgramConfigState): Record<st
         eventVenue: pc.eventVenue,
         barcodeType: pc.barcodeType,
         maxScans: pc.maxScans,
+      }
+    case "BUSINESS_CARD":
+      return {
+        contactName: pc.contactName,
+        jobTitle: pc.jobTitle || undefined,
+        phone: pc.bcPhone || undefined,
+        email: pc.bcEmail || undefined,
+        website: pc.bcWebsite || undefined,
+        linkedinUrl: pc.linkedinUrl || undefined,
+        twitterUrl: pc.twitterUrl || undefined,
+        instagramUrl: pc.instagramUrl || undefined,
       }
     default:
       return {}
@@ -212,6 +224,15 @@ export function StudioLayout({
       eventVenue: (cfg.eventVenue as string) ?? "",
       barcodeType: (cfg.barcodeType as string) ?? "qr",
       maxScans: (cfg.maxScans as number) ?? 1,
+      // Business card
+      contactName: (cfg.contactName as string) ?? "",
+      jobTitle: (cfg.jobTitle as string) ?? "",
+      bcPhone: (cfg.phone as string) ?? "",
+      bcEmail: (cfg.email as string) ?? "",
+      bcWebsite: (cfg.website as string) ?? "",
+      linkedinUrl: (cfg.linkedinUrl as string) ?? "",
+      twitterUrl: (cfg.twitterUrl as string) ?? "",
+      instagramUrl: (cfg.instagramUrl as string) ?? "",
     })
     // Mark clean after setting logos and config since it's not a user change
     store.getState().markClean()

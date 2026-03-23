@@ -56,7 +56,7 @@ import { scanTicket, type ScanTicketResult } from "@/server/ticket-actions"
 import type { PassInstanceSummary } from "@/types/pass-instance"
 import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
-import { parsePointsConfig, parseMembershipConfig, getCheapestCatalogItem } from "@/lib/pass-config"
+import { parsePointsConfig, parseMembershipConfig, parseBusinessCardConfig, getCheapestCatalogItem } from "@/lib/pass-config"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -1162,6 +1162,8 @@ function ConfirmStep({
   const isPoints = passInstance.passType === "POINTS"
   const isGiftCard = passInstance.passType === "GIFT_CARD"
   const isTicket = passInstance.passType === "TICKET"
+  const isBusinessCard = passInstance.passType === "BUSINESS_CARD"
+  const businessCardCfg = isBusinessCard ? parseBusinessCardConfig(passInstance.templateConfig) : null
   const confirmData = passInstance.data as Record<string, unknown> | null ?? {}
   const confirmConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
   const filled = (confirmData.currentCycleVisits as number) ?? 0
@@ -1248,6 +1250,11 @@ function ConfirmStep({
             showHolderPhoto={membershipCfg?.showHolderPhoto}
             holderPhotoPosition={membershipCfg?.holderPhotoPosition}
             holderPhotoUrl={holderPhotoUrl}
+            contactName={businessCardCfg?.contactName}
+            jobTitle={businessCardCfg?.jobTitle}
+            contactPhone={businessCardCfg?.phone}
+            contactEmail={businessCardCfg?.email}
+            contactWebsite={businessCardCfg?.website}
           />
         </div>
       ) : isMembership ? (

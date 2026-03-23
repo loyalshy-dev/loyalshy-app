@@ -44,6 +44,10 @@ export type TicketData = {
   voidedAt?: string // ISO datetime
 }
 
+export type BusinessCardData = {
+  addedToWalletAt?: string // ISO datetime
+}
+
 export type PassInstanceData =
   | StampCardData
   | CouponData
@@ -51,6 +55,7 @@ export type PassInstanceData =
   | PointsData
   | GiftCardData
   | TicketData
+  | BusinessCardData
 
 // ─── Pass design snapshot (shared across instance types) ─────
 

@@ -6,7 +6,7 @@ import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, getCheapestCatalogItem, getWalletRewardText } from "../../pass-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, parseBusinessCardConfig, getCheapestCatalogItem, getWalletRewardText } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -139,6 +139,7 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
       case "POINTS": return `${name} Points`
       case "GIFT_CARD": return `${name} Gift Card`
       case "TICKET": return `${name} Ticket`
+      case "BUSINESS_CARD": return `${name} Business Card`
       default: return `${name} Loyalty`
     }
   })()
@@ -449,6 +450,16 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     secondaryLoyaltyPoints = {
       label: lbl("scanStatus", "SCANS"),
       balance: { string: `${input.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` },
+    }
+  } else if (input.passType === "BUSINESS_CARD") {
+    const bcConfig = parseBusinessCardConfig(input.templateConfig)
+    loyaltyPoints = {
+      label: formatLabel("CONTACT", labelFmt),
+      balance: { string: bcConfig?.contactName ?? input.organizationName },
+    }
+    secondaryLoyaltyPoints = {
+      label: formatLabel("TITLE", labelFmt),
+      balance: { string: bcConfig?.jobTitle ?? "Business Card" },
     }
   } else {
     // STAMP_CARD (default)

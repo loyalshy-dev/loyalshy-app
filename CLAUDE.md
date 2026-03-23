@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple/Google Wallet integration. Supports 6 pass types: stamp cards, coupons, memberships, points, gift cards, and tickets. Contacts receive wallet passes via QR code scan, shareable link, direct issue, bulk CSV import, email, or REST API.
+Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple/Google Wallet integration. Supports 7 pass types: stamp cards, coupons, memberships, points, gift cards, tickets, and business cards. Contacts receive wallet passes via QR code scan, shareable link, direct issue, bulk CSV import, email, or REST API.
 
 ## Stack (Verified Mar 2026)
 
@@ -168,7 +168,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
     /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, pass types carousel, motion animations)
       motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn) — used below-fold only; Hero/SocialProof use CSS animations
       contact-form.tsx → Contact form client component (Zod validation, honeypot, inquiry type pre-selection from URL params)
-      pass-types-carousel.tsx → Auto-playing carousel showcasing all 6 pass types with screenshots, descriptions, and use case tags
+      pass-types-carousel.tsx → Auto-playing carousel showcasing all 7 pass types with screenshots, descriptions, and use case tags
     /wallet         → Wallet pass components
   /i18n             → Internationalization config
     config.ts       → Locale definitions (en, es, fr)
@@ -196,13 +196,13 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 | LoyaltyProgram | PassTemplate | Generic template for any pass type |
 | Enrollment | PassInstance | Issued pass (Contact × PassTemplate) |
 | Visit | Interaction | Single table with InteractionType discriminator |
-| ProgramType | PassType | 6 types (see below) |
+| ProgramType | PassType | 7 types (see below) |
 
-### Pass Types (10)
-STAMP_CARD, COUPON, MEMBERSHIP, POINTS, GIFT_CARD, TICKET
+### Pass Types (7)
+STAMP_CARD, COUPON, MEMBERSHIP, POINTS, GIFT_CARD, TICKET, BUSINESS_CARD
 
 ### Join Mode (per PassTemplate)
-- **OPEN** (default for STAMP_CARD, COUPON, POINTS, MEMBERSHIP): contacts self-join via QR code or shareable link on `/join/[slug]`
+- **OPEN** (default for STAMP_CARD, COUPON, POINTS, MEMBERSHIP, BUSINESS_CARD): contacts self-join via QR code or shareable link on `/join/[slug]`
 - **INVITE_ONLY** (default for TICKET, GIFT_CARD): passes issued by org only (Direct Issue, CSV Import, API). Public join page filters out INVITE_ONLY templates; `joinTemplate` server action rejects them server-side.
 - Owners can override the default per program in the Distribution tab.
 
@@ -236,7 +236,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase P4 — Wallet Pass Generators (Apple pass: storeCard/eventTicket/generic; Google pass: Loyalty/GiftCard/EventTicket/Generic classes)
 - [x] Phase P5 — Dashboard UI entity renames (Restaurant→Organization, Customer→Contact, Program→Template, Enrollment→PassInstance throughout all dashboard components, settings, register dialog, wallet renderer, Trigger.dev emails)
 - [x] Phase P6 — Public Pages & Onboarding (marketing copy restaurant→business, restaurantName→businessName type rename)
-- [x] Phase P7 — Studio & Card Renderer (all 6 type panels, field configs, Apple/Google generators, renderer support)
+- [x] Phase P7 — Studio & Card Renderer (all type panels, field configs, Apple/Google generators, renderer support)
 - [x] Phase P8 — Admin, Jobs & Polish (admin /restaurants/→/organizations/, dashboard /customers/→/contacts/, file + component renames, revalidatePath updates)
 - [x] Phase API-1 — API Foundation (ApiKey/WebhookEndpoint/WebhookDelivery/ApiRequestLog models, auth, rate limiting, CORS, error handling, idempotency, request logging)
 - [x] Phase API-2 — Core CRUD Endpoints (contacts, templates, passes, interactions — list/detail/create/update/delete routes, shared data layer, serializers)
@@ -253,7 +253,8 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase REDESIGN — Landing page redesign: asymmetric hero with WalletStack (pass-type images), social proof trust badges (no fake stats), gradient mesh backgrounds on all sections, features bento grid with uniform card layout and equal heights, pass types carousel (flat screenshots, smooth crossfade), feature showcase (smooth crossfade), how-it-works connecting line + perspective screenshots, wallet preview with PhoneMockupInteractive (pass-type images), pricing with stronger highlight + pill buttons, closing CTA with oversized heading, dark mode marketing CSS variables, testimonials removed (fake data), footer CSS variable background, Try Demo section (env-gated via NEXT_PUBLIC_DEMO_JOIN_URL, wallet buttons + join page link), admin showcase system removed (unused, -2080 lines), raw SQL enum fix in reward-actions.ts
 - [x] Phase ADMIN-1 — Admin panel upgrade Phase 1: tiered admin roles (ADMIN_SUPPORT/BILLING/OPS/SUPER_ADMIN), AdminAuditLog model + audit trail on all admin mutations, assertAdminRole() DAL with hierarchy, server-side impersonation logging, audit log viewer page with filters, admin i18n namespace (~183 keys × 3 locales), safety guards (self-protection, last admin, role hierarchy enforcement), Better Auth admin plugin updated with all roles
 - [x] Phase CONTACT — Contact form: `/contact` public page with Zod-validated server action, Resend email (team notification + sender confirmation), Upstash Redis rate limiting (3/hr per IP with in-memory fallback), honeypot spam protection, inquiry type routing (general/sales/partnership/support), URL param pre-selection (`?type=sales` from Enterprise pricing CTA), i18n `contact` namespace (~38 keys × 3 locales), navbar/footer/pricing/closing CTA links updated, email header injection protection
-- [ ] Phase 6.1 — Production deployment
+- [x] Phase 6.1 — Production deployment (Vercel, public domain)
+- [x] Phase BUSINESS_CARD — 7th pass type: digital business card (BUSINESS_CARD enum, BusinessCardConfig, one-per-org constraint, Apple Generic / Google Loyalty pass, studio panel, create form, vCard .vcf download, website embed snippet, i18n 3 locales)
 
 ## Conversation Strategy
 
@@ -285,7 +286,7 @@ Update the "Current Progress" section above to track what's done.
 7. Invitation (Better Auth's org invite — separate from StaffInvitation)
 
 **Application (14):**
-8. PassTemplate (passType: 6 types, joinMode: OPEN/INVITE_ONLY, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
+8. PassTemplate (passType: 7 types, joinMode: OPEN/INVITE_ONLY, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
 9. PassInstance (pivot: Contact × PassTemplate — wallet pass, status, data JSON for type-specific state)
 10. Contact (end user — identity + denormalized totalInteractions + sequential memberNumber per org)
 11. Interaction (type discriminator, metadata JSON, linked to PassInstance)
@@ -329,13 +330,13 @@ Update the "Current Progress" section above to track what's done.
 
 | Display Name | PlanId (DB) | Monthly | Annual | Contacts | Staff | Programs |
 |---|---|---|---|---|---|---|
-| Free | FREE | €0 | €0 | 50 | 1 | 1 (stamp card or coupon) |
+| Free | FREE | €0 | €0 | 50 | 1 | 1 (stamp card, coupon, or business card) |
 | Pro | STARTER | €29 | €24 | 500 | 2 | 2 |
 | Business | GROWTH | €49 | €39 | 2,500 | 5 | 5 |
 | Scale | SCALE | €99 | €79 | Unlimited | 25 | Unlimited |
 | Enterprise | ENTERPRISE | Custom | Custom | Unlimited | Unlimited | Unlimited |
 
-**Important:** PlanId values (`FREE`, `STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, API rate limiting, and throughout the codebase. Display names ("Free", "Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc. Free users have no Stripe customer — Stripe customer is created on-demand at first paid checkout. Subscription cancellation downgrades to FREE. Free plan allows only STAMP_CARD and COUPON pass types (`allowedPassTypes` in plans.ts); paid plans allow all 10. No default program is created at signup — users choose their first program type from the dashboard. All plans include API access — Free plan has tight limits (5 req/min, 100/day, 1 key, 1 webhook) for testing and evaluation.
+**Important:** PlanId values (`FREE`, `STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, API rate limiting, and throughout the codebase. Display names ("Free", "Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc. Free users have no Stripe customer — Stripe customer is created on-demand at first paid checkout. Subscription cancellation downgrades to FREE. Free plan allows only STAMP_CARD, COUPON, and BUSINESS_CARD pass types (`allowedPassTypes` in plans.ts); paid plans allow all 7. No default program is created at signup — users choose their first program type from the dashboard. All plans include API access — Free plan has tight limits (5 req/min, 100/day, 1 key, 1 webhook) for testing and evaluation.
 
 ## Dashboard Navigation
 

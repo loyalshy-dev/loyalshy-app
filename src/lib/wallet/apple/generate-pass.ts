@@ -11,7 +11,7 @@ import {
 } from "./constants"
 import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters, getFieldConfig, splitFieldsForApple } from "../card-design"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, getCheapestCatalogItem } from "../../pass-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, parseBusinessCardConfig, getCheapestCatalogItem } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -183,7 +183,7 @@ export async function generateApplePass(
   // Apple generic pass type (MEMBERSHIP) does NOT render strip images.
   // It renders thumbnail images instead (displayed on the right side of the pass front).
   // For these types, redirect strip content → thumbnail, and use holder photo as thumbnail if available.
-  const isGenericPassType = input.programType === "MEMBERSHIP"
+  const isGenericPassType = input.programType === "MEMBERSHIP" || input.programType === "BUSINESS_CARD"
 
   // For generic passes: holder photo takes priority as thumbnail, otherwise use strip image as thumbnail
   const thumbnailUrl = isGenericPassType
@@ -226,6 +226,7 @@ export async function generateApplePass(
       case "POINTS": return `${name} Points Card`
       case "GIFT_CARD": return `${name} Gift Card`
       case "TICKET": return `${name} Ticket`
+      case "BUSINESS_CARD": return `${name} Business Card`
       default: return `${name} Loyalty Card`
     }
   })()
@@ -250,6 +251,7 @@ export async function generateApplePass(
   switch (input.programType) {
     case "TICKET": pass.type = "eventTicket"; break
     case "MEMBERSHIP": pass.type = "generic"; break
+    case "BUSINESS_CARD": pass.type = "generic"; break
     default: pass.type = "storeCard"; break // STAMP_CARD, COUPON, POINTS, GIFT_CARD
   }
 
@@ -296,6 +298,7 @@ export async function generateApplePass(
   const pointsConfig = input.programType === "POINTS" ? parsePointsConfig(input.programConfig) : null
   const giftCardConfig = input.programType === "GIFT_CARD" ? parseGiftCardConfig(input.programConfig) : null
   const ticketConfig = input.programType === "TICKET" ? parseTicketConfig(input.programConfig) : null
+  const businessCardConfig = input.programType === "BUSINESS_CARD" ? parseBusinessCardConfig(input.programConfig) : null
   const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Custom field labels from editorConfig
@@ -517,6 +520,32 @@ export async function generateApplePass(
         value: registeredAtFull,
       }
     )
+  }
+
+  // Business card contact details back fields
+  if (input.programType === "BUSINESS_CARD" && businessCardConfig) {
+    if (businessCardConfig.contactName) {
+      pass.backFields.push({ key: "bcName", label: "Name", value: businessCardConfig.contactName })
+    }
+    if (businessCardConfig.jobTitle) {
+      pass.backFields.push({ key: "bcTitle", label: "Title", value: businessCardConfig.jobTitle })
+    }
+    if (businessCardConfig.phone) {
+      pass.backFields.push({ key: "bcPhone", label: "Phone", value: businessCardConfig.phone })
+    }
+    if (businessCardConfig.email) {
+      pass.backFields.push({ key: "bcEmail", label: "Email", value: businessCardConfig.email })
+    }
+    if (businessCardConfig.website) {
+      pass.backFields.push({ key: "bcWebsite", label: "Website", value: businessCardConfig.website })
+    }
+    const socialLines: string[] = []
+    if (businessCardConfig.linkedinUrl) socialLines.push(`LinkedIn: ${businessCardConfig.linkedinUrl}`)
+    if (businessCardConfig.twitterUrl) socialLines.push(`X: ${businessCardConfig.twitterUrl}`)
+    if (businessCardConfig.instagramUrl) socialLines.push(`Instagram: ${businessCardConfig.instagramUrl}`)
+    if (socialLines.length > 0) {
+      pass.backFields.push({ key: "bcSocials", label: "Social Media", value: socialLines.join("\n") })
+    }
   }
 
   // T&C from program or type-specific config

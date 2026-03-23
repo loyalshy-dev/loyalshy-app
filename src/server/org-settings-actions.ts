@@ -152,7 +152,7 @@ const savePassDesignSchema = z.object({
   }).optional(),
 })
 
-const PASS_TYPE_ENUM = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"] as const
+const PASS_TYPE_ENUM = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET", "BUSINESS_CARD"] as const
 
 const createPassTemplateSchema = z.object({
   organizationId: z.string().min(1),
@@ -347,9 +347,18 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
   const PASS_TO_CARD: Record<string, string> = {
     STAMP_CARD: "STAMP", COUPON: "COUPON", MEMBERSHIP: "TIER",
     POINTS: "POINTS", GIFT_CARD: "GIFT_CARD",
-    TICKET: "TICKET",
+    TICKET: "TICKET", BUSINESS_CARD: "GENERIC",
   }
   const defaultCardType = (PASS_TO_CARD[parsed.passType] ?? "STAMP") as "STAMP"
+
+  // One business card per organization
+  if (parsed.passType === "BUSINESS_CARD") {
+    const existing = await db.passTemplate.findFirst({
+      where: { organizationId: parsed.organizationId, passType: "BUSINESS_CARD", status: { not: "ARCHIVED" } },
+      select: { id: true },
+    })
+    if (existing) return { error: t("businessCardAlreadyExists") }
+  }
 
   // Default join mode: OPEN for self-service types, INVITE_ONLY for org-issued types
   const INVITE_ONLY_TYPES = new Set(["TICKET", "GIFT_CARD"])
@@ -366,7 +375,7 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
       passDesign: {
         create: {
           cardType: defaultCardType,
-          showStrip: true,
+          showStrip: parsed.passType !== "BUSINESS_CARD",
           patternStyle: "NONE",
           progressStyle: "NUMBERS",
           labelFormat: "UPPERCASE",

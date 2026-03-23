@@ -68,7 +68,8 @@ enum PassType {
   MEMBERSHIP  @map("membership")
   POINTS      @map("points")
   GIFT_CARD   @map("gift_card")
-  TICKET      @map("ticket")
+  TICKET         @map("ticket")
+  BUSINESS_CARD  @map("business_card")
 
   @@map("pass_type")
 }

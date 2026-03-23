@@ -7,6 +7,7 @@ import type {
   PointsConfig,
   GiftCardConfig,
   TicketConfig,
+  BusinessCardConfig,
   MinigameConfig,
   PassTemplateConfig,
 } from "@/types/pass-types"
@@ -95,6 +96,17 @@ export const ticketConfigSchema = z.object({
   maxScans: z.number().int().min(1).max(100),
 })
 
+export const businessCardConfigSchema = z.object({
+  contactName: z.string().min(1).max(100),
+  jobTitle: z.string().max(100).optional(),
+  phone: z.string().max(30).optional(),
+  email: z.string().email().max(255).or(z.literal("")).optional(),
+  website: z.string().url().max(200).or(z.literal("")).optional(),
+  linkedinUrl: z.string().max(200).optional(),
+  twitterUrl: z.string().max(200).optional(),
+  instagramUrl: z.string().max(200).optional(),
+})
+
 export const prizeItemSchema = z.object({
   name: z.string().min(1).max(100),
   weight: z.number().int().min(1).max(10),
@@ -140,6 +152,10 @@ export function parseTicketConfig(config: unknown): TicketConfig | null {
   return safeParse(ticketConfigSchema, config)
 }
 
+export function parseBusinessCardConfig(config: unknown): BusinessCardConfig | null {
+  return safeParse(businessCardConfigSchema, config)
+}
+
 export function parseMinigameConfig(config: unknown): MinigameConfig | null {
   if (!config || typeof config !== "object") return null
   const obj = config as Record<string, unknown>
@@ -175,6 +191,10 @@ export function isTicketConfig(config: unknown): config is TicketConfig {
   return parseTicketConfig(config) !== null
 }
 
+export function isBusinessCardConfig(config: unknown): config is BusinessCardConfig {
+  return parseBusinessCardConfig(config) !== null
+}
+
 // ─── Type-dispatch validator ────────────────────────────────
 
 export function validateTemplateConfig(
@@ -188,6 +208,7 @@ export function validateTemplateConfig(
     POINTS: pointsConfigSchema as z.ZodType<PassTemplateConfig>,
     GIFT_CARD: giftCardConfigSchema as z.ZodType<PassTemplateConfig>,
     TICKET: ticketConfigSchema as z.ZodType<PassTemplateConfig>,
+    BUSINESS_CARD: businessCardConfigSchema as z.ZodType<PassTemplateConfig>,
   }
 
   const schema = schemaMap[passType]

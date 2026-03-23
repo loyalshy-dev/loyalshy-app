@@ -510,6 +510,84 @@ function TicketFields({ store }: { store: CardDesignStoreApi }) {
   )
 }
 
+// ─── Business Card Fields ────────────────────────────────────
+
+function BusinessCardFields({ store }: { store: CardDesignStoreApi }) {
+  const t = useTranslations("dashboard.programEditor")
+  const contactName = useStore(store, (s) => s.programConfig.contactName)
+  const jobTitle = useStore(store, (s) => s.programConfig.jobTitle)
+  const bcPhone = useStore(store, (s) => s.programConfig.bcPhone)
+  const bcEmail = useStore(store, (s) => s.programConfig.bcEmail)
+  const bcWebsite = useStore(store, (s) => s.programConfig.bcWebsite)
+  const linkedinUrl = useStore(store, (s) => s.programConfig.linkedinUrl)
+  const twitterUrl = useStore(store, (s) => s.programConfig.twitterUrl)
+  const instagramUrl = useStore(store, (s) => s.programConfig.instagramUrl)
+  const set = store.getState().setConfigField
+
+  return (
+    <>
+      <SectionHeader>{t("contactInformation")}</SectionHeader>
+      <TextInput
+        label={t("contactName")}
+        value={contactName}
+        onChange={(v) => set("contactName", v)}
+        placeholder={t("contactNamePlaceholder")}
+        maxLength={100}
+      />
+      <TextInput
+        label={t("jobTitle")}
+        value={jobTitle}
+        onChange={(v) => set("jobTitle", v)}
+        placeholder={t("jobTitlePlaceholder")}
+        maxLength={100}
+      />
+      <TextInput
+        label={t("phone")}
+        value={bcPhone}
+        onChange={(v) => set("bcPhone", v)}
+        placeholder={t("phonePlaceholder")}
+        maxLength={30}
+      />
+      <TextInput
+        label={t("email")}
+        value={bcEmail}
+        onChange={(v) => set("bcEmail", v)}
+        placeholder={t("emailPlaceholder")}
+        maxLength={255}
+      />
+      <TextInput
+        label={t("website")}
+        value={bcWebsite}
+        onChange={(v) => set("bcWebsite", v)}
+        placeholder={t("websitePlaceholder")}
+        maxLength={200}
+      />
+      <SectionHeader>{t("socialLinks")}</SectionHeader>
+      <TextInput
+        label="LinkedIn"
+        value={linkedinUrl}
+        onChange={(v) => set("linkedinUrl", v)}
+        placeholder="https://linkedin.com/in/..."
+        maxLength={200}
+      />
+      <TextInput
+        label="X (Twitter)"
+        value={twitterUrl}
+        onChange={(v) => set("twitterUrl", v)}
+        placeholder="https://x.com/..."
+        maxLength={200}
+      />
+      <TextInput
+        label="Instagram"
+        value={instagramUrl}
+        onChange={(v) => set("instagramUrl", v)}
+        placeholder="https://instagram.com/..."
+        maxLength={200}
+      />
+    </>
+  )
+}
+
 // ─── Schedule Fields ─────────────────────────────────────────
 
 function ScheduleFields({ store }: { store: CardDesignStoreApi }) {
@@ -578,6 +656,7 @@ export function ProgramPanel({ store, passType }: Props) {
       {passType === "POINTS" && <PointsFields store={store} />}
       {passType === "GIFT_CARD" && <GiftCardFields store={store} />}
       {passType === "TICKET" && <TicketFields store={store} />}
+      {passType === "BUSINESS_CARD" && <BusinessCardFields store={store} />}
 
       <ScheduleFields store={store} />
 

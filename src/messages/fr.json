@@ -146,7 +146,7 @@
       "description": "Invite du personnel avec un accès basé sur les rôles. Propriétaires et personnel voient des vues différentes."
     },
     "passTypes": {
-      "title": "6 types de passes",
+      "title": "7 types de passes",
       "description": "Cartes tampons, coupons, abonnements, points, cartes cadeaux et billets."
     },
     "pushNotifications": {
@@ -156,7 +156,7 @@
   },
   "passTypesCarousel": {
     "sectionLabel": "Types de pass",
-    "title": "Une plateforme, six types de pass",
+    "title": "Une plateforme, sept types de pass",
     "subtitle": "Des cartes tampons aux billets d'événements — créez le pass digital exact dont votre entreprise a besoin.",
     "prev": "Type de pass précédent",
     "next": "Type de pass suivant",
@@ -308,7 +308,7 @@
       "description": "Essaie Loyalshy avec tes premiers clients",
       "features": {
         "contacts": "Jusqu'à 50 contacts",
-        "programs": "1 programme (carte tampons ou coupon)",
+        "programs": "1 programme (carte tampons, coupon ou carte de visite)",
         "staff": "1 membre d'équipe",
         "wallet": "Passes Apple & Google Wallet",
         "studio": "Studio de design de cartes",
@@ -323,7 +323,7 @@
         "contacts": "Jusqu'à 500 contacts",
         "staff": "2 membres d'équipe",
         "programs": "Jusqu'à 2 programmes",
-        "passTypes": "Les 6 types de passes",
+        "passTypes": "Les 7 types de passes",
         "wallet": "Passes Apple & Google Wallet",
         "studio": "Studio de design de cartes",
         "analytics": "Analytiques du tableau de bord",
@@ -337,7 +337,7 @@
         "contacts": "Jusqu'à 2 500 contacts",
         "staff": "5 membres d'équipe",
         "programs": "Jusqu'à 5 programmes",
-        "passTypes": "Les 6 types de passes",
+        "passTypes": "Les 7 types de passes",
         "brandColors": "Couleurs de marque sur les passes",
         "bulkImport": "Importation CSV en masse",
         "support": "Support email prioritaire",
@@ -351,7 +351,7 @@
         "contacts": "Contacts illimités",
         "staff": "25 membres d'équipe",
         "programs": "Programmes illimités",
-        "passTypes": "Les 6 types de passes",
+        "passTypes": "Les 7 types de passes",
         "brandColors": "Couleurs de marque sur les passes",
         "bulkImport": "Importation CSV en masse",
         "webhooks": "Événements webhook",
@@ -387,11 +387,11 @@
       },
       "passTypes": {
         "question": "Quels types de passes puis-je créer ?",
-        "answer": "Loyalshy prend en charge 6 types de passes : cartes tampons, coupons, abonnements, programmes de points, cartes cadeaux et billets. Chaque type a son propre ensemble de fonctionnalités et d'interactions."
+        "answer": "Loyalshy prend en charge 7 types de passes : cartes tampons, coupons, abonnements, programmes de points, cartes cadeaux, billets et cartes de visite. Chaque type a son propre ensemble de fonctionnalités et d'interactions."
       },
       "freePlan": {
         "question": "Y a-t-il un plan gratuit ?",
-        "answer": "Oui ! Notre plan Gratuit te permet de démarrer avec jusqu'à 50 contacts et 1 programme — choisis entre carte tampons ou coupon. Aucune carte bancaire requise, gratuit pour toujours. Passe à la version supérieure quand tu veux."
+        "answer": "Oui ! Notre plan Gratuit te permet de démarrer avec jusqu'à 50 contacts et 1 programme — choisis entre carte tampons, coupon ou carte de visite. Aucune carte bancaire requise, gratuit pour toujours. Passe à la version supérieure quand tu veux."
       },
       "cancel": {
         "question": "Comment résilier ?",
@@ -685,6 +685,9 @@
       "coupons": "Coupons",
       "memberships": "Abonnements",
       "points": "Points",
+      "giftCards": "Cartes Cadeaux",
+      "tickets": "Billets",
+      "businessCards": "Cartes de Visite",
       "noPrograms": "Aucun programme",
       "createFirst": "Créez votre premier programme de fidélité pour commencer à récompenser vos clients.",
       "createToStart": "Créez un nouveau programme pour commencer.",
@@ -746,7 +749,7 @@
       "customizeCard": "Personnalisez votre carte de fidélité",
       "customizeCardDescription": "Définissez le nombre de visites requises, la description de la récompense et l'expiration",
       "createFirstProgram": "Créez votre premier programme",
-      "createFirstProgramDescription": "Choisissez entre carte tampons ou coupon pour récompenser vos clients",
+      "createFirstProgramDescription": "Choisissez entre carte tampons, coupon ou carte de visite pour récompenser vos clients",
       "printQr": "Imprimez votre QR code",
       "printQrDescription": "Téléchargez et affichez votre QR code à votre comptoir",
       "firstContact": "Enregistrez votre premier contact",
@@ -908,7 +911,11 @@
       "joinModeInviteOnlyDescription": "Seul vous pouvez émettre des passes via émission directe ou import CSV.",
       "joinModeUpdated": "Mode d'accès mis à jour",
       "duplicateNote": "Les codes QR et les liens sont en libre-service — les contacts s'identifient par email ou téléphone. Pour plus de contrôle, utilisez l'émission directe ou l'import CSV.",
-      "duplicateNoteSettings": "Vous pouvez aussi exiger l'email (au lieu de l'email ou téléphone) dans <link>Paramètres > Général > Formulaire public</link>."
+      "duplicateNoteSettings": "Vous pouvez aussi exiger l'email (au lieu de l'email ou téléphone) dans <link>Paramètres > Général > Formulaire public</link>.",
+      "embedSnippet": "Intégrer sur le Web",
+      "embedDescription": "Ajoutez ce code HTML à votre site pour permettre aux visiteurs d'enregistrer votre carte de visite.",
+      "embedButtonText": "Enregistrer la Carte de Visite",
+      "copySnippet": "Copier le code"
     },
     "programSettings": {
       "title": "Paramètres",
@@ -1211,7 +1218,19 @@
       "maxScans": "Scans maximum",
       "customDuration": "Durée personnalisée",
       "daysSuffix": "jours",
-      "noEndDate": "Pas de date de fin — le programme fonctionne indéfiniment."
+      "noEndDate": "Pas de date de fin — le programme fonctionne indéfiniment.",
+      "contactInformation": "Informations de Contact",
+      "contactName": "Nom du Contact",
+      "contactNamePlaceholder": "Jean Dupont",
+      "jobTitle": "Poste",
+      "jobTitlePlaceholder": "Directeur Commercial",
+      "phone": "Téléphone",
+      "phonePlaceholder": "+33 6 12 34 56 78",
+      "email": "Email",
+      "emailPlaceholder": "jean@entreprise.fr",
+      "website": "Site Web",
+      "websitePlaceholder": "https://entreprise.fr",
+      "socialLinks": "Réseaux Sociaux"
     },
     "createProgram": {
       "chooseType": "Choisissez un type de programme pour commencer.",
@@ -1301,7 +1320,21 @@
       "venueRequired": "Le lieu est requis",
       "venuePlaceholder": "ex. Accor Arena",
       "createTicket": "Créer un billet",
-      "ticketCreated": "Billet d'événement créé"
+      "ticketCreated": "Billet d'événement créé",
+      "businessCardNamePlaceholder": "Ma Carte de Visite",
+      "contactName": "Nom du Contact",
+      "contactNameRequired": "Le nom du contact est obligatoire",
+      "contactNamePlaceholder": "Jean Dupont",
+      "jobTitle": "Poste",
+      "jobTitlePlaceholder": "Directeur Commercial",
+      "phone": "Téléphone",
+      "phonePlaceholder": "+33 6 12 34 56 78",
+      "bcEmail": "Email",
+      "emailPlaceholder": "jean@entreprise.fr",
+      "bcWebsite": "Site Web",
+      "websitePlaceholder": "https://entreprise.fr",
+      "createBusinessCard": "Créer une Carte de Visite",
+      "businessCardCreated": "Carte de visite créée !"
     },
     "studio": {
       "save": "Enregistrer",
@@ -1689,7 +1722,7 @@
     "invalidFileType": "Le fichier doit être au format PNG, JPEG ou WebP",
     "invalidFileTypeSvg": "Le fichier doit être au format PNG, JPEG, WebP ou SVG",
     "templateLimitReached": "Limite de modèles atteinte ({limit}). Passez à un plan supérieur pour créer plus de modèles.",
-    "passTypeNotAllowed": "Ce type de pass n'est pas disponible avec votre plan actuel. Passez à un plan supérieur pour débloquer les 6 types de pass.",
+    "passTypeNotAllowed": "Ce type de pass n'est pas disponible avec votre plan actuel. Passez à un plan supérieur pour débloquer les 7 types de pass.",
     "templateNotFound": "Modèle de pass introuvable",
     "templateAlreadyArchived": "Le modèle est déjà archivé",
     "templateAlreadyActive": "Le modèle est déjà actif",
@@ -1732,7 +1765,8 @@
     "csvTotalInteractions": "Total des interactions",
     "csvActivePasses": "Passes actifs",
     "csvLastInteraction": "Dernière interaction",
-    "csvJoined": "Inscrit le"
+    "csvJoined": "Inscrit le",
+    "businessCardAlreadyExists": "Votre organisation possède déjà une carte de visite. Archivez l'existante pour en créer une nouvelle."
   },
   "admin": {
     "nav": {
@@ -1910,7 +1944,8 @@
       "bookmarkHint": "Ajoutez cette page en favori pour accéder à votre carte à tout moment",
       "walletFailed": "Impossible de générer le pass",
       "appleWallet": "Apple Wallet",
-      "googleWallet": "Google Wallet"
+      "googleWallet": "Google Wallet",
+      "saveToContacts": "Enregistrer dans les Contacts"
     }
   },
   "contact": {

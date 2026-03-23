@@ -2,10 +2,10 @@
 
 export type PlanId = "FREE" | "STARTER" | "GROWTH" | "SCALE" | "ENTERPRISE"
 
-export type PassType = "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "GIFT_CARD" | "TICKET"
+export type PassType = "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "GIFT_CARD" | "TICKET" | "BUSINESS_CARD"
 
 export const ALL_PASS_TYPES: PassType[] = [
-  "STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET",
+  "STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET", "BUSINESS_CARD",
 ]
 
 export type PlanDefinition = {
@@ -36,10 +36,10 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     customerLimit: 50,
     staffLimit: 1,
     programLimit: 1,
-    allowedPassTypes: ["STAMP_CARD", "COUPON"],
+    allowedPassTypes: ["STAMP_CARD", "COUPON", "BUSINESS_CARD"],
     features: [
       "Up to 50 contacts",
-      "1 program (stamp card or coupon)",
+      "1 program (stamp card, coupon, or business card)",
       "1 staff member",
       "Apple & Google Wallet",
       "Card design studio",
@@ -65,7 +65,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       "Up to 500 contacts",
       "2 staff members",
       "Up to 2 programs",
-      "All 6 pass types",
+      "All 7 pass types",
       "Apple & Google Wallet passes",
       "Card design studio",
       "Dashboard analytics",
@@ -91,7 +91,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       "Up to 2,500 contacts",
       "5 staff members",
       "Up to 5 programs",
-      "All 6 pass types",
+      "All 7 pass types",
       "Custom brand colors on passes",
       "Bulk CSV import",
       "Priority email support",
@@ -117,7 +117,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       "Unlimited contacts",
       "25 staff members",
       "Unlimited programs",
-      "All 6 pass types",
+      "All 7 pass types",
       "Custom brand colors on passes",
       "Bulk CSV import",
       "Webhook events",

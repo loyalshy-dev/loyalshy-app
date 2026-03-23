@@ -6,7 +6,7 @@ import type { PreviewFormat, DeviceFrame } from "@/types/editor"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { DeviceFrameWrapper } from "./device-frame"
 import { InteractiveCardWrapper } from "./interactive-card-overlay"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parseGiftCardConfig, parseTicketConfig } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parseGiftCardConfig, parseTicketConfig, parseBusinessCardConfig } from "@/lib/pass-config"
 import type { SocialLinks } from "@/lib/wallet/card-design"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 
@@ -127,6 +127,8 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
   const giftCardConfig = useMemo(() => passType === "GIFT_CARD" ? parseGiftCardConfig(templateConfig) : null, [passType, templateConfig])
   // Ticket
   const ticketConfig = useMemo(() => passType === "TICKET" ? parseTicketConfig(templateConfig) : null, [passType, templateConfig])
+  // Business card
+  const businessCardConfig = useMemo(() => passType === "BUSINESS_CARD" ? parseBusinessCardConfig(templateConfig) : null, [passType, templateConfig])
 
   // Check if back has any content
   const hasBackContent = !!(businessHours || customMessage ||
@@ -235,6 +237,12 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
                 showHolderPhoto={membershipConfig?.showHolderPhoto}
                 holderPhotoPosition={membershipConfig?.holderPhotoPosition}
                 holderPhotoUrl={holderPhotoUrl}
+                // Business card props
+                contactName={businessCardConfig?.contactName}
+                jobTitle={businessCardConfig?.jobTitle}
+                contactPhone={businessCardConfig?.phone}
+                contactEmail={businessCardConfig?.email}
+                contactWebsite={businessCardConfig?.website}
               />
               </div>
               </InteractiveCardWrapper>

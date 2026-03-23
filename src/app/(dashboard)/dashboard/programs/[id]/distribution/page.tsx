@@ -8,6 +8,7 @@ import { CsvImportSection } from "@/components/dashboard/programs/csv-import-sec
 import { ShareLinkSection } from "@/components/dashboard/programs/distribution-share-section"
 import { DistributionStats } from "@/components/dashboard/programs/distribution-stats"
 import { JoinModeToggle } from "@/components/dashboard/programs/join-mode-toggle"
+import { EmbedSnippetSection } from "@/components/dashboard/programs/embed-snippet-section"
 
 export default async function ProgramDistributionPage(props: {
   params: Promise<{ id: string }>
@@ -137,6 +138,13 @@ export default async function ProgramDistributionPage(props: {
             templateId={program.id}
             templateName={program.name}
           />
+          {program.passType === "BUSINESS_CARD" && isOpen && (
+            <EmbedSnippetSection
+              joinUrl={joinUrl}
+              organizationName={organization.name}
+              templateName={program.name}
+            />
+          )}
         </div>
       </div>
 

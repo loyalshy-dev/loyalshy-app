@@ -182,6 +182,19 @@ const FIELD_CONFIG_MAP: Record<string, FieldConfigEntry> = {
     defaultSecondary: ["eventDate", "eventVenue", "customerName"],
     defaultFields: ["scanStatus", "eventDate", "eventVenue", "customerName"],
   },
+  BUSINESS_CARD: {
+    availableFields: [
+      { id: "organization", label: "Organization" },
+      { id: "contactName", label: "Name" },
+      { id: "jobTitle", label: "Title" },
+      { id: "phone", label: "Phone" },
+      { id: "email", label: "Email" },
+      { id: "website", label: "Website" },
+    ] as const,
+    defaultHeader: ["organization"],
+    defaultSecondary: ["contactName", "jobTitle", "phone", "email"],
+    defaultFields: ["organization", "contactName", "jobTitle", "phone", "email"],
+  },
 }
 
 /** Get available fields and defaults for a pass type */

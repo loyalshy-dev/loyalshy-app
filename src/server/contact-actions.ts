@@ -146,7 +146,7 @@ export async function getContacts(
   }
 
   // Filter by pass type
-  const validTypes = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"]
+  const validTypes = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET", "BUSINESS_CARD"]
   if (passType !== "all" && validTypes.includes(passType)) {
     where.passInstances = {
       some: {

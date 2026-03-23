@@ -16,6 +16,7 @@ const PASS_TYPES = [
   "POINTS",
   "GIFT_CARD",
   "TICKET",
+  "BUSINESS_CARD",
 ] as const
 
 const PASS_INSTANCE_STATUSES = [

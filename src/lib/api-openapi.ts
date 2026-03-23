@@ -932,7 +932,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             description: { type: "string" as const, nullable: true, description: "Optional description", example: "Collect 10 stamps, get a free drink" },
             passType: {
               type: "string" as const,
-              enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"],
+              enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET", "BUSINESS_CARD"],
               description: "Type of wallet pass",
               example: "STAMP_CARD",
             },
@@ -982,7 +982,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             templateName: { type: "string" as const, description: "Name of the pass template", example: "Coffee Stamp Card" },
             passType: {
               type: "string" as const,
-              enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"],
+              enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET", "BUSINESS_CARD"],
               description: "Pass type (inherited from template)",
               example: "STAMP_CARD",
             },
@@ -1373,7 +1373,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             { name: "search", in: "query", description: "Full-text search across name, email, and phone", schema: { type: "string" } },
             { name: "sort", in: "query", description: "Sort field", schema: { type: "string", enum: ["fullName", "createdAt", "totalInteractions", "lastInteractionAt"], default: "createdAt" } },
             { name: "order", in: "query", description: "Sort direction", schema: { type: "string", enum: ["asc", "desc"], default: "desc" } },
-            { name: "pass_type", in: "query", description: "Filter to contacts with at least one pass of this type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"] } },
+            { name: "pass_type", in: "query", description: "Filter to contacts with at least one pass of this type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET", "BUSINESS_CARD"] } },
           ],
           "x-codeSamples": [
             {
@@ -1719,7 +1719,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             { name: "page", in: "query", schema: { type: "integer", default: 1, minimum: 1 } },
             { name: "per_page", in: "query", schema: { type: "integer", default: 20, minimum: 1, maximum: 100 } },
             { name: "status", in: "query", description: "Filter by template status", schema: { type: "string", enum: ["DRAFT", "ACTIVE", "ARCHIVED"] } },
-            { name: "pass_type", in: "query", description: "Filter by pass type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"] } },
+            { name: "pass_type", in: "query", description: "Filter by pass type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET", "BUSINESS_CARD"] } },
           ],
           "x-codeSamples": [
             {
@@ -1871,7 +1871,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             { name: "contact_id", in: "query", description: "Filter by contact", schema: { type: "string" } },
             { name: "template_id", in: "query", description: "Filter by template", schema: { type: "string" } },
             { name: "status", in: "query", description: "Filter by pass status", schema: { type: "string", enum: ["ACTIVE", "COMPLETED", "SUSPENDED", "EXPIRED", "REVOKED", "VOIDED"] } },
-            { name: "pass_type", in: "query", description: "Filter by pass type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"] } },
+            { name: "pass_type", in: "query", description: "Filter by pass type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET", "BUSINESS_CARD"] } },
           ],
           "x-codeSamples": [
             {

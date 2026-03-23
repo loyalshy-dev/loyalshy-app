@@ -108,6 +108,15 @@ export type ProgramConfigState = {
   eventVenue: string
   barcodeType: string
   maxScans: number
+  // BUSINESS_CARD
+  contactName: string
+  jobTitle: string
+  bcPhone: string
+  bcEmail: string
+  bcWebsite: string
+  linkedinUrl: string
+  twitterUrl: string
+  instagramUrl: string
   // Schedule
   startsAt: string // ISO date string
   endsAt: string   // ISO date string (empty = no end)
@@ -199,6 +208,14 @@ const DEFAULT_CONFIG: ProgramConfigState = {
   eventVenue: "",
   barcodeType: "qr",
   maxScans: 1,
+  contactName: "",
+  jobTitle: "",
+  bcPhone: "",
+  bcEmail: "",
+  bcWebsite: "",
+  linkedinUrl: "",
+  twitterUrl: "",
+  instagramUrl: "",
   startsAt: "",
   endsAt: "",
   minigameEnabled: false,

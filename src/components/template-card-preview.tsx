@@ -6,6 +6,7 @@ import {
   formatCouponValue,
   parseGiftCardConfig,
   parseTicketConfig,
+  parseBusinessCardConfig,
 } from "@/lib/pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -128,6 +129,17 @@ function buildTypeProps(passType: string, config: unknown) {
           : undefined
         props.eventVenue = c.eventVenue
         props.scanStatus = `0 / ${c.maxScans}`
+      }
+      break
+    }
+    case "BUSINESS_CARD": {
+      const c = parseBusinessCardConfig(config)
+      if (c) {
+        props.contactName = c.contactName
+        props.jobTitle = c.jobTitle
+        props.contactPhone = c.phone
+        props.contactEmail = c.email
+        props.contactWebsite = c.website
       }
       break
     }

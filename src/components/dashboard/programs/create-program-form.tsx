@@ -27,7 +27,7 @@ function TypeSelector({
   const t = useTranslations("dashboard.createProgram")
   const types: PassType[] = [
     "STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS",
-    "GIFT_CARD", "TICKET",
+    "GIFT_CARD", "TICKET", "BUSINESS_CARD",
   ]
 
   return (
@@ -943,6 +943,143 @@ function GiftCardForm({
   )
 }
 
+// ─── Business Card Form ──────────────────────────────────────
+
+type BusinessCardFormData = {
+  name: string
+  contactName: string
+  jobTitle: string
+  phone: string
+  email: string
+  website: string
+}
+
+function BusinessCardForm({
+  organizationId,
+  onCreated,
+  onBack,
+}: {
+  organizationId: string
+  onCreated: () => void
+  onBack: () => void
+}) {
+  const t = useTranslations("dashboard.createProgram")
+  const [isPending, startTransition] = useTransition()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<BusinessCardFormData>({
+    defaultValues: {
+      name: "",
+      contactName: "",
+      jobTitle: "",
+      phone: "",
+      email: "",
+      website: "",
+    },
+  })
+
+  function onSubmit(data: BusinessCardFormData) {
+    startTransition(async () => {
+      const result = await createPassTemplate({
+        organizationId,
+        passType: "BUSINESS_CARD",
+        name: data.name,
+        config: {
+          contactName: data.contactName,
+          jobTitle: data.jobTitle || undefined,
+          phone: data.phone || undefined,
+          email: data.email || undefined,
+          website: data.website || undefined,
+        },
+      })
+      if ("error" in result) {
+        toast.error(String(result.error))
+      } else {
+        toast.success(t("businessCardCreated"))
+        reset()
+        onCreated()
+      }
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <button
+        type="button"
+        onClick={onBack}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-3 w-3" />
+        {t("backToTypeSelection")}
+      </button>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="bc-name">{t("programName")}</Label>
+          <Input
+            id="bc-name"
+            {...register("name", { required: t("programNameRequired") })}
+            placeholder={t("businessCardNamePlaceholder")}
+          />
+          {errors.name && (
+            <p className="text-xs text-destructive">{errors.name.message}</p>
+          )}
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="bc-contact-name">{t("contactName")}</Label>
+          <Input
+            id="bc-contact-name"
+            {...register("contactName", { required: t("contactNameRequired") })}
+            placeholder={t("contactNamePlaceholder")}
+          />
+          {errors.contactName && (
+            <p className="text-xs text-destructive">{errors.contactName.message}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="bc-job-title">{t("jobTitle")}</Label>
+          <Input
+            id="bc-job-title"
+            {...register("jobTitle")}
+            placeholder={t("jobTitlePlaceholder")}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="bc-phone">{t("phone")}</Label>
+          <Input
+            id="bc-phone"
+            {...register("phone")}
+            placeholder={t("phonePlaceholder")}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="bc-email">{t("bcEmail")}</Label>
+          <Input
+            id="bc-email"
+            type="email"
+            {...register("email")}
+            placeholder={t("emailPlaceholder")}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="bc-website">{t("bcWebsite")}</Label>
+          <Input
+            id="bc-website"
+            {...register("website")}
+            placeholder={t("websitePlaceholder")}
+          />
+        </div>
+      </div>
+      <Button type="submit" disabled={isPending} className="w-full">
+        {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+        {t("createBusinessCard")}
+      </Button>
+    </form>
+  )
+}
+
 // ─── Ticket Form ─────────────────────────────────────────────
 
 type TicketFormData = {
@@ -1122,5 +1259,7 @@ export function CreateProgramForm({
       return <GiftCardForm {...formProps} />
     case "TICKET":
       return <TicketForm {...formProps} />
+    case "BUSINESS_CARD":
+      return <BusinessCardForm {...formProps} />
   }
 }

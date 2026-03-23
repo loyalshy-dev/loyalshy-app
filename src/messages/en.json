@@ -308,7 +308,7 @@
       "description": "Try Loyalshy with your first customers",
       "features": {
         "contacts": "Up to 50 contacts",
-        "programs": "1 program (stamp card or coupon)",
+        "programs": "1 program (stamp card, coupon, or business card)",
         "staff": "1 staff member",
         "wallet": "Apple & Google Wallet passes",
         "studio": "Card design studio",
@@ -323,7 +323,7 @@
         "contacts": "Up to 500 contacts",
         "staff": "2 staff members",
         "programs": "Up to 2 programs",
-        "passTypes": "All 6 pass types",
+        "passTypes": "All 7 pass types",
         "wallet": "Apple & Google Wallet passes",
         "studio": "Card design studio",
         "analytics": "Dashboard analytics",
@@ -337,7 +337,7 @@
         "contacts": "Up to 2,500 contacts",
         "staff": "5 staff members",
         "programs": "Up to 5 programs",
-        "passTypes": "All 6 pass types",
+        "passTypes": "All 7 pass types",
         "brandColors": "Custom brand colors on passes",
         "bulkImport": "Bulk CSV import",
         "support": "Priority email support",
@@ -351,7 +351,7 @@
         "contacts": "Unlimited contacts",
         "staff": "25 staff members",
         "programs": "Unlimited programs",
-        "passTypes": "All 6 pass types",
+        "passTypes": "All 7 pass types",
         "brandColors": "Custom brand colors on passes",
         "bulkImport": "Bulk CSV import",
         "webhooks": "Webhook events",
@@ -391,7 +391,7 @@
       },
       "freePlan": {
         "question": "Is there a free plan?",
-        "answer": "Yes! Our Free plan lets you get started with up to 50 contacts and 1 program — choose a stamp card or coupon. No credit card required, free forever. Upgrade anytime when you need more."
+        "answer": "Yes! Our Free plan lets you get started with up to 50 contacts and 1 program — choose a stamp card, coupon, or business card. No credit card required, free forever. Upgrade anytime when you need more."
       },
       "cancel": {
         "question": "How do I cancel?",
@@ -702,6 +702,9 @@
       "coupons": "Coupons",
       "memberships": "Memberships",
       "points": "Points",
+      "giftCards": "Gift Cards",
+      "tickets": "Tickets",
+      "businessCards": "Business Cards",
       "noPrograms": "No programs yet",
       "createFirst": "Create your first loyalty program to start rewarding your customers.",
       "createToStart": "Create a new program to get started.",
@@ -763,7 +766,7 @@
       "customizeCard": "Customize your loyalty card",
       "customizeCardDescription": "Set visits required, reward description, and expiry",
       "createFirstProgram": "Create your first program",
-      "createFirstProgramDescription": "Choose a stamp card or coupon to start rewarding customers",
+      "createFirstProgramDescription": "Choose a stamp card, coupon, or business card to start rewarding customers",
       "printQr": "Print your QR code",
       "printQrDescription": "Download and display your QR code at your counter",
       "firstContact": "Register your first contact",
@@ -925,7 +928,11 @@
       "joinModeInviteOnlyDescription": "Only you can issue passes via Direct Issue or CSV Import.",
       "joinModeUpdated": "Access mode updated",
       "duplicateNote": "QR codes and links are self-service — contacts identify themselves by email or phone. For tighter control, use Direct Issue or CSV Import.",
-      "duplicateNoteSettings": "You can also require email (instead of email or phone) in <link>Settings > General > Public Join Form</link>."
+      "duplicateNoteSettings": "You can also require email (instead of email or phone) in <link>Settings > General > Public Join Form</link>.",
+      "embedSnippet": "Website Embed",
+      "embedDescription": "Add this HTML snippet to your website to let visitors save your business card directly.",
+      "embedButtonText": "Save Business Card",
+      "copySnippet": "Copy snippet"
     },
     "programSettings": {
       "title": "Settings",
@@ -1228,7 +1235,19 @@
       "maxScans": "Max scans",
       "customDuration": "Custom duration",
       "daysSuffix": "days",
-      "noEndDate": "No end date — program runs indefinitely."
+      "noEndDate": "No end date — program runs indefinitely.",
+      "contactInformation": "Contact Information",
+      "contactName": "Contact Name",
+      "contactNamePlaceholder": "John Doe",
+      "jobTitle": "Job Title",
+      "jobTitlePlaceholder": "Sales Manager",
+      "phone": "Phone",
+      "phonePlaceholder": "+34 612 345 678",
+      "email": "Email",
+      "emailPlaceholder": "john@company.com",
+      "website": "Website",
+      "websitePlaceholder": "https://company.com",
+      "socialLinks": "Social Links"
     },
     "createProgram": {
       "chooseType": "Choose a program type to get started.",
@@ -1318,7 +1337,21 @@
       "venueRequired": "Venue is required",
       "venuePlaceholder": "e.g., Madison Square Garden",
       "createTicket": "Create Ticket",
-      "ticketCreated": "Event ticket created"
+      "ticketCreated": "Event ticket created",
+      "businessCardNamePlaceholder": "My Business Card",
+      "contactName": "Contact Name",
+      "contactNameRequired": "Contact name is required",
+      "contactNamePlaceholder": "John Doe",
+      "jobTitle": "Job Title",
+      "jobTitlePlaceholder": "Sales Manager",
+      "phone": "Phone",
+      "phonePlaceholder": "+34 612 345 678",
+      "bcEmail": "Email",
+      "emailPlaceholder": "john@company.com",
+      "bcWebsite": "Website",
+      "websitePlaceholder": "https://company.com",
+      "createBusinessCard": "Create Business Card",
+      "businessCardCreated": "Business card created!"
     },
     "studio": {
       "save": "Save",
@@ -1749,7 +1782,8 @@
     "csvTotalInteractions": "Total Interactions",
     "csvActivePasses": "Active Passes",
     "csvLastInteraction": "Last Interaction",
-    "csvJoined": "Joined"
+    "csvJoined": "Joined",
+    "businessCardAlreadyExists": "Your organization already has a business card. Archive the existing one to create a new one."
   },
   "admin": {
     "nav": {
@@ -1927,7 +1961,8 @@
       "bookmarkHint": "Bookmark this page to access your card anytime",
       "walletFailed": "Failed to generate wallet pass",
       "appleWallet": "Apple Wallet",
-      "googleWallet": "Google Wallet"
+      "googleWallet": "Google Wallet",
+      "saveToContacts": "Save to Contacts"
     }
   },
   "contact": {

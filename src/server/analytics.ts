@@ -22,6 +22,7 @@ export type PassInstancesByType = {
   POINTS: number
   GIFT_CARD: number
   TICKET: number
+  BUSINESS_CARD: number
 }
 
 export type OverviewStats = {
@@ -212,7 +213,7 @@ export async function getOverviewStats(): Promise<OverviewStats> {
 
   const passInstancesByType: PassInstancesByType = {
     STAMP_CARD: 0, COUPON: 0, MEMBERSHIP: 0, POINTS: 0,
-    GIFT_CARD: 0, TICKET: 0,
+    GIFT_CARD: 0, TICKET: 0, BUSINESS_CARD: 0,
   }
   let activePassInstances = 0
   for (const e of passInstancesByTypeRaw) {

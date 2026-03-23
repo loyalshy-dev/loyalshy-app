@@ -5,6 +5,7 @@ import {
   Coins,
   Gift,
   CalendarDays,
+  ContactRound,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
@@ -17,6 +18,7 @@ export type PassType =
   | "POINTS"
   | "GIFT_CARD"
   | "TICKET"
+  | "BUSINESS_CARD"
 
 // ─── Type-specific configs (stored in PassTemplate.config JSON) ───
 
@@ -77,6 +79,17 @@ export type TicketConfig = {
   maxScans: number
 }
 
+export type BusinessCardConfig = {
+  contactName: string
+  jobTitle?: string
+  phone?: string
+  email?: string
+  website?: string
+  linkedinUrl?: string
+  twitterUrl?: string
+  instagramUrl?: string
+}
+
 export type PassTemplateConfig =
   | StampCardConfig
   | CouponConfig
@@ -84,6 +97,7 @@ export type PassTemplateConfig =
   | PointsConfig
   | GiftCardConfig
   | TicketConfig
+  | BusinessCardConfig
 
 // ─── Minigame config ────────────────────────────────────────
 
@@ -108,13 +122,15 @@ export type DesignCardType =
   | "TICKET"
   | "GENERIC"
 
+export type PassTypeCategory = "loyalty" | "commerce" | "event" | "identity"
+
 export type PassTypeMeta = {
   label: string
   shortLabel: string
   icon: LucideIcon
   description: string
   defaultCardType: DesignCardType
-  category: "loyalty" | "commerce" | "event" | "identity"
+  category: PassTypeCategory
 }
 
 export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
@@ -165,5 +181,13 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     description: "Digital ticket for events, concerts, conferences",
     defaultCardType: "TICKET",
     category: "event",
+  },
+  BUSINESS_CARD: {
+    label: "Business Card",
+    shortLabel: "Card",
+    icon: ContactRound,
+    description: "Digital business card for Apple & Google Wallet",
+    defaultCardType: "GENERIC",
+    category: "identity",
   },
 }

@@ -48,7 +48,7 @@ function getTypeSubtitle(program: TemplateListItem): string {
   }
 }
 
-type TypeFilter = "ALL" | "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "GIFT_CARD" | "TICKET"
+type TypeFilter = "ALL" | "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "GIFT_CARD" | "TICKET" | "BUSINESS_CARD"
 
 type TemplatesListViewProps = {
   programs: TemplateListItem[]
@@ -81,6 +81,7 @@ export function TemplatesListView({
     POINTS: programs.filter((p) => p.passType === "POINTS").length,
     GIFT_CARD: programs.filter((p) => p.passType === "GIFT_CARD").length,
     TICKET: programs.filter((p) => p.passType === "TICKET").length,
+    BUSINESS_CARD: programs.filter((p) => p.passType === "BUSINESS_CARD").length,
   }
 
   const filteredPrograms =
@@ -96,6 +97,7 @@ export function TemplatesListView({
     { key: "POINTS", label: t("points") },
     { key: "GIFT_CARD", label: t("giftCards") },
     { key: "TICKET", label: t("tickets") },
+    { key: "BUSINESS_CARD", label: t("businessCards") },
   ]
 
   // Only show filter tabs if there's more than one type

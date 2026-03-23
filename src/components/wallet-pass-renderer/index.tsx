@@ -92,6 +92,12 @@ type WalletPassRendererProps = {
   holderPhotoPosition?: "left" | "center" | "right" // avatar placement on strip
   holderPhotoUrl?: string | null  // uploaded holder avatar image URL
   memberNumber?: string      // unique member identifier (derived from pass instance ID)
+  // Business card-specific
+  contactName?: string       // contact person name
+  jobTitle?: string          // job title / role
+  contactPhone?: string      // phone number
+  contactEmail?: string      // email address
+  contactWebsite?: string    // website URL
 }
 
 // ─── Constants ──────────────────────────────────────────────
@@ -151,6 +157,11 @@ export function WalletPassRenderer({
   holderPhotoPosition = "center",
   holderPhotoUrl,
   memberNumber,
+  contactName,
+  jobTitle,
+  contactPhone,
+  contactEmail,
+  contactWebsite,
 }: WalletPassRendererProps) {
   const cardType = design.cardType ?? "STAMP"
   const isTicket = cardType === "TICKET"
@@ -276,6 +287,22 @@ export function WalletPassRenderer({
         break
       case "scanStatus":
         resolved = { label: lbl("SCANS"), value: scanStatus ?? "0 / 1" }
+        break
+      // Business card fields
+      case "contactName":
+        resolved = { label: lbl("NAME"), value: contactName ?? "—" }
+        break
+      case "jobTitle":
+        resolved = { label: lbl("TITLE"), value: jobTitle ?? "—" }
+        break
+      case "phone":
+        resolved = { label: lbl("PHONE"), value: contactPhone ?? "—" }
+        break
+      case "email":
+        resolved = { label: lbl("EMAIL"), value: contactEmail ?? "—" }
+        break
+      case "website":
+        resolved = { label: lbl("WEBSITE"), value: contactWebsite ?? "—" }
         break
       // Shared fields
       case "customerName":

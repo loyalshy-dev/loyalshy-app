@@ -54,8 +54,8 @@ export type JoinResult = {
 // ─── Validation ─────────────────────────────────────────────
 
 const joinSchema = z.object({
-  fullName: z.string().min(1, "Name is required").max(100),
-  email: z.string().email("Invalid email").max(255).min(1, "Email is required"),
+  fullName: z.string().max(100).optional().default(""),
+  email: z.string().max(255).optional().default(""),
   organizationSlug: z.string().min(1),
   templateId: z.string().min(1),
 })
@@ -342,8 +342,8 @@ export async function joinTemplate(
   }
 
   const raw = {
-    fullName: formData.get("fullName") as string,
-    email: formData.get("email") as string,
+    fullName: (formData.get("fullName") as string) || undefined,
+    email: (formData.get("email") as string) || undefined,
     organizationSlug: formData.get("organizationSlug") as string,
     templateId: formData.get("templateId") as string,
   }
@@ -357,12 +357,11 @@ export async function joinTemplate(
   }
 
   const { organizationSlug, templateId } = parsed.data
-  const fullName = sanitizeText(parsed.data.fullName, 100)
-  const cleanEmail = sanitizeText(parsed.data.email, 255)
+  let fullName = sanitizeText(parsed.data.fullName ?? "", 100)
+  let cleanEmail = sanitizeText(parsed.data.email ?? "", 255)
 
-  if (!cleanEmail) {
-    return { success: false, error: "Valid email address is required." }
-  }
+  // BUSINESS_CARD skips the form — defer email validation until after template fetch
+  const deferEmailValidation = !cleanEmail
 
   // Fetch organization
   const organization = await db.organization.findUnique({
@@ -391,6 +390,18 @@ export async function joinTemplate(
   // Reject self-join for invite-only programs
   if (template.joinMode === "INVITE_ONLY") {
     return { success: false, error: "This program is invite-only. Please contact the business to get a pass." }
+  }
+
+  // For non-BUSINESS_CARD types, email is required
+  if (deferEmailValidation && template.passType !== "BUSINESS_CARD") {
+    return { success: false, error: "Valid email address is required." }
+  }
+
+  // BUSINESS_CARD: generate anonymous contact identity
+  if (template.passType === "BUSINESS_CARD" && !cleanEmail) {
+    const uniqueId = crypto.randomUUID().slice(0, 8)
+    cleanEmail = `visitor-${uniqueId}@anonymous.loyalshy.com`
+    if (!fullName) fullName = "Visitor"
   }
 
   const templateConfig = (template.config as Record<string, unknown>) ?? {}
