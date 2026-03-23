@@ -237,6 +237,9 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
             contactPhone={businessCardConfig?.phone}
             contactEmail={businessCardConfig?.email}
             contactWebsite={businessCardConfig?.website}
+            contactLinkedin={businessCardConfig?.linkedinUrl}
+            contactTwitter={businessCardConfig?.twitterUrl}
+            contactInstagram={businessCardConfig?.instagramUrl}
           />
         </div>
 

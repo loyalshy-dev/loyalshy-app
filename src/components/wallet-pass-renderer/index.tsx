@@ -98,6 +98,9 @@ type WalletPassRendererProps = {
   contactPhone?: string      // phone number
   contactEmail?: string      // email address
   contactWebsite?: string    // website URL
+  contactLinkedin?: string   // LinkedIn URL
+  contactTwitter?: string    // X/Twitter URL
+  contactInstagram?: string  // Instagram URL
 }
 
 // ─── Constants ──────────────────────────────────────────────
@@ -162,6 +165,9 @@ export function WalletPassRenderer({
   contactPhone,
   contactEmail,
   contactWebsite,
+  contactLinkedin,
+  contactTwitter,
+  contactInstagram,
 }: WalletPassRendererProps) {
   const cardType = design.cardType ?? "STAMP"
   const isTicket = cardType === "TICKET"
@@ -303,6 +309,15 @@ export function WalletPassRenderer({
         break
       case "website":
         resolved = { label: lbl("WEBSITE"), value: contactWebsite ?? "—" }
+        break
+      case "linkedin":
+        resolved = { label: lbl("LINKEDIN"), value: contactLinkedin ?? "—" }
+        break
+      case "twitter":
+        resolved = { label: lbl("X"), value: contactTwitter ?? "—" }
+        break
+      case "instagram":
+        resolved = { label: lbl("INSTAGRAM"), value: contactInstagram ?? "—" }
         break
       // Shared fields
       case "customerName":

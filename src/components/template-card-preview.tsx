@@ -140,6 +140,9 @@ function buildTypeProps(passType: string, config: unknown) {
         props.contactPhone = c.phone
         props.contactEmail = c.email
         props.contactWebsite = c.website
+        props.contactLinkedin = c.linkedinUrl
+        props.contactTwitter = c.twitterUrl
+        props.contactInstagram = c.instagramUrl
       }
       break
     }

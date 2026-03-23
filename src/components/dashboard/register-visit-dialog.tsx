@@ -1255,6 +1255,9 @@ function ConfirmStep({
             contactPhone={businessCardCfg?.phone}
             contactEmail={businessCardCfg?.email}
             contactWebsite={businessCardCfg?.website}
+            contactLinkedin={businessCardCfg?.linkedinUrl}
+            contactTwitter={businessCardCfg?.twitterUrl}
+            contactInstagram={businessCardCfg?.instagramUrl}
           />
         </div>
       ) : isMembership ? (

@@ -387,6 +387,9 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     phone: { id: "phone", header: lbl("phone", "PHONE"), body: businessCardConfig?.phone ?? "" },
     email: { id: "email", header: lbl("email", "EMAIL"), body: businessCardConfig?.email ?? "" },
     website: { id: "website", header: lbl("website", "WEBSITE"), body: businessCardConfig?.website ?? "" },
+    linkedin: { id: "linkedin", header: lbl("linkedin", "LINKEDIN"), body: businessCardConfig?.linkedinUrl ?? "" },
+    twitter: { id: "twitter", header: lbl("twitter", "X"), body: businessCardConfig?.twitterUrl ?? "" },
+    instagram: { id: "instagram", header: lbl("instagram", "INSTAGRAM"), body: businessCardConfig?.instagramUrl ?? "" },
   }
 
   // Build textModulesData from user-configured unified fields

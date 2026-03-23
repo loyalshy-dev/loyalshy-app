@@ -243,6 +243,9 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
                 contactPhone={businessCardConfig?.phone}
                 contactEmail={businessCardConfig?.email}
                 contactWebsite={businessCardConfig?.website}
+                contactLinkedin={businessCardConfig?.linkedinUrl}
+                contactTwitter={businessCardConfig?.twitterUrl}
+                contactInstagram={businessCardConfig?.instagramUrl}
               />
               </div>
               </InteractiveCardWrapper>

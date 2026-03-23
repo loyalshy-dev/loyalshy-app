@@ -150,6 +150,9 @@ function getRendererProps(passInstance: PassInstanceDetail) {
       contactPhone: config?.phone,
       contactEmail: config?.email,
       contactWebsite: config?.website,
+      contactLinkedin: config?.linkedinUrl,
+      contactTwitter: config?.twitterUrl,
+      contactInstagram: config?.instagramUrl,
     }
   }
   const cycleData = data as { currentCycleVisits?: number }

@@ -186,10 +186,10 @@ export async function generateApplePass(
   const isGenericPassType = input.programType === "MEMBERSHIP" || input.programType === "BUSINESS_CARD"
 
   // For generic passes: holder photo takes priority as thumbnail, otherwise use strip image as thumbnail
-  // BUSINESS_CARD: only show thumbnail if user explicitly enabled strip image
+  // BUSINESS_CARD: never show thumbnail — clean text-only card, logo is enough branding
   const thumbnailUrl = isGenericPassType
     ? (input.programType === "BUSINESS_CARD"
-      ? (showStrip ? stripImageUrl : null)
+      ? null
       : (input.holderPhotoUrl ?? stripImageUrl))
     : null
 
@@ -351,6 +351,9 @@ export async function generateApplePass(
     phone: { key: "phone", label: lbl("phone", "PHONE"), value: businessCardConfig?.phone ?? "" },
     email: { key: "email", label: lbl("email", "EMAIL"), value: businessCardConfig?.email ?? "" },
     website: { key: "website", label: lbl("website", "WEBSITE"), value: businessCardConfig?.website ?? "" },
+    linkedin: { key: "linkedin", label: lbl("linkedin", "LINKEDIN"), value: businessCardConfig?.linkedinUrl ?? "" },
+    twitter: { key: "twitter", label: lbl("twitter", "X"), value: businessCardConfig?.twitterUrl ?? "" },
+    instagram: { key: "instagram", label: lbl("instagram", "INSTAGRAM"), value: businessCardConfig?.instagramUrl ?? "" },
   }
 
   // User-configurable field layout for all pass types
