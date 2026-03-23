@@ -186,9 +186,11 @@ export async function generateApplePass(
   const isGenericPassType = input.programType === "MEMBERSHIP" || input.programType === "BUSINESS_CARD"
 
   // For generic passes: holder photo takes priority as thumbnail, otherwise use strip image as thumbnail
-  // BUSINESS_CARD: no thumbnail — just logo + fields
+  // BUSINESS_CARD: only show thumbnail if user explicitly enabled strip image
   const thumbnailUrl = isGenericPassType
-    ? (input.programType === "BUSINESS_CARD" ? null : (input.holderPhotoUrl ?? stripImageUrl))
+    ? (input.programType === "BUSINESS_CARD"
+      ? (showStrip ? stripImageUrl : null)
+      : (input.holderPhotoUrl ?? stripImageUrl))
     : null
 
   const icons = await getIconBuffers(
