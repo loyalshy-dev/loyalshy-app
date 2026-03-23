@@ -581,12 +581,15 @@ export function WalletPassRenderer({
         pointerEvents: "none",
       }}
     >
-      {primaryFields.map((f, i) => (
+      {primaryFields.map((f, i) => {
+        const len = f.value.length
+        const stripPrimarySize = len <= 6 ? 46 : len <= 10 ? 36 : len <= 16 ? 28 : len <= 22 ? 22 : 18
+        return (
         <div key={i} style={{ pointerEvents: "auto", textAlign: "left", width: "100%" }}>
           <div
             data-color-zone="text"
             style={{
-              fontSize: 46,
+              fontSize: stripPrimarySize,
               fontWeight: 400,
               letterSpacing: "0.02em",
               lineHeight: 1.2,
@@ -612,7 +615,8 @@ export function WalletPassRenderer({
             {f.label}
           </div>
         </div>
-      ))}
+        )
+      })}
     </div>
   ) : null
 
