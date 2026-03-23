@@ -116,6 +116,7 @@ export async function generateApplePassForEmail(
       programConfig: template.config,
       pointsBalance,
       remainingUses,
+      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       passInstanceId: passInstance.id,
       organizationSlug: organization.slug,
     })

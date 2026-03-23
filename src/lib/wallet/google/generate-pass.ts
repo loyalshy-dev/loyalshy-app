@@ -56,6 +56,8 @@ export type GooglePassGenerationInput = {
   transitIsBoarded?: boolean
   // Business ID data
   businessIdVerifications?: number
+  // Holder photo URL (BUSINESS_ID, MEMBERSHIP, ACCESS — per-instance from PassInstance.data.holderPhotoUrl)
+  holderPhotoUrl?: string | null
   // Prize reveal
   hasUnrevealedPrize?: boolean
   organizationSlug?: string
@@ -580,6 +582,12 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   } else if (isStampType) {
     // Only use logo as hero for stamp/points cards — for coupon/membership it looks oversized
     heroImageUrl = googleLogo
+  }
+
+  // For generic pass types (BUSINESS_ID, MEMBERSHIP, ACCESS): use holder photo as hero image if available and no strip is set
+  const isGenericType = input.passType === "BUSINESS_ID" || input.passType === "MEMBERSHIP" || input.passType === "ACCESS"
+  if (isGenericType && input.holderPhotoUrl && !heroImageUrl) {
+    heroImageUrl = input.holderPhotoUrl
   }
 
   // Google validates image URLs server-side — skip non-HTTPS URLs (local dev, private IPs)

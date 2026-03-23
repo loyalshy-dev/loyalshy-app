@@ -18,11 +18,16 @@ type IconBuffers = Record<string, Buffer>
  *
  * If a strip image URL is provided, it is fetched and included as
  * strip.png / strip@2x.png / strip@3x.png for storeCard type passes.
+ *
+ * Thumbnail: Portrait — 90x90 (@1x), 180x180 (@2x), 270x270 (@3x)
+ * Used by generic pass type (BUSINESS_ID, MEMBERSHIP, ACCESS) instead of strip.
+ * If thumbnailUrl is provided, it is fetched and included as thumbnail.png.
  */
 export async function getIconBuffers(
   logoUrl: string | null,
   stripImageUrl?: string | null,
-  logoZoom?: number
+  logoZoom?: number,
+  thumbnailUrl?: string | null,
 ): Promise<IconBuffers> {
   const zoom = Math.max(0.5, Math.min(3, logoZoom ?? 1))
   let rawLogoBuffer = PLACEHOLDER_PNG
@@ -114,6 +119,36 @@ export async function getIconBuffers(
       }
     } catch {
       // Skip strip image if fetch fails
+    }
+  }
+
+  // Add thumbnail image if provided (used by generic pass type: BUSINESS_ID, MEMBERSHIP, ACCESS)
+  // Apple Wallet generic passes display thumbnail on the right side of the pass front.
+  if (thumbnailUrl) {
+    try {
+      const response = await fetch(thumbnailUrl, {
+        signal: AbortSignal.timeout(10000),
+      })
+      if (response.ok) {
+        const rawThumb = Buffer.from(await response.arrayBuffer())
+        try {
+          const sharp = (await import("sharp")).default
+          const [thumb1x, thumb2x, thumb3x] = await Promise.all([
+            sharp(rawThumb).resize(90, 90, { fit: "cover", position: "centre" }).png().toBuffer(),
+            sharp(rawThumb).resize(180, 180, { fit: "cover", position: "centre" }).png().toBuffer(),
+            sharp(rawThumb).resize(270, 270, { fit: "cover", position: "centre" }).png().toBuffer(),
+          ])
+          buffers["thumbnail.png"] = thumb1x
+          buffers["thumbnail@2x.png"] = thumb2x
+          buffers["thumbnail@3x.png"] = thumb3x
+        } catch {
+          buffers["thumbnail.png"] = rawThumb
+          buffers["thumbnail@2x.png"] = rawThumb
+          buffers["thumbnail@3x.png"] = rawThumb
+        }
+      }
+    } catch {
+      // Skip thumbnail if fetch fails
     }
   }
 

@@ -132,6 +132,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       programConfig: template.config,
       pointsBalance,
       remainingUses,
+      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       passInstanceId: passInstance.id,
       organizationSlug: organization.slug,
       hasUnrevealedPrize: passInstance.rewards.some(

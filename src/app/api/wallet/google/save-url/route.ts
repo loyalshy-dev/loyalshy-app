@@ -170,6 +170,7 @@ export async function POST(request: Request) {
       templateConfig: template.config,
       pointsBalance,
       remainingUses,
+      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
     })

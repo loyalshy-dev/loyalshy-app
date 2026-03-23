@@ -60,6 +60,8 @@ export type PassGenerationInput = {
   transitIsBoarded?: boolean
   // Business ID data
   businessIdVerifications?: number
+  // Holder photo URL (BUSINESS_ID, MEMBERSHIP, ACCESS — per-instance from PassInstance.data.holderPhotoUrl)
+  holderPhotoUrl?: string | null
   // Pass instance + org slug for generating card page links (prize reveal)
   passInstanceId?: string
   organizationSlug?: string
@@ -186,13 +188,35 @@ export async function generateApplePass(
     }
   }
 
-  const icons = await getIconBuffers(input.organizationLogoApple ?? input.organizationLogo, stripImageUrl, stripFilters.logoAppleZoom)
+  // Apple generic pass type (BUSINESS_ID, MEMBERSHIP, ACCESS) does NOT render strip images.
+  // It renders thumbnail images instead (displayed on the right side of the pass front).
+  // For these types, redirect strip content → thumbnail, and use holder photo as thumbnail if available.
+  const isGenericPassType = input.programType === "BUSINESS_ID" || input.programType === "MEMBERSHIP" || input.programType === "ACCESS"
+
+  // For generic passes: holder photo takes priority as thumbnail, otherwise use strip image as thumbnail
+  const thumbnailUrl = isGenericPassType
+    ? (input.holderPhotoUrl ?? stripImageUrl)
+    : null
+
+  const icons = await getIconBuffers(
+    input.organizationLogoApple ?? input.organizationLogo,
+    isGenericPassType ? null : stripImageUrl, // Don't pass strip for generic — Apple ignores it
+    stripFilters.logoAppleZoom,
+    thumbnailUrl,
+  )
 
   // If we have a dynamically generated stamp grid buffer, inject it directly
   if (stampGridStripBuffer) {
-    icons["strip.png"] = stampGridStripBuffer
-    icons["strip@2x.png"] = stampGridStripBuffer
-    icons["strip@3x.png"] = stampGridStripBuffer
+    if (isGenericPassType) {
+      // For generic passes, use as thumbnail instead of strip
+      icons["thumbnail.png"] = stampGridStripBuffer
+      icons["thumbnail@2x.png"] = stampGridStripBuffer
+      icons["thumbnail@3x.png"] = stampGridStripBuffer
+    } else {
+      icons["strip.png"] = stampGridStripBuffer
+      icons["strip@2x.png"] = stampGridStripBuffer
+      icons["strip@3x.png"] = stampGridStripBuffer
+    }
   }
   const colors = getPassColors(
     design?.primaryColor ?? input.brandColor,

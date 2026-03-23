@@ -132,6 +132,7 @@ export async function GET(
         programConfig: template.config,
         pointsBalance,
         remainingUses,
+        holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
         passInstanceId: passInstance.id,
         organizationSlug: organization.slug,
       })
@@ -203,6 +204,7 @@ export async function GET(
       templateConfig: template.config,
       pointsBalance,
       remainingUses,
+      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
     })

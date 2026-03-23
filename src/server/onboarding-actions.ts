@@ -665,6 +665,7 @@ export async function requestWalletPass(
       hasUnrevealedPrize: passInstance.rewards.some(
         (r) => r.revealedAt === null && r.description != null
       ),
+      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
     },
     organization,
     {
@@ -702,6 +703,7 @@ type InstancePassData = {
   walletProvider: string
   hasAvailableReward: boolean
   hasUnrevealedPrize?: boolean
+  holderPhotoUrl?: string | null
 }
 
 async function issuePassForInstance(
@@ -766,6 +768,7 @@ async function issuePassForInstance(
         pointsBalance: instance.pointsBalance ?? 0,
         remainingUses: instance.remainingUses ?? 0,
         hasUnrevealedPrize: instance.hasUnrevealedPrize ?? false,
+        holderPhotoUrl: instance.holderPhotoUrl ?? undefined,
         passInstanceId: instance.passInstanceId,
         organizationSlug: organization.slug,
       })
@@ -848,6 +851,7 @@ async function issuePassForInstance(
       templateConfig: template.config,
       pointsBalance: instance.pointsBalance ?? 0,
       remainingUses: instance.remainingUses ?? 0,
+      holderPhotoUrl: instance.holderPhotoUrl ?? undefined,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
     })

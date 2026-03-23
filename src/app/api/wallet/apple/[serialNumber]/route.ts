@@ -118,6 +118,7 @@ export async function GET(
       programConfig: template.config,
       pointsBalance,
       remainingUses,
+      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
     })
 
     return new NextResponse(new Uint8Array(passBuffer), {

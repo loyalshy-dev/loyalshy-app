@@ -21,6 +21,7 @@ export type MembershipData = {
   memberSince: string // ISO datetime
   tier: string
   benefits: string
+  holderPhotoUrl?: string
 }
 
 export type PointsData = {
@@ -55,6 +56,7 @@ export type AccessData = {
   lastGrantedAt?: string // ISO datetime
   todayGranted: number
   todayDate?: string // YYYY-MM-DD
+  holderPhotoUrl?: string
 }
 
 export type TransitData = {
@@ -68,7 +70,7 @@ export type BusinessIdData = {
   lastVerifiedAt?: string // ISO datetime
   title?: string
   department?: string
-  photoUrl?: string
+  holderPhotoUrl?: string
 }
 
 export type PassInstanceData =

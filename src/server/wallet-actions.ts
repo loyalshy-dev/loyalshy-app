@@ -135,6 +135,7 @@ export async function issueAppleWalletPass(
       accessTotalGranted: (instanceData.totalGranted as number) ?? 0,
       transitIsBoarded: (instanceData.isBoarded as boolean) ?? false,
       businessIdVerifications: (instanceData.totalVerifications as number) ?? 0,
+      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       hasUnrevealedPrize,
       passInstanceId: passInstance.id,
       organizationSlug: organization.slug,
@@ -291,6 +292,7 @@ export async function issueGoogleWalletPass(
       accessTotalGranted: (instanceData.totalGranted as number) ?? 0,
       transitIsBoarded: (instanceData.isBoarded as boolean) ?? false,
       businessIdVerifications: (instanceData.totalVerifications as number) ?? 0,
+      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
     })
