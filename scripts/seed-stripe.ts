@@ -22,7 +22,7 @@ const plans = [
   {
     loyalshyPlan: "STARTER",
     name: "Loyalshy Pro",
-    description: "Up to 500 contacts, 2 staff, all 10 pass types, card design studio.",
+    description: "Up to 500 contacts, 2 staff, all 6 pass types, card design studio.",
     prices: [
       { amount: 2900, interval: "month" as const, lookupKey: "starter_monthly" },
       { amount: 2400, interval: "month" as const, lookupKey: "starter_annual", intervalCount: 12 },

@@ -30,12 +30,6 @@ export type PointsData = {
   totalPointsSpent: number
 }
 
-export type PrepaidData = {
-  remainingUses: number
-  totalUsed: number
-  lastUsedAt?: string // ISO datetime
-}
-
 export type GiftCardData = {
   currency: string
   balanceCents: number
@@ -50,40 +44,13 @@ export type TicketData = {
   voidedAt?: string // ISO datetime
 }
 
-export type AccessData = {
-  totalGranted: number
-  totalDenied: number
-  lastGrantedAt?: string // ISO datetime
-  todayGranted: number
-  todayDate?: string // YYYY-MM-DD
-  holderPhotoUrl?: string
-}
-
-export type TransitData = {
-  boardedAt?: string // ISO datetime
-  exitedAt?: string // ISO datetime
-  isBoarded: boolean
-}
-
-export type BusinessIdData = {
-  totalVerifications: number
-  lastVerifiedAt?: string // ISO datetime
-  title?: string
-  department?: string
-  holderPhotoUrl?: string
-}
-
 export type PassInstanceData =
   | StampCardData
   | CouponData
   | MembershipData
   | PointsData
-  | PrepaidData
   | GiftCardData
   | TicketData
-  | AccessData
-  | TransitData
-  | BusinessIdData
 
 // ─── Pass design snapshot (shared across instance types) ─────
 

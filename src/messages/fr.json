@@ -146,8 +146,8 @@
       "description": "Invite du personnel avec un accès basé sur les rôles. Propriétaires et personnel voient des vues différentes."
     },
     "passTypes": {
-      "title": "10 types de passes",
-      "description": "Cartes tampons, coupons, abonnements, points, prépayés, cartes cadeaux, billets, passes d'accès, transit et badges professionnels."
+      "title": "6 types de passes",
+      "description": "Cartes tampons, coupons, abonnements, points, cartes cadeaux et billets."
     },
     "pushNotifications": {
       "title": "Notifications Push",
@@ -156,8 +156,8 @@
   },
   "passTypesCarousel": {
     "sectionLabel": "Types de pass",
-    "title": "Une plateforme, dix types de pass",
-    "subtitle": "Des cartes de tampons aux pass de transport — crée exactement le pass numérique dont ton entreprise a besoin.",
+    "title": "Une plateforme, six types de pass",
+    "subtitle": "Des cartes tampons aux billets d'événements — créez le pass digital exact dont votre entreprise a besoin.",
     "prev": "Type de pass précédent",
     "next": "Type de pass suivant",
     "types": {
@@ -205,17 +205,6 @@
           "Compagnies aériennes"
         ]
       },
-      "prepaid": {
-        "label": "Pass Prépayé",
-        "description": "Pass à utilisation limitée qui se décomptent à chaque usage. Rechargeables ou à usage unique — parfaits pour les packs de cours, services et transport.",
-        "alt": "Pass prépayé montrant les utilisations restantes",
-        "useCases": [
-          "Studios de yoga",
-          "Stations de lavage",
-          "Packs de cours",
-          "Pass de bus"
-        ]
-      },
       "giftCard": {
         "label": "Carte Cadeau",
         "description": "Cartes cadeaux avec suivi du solde en temps réel. Les clients consultent leur solde depuis leur portefeuille — charges et remboursements intégrés.",
@@ -236,39 +225,6 @@
           "Conférences",
           "Festivals",
           "Événements sportifs"
-        ]
-      },
-      "access": {
-        "label": "Pass d'Accès",
-        "description": "Accorde ou refuse l'accès aux installations, espaces de coworking et parkings. Suivi des entrées et gestion des permissions numériquement.",
-        "alt": "Pass d'accès pour entrée aux installations",
-        "useCases": [
-          "Coworkings",
-          "Parkings",
-          "Immeubles de bureaux",
-          "Zones VIP"
-        ]
-      },
-      "transit": {
-        "label": "Pass de Transport",
-        "description": "Pass de transport numériques pour bus, trains et ferries. Suivi d'embarquement et de sortie avec informations de ligne et de zone.",
-        "alt": "Pass de transport montrant les informations de ligne et zone",
-        "useCases": [
-          "Compagnies de bus",
-          "Ferries",
-          "Navettes",
-          "Transport privé"
-        ]
-      },
-      "businessId": {
-        "label": "Badge Professionnel",
-        "description": "Badges d'identification numériques pour employés ou prestataires. Vérifie l'identité sur place par scan QR — inclut poste, département et expiration.",
-        "alt": "Badge professionnel avec détails de l'employé",
-        "useCases": [
-          "Entreprises",
-          "Prestataires",
-          "Bénévoles",
-          "Badges du personnel"
         ]
       }
     }
@@ -367,7 +323,7 @@
         "contacts": "Jusqu'à 500 contacts",
         "staff": "2 membres d'équipe",
         "programs": "Jusqu'à 2 programmes",
-        "passTypes": "Les 10 types de passes",
+        "passTypes": "Les 6 types de passes",
         "wallet": "Passes Apple & Google Wallet",
         "studio": "Studio de design de cartes",
         "analytics": "Analytiques du tableau de bord",
@@ -381,7 +337,7 @@
         "contacts": "Jusqu'à 2 500 contacts",
         "staff": "5 membres d'équipe",
         "programs": "Jusqu'à 5 programmes",
-        "passTypes": "Les 10 types de passes",
+        "passTypes": "Les 6 types de passes",
         "brandColors": "Couleurs de marque sur les passes",
         "bulkImport": "Importation CSV en masse",
         "support": "Support email prioritaire",
@@ -395,7 +351,7 @@
         "contacts": "Contacts illimités",
         "staff": "25 membres d'équipe",
         "programs": "Programmes illimités",
-        "passTypes": "Les 10 types de passes",
+        "passTypes": "Les 6 types de passes",
         "brandColors": "Couleurs de marque sur les passes",
         "bulkImport": "Importation CSV en masse",
         "webhooks": "Événements webhook",
@@ -431,7 +387,7 @@
       },
       "passTypes": {
         "question": "Quels types de passes puis-je créer ?",
-        "answer": "Loyalshy prend en charge 10 types de passes : cartes tampons, coupons, abonnements, programmes de points, cartes prépayées, cartes cadeaux, billets, passes d'accès, passes de transit et badges professionnels. Chaque type a son propre ensemble de fonctionnalités et d'interactions."
+        "answer": "Loyalshy prend en charge 6 types de passes : cartes tampons, coupons, abonnements, programmes de points, cartes cadeaux et billets. Chaque type a son propre ensemble de fonctionnalités et d'interactions."
       },
       "freePlan": {
         "question": "Y a-t-il un plan gratuit ?",
@@ -639,12 +595,8 @@
       "checkIn": "s'est enregistré(e)",
       "passUse": "a utilisé un pass",
       "pointsEarn": "a gagné des points",
-      "recharge": "a rechargé un pass",
       "giftUse": "a utilisé une carte cadeau",
       "ticketScan": "a scanné un billet",
-      "access": "a accédé à l'établissement",
-      "board": "a embarqué",
-      "verify": "a vérifié son identité",
       "rewardEarned": "a gagné une récompense",
       "rewardRedeemed": "a utilisé une récompense",
       "couponRedeemed": "a utilisé un coupon",
@@ -733,7 +685,6 @@
       "coupons": "Coupons",
       "memberships": "Abonnements",
       "points": "Points",
-      "prepaid": "Prépayé",
       "noPrograms": "Aucun programme",
       "createFirst": "Créez votre premier programme de fidélité pour commencer à récompenser vos clients.",
       "createToStart": "Créez un nouveau programme pour commencer.",
@@ -887,8 +838,7 @@
       "stampCard": "Carte de tampons",
       "coupon": "Coupon",
       "membership": "Abonnement",
-      "points": "Points",
-      "prepaidPass": "Pass prépayé"
+      "points": "Points"
     },
     "contactColumns": {
       "name": "Nom",
@@ -1066,10 +1016,7 @@
       "addPoints": "Ajouter des points",
       "redeemPoints": "Utiliser des points",
       "charge": "Débiter",
-      "recharge": "Recharger",
       "scanTicket": "Scanner le billet",
-      "grantAccess": "Accorder l'accès",
-      "denyAccess": "Refuser l'accès",
       "amount": "Montant",
       "points": "Points",
       "note": "Note",
@@ -1182,17 +1129,6 @@
       "descriptionOptional": "Description (optionnel)",
       "descriptionPlaceholder": "Courte description...",
       "removeCatalogItem": "Supprimer l'article du catalogue",
-      "prepaidConfiguration": "Configuration prépayée",
-      "prepaidConfigDesc": "Configurez le nombre d'utilisations et les options de recharge.",
-      "totalUses": "Total d'utilisations",
-      "totalUsesHint": "Nombre d'utilisations incluses dans ce pass.",
-      "useLabel": "Libellé d'utilisation",
-      "useLabelPlaceholder": "ex. trajet, lavage, séance",
-      "useLabelHint": "Nom de chaque utilisation (ex. « trajet », « lavage »).",
-      "rechargeable": "Rechargeable",
-      "rechargeableNo": "Non — pass à usage unique",
-      "rechargeableYes": "Oui — peut être rechargé",
-      "prepaidValidUntil": "Valide jusqu'au (optionnel)",
       "scheduleSection": "Planification",
       "scheduleDesc": "Contrôlez quand le programme est actif et accepte des clients.",
       "status": "Statut",
@@ -1259,7 +1195,6 @@
       "autoRenewDesc": "Renouveler automatiquement l'adhésion à l'expiration",
       "pointsLabel": "Libellé des points",
       "pointsLabelPlaceholder": "pts",
-      "rechargeableDesc": "Permettre aux utilisateurs de recharger quand le solde est épuisé",
       "giftCardConfiguration": "Carte Cadeau",
       "currency": "Devise",
       "currencyPlaceholder": "EUR",
@@ -1274,37 +1209,6 @@
       "venue": "Lieu",
       "venuePlaceholder": "Palais des Sports",
       "maxScans": "Scans maximum",
-      "accessConfiguration": "Pass d'Accès",
-      "accessLabel": "Libellé d'accès",
-      "accessLabelPlaceholder": "Accès VIP",
-      "maxDailyUses": "Utilisations quotidiennes max",
-      "maxDailyUsesSuffix": "0 = illimité",
-      "validDays": "Jours valides",
-      "validDaysHint": "Ne sélectionnez aucun jour pour tous les jours.",
-      "dayMon": "Lun",
-      "dayTue": "Mar",
-      "dayWed": "Mer",
-      "dayThu": "Jeu",
-      "dayFri": "Ven",
-      "daySat": "Sam",
-      "daySun": "Dim",
-      "validFrom": "Valide à partir de",
-      "validUntilTime": "Valide jusqu'à",
-      "transitConfiguration": "Pass Transit",
-      "transitType": "Type de transit",
-      "transitBus": "Bus",
-      "transitTrain": "Train",
-      "transitFerry": "Ferry",
-      "transitFlight": "Vol",
-      "transitOther": "Autre",
-      "origin": "Origine",
-      "originPlaceholder": "Gare Centrale",
-      "destination": "Destination",
-      "destinationPlaceholder": "Aéroport",
-      "departure": "Départ",
-      "businessIdConfiguration": "Carte d'Identité Professionnelle",
-      "idLabel": "Libellé d'ID",
-      "idLabelPlaceholder": "ID Employé",
       "customDuration": "Durée personnalisée",
       "daysSuffix": "jours",
       "noEndDate": "Pas de date de fin — le programme fonctionne indéfiniment."
@@ -1374,18 +1278,7 @@
       "catalogValidationError": "Tous les articles du catalogue doivent avoir un nom et un coût en points d'au moins 1",
       "createPointsProgram": "Créer un programme de points",
       "pointsProgramCreated": "Programme de points créé",
-      "prepaidProgramNamePlaceholder": "ex. Pass bus, Carte de lavage, Pack de cours",
-      "totalUses": "Total d'utilisations",
-      "useLabel": "Libellé d'utilisation",
       "useLabelRequired": "Le libellé d'utilisation est requis",
-      "useLabelPlaceholder": "ex. trajet, lavage, séance, cours",
-      "rechargeable": "Rechargeable",
-      "rechargeableYes": "Oui",
-      "rechargeableNo": "Non",
-      "rechargeAmount": "Montant de recharge",
-      "prepaidValidUntil": "Valide jusqu'au (optionnel)",
-      "createPrepaid": "Créer un pass prépayé",
-      "prepaidCreated": "Pass prépayé créé",
       "giftCardName": "Nom de la carte",
       "giftCardNameRequired": "Le nom de la carte est requis",
       "giftCardNamePlaceholder": "ex. Carte cadeau boutique, Cadeau anniversaire",
@@ -1408,36 +1301,7 @@
       "venueRequired": "Le lieu est requis",
       "venuePlaceholder": "ex. Accor Arena",
       "createTicket": "Créer un billet",
-      "ticketCreated": "Billet d'événement créé",
-      "accessProgramNamePlaceholder": "ex. Accès salle de sport, Badge bâtiment, Entrée piscine",
-      "accessLabel": "Libellé d'accès",
-      "accessLabelRequired": "Le libellé est requis",
-      "accessLabelPlaceholder": "ex. Entrée salle de sport, Accès piscine",
-      "dailyLimit": "Limite journalière (0 = illimité)",
-      "validDays": "Jours valides (laissez vide pour tous les jours)",
-      "validFrom": "Valide à partir du (optionnel)",
-      "validUntilTime": "Valide jusqu'au (optionnel)",
-      "createAccessPass": "Créer un pass d'accès",
-      "accessPassCreated": "Pass d'accès créé",
-      "transitType": "Type de transport",
-      "transitTypeBus": "Bus",
-      "transitTypeTrain": "Train",
-      "transitTypeFerry": "Ferry",
-      "transitTypeFlight": "Avion",
-      "transitTypeOther": "Autre",
-      "origin": "Origine (optionnel)",
-      "originPlaceholder": "ex. Paris Gare du Nord",
-      "destination": "Destination (optionnel)",
-      "destinationPlaceholder": "ex. Lyon Part-Dieu",
-      "departureDateTime": "Date et heure de départ (optionnel)",
-      "createTransit": "Créer un pass de transit",
-      "transitCreated": "Pass de transit créé",
-      "businessIdNamePlaceholder": "ex. Badge employé, Badge prestataire",
-      "idLabel": "Libellé de l'identifiant",
-      "idLabelRequired": "Le libellé de l'identifiant est requis",
-      "idLabelPlaceholder": "ex. Badge employé, Membre",
-      "createBusinessId": "Créer un badge professionnel",
-      "businessIdCreated": "Badge professionnel créé"
+      "ticketCreated": "Billet d'événement créé"
     },
     "studio": {
       "save": "Enregistrer",
@@ -1553,7 +1417,7 @@
     "section1Title": "1. Accord",
     "section1P1": "En accédant ou en utilisant Loyalshy (« le Service »), vous acceptez d'être lié(e) par les présentes Conditions d'utilisation. Si vous n'acceptez pas, n'utilisez pas le Service.",
     "section2Title": "2. Description du Service",
-    "section2P1": "Loyalshy est une plateforme de passes de portefeuille digital qui permet aux entreprises de créer, gérer et distribuer des passes Apple Wallet et Google Wallet. La plateforme prend en charge les cartes tampons, coupons, abonnements, programmes de points, passes prépayés, cartes cadeaux, billets, passes d'accès, passes de transit et badges professionnels.",
+    "section2P1": "Loyalshy est une plateforme de passes de portefeuille digital qui permet aux entreprises de créer, gérer et distribuer des passes Apple Wallet et Google Wallet. La plateforme prend en charge les cartes tampons, coupons, abonnements, programmes de points, cartes cadeaux et billets.",
     "section3Title": "3. Comptes",
     "section3P1": "Vous devez fournir des informations exactes lors de la création d'un compte. Vous êtes responsable du maintien de la sécurité de vos identifiants. Vous devez nous informer immédiatement de tout accès non autorisé.",
     "section3P2": "Chaque organisation sur Loyalshy fonctionne comme un tenant séparé. Les propriétaires d'organisation sont responsables de la gestion des membres de l'équipe et de leurs niveaux d'accès.",
@@ -1825,7 +1689,7 @@
     "invalidFileType": "Le fichier doit être au format PNG, JPEG ou WebP",
     "invalidFileTypeSvg": "Le fichier doit être au format PNG, JPEG, WebP ou SVG",
     "templateLimitReached": "Limite de modèles atteinte ({limit}). Passez à un plan supérieur pour créer plus de modèles.",
-    "passTypeNotAllowed": "Ce type de pass n'est pas disponible avec votre plan actuel. Passez à un plan supérieur pour débloquer les 10 types de pass.",
+    "passTypeNotAllowed": "Ce type de pass n'est pas disponible avec votre plan actuel. Passez à un plan supérieur pour débloquer les 6 types de pass.",
     "templateNotFound": "Modèle de pass introuvable",
     "templateAlreadyArchived": "Le modèle est déjà archivé",
     "templateAlreadyActive": "Le modèle est déjà actif",
@@ -1858,7 +1722,6 @@
     "notAPointsCard": "Ce pass n'est pas une carte de points",
     "rewardNotInCatalog": "Récompense introuvable dans le catalogue",
     "notEnoughPoints": "Points insuffisants. Nécessaire : {needed}, disponible : {current}",
-    "notAPrepaidPass": "Ce pass n'est pas un pass prépayé",
     "noRemainingUses": "Ce pass n'a plus d'utilisations restantes",
     "missingPassOrFile": "Instance de pass ou fichier manquant",
     "passTypeNoPhoto": "Ce type de pass ne prend pas en charge les photos du titulaire",
@@ -2036,7 +1899,6 @@
     "somethingWentWrong": "Une erreur est survenue",
     "stampSubtitle": "{reward} après {visits} visites",
     "pointsSubtitle": "Gagnez des points — {reward}",
-    "prepaidSubtitle": "Solde prépayé — {reward}",
     "giftCardSubtitle": "Carte cadeau — {reward}",
     "card": {
       "title": "Carte de {name}",

@@ -67,12 +67,8 @@ enum PassType {
   COUPON      @map("coupon")
   MEMBERSHIP  @map("membership")
   POINTS      @map("points")
-  PREPAID     @map("prepaid")
   GIFT_CARD   @map("gift_card")
   TICKET      @map("ticket")
-  ACCESS      @map("access")
-  TRANSIT     @map("transit")
-  BUSINESS_ID @map("business_id")
 
   @@map("pass_type")
 }
@@ -112,28 +108,18 @@ enum WalletProvider {
 }
 
 enum InteractionType {
-  // Loyalty (stamp/coupon/membership/points/prepaid)
+  // Loyalty (stamp/coupon/membership/points)
   STAMP            @map("stamp")
   COUPON_REDEEM    @map("coupon_redeem")
   CHECK_IN         @map("check_in")
   POINTS_EARN      @map("points_earn")
   POINTS_REDEEM    @map("points_redeem")
-  PREPAID_USE      @map("prepaid_use")
-  PREPAID_RECHARGE @map("prepaid_recharge")
   // Gift card
   GIFT_CHARGE      @map("gift_charge")
   GIFT_REFUND      @map("gift_refund")
   // Ticket
   TICKET_SCAN      @map("ticket_scan")
   TICKET_VOID      @map("ticket_void")
-  // Access
-  ACCESS_GRANT     @map("access_grant")
-  ACCESS_DENY      @map("access_deny")
-  // Transit
-  TRANSIT_BOARD    @map("transit_board")
-  TRANSIT_EXIT     @map("transit_exit")
-  // Business ID
-  ID_VERIFY        @map("id_verify")
   // Generic
   STATUS_CHANGE    @map("status_change")
   REWARD_EARNED    @map("reward_earned")
@@ -219,12 +205,8 @@ enum DesignCardType {
   POINTS      @map("points")
   TIER        @map("tier")
   COUPON      @map("coupon")
-  PREPAID     @map("prepaid")
   GIFT_CARD   @map("gift_card")
   TICKET      @map("ticket")
-  ACCESS      @map("access")
-  TRANSIT     @map("transit")
-  BUSINESS_ID @map("business_id")
   GENERIC     @map("generic")
 
   @@map("design_card_type")

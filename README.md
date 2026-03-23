@@ -1,6 +1,6 @@
 # Loyalshy — Digital Wallet Pass Platform
 
-Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple and Google Wallet integration. Supports 10 pass types: stamp cards, coupons, memberships, points programs, prepaid passes, gift cards, event tickets, access passes, transit passes, and business IDs.
+Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple and Google Wallet integration. Supports 6 pass types: stamp cards, coupons, memberships, points programs, gift cards, and event tickets.
 
 ## Tech Stack
 
@@ -70,12 +70,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | COUPON | Single or multi-use discount codes |
 | MEMBERSHIP | Digital ID with tier, benefits, lifecycle |
 | POINTS | Earn and redeem points from a catalog |
-| PREPAID | Fixed-use passes with optional recharge |
 | GIFT_CARD | Monetary balance with partial redemption |
 | TICKET | Event entry with scan tracking |
-| ACCESS | Facility/area access with time restrictions |
-| TRANSIT | Boarding passes with origin/destination |
-| BUSINESS_ID | Employee/member identification |
 
 ---
 

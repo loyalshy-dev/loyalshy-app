@@ -24,18 +24,10 @@ export function ProgramsSummary({ programs }: ProgramsSummaryProps) {
         return `${program.activePassInstances} ${t("members")} \u00b7 ${program.totalInteractions} ${t("checkIns")}`
       case "POINTS":
         return `${program.activePassInstances} ${t("enrolled")} \u00b7 ${program.redeemedRewards} ${t("redeemed")}`
-      case "PREPAID":
-        return `${program.activePassInstances} ${t("issued")} \u00b7 ${program.totalInteractions} ${t("uses")}`
       case "GIFT_CARD":
         return `${program.activePassInstances} ${t("cards")} \u00b7 ${program.totalInteractions} ${t("transactions")}`
       case "TICKET":
         return `${program.activePassInstances} ${t("tickets")} \u00b7 ${program.totalInteractions} ${t("scans")}`
-      case "ACCESS":
-        return `${program.activePassInstances} ${t("passes")} \u00b7 ${program.totalInteractions} ${t("accessLogs")}`
-      case "TRANSIT":
-        return `${program.activePassInstances} ${t("passes")} \u00b7 ${program.totalInteractions} ${t("trips")}`
-      case "BUSINESS_ID":
-        return `${program.activePassInstances} ${t("ids")} \u00b7 ${program.totalInteractions} ${t("verifications")}`
       default:
         return `${program.activePassInstances} ${t("enrolled")}`
     }

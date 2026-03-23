@@ -21,12 +21,8 @@ import {
   Ticket,
   Crown,
   Coins,
-  Minus,
   Gift,
   CalendarDays,
-  ShieldCheck,
-  Bus,
-  BadgeCheck,
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -50,22 +46,17 @@ import {
   checkInMember,
   earnPoints,
   redeemPoints,
-  usePrepaid,
   type RedeemCouponResult,
   type CheckInResult,
   type EarnPointsResult,
   type RedeemPointsResult,
-  type UsePrepaidResult,
 } from "@/server/interaction-actions"
 import { chargeGiftCard, type ChargeGiftCardResult } from "@/server/gift-card-actions"
 import { scanTicket, type ScanTicketResult } from "@/server/ticket-actions"
-import { grantAccess, type GrantAccessResult } from "@/server/access-actions"
-import { transitBoard, type TransitBoardResult } from "@/server/transit-actions"
-import { verifyId, type VerifyIdResult } from "@/server/business-id-actions"
 import type { PassInstanceSummary } from "@/types/pass-instance"
 import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
-import { parsePointsConfig, parsePrepaidConfig, parseBusinessIdConfig, parseMembershipConfig, parseAccessConfig, getCheapestCatalogItem } from "@/lib/pass-config"
+import { parsePointsConfig, parseMembershipConfig, getCheapestCatalogItem } from "@/lib/pass-config"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -131,12 +122,8 @@ export function RegisterVisitDialog({
   const [checkInResult, setCheckInResult] = useState<CheckInResult | null>(null)
   const [earnPointsResult, setEarnPointsResult] = useState<EarnPointsResult | null>(null)
   const [redeemPointsResult, setRedeemPointsResult] = useState<RedeemPointsResult | null>(null)
-  const [usePrepaidResult, setUsePrepaidResult] = useState<UsePrepaidResult | null>(null)
   const [giftCardResult, setGiftCardResult] = useState<ChargeGiftCardResult | null>(null)
   const [ticketResult, setTicketResult] = useState<ScanTicketResult | null>(null)
-  const [accessResult, setAccessResult] = useState<GrantAccessResult | null>(null)
-  const [transitResult, setTransitResult] = useState<TransitBoardResult | null>(null)
-  const [verifyIdResult, setVerifyIdResult] = useState<VerifyIdResult | null>(null)
   const [giftCardAmount, setGiftCardAmount] = useState("")
   const [scanMode, setScanMode] = useState(false)
   const [scanError, setScanError] = useState<string | null>(null)
@@ -217,7 +204,6 @@ export function RegisterVisitDialog({
         setCheckInResult(null)
         setEarnPointsResult(null)
         setRedeemPointsResult(null)
-        setUsePrepaidResult(null)
         setScanMode(false)
         setScanError(null)
         setIsScanLooking(false)
@@ -443,34 +429,6 @@ export function RegisterVisitDialog({
     })
   }
 
-  // Use one prepaid unit
-  function handleUsePrepaid() {
-    if (!selectedPassInstance) return
-
-    startRegister(async () => {
-      const result = await usePrepaid(selectedPassInstance.passInstanceId)
-
-      if (!result.success) {
-        toast.error(result.error ?? "Failed to use prepaid pass")
-        return
-      }
-
-      setUsePrepaidResult(result)
-
-      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-        navigator.vibrate(10)
-      }
-
-      toast.success(
-        `${result.useLabel} used for ${selectedCustomer?.fullName}`,
-        { description: `${result.remainingUses} remaining` }
-      )
-
-      setStep("success")
-      autoDismiss()
-    })
-  }
-
   // Charge gift card
   function handleChargeGiftCard() {
     if (!selectedPassInstance) return
@@ -497,45 +455,6 @@ export function RegisterVisitDialog({
       if (!result.success) { toast.error(result.error ?? "Failed to scan ticket"); return }
       setTicketResult(result)
       toast.success(`Ticket scanned — ${result.eventName}`, { description: `Scan ${result.scanCount}/${result.maxScans}` })
-      setStep("success")
-      autoDismiss()
-    })
-  }
-
-  // Grant access
-  function handleGrantAccess() {
-    if (!selectedPassInstance) return
-    startRegister(async () => {
-      const result = await grantAccess(selectedPassInstance.passInstanceId)
-      if (!result.success) { toast.error(result.error ?? "Failed to grant access"); return }
-      setAccessResult(result)
-      toast.success(`${result.accessLabel} granted for ${selectedCustomer?.fullName}`)
-      setStep("success")
-      autoDismiss()
-    })
-  }
-
-  // Transit board
-  function handleTransitBoard() {
-    if (!selectedPassInstance) return
-    startRegister(async () => {
-      const result = await transitBoard(selectedPassInstance.passInstanceId)
-      if (!result.success) { toast.error(result.error ?? "Failed to board"); return }
-      setTransitResult(result)
-      toast.success("Boarded successfully")
-      setStep("success")
-      autoDismiss()
-    })
-  }
-
-  // Verify ID
-  function handleVerifyId() {
-    if (!selectedPassInstance) return
-    startRegister(async () => {
-      const result = await verifyId(selectedPassInstance.passInstanceId)
-      if (!result.success) { toast.error(result.error ?? "Failed to verify ID"); return }
-      setVerifyIdResult(result)
-      toast.success(`${result.idLabel} verified for ${result.contactName}`)
       setStep("success")
       autoDismiss()
     })
@@ -692,12 +611,8 @@ export function RegisterVisitDialog({
             onConfirmCheckIn={handleConfirmCheckIn}
             onEarnPoints={handleEarnPoints}
             onRedeemPoints={handleRedeemPoints}
-            onUsePrepaid={handleUsePrepaid}
             onChargeGiftCard={handleChargeGiftCard}
             onScanTicket={handleScanTicket}
-            onGrantAccess={handleGrantAccess}
-            onTransitBoard={handleTransitBoard}
-            onVerifyId={handleVerifyId}
             giftCardAmount={giftCardAmount}
             onGiftCardAmountChange={setGiftCardAmount}
             onBack={handleBack}
@@ -716,12 +631,8 @@ export function RegisterVisitDialog({
             checkInResult={checkInResult}
             earnPointsResult={earnPointsResult}
             redeemPointsResult={redeemPointsResult}
-            usePrepaidResult={usePrepaidResult}
             giftCardResult={giftCardResult}
             ticketResult={ticketResult}
-            accessResult={accessResult}
-            transitResult={transitResult}
-            verifyIdResult={verifyIdResult}
             onClose={() => onOpenChange(false)}
           />
         )}
@@ -1066,29 +977,23 @@ function ProgramPickerStep({
             const isCoupon = passInstance.passType === "COUPON"
             const isMembership = passInstance.passType === "MEMBERSHIP"
             const isPoints = passInstance.passType === "POINTS"
-            const isPrepaid = passInstance.passType === "PREPAID"
             const instanceData = passInstance.data as Record<string, unknown> | null ?? {}
             const templateConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
             const pointsConfig = isPoints ? parsePointsConfig(passInstance.templateConfig) : null
             const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
             const pointsBalance = (instanceData.pointsBalance as number) ?? 0
-            const remainingUses = (instanceData.remainingUses as number) ?? 0
-            const prepaidConfig = isPrepaid ? parsePrepaidConfig(passInstance.templateConfig) : null
-            const totalUses = prepaidConfig?.totalUses ?? 0
             const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
             const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
             const pct = isCoupon || isMembership
               ? 100
-              : isPrepaid
-                ? totalUses > 0 ? Math.min((remainingUses / totalUses) * 100, 100) : 0
-                : isPoints
-                  ? cheapestItem
-                    ? Math.min((pointsBalance / cheapestItem.pointsCost) * 100, 100)
-                    : 0
-                  : Math.min(
-                      (currentCycleVisits / visitsRequired) * 100,
-                      100
-                    )
+              : isPoints
+                ? cheapestItem
+                  ? Math.min((pointsBalance / cheapestItem.pointsCost) * 100, 100)
+                  : 0
+                : Math.min(
+                    (currentCycleVisits / visitsRequired) * 100,
+                    100
+                  )
 
             return (
               <Card asChild key={passInstance.passInstanceId}>
@@ -1104,18 +1009,10 @@ function ProgramPickerStep({
                     <Ticket className="size-5 text-brand" />
                   ) : isPoints ? (
                     <Coins className="size-5 text-brand" />
-                  ) : isPrepaid ? (
-                    <CreditCard className="size-5 text-brand" />
                   ) : passInstance.passType === "GIFT_CARD" ? (
                     <Gift className="size-5 text-brand" />
                   ) : passInstance.passType === "TICKET" ? (
                     <CalendarDays className="size-5 text-brand" />
-                  ) : passInstance.passType === "ACCESS" ? (
-                    <ShieldCheck className="size-5 text-brand" />
-                  ) : passInstance.passType === "TRANSIT" ? (
-                    <Bus className="size-5 text-brand" />
-                  ) : passInstance.passType === "BUSINESS_ID" ? (
-                    <BadgeCheck className="size-5 text-brand" />
                   ) : (
                     <Stamp className="size-5 text-brand" />
                   )}
@@ -1140,11 +1037,6 @@ function ProgramPickerStep({
                         {pointsBalance} pts
                       </span>
                     )}
-                    {isPrepaid && (
-                      <span className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${remainingUses <= 0 ? "bg-destructive/10 text-destructive" : "bg-brand/10 text-brand"}`}>
-                        {remainingUses}/{totalUses}
-                      </span>
-                    )}
                   </div>
                   {isMembership ? (
                     <p className={`text-[12px] mt-1 ${passInstance.status === "SUSPENDED" ? "text-destructive" : "text-muted-foreground"}`}>
@@ -1154,18 +1046,6 @@ function ProgramPickerStep({
                     <p className="text-[12px] font-medium text-success mt-1">
                       Ready to redeem
                     </p>
-                  ) : isPrepaid ? (
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-30">
-                        <div
-                          className="h-full rounded-full bg-brand transition-all"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      <span className={`text-[12px] font-medium tabular-nums ${remainingUses <= 0 ? "text-destructive" : "text-muted-foreground"}`}>
-                        {remainingUses} {prepaidConfig?.useLabel ?? "use"}{remainingUses !== 1 ? "s" : ""} left
-                      </span>
-                    </div>
                   ) : isPoints ? (
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-30">
@@ -1228,12 +1108,8 @@ function ConfirmStep({
   onConfirmCheckIn,
   onEarnPoints,
   onRedeemPoints,
-  onUsePrepaid,
   onChargeGiftCard,
   onScanTicket,
-  onGrantAccess,
-  onTransitBoard,
-  onVerifyId,
   giftCardAmount,
   onGiftCardAmountChange,
   onBack,
@@ -1247,12 +1123,8 @@ function ConfirmStep({
   onConfirmCheckIn: () => void
   onEarnPoints: () => void
   onRedeemPoints: (catalogItemId: string) => void
-  onUsePrepaid: () => void
   onChargeGiftCard: () => void
   onScanTicket: () => void
-  onGrantAccess: () => void
-  onTransitBoard: () => void
-  onVerifyId: () => void
   giftCardAmount: string
   onGiftCardAmountChange: (val: string) => void
   onBack: () => void
@@ -1288,12 +1160,8 @@ function ConfirmStep({
   const isCoupon = passInstance.passType === "COUPON"
   const isMembership = passInstance.passType === "MEMBERSHIP"
   const isPoints = passInstance.passType === "POINTS"
-  const isPrepaid = passInstance.passType === "PREPAID"
   const isGiftCard = passInstance.passType === "GIFT_CARD"
   const isTicket = passInstance.passType === "TICKET"
-  const isAccess = passInstance.passType === "ACCESS"
-  const isTransit = passInstance.passType === "TRANSIT"
-  const isBusinessId = passInstance.passType === "BUSINESS_ID"
   const confirmData = passInstance.data as Record<string, unknown> | null ?? {}
   const confirmConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
   const filled = (confirmData.currentCycleVisits as number) ?? 0
@@ -1305,9 +1173,6 @@ function ConfirmStep({
   const affordableCatalogItems = pointsConfig
     ? pointsConfig.catalog.filter((item) => pointsBalance >= item.pointsCost)
     : []
-  const prepaidConfig = isPrepaid ? parsePrepaidConfig(passInstance.templateConfig) : null
-  const remainingUses = (confirmData.remainingUses as number) ?? 0
-  const totalUses = prepaidConfig?.totalUses ?? 0
   const giftBalanceCents = (confirmData.balanceCents as number) ?? 0
   const giftCurrency = (confirmData.currency as string) ?? "USD"
   const ticketScanCount = (confirmData.scanCount as number) ?? 0
@@ -1315,10 +1180,8 @@ function ConfirmStep({
 
   // Build WalletPassDesign from card design data when available
   const design = cardDesign ? buildWalletPassDesign(cardDesign) : null
-  const businessIdCfg = isBusinessId ? parseBusinessIdConfig(passInstance.templateConfig) : null
   const membershipCfg = isMembership ? parseMembershipConfig(passInstance.templateConfig) : null
-  const accessCfg = isAccess ? parseAccessConfig(passInstance.templateConfig) : null
-  const holderPhotoUrl = (isBusinessId || isMembership || isAccess)
+  const holderPhotoUrl = isMembership
     ? (typeof confirmData.holderPhotoUrl === "string" ? confirmData.holderPhotoUrl : undefined)
     : undefined
 
@@ -1336,7 +1199,7 @@ function ConfirmStep({
           <ArrowLeft className="size-4" />
         </Button>
         <DialogTitle className="text-base">
-          {isMembership ? t("checkIn") : isCoupon ? t("redeemCoupon") : isPoints ? t("addPoints") : isPrepaid ? t("charge") : isGiftCard ? t("charge") : isTicket ? t("scanTicket") : isAccess ? t("grantAccess") : isTransit ? t("recharge") : isBusinessId ? "Verify ID" : t("registerStamp")}
+          {isMembership ? t("checkIn") : isCoupon ? t("redeemCoupon") : isPoints ? t("addPoints") : isGiftCard ? t("charge") : isTicket ? t("scanTicket") : t("registerStamp")}
         </DialogTitle>
       </div>
 
@@ -1355,21 +1218,13 @@ function ConfirmStep({
               ? `${passInstance.templateName} — Member Check-in`
               : isCoupon
                 ? `${passInstance.templateName} — Coupon Redemption`
-                : isPrepaid
-                  ? `${passInstance.templateName} — ${remainingUses}/${totalUses} ${prepaidConfig?.useLabel ?? "use"}${remainingUses !== 1 ? "s" : ""} remaining`
-                  : isPoints
-                    ? `${passInstance.templateName} — ${pointsBalance} pts balance`
-                    : isGiftCard
-                      ? `${passInstance.templateName} — ${(giftBalanceCents / 100).toFixed(2)} ${giftCurrency} balance`
-                      : isTicket
-                        ? `${passInstance.templateName} — ${ticketScanCount}/${ticketMaxScans} scans`
-                        : isAccess
-                          ? `${passInstance.templateName} — Access Pass`
-                          : isTransit
-                            ? `${passInstance.templateName} — Transit Pass`
-                            : isBusinessId
-                              ? `${passInstance.templateName} — ID Verification`
-                              : `${passInstance.templateName} — Visit #${totalVisitsFromData + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
+                : isPoints
+                  ? `${passInstance.templateName} — ${pointsBalance} pts balance`
+                  : isGiftCard
+                    ? `${passInstance.templateName} — ${(giftBalanceCents / 100).toFixed(2)} ${giftCurrency} balance`
+                    : isTicket
+                      ? `${passInstance.templateName} — ${ticketScanCount}/${ticketMaxScans} scans`
+                      : `${passInstance.templateName} — Visit #${totalVisitsFromData + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
           </p>
         </div>
       </div>
@@ -1385,15 +1240,14 @@ function ConfirmStep({
             logoUrl={passInstance.passDesign?.logoUrl}
             logoAppleUrl={passInstance.passDesign?.logoAppleUrl}
             logoGoogleUrl={passInstance.passDesign?.logoGoogleUrl}
-            currentVisits={isCoupon || isMembership || isPoints ? 1 : isPrepaid ? remainingUses : nextVisit}
-            totalVisits={isCoupon || isMembership || isPoints ? 1 : isPrepaid ? totalUses : visitsRequired}
+            currentVisits={isCoupon || isMembership || isPoints ? 1 : nextVisit}
+            totalVisits={isCoupon || isMembership || isPoints ? 1 : visitsRequired}
             rewardDescription=""
             compact
             width={280}
-            showHolderPhoto={businessIdCfg?.showHolderPhoto ?? membershipCfg?.showHolderPhoto ?? accessCfg?.showHolderPhoto ?? (isBusinessId ? true : undefined)}
-            holderPhotoPosition={businessIdCfg?.holderPhotoPosition ?? membershipCfg?.holderPhotoPosition ?? accessCfg?.holderPhotoPosition}
+            showHolderPhoto={membershipCfg?.showHolderPhoto}
+            holderPhotoPosition={membershipCfg?.holderPhotoPosition}
             holderPhotoUrl={holderPhotoUrl}
-            idLabel={businessIdCfg?.idLabel}
           />
         </div>
       ) : isMembership ? (
@@ -1408,18 +1262,6 @@ function ConfirmStep({
           <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-6">
             <Ticket className="size-10 text-brand" />
             <p className="text-[13px] font-medium text-center">Ready to redeem</p>
-          </div>
-        </div>
-      ) : isPrepaid ? (
-        <div className="px-6">
-          <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-4">
-            <CreditCard className="size-8 text-brand" />
-            <p className="text-[22px] font-bold tabular-nums text-brand">
-              {remainingUses} / {totalUses}
-            </p>
-            <p className="text-[12px] text-muted-foreground">
-              {prepaidConfig?.useLabel ?? "use"}{remainingUses !== 1 ? "s" : ""} remaining
-            </p>
           </div>
         </div>
       ) : isPoints ? (
@@ -1526,44 +1368,27 @@ function ConfirmStep({
           <Button
             className="w-full h-11 text-[14px] font-medium gap-2"
             onClick={
-              isPrepaid ? onUsePrepaid
-              : isMembership ? onConfirmCheckIn
+              isMembership ? onConfirmCheckIn
               : isCoupon ? onConfirmCoupon
               : isTicket ? onScanTicket
-              : isAccess ? onGrantAccess
-              : isTransit ? onTransitBoard
-              : isBusinessId ? onVerifyId
               : onConfirm
             }
-            disabled={isRegistering || (isPrepaid && remainingUses <= 0) || (isTicket && ticketScanCount >= ticketMaxScans)}
+            disabled={isRegistering || (isTicket && ticketScanCount >= ticketMaxScans)}
           >
             {isRegistering ? (
               <Loader2 className="size-4 animate-spin" />
-            ) : isPrepaid ? (
-              <Minus className="size-4" />
             ) : isMembership ? (
               <Crown className="size-4" />
             ) : isCoupon ? (
               <Ticket className="size-4" />
             ) : isTicket ? (
               <CalendarDays className="size-4" />
-            ) : isAccess ? (
-              <ShieldCheck className="size-4" />
-            ) : isTransit ? (
-              <Bus className="size-4" />
-            ) : isBusinessId ? (
-              <BadgeCheck className="size-4" />
             ) : (
               <Stamp className="size-4" />
             )}
-            {isPrepaid
-              ? remainingUses <= 0 ? "Depleted" : `Use 1 ${prepaidConfig?.useLabel ?? "use"}`
-              : isMembership ? t("checkIn")
+            {isMembership ? t("checkIn")
               : isCoupon ? t("redeemCoupon")
               : isTicket ? (ticketScanCount >= ticketMaxScans ? "Max Scans Reached" : t("scanTicket"))
-              : isAccess ? t("grantAccess")
-              : isTransit ? t("recharge")
-              : isBusinessId ? "Verify ID"
               : t("registerStamp")}
           </Button>
         </div>
@@ -1639,12 +1464,8 @@ function SuccessStep({
   checkInResult,
   earnPointsResult,
   redeemPointsResult,
-  usePrepaidResult,
   giftCardResult,
   ticketResult,
-  accessResult,
-  transitResult,
-  verifyIdResult,
   onClose,
 }: {
   customer: InteractionSearchResult
@@ -1657,12 +1478,8 @@ function SuccessStep({
   checkInResult: CheckInResult | null
   earnPointsResult: EarnPointsResult | null
   redeemPointsResult: RedeemPointsResult | null
-  usePrepaidResult: UsePrepaidResult | null
   giftCardResult: ChargeGiftCardResult | null
   ticketResult: ScanTicketResult | null
-  accessResult: GrantAccessResult | null
-  transitResult: TransitBoardResult | null
-  verifyIdResult: VerifyIdResult | null
   onClose: () => void
 }) {
   return (
@@ -1670,22 +1487,7 @@ function SuccessStep({
       className="flex flex-col items-center py-10 px-6 cursor-pointer"
       onClick={onClose}
     >
-      {usePrepaidResult ? (
-        <>
-          <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
-            <AnimatedCheckmark />
-          </div>
-          <p className="text-lg font-semibold mt-6">
-            {usePrepaidResult.isDepleted ? "Pass Depleted!" : "Use Recorded!"}
-          </p>
-          <p className="text-[13px] text-muted-foreground mt-1">
-            {customer.fullName} — {usePrepaidResult.templateName}
-          </p>
-          <p className={`text-[12px] mt-0.5 tabular-nums ${usePrepaidResult.isDepleted ? "text-destructive font-medium" : "text-muted-foreground"}`}>
-            {usePrepaidResult.remainingUses}/{usePrepaidResult.totalUses} {usePrepaidResult.useLabel}{usePrepaidResult.remainingUses !== 1 ? "s" : ""} remaining
-          </p>
-        </>
-      ) : checkInResult ? (
+      {checkInResult ? (
         <>
           <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
             <AnimatedCheckmark />
@@ -1796,39 +1598,6 @@ function SuccessStep({
           <p className="text-[12px] text-muted-foreground mt-0.5 tabular-nums">
             Scan {ticketResult.scanCount}/{ticketResult.maxScans}
             {ticketResult.isMaxedOut && " — Fully used"}
-          </p>
-        </>
-      ) : accessResult ? (
-        <>
-          <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
-            <ShieldCheck className="size-10 text-success animate-[bounce-in_0.5s_ease-out_0.2s_both]" />
-          </div>
-          <p className="text-lg font-semibold mt-6">Access Granted!</p>
-          <p className="text-[13px] text-muted-foreground mt-1">
-            {customer.fullName} — {accessResult.accessLabel}
-          </p>
-        </>
-      ) : transitResult ? (
-        <>
-          <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
-            <Bus className="size-10 text-success animate-[bounce-in_0.5s_ease-out_0.2s_both]" />
-          </div>
-          <p className="text-lg font-semibold mt-6">Boarded!</p>
-          <p className="text-[13px] text-muted-foreground mt-1">
-            {customer.fullName} — {transitResult.templateName}
-          </p>
-        </>
-      ) : verifyIdResult ? (
-        <>
-          <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
-            <BadgeCheck className="size-10 text-success animate-[bounce-in_0.5s_ease-out_0.2s_both]" />
-          </div>
-          <p className="text-lg font-semibold mt-6">ID Verified!</p>
-          <p className="text-[13px] text-muted-foreground mt-1">
-            {verifyIdResult.contactName} — {verifyIdResult.idLabel}
-          </p>
-          <p className="text-[12px] text-muted-foreground mt-0.5 tabular-nums">
-            {verifyIdResult.totalVerifications} total verification{verifyIdResult.totalVerifications !== 1 ? "s" : ""}
           </p>
         </>
       ) : wasRewardEarned ? (

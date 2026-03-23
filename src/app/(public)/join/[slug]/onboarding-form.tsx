@@ -14,11 +14,7 @@ import {
   Tag,
   Users,
   Star,
-  Wallet,
   Ticket,
-  KeyRound,
-  Train,
-  BadgeCheck,
 } from "lucide-react"
 import { joinTemplate, requestWalletPass } from "@/server/onboarding-actions"
 import type { OrganizationPublicInfo, JoinResult } from "@/server/onboarding-actions"
@@ -45,12 +41,8 @@ function getPassTypeIcon(passType: string) {
     case "COUPON": return Tag
     case "MEMBERSHIP": return Users
     case "POINTS": return Star
-    case "PREPAID": return Wallet
     case "GIFT_CARD": return Gift
     case "TICKET": return Ticket
-    case "ACCESS": return KeyRound
-    case "TRANSIT": return Train
-    case "BUSINESS_ID": return BadgeCheck
     default: return CreditCard
   }
 }
@@ -62,17 +54,12 @@ function getProgramSubtitle(p: PublicTemplateInfo, t: ReturnType<typeof useTrans
       return t("stampSubtitle", { reward, visits: getVisitsRequired(p) })
     case "COUPON":
     case "MEMBERSHIP":
-    case "BUSINESS_ID":
       return reward
     case "POINTS":
       return t("pointsSubtitle", { reward })
-    case "PREPAID":
-      return t("prepaidSubtitle", { reward })
     case "GIFT_CARD":
       return t("giftCardSubtitle", { reward })
     case "TICKET":
-    case "ACCESS":
-    case "TRANSIT":
       return reward
     default:
       return reward
@@ -85,14 +72,10 @@ function shouldShowInfoBadge(passType: string): boolean {
     case "STAMP_CARD":
     case "COUPON":
     case "POINTS":
-    case "PREPAID":
     case "GIFT_CARD":
     case "MEMBERSHIP":
       return true
     case "TICKET":
-    case "ACCESS":
-    case "TRANSIT":
-    case "BUSINESS_ID":
       return false
     default:
       return false

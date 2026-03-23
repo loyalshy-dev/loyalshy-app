@@ -5,10 +5,9 @@ import { getTemplateDetail } from "@/server/template-actions"
 import { Users, Stamp, Gift, CheckCircle, Ticket, Crown, Clock } from "lucide-react"
 import { statusConfig } from "@/components/dashboard/programs/program-status"
 import { format } from "date-fns"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, formatMembershipDuration, parsePrepaidConfig } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, formatMembershipDuration } from "@/lib/pass-config"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
-import type { CouponConfig, MembershipConfig, PrepaidConfig } from "@/types/pass-types"
-import { CreditCard } from "lucide-react"
+import type { CouponConfig, MembershipConfig } from "@/types/pass-types"
 import { Card } from "@/components/ui/card"
 
 function StampCardStats({ program }: { program: NonNullable<Awaited<ReturnType<typeof getTemplateDetail>>> }) {
@@ -251,82 +250,6 @@ function MembershipDetails({ config }: { config: MembershipConfig | null }) {
   )
 }
 
-function PrepaidStats({ program }: { program: NonNullable<Awaited<ReturnType<typeof getTemplateDetail>>> }) {
-  const config = parsePrepaidConfig(program.config)
-  const stats = [
-    {
-      label: "Passes Issued",
-      value: program.passInstanceCount,
-      sub: `${program.activePassInstanceCount} active`,
-      icon: CreditCard,
-    },
-    {
-      label: "Total Uses",
-      value: program.totalInteractions,
-      sub: "all time",
-      icon: CheckCircle,
-    },
-    {
-      label: "Uses Per Pass",
-      value: config?.totalUses ?? "-",
-      sub: config?.rechargeable ? "rechargeable" : "single pass",
-      icon: Stamp,
-    },
-    {
-      label: "Available Rewards",
-      value: program.availableRewards,
-      sub: `${program.redeemedRewards} redeemed`,
-      icon: Gift,
-    },
-  ]
-
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {stats.map((stat) => (
-        <Card
-          key={stat.label}
-          className="p-4"
-        >
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">
-              {stat.label}
-            </p>
-            <stat.icon className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <p className="text-2xl font-semibold tracking-tight mt-1">
-            {stat.value}
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">{stat.sub}</p>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
-function PrepaidDetails({ config }: { config: PrepaidConfig | null }) {
-  if (!config) return null
-  return (
-    <dl className="grid gap-4 sm:grid-cols-2 text-sm">
-      <div>
-        <dt className="text-muted-foreground text-xs">Uses Per Pass</dt>
-        <dd className="mt-0.5 font-medium">{config.totalUses} {config.useLabel}s</dd>
-      </div>
-      <div>
-        <dt className="text-muted-foreground text-xs">Rechargeable</dt>
-        <dd className="mt-0.5 font-medium">{config.rechargeable ? "Yes" : "No"}</dd>
-      </div>
-      {config.validUntil && (
-        <div>
-          <dt className="text-muted-foreground text-xs">Valid Until</dt>
-          <dd className="mt-0.5 font-medium">
-            {format(new Date(config.validUntil), "MMM d, yyyy")}
-          </dd>
-        </div>
-      )}
-    </dl>
-  )
-}
-
 export default async function ProgramOverviewPage(props: {
   params: Promise<{ id: string }>
 }) {
@@ -343,15 +266,12 @@ export default async function ProgramOverviewPage(props: {
   const typeMeta = PASS_TYPE_META[passType]
   const couponConfig = passType === "COUPON" ? parseCouponConfig(program.config) : null
   const membershipConfig = passType === "MEMBERSHIP" ? parseMembershipConfig(program.config) : null
-  const prepaidConfig = passType === "PREPAID" ? parsePrepaidConfig(program.config) : null
-
   return (
     <div className="space-y-6">
       {/* Stat cards */}
       {passType === "STAMP_CARD" && <StampCardStats program={program} />}
       {passType === "COUPON" && <CouponStats program={program} config={couponConfig} />}
       {passType === "MEMBERSHIP" && <MembershipStats program={program} config={membershipConfig} />}
-      {passType === "PREPAID" && <PrepaidStats program={program} />}
 
       {/* Template details */}
       <Card className="p-6">
@@ -369,7 +289,6 @@ export default async function ProgramOverviewPage(props: {
         {passType === "STAMP_CARD" && <StampCardDetails program={program} />}
         {passType === "COUPON" && <CouponDetails config={couponConfig} />}
         {passType === "MEMBERSHIP" && <MembershipDetails config={membershipConfig} />}
-        {passType === "PREPAID" && <PrepaidDetails config={prepaidConfig} />}
 
         {/* Shared dates */}
         <dl className="grid gap-4 sm:grid-cols-2 text-sm mt-4 pt-4 border-t border-border">

@@ -11,7 +11,7 @@ import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConf
 import type { ProgressStyle, LabelFormat } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { getWalletRewardText, parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem } from "../../pass-config"
+import { getWalletRewardText, parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, getCheapestCatalogItem } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -40,18 +40,11 @@ type GooglePassUpdateData = {
   customProgressLabel: string | null
   heroImageUrl?: string | null
   revealLink?: string | null
-  remainingUses?: number
   // Gift card data
   giftBalanceCents?: number
   giftCurrency?: string
   // Ticket data
   ticketScanCount?: number
-  // Access data
-  accessTotalGranted?: number
-  // Transit data
-  transitIsBoarded?: boolean
-  // Business ID data
-  businessIdVerifications?: number
   // Pass instance status (for coupon redeemed display)
   passInstanceStatus?: string
   // Editor config for custom field labels
@@ -84,12 +77,8 @@ async function patchGoogleWalletObject(
   const couponConfig = data.passType === "COUPON" ? parseCouponConfig(data.templateConfig) : null
   const membershipConfig = data.passType === "MEMBERSHIP" ? parseMembershipConfig(data.templateConfig) : null
   const pointsConfig = data.passType === "POINTS" ? parsePointsConfig(data.templateConfig) : null
-  const prepaidConfig = data.passType === "PREPAID" ? parsePrepaidConfig(data.templateConfig) : null
   const giftCardConfig = data.passType === "GIFT_CARD" ? parseGiftCardConfig(data.templateConfig) : null
   const ticketConfig = data.passType === "TICKET" ? parseTicketConfig(data.templateConfig) : null
-  const accessConfig = data.passType === "ACCESS" ? parseAccessConfig(data.templateConfig) : null
-  const transitConfig = data.passType === "TRANSIT" ? parseTransitConfig(data.templateConfig) : null
-  const businessIdConfig = data.passType === "BUSINESS_ID" ? parseBusinessIdConfig(data.templateConfig) : null
   const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Custom field labels from editorConfig
@@ -129,10 +118,6 @@ async function patchGoogleWalletObject(
     benefits: { id: "benefits", header: lbl("benefits", "BENEFITS"), body: membershipConfig?.benefits ?? "" },
     // POINTS
     earnRate: { id: "earnRate", header: lbl("earnRate", "EARN RATE"), body: pointsConfig ? `${pointsConfig.pointsPerVisit} points per visit` : "" },
-    // PREPAID
-    remaining: { id: "remaining", header: lbl("remaining", "REMAINING"), body: `${data.remainingUses ?? 0} / ${prepaidConfig?.totalUses ?? 0}` },
-    prepaidValidUntil: { id: "prepaidValidUntil", header: lbl("prepaidValidUntil", "VALID UNTIL"), body: prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
-    totalUsed: { id: "totalUsed", header: lbl("totalUsed", "TOTAL USED"), body: String(data.totalVisits) },
     // GIFT_CARD
     giftBalance: { id: "giftBalance", header: lbl("giftBalance", "BALANCE"), body: giftCardConfig ? `${giftCardConfig.currency} ${((data.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
     giftInitial: { id: "giftInitial", header: lbl("giftInitial", "INITIAL VALUE"), body: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
@@ -141,17 +126,6 @@ async function patchGoogleWalletObject(
     eventDate: { id: "eventDate", header: lbl("eventDate", "DATE"), body: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
     eventVenue: { id: "eventVenue", header: lbl("eventVenue", "VENUE"), body: ticketConfig?.eventVenue ?? "" },
     scanStatus: { id: "scanStatus", header: lbl("scanStatus", "SCANS"), body: `${data.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
-    // ACCESS
-    accessLabel: { id: "accessLabel", header: lbl("accessLabel", accessConfig?.accessLabel ?? "ACCESS"), body: "Active" },
-    accessGranted: { id: "accessGranted", header: lbl("accessGranted", "TOTAL GRANTED"), body: String(data.accessTotalGranted ?? 0) },
-    // TRANSIT
-    transitType: { id: "transitType", header: lbl("transitType", "TYPE"), body: (transitConfig?.transitType ?? "other").toUpperCase() },
-    origin: { id: "origin", header: lbl("origin", "FROM"), body: transitConfig?.originName ?? "—" },
-    destination: { id: "destination", header: lbl("destination", "TO"), body: transitConfig?.destinationName ?? "—" },
-    boardingStatus: { id: "boardingStatus", header: lbl("boardingStatus", "STATUS"), body: data.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
-    // BUSINESS_ID
-    idLabel: { id: "idLabel", header: lbl("idLabel", businessIdConfig?.idLabel ?? "ID"), body: data.contactName },
-    verifications: { id: "verifications", header: lbl("verifications", "VERIFICATIONS"), body: String(data.businessIdVerifications ?? 0) },
   }
 
   // Build textModulesData from user-configured unified fields
@@ -182,9 +156,6 @@ async function patchGoogleWalletObject(
   } else if (data.passType === "MEMBERSHIP" && membershipConfig) {
     loyaltyPoints = { label: lbl("tierName", "TIER"), balance: { string: membershipConfig.membershipTier } }
     secondaryLoyaltyPoints = { label: formatLabel("STATUS", labelFmt), balance: { string: membershipStatusText } }
-  } else if (data.passType === "PREPAID" && prepaidConfig) {
-    loyaltyPoints = { label: lbl("remaining", "REMAINING"), balance: { string: `${data.remainingUses ?? 0} / ${prepaidConfig.totalUses}` } }
-    secondaryLoyaltyPoints = { label: formatLabel("USED", labelFmt), balance: { int: data.totalVisits } }
   } else if (data.passType === "POINTS" && pointsConfig) {
     loyaltyPoints = { label: formatLabel("POINTS", labelFmt), balance: { int: data.pointsBalance ?? 0 } }
     secondaryLoyaltyPoints = cheapestItem
@@ -197,15 +168,6 @@ async function patchGoogleWalletObject(
   } else if (data.passType === "TICKET" && ticketConfig) {
     loyaltyPoints = { label: lbl("eventName", "EVENT"), balance: { string: ticketConfig.eventName } }
     secondaryLoyaltyPoints = { label: lbl("scanStatus", "SCANS"), balance: { string: `${data.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` } }
-  } else if (data.passType === "ACCESS" && accessConfig) {
-    loyaltyPoints = { label: lbl("accessLabel", accessConfig.accessLabel), balance: { string: "Active" } }
-    secondaryLoyaltyPoints = { label: lbl("accessGranted", "TOTAL GRANTED"), balance: { int: data.accessTotalGranted ?? 0 } }
-  } else if (data.passType === "TRANSIT" && transitConfig) {
-    loyaltyPoints = { label: lbl("boardingStatus", "STATUS"), balance: { string: data.transitIsBoarded ? "BOARDED" : "NOT BOARDED" } }
-    secondaryLoyaltyPoints = { label: lbl("transitType", "TYPE"), balance: { string: transitConfig.transitType.toUpperCase() } }
-  } else if (data.passType === "BUSINESS_ID" && businessIdConfig) {
-    loyaltyPoints = { label: lbl("idLabel", businessIdConfig.idLabel), balance: { string: data.contactName } }
-    secondaryLoyaltyPoints = { label: lbl("verifications", "VERIFICATIONS"), balance: { int: data.businessIdVerifications ?? 0 } }
   } else {
     // STAMP_CARD (default)
     const progressValue = formatProgressValue(data.currentCycleVisits, data.visitsRequired, data.progressStyle, data.hasAvailableReward)
@@ -333,13 +295,9 @@ export async function notifyGooglePassUpdate(
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalVisits = (instanceData.totalVisits as number) ?? 0
   const pointsBalance = (instanceData.pointsBalance as number) ?? 0
-  const remainingUses = (instanceData.remainingUses as number) ?? 0
   const giftBalanceCents = (instanceData.balanceCents as number) ?? undefined
   const giftCurrency = (instanceData.currency as string) ?? undefined
   const ticketScanCount = (instanceData.scanCount as number) ?? 0
-  const accessTotalGranted = (instanceData.totalGranted as number) ?? 0
-  const transitIsBoarded = (instanceData.isBoarded as boolean) ?? false
-  const businessIdVerifications = (instanceData.totalVerifications as number) ?? 0
 
   // Extract config values from PassTemplate.config JSON
   const templateConfig = (passInstance.passTemplate.config ?? {}) as Record<string, unknown>
@@ -405,13 +363,9 @@ export async function notifyGooglePassUpdate(
       visitsRequired,
       totalVisits,
       pointsBalance,
-      remainingUses,
       giftBalanceCents,
       giftCurrency,
       ticketScanCount,
-      accessTotalGranted,
-      transitIsBoarded,
-      businessIdVerifications,
       hasAvailableReward,
       rewardDescription: getWalletRewardText(passInstance.passTemplate.config, rewardDescription),
       revealedPrize: revealedReward?.description ?? null,

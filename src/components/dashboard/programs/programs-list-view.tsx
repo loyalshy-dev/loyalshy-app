@@ -11,7 +11,7 @@ import { TemplateCardPreview } from "@/components/template-card-preview"
 import { statusConfig } from "./program-status"
 import { CreateProgramForm } from "./create-program-form"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig, parsePrepaidConfig } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import type { TemplateListItem } from "@/server/template-actions"
@@ -43,16 +43,12 @@ function getTypeSubtitle(program: TemplateListItem): string {
       const subtitle = pConfig ? `${pConfig.pointsPerVisit} pts/visit` : "Points"
       return `${subtitle} | ${count} enrolled`
     }
-    case "PREPAID": {
-      const prepConfig = parsePrepaidConfig(program.config)
-      return `${prepConfig?.totalUses ?? 0} ${prepConfig?.useLabel ?? "use"}s | ${count} issued`
-    }
     default:
       return `${count} enrolled`
   }
 }
 
-type TypeFilter = "ALL" | "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "PREPAID"
+type TypeFilter = "ALL" | "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "GIFT_CARD" | "TICKET"
 
 type TemplatesListViewProps = {
   programs: TemplateListItem[]
@@ -83,7 +79,8 @@ export function TemplatesListView({
     COUPON: programs.filter((p) => p.passType === "COUPON").length,
     MEMBERSHIP: programs.filter((p) => p.passType === "MEMBERSHIP").length,
     POINTS: programs.filter((p) => p.passType === "POINTS").length,
-    PREPAID: programs.filter((p) => p.passType === "PREPAID").length,
+    GIFT_CARD: programs.filter((p) => p.passType === "GIFT_CARD").length,
+    TICKET: programs.filter((p) => p.passType === "TICKET").length,
   }
 
   const filteredPrograms =
@@ -97,7 +94,8 @@ export function TemplatesListView({
     { key: "COUPON", label: t("coupons") },
     { key: "MEMBERSHIP", label: t("memberships") },
     { key: "POINTS", label: t("points") },
-    { key: "PREPAID", label: t("prepaid") },
+    { key: "GIFT_CARD", label: t("giftCards") },
+    { key: "TICKET", label: t("tickets") },
   ]
 
   // Only show filter tabs if there's more than one type

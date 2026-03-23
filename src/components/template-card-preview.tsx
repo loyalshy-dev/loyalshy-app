@@ -4,12 +4,8 @@ import {
   parseCouponConfig,
   parseMembershipConfig,
   formatCouponValue,
-  parsePrepaidConfig,
   parseGiftCardConfig,
   parseTicketConfig,
-  parseAccessConfig,
-  parseTransitConfig,
-  parseBusinessIdConfig,
 } from "@/lib/pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -76,9 +72,6 @@ type TemplateCardPreviewProps = {
   qrValue?: string
   /** Member since date string */
   memberSince?: string
-  // ─── Prepaid overrides (for live data) ──
-  /** Override remaining uses (default: totalUses from config) */
-  remainingUses?: number
 }
 
 // ─── Helper: build all type-specific renderer props from config ──
@@ -117,17 +110,6 @@ function buildTypeProps(passType: string, config: unknown) {
       }
       break
     }
-    case "PREPAID": {
-      const c = parsePrepaidConfig(config)
-      if (c) {
-        props.remainingUses = c.totalUses
-        props.totalUses = c.totalUses
-        props.prepaidValidUntil = c.validUntil
-          ? new Date(c.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-          : "No expiry"
-      }
-      break
-    }
     case "GIFT_CARD": {
       const c = parseGiftCardConfig(config)
       if (c) {
@@ -147,36 +129,6 @@ function buildTypeProps(passType: string, config: unknown) {
         props.eventVenue = c.eventVenue
         props.scanStatus = `0 / ${c.maxScans}`
       }
-      break
-    }
-    case "ACCESS": {
-      const c = parseAccessConfig(config)
-      if (c) {
-        props.accessLabel = c.accessLabel
-        props.showHolderPhoto = c.showHolderPhoto
-        props.holderPhotoPosition = c.holderPhotoPosition
-      }
-      props.accessGranted = "0"
-      break
-    }
-    case "TRANSIT": {
-      const c = parseTransitConfig(config)
-      if (c) {
-        props.transitType = c.transitType?.toUpperCase()
-        props.originName = c.originName
-        props.destinationName = c.destinationName
-      }
-      props.boardingStatus = "NOT BOARDED"
-      break
-    }
-    case "BUSINESS_ID": {
-      const c = parseBusinessIdConfig(config)
-      if (c) {
-        props.idLabel = c.idLabel
-        props.showHolderPhoto = c.showHolderPhoto ?? true
-        props.holderPhotoPosition = c.holderPhotoPosition ?? "center"
-      }
-      props.verifications = "0"
       break
     }
   }
@@ -205,7 +157,6 @@ export function TemplateCardPreview({
   hasReward,
   qrValue,
   memberSince,
-  remainingUses,
 }: TemplateCardPreviewProps) {
   const design = buildWalletPassDesign(template.passDesign)
   const typeProps = buildTypeProps(template.passType, template.config)
@@ -216,11 +167,6 @@ export function TemplateCardPreview({
   const cfg = (template.config as Record<string, unknown> | null) ?? {}
   const defaultTotalVisits = (cfg as { stampsRequired?: number }).stampsRequired ?? 10
   const defaultRewardDescription = (cfg as { rewardDescription?: string }).rewardDescription ?? ""
-
-  // Apply remainingUses override (for live prepaid data)
-  if (remainingUses !== undefined) {
-    typeProps.remainingUses = remainingUses
-  }
 
   return (
     <WalletPassRenderer

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple/Google Wallet integration. Supports 10 pass types: stamp cards, coupons, memberships, points, prepaid, gift cards, tickets, access passes, transit passes, and business IDs. Contacts receive wallet passes via QR code scan, shareable link, direct issue, bulk CSV import, email, or REST API.
+Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple/Google Wallet integration. Supports 6 pass types: stamp cards, coupons, memberships, points, gift cards, and tickets. Contacts receive wallet passes via QR code scan, shareable link, direct issue, bulk CSV import, email, or REST API.
 
 ## Stack (Verified Mar 2026)
 
@@ -168,7 +168,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
     /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, pass types carousel, motion animations)
       motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn) — used below-fold only; Hero/SocialProof use CSS animations
       contact-form.tsx → Contact form client component (Zod validation, honeypot, inquiry type pre-selection from URL params)
-      pass-types-carousel.tsx → Auto-playing carousel showcasing all 10 pass types with screenshots, descriptions, and use case tags
+      pass-types-carousel.tsx → Auto-playing carousel showcasing all 6 pass types with screenshots, descriptions, and use case tags
     /wallet         → Wallet pass components
   /i18n             → Internationalization config
     config.ts       → Locale definitions (en, es, fr)
@@ -196,18 +196,18 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 | LoyaltyProgram | PassTemplate | Generic template for any pass type |
 | Enrollment | PassInstance | Issued pass (Contact × PassTemplate) |
 | Visit | Interaction | Single table with InteractionType discriminator |
-| ProgramType | PassType | 10 types (see below) |
+| ProgramType | PassType | 6 types (see below) |
 
 ### Pass Types (10)
-STAMP_CARD, COUPON, MEMBERSHIP, POINTS, PREPAID, GIFT_CARD, TICKET, ACCESS, TRANSIT, BUSINESS_ID
+STAMP_CARD, COUPON, MEMBERSHIP, POINTS, GIFT_CARD, TICKET
 
 ### Join Mode (per PassTemplate)
 - **OPEN** (default for STAMP_CARD, COUPON, POINTS, MEMBERSHIP): contacts self-join via QR code or shareable link on `/join/[slug]`
-- **INVITE_ONLY** (default for TICKET, ACCESS, TRANSIT, BUSINESS_ID, GIFT_CARD, PREPAID): passes issued by org only (Direct Issue, CSV Import, API). Public join page filters out INVITE_ONLY templates; `joinTemplate` server action rejects them server-side.
+- **INVITE_ONLY** (default for TICKET, GIFT_CARD): passes issued by org only (Direct Issue, CSV Import, API). Public join page filters out INVITE_ONLY templates; `joinTemplate` server action rejects them server-side.
 - Owners can override the default per program in the Distribution tab.
 
 ### Interaction Types
-STAMP, COUPON_REDEEM, CHECK_IN, POINTS_EARN, POINTS_REDEEM, PREPAID_USE, PREPAID_RECHARGE, GIFT_CHARGE, GIFT_REFUND, TICKET_SCAN, TICKET_VOID, ACCESS_GRANT, ACCESS_DENY, TRANSIT_BOARD, TRANSIT_EXIT, ID_VERIFY, STATUS_CHANGE, REWARD_EARNED, REWARD_REDEEMED, NOTE
+STAMP, COUPON_REDEEM, CHECK_IN, POINTS_EARN, POINTS_REDEEM, GIFT_CHARGE, GIFT_REFUND, TICKET_SCAN, TICKET_VOID, STATUS_CHANGE, REWARD_EARNED, REWARD_REDEEMED, NOTE
 
 ## Development Phases
 
@@ -219,8 +219,8 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 
 **Rewrite phases:**
 - **Phase P1** — Schema & Core Data Layer (new Prisma schema, types, DAL)
-- **Phase P2** — Server Actions (Loyalty Types: stamp, coupon, membership, points, prepaid)
-- **Phase P3** — Server Actions (New Types: gift card, ticket, access, transit, business ID)
+- **Phase P2** — Server Actions (Loyalty Types: stamp, coupon, membership, points)
+- **Phase P3** — Server Actions (New Types: gift card, ticket)
 - **Phase P4** — Wallet Pass Generators (Apple 3 styles, Google 4 classes)
 - **Phase P5** — Dashboard UI (entity renames, navigation updates)
 - **Phase P6** — Public Pages & Onboarding (marketing copy, join flow)
@@ -231,12 +231,12 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 
 - [x] Phase 0–5, 7–11 — All original phases complete
 - [x] Phase P1 — Schema & Core Data Layer (new Prisma schema with PassTemplate/PassInstance/Contact/Interaction/Organization, type definitions, DAL rewrite)
-- [x] Phase P2 — Server Actions for loyalty types (stamp, coupon, membership, points, prepaid actions)
-- [x] Phase P3 — Server Actions for new types (gift card, ticket, access, transit, business ID actions)
-- [x] Phase P4 — Wallet Pass Generators (Apple pass: storeCard/eventTicket/boardingPass/generic; Google pass: Loyalty/GiftCard/EventTicket/Transit/Generic classes)
+- [x] Phase P2 — Server Actions for loyalty types (stamp, coupon, membership, points actions)
+- [x] Phase P3 — Server Actions for new types (gift card, ticket actions)
+- [x] Phase P4 — Wallet Pass Generators (Apple pass: storeCard/eventTicket/generic; Google pass: Loyalty/GiftCard/EventTicket/Generic classes)
 - [x] Phase P5 — Dashboard UI entity renames (Restaurant→Organization, Customer→Contact, Program→Template, Enrollment→PassInstance throughout all dashboard components, settings, register dialog, wallet renderer, Trigger.dev emails)
 - [x] Phase P6 — Public Pages & Onboarding (marketing copy restaurant→business, restaurantName→businessName type rename)
-- [x] Phase P7 — Studio & Card Renderer (all 10 type panels, field configs, Apple/Google generators, renderer support)
+- [x] Phase P7 — Studio & Card Renderer (all 6 type panels, field configs, Apple/Google generators, renderer support)
 - [x] Phase P8 — Admin, Jobs & Polish (admin /restaurants/→/organizations/, dashboard /customers/→/contacts/, file + component renames, revalidatePath updates)
 - [x] Phase API-1 — API Foundation (ApiKey/WebhookEndpoint/WebhookDelivery/ApiRequestLog models, auth, rate limiting, CORS, error handling, idempotency, request logging)
 - [x] Phase API-2 — Core CRUD Endpoints (contacts, templates, passes, interactions — list/detail/create/update/delete routes, shared data layer, serializers)
@@ -285,12 +285,12 @@ Update the "Current Progress" section above to track what's done.
 7. Invitation (Better Auth's org invite — separate from StaffInvitation)
 
 **Application (14):**
-8. PassTemplate (passType: 10 types, joinMode: OPEN/INVITE_ONLY, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
+8. PassTemplate (passType: 6 types, joinMode: OPEN/INVITE_ONLY, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
 9. PassInstance (pivot: Contact × PassTemplate — wallet pass, status, data JSON for type-specific state)
 10. Contact (end user — identity + denormalized totalInteractions + sequential memberNumber per org)
 11. Interaction (type discriminator, metadata JSON, linked to PassInstance)
 12. Reward (linked to PassInstance; `revealedAt` nullable — null means prize minigame not yet played)
-13. PassDesign (per PassTemplate; typed columns for wallet passes + `editorConfig` JSON for rich studio editor; `cardType`: STAMP/POINTS/TIER/COUPON/PREPAID/GIFT_CARD/TICKET/ACCESS/TRANSIT/BUSINESS_ID/GENERIC; per-program logos: `logoUrl`/`logoAppleUrl`/`logoGoogleUrl` with fallback to Organization logos)
+13. PassDesign (per PassTemplate; typed columns for wallet passes + `editorConfig` JSON for rich studio editor; `cardType`: STAMP/POINTS/TIER/COUPON/GIFT_CARD/TICKET/GENERIC; per-program logos: `logoUrl`/`logoAppleUrl`/`logoGoogleUrl` with fallback to Organization logos)
 14. WalletPassLog (linked to PassInstance)
 15. StaffInvitation (custom invite flow with tokens — NOT Better Auth's Invitation)
 16. DeviceRegistration (Apple Wallet push, linked to PassInstance)

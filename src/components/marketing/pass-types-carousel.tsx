@@ -7,12 +7,8 @@ import {
   Ticket,
   Crown,
   Coins,
-  CreditCard,
   Gift,
   CalendarDays,
-  ShieldCheck,
-  Bus,
-  BadgeCheck,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -25,12 +21,8 @@ const PASS_TYPES = [
   { id: "coupon", icon: Ticket, image: "/pass-types/coupon-google.webp" },
   { id: "membership", icon: Crown, image: "/pass-types/memebership-apple.webp" },
   { id: "points", icon: Coins, image: null },
-  { id: "prepaid", icon: CreditCard, image: null },
   { id: "giftCard", icon: Gift, image: null },
   { id: "ticket", icon: CalendarDays, image: "/pass-types/ticket-google.webp" },
-  { id: "access", icon: ShieldCheck, image: null },
-  { id: "transit", icon: Bus, image: null },
-  { id: "businessId", icon: BadgeCheck, image: null },
 ] as const
 
 export function PassTypesCarousel() {

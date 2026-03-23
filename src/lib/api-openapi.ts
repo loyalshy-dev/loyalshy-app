@@ -359,7 +359,7 @@ curl "https://your-domain.com/api/v1/passes?contact_id=CONTACT_ID&template_id=TE
 
 ---
 
-### Gym Membership — Access passes with check-ins
+### Gym Membership — Membership passes with check-ins
 
 **Scenario:** A gym chain issues digital membership cards. Members check in by scanning their pass at the entrance.
 
@@ -511,177 +511,6 @@ app.post("/webhooks/loyalshy", (req, res) => {
 \`\`\`
 
 Webhooks are retried up to 5 times with exponential backoff. Endpoints that fail 10 times consecutively are automatically disabled — you can re-enable them in the dashboard or via the API.
-
----
-
-### University Student ID — Digital campus identity cards
-
-**Scenario:** A university issues digital student IDs that work as campus building access, library cards, and exam verification — replacing plastic cards.
-
-**Setup (once):**
-1. Create a **Business ID** template in the dashboard — add fields for student name, student number, faculty, and expiry date
-2. Design the pass in the card studio — add the university logo, student photo placeholder, and campus branding
-3. Set validity duration (e.g., 1 academic year)
-4. Activate the template and create an API key
-
-**Integration flow:**
-
-**Step 1: Issue student ID when enrollment is confirmed**
-
-Connect your student information system (SIS) to issue IDs automatically after enrollment:
-
-\`\`\`bash
-curl -X POST https://your-domain.com/api/v1/passes \\
-  -H "Authorization: Bearer lsk_live_..." \\
-  -H "Content-Type: application/json" \\
-  -H "Idempotency-Key: enrollment-2026-STU-48291" \\
-  -d '{
-    "templateId": "YOUR_STUDENT_ID_TEMPLATE_ID",
-    "contact": {
-      "fullName": "Emma Rodriguez",
-      "email": "e.rodriguez@university.edu",
-      "phone": "+34655123456"
-    },
-    "sendEmail": true
-  }'
-\`\`\`
-
-The student receives their digital ID via email with Apple Wallet and Google Wallet buttons. The \`Idempotency-Key\` tied to the enrollment ID prevents duplicates if your SIS retries.
-
-**Step 2: Verify identity at campus checkpoints**
-
-When a student scans their pass at the library, lab, or exam hall:
-
-\`\`\`bash
-curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
-  -H "Authorization: Bearer lsk_live_..." \\
-  -H "Content-Type: application/json" \\
-  -d '{"action": "verify"}'
-\`\`\`
-
-Each verification is logged as an \`ID_VERIFY\` interaction with a timestamp — useful for attendance tracking and building access audits.
-
-**Step 3: Embed wallet links in the student portal**
-
-Use the \`walletUrls\` from the response to add "Add to Wallet" buttons on your student portal:
-
-\`\`\`javascript
-// After issuing the ID
-const { data: pass } = await res.json();
-
-// Render on your student portal
-const walletLinks = {
-  viewOnline: pass.walletUrls.cardUrl,
-  addToiPhone: pass.walletUrls.appleWalletUrl,
-  addToAndroid: pass.walletUrls.googleWalletUrl,
-};
-\`\`\`
-
-**Step 4: Monitor usage and revoke on graduation/withdrawal**
-
-Track verification activity across campus:
-
-\`\`\`bash
-curl "https://your-domain.com/api/v1/interactions?type=ID_VERIFY&since=2026-09-01T00:00:00Z" \\
-  -H "Authorization: Bearer lsk_live_..."
-\`\`\`
-
-When a student graduates or withdraws, revoke their ID by updating the pass status:
-
-\`\`\`bash
-curl -X PATCH https://your-domain.com/api/v1/passes/PASS_ID \\
-  -H "Authorization: Bearer lsk_live_..." \\
-  -H "Content-Type: application/json" \\
-  -d '{"status": "REVOKED"}'
-\`\`\`
-
----
-
-### Public Transit / Bus Pass — Digital monthly passes
-
-**Scenario:** A city transit agency issues monthly bus passes as wallet passes. Passengers board by scanning their pass, and the system tracks boardings and exits per route.
-
-**Setup (once):**
-1. Create a **Transit** template — set the validity period (e.g., 30 days), zone coverage, and route info
-2. Design the pass with the transit authority logo, route map strip image, and zone indicator
-3. Activate the template and create an API key
-
-**Integration flow:**
-
-**Step 1: Issue a monthly pass when the passenger purchases online**
-
-\`\`\`bash
-curl -X POST https://your-domain.com/api/v1/passes \\
-  -H "Authorization: Bearer lsk_live_..." \\
-  -H "Content-Type: application/json" \\
-  -H "Idempotency-Key: order-TRN-20260312-7841" \\
-  -d '{
-    "templateId": "YOUR_TRANSIT_TEMPLATE_ID",
-    "contact": {
-      "fullName": "Lucas Fernandez",
-      "email": "lucas.f@email.com"
-    },
-    "sendEmail": true
-  }'
-\`\`\`
-
-The passenger gets an email with wallet download links. The pass shows on their lock screen when they're near a bus stop (Apple Wallet location-triggered).
-
-**Step 2: Record boarding when the passenger taps at the door scanner**
-
-\`\`\`bash
-curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
-  -H "Authorization: Bearer lsk_live_..." \\
-  -H "Content-Type: application/json" \\
-  -d '{"action": "board"}'
-\`\`\`
-
-Response:
-
-\`\`\`json
-{
-  "data": {
-    "action": "board",
-    "passInstanceId": "...",
-    "result": { "boardingCount": 47 },
-    "interaction": { "id": "...", "type": "TRANSIT_BOARD", "createdAt": "..." }
-  }
-}
-\`\`\`
-
-**Step 3: Record exit (optional, for zone-based billing)**
-
-If your system tracks exits for zone validation:
-
-\`\`\`bash
-curl -X POST https://your-domain.com/api/v1/passes/PASS_ID/actions \\
-  -H "Authorization: Bearer lsk_live_..." \\
-  -H "Content-Type: application/json" \\
-  -d '{"action": "exit"}'
-\`\`\`
-
-**Step 4: Analyze ridership with daily stats**
-
-Track boarding trends to optimize routes and schedules:
-
-\`\`\`bash
-curl "https://your-domain.com/api/v1/stats/daily?from=2026-03-01&to=2026-03-12" \\
-  -H "Authorization: Bearer lsk_live_..."
-\`\`\`
-
-**Step 5: Auto-expire and renew**
-
-Transit passes have a built-in expiry date. When a pass expires, the status changes automatically. Set up a webhook on \`pass.expired\` to trigger a renewal reminder in your billing system:
-
-\`\`\`bash
-curl -X POST https://your-domain.com/api/v1/webhooks \\
-  -H "Authorization: Bearer lsk_live_..." \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "url": "https://transit-billing.example.com/webhooks/loyalshy",
-    "events": ["pass.expired"]
-  }'
-\`\`\`
 
 ---
 
@@ -1103,7 +932,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             description: { type: "string" as const, nullable: true, description: "Optional description", example: "Collect 10 stamps, get a free drink" },
             passType: {
               type: "string" as const,
-              enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID"],
+              enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"],
               description: "Type of wallet pass",
               example: "STAMP_CARD",
             },
@@ -1153,7 +982,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             templateName: { type: "string" as const, description: "Name of the pass template", example: "Coffee Stamp Card" },
             passType: {
               type: "string" as const,
-              enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID"],
+              enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"],
               description: "Pass type (inherited from template)",
               example: "STAMP_CARD",
             },
@@ -1238,7 +1067,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             type: {
               type: "string" as const,
               description: "Interaction type discriminator",
-              enum: ["STAMP", "COUPON_REDEEM", "CHECK_IN", "POINTS_EARN", "POINTS_REDEEM", "PREPAID_USE", "PREPAID_RECHARGE", "GIFT_CHARGE", "GIFT_REFUND", "TICKET_SCAN", "TICKET_VOID", "ACCESS_GRANT", "ACCESS_DENY", "TRANSIT_BOARD", "TRANSIT_EXIT", "ID_VERIFY", "STATUS_CHANGE", "REWARD_EARNED", "REWARD_REDEEMED", "NOTE"],
+              enum: ["STAMP", "COUPON_REDEEM", "CHECK_IN", "POINTS_EARN", "POINTS_REDEEM", "GIFT_CHARGE", "GIFT_REFUND", "TICKET_SCAN", "TICKET_VOID", "STATUS_CHANGE", "REWARD_EARNED", "REWARD_REDEEMED", "NOTE"],
               example: "STAMP",
             },
             metadata: { type: "object" as const, description: "Type-specific metadata", example: { stampNumber: 7 } },
@@ -1544,7 +1373,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             { name: "search", in: "query", description: "Full-text search across name, email, and phone", schema: { type: "string" } },
             { name: "sort", in: "query", description: "Sort field", schema: { type: "string", enum: ["fullName", "createdAt", "totalInteractions", "lastInteractionAt"], default: "createdAt" } },
             { name: "order", in: "query", description: "Sort direction", schema: { type: "string", enum: ["asc", "desc"], default: "desc" } },
-            { name: "pass_type", in: "query", description: "Filter to contacts with at least one pass of this type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID"] } },
+            { name: "pass_type", in: "query", description: "Filter to contacts with at least one pass of this type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"] } },
           ],
           "x-codeSamples": [
             {
@@ -1890,7 +1719,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             { name: "page", in: "query", schema: { type: "integer", default: 1, minimum: 1 } },
             { name: "per_page", in: "query", schema: { type: "integer", default: 20, minimum: 1, maximum: 100 } },
             { name: "status", in: "query", description: "Filter by template status", schema: { type: "string", enum: ["DRAFT", "ACTIVE", "ARCHIVED"] } },
-            { name: "pass_type", in: "query", description: "Filter by pass type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID"] } },
+            { name: "pass_type", in: "query", description: "Filter by pass type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"] } },
           ],
           "x-codeSamples": [
             {
@@ -2042,7 +1871,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             { name: "contact_id", in: "query", description: "Filter by contact", schema: { type: "string" } },
             { name: "template_id", in: "query", description: "Filter by template", schema: { type: "string" } },
             { name: "status", in: "query", description: "Filter by pass status", schema: { type: "string", enum: ["ACTIVE", "COMPLETED", "SUSPENDED", "EXPIRED", "REVOKED", "VOIDED"] } },
-            { name: "pass_type", in: "query", description: "Filter by pass type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID"] } },
+            { name: "pass_type", in: "query", description: "Filter by pass type", schema: { type: "string", enum: ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"] } },
           ],
           "x-codeSamples": [
             {
@@ -2275,9 +2104,8 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
             "Execute an action on a pass instance. The action must match the pass type:\n\n" +
             "| Pass Type | Actions |\n|---|---|\n" +
             "| STAMP_CARD | `stamp` |\n| COUPON | `redeem` |\n| MEMBERSHIP | `check_in` |\n" +
-            "| POINTS | `earn_points`, `redeem_points` |\n| PREPAID | `use`, `recharge` |\n" +
-            "| GIFT_CARD | `charge`, `refund` |\n| TICKET | `scan`, `void` |\n" +
-            "| ACCESS | `grant`, `deny` |\n| TRANSIT | `board`, `exit` |\n| BUSINESS_ID | `verify` |",
+            "| POINTS | `earn_points`, `redeem_points` |\n" +
+            "| GIFT_CARD | `charge`, `refund` |\n| TICKET | `scan`, `void` |",
           parameters: [{ name: "id", in: "path", required: true, description: "Pass instance ID", schema: { type: "string" } }],
           requestBody: {
             required: true,
@@ -2290,7 +2118,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
                       title: "Simple action",
                       description: "Actions with no extra parameters",
                       required: ["action"],
-                      properties: { action: { type: "string", enum: ["stamp", "check_in", "scan", "void", "grant", "deny", "board", "exit", "verify"] } },
+                      properties: { action: { type: "string", enum: ["stamp", "check_in", "scan", "void"] } },
                     },
                     {
                       type: "object",
@@ -2303,18 +2131,6 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
                       title: "Points action",
                       required: ["action", "points"],
                       properties: { action: { type: "string", enum: ["earn_points", "redeem_points"] }, points: { type: "integer", minimum: 1, description: "Number of points to earn or redeem" } },
-                    },
-                    {
-                      type: "object",
-                      title: "Prepaid use",
-                      required: ["action", "amount"],
-                      properties: { action: { const: "use" }, amount: { type: "integer", minimum: 1, description: "Number of uses to consume" } },
-                    },
-                    {
-                      type: "object",
-                      title: "Prepaid recharge",
-                      required: ["action", "uses"],
-                      properties: { action: { const: "recharge" }, uses: { type: "integer", minimum: 1, description: "Number of uses to add" } },
                     },
                     {
                       type: "object",
@@ -2456,7 +2272,7 @@ After 10 consecutive failures across any deliveries, the endpoint is **auto-disa
                   properties: {
                     type: {
                       type: "string",
-                      enum: ["STAMP", "COUPON_REDEEM", "CHECK_IN", "POINTS_EARN", "POINTS_REDEEM", "PREPAID_USE", "PREPAID_RECHARGE", "GIFT_CHARGE", "GIFT_REFUND", "TICKET_SCAN", "TICKET_VOID", "ACCESS_GRANT", "ACCESS_DENY", "TRANSIT_BOARD", "TRANSIT_EXIT", "ID_VERIFY", "STATUS_CHANGE", "REWARD_EARNED", "REWARD_REDEEMED", "NOTE"],
+                      enum: ["STAMP", "COUPON_REDEEM", "CHECK_IN", "POINTS_EARN", "POINTS_REDEEM", "GIFT_CHARGE", "GIFT_REFUND", "TICKET_SCAN", "TICKET_VOID", "STATUS_CHANGE", "REWARD_EARNED", "REWARD_REDEEMED", "NOTE"],
                       description: "Interaction type",
                     },
                     metadata: { type: "object", description: "Arbitrary metadata for the interaction" },

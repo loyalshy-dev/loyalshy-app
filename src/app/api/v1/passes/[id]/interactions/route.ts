@@ -10,17 +10,10 @@ import {
   performCheckIn,
   performEarnPoints,
   performRedeemPoints,
-  performPrepaidUse,
-  performPrepaidRecharge,
   performGiftCardCharge,
   performGiftCardRefund,
   performTicketScan,
   performTicketVoid,
-  performAccessGrant,
-  performAccessDeny,
-  performTransitBoard,
-  performTransitExit,
-  performIdVerify,
   type ActionResult,
 } from "@/lib/api-data"
 import { serializeInteraction } from "@/lib/api-serializers"
@@ -37,17 +30,10 @@ const DOMAIN_INTERACTION_TYPES = new Set([
   "CHECK_IN",
   "POINTS_EARN",
   "POINTS_REDEEM",
-  "PREPAID_USE",
-  "PREPAID_RECHARGE",
   "GIFT_CHARGE",
   "GIFT_REFUND",
   "TICKET_SCAN",
   "TICKET_VOID",
-  "ACCESS_GRANT",
-  "ACCESS_DENY",
-  "TRANSIT_BOARD",
-  "TRANSIT_EXIT",
-  "ID_VERIFY",
 ])
 
 // Log-only interaction types (no domain side effects)
@@ -162,20 +148,6 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
           typeof metadata?.points === "number" ? metadata.points : 0
         )
         break
-      case "PREPAID_USE":
-        result = await performPrepaidUse(
-          ctx.organizationId,
-          passId,
-          typeof metadata?.amount === "number" ? metadata.amount : 1
-        )
-        break
-      case "PREPAID_RECHARGE":
-        result = await performPrepaidRecharge(
-          ctx.organizationId,
-          passId,
-          typeof metadata?.uses === "number" ? metadata.uses : 0
-        )
-        break
       case "GIFT_CHARGE":
         result = await performGiftCardCharge(
           ctx.organizationId,
@@ -195,21 +167,6 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
         break
       case "TICKET_VOID":
         result = await performTicketVoid(ctx.organizationId, passId)
-        break
-      case "ACCESS_GRANT":
-        result = await performAccessGrant(ctx.organizationId, passId)
-        break
-      case "ACCESS_DENY":
-        result = await performAccessDeny(ctx.organizationId, passId)
-        break
-      case "TRANSIT_BOARD":
-        result = await performTransitBoard(ctx.organizationId, passId)
-        break
-      case "TRANSIT_EXIT":
-        result = await performTransitExit(ctx.organizationId, passId)
-        break
-      case "ID_VERIFY":
-        result = await performIdVerify(ctx.organizationId, passId)
         break
       default:
         throw new UnprocessableError(`Unhandled domain interaction type: ${interactionType}`)

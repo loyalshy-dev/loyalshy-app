@@ -34,12 +34,8 @@ function passTypeToCardType(passType: string): CardType {
     case "COUPON": return "COUPON"
     case "MEMBERSHIP": return "TIER"
     case "POINTS": return "POINTS"
-    case "PREPAID": return "PREPAID"
     case "GIFT_CARD": return "GIFT_CARD"
     case "TICKET": return "TICKET"
-    case "ACCESS": return "ACCESS"
-    case "TRANSIT": return "TRANSIT"
-    case "BUSINESS_ID": return "BUSINESS_ID"
     default: return "STAMP"
   }
 }
@@ -80,14 +76,6 @@ function buildConfigPayload(passType: string, pc: ProgramConfigState): Record<st
         pointsPerVisit: pc.pointsPerVisit,
         pointsLabel: pc.pointsLabel,
       }
-    case "PREPAID":
-      return {
-        totalUses: pc.totalUses,
-        useLabel: pc.useLabel,
-        rechargeable: pc.rechargeable,
-        rechargeAmount: pc.rechargeable ? pc.rechargeAmount : undefined,
-        terms: pc.terms || undefined,
-      }
     case "GIFT_CARD":
       return {
         currency: pc.currency,
@@ -102,34 +90,6 @@ function buildConfigPayload(passType: string, pc: ProgramConfigState): Record<st
         eventVenue: pc.eventVenue,
         barcodeType: pc.barcodeType,
         maxScans: pc.maxScans,
-      }
-    case "ACCESS":
-      return {
-        accessLabel: pc.accessLabel,
-        validDays: pc.validDays.length > 0 ? pc.validDays : undefined,
-        validTimeStart: pc.validTimeStart || undefined,
-        validTimeEnd: pc.validTimeEnd || undefined,
-        validDuration: pc.validDuration,
-        customDurationDays: pc.validDuration === "custom" ? pc.customDurationDays : undefined,
-        maxDailyUses: pc.maxDailyUses || undefined,
-        showHolderPhoto: pc.showHolderPhoto,
-        holderPhotoPosition: pc.holderPhotoPosition,
-      }
-    case "TRANSIT":
-      return {
-        transitType: pc.transitType,
-        originName: pc.originName || undefined,
-        destinationName: pc.destinationName || undefined,
-        departureDateTime: pc.departureDateTime || undefined,
-        barcodeType: pc.barcodeType,
-      }
-    case "BUSINESS_ID":
-      return {
-        idLabel: pc.idLabel,
-        showHolderPhoto: pc.showHolderPhoto,
-        holderPhotoPosition: pc.holderPhotoPosition,
-        validDuration: pc.validDuration,
-        customDurationDays: pc.validDuration === "custom" ? pc.customDurationDays : undefined,
       }
     default:
       return {}
@@ -233,10 +193,6 @@ export function StudioLayout({
       autoRenew: (cfg.autoRenew as boolean) ?? false,
       pointsPerVisit: (cfg.pointsPerVisit as number) ?? 1,
       pointsLabel: (cfg.pointsLabel as string) ?? "pts",
-      totalUses: (cfg.totalUses as number) ?? 10,
-      useLabel: (cfg.useLabel as string) ?? "use",
-      rechargeable: (cfg.rechargeable as boolean) ?? false,
-      rechargeAmount: (cfg.rechargeAmount as number) ?? 0,
       startsAt: toDateStr(templateStartsAt),
       endsAt: toDateStr(templateEndsAt),
       minigameEnabled: (minigame.enabled as boolean) ?? false,
@@ -256,21 +212,6 @@ export function StudioLayout({
       eventVenue: (cfg.eventVenue as string) ?? "",
       barcodeType: (cfg.barcodeType as string) ?? "qr",
       maxScans: (cfg.maxScans as number) ?? 1,
-      // Access
-      accessLabel: (cfg.accessLabel as string) ?? "Access Pass",
-      validDays: (cfg.validDays as string[]) ?? [],
-      validTimeStart: (cfg.validTimeStart as string) ?? "",
-      validTimeEnd: (cfg.validTimeEnd as string) ?? "",
-      maxDailyUses: (cfg.maxDailyUses as number) ?? 0,
-      // Transit
-      transitType: (cfg.transitType as string) ?? "bus",
-      originName: (cfg.originName as string) ?? "",
-      destinationName: (cfg.destinationName as string) ?? "",
-      departureDateTime: (cfg.departureDateTime as string) ?? "",
-      // Business ID
-      idLabel: (cfg.idLabel as string) ?? "Employee ID",
-      showHolderPhoto: (cfg.showHolderPhoto as boolean) ?? true,
-      holderPhotoPosition: (cfg.holderPhotoPosition as "left" | "center" | "right") ?? "center",
     })
     // Mark clean after setting logos and config since it's not a user change
     store.getState().markClean()
@@ -1224,7 +1165,7 @@ function MobileToolBar({
     { id: "details", label: t("details"), icon: <FileText size={20} /> },
     { id: "notifications", label: t("notifications"), icon: <Bell size={20} /> },
     { id: "prize", label: t("prize"), icon: <Gift size={20} />, condition: passType === "STAMP_CARD" || passType === "COUPON" },
-    { id: "avatar", label: t("avatar"), icon: <Camera size={20} />, condition: passType === "MEMBERSHIP" || passType === "ACCESS" || passType === "BUSINESS_ID" },
+    { id: "avatar", label: t("avatar"), icon: <Camera size={20} />, condition: passType === "MEMBERSHIP" },
   ]
 
   const visibleTools = ALL_TOOLS.filter((tool) => tool.condition === undefined || tool.condition)

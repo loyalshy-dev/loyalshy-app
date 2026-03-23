@@ -80,10 +80,6 @@ type WalletPassRendererProps = {
   // Membership-specific
   tierName?: string          // e.g. "VIP", "Gold"
   benefits?: string          // membership benefits summary
-  // Prepaid-specific
-  remainingUses?: number     // remaining uses on prepaid pass
-  totalUses?: number         // total uses on prepaid pass
-  prepaidValidUntil?: string // expiry date for prepaid
   // Gift card-specific
   giftBalance?: string       // e.g. "USD 25.00"
   giftInitialValue?: string  // e.g. "USD 50.00"
@@ -92,17 +88,6 @@ type WalletPassRendererProps = {
   eventDate?: string         // formatted date string
   eventVenue?: string        // venue name
   scanStatus?: string        // e.g. "0 / 1"
-  // Access-specific
-  accessLabel?: string       // e.g. "VIP Access"
-  accessGranted?: string     // e.g. "12"
-  // Transit-specific
-  transitType?: string       // e.g. "BUS", "TRAIN"
-  originName?: string        // e.g. "Central Station"
-  destinationName?: string   // e.g. "Airport"
-  boardingStatus?: string    // e.g. "NOT BOARDED"
-  // Business ID-specific
-  idLabel?: string           // e.g. "Employee ID"
-  verifications?: string     // e.g. "5"
   showHolderPhoto?: boolean  // overlay holder avatar on strip
   holderPhotoPosition?: "left" | "center" | "right" // avatar placement on strip
   holderPhotoUrl?: string | null  // uploaded holder avatar image URL
@@ -156,23 +141,12 @@ export function WalletPassRenderer({
   validUntil,
   tierName,
   benefits,
-  remainingUses,
-  totalUses,
-  prepaidValidUntil,
   giftBalance,
   giftInitialValue,
   eventName,
   eventDate,
   eventVenue,
   scanStatus,
-  accessLabel,
-  accessGranted,
-  transitType,
-  originName,
-  destinationName,
-  boardingStatus,
-  idLabel,
-  verifications,
   showHolderPhoto,
   holderPhotoPosition = "center",
   holderPhotoUrl,
@@ -283,16 +257,6 @@ export function WalletPassRenderer({
       case "benefits":
         resolved = { label: lbl("BENEFITS"), value: benefits ?? "—" }
         break
-      // Prepaid fields
-      case "remaining":
-        resolved = { label: lbl("REMAINING"), value: `${remainingUses ?? 0} / ${totalUses ?? 0}` }
-        break
-      case "prepaidValidUntil":
-        resolved = { label: lbl("VALID UNTIL"), value: prepaidValidUntil ?? "No expiry" }
-        break
-      case "totalUsed":
-        resolved = { label: lbl("TOTAL USED"), value: `${currentVisits}` }
-        break
       // Gift card fields
       case "giftBalance":
         resolved = { label: lbl("BALANCE"), value: giftBalance ?? "$0.00" }
@@ -312,33 +276,6 @@ export function WalletPassRenderer({
         break
       case "scanStatus":
         resolved = { label: lbl("SCANS"), value: scanStatus ?? "0 / 1" }
-        break
-      // Access fields
-      case "accessLabel":
-        resolved = { label: lbl(accessLabel ?? "ACCESS"), value: "Granted" }
-        break
-      case "accessGranted":
-        resolved = { label: lbl("TOTAL GRANTED"), value: accessGranted ?? "0" }
-        break
-      // Transit fields
-      case "transitType":
-        resolved = { label: lbl("TYPE"), value: transitType ?? "OTHER" }
-        break
-      case "origin":
-        resolved = { label: lbl("FROM"), value: originName ?? "—" }
-        break
-      case "destination":
-        resolved = { label: lbl("TO"), value: destinationName ?? "—" }
-        break
-      case "boardingStatus":
-        resolved = { label: lbl("STATUS"), value: boardingStatus ?? "NOT BOARDED" }
-        break
-      // Business ID fields
-      case "idLabel":
-        resolved = { label: lbl(idLabel ?? "ID"), value: customerName }
-        break
-      case "verifications":
-        resolved = { label: lbl("VERIFICATIONS"), value: verifications ?? "0" }
         break
       // Shared fields
       case "customerName":
@@ -723,8 +660,8 @@ export function WalletPassRenderer({
         {/* Primary field overlay on strip (non-stamp types, e.g. Discount: Free item) */}
         {primaryOverlay}
 
-        {/* Holder photo overlay (Business ID, Membership, Access) */}
-        {showHolderPhoto && (cardType === "BUSINESS_ID" || cardType === "TIER" || cardType === "ACCESS") && (
+        {/* Holder photo overlay (Membership) */}
+        {showHolderPhoto && cardType === "TIER" && (
           <div
             style={{
               position: "absolute",

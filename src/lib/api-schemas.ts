@@ -14,12 +14,8 @@ const PASS_TYPES = [
   "COUPON",
   "MEMBERSHIP",
   "POINTS",
-  "PREPAID",
   "GIFT_CARD",
   "TICKET",
-  "ACCESS",
-  "TRANSIT",
-  "BUSINESS_ID",
 ] as const
 
 const PASS_INSTANCE_STATUSES = [
@@ -37,17 +33,10 @@ const INTERACTION_TYPES = [
   "CHECK_IN",
   "POINTS_EARN",
   "POINTS_REDEEM",
-  "PREPAID_USE",
-  "PREPAID_RECHARGE",
   "GIFT_CHARGE",
   "GIFT_REFUND",
   "TICKET_SCAN",
   "TICKET_VOID",
-  "ACCESS_GRANT",
-  "ACCESS_DENY",
-  "TRANSIT_BOARD",
-  "TRANSIT_EXIT",
-  "ID_VERIFY",
   "STATUS_CHANGE",
   "REWARD_EARNED",
   "REWARD_REDEEMED",
@@ -141,14 +130,6 @@ export const actionBodySchema = z.discriminatedUnion("action", [
     points: z.number().int().positive(),
   }),
   z.object({
-    action: z.literal("use"),
-    amount: z.number().int().positive(),
-  }),
-  z.object({
-    action: z.literal("recharge"),
-    uses: z.number().int().positive(),
-  }),
-  z.object({
     action: z.literal("charge"),
     amountCents: z.number().int().positive(),
   }),
@@ -158,11 +139,6 @@ export const actionBodySchema = z.discriminatedUnion("action", [
   }),
   z.object({ action: z.literal("scan") }),
   z.object({ action: z.literal("void") }),
-  z.object({ action: z.literal("grant") }),
-  z.object({ action: z.literal("deny") }),
-  z.object({ action: z.literal("board") }),
-  z.object({ action: z.literal("exit") }),
-  z.object({ action: z.literal("verify") }),
 ])
 
 export type ActionBody = z.infer<typeof actionBodySchema>
@@ -174,17 +150,10 @@ export const ACTION_TO_PASS_TYPE: Record<ActionBody["action"], string> = {
   check_in: "MEMBERSHIP",
   earn_points: "POINTS",
   redeem_points: "POINTS",
-  use: "PREPAID",
-  recharge: "PREPAID",
   charge: "GIFT_CARD",
   refund: "GIFT_CARD",
   scan: "TICKET",
   void: "TICKET",
-  grant: "ACCESS",
-  deny: "ACCESS",
-  board: "TRANSIT",
-  exit: "TRANSIT",
-  verify: "BUSINESS_ID",
 }
 
 // ─── Bulk Operations ────────────────────────────────────────

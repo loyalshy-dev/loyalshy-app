@@ -5,12 +5,8 @@ import type {
   CouponConfig,
   MembershipConfig,
   PointsConfig,
-  PrepaidConfig,
   GiftCardConfig,
   TicketConfig,
-  AccessConfig,
-  TransitConfig,
-  BusinessIdConfig,
   MinigameConfig,
   PassTemplateConfig,
 } from "@/types/pass-types"
@@ -84,15 +80,6 @@ export const pointsConfigSchema = z.object({
   pointsLabel: z.string().max(20).optional(),
 })
 
-export const prepaidConfigSchema = z.object({
-  totalUses: z.number().int().min(1).max(1000),
-  useLabel: z.string().min(1).max(30),
-  rechargeable: z.boolean(),
-  rechargeAmount: z.number().int().min(1).max(1000).optional(),
-  validUntil: z.string().optional(),
-  terms: z.string().max(5000).optional(),
-})
-
 export const giftCardConfigSchema = z.object({
   currency: z.string().min(1).max(3),
   initialBalanceCents: z.number().int().min(100).max(100_000_00),
@@ -106,34 +93,6 @@ export const ticketConfigSchema = z.object({
   eventVenue: z.string().min(1).max(200),
   barcodeType: z.enum(["qr", "code128", "pdf417", "aztec"]),
   maxScans: z.number().int().min(1).max(100),
-})
-
-export const accessConfigSchema = z.object({
-  accessLabel: z.string().min(1).max(100),
-  validDays: z.array(z.string()).optional(),
-  validTimeStart: z.string().optional(),
-  validTimeEnd: z.string().optional(),
-  validDuration: z.enum(["monthly", "yearly", "lifetime", "custom"]),
-  customDurationDays: z.number().int().min(1).max(3650).optional(),
-  maxDailyUses: z.number().int().min(1).max(100).optional(),
-  showHolderPhoto: z.boolean().optional(),
-  holderPhotoPosition: z.enum(["left", "center", "right"]).optional(),
-})
-
-export const transitConfigSchema = z.object({
-  transitType: z.enum(["bus", "train", "ferry", "flight", "other"]),
-  originName: z.string().max(200).optional(),
-  destinationName: z.string().max(200).optional(),
-  departureDateTime: z.string().optional(),
-  barcodeType: z.enum(["qr", "code128", "pdf417", "aztec"]),
-})
-
-export const businessIdConfigSchema = z.object({
-  idLabel: z.string().min(1).max(100),
-  validDuration: z.enum(["monthly", "yearly", "lifetime", "custom"]),
-  customDurationDays: z.number().int().min(1).max(3650).optional(),
-  showHolderPhoto: z.boolean().optional(),
-  holderPhotoPosition: z.enum(["left", "center", "right"]).optional(),
 })
 
 export const prizeItemSchema = z.object({
@@ -173,28 +132,12 @@ export function parsePointsConfig(config: unknown): PointsConfig | null {
   return safeParse(pointsConfigSchema, config)
 }
 
-export function parsePrepaidConfig(config: unknown): PrepaidConfig | null {
-  return safeParse(prepaidConfigSchema, config)
-}
-
 export function parseGiftCardConfig(config: unknown): GiftCardConfig | null {
   return safeParse(giftCardConfigSchema, config)
 }
 
 export function parseTicketConfig(config: unknown): TicketConfig | null {
   return safeParse(ticketConfigSchema, config)
-}
-
-export function parseAccessConfig(config: unknown): AccessConfig | null {
-  return safeParse(accessConfigSchema, config)
-}
-
-export function parseTransitConfig(config: unknown): TransitConfig | null {
-  return safeParse(transitConfigSchema, config)
-}
-
-export function parseBusinessIdConfig(config: unknown): BusinessIdConfig | null {
-  return safeParse(businessIdConfigSchema, config)
 }
 
 export function parseMinigameConfig(config: unknown): MinigameConfig | null {
@@ -224,28 +167,12 @@ export function isPointsConfig(config: unknown): config is PointsConfig {
   return parsePointsConfig(config) !== null
 }
 
-export function isPrepaidConfig(config: unknown): config is PrepaidConfig {
-  return parsePrepaidConfig(config) !== null
-}
-
 export function isGiftCardConfig(config: unknown): config is GiftCardConfig {
   return parseGiftCardConfig(config) !== null
 }
 
 export function isTicketConfig(config: unknown): config is TicketConfig {
   return parseTicketConfig(config) !== null
-}
-
-export function isAccessConfig(config: unknown): config is AccessConfig {
-  return parseAccessConfig(config) !== null
-}
-
-export function isTransitConfig(config: unknown): config is TransitConfig {
-  return parseTransitConfig(config) !== null
-}
-
-export function isBusinessIdConfig(config: unknown): config is BusinessIdConfig {
-  return parseBusinessIdConfig(config) !== null
 }
 
 // ─── Type-dispatch validator ────────────────────────────────
@@ -259,12 +186,8 @@ export function validateTemplateConfig(
     COUPON: couponConfigSchema as z.ZodType<PassTemplateConfig>,
     MEMBERSHIP: membershipConfigSchema as z.ZodType<PassTemplateConfig>,
     POINTS: pointsConfigSchema as z.ZodType<PassTemplateConfig>,
-    PREPAID: prepaidConfigSchema as z.ZodType<PassTemplateConfig>,
     GIFT_CARD: giftCardConfigSchema as z.ZodType<PassTemplateConfig>,
     TICKET: ticketConfigSchema as z.ZodType<PassTemplateConfig>,
-    ACCESS: accessConfigSchema as z.ZodType<PassTemplateConfig>,
-    TRANSIT: transitConfigSchema as z.ZodType<PassTemplateConfig>,
-    BUSINESS_ID: businessIdConfigSchema as z.ZodType<PassTemplateConfig>,
   }
 
   const schema = schemaMap[passType]
@@ -334,10 +257,6 @@ export function formatDuration(validDuration: string, customDurationDays?: numbe
 
 export function formatPointsValue(config: PointsConfig): string {
   return `${config.pointsPerVisit} pts/visit`
-}
-
-export function formatPrepaidValue(config: PrepaidConfig): string {
-  return `${config.totalUses} ${config.useLabel}${config.totalUses !== 1 ? "s" : ""}`
 }
 
 export function formatGiftCardValue(config: GiftCardConfig): string {

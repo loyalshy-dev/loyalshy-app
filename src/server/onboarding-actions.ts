@@ -10,7 +10,7 @@ import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { buildCardUrl } from "@/lib/card-access"
-import { parseCouponConfig, parsePrepaidConfig, parseMembershipConfig, computeMembershipExpiresAt, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, computeMembershipExpiresAt, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 import { verifyCardSignature } from "@/lib/card-access"
 import type { PublicTemplateInfo } from "@/types/pass-instance"
 import type { MinigameConfig } from "@/types/pass-types"
@@ -475,15 +475,11 @@ export async function joinTemplate(
     const walletPassId = randomUUID()
 
     // Type-specific instance data
-    const prepaidConfig = template.passType === "PREPAID" ? parsePrepaidConfig(template.config) : null
     const membershipConfig = template.passType === "MEMBERSHIP" ? parseMembershipConfig(template.config) : null
 
     const instanceDataObj: Record<string, unknown> = {
       currentCycleVisits: 0,
       totalInteractions: 0,
-    }
-    if (prepaidConfig) {
-      instanceDataObj.remainingUses = prepaidConfig.totalUses
     }
 
     passInstance = await db.passInstance.create({
@@ -493,7 +489,6 @@ export async function joinTemplate(
         walletPassId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data: instanceDataObj as any,
-        ...(prepaidConfig?.validUntil ? { expiresAt: new Date(prepaidConfig.validUntil) } : {}),
         ...(membershipConfig ? { expiresAt: computeMembershipExpiresAt(membershipConfig) } : {}),
       },
       select: {
@@ -657,7 +652,6 @@ export async function requestWalletPass(
       currentCycleVisits: (instanceData.currentCycleVisits as number) ?? 0,
       totalInteractions: (instanceData.totalInteractions as number) ?? 0,
       pointsBalance: (instanceData.pointsBalance as number) ?? 0,
-      remainingUses: (instanceData.remainingUses as number) ?? 0,
       walletPassId: passInstance.walletPassId,
       walletPassSerialNumber: passInstance.walletPassSerialNumber,
       walletProvider: passInstance.walletProvider,
@@ -697,7 +691,6 @@ type InstancePassData = {
   currentCycleVisits: number
   totalInteractions: number
   pointsBalance?: number
-  remainingUses?: number
   walletPassId: string | null
   walletPassSerialNumber: string | null
   walletProvider: string
@@ -766,7 +759,6 @@ async function issuePassForInstance(
         programType: template.passType,
         programConfig: template.config,
         pointsBalance: instance.pointsBalance ?? 0,
-        remainingUses: instance.remainingUses ?? 0,
         hasUnrevealedPrize: instance.hasUnrevealedPrize ?? false,
         holderPhotoUrl: instance.holderPhotoUrl ?? undefined,
         passInstanceId: instance.passInstanceId,
@@ -850,7 +842,6 @@ async function issuePassForInstance(
       passType: template.passType,
       templateConfig: template.config,
       pointsBalance: instance.pointsBalance ?? 0,
-      remainingUses: instance.remainingUses ?? 0,
       holderPhotoUrl: instance.holderPhotoUrl ?? undefined,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,

@@ -20,7 +20,7 @@ type IconBuffers = Record<string, Buffer>
  * strip.png / strip@2x.png / strip@3x.png for storeCard type passes.
  *
  * Thumbnail: Portrait — 90x90 (@1x), 180x180 (@2x), 270x270 (@3x)
- * Used by generic pass type (BUSINESS_ID, MEMBERSHIP, ACCESS) instead of strip.
+ * Used by generic pass type (MEMBERSHIP) instead of strip.
  * If thumbnailUrl is provided, it is fetched and included as thumbnail.png.
  */
 export async function getIconBuffers(
@@ -122,7 +122,7 @@ export async function getIconBuffers(
     }
   }
 
-  // Add thumbnail image if provided (used by generic pass type: BUSINESS_ID, MEMBERSHIP, ACCESS)
+  // Add thumbnail image if provided (used by generic pass type: MEMBERSHIP)
   // Apple Wallet generic passes display thumbnail on the right side of the pass front.
   if (thumbnailUrl) {
     try {

@@ -17,15 +17,11 @@ import { generateApplePassForEmail } from "@/lib/wallet/generate-pass-for-email"
 import { sanitizeText } from "@/lib/sanitize"
 import {
   parseCouponConfig,
-  parsePrepaidConfig,
   parseMembershipConfig,
   computeMembershipExpiresAt,
   parseMinigameConfig,
   weightedRandomPrize,
   parseGiftCardConfig,
-  parseAccessConfig,
-  parseBusinessIdConfig,
-  computeDurationExpiresAt,
 } from "@/lib/pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -83,12 +79,8 @@ const PASS_TYPE_LABELS: Record<string, string> = {
   COUPON: "Coupon",
   MEMBERSHIP: "Membership Card",
   POINTS: "Points Card",
-  PREPAID: "Prepaid Pass",
   GIFT_CARD: "Gift Card",
   TICKET: "Event Ticket",
-  ACCESS: "Access Pass",
-  TRANSIT: "Transit Pass",
-  BUSINESS_ID: "Business ID",
 }
 
 // ─── Search Contacts for Direct Issue ───────────────────────
@@ -238,14 +230,6 @@ export async function issuePassToContacts(
     // Type-specific data initialization
     let expiresAt: Date | null = null
 
-    if (template.passType === "PREPAID") {
-      const prepaidConfig = parsePrepaidConfig(template.config)
-      if (prepaidConfig) {
-        instanceDataObj.remainingUses = prepaidConfig.totalUses
-        if (prepaidConfig.validUntil) expiresAt = new Date(prepaidConfig.validUntil)
-      }
-    }
-
     if (template.passType === "MEMBERSHIP") {
       const membershipConfig = parseMembershipConfig(template.config)
       if (membershipConfig) {
@@ -263,20 +247,6 @@ export async function issuePassToContacts(
           d.setMonth(d.getMonth() + giftCardConfig.expiryMonths)
           expiresAt = d
         }
-      }
-    }
-
-    if (template.passType === "ACCESS") {
-      const accessConfig = parseAccessConfig(template.config)
-      if (accessConfig) {
-        expiresAt = computeDurationExpiresAt(accessConfig.validDuration, accessConfig.customDurationDays)
-      }
-    }
-
-    if (template.passType === "BUSINESS_ID") {
-      const bizConfig = parseBusinessIdConfig(template.config)
-      if (bizConfig) {
-        expiresAt = computeDurationExpiresAt(bizConfig.validDuration, bizConfig.customDurationDays)
       }
     }
 
@@ -672,14 +642,6 @@ export async function bulkImportAndIssue(
 
       let expiresAt: Date | null = null
 
-      if (template.passType === "PREPAID") {
-        const prepaidConfig = parsePrepaidConfig(template.config)
-        if (prepaidConfig) {
-          instanceDataObj.remainingUses = prepaidConfig.totalUses
-          if (prepaidConfig.validUntil) expiresAt = new Date(prepaidConfig.validUntil)
-        }
-      }
-
       if (template.passType === "MEMBERSHIP") {
         const membershipConfig = parseMembershipConfig(template.config)
         if (membershipConfig) expiresAt = computeMembershipExpiresAt(membershipConfig)
@@ -696,16 +658,6 @@ export async function bulkImportAndIssue(
             expiresAt = d
           }
         }
-      }
-
-      if (template.passType === "ACCESS") {
-        const accessConfig = parseAccessConfig(template.config)
-        if (accessConfig) expiresAt = computeDurationExpiresAt(accessConfig.validDuration, accessConfig.customDurationDays)
-      }
-
-      if (template.passType === "BUSINESS_ID") {
-        const bizConfig = parseBusinessIdConfig(template.config)
-        if (bizConfig) expiresAt = computeDurationExpiresAt(bizConfig.validDuration, bizConfig.customDurationDays)
       }
 
       if (template.passType === "TICKET") instanceDataObj.scanCount = 0
@@ -1000,7 +952,7 @@ export async function sendPassEmail(
 
 // ─── Holder Photo (per-instance) ─────────────────────────────
 
-const HOLDER_PHOTO_PASS_TYPES = ["BUSINESS_ID", "MEMBERSHIP", "ACCESS"]
+const HOLDER_PHOTO_PASS_TYPES = ["MEMBERSHIP"]
 
 export async function uploadInstanceHolderPhoto(
   formData: FormData

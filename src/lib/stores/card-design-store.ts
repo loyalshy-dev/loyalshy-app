@@ -92,14 +92,11 @@ export type ProgramConfigState = {
   validDuration: string
   customDurationDays: number
   autoRenew: boolean
+  showHolderPhoto: boolean
+  holderPhotoPosition: "left" | "center" | "right"
   // POINTS
   pointsPerVisit: number
   pointsLabel: string
-  // PREPAID
-  totalUses: number
-  useLabel: string
-  rechargeable: boolean
-  rechargeAmount: number
   // GIFT_CARD
   currency: string
   initialBalanceCents: number
@@ -111,21 +108,6 @@ export type ProgramConfigState = {
   eventVenue: string
   barcodeType: string
   maxScans: number
-  // ACCESS
-  accessLabel: string
-  validDays: string[]
-  validTimeStart: string
-  validTimeEnd: string
-  maxDailyUses: number
-  // TRANSIT
-  transitType: string
-  originName: string
-  destinationName: string
-  departureDateTime: string
-  // BUSINESS_ID
-  idLabel: string
-  showHolderPhoto: boolean
-  holderPhotoPosition: "left" | "center" | "right"
   // Schedule
   startsAt: string // ISO date string
   endsAt: string   // ISO date string (empty = no end)
@@ -204,12 +186,10 @@ const DEFAULT_CONFIG: ProgramConfigState = {
   validDuration: "yearly",
   customDurationDays: 365,
   autoRenew: false,
+  showHolderPhoto: false,
+  holderPhotoPosition: "right",
   pointsPerVisit: 1,
   pointsLabel: "pts",
-  totalUses: 10,
-  useLabel: "use",
-  rechargeable: false,
-  rechargeAmount: 0,
   currency: "USD",
   initialBalanceCents: 2500,
   partialRedemption: true,
@@ -219,18 +199,6 @@ const DEFAULT_CONFIG: ProgramConfigState = {
   eventVenue: "",
   barcodeType: "qr",
   maxScans: 1,
-  accessLabel: "Access Pass",
-  validDays: [],
-  validTimeStart: "",
-  validTimeEnd: "",
-  maxDailyUses: 0,
-  transitType: "bus",
-  originName: "",
-  destinationName: "",
-  departureDateTime: "",
-  idLabel: "Employee ID",
-  showHolderPhoto: true,
-  holderPhotoPosition: "center",
   startsAt: "",
   endsAt: "",
   minigameEnabled: false,

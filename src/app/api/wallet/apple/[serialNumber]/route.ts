@@ -76,7 +76,6 @@ export async function GET(
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalVisits = (instanceData.totalVisits as number) ?? 0
   const pointsBalance = (instanceData.pointsBalance as number) ?? 0
-  const remainingUses = (instanceData.remainingUses as number) ?? 0
 
   // Extract config values from PassTemplate.config JSON
   const templateConfig = (template.config ?? {}) as Record<string, unknown>
@@ -117,7 +116,6 @@ export async function GET(
       programType: template.passType,
       programConfig: template.config,
       pointsBalance,
-      remainingUses,
       holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
     })
 

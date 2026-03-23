@@ -6,7 +6,7 @@ import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem, getWalletRewardText } from "../../pass-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, getCheapestCatalogItem, getWalletRewardText } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -44,19 +44,12 @@ export type GooglePassGenerationInput = {
   passType?: string
   templateConfig?: unknown
   pointsBalance?: number
-  remainingUses?: number
   // Gift card data
   giftBalanceCents?: number
   giftCurrency?: string
   // Ticket data
   ticketScanCount?: number
-  // Access data
-  accessTotalGranted?: number
-  // Transit data
-  transitIsBoarded?: boolean
-  // Business ID data
-  businessIdVerifications?: number
-  // Holder photo URL (BUSINESS_ID, MEMBERSHIP, ACCESS — per-instance from PassInstance.data.holderPhotoUrl)
+  // Holder photo URL (MEMBERSHIP — per-instance from PassInstance.data.holderPhotoUrl)
   holderPhotoUrl?: string | null
   // Prize reveal
   hasUnrevealedPrize?: boolean
@@ -144,12 +137,8 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
       case "COUPON": return name
       case "MEMBERSHIP": return `${name} Membership`
       case "POINTS": return `${name} Points`
-      case "PREPAID": return `${name} Pass`
       case "GIFT_CARD": return `${name} Gift Card`
       case "TICKET": return `${name} Ticket`
-      case "ACCESS": return `${name} Access`
-      case "TRANSIT": return `${name} Transit`
-      case "BUSINESS_ID": return `${name} ID`
       default: return `${name} Loyalty`
     }
   })()
@@ -352,12 +341,8 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   const couponConfig = input.passType === "COUPON" ? parseCouponConfig(input.templateConfig) : null
   const membershipConfig = input.passType === "MEMBERSHIP" ? parseMembershipConfig(input.templateConfig) : null
   const pointsConfig = input.passType === "POINTS" ? parsePointsConfig(input.templateConfig) : null
-  const prepaidConfig = input.passType === "PREPAID" ? parsePrepaidConfig(input.templateConfig) : null
   const giftCardConfig = input.passType === "GIFT_CARD" ? parseGiftCardConfig(input.templateConfig) : null
   const ticketConfig = input.passType === "TICKET" ? parseTicketConfig(input.templateConfig) : null
-  const accessConfig = input.passType === "ACCESS" ? parseAccessConfig(input.templateConfig) : null
-  const transitConfig = input.passType === "TRANSIT" ? parseTransitConfig(input.templateConfig) : null
-  const businessIdConfig = input.passType === "BUSINESS_ID" ? parseBusinessIdConfig(input.templateConfig) : null
   const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Custom field labels from editorConfig
@@ -379,17 +364,13 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     customerName: { id: "customerName", header: lbl("customerName", "NAME"), body: input.contactName },
     // COUPON
     discount: { id: "discount", header: lbl("discount", couponConfig ? (getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) !== formatCouponValue(couponConfig) ? "PRIZES" : "DISCOUNT") : "DISCOUNT"), body: couponConfig ? getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) : "" },
-    validUntil: { id: "validUntil", header: lbl("validUntil", "VALID UNTIL"), body: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : (prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry") },
+    validUntil: { id: "validUntil", header: lbl("validUntil", "VALID UNTIL"), body: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
     couponCode: { id: "couponCode", header: lbl("couponCode", "CODE"), body: couponConfig?.couponCode ?? "" },
     // MEMBERSHIP
     tierName: { id: "tierName", header: lbl("tierName", "TIER"), body: membershipConfig?.membershipTier ?? "" },
     benefits: { id: "benefits", header: lbl("benefits", "BENEFITS"), body: membershipConfig?.benefits ?? "" },
     // POINTS
     earnRate: { id: "earnRate", header: lbl("earnRate", "EARN RATE"), body: pointsConfig ? `${pointsConfig.pointsPerVisit} points per visit` : "" },
-    // PREPAID
-    remaining: { id: "remaining", header: lbl("remaining", "REMAINING"), body: `${input.remainingUses ?? 0} / ${prepaidConfig?.totalUses ?? 0}` },
-    prepaidValidUntil: { id: "prepaidValidUntil", header: lbl("prepaidValidUntil", "VALID UNTIL"), body: prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
-    totalUsed: { id: "totalUsed", header: lbl("totalUsed", "TOTAL USED"), body: String(input.totalVisits) },
     // GIFT_CARD
     giftBalance: { id: "giftBalance", header: lbl("giftBalance", "BALANCE"), body: giftCardConfig ? `${giftCardConfig.currency} ${((input.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
     giftInitial: { id: "giftInitial", header: lbl("giftInitial", "INITIAL VALUE"), body: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
@@ -398,17 +379,6 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     eventDate: { id: "eventDate", header: lbl("eventDate", "DATE"), body: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
     eventVenue: { id: "eventVenue", header: lbl("eventVenue", "VENUE"), body: ticketConfig?.eventVenue ?? "" },
     scanStatus: { id: "scanStatus", header: lbl("scanStatus", "SCANS"), body: `${input.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
-    // ACCESS
-    accessLabel: { id: "accessLabel", header: lbl("accessLabel", accessConfig?.accessLabel ?? "ACCESS"), body: "Active" },
-    accessGranted: { id: "accessGranted", header: lbl("accessGranted", "TOTAL GRANTED"), body: String(input.accessTotalGranted ?? 0) },
-    // TRANSIT
-    transitType: { id: "transitType", header: lbl("transitType", "TYPE"), body: (transitConfig?.transitType ?? "other").toUpperCase() },
-    origin: { id: "origin", header: lbl("origin", "FROM"), body: transitConfig?.originName ?? "—" },
-    destination: { id: "destination", header: lbl("destination", "TO"), body: transitConfig?.destinationName ?? "—" },
-    boardingStatus: { id: "boardingStatus", header: lbl("boardingStatus", "STATUS"), body: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
-    // BUSINESS_ID
-    idLabel: { id: "idLabel", header: lbl("idLabel", businessIdConfig?.idLabel ?? "ID"), body: input.contactName },
-    verifications: { id: "verifications", header: lbl("verifications", "VERIFICATIONS"), body: String(input.businessIdVerifications ?? 0) },
   }
 
   // Build textModulesData from user-configured unified fields
@@ -453,15 +423,6 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       label: formatLabel("CHECK-INS", labelFmt),
       balance: { int: input.totalVisits },
     }
-  } else if (input.passType === "PREPAID" && prepaidConfig) {
-    loyaltyPoints = {
-      label: lbl("remaining", "REMAINING"),
-      balance: { string: `${input.remainingUses ?? 0} / ${prepaidConfig.totalUses}` },
-    }
-    secondaryLoyaltyPoints = {
-      label: formatLabel("USED", labelFmt),
-      balance: { int: input.totalVisits },
-    }
   } else if (input.passType === "POINTS" && pointsConfig) {
     loyaltyPoints = {
       label: formatLabel("POINTS", labelFmt),
@@ -488,33 +449,6 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     secondaryLoyaltyPoints = {
       label: lbl("scanStatus", "SCANS"),
       balance: { string: `${input.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` },
-    }
-  } else if (input.passType === "ACCESS" && accessConfig) {
-    loyaltyPoints = {
-      label: lbl("accessLabel", accessConfig.accessLabel),
-      balance: { string: "Active" },
-    }
-    secondaryLoyaltyPoints = {
-      label: lbl("accessGranted", "TOTAL GRANTED"),
-      balance: { int: input.accessTotalGranted ?? 0 },
-    }
-  } else if (input.passType === "TRANSIT" && transitConfig) {
-    loyaltyPoints = {
-      label: lbl("boardingStatus", "STATUS"),
-      balance: { string: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
-    }
-    secondaryLoyaltyPoints = {
-      label: lbl("transitType", "TYPE"),
-      balance: { string: transitConfig.transitType.toUpperCase() },
-    }
-  } else if (input.passType === "BUSINESS_ID" && businessIdConfig) {
-    loyaltyPoints = {
-      label: lbl("idLabel", businessIdConfig.idLabel),
-      balance: { string: input.contactName },
-    }
-    secondaryLoyaltyPoints = {
-      label: lbl("verifications", "VERIFICATIONS"),
-      balance: { int: input.businessIdVerifications ?? 0 },
     }
   } else {
     // STAMP_CARD (default)
@@ -584,8 +518,8 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     heroImageUrl = googleLogo
   }
 
-  // For generic pass types (BUSINESS_ID, MEMBERSHIP, ACCESS): use holder photo as hero image if available and no strip is set
-  const isGenericType = input.passType === "BUSINESS_ID" || input.passType === "MEMBERSHIP" || input.passType === "ACCESS"
+  // For generic pass types (MEMBERSHIP): use holder photo as hero image if available and no strip is set
+  const isGenericType = input.passType === "MEMBERSHIP"
   if (isGenericType && input.holderPhotoUrl && !heroImageUrl) {
     heroImageUrl = input.holderPhotoUrl
   }

@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     template: "%s — Loyalshy",
   },
   description:
-    "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, tickets, prepaid passes, and more — all from one platform.",
+    "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, points, gift cards, tickets, and more — all from one platform.",
   keywords: [
     "digital wallet passes",
     "Apple Wallet",
@@ -47,22 +47,22 @@ export const metadata: Metadata = {
     "digital coupons",
     "stamp cards",
     "event tickets",
-    "prepaid passes",
     "gift cards",
+    "points programs",
   ],
   openGraph: {
     type: "website",
     siteName: "Loyalshy",
     title: "Loyalshy — Digital Wallet Passes for Any Business",
     description:
-      "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, tickets, prepaid passes, and more.",
+      "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, points, gift cards, tickets, and more.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: "Loyalshy — Digital Wallet Passes for Any Business",
     description:
-      "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, tickets, prepaid passes, and more.",
+      "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, points, gift cards, tickets, and more.",
   },
   robots: {
     index: true,

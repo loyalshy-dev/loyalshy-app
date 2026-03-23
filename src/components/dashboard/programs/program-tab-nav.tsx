@@ -51,7 +51,6 @@ export function ProgramTabNav({
       case "TICKET":
         return t("attendees")
       case "MEMBERSHIP":
-      case "BUSINESS_ID":
         return t("members")
       case "GIFT_CARD":
         return t("cardsTab")

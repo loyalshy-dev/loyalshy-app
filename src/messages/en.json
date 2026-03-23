@@ -146,8 +146,8 @@
       "description": "Invite staff with role-based access. Owners and staff see different views."
     },
     "passTypes": {
-      "title": "10 Pass Types",
-      "description": "Stamp cards, coupons, memberships, points, prepaid, gift cards, tickets, access passes, transit, and business IDs."
+      "title": "6 Pass Types",
+      "description": "Stamp cards, coupons, memberships, points, gift cards, and tickets."
     },
     "pushNotifications": {
       "title": "Push Notifications",
@@ -156,8 +156,8 @@
   },
   "passTypesCarousel": {
     "sectionLabel": "Pass Types",
-    "title": "One platform, ten pass types",
-    "subtitle": "From stamp cards to transit passes — create the exact digital wallet pass your business needs.",
+    "title": "One platform, six pass types",
+    "subtitle": "From stamp cards to event tickets — create the exact digital wallet pass your business needs.",
     "prev": "Previous pass type",
     "next": "Next pass type",
     "types": {
@@ -205,17 +205,6 @@
           "Airlines"
         ]
       },
-      "prepaid": {
-        "label": "Prepaid Pass",
-        "description": "Fixed-use passes that count down with each use. Rechargeable or one-time — great for class packs, service bundles, and transport.",
-        "alt": "Prepaid pass showing remaining uses",
-        "useCases": [
-          "Yoga studios",
-          "Car washes",
-          "Class packs",
-          "Bus passes"
-        ]
-      },
       "giftCard": {
         "label": "Gift Card",
         "description": "Stored-value gift cards with real-time balance tracking. Customers check their balance right from their wallet — charges and refunds built in.",
@@ -236,39 +225,6 @@
           "Conferences",
           "Festivals",
           "Sports events"
-        ]
-      },
-      "access": {
-        "label": "Access Pass",
-        "description": "Grant or deny access to facilities, co-working spaces, and parking areas. Track entry logs and manage permissions digitally.",
-        "alt": "Access pass for facility entry",
-        "useCases": [
-          "Co-working",
-          "Parking",
-          "Office buildings",
-          "VIP areas"
-        ]
-      },
-      "transit": {
-        "label": "Transit Pass",
-        "description": "Digital transit passes for buses, trains, and ferries. Board and exit tracking with route and zone information built in.",
-        "alt": "Transit pass showing route and zone information",
-        "useCases": [
-          "Bus companies",
-          "Ferries",
-          "Shuttles",
-          "Private transit"
-        ]
-      },
-      "businessId": {
-        "label": "Business ID",
-        "description": "Digital employee or contractor ID cards. Verify identity on the spot with QR scan — includes role, department, and expiry.",
-        "alt": "Business ID card with employee details",
-        "useCases": [
-          "Corporations",
-          "Contractors",
-          "Volunteers",
-          "Staff badges"
         ]
       }
     }
@@ -367,7 +323,7 @@
         "contacts": "Up to 500 contacts",
         "staff": "2 staff members",
         "programs": "Up to 2 programs",
-        "passTypes": "All 10 pass types",
+        "passTypes": "All 6 pass types",
         "wallet": "Apple & Google Wallet passes",
         "studio": "Card design studio",
         "analytics": "Dashboard analytics",
@@ -381,7 +337,7 @@
         "contacts": "Up to 2,500 contacts",
         "staff": "5 staff members",
         "programs": "Up to 5 programs",
-        "passTypes": "All 10 pass types",
+        "passTypes": "All 6 pass types",
         "brandColors": "Custom brand colors on passes",
         "bulkImport": "Bulk CSV import",
         "support": "Priority email support",
@@ -395,7 +351,7 @@
         "contacts": "Unlimited contacts",
         "staff": "25 staff members",
         "programs": "Unlimited programs",
-        "passTypes": "All 10 pass types",
+        "passTypes": "All 6 pass types",
         "brandColors": "Custom brand colors on passes",
         "bulkImport": "Bulk CSV import",
         "webhooks": "Webhook events",
@@ -431,7 +387,7 @@
       },
       "passTypes": {
         "question": "What types of passes can I create?",
-        "answer": "Loyalshy supports 10 pass types: stamp cards, coupons, memberships, points programs, prepaid cards, gift cards, tickets, access passes, transit passes, and business IDs. Each type has its own set of features and interactions."
+        "answer": "Loyalshy supports 6 pass types: stamp cards, coupons, memberships, points programs, gift cards, and tickets. Each type has its own set of features and interactions."
       },
       "freePlan": {
         "question": "Is there a free plan?",
@@ -656,12 +612,8 @@
       "checkIn": "checked in",
       "passUse": "used a pass",
       "pointsEarn": "earned points",
-      "recharge": "recharged a pass",
       "giftUse": "used gift card",
       "ticketScan": "scanned ticket",
-      "access": "accessed facility",
-      "board": "boarded",
-      "verify": "verified ID",
       "rewardEarned": "earned a reward",
       "rewardRedeemed": "redeemed a reward",
       "couponRedeemed": "redeemed a coupon",
@@ -750,7 +702,6 @@
       "coupons": "Coupons",
       "memberships": "Memberships",
       "points": "Points",
-      "prepaid": "Prepaid",
       "noPrograms": "No programs yet",
       "createFirst": "Create your first loyalty program to start rewarding your customers.",
       "createToStart": "Create a new program to get started.",
@@ -904,8 +855,7 @@
       "stampCard": "Stamp Card",
       "coupon": "Coupon",
       "membership": "Membership",
-      "points": "Points",
-      "prepaidPass": "Prepaid Pass"
+      "points": "Points"
     },
     "contactColumns": {
       "name": "Name",
@@ -1083,10 +1033,7 @@
       "addPoints": "Add Points",
       "redeemPoints": "Redeem Points",
       "charge": "Charge",
-      "recharge": "Recharge",
       "scanTicket": "Scan Ticket",
-      "grantAccess": "Grant Access",
-      "denyAccess": "Deny Access",
       "amount": "Amount",
       "points": "Points",
       "note": "Note",
@@ -1199,17 +1146,6 @@
       "descriptionOptional": "Description (optional)",
       "descriptionPlaceholder": "Short description...",
       "removeCatalogItem": "Remove catalog item",
-      "prepaidConfiguration": "Prepaid Configuration",
-      "prepaidConfigDesc": "Configure the number of uses and recharge options.",
-      "totalUses": "Total Uses",
-      "totalUsesHint": "Number of uses included in this pass.",
-      "useLabel": "Use Label",
-      "useLabelPlaceholder": "e.g., ride, wash, session",
-      "useLabelHint": "What each use is called (e.g., \"ride\", \"wash\").",
-      "rechargeable": "Rechargeable",
-      "rechargeableNo": "No — single use pass",
-      "rechargeableYes": "Yes — can be recharged",
-      "prepaidValidUntil": "Valid Until (Optional)",
       "scheduleSection": "Schedule",
       "scheduleDesc": "Control when the program is active and accepting customers.",
       "status": "Status",
@@ -1276,7 +1212,6 @@
       "autoRenewDesc": "Automatically renew membership when it expires",
       "pointsLabel": "Points Label",
       "pointsLabelPlaceholder": "pts",
-      "rechargeableDesc": "Allow pass holders to recharge when depleted",
       "giftCardConfiguration": "Gift Card",
       "currency": "Currency",
       "currencyPlaceholder": "USD",
@@ -1291,37 +1226,6 @@
       "venue": "Venue",
       "venuePlaceholder": "Madison Square Garden",
       "maxScans": "Max scans",
-      "accessConfiguration": "Access Pass",
-      "accessLabel": "Access label",
-      "accessLabelPlaceholder": "VIP Access",
-      "maxDailyUses": "Max daily uses",
-      "maxDailyUsesSuffix": "0 = unlimited",
-      "validDays": "Valid days",
-      "validDaysHint": "Select none for all days.",
-      "dayMon": "Mon",
-      "dayTue": "Tue",
-      "dayWed": "Wed",
-      "dayThu": "Thu",
-      "dayFri": "Fri",
-      "daySat": "Sat",
-      "daySun": "Sun",
-      "validFrom": "Valid from",
-      "validUntilTime": "Valid until",
-      "transitConfiguration": "Transit Pass",
-      "transitType": "Transit type",
-      "transitBus": "Bus",
-      "transitTrain": "Train",
-      "transitFerry": "Ferry",
-      "transitFlight": "Flight",
-      "transitOther": "Other",
-      "origin": "Origin",
-      "originPlaceholder": "Central Station",
-      "destination": "Destination",
-      "destinationPlaceholder": "Airport",
-      "departure": "Departure",
-      "businessIdConfiguration": "Business ID",
-      "idLabel": "ID label",
-      "idLabelPlaceholder": "Employee ID",
       "customDuration": "Custom duration",
       "daysSuffix": "days",
       "noEndDate": "No end date — program runs indefinitely."
@@ -1391,18 +1295,7 @@
       "catalogValidationError": "All catalog items must have a name and a points cost of at least 1",
       "createPointsProgram": "Create Points Program",
       "pointsProgramCreated": "Points program created",
-      "prepaidProgramNamePlaceholder": "e.g., Bus Pass, Car Wash Card, Class Pack",
-      "totalUses": "Total Uses",
-      "useLabel": "Use Label",
       "useLabelRequired": "Use label is required",
-      "useLabelPlaceholder": "e.g., ride, wash, session, class",
-      "rechargeable": "Rechargeable",
-      "rechargeableYes": "Yes",
-      "rechargeableNo": "No",
-      "rechargeAmount": "Recharge Amount",
-      "prepaidValidUntil": "Valid Until (Optional)",
-      "createPrepaid": "Create Prepaid Pass",
-      "prepaidCreated": "Prepaid pass created",
       "giftCardName": "Card Name",
       "giftCardNameRequired": "Card name is required",
       "giftCardNamePlaceholder": "e.g., Store Gift Card, Birthday Gift",
@@ -1425,36 +1318,7 @@
       "venueRequired": "Venue is required",
       "venuePlaceholder": "e.g., Madison Square Garden",
       "createTicket": "Create Ticket",
-      "ticketCreated": "Event ticket created",
-      "accessProgramNamePlaceholder": "e.g., Gym Access, Building Pass, Pool Entry",
-      "accessLabel": "Access Label",
-      "accessLabelRequired": "Label is required",
-      "accessLabelPlaceholder": "e.g., Gym Entry, Pool Access",
-      "dailyLimit": "Daily Limit (0 = unlimited)",
-      "validDays": "Valid Days (leave empty for all days)",
-      "validFrom": "Valid From (Optional)",
-      "validUntilTime": "Valid Until (Optional)",
-      "createAccessPass": "Create Access Pass",
-      "accessPassCreated": "Access pass created",
-      "transitType": "Transit Type",
-      "transitTypeBus": "Bus",
-      "transitTypeTrain": "Train",
-      "transitTypeFerry": "Ferry",
-      "transitTypeFlight": "Flight",
-      "transitTypeOther": "Other",
-      "origin": "Origin (Optional)",
-      "originPlaceholder": "e.g., New York Penn Station",
-      "destination": "Destination (Optional)",
-      "destinationPlaceholder": "e.g., Boston South Station",
-      "departureDateTime": "Departure Date & Time (Optional)",
-      "createTransit": "Create Transit Pass",
-      "transitCreated": "Transit pass created",
-      "businessIdNamePlaceholder": "e.g., Employee ID, Contractor Badge",
-      "idLabel": "ID Label",
-      "idLabelRequired": "ID label is required",
-      "idLabelPlaceholder": "e.g., Employee ID, Member",
-      "createBusinessId": "Create Business ID",
-      "businessIdCreated": "Business ID created"
+      "ticketCreated": "Event ticket created"
     },
     "studio": {
       "save": "Save",
@@ -1570,7 +1434,7 @@
     "section1Title": "1. Agreement",
     "section1P1": "By accessing or using Loyalshy (\"the Service\"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.",
     "section2Title": "2. Description of Service",
-    "section2P1": "Loyalshy is a digital wallet pass platform that enables businesses to create, manage, and distribute Apple Wallet and Google Wallet passes. The platform supports stamp cards, coupons, memberships, points programs, prepaid passes, gift cards, tickets, access passes, transit passes, and business IDs.",
+    "section2P1": "Loyalshy is a digital wallet pass platform that enables businesses to create, manage, and distribute Apple Wallet and Google Wallet passes. The platform supports stamp cards, coupons, memberships, points programs, gift cards, and tickets.",
     "section3Title": "3. Accounts",
     "section3P1": "You must provide accurate information when creating an account. You are responsible for maintaining the security of your account credentials. You must notify us immediately of any unauthorized access.",
     "section3P2": "Each organization on Loyalshy operates as a separate tenant. Organization owners are responsible for managing team members and their access levels.",
@@ -1842,7 +1706,7 @@
     "invalidFileType": "File must be PNG, JPEG, or WebP",
     "invalidFileTypeSvg": "File must be PNG, JPEG, WebP, or SVG",
     "templateLimitReached": "Template limit reached ({limit}). Upgrade your plan to create more templates.",
-    "passTypeNotAllowed": "This pass type is not available on your current plan. Upgrade to unlock all 10 pass types.",
+    "passTypeNotAllowed": "This pass type is not available on your current plan. Upgrade to unlock all 6 pass types.",
     "templateNotFound": "Pass template not found",
     "templateAlreadyArchived": "Template is already archived",
     "templateAlreadyActive": "Template is already active",
@@ -1875,7 +1739,6 @@
     "notAPointsCard": "This pass is not a points card",
     "rewardNotInCatalog": "Reward not found in catalog",
     "notEnoughPoints": "Not enough points. Need {needed}, have {current}",
-    "notAPrepaidPass": "This pass is not a prepaid pass",
     "noRemainingUses": "This pass has no remaining uses",
     "missingPassOrFile": "Missing pass instance ID or file",
     "passTypeNoPhoto": "Pass type does not support holder photos",
@@ -2053,7 +1916,6 @@
     "somethingWentWrong": "Something went wrong",
     "stampSubtitle": "{reward} after {visits} visits",
     "pointsSubtitle": "Earn points — {reward}",
-    "prepaidSubtitle": "Prepaid balance — {reward}",
     "giftCardSubtitle": "Gift card — {reward}",
     "card": {
       "title": "{name}'s Card",

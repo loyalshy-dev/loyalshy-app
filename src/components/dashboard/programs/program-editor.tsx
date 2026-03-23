@@ -46,7 +46,7 @@ import {
   deleteTemplate as deleteProgram,
 } from "@/server/org-settings-actions"
 import type { TemplateWithDesign, TemplateDeleteCounts } from "@/server/org-settings-actions"
-import { parseCouponConfig, parseMembershipConfig, parseMinigameConfig, parsePointsConfig, parsePrepaidConfig } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, parseMinigameConfig, parsePointsConfig } from "@/lib/pass-config"
 import type { PointsCatalogItem } from "@/types/pass-types"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { PrizeRevealEditor } from "@/components/dashboard/programs/prize-reveal-editor"
@@ -137,13 +137,6 @@ type LoyaltyForm = {
   benefits: string
   validDuration: string
   customDurationDays: number
-  // Prepaid config fields
-  totalUses: number
-  useLabel: string
-  rechargeable: boolean
-  rechargeAmount: number
-  prepaidValidUntil: string
-  prepaidTerms: string
 }
 
 type Organization = {
@@ -183,7 +176,6 @@ export function ProgramEditor({
   const isCoupon = programType === "COUPON"
   const isMembership = programType === "MEMBERSHIP"
   const isPoints = programType === "POINTS"
-  const isPrepaid = programType === "PREPAID"
 
   // Extract stamp-card flat fields from config JSON
   const stampConfig = program.config as Record<string, unknown> | null ?? {}
@@ -196,7 +188,6 @@ export function ProgramEditor({
   const hasPrizes = !!(minigameConfig?.enabled && minigameConfig.prizes?.length)
   const membershipConfig = isMembership ? parseMembershipConfig(program.config) : null
   const pointsConfig = isPoints ? parsePointsConfig(program.config) : null
-  const prepaidConfig = isPrepaid ? parsePrepaidConfig(program.config) : null
   const [pointsPerVisit, setPointsPerVisit] = useState<number>(
     pointsConfig?.pointsPerVisit ?? 10
   )
@@ -234,13 +225,6 @@ export function ProgramEditor({
       benefits: membershipConfig?.benefits ?? "",
       validDuration: membershipConfig?.validDuration ?? "monthly",
       customDurationDays: membershipConfig?.customDurationDays ?? 30,
-      // Prepaid defaults
-      totalUses: prepaidConfig?.totalUses ?? 10,
-      useLabel: prepaidConfig?.useLabel ?? "use",
-      rechargeable: prepaidConfig?.rechargeable ?? false,
-      rechargeAmount: prepaidConfig?.rechargeAmount ?? 10,
-      prepaidValidUntil: prepaidConfig?.validUntil ?? "",
-      prepaidTerms: prepaidConfig?.terms ?? "",
     },
   })
 
@@ -276,16 +260,6 @@ export function ProgramEditor({
       return {
         pointsPerVisit,
         catalog: catalogItems,
-      }
-    }
-    if (isPrepaid) {
-      return {
-        totalUses: data.totalUses,
-        useLabel: data.useLabel,
-        rechargeable: data.rechargeable,
-        ...(data.rechargeable ? { rechargeAmount: data.rechargeAmount } : {}),
-        ...(data.prepaidValidUntil ? { validUntil: data.prepaidValidUntil } : {}),
-        ...(data.prepaidTerms ? { terms: data.prepaidTerms } : {}),
       }
     }
     return undefined
@@ -839,63 +813,6 @@ export function ProgramEditor({
                       {errors.rewardDescription.message}
                     </p>
                   )}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {isPrepaid && (
-            <section id="prepaid" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
-              <div>
-                <h3 className="text-sm font-semibold">{t("prepaidConfiguration")}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{t("prepaidConfigDesc")}</p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor={`total-uses-${program.id}`}>{t("totalUses")}</Label>
-                  <Input
-                    id={`total-uses-${program.id}`}
-                    type="number"
-                    min={1}
-                    max={999}
-                    {...register("totalUses", { valueAsNumber: true, min: 1 })}
-                    disabled={isArchived}
-                  />
-                  <p className="text-xs text-muted-foreground">{t("totalUsesHint")}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`use-label-${program.id}`}>{t("useLabel")}</Label>
-                  <Input
-                    id={`use-label-${program.id}`}
-                    {...register("useLabel")}
-                    placeholder={t("useLabelPlaceholder")}
-                    disabled={isArchived}
-                  />
-                  <p className="text-xs text-muted-foreground">{t("useLabelHint")}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`rechargeable-${program.id}`}>{t("rechargeable")}</Label>
-                  <select
-                    id={`rechargeable-${program.id}`}
-                    {...register("rechargeable")}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={isArchived}
-                  >
-                    <option value="false">{t("rechargeableNo")}</option>
-                    <option value="true">{t("rechargeableYes")}</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`prepaid-valid-${program.id}`}>{t("prepaidValidUntil")}</Label>
-                  <Input
-                    id={`prepaid-valid-${program.id}`}
-                    type="date"
-                    {...register("prepaidValidUntil")}
-                    disabled={isArchived}
-                  />
                 </div>
               </div>
             </section>

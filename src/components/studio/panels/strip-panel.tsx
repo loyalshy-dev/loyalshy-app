@@ -66,7 +66,7 @@ type Props = {
   programId: string
   /** When true, strip cannot be toggled off (used for stamp/points cards where progress is baked into strip) */
   forceStrip?: boolean
-  /** Card type for type-specific options (e.g., holder photo for BUSINESS_ID) */
+  /** Card type for type-specific options */
   cardType?: string
   /** Organization ID for media gallery (optional — gallery hidden when omitted) */
   organizationId?: string

@@ -393,7 +393,7 @@ export function FloatingToolMenu({ store, cardType }: { store: CardDesignStoreAp
 
   const hasProgress = cardType === "STAMP" || cardType === "POINTS"
   const hasPrize = cardType === "STAMP" || cardType === "COUPON"
-  const hasAvatar = cardType === "BUSINESS_ID" || cardType === "TIER" || cardType === "ACCESS"
+  const hasAvatar = cardType === "TIER"
   const items = TOOL_MENU_ITEMS.filter((t) => {
     if (t.id === "progress" && !hasProgress) return false
     if (t.id === "prize" && !hasPrize) return false

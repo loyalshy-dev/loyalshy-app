@@ -1,6 +1,6 @@
 # Pass Types — Flow & UX Guide
 
-Loyalshy supports ten pass types across two categories: **loyalty** (5 types that existed pre-rewrite) and **utility** (5 new types). Each has a distinct contact journey, staff workflow, and wallet pass behavior.
+Loyalshy supports six pass types across two categories: **loyalty** (4 types) and **commerce/event** (2 types). Each has a distinct contact journey, staff workflow, and wallet pass behavior.
 
 ---
 
@@ -172,54 +172,9 @@ Earn points per interaction, redeem from a reward catalog.
 
 ---
 
-### 5. Prepaid (`PREPAID`)
+## Commerce & Event Pass Types
 
-A prepaid pass with a fixed number of uses that counts down. Each use consumes one unit. Can be recharged. Think bus pass (15 rides), car wash card (5 washes), class pack (10 yoga sessions).
-
-#### Configuration (`PrepaidConfig`)
-
-| Field | Description |
-|-------|-------------|
-| totalUses | Starting balance (e.g., 15 rides, 5 washes) |
-| useLabel | What each unit is called (e.g., "ride", "wash", "session", "class") |
-| rechargeable | Whether the card can be topped up after purchase |
-| rechargeAmount | Default top-up amount (e.g., +15 rides) |
-
-#### Contact Journey
-
-1. **Scan QR code** → receives pass with full starting balance (e.g., 15/15 rides)
-2. **Add to wallet** — pass shows remaining uses prominently
-3. **Each use** — staff registers a PREPAID_USE interaction
-   - Balance decrements: 15 → 14 → 13 → ...
-   - Pass updates immediately with new remaining count
-4. **Low balance** — pass shows warning when running low (e.g., 2 remaining)
-5. **Depleted (0 remaining)** — pass visually changes to "depleted" state
-6. **Recharge** — if rechargeable, business registers a PREPAID_RECHARGE interaction (e.g., +15 rides). Pass reactivates
-
-#### Staff Workflow
-
-- **Use** → from register interaction dialog → select prepaid pass instance → confirm (-1 use)
-- **Recharge** → from contact detail or pass instance detail → add uses → confirm
-- Dashboard shows: remaining balance, usage history, depletion rate
-
-#### Wallet Pass
-
-- Apple: `storeCard` | Google: `LoyaltyClass/Object`
-- Shows: remaining uses (e.g., "12 / 15"), use label, valid until, member since
-- Progress bar/count depletes (opposite of stamp card — counts DOWN)
-- Low balance state: visual warning (e.g., "2 rides remaining")
-- Depleted state: grayed out, "0 remaining — Recharge needed"
-- After recharge: pass reactivates with new balance
-
-#### Key Distinction
-
-Prepaid is a **consumable balance** — each use costs one unit. Unlike membership (where check-ins are just statistics), prepaid uses actually **deplete the card**. Unlike stamp cards (which count up toward a reward), prepaid counts **down toward zero**. The card can be recharged to start over.
-
----
-
-## Utility Pass Types
-
-### 6. Gift Card (`GIFT_CARD`)
+### 5. Gift Card (`GIFT_CARD`)
 
 A monetary balance card with partial or full redemption.
 
@@ -253,7 +208,7 @@ A monetary balance card with partial or full redemption.
 
 ---
 
-### 7. Ticket (`TICKET`)
+### 6. Ticket (`TICKET`)
 
 An event entry pass with scan tracking.
 
@@ -284,90 +239,6 @@ An event entry pass with scan tracking.
 
 - Apple: `eventTicket` | Google: `EventTicketClass/Object`
 - Shows: event name, date, venue, seat/section, barcode
-
----
-
-### 8. Access (`ACCESS`)
-
-A facility or area access pass with optional time restrictions.
-
-#### Configuration (`AccessConfig`)
-
-| Field | Description |
-|-------|-------------|
-| accessLabel | What is being accessed (e.g., "Building A", "VIP Lounge") |
-| validDays | Which days of the week the pass is valid |
-| validTimeStart | Start of daily valid window (e.g., "09:00") |
-| validTimeEnd | End of daily valid window (e.g., "17:00") |
-| validDuration | How long the pass is valid (`monthly`, `yearly`, etc.) |
-| maxDailyUses | Maximum uses per day |
-
-#### Contact Journey
-
-1. **Receives access pass** → pass instance created
-2. **Add to wallet** — pass shows access area and validity
-3. **Present pass** — contact shows pass at access point
-4. **Grant/deny** — staff registers ACCESS_GRANT or ACCESS_DENY interaction
-
-#### Wallet Pass
-
-- Apple: `generic` | Google: `GenericClass/Object`
-- Shows: access area, valid hours, valid days, status
-
----
-
-### 9. Transit (`TRANSIT`)
-
-A boarding pass for transportation services.
-
-#### Configuration (`TransitConfig`)
-
-| Field | Description |
-|-------|-------------|
-| transitType | Type of transit (bus, train, ferry, flight, etc.) |
-| originName | Departure location |
-| destinationName | Arrival location |
-| departureDateTime | Departure date and time |
-| barcodeType | Barcode format |
-
-#### Contact Journey
-
-1. **Receives transit pass** → pass instance created with route details
-2. **Add to wallet** — pass shows origin, destination, departure time
-3. **Board** — TRANSIT_BOARD interaction registered at departure
-4. **Exit** — TRANSIT_EXIT interaction registered at arrival
-
-#### Wallet Pass
-
-- Apple: `boardingPass` | Google: `TransitClass/Object`
-- Shows: origin, destination, departure time, transit type, barcode
-
----
-
-### 10. Business ID (`BUSINESS_ID`)
-
-An employee or member identification card.
-
-#### Configuration (`BusinessIdConfig`)
-
-| Field | Description |
-|-------|-------------|
-| idLabel | What the ID represents (e.g., "Employee ID", "Student ID") |
-| showTitle | Whether to display job title |
-| showPhoto | Whether to display photo |
-| showEmployeeId | Whether to display an ID number |
-| validDuration | How long the ID is valid |
-
-#### Contact Journey
-
-1. **Receives ID** → pass instance created with identity details
-2. **Add to wallet** — pass serves as digital ID
-3. **Verification** — staff registers an ID_VERIFY interaction when identity is checked
-
-#### Wallet Pass
-
-- Apple: `generic` | Google: `GenericClass/Object`
-- Shows: name, title, department, ID number, photo, organization
 
 ---
 
@@ -407,27 +278,15 @@ Available for **Stamp Card** and **Coupon** templates only.
 
 ## Comparison Table
 
-### Loyalty Types
-
-| Feature | Stamp Card | Coupon | Membership | Points | Prepaid |
-|---------|-----------|--------|------------|--------|---------|
-| Interaction tracking | Yes (stamps) | No | Yes (check-ins) | Yes (earns points) | Yes (uses consumed) |
-| Balance/progress | Counts UP to N | N/A | N/A (stats only) | Earns/spends | Counts DOWN from N |
-| Reward cycle | After N stamps | Immediate | None | Catalog redemption | None |
-| Rechargeable | N/A (auto-cycles) | N/A | N/A (renew) | N/A (earns more) | Yes (top up uses) |
-| Minigame support | Yes | Yes | No | No | No |
-| Staff action | Register Stamp | Redeem Coupon | Check In | Earn/Redeem Points | Use / Recharge |
-| Ends when | Cycles forever | Redeemed or expired | Business cancels | Never | Depleted (reloadable) |
-
-### Utility Types
-
-| Feature | Gift Card | Ticket | Access | Transit | Business ID |
-|---------|-----------|--------|--------|---------|-------------|
-| Primary use | Monetary balance | Event entry | Facility access | Boarding | Identity |
-| Balance/state | Currency amount | Scan count | Grant/deny log | Board/exit | Verification log |
-| Consumable | Yes (money) | Yes (scans) | No (log only) | Yes (one trip) | No (log only) |
-| Apple pass style | storeCard | eventTicket | generic | boardingPass | generic |
-| Google pass class | GiftCard | EventTicket | Generic | Transit | Generic |
+| Feature | Stamp Card | Coupon | Membership | Points | Gift Card | Ticket |
+|---------|-----------|--------|------------|--------|-----------|--------|
+| Interaction tracking | Yes (stamps) | No | Yes (check-ins) | Yes (earns points) | Yes (charges) | Yes (scans) |
+| Balance/progress | Counts UP to N | N/A | N/A (stats only) | Earns/spends | Currency amount | Scan count |
+| Reward cycle | After N stamps | Immediate | None | Catalog redemption | None | None |
+| Minigame support | Yes | Yes | No | No | No | No |
+| Staff action | Register Stamp | Redeem Coupon | Check In | Earn/Redeem Points | Charge/Refund | Scan/Void |
+| Ends when | Cycles forever | Redeemed or expired | Business cancels | Never | Depleted | Event passed |
+| Apple pass style | storeCard | storeCard | storeCard | storeCard | storeCard | eventTicket |
 
 ---
 
@@ -436,12 +295,12 @@ Available for **Stamp Card** and **Coupon** templates only.
 All pass types share the same pass instance statuses:
 
 ```
-ACTIVE → COMPLETED (stamp card cycle done / single coupon redeemed / prepaid depleted / ticket used)
+ACTIVE → COMPLETED (stamp card cycle done / single coupon redeemed / ticket used)
 ACTIVE → SUSPENDED (membership suspended by business)
-ACTIVE → EXPIRED (membership or prepaid expiry reached / ticket event passed)
+ACTIVE → EXPIRED (membership expiry reached / ticket event passed)
 ACTIVE → REVOKED (business revokes the pass)
 ACTIVE → VOIDED (ticket voided / gift card cancelled)
-ACTIVE → (keeps going for unlimited coupons, memberships, points, and recharged prepaid)
+ACTIVE → (keeps going for unlimited coupons, memberships, and points)
 ```
 
 ### Wallet Pass Providers
@@ -463,9 +322,5 @@ Pass updates are triggered via Trigger.dev background jobs (production) or direc
 | Promotional campaign, seasonal discount | Coupon |
 | Gym, library, club, campus, coworking | Membership |
 | Restaurant with varied rewards, loyalty program | Points |
-| Bus pass, car wash, class pack, session bundle | Prepaid |
 | Store credit, birthday gift, employee reward | Gift Card |
 | Concerts, conferences, sports events | Ticket |
-| Building entry, VIP areas, parking | Access |
-| Bus/train/ferry/flight boarding | Transit |
-| Employee badges, student IDs, member cards | Business ID |

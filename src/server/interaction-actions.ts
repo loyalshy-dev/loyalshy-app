@@ -4,7 +4,7 @@
  * interaction-actions.ts
  *
  * Facade module adapting stamp-actions and implementing coupon/membership/
- * points/prepaid interaction actions for register-visit-dialog.tsx.
+ * points interaction actions for register-visit-dialog.tsx.
  *
  * InteractionSearchResult aliases StampSearchResult so both naming
  * conventions remain compatible.
@@ -18,7 +18,7 @@ import {
   getOrganizationForUser,
   assertOrganizationAccess,
 } from "@/lib/dal"
-import { parseCouponConfig, parsePointsConfig, parsePrepaidConfig, formatCouponValue, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
+import { parseCouponConfig, parsePointsConfig, formatCouponValue, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 
 // NOTE: stamp-actions exports (searchContactsForStamp, registerStamp, lookupPassInstanceByWalletPassId)
 // must be imported directly from "@/server/stamp-actions" — Turbopack does not support
@@ -489,94 +489,3 @@ export async function redeemPoints(
   }
 }
 
-// ─── Prepaid Use ─────────────────────────────────────────────
-
-export type UsePrepaidResult = {
-  success: boolean
-  error?: string
-  templateName?: string
-  remainingUses?: number
-  totalUses?: number
-  useLabel?: string
-  isDepleted?: boolean
-}
-
-export async function usePrepaid(
-  passInstanceId: string
-): Promise<UsePrepaidResult> {
-  const t = await getTranslations("serverErrors")
-  const session = await assertAuthenticated()
-  const { error, organization, passInstance } = await fetchPassInstanceForInteraction(passInstanceId)
-
-  if (error || !organization || !passInstance) {
-    return { success: false, error: error ?? t("unknownError") }
-  }
-
-  if (passInstance.passTemplate.passType !== "PREPAID") {
-    return { success: false, error: t("notAPrepaidPass") }
-  }
-
-  const prepaidConfig = parsePrepaidConfig(passInstance.passTemplate.config)
-  const totalUses = prepaidConfig?.totalUses ?? 0
-  const useLabel = prepaidConfig?.useLabel ?? "use"
-
-  const instanceData = (passInstance.data as Record<string, unknown>) ?? {}
-  const currentRemaining = (instanceData.remainingUses as number) ?? 0
-  const totalUsed = (instanceData.totalUsed as number) ?? 0
-
-  if (currentRemaining <= 0) {
-    return { success: false, error: t("noRemainingUses") }
-  }
-
-  const newRemaining = currentRemaining - 1
-  const isDepleted = newRemaining <= 0
-
-  await db.$transaction(async (tx) => {
-    await tx.passInstance.update({
-      where: { id: passInstance.id },
-      data: {
-        data: {
-          ...instanceData,
-          remainingUses: newRemaining,
-          totalUsed: totalUsed + 1,
-          lastUsedAt: new Date().toISOString(),
-        },
-        status: isDepleted ? "COMPLETED" : "ACTIVE",
-      },
-    })
-
-    await tx.interaction.create({
-      data: {
-        contactId: passInstance.contact.id,
-        organizationId: organization.id,
-        passTemplateId: passInstance.passTemplate.id,
-        passInstanceId: passInstance.id,
-        performedById: session.user.id,
-        type: "PREPAID_USE",
-        metadata: { remainingUses: newRemaining, totalUsed: totalUsed + 1 },
-      },
-    })
-
-    await tx.contact.update({
-      where: { id: passInstance.contact.id },
-      data: {
-        totalInteractions: passInstance.contact.totalInteractions + 1,
-        lastInteractionAt: new Date(),
-      },
-    })
-  })
-
-  dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "PREPAID_USE")
-
-  revalidatePath("/dashboard")
-  revalidatePath("/dashboard/contacts")
-
-  return {
-    success: true,
-    templateName: passInstance.passTemplate.name,
-    remainingUses: newRemaining,
-    totalUses,
-    useLabel,
-    isDepleted,
-  }
-}

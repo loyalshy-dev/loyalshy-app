@@ -89,7 +89,6 @@ export async function GET(
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalInteractions = (instanceData.totalInteractions as number) ?? 0
   const pointsBalance = (instanceData.pointsBalance as number) ?? 0
-  const remainingUses = (instanceData.remainingUses as number) ?? 0
 
   const templateConfig = (template.config ?? {}) as Record<string, unknown>
   const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
@@ -131,7 +130,6 @@ export async function GET(
         programType: template.passType,
         programConfig: template.config,
         pointsBalance,
-        remainingUses,
         holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
         passInstanceId: passInstance.id,
         organizationSlug: organization.slug,
@@ -203,7 +201,6 @@ export async function GET(
       passType: template.passType,
       templateConfig: template.config,
       pointsBalance,
-      remainingUses,
       holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,

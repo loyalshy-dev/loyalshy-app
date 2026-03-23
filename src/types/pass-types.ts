@@ -3,12 +3,8 @@ import {
   Ticket,
   Crown,
   Coins,
-  CreditCard,
   Gift,
   CalendarDays,
-  ShieldCheck,
-  Bus,
-  BadgeCheck,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
@@ -19,12 +15,8 @@ export type PassType =
   | "COUPON"
   | "MEMBERSHIP"
   | "POINTS"
-  | "PREPAID"
   | "GIFT_CARD"
   | "TICKET"
-  | "ACCESS"
-  | "TRANSIT"
-  | "BUSINESS_ID"
 
 // ─── Type-specific configs (stored in PassTemplate.config JSON) ───
 
@@ -70,15 +62,6 @@ export type PointsConfig = {
   pointsLabel?: string
 }
 
-export type PrepaidConfig = {
-  totalUses: number
-  useLabel: string
-  rechargeable: boolean
-  rechargeAmount?: number
-  validUntil?: string
-  terms?: string
-}
-
 export type GiftCardConfig = {
   currency: string
   initialBalanceCents: number
@@ -94,45 +77,13 @@ export type TicketConfig = {
   maxScans: number
 }
 
-export type AccessConfig = {
-  accessLabel: string
-  validDays?: string[] // e.g. ["mon","tue","wed"]
-  validTimeStart?: string // HH:mm
-  validTimeEnd?: string // HH:mm
-  validDuration: "monthly" | "yearly" | "lifetime" | "custom"
-  customDurationDays?: number
-  maxDailyUses?: number
-  showHolderPhoto?: boolean
-  holderPhotoPosition?: "left" | "center" | "right"
-}
-
-export type TransitConfig = {
-  transitType: "bus" | "train" | "ferry" | "flight" | "other"
-  originName?: string
-  destinationName?: string
-  departureDateTime?: string // ISO datetime
-  barcodeType: "qr" | "code128" | "pdf417" | "aztec"
-}
-
-export type BusinessIdConfig = {
-  idLabel: string // e.g. "Employee ID", "Student ID"
-  validDuration: "monthly" | "yearly" | "lifetime" | "custom"
-  customDurationDays?: number
-  showHolderPhoto?: boolean // overlay holder avatar on strip image
-  holderPhotoPosition?: "left" | "center" | "right" // avatar placement on strip
-}
-
 export type PassTemplateConfig =
   | StampCardConfig
   | CouponConfig
   | MembershipConfig
   | PointsConfig
-  | PrepaidConfig
   | GiftCardConfig
   | TicketConfig
-  | AccessConfig
-  | TransitConfig
-  | BusinessIdConfig
 
 // ─── Minigame config ────────────────────────────────────────
 
@@ -153,12 +104,8 @@ export type DesignCardType =
   | "POINTS"
   | "TIER"
   | "COUPON"
-  | "PREPAID"
   | "GIFT_CARD"
   | "TICKET"
-  | "ACCESS"
-  | "TRANSIT"
-  | "BUSINESS_ID"
   | "GENERIC"
 
 export type PassTypeMeta = {
@@ -203,14 +150,6 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     defaultCardType: "POINTS",
     category: "loyalty",
   },
-  PREPAID: {
-    label: "Prepaid Pass",
-    shortLabel: "Prepaid",
-    icon: CreditCard,
-    description: "Fixed uses that count down — bus pass, car wash, class pack",
-    defaultCardType: "PREPAID",
-    category: "commerce",
-  },
   GIFT_CARD: {
     label: "Gift Card",
     shortLabel: "Gift Card",
@@ -226,29 +165,5 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     description: "Digital ticket for events, concerts, conferences",
     defaultCardType: "TICKET",
     category: "event",
-  },
-  ACCESS: {
-    label: "Access Pass",
-    shortLabel: "Access",
-    icon: ShieldCheck,
-    description: "Grant access to facilities, co-working spaces, parking",
-    defaultCardType: "ACCESS",
-    category: "event",
-  },
-  TRANSIT: {
-    label: "Transit Pass",
-    shortLabel: "Transit",
-    icon: Bus,
-    description: "Boarding passes for buses, trains, ferries, flights",
-    defaultCardType: "TRANSIT",
-    category: "event",
-  },
-  BUSINESS_ID: {
-    label: "Business ID",
-    shortLabel: "ID",
-    icon: BadgeCheck,
-    description: "Employee, student, or contractor identification card",
-    defaultCardType: "BUSINESS_ID",
-    category: "identity",
   },
 }

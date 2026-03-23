@@ -11,7 +11,7 @@ import {
 } from "./constants"
 import type { CardDesignData, CardType } from "../card-design"
 import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters, getFieldConfig, splitFieldsForApple } from "../card-design"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem } from "../../pass-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, getCheapestCatalogItem } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -47,20 +47,12 @@ export type PassGenerationInput = {
   programConfig?: unknown
   // Points balance for POINTS program type
   pointsBalance?: number
-  // Remaining uses for PREPAID program type
-  remainingUses?: number
   // Gift card data
   giftBalanceCents?: number
   giftCurrency?: string
   // Ticket data
   ticketScanCount?: number
-  // Access data
-  accessTotalGranted?: number
-  // Transit data
-  transitIsBoarded?: boolean
-  // Business ID data
-  businessIdVerifications?: number
-  // Holder photo URL (BUSINESS_ID, MEMBERSHIP, ACCESS — per-instance from PassInstance.data.holderPhotoUrl)
+  // Holder photo URL (MEMBERSHIP — per-instance from PassInstance.data.holderPhotoUrl)
   holderPhotoUrl?: string | null
   // Pass instance + org slug for generating card page links (prize reveal)
   passInstanceId?: string
@@ -188,10 +180,10 @@ export async function generateApplePass(
     }
   }
 
-  // Apple generic pass type (BUSINESS_ID, MEMBERSHIP, ACCESS) does NOT render strip images.
+  // Apple generic pass type (MEMBERSHIP) does NOT render strip images.
   // It renders thumbnail images instead (displayed on the right side of the pass front).
   // For these types, redirect strip content → thumbnail, and use holder photo as thumbnail if available.
-  const isGenericPassType = input.programType === "BUSINESS_ID" || input.programType === "MEMBERSHIP" || input.programType === "ACCESS"
+  const isGenericPassType = input.programType === "MEMBERSHIP"
 
   // For generic passes: holder photo takes priority as thumbnail, otherwise use strip image as thumbnail
   const thumbnailUrl = isGenericPassType
@@ -232,12 +224,8 @@ export async function generateApplePass(
       case "COUPON": return `${name} Coupon`
       case "MEMBERSHIP": return `${name} Membership`
       case "POINTS": return `${name} Points Card`
-      case "PREPAID": return `${name} Pass`
       case "GIFT_CARD": return `${name} Gift Card`
       case "TICKET": return `${name} Ticket`
-      case "ACCESS": return `${name} Access Pass`
-      case "TRANSIT": return `${name} Boarding Pass`
-      case "BUSINESS_ID": return `${name} ID`
       default: return `${name} Loyalty Card`
     }
   })()
@@ -261,11 +249,8 @@ export async function generateApplePass(
   // Apple Wallet pass type mapping
   switch (input.programType) {
     case "TICKET": pass.type = "eventTicket"; break
-    case "TRANSIT": pass.type = "boardingPass"; break
-    case "MEMBERSHIP":
-    case "ACCESS":
-    case "BUSINESS_ID": pass.type = "generic"; break
-    default: pass.type = "storeCard"; break // STAMP_CARD, COUPON, POINTS, PREPAID, GIFT_CARD
+    case "MEMBERSHIP": pass.type = "generic"; break
+    default: pass.type = "storeCard"; break // STAMP_CARD, COUPON, POINTS, GIFT_CARD
   }
 
   // Apple Watch notes:
@@ -309,12 +294,8 @@ export async function generateApplePass(
   const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
   const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
   const pointsConfig = input.programType === "POINTS" ? parsePointsConfig(input.programConfig) : null
-  const prepaidConfig = input.programType === "PREPAID" ? parsePrepaidConfig(input.programConfig) : null
   const giftCardConfig = input.programType === "GIFT_CARD" ? parseGiftCardConfig(input.programConfig) : null
   const ticketConfig = input.programType === "TICKET" ? parseTicketConfig(input.programConfig) : null
-  const accessConfig = input.programType === "ACCESS" ? parseAccessConfig(input.programConfig) : null
-  const transitConfig = input.programType === "TRANSIT" ? parseTransitConfig(input.programConfig) : null
-  const businessIdConfig = input.programType === "BUSINESS_ID" ? parseBusinessIdConfig(input.programConfig) : null
   const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Custom field labels from editorConfig
@@ -347,10 +328,6 @@ export async function generateApplePass(
     pointsBalance: { key: "pointsBalance", label: lbl("pointsBalance", "POINTS"), value: String(input.pointsBalance ?? 0) },
     nextRewardPoints: { key: "nextRewardPoints", label: lbl("nextRewardPoints", "NEXT REWARD"), value: cheapestItem ? `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` : "" },
     earnRate: { key: "earnRate", label: lbl("earnRate", "EARN RATE"), value: pointsConfig ? `${pointsConfig.pointsPerVisit} pts/visit` : "" },
-    // PREPAID fields
-    remaining: { key: "remaining", label: lbl("remaining", "REMAINING"), value: `${input.remainingUses ?? 0} / ${prepaidConfig?.totalUses ?? 0}` },
-    prepaidValidUntil: { key: "prepaidValidUntil", label: lbl("prepaidValidUntil", "VALID UNTIL"), value: prepaidConfig?.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
-    totalUsed: { key: "totalUsed", label: lbl("totalUsed", "TOTAL USED"), value: String(input.totalVisits) },
     // GIFT_CARD fields
     giftBalance: { key: "giftBalance", label: lbl("giftBalance", "BALANCE"), value: giftCardConfig ? `${giftCardConfig.currency} ${((input.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
     giftInitial: { key: "giftInitial", label: lbl("giftInitial", "INITIAL VALUE"), value: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
@@ -359,17 +336,6 @@ export async function generateApplePass(
     eventDate: { key: "eventDate", label: lbl("eventDate", "DATE"), value: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
     eventVenue: { key: "eventVenue", label: lbl("eventVenue", "VENUE"), value: ticketConfig?.eventVenue ?? "" },
     scanStatus: { key: "scanStatus", label: lbl("scanStatus", "SCANS"), value: `${input.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
-    // ACCESS fields
-    accessLabel: { key: "accessLabel", label: lbl("accessLabel", accessConfig?.accessLabel ?? "ACCESS"), value: "Granted" },
-    accessGranted: { key: "accessGranted", label: lbl("accessGranted", "TOTAL GRANTED"), value: String(input.accessTotalGranted ?? 0) },
-    // TRANSIT fields
-    transitType: { key: "transitType", label: lbl("transitType", "TYPE"), value: (transitConfig?.transitType ?? "other").toUpperCase() },
-    origin: { key: "origin", label: lbl("origin", "FROM"), value: transitConfig?.originName ?? "" },
-    destination: { key: "destination", label: lbl("destination", "TO"), value: transitConfig?.destinationName ?? "" },
-    boardingStatus: { key: "boardingStatus", label: lbl("boardingStatus", "STATUS"), value: input.transitIsBoarded ? "BOARDED" : "NOT BOARDED" },
-    // BUSINESS_ID fields
-    idLabel: { key: "idLabel", label: lbl("idLabel", businessIdConfig?.idLabel ?? "ID"), value: input.customerName },
-    verifications: { key: "verifications", label: lbl("verifications", "VERIFICATIONS"), value: String(input.businessIdVerifications ?? 0) },
     // Generic fields
     title: { key: "title", label: lbl("title", "TITLE"), value: input.programName ?? "" },
     description: { key: "description", label: lbl("description", "DESCRIPTION"), value: input.rewardDescription },
@@ -423,11 +389,6 @@ export async function generateApplePass(
   for (const fieldId of appleLayout.auxiliary) {
     const f = fieldData[fieldId]
     if (f) pass.auxiliaryFields.push(f)
-  }
-
-  // Transit pass requires transitType for boardingPass
-  if (input.programType === "TRANSIT") {
-    (pass as unknown as Record<string, unknown>).transitType = "PKTransitTypeGeneric"
   }
 
   // ── Back fields: Program info, T&C, contact, card design extras ──
@@ -495,24 +456,6 @@ export async function generateApplePass(
       label: "REWARD CATALOG",
       value: catalogText,
     })
-  } else if (input.programType === "PREPAID" && prepaidConfig) {
-    pass.backFields.push({
-      key: "prepaidDetails",
-      label: "Pass Details",
-      value: `${input.remainingUses ?? 0} of ${prepaidConfig.totalUses} ${prepaidConfig.useLabel}s remaining.${prepaidConfig.rechargeable ? " This pass can be recharged." : ""}`,
-    })
-    if (prepaidConfig.validUntil) {
-      pass.backFields.push({
-        key: "prepaidExpiry",
-        label: "Valid Until",
-        value: new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
-      })
-    }
-    pass.backFields.push({
-      key: "prepaidUsage",
-      label: "How to Use",
-      value: `Show this pass to staff each time you use a ${prepaidConfig.useLabel}. Your remaining balance will be updated automatically.`,
-    })
   } else if (input.programType === "GIFT_CARD" && giftCardConfig) {
     const balanceCents = input.giftBalanceCents ?? giftCardConfig.initialBalanceCents
     pass.backFields.push({
@@ -545,24 +488,6 @@ export async function generateApplePass(
         value: `${input.ticketScanCount ?? 0} of ${ticketConfig.maxScans} scans used.`,
       }
     )
-  } else if (input.programType === "ACCESS" && accessConfig) {
-    pass.backFields.push({
-      key: "accessDetails",
-      label: `${accessConfig.accessLabel} Details`,
-      value: `Total grants: ${input.accessTotalGranted ?? 0}${accessConfig.maxDailyUses ? `\nDaily limit: ${accessConfig.maxDailyUses} uses` : ""}${accessConfig.validDays?.length ? `\nValid days: ${accessConfig.validDays.join(", ")}` : ""}${accessConfig.validTimeStart && accessConfig.validTimeEnd ? `\nValid hours: ${accessConfig.validTimeStart}–${accessConfig.validTimeEnd}` : ""}`,
-    })
-  } else if (input.programType === "TRANSIT" && transitConfig) {
-    pass.backFields.push({
-      key: "transitDetails",
-      label: "Transit Details",
-      value: `Type: ${transitConfig.transitType.toUpperCase()}${transitConfig.originName ? `\nFrom: ${transitConfig.originName}` : ""}${transitConfig.destinationName ? `\nTo: ${transitConfig.destinationName}` : ""}${transitConfig.departureDateTime ? `\nDeparture: ${new Date(transitConfig.departureDateTime).toLocaleString("en-US")}` : ""}`,
-    })
-  } else if (input.programType === "BUSINESS_ID" && businessIdConfig) {
-    pass.backFields.push({
-      key: "idDetails",
-      label: businessIdConfig.idLabel,
-      value: `Name: ${input.customerName}\nVerifications: ${input.businessIdVerifications ?? 0}`,
-    })
   } else {
     // STAMP_CARD (default)
     pass.backFields.push(
@@ -598,7 +523,6 @@ export async function generateApplePass(
   const termsText = (
     input.programType === "COUPON" ? couponConfig?.terms :
     input.programType === "MEMBERSHIP" ? membershipConfig?.terms :
-    input.programType === "PREPAID" ? prepaidConfig?.terms :
     null
   ) ?? input.termsAndConditions
   if (termsText) {

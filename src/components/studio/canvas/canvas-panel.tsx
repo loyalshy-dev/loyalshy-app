@@ -6,7 +6,7 @@ import type { PreviewFormat, DeviceFrame } from "@/types/editor"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { DeviceFrameWrapper } from "./device-frame"
 import { InteractiveCardWrapper } from "./interactive-card-overlay"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig } from "@/lib/pass-config"
+import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parseGiftCardConfig, parseTicketConfig } from "@/lib/pass-config"
 import type { SocialLinks } from "@/lib/wallet/card-design"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 
@@ -31,7 +31,7 @@ type CanvasPanelProps = {
   businessHours?: string
   socialLinks?: SocialLinks
   customMessage?: string
-  // Business ID holder photo
+  // Holder photo (membership)
   holderPhotoUrl?: string | null
   // Store for interactive color overlay
   store?: CardDesignStoreApi
@@ -123,18 +123,10 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
     return { tierName: membershipConfig.membershipTier ?? "Member", benefits: membershipConfig.benefits ?? "Exclusive perks" }
   }, [membershipConfig])
 
-  // Prepaid
-  const prepaidConfig = useMemo(() => passType === "PREPAID" ? parsePrepaidConfig(templateConfig) : null, [passType, templateConfig])
   // Gift card
   const giftCardConfig = useMemo(() => passType === "GIFT_CARD" ? parseGiftCardConfig(templateConfig) : null, [passType, templateConfig])
   // Ticket
   const ticketConfig = useMemo(() => passType === "TICKET" ? parseTicketConfig(templateConfig) : null, [passType, templateConfig])
-  // Access
-  const accessConfig = useMemo(() => passType === "ACCESS" ? parseAccessConfig(templateConfig) : null, [passType, templateConfig])
-  // Transit
-  const transitConfig = useMemo(() => passType === "TRANSIT" ? parseTransitConfig(templateConfig) : null, [passType, templateConfig])
-  // Business ID
-  const businessIdConfig = useMemo(() => passType === "BUSINESS_ID" ? parseBusinessIdConfig(templateConfig) : null, [passType, templateConfig])
 
   // Check if back has any content
   const hasBackContent = !!(businessHours || customMessage ||
@@ -232,12 +224,6 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
                 // Membership props
                 tierName={membershipPreview.tierName}
                 benefits={membershipPreview.benefits}
-                // Prepaid props
-                remainingUses={prepaidConfig?.totalUses}
-                totalUses={prepaidConfig?.totalUses}
-                prepaidValidUntil={prepaidConfig?.validUntil
-                  ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                  : passType === "PREPAID" ? t("noExpiry") : undefined}
                 // Gift card props
                 giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
                 giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
@@ -246,19 +232,8 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
                 eventDate={ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : undefined}
                 eventVenue={ticketConfig?.eventVenue}
                 scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
-                // Access props
-                accessLabel={accessConfig?.accessLabel}
-                accessGranted={passType === "ACCESS" ? "0" : undefined}
-                // Transit props
-                transitType={transitConfig?.transitType?.toUpperCase()}
-                originName={transitConfig?.originName}
-                destinationName={transitConfig?.destinationName}
-                boardingStatus={passType === "TRANSIT" ? "NOT BOARDED" : undefined}
-                // Business ID props
-                idLabel={businessIdConfig?.idLabel}
-                verifications={passType === "BUSINESS_ID" ? "0" : undefined}
-                showHolderPhoto={businessIdConfig?.showHolderPhoto ?? membershipConfig?.showHolderPhoto ?? accessConfig?.showHolderPhoto}
-                holderPhotoPosition={businessIdConfig?.holderPhotoPosition ?? membershipConfig?.holderPhotoPosition ?? accessConfig?.holderPhotoPosition}
+                showHolderPhoto={membershipConfig?.showHolderPhoto}
+                holderPhotoPosition={membershipConfig?.holderPhotoPosition}
                 holderPhotoUrl={holderPhotoUrl}
               />
               </div>

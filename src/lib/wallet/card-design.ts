@@ -2,7 +2,7 @@ import crypto from "crypto"
 
 // ─── Types ──────────────────────────────────────────────────
 
-export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "PREPAID" | "GIFT_CARD" | "TICKET" | "ACCESS" | "TRANSIT" | "BUSINESS_ID" | "GENERIC"
+export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "GIFT_CARD" | "TICKET" | "GENERIC"
 export type PatternStyle = "NONE" | "DOTS" | "WAVES" | "GEOMETRIC" | "CHEVRON" | "CROSSHATCH" | "DIAMONDS" | "CONFETTI" | "SOLID_PRIMARY" | "SOLID_SECONDARY" | "STAMP_GRID"
 export type ProgressStyle = "NUMBERS" | "CIRCLES" | "SQUARES" | "STARS" | "STAMPS" | "PERCENTAGE" | "REMAINING"
 export type LabelFormat = "UPPERCASE" | "TITLE_CASE" | "LOWERCASE"
@@ -157,19 +157,6 @@ const FIELD_CONFIG_MAP: Record<string, FieldConfigEntry> = {
     defaultSecondary: ["benefits", "memberSince", "customerName"],
     defaultFields: ["organization", "benefits", "memberSince", "customerName"],
   },
-  PREPAID: {
-    availableFields: [
-      { id: "organization", label: "Organization" },
-      { id: "remaining", label: "Remaining" },
-      { id: "prepaidValidUntil", label: "Valid Until" },
-      { id: "totalUsed", label: "Total Used" },
-      { id: "customerName", label: "Name" },
-      { id: "memberSince", label: "Since" },
-    ] as const,
-    defaultHeader: ["organization"],
-    defaultSecondary: ["prepaidValidUntil", "totalUsed", "customerName"],
-    defaultFields: ["organization", "prepaidValidUntil", "totalUsed", "customerName"],
-  },
   GIFT_CARD: {
     availableFields: [
       { id: "organization", label: "Organization" },
@@ -194,43 +181,6 @@ const FIELD_CONFIG_MAP: Record<string, FieldConfigEntry> = {
     defaultHeader: ["scanStatus"],
     defaultSecondary: ["eventDate", "eventVenue", "customerName"],
     defaultFields: ["scanStatus", "eventDate", "eventVenue", "customerName"],
-  },
-  ACCESS: {
-    availableFields: [
-      { id: "organization", label: "Organization" },
-      { id: "accessLabel", label: "Access" },
-      { id: "accessGranted", label: "Granted" },
-      { id: "customerName", label: "Name" },
-      { id: "memberSince", label: "Since" },
-    ] as const,
-    defaultHeader: ["accessGranted"],
-    defaultSecondary: ["customerName", "memberSince"],
-    defaultFields: ["accessGranted", "customerName", "memberSince"],
-  },
-  TRANSIT: {
-    availableFields: [
-      { id: "organization", label: "Organization" },
-      { id: "origin", label: "Origin" },
-      { id: "destination", label: "Destination" },
-      { id: "transitType", label: "Type" },
-      { id: "boardingStatus", label: "Status" },
-      { id: "customerName", label: "Name" },
-    ] as const,
-    defaultHeader: ["boardingStatus"],
-    defaultSecondary: ["destination", "transitType"],
-    defaultFields: ["boardingStatus", "destination", "transitType"],
-  },
-  BUSINESS_ID: {
-    availableFields: [
-      { id: "organization", label: "Organization" },
-      { id: "idLabel", label: "ID Label" },
-      { id: "verifications", label: "Verifications" },
-      { id: "memberSince", label: "Since" },
-      { id: "customerName", label: "Name" },
-    ] as const,
-    defaultHeader: ["verifications"],
-    defaultSecondary: ["organization", "memberSince"],
-    defaultFields: ["verifications", "organization", "memberSince"],
   },
 }
 
@@ -635,7 +585,6 @@ export type PassFieldLayout = {
  * STAMP/POINTS: header=organization+memberNumber, primary=progress, secondary=nextReward+totalVisits+memberSince, auxiliary=customerName
  * COUPON: header=organization, primary=discount, secondary=validUntil+couponCode+customerName
  * TIER: header=organization, primary=tierName, secondary=benefits+memberSince+customerName
- * PREPAID: header=organization, primary=remaining, secondary=prepaidValidUntil+totalUsed+customerName
  * GENERIC: header=organization, primary=title, secondary=description+customerName
  */
 export function getFieldLayout(cardType?: CardType): PassFieldLayout {
@@ -669,21 +618,6 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
     }
   }
 
-  if (cardType === "PREPAID") {
-    return {
-      apple: {
-        header: ["organization"],
-        primary: ["remaining"],
-        secondary: ["prepaidValidUntil", "totalUsed", "customerName"],
-        auxiliary: [],
-      },
-      google: {
-        rows: 1,
-        fields: ["remaining", "prepaidValidUntil", "totalUsed", "customerName"],
-      },
-    }
-  }
-
   if (cardType === "GIFT_CARD") {
     return {
       apple: {
@@ -710,51 +644,6 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
       google: {
         rows: 1,
         fields: ["eventDate", "eventVenue", "scanStatus", "customerName"],
-      },
-    }
-  }
-
-  if (cardType === "ACCESS") {
-    return {
-      apple: {
-        header: ["accessGranted"],
-        primary: ["accessLabel"],
-        secondary: ["customerName", "memberSince"],
-        auxiliary: [],
-      },
-      google: {
-        rows: 1,
-        fields: ["accessLabel", "accessGranted", "customerName", "memberSince"],
-      },
-    }
-  }
-
-  if (cardType === "TRANSIT") {
-    return {
-      apple: {
-        header: ["boardingStatus"],
-        primary: ["origin"],
-        secondary: ["destination", "transitType"],
-        auxiliary: ["customerName"],
-      },
-      google: {
-        rows: 1,
-        fields: ["origin", "destination", "transitType", "boardingStatus", "customerName"],
-      },
-    }
-  }
-
-  if (cardType === "BUSINESS_ID") {
-    return {
-      apple: {
-        header: ["verifications"],
-        primary: ["idLabel"],
-        secondary: ["organization", "memberSince"],
-        auxiliary: [],
-      },
-      google: {
-        rows: 1,
-        fields: ["idLabel", "verifications", "organization", "memberSince"],
       },
     }
   }

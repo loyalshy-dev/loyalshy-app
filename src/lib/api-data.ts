@@ -11,19 +11,14 @@ import {
 } from "@/lib/email-templates"
 import {
   parseCouponConfig,
-  parsePrepaidConfig,
   parseMembershipConfig,
   computeMembershipExpiresAt,
   parseMinigameConfig,
   weightedRandomPrize,
   parseGiftCardConfig,
-  parseAccessConfig,
-  parseBusinessIdConfig,
-  parseTransitConfig,
   parseTicketConfig,
   parsePointsConfig,
   parseStampCardConfig,
-  computeDurationExpiresAt,
   formatCouponValue,
 } from "@/lib/pass-config"
 import type { Prisma } from "@prisma/client"
@@ -335,12 +330,8 @@ const PASS_TYPE_LABELS: Record<string, string> = {
   COUPON: "Coupon",
   MEMBERSHIP: "Membership Card",
   POINTS: "Points Card",
-  PREPAID: "Prepaid Card",
   GIFT_CARD: "Gift Card",
   TICKET: "Ticket",
-  ACCESS: "Access Pass",
-  TRANSIT: "Transit Pass",
-  BUSINESS_ID: "Business ID",
 }
 
 export type WalletUrls = {
@@ -813,14 +804,6 @@ export async function issuePass(
   }
   let expiresAt: Date | null = null
 
-  if (template.passType === "PREPAID") {
-    const cfg = parsePrepaidConfig(template.config)
-    if (cfg) {
-      instanceData.remainingUses = cfg.totalUses
-      if (cfg.validUntil) expiresAt = new Date(cfg.validUntil)
-    }
-  }
-
   if (template.passType === "MEMBERSHIP") {
     const cfg = parseMembershipConfig(template.config)
     if (cfg) expiresAt = computeMembershipExpiresAt(cfg)
@@ -837,16 +820,6 @@ export async function issuePass(
         expiresAt = d
       }
     }
-  }
-
-  if (template.passType === "ACCESS") {
-    const cfg = parseAccessConfig(template.config)
-    if (cfg) expiresAt = computeDurationExpiresAt(cfg.validDuration, cfg.customDurationDays)
-  }
-
-  if (template.passType === "BUSINESS_ID") {
-    const cfg = parseBusinessIdConfig(template.config)
-    if (cfg) expiresAt = computeDurationExpiresAt(cfg.validDuration, cfg.customDurationDays)
   }
 
   if (template.passType === "TICKET") instanceData.scanCount = 0
@@ -1212,50 +1185,6 @@ export async function performRedeemPoints(organizationId: string, passInstanceId
   return { action: "redeem_points", passInstanceId: pi.id, result: { pointsSpent: points, newBalance }, interaction: txResult }
 }
 
-// ─── PREPAID: use ──────────────────────────────────────────
-
-export async function performPrepaidUse(organizationId: string, passInstanceId: string, amount: number): Promise<ActionResult | { error: string }> {
-  const fetched = await fetchPassForAction(organizationId, passInstanceId)
-  if (fetched.error) return { error: fetched.error }
-  const pi = fetched.passInstance!
-  const data = pi.data as Record<string, unknown>
-  const remaining = (data.remainingUses as number) ?? 0
-  if (remaining < amount) return { error: `Insufficient uses. Remaining: ${remaining}, requested: ${amount}.` }
-  const newRemaining = remaining - amount
-  const totalUsed = ((data.totalUsed as number) ?? 0) + amount
-  const isDepleted = newRemaining <= 0
-
-  const txResult = await db.$transaction(async (tx) => {
-    await tx.passInstance.update({ where: { id: pi.id }, data: { data: { ...data, remainingUses: newRemaining, totalUsed, lastUsedAt: new Date().toISOString() } as Prisma.JsonObject, status: isDepleted ? "COMPLETED" : "ACTIVE" } })
-    const interaction = await tx.interaction.create({ data: { contactId: pi.contactId, organizationId, passTemplateId: pi.passTemplate.id, passInstanceId: pi.id, type: "PREPAID_USE", metadata: { remainingUses: newRemaining, totalUsed } as Prisma.JsonObject }, select: { id: true, type: true, createdAt: true } })
-    await bumpContactStats(pi.contactId, tx)
-    return interaction
-  })
-  return { action: "use", passInstanceId: pi.id, result: { remainingUses: newRemaining, totalUsed, isDepleted }, interaction: txResult }
-}
-
-// ─── PREPAID: recharge (NEW) ───────────────────────────────
-
-export async function performPrepaidRecharge(organizationId: string, passInstanceId: string, uses: number): Promise<ActionResult | { error: string }> {
-  const pi = await db.passInstance.findFirst({
-    where: { id: passInstanceId, passTemplate: { organizationId } },
-    include: { passTemplate: { select: { id: true, name: true, passType: true, config: true, status: true, endsAt: true } }, contact: { select: { id: true, fullName: true, deletedAt: true } } },
-  })
-  if (!pi) return { error: "Pass instance not found." }
-  if (pi.contact.deletedAt) return { error: "Contact has been deleted." }
-  if (!["ACTIVE", "COMPLETED"].includes(pi.status)) return { error: `Pass instance is ${pi.status}. Cannot recharge.` }
-  const data = pi.data as Record<string, unknown>
-  const newRemaining = ((data.remainingUses as number) ?? 0) + uses
-
-  const txResult = await db.$transaction(async (tx) => {
-    await tx.passInstance.update({ where: { id: pi.id }, data: { data: { ...data, remainingUses: newRemaining } as Prisma.JsonObject, status: "ACTIVE" } })
-    const interaction = await tx.interaction.create({ data: { contactId: pi.contactId, organizationId, passTemplateId: pi.passTemplate.id, passInstanceId: pi.id, type: "PREPAID_RECHARGE", metadata: { usesAdded: uses, newRemaining } as Prisma.JsonObject }, select: { id: true, type: true, createdAt: true } })
-    await bumpContactStats(pi.contactId, tx)
-    return interaction
-  })
-  return { action: "recharge", passInstanceId: pi.id, result: { usesAdded: uses, remainingUses: newRemaining }, interaction: txResult }
-}
-
 // ─── GIFT_CARD: charge ─────────────────────────────────────
 
 export async function performGiftCardCharge(organizationId: string, passInstanceId: string, amountCents: number): Promise<ActionResult | { error: string }> {
@@ -1341,99 +1270,6 @@ export async function performTicketVoid(organizationId: string, passInstanceId: 
     return interaction
   })
   return { action: "void", passInstanceId: pi.id, result: {}, interaction: txResult }
-}
-
-// ─── ACCESS: grant ─────────────────────────────────────────
-
-export async function performAccessGrant(organizationId: string, passInstanceId: string): Promise<ActionResult | { error: string }> {
-  const fetched = await fetchPassForAction(organizationId, passInstanceId)
-  if (fetched.error) return { error: fetched.error }
-  const pi = fetched.passInstance!
-  const data = pi.data as Record<string, unknown>
-  const today = new Date().toISOString().slice(0, 10)
-  const todayGranted = (data.todayDate as string) === today ? ((data.todayGranted as number) ?? 0) + 1 : 1
-  const totalGranted = ((data.totalGranted as number) ?? 0) + 1
-
-  const txResult = await db.$transaction(async (tx) => {
-    await tx.passInstance.update({ where: { id: pi.id }, data: { data: { ...data, totalGranted, todayGranted, todayDate: today, lastGrantedAt: new Date().toISOString() } as Prisma.JsonObject } })
-    const interaction = await tx.interaction.create({ data: { contactId: pi.contactId, organizationId, passTemplateId: pi.passTemplate.id, passInstanceId: pi.id, type: "ACCESS_GRANT", metadata: { totalGranted, todayGranted } as Prisma.JsonObject }, select: { id: true, type: true, createdAt: true } })
-    await bumpContactStats(pi.contactId, tx)
-    return interaction
-  })
-  return { action: "grant", passInstanceId: pi.id, result: { totalGranted, todayGranted }, interaction: txResult }
-}
-
-// ─── ACCESS: deny ──────────────────────────────────────────
-
-export async function performAccessDeny(organizationId: string, passInstanceId: string): Promise<ActionResult | { error: string }> {
-  const fetched = await fetchPassForAction(organizationId, passInstanceId)
-  if (fetched.error) return { error: fetched.error }
-  const pi = fetched.passInstance!
-  const data = pi.data as Record<string, unknown>
-  const totalDenied = ((data.totalDenied as number) ?? 0) + 1
-
-  const txResult = await db.$transaction(async (tx) => {
-    await tx.passInstance.update({ where: { id: pi.id }, data: { data: { ...data, totalDenied } as Prisma.JsonObject } })
-    const interaction = await tx.interaction.create({ data: { contactId: pi.contactId, organizationId, passTemplateId: pi.passTemplate.id, passInstanceId: pi.id, type: "ACCESS_DENY", metadata: { totalDenied } as Prisma.JsonObject }, select: { id: true, type: true, createdAt: true } })
-    await bumpContactStats(pi.contactId, tx)
-    return interaction
-  })
-  return { action: "deny", passInstanceId: pi.id, result: { totalDenied }, interaction: txResult }
-}
-
-// ─── TRANSIT: board ────────────────────────────────────────
-
-export async function performTransitBoard(organizationId: string, passInstanceId: string): Promise<ActionResult | { error: string }> {
-  const fetched = await fetchPassForAction(organizationId, passInstanceId)
-  if (fetched.error) return { error: fetched.error }
-  const pi = fetched.passInstance!
-  const data = pi.data as Record<string, unknown>
-  if (data.isBoarded) return { error: "Already boarded. Must exit first." }
-  const transitConfig = parseTransitConfig(pi.passTemplate.config)
-
-  const txResult = await db.$transaction(async (tx) => {
-    await tx.passInstance.update({ where: { id: pi.id }, data: { data: { ...data, isBoarded: true, boardedAt: new Date().toISOString(), exitedAt: undefined } as Prisma.JsonObject } })
-    const interaction = await tx.interaction.create({ data: { contactId: pi.contactId, organizationId, passTemplateId: pi.passTemplate.id, passInstanceId: pi.id, type: "TRANSIT_BOARD", metadata: { transitType: transitConfig?.transitType, originName: transitConfig?.originName, destinationName: transitConfig?.destinationName } as Prisma.JsonObject }, select: { id: true, type: true, createdAt: true } })
-    await bumpContactStats(pi.contactId, tx)
-    return interaction
-  })
-  return { action: "board", passInstanceId: pi.id, result: { isBoarded: true }, interaction: txResult }
-}
-
-// ─── TRANSIT: exit ─────────────────────────────────────────
-
-export async function performTransitExit(organizationId: string, passInstanceId: string): Promise<ActionResult | { error: string }> {
-  const fetched = await fetchPassForAction(organizationId, passInstanceId)
-  if (fetched.error) return { error: fetched.error }
-  const pi = fetched.passInstance!
-  const data = pi.data as Record<string, unknown>
-  if (!data.isBoarded) return { error: "Not currently boarded. Must board first." }
-
-  const txResult = await db.$transaction(async (tx) => {
-    await tx.passInstance.update({ where: { id: pi.id }, data: { data: { ...data, isBoarded: false, exitedAt: new Date().toISOString() } as Prisma.JsonObject } })
-    const interaction = await tx.interaction.create({ data: { contactId: pi.contactId, organizationId, passTemplateId: pi.passTemplate.id, passInstanceId: pi.id, type: "TRANSIT_EXIT", metadata: {} as Prisma.JsonObject }, select: { id: true, type: true, createdAt: true } })
-    await bumpContactStats(pi.contactId, tx)
-    return interaction
-  })
-  return { action: "exit", passInstanceId: pi.id, result: { isBoarded: false }, interaction: txResult }
-}
-
-// ─── BUSINESS_ID: verify ───────────────────────────────────
-
-export async function performIdVerify(organizationId: string, passInstanceId: string): Promise<ActionResult | { error: string }> {
-  const fetched = await fetchPassForAction(organizationId, passInstanceId)
-  if (fetched.error) return { error: fetched.error }
-  const pi = fetched.passInstance!
-  const data = pi.data as Record<string, unknown>
-  const totalVerifications = ((data.totalVerifications as number) ?? 0) + 1
-
-  const txResult = await db.$transaction(async (tx) => {
-    await tx.passInstance.update({ where: { id: pi.id }, data: { data: { ...data, totalVerifications, lastVerifiedAt: new Date().toISOString() } as Prisma.JsonObject } })
-    const interaction = await tx.interaction.create({ data: { contactId: pi.contactId, organizationId, passTemplateId: pi.passTemplate.id, passInstanceId: pi.id, type: "ID_VERIFY", metadata: { totalVerifications } as Prisma.JsonObject }, select: { id: true, type: true, createdAt: true } })
-    await bumpContactStats(pi.contactId, tx)
-    return interaction
-  })
-  return { action: "verify", passInstanceId: pi.id, result: { totalVerifications, contactName: pi.contact.fullName }, interaction: txResult }
 }
 
 // ═══════════════════════════════════════════════════════════

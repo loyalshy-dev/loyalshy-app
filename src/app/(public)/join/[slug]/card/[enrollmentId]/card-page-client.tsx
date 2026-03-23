@@ -9,7 +9,7 @@ import { computeTextColor } from "@/lib/wallet/card-design"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { MinigameStep } from "@/components/minigames"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePrepaidConfig, parseBusinessIdConfig, parseAccessConfig } from "@/lib/pass-config"
+import { parseCouponConfig, formatCouponValue, parseMembershipConfig } from "@/lib/pass-config"
 
 type Platform = "apple" | "google"
 
@@ -94,21 +94,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
   const tierName = membershipConfig?.membershipTier ?? undefined
   const benefits = membershipConfig?.benefits ?? undefined
 
-  // Prepaid-specific props
-  const prepaidConfig = data.template.passType === "PREPAID" ? parsePrepaidConfig(data.template.config) : null
-  const remainingUses = data.remainingUses ?? 0
-  const totalUses = prepaidConfig?.totalUses ?? 0
-  const prepaidValidUntil = prepaidConfig?.validUntil
-    ? new Date(prepaidConfig.validUntil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
-    : undefined
-
-  // Business ID-specific props
-  const businessIdConfig = data.template.passType === "BUSINESS_ID" ? parseBusinessIdConfig(data.template.config) : null
-
-  // Access-specific props
-  const accessConfig = data.template.passType === "ACCESS" ? parseAccessConfig(data.template.config) : null
-
-  // Holder photo — per-instance, supported by BUSINESS_ID, MEMBERSHIP, ACCESS
+  // Holder photo — per-instance, supported by MEMBERSHIP
   const holderPhotoUrl = data.holderPhotoUrl ?? undefined
 
   function handleAddToWallet(chosenPlatform: Platform) {
@@ -239,15 +225,10 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
             validUntil={validUntil}
             tierName={tierName}
             benefits={benefits}
-            remainingUses={remainingUses}
-            totalUses={totalUses}
-            prepaidValidUntil={prepaidValidUntil}
             memberNumber={data.memberNumber != null ? `${data.memberNumber}` : "—"}
-            idLabel={businessIdConfig?.idLabel}
-            showHolderPhoto={businessIdConfig?.showHolderPhoto ?? membershipConfig?.showHolderPhoto ?? accessConfig?.showHolderPhoto ?? (data.template.passType === "BUSINESS_ID" ? true : undefined)}
-            holderPhotoPosition={businessIdConfig?.holderPhotoPosition ?? membershipConfig?.holderPhotoPosition ?? accessConfig?.holderPhotoPosition}
+            showHolderPhoto={membershipConfig?.showHolderPhoto}
+            holderPhotoPosition={membershipConfig?.holderPhotoPosition}
             holderPhotoUrl={holderPhotoUrl}
-            verifications={data.template.passType === "BUSINESS_ID" ? `${data.totalInteractions}` : undefined}
           />
         </div>
 

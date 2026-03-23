@@ -7,7 +7,7 @@ import { createDb } from "./db"
 
 type UpdateWalletPassPayload = {
   passInstanceId: string
-  updateType: "STAMP" | "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "TEMPLATE_CHANGE" | "PASS_INSTANCE_SUSPENDED" | "CHECK_IN" | "POINTS_EARNED" | "POINTS_REDEEMED" | "PREPAID_USE" | "PREPAID_RECHARGE" | "GIFT_CHARGE" | "GIFT_REFUND" | "TICKET_SCAN" | "TICKET_VOID" | "ACCESS_GRANT" | "ACCESS_DENY" | "TRANSIT_BOARD" | "TRANSIT_EXIT" | "ID_VERIFY"
+  updateType: "STAMP" | "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "TEMPLATE_CHANGE" | "PASS_INSTANCE_SUSPENDED" | "CHECK_IN" | "POINTS_EARNED" | "POINTS_REDEEMED" | "GIFT_CHARGE" | "GIFT_REFUND" | "TICKET_SCAN" | "TICKET_VOID"
 }
 
 // ─── Task ───────────────────────────────────────────────────
@@ -93,7 +93,6 @@ export const updateWalletPassTask = task({
       const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
       const totalVisits = (instanceData.totalVisits as number) ?? 0
       const pointsBalance = (instanceData.pointsBalance as number) ?? 0
-      const remainingUses = (instanceData.remainingUses as number) ?? 0
 
       // Extract config from PassTemplate.config JSON
       const templateConfig = (template.config ?? {}) as Record<string, unknown>
@@ -254,7 +253,7 @@ async function patchGooglePass(
   const token = await getAccessToken()
 
   const { formatProgressValue, formatLabel } = await import("@/lib/wallet/card-design")
-  const { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parsePrepaidConfig, parseGiftCardConfig, parseTicketConfig, parseAccessConfig, parseTransitConfig, parseBusinessIdConfig, getCheapestCatalogItem, getWalletRewardText } = await import("@/lib/pass-config")
+  const { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, getCheapestCatalogItem, getWalletRewardText } = await import("@/lib/pass-config")
   type ProgressStyle = import("@/lib/wallet/card-design").ProgressStyle
   type LabelFormat = import("@/lib/wallet/card-design").LabelFormat
 
@@ -274,12 +273,8 @@ async function patchGooglePass(
   const couponConfig = template.passType === "COUPON" ? parseCouponConfig(template.config) : null
   const membershipConfig = template.passType === "MEMBERSHIP" ? parseMembershipConfig(template.config) : null
   const pointsConfig = template.passType === "POINTS" ? parsePointsConfig(template.config) : null
-  const prepaidConfig = template.passType === "PREPAID" ? parsePrepaidConfig(template.config) : null
   const giftCardConfig = template.passType === "GIFT_CARD" ? parseGiftCardConfig(template.config) : null
   const ticketConfig = template.passType === "TICKET" ? parseTicketConfig(template.config) : null
-  const accessConfig = template.passType === "ACCESS" ? parseAccessConfig(template.config) : null
-  const transitConfig = template.passType === "TRANSIT" ? parseTransitConfig(template.config) : null
-  const businessIdConfig = template.passType === "BUSINESS_ID" ? parseBusinessIdConfig(template.config) : null
 
   if (template.passType === "COUPON" && couponConfig) {
     // Show revealed prize, prize names (if minigame), or generic discount
@@ -331,16 +326,6 @@ async function patchGooglePass(
       { id: "earnRate", header: formatLabel("EARN RATE", labelFmt), body: `${pointsConfig.pointsPerVisit} points per visit` },
       { id: "memberSince", header: formatLabel("MEMBER SINCE", labelFmt), body: memberSinceFormatted },
     ]
-  } else if (template.passType === "PREPAID" && prepaidConfig) {
-    const remaining = (passInstance.data.remainingUses as number) ?? 0
-    loyaltyPoints = { label: formatLabel("REMAINING", labelFmt), balance: { string: `${remaining} / ${prepaidConfig.totalUses}` } }
-    secondaryLoyaltyPoints = { label: formatLabel("USED", labelFmt), balance: { int: passInstance.totalVisits } }
-    textModulesData = [
-      { id: "remaining", header: formatLabel(`${prepaidConfig.useLabel.toUpperCase()}S LEFT`, labelFmt), body: `${remaining} / ${prepaidConfig.totalUses}` },
-      { id: "validUntil", header: formatLabel("VALID UNTIL", labelFmt), body: prepaidConfig.validUntil ? new Date(prepaidConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
-      { id: "totalUsed", header: formatLabel("TOTAL USED", labelFmt), body: String(passInstance.totalVisits) },
-      { id: "memberSince", header: formatLabel("ADDED", labelFmt), body: memberSinceFormatted },
-    ]
   } else if (template.passType === "GIFT_CARD" && giftCardConfig) {
     const balanceCents = (passInstance.data.balanceCents as number) ?? giftCardConfig.initialBalanceCents
     const balanceStr = `${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}`
@@ -360,32 +345,6 @@ async function patchGooglePass(
       { id: "venue", header: formatLabel("VENUE", labelFmt), body: ticketConfig.eventVenue },
       { id: "scans", header: formatLabel("SCANS", labelFmt), body: `${scanCount} / ${ticketConfig.maxScans}` },
       { id: "holder", header: formatLabel("HOLDER", labelFmt), body: passInstance.contact.fullName },
-    ]
-  } else if (template.passType === "ACCESS" && accessConfig) {
-    const totalGranted = (passInstance.data.totalGranted as number) ?? 0
-    loyaltyPoints = { label: formatLabel(accessConfig.accessLabel, labelFmt), balance: { string: "Active" } }
-    secondaryLoyaltyPoints = { label: formatLabel("TOTAL GRANTED", labelFmt), balance: { int: totalGranted } }
-    textModulesData = [
-      { id: "accessLabel", header: formatLabel(accessConfig.accessLabel, labelFmt), body: "Active" },
-      { id: "totalGranted", header: formatLabel("TOTAL GRANTED", labelFmt), body: String(totalGranted) },
-    ]
-  } else if (template.passType === "TRANSIT" && transitConfig) {
-    const isBoarded = (passInstance.data.isBoarded as boolean) ?? false
-    loyaltyPoints = { label: formatLabel("STATUS", labelFmt), balance: { string: isBoarded ? "BOARDED" : "NOT BOARDED" } }
-    secondaryLoyaltyPoints = { label: formatLabel("TYPE", labelFmt), balance: { string: transitConfig.transitType.toUpperCase() } }
-    textModulesData = [
-      { id: "origin", header: formatLabel("FROM", labelFmt), body: transitConfig.originName ?? "—" },
-      { id: "destination", header: formatLabel("TO", labelFmt), body: transitConfig.destinationName ?? "—" },
-      { id: "transitType", header: formatLabel("TYPE", labelFmt), body: transitConfig.transitType.toUpperCase() },
-      { id: "boardingStatus", header: formatLabel("STATUS", labelFmt), body: isBoarded ? "BOARDED" : "NOT BOARDED" },
-    ]
-  } else if (template.passType === "BUSINESS_ID" && businessIdConfig) {
-    const verifications = (passInstance.data.totalVerifications as number) ?? 0
-    loyaltyPoints = { label: formatLabel(businessIdConfig.idLabel, labelFmt), balance: { string: passInstance.contact.fullName } }
-    secondaryLoyaltyPoints = { label: formatLabel("VERIFICATIONS", labelFmt), balance: { int: verifications } }
-    textModulesData = [
-      { id: "idLabel", header: formatLabel(businessIdConfig.idLabel, labelFmt), body: passInstance.contact.fullName },
-      { id: "verifications", header: formatLabel("VERIFICATIONS", labelFmt), body: String(verifications) },
     ]
   } else {
     // STAMP_CARD (default)

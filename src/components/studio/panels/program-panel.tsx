@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { useStore } from "zustand"
 import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
@@ -429,40 +428,6 @@ function PointsFields({ store }: { store: CardDesignStoreApi }) {
   )
 }
 
-function PrepaidFields({ store }: { store: CardDesignStoreApi }) {
-  const t = useTranslations("dashboard.programEditor")
-  const totalUses = useStore(store, (s) => s.programConfig.totalUses)
-  const useLabel = useStore(store, (s) => s.programConfig.useLabel)
-  const rechargeable = useStore(store, (s) => s.programConfig.rechargeable)
-  const set = store.getState().setConfigField
-
-  return (
-    <>
-      <SectionHeader>{t("prepaidConfiguration")}</SectionHeader>
-      <NumberInput
-        label={t("totalUses")}
-        value={totalUses}
-        onChange={(v) => set("totalUses", Math.max(1, v))}
-        min={1}
-        suffix={`${useLabel}s`}
-      />
-      <TextInput
-        label={t("useLabel")}
-        value={useLabel}
-        onChange={(v) => set("useLabel", v)}
-        placeholder={t("useLabelPlaceholder")}
-        maxLength={30}
-      />
-      <ToggleInput
-        label={t("rechargeable")}
-        description={t("rechargeableDesc")}
-        value={rechargeable}
-        onChange={(v) => set("rechargeable", v)}
-      />
-    </>
-  )
-}
-
 function GiftCardFields({ store }: { store: CardDesignStoreApi }) {
   const t = useTranslations("dashboard.programEditor")
   const currency = useStore(store, (s) => s.programConfig.currency)
@@ -545,207 +510,6 @@ function TicketFields({ store }: { store: CardDesignStoreApi }) {
   )
 }
 
-const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const
-const DAY_I18N: Record<string, string> = { mon: "dayMon", tue: "dayTue", wed: "dayWed", thu: "dayThu", fri: "dayFri", sat: "daySat", sun: "daySun" }
-
-function AccessFields({ store }: { store: CardDesignStoreApi }) {
-  const t = useTranslations("dashboard.programEditor")
-  const accessLabel = useStore(store, (s) => s.programConfig.accessLabel)
-  const validDuration = useStore(store, (s) => s.programConfig.validDuration)
-  const customDurationDays = useStore(store, (s) => s.programConfig.customDurationDays)
-  const maxDailyUses = useStore(store, (s) => s.programConfig.maxDailyUses)
-  const validDays = useStore(store, (s) => s.programConfig.validDays)
-  const validTimeStart = useStore(store, (s) => s.programConfig.validTimeStart)
-  const validTimeEnd = useStore(store, (s) => s.programConfig.validTimeEnd)
-  const set = store.getState().setConfigField
-
-  function toggleDay(day: string) {
-    const current = validDays ?? []
-    if (current.includes(day)) {
-      set("validDays", current.filter((d) => d !== day))
-    } else {
-      set("validDays", [...current, day])
-    }
-  }
-
-  return (
-    <>
-      <SectionHeader>{t("accessConfiguration")}</SectionHeader>
-      <TextInput
-        label={t("accessLabel")}
-        value={accessLabel}
-        onChange={(v) => set("accessLabel", v)}
-        placeholder={t("accessLabelPlaceholder")}
-        maxLength={100}
-      />
-      <SelectInput
-        label={t("duration")}
-        value={validDuration}
-        onChange={(v) => set("validDuration", v)}
-        options={[
-          { value: "monthly", label: t("durationMonthly") },
-          { value: "yearly", label: t("durationYearly") },
-          { value: "lifetime", label: t("durationLifetime") },
-          { value: "custom", label: t("durationCustom") },
-        ]}
-      />
-      {validDuration === "custom" && (
-        <NumberInput
-          label={t("customDuration")}
-          value={customDurationDays}
-          onChange={(v) => set("customDurationDays", Math.max(1, v))}
-          min={1}
-          suffix={t("daysSuffix")}
-        />
-      )}
-      <NumberInput
-        label={t("maxDailyUses")}
-        value={maxDailyUses}
-        onChange={(v) => set("maxDailyUses", Math.max(0, v))}
-        min={0}
-        suffix={t("maxDailyUsesSuffix")}
-      />
-
-      <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 12, color: "var(--foreground)", marginBottom: 4 }}>{t("validDays")}</div>
-        <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginBottom: 6 }}>
-          {t("validDaysHint")}
-        </div>
-        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-          {DAY_KEYS.map((day) => (
-            <button
-              key={day}
-              onClick={() => toggleDay(day)}
-              style={{
-                padding: "4px 8px",
-                borderRadius: 9999,
-                border: "1px solid var(--border)",
-                backgroundColor: validDays.includes(day) ? "var(--primary)" : "var(--background)",
-                color: validDays.includes(day) ? "var(--primary-foreground)" : "var(--foreground)",
-                cursor: "pointer",
-                fontSize: 11,
-                fontWeight: validDays.includes(day) ? 600 : 400,
-              }}
-            >
-              {t(DAY_I18N[day] as "dayMon")}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ display: "flex", gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <TextInput
-            label={t("validFrom")}
-            value={validTimeStart}
-            onChange={(v) => set("validTimeStart", v)}
-            placeholder="09:00"
-            type="time"
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <TextInput
-            label={t("validUntilTime")}
-            value={validTimeEnd}
-            onChange={(v) => set("validTimeEnd", v)}
-            placeholder="18:00"
-            type="time"
-          />
-        </div>
-      </div>
-    </>
-  )
-}
-
-function TransitFields({ store }: { store: CardDesignStoreApi }) {
-  const t = useTranslations("dashboard.programEditor")
-  const transitType = useStore(store, (s) => s.programConfig.transitType)
-  const originName = useStore(store, (s) => s.programConfig.originName)
-  const destinationName = useStore(store, (s) => s.programConfig.destinationName)
-  const departureDateTime = useStore(store, (s) => s.programConfig.departureDateTime)
-  const set = store.getState().setConfigField
-
-  return (
-    <>
-      <SectionHeader>{t("transitConfiguration")}</SectionHeader>
-      <SelectInput
-        label={t("transitType")}
-        value={transitType}
-        onChange={(v) => set("transitType", v)}
-        options={[
-          { value: "bus", label: t("transitBus") },
-          { value: "train", label: t("transitTrain") },
-          { value: "ferry", label: t("transitFerry") },
-          { value: "flight", label: t("transitFlight") },
-          { value: "other", label: t("transitOther") },
-        ]}
-      />
-      <TextInput
-        label={t("origin")}
-        value={originName}
-        onChange={(v) => set("originName", v)}
-        placeholder={t("originPlaceholder")}
-        maxLength={200}
-      />
-      <TextInput
-        label={t("destination")}
-        value={destinationName}
-        onChange={(v) => set("destinationName", v)}
-        placeholder={t("destinationPlaceholder")}
-        maxLength={200}
-      />
-      <TextInput
-        label={t("departure")}
-        value={departureDateTime}
-        onChange={(v) => set("departureDateTime", v)}
-        placeholder=""
-        type="datetime-local"
-      />
-    </>
-  )
-}
-
-function BusinessIdFields({ store }: { store: CardDesignStoreApi }) {
-  const t = useTranslations("dashboard.programEditor")
-  const idLabel = useStore(store, (s) => s.programConfig.idLabel)
-  const validDuration = useStore(store, (s) => s.programConfig.validDuration)
-  const customDurationDays = useStore(store, (s) => s.programConfig.customDurationDays)
-  const set = store.getState().setConfigField
-
-  return (
-    <>
-      <SectionHeader>{t("businessIdConfiguration")}</SectionHeader>
-      <TextInput
-        label={t("idLabel")}
-        value={idLabel}
-        onChange={(v) => set("idLabel", v)}
-        placeholder={t("idLabelPlaceholder")}
-        maxLength={100}
-      />
-      <SelectInput
-        label={t("duration")}
-        value={validDuration}
-        onChange={(v) => set("validDuration", v)}
-        options={[
-          { value: "monthly", label: t("durationMonthly") },
-          { value: "yearly", label: t("durationYearly") },
-          { value: "lifetime", label: t("durationLifetime") },
-          { value: "custom", label: t("durationCustom") },
-        ]}
-      />
-      {validDuration === "custom" && (
-        <NumberInput
-          label={t("customDuration")}
-          value={customDurationDays}
-          onChange={(v) => set("customDurationDays", Math.max(1, v))}
-          min={1}
-          suffix={t("daysSuffix")}
-        />
-      )}
-    </>
-  )
-}
-
 // ─── Schedule Fields ─────────────────────────────────────────
 
 function ScheduleFields({ store }: { store: CardDesignStoreApi }) {
@@ -812,12 +576,8 @@ export function ProgramPanel({ store, passType }: Props) {
       {passType === "COUPON" && <CouponFields store={store} />}
       {passType === "MEMBERSHIP" && <MembershipFields store={store} />}
       {passType === "POINTS" && <PointsFields store={store} />}
-      {passType === "PREPAID" && <PrepaidFields store={store} />}
       {passType === "GIFT_CARD" && <GiftCardFields store={store} />}
       {passType === "TICKET" && <TicketFields store={store} />}
-      {passType === "ACCESS" && <AccessFields store={store} />}
-      {passType === "TRANSIT" && <TransitFields store={store} />}
-      {passType === "BUSINESS_ID" && <BusinessIdFields store={store} />}
 
       <ScheduleFields store={store} />
 

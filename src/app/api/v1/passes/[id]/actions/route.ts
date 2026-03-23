@@ -9,17 +9,10 @@ import {
   performCheckIn,
   performEarnPoints,
   performRedeemPoints,
-  performPrepaidUse,
-  performPrepaidRecharge,
   performGiftCardCharge,
   performGiftCardRefund,
   performTicketScan,
   performTicketVoid,
-  performAccessGrant,
-  performAccessDeny,
-  performTransitBoard,
-  performTransitExit,
-  performIdVerify,
 } from "@/lib/api-data"
 import { apiCreated } from "@/lib/api-response"
 import {
@@ -96,20 +89,6 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
         action.points
       )
       break
-    case "use":
-      result = await performPrepaidUse(
-        ctx.organizationId,
-        passId,
-        action.amount
-      )
-      break
-    case "recharge":
-      result = await performPrepaidRecharge(
-        ctx.organizationId,
-        passId,
-        action.uses
-      )
-      break
     case "charge":
       result = await performGiftCardCharge(
         ctx.organizationId,
@@ -129,21 +108,6 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
       break
     case "void":
       result = await performTicketVoid(ctx.organizationId, passId)
-      break
-    case "grant":
-      result = await performAccessGrant(ctx.organizationId, passId)
-      break
-    case "deny":
-      result = await performAccessDeny(ctx.organizationId, passId)
-      break
-    case "board":
-      result = await performTransitBoard(ctx.organizationId, passId)
-      break
-    case "exit":
-      result = await performTransitExit(ctx.organizationId, passId)
-      break
-    case "verify":
-      result = await performIdVerify(ctx.organizationId, passId)
       break
   }
 

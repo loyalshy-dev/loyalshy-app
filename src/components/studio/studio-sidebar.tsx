@@ -208,7 +208,7 @@ export function StudioSidebar({
         </Section>
       )}
 
-      {(passType === "BUSINESS_ID" || passType === "MEMBERSHIP" || passType === "ACCESS") && (
+      {passType === "MEMBERSHIP" && (
         <Section title="Holder Photo" isOpen={openSections.has("avatar")} onToggle={() => toggle("avatar")}>
           <AvatarPanel store={store} programId={templateId} />
         </Section>

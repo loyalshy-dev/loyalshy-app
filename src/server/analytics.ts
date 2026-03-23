@@ -20,12 +20,8 @@ export type PassInstancesByType = {
   COUPON: number
   MEMBERSHIP: number
   POINTS: number
-  PREPAID: number
   GIFT_CARD: number
   TICKET: number
-  ACCESS: number
-  TRANSIT: number
-  BUSINESS_ID: number
 }
 
 export type OverviewStats = {
@@ -57,7 +53,7 @@ export type RewardDistributionItem = {
 
 export type ActivityItem = {
   id: string
-  type: "stamp" | "reward_earned" | "reward_redeemed" | "check_in" | "coupon_redeemed" | "prepaid_use" | "prepaid_recharge" | "points_earned" | "gift_charge" | "ticket_scan" | "access_grant" | "transit_board" | "id_verify"
+  type: "stamp" | "reward_earned" | "reward_redeemed" | "check_in" | "coupon_redeemed" | "points_earned" | "gift_charge" | "ticket_scan"
   contactName: string
   staffName: string | null
   templateName: string | null
@@ -215,8 +211,8 @@ export async function getOverviewStats(): Promise<OverviewStats> {
       : rewardsRedeemedThisMonth > 0 ? 100 : 0
 
   const passInstancesByType: PassInstancesByType = {
-    STAMP_CARD: 0, COUPON: 0, MEMBERSHIP: 0, POINTS: 0, PREPAID: 0,
-    GIFT_CARD: 0, TICKET: 0, ACCESS: 0, TRANSIT: 0, BUSINESS_ID: 0,
+    STAMP_CARD: 0, COUPON: 0, MEMBERSHIP: 0, POINTS: 0,
+    GIFT_CARD: 0, TICKET: 0,
   }
   let activePassInstances = 0
   for (const e of passInstancesByTypeRaw) {
@@ -462,12 +458,8 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
       COUPON: "stamp",
       MEMBERSHIP: "check_in",
       POINTS: "points_earned",
-      PREPAID: "prepaid_use",
       GIFT_CARD: "gift_charge",
       TICKET: "ticket_scan",
-      ACCESS: "access_grant",
-      TRANSIT: "transit_board",
-      BUSINESS_ID: "id_verify",
     }
     const type = typeMap[pType] ?? "stamp"
 
@@ -616,11 +608,6 @@ export async function getTopContacts(): Promise<TopContactItem[]> {
         case "POINTS":
           engagementLabel = `${instanceData.pointsBalance ?? 0} pts`
           break
-        case "PREPAID": {
-          const total = (instance.passTemplate.config as { totalUses?: number } | null)?.totalUses ?? 0
-          engagementLabel = `${instanceData.remainingUses ?? 0}/${total} left`
-          break
-        }
         case "STAMP_CARD": {
           const visitsRequired = (instance.passTemplate.config as { stampsRequired?: number } | null)?.stampsRequired ?? 10
           engagementLabel = `${instanceData.currentCycleVisits ?? 0}/${visitsRequired} stamps`
@@ -636,15 +623,6 @@ export async function getTopContacts(): Promise<TopContactItem[]> {
         }
         case "TICKET":
           engagementLabel = `${(instanceData.scansUsed as number) ?? 0} scans`
-          break
-        case "ACCESS":
-          engagementLabel = `${c.totalInteractions} access`
-          break
-        case "TRANSIT":
-          engagementLabel = `${c.totalInteractions} trips`
-          break
-        case "BUSINESS_ID":
-          engagementLabel = `${c.totalInteractions} verifications`
           break
         default:
           engagementLabel = `${c.totalInteractions} interactions`

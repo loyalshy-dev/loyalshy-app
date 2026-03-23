@@ -62,7 +62,7 @@ function JsonLd() {
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         description:
-          "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, tickets, prepaid passes, and more — all from one platform.",
+          "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, points, gift cards, tickets, and more — all from one platform.",
         offers: {
           "@type": "AggregateOffer",
           priceCurrency: "EUR",
@@ -75,12 +75,8 @@ function JsonLd() {
           "Coupons",
           "Memberships",
           "Points programs",
-          "Prepaid passes",
           "Gift cards",
           "Tickets",
-          "Access passes",
-          "Transit passes",
-          "Business IDs",
           "Apple Wallet integration",
           "Google Wallet integration",
           "QR code onboarding",

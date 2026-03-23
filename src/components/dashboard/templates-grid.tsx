@@ -15,7 +15,6 @@ import {
   parseMembershipConfig,
   formatCouponValue,
   parsePointsConfig,
-  parsePrepaidConfig,
 } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
@@ -49,10 +48,6 @@ function getTypeSubtitle(template: TemplateListItem): string {
       const subtitle = pConfig ? `${pConfig.pointsPerVisit} pts/visit` : "Points"
       return `${subtitle} | ${count} active`
     }
-    case "PREPAID": {
-      const prepConfig = parsePrepaidConfig(template.config)
-      return `${prepConfig?.totalUses ?? 0} ${prepConfig?.useLabel ?? "use"}s | ${count} issued`
-    }
     default:
       return `${count} passes`
   }
@@ -64,12 +59,8 @@ type TypeFilter =
   | "COUPON"
   | "MEMBERSHIP"
   | "POINTS"
-  | "PREPAID"
   | "GIFT_CARD"
   | "TICKET"
-  | "ACCESS"
-  | "TRANSIT"
-  | "BUSINESS_ID"
 
 type TemplatesGridViewProps = {
   templates: TemplateListItem[]
@@ -116,12 +107,8 @@ export function TemplatesGridView({
     "COUPON",
     "MEMBERSHIP",
     "POINTS",
-    "PREPAID",
     "GIFT_CARD",
     "TICKET",
-    "ACCESS",
-    "TRANSIT",
-    "BUSINESS_ID",
   ]
   for (const t of typeOrder) {
     if (typeCounts.has(t)) {

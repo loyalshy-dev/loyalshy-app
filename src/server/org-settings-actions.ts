@@ -86,7 +86,7 @@ const inviteTeamMemberSchema = z.object({
 
 const savePassDesignSchema = z.object({
   templateId: z.string().min(1),
-  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID", "GENERIC"]).optional().default("STAMP"),
+  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON", "GIFT_CARD", "TICKET", "GENERIC"]).optional().default("STAMP"),
   showStrip: z.boolean(),
   primaryColor: z.string().max(20).optional().default(""),
   secondaryColor: z.string().max(20).optional().default(""),
@@ -152,7 +152,7 @@ const savePassDesignSchema = z.object({
   }).optional(),
 })
 
-const PASS_TYPE_ENUM = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "PREPAID", "GIFT_CARD", "TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID"] as const
+const PASS_TYPE_ENUM = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET"] as const
 
 const createPassTemplateSchema = z.object({
   organizationId: z.string().min(1),
@@ -346,14 +346,13 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
   // Map pass type to default card type
   const PASS_TO_CARD: Record<string, string> = {
     STAMP_CARD: "STAMP", COUPON: "COUPON", MEMBERSHIP: "TIER",
-    POINTS: "POINTS", PREPAID: "PREPAID", GIFT_CARD: "GIFT_CARD",
-    TICKET: "TICKET", ACCESS: "ACCESS", TRANSIT: "TRANSIT",
-    BUSINESS_ID: "BUSINESS_ID",
+    POINTS: "POINTS", GIFT_CARD: "GIFT_CARD",
+    TICKET: "TICKET",
   }
   const defaultCardType = (PASS_TO_CARD[parsed.passType] ?? "STAMP") as "STAMP"
 
   // Default join mode: OPEN for self-service types, INVITE_ONLY for org-issued types
-  const INVITE_ONLY_TYPES = new Set(["TICKET", "ACCESS", "TRANSIT", "BUSINESS_ID", "GIFT_CARD", "PREPAID"])
+  const INVITE_ONLY_TYPES = new Set(["TICKET", "GIFT_CARD"])
   const defaultJoinMode = INVITE_ONLY_TYPES.has(parsed.passType) ? "INVITE_ONLY" : "OPEN"
 
   const template = await db.passTemplate.create({
@@ -1243,7 +1242,7 @@ export async function deleteEmptyIcon(templateId: string) {
   return deleteStampIconGeneric(templateId, "customEmptyIconUrl")
 }
 
-// ─── Holder Photo Upload (Business ID) ──────────────────────
+// ─── Holder Photo Upload (Membership) ───────────────────────
 
 export async function uploadHolderPhoto(formData: FormData) {
   const t = await getTranslations("serverErrors")

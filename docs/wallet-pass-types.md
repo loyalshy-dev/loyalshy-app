@@ -1,13 +1,13 @@
 # Wallet Pass Types — Apple & Google Generation Reference
 
-How each of the 10 pass types maps to Apple/Google Wallet classes, field placement, config schemas, and visual quirks.
+How each of the 6 pass types maps to Apple/Google Wallet classes, field placement, config schemas, and visual quirks.
 
 ---
 
 ## Architecture Overview
 
-- **Apple Wallet** uses 4 PKPass styles: `storeCard`, `eventTicket`, `boardingPass`, `generic`
-- **Google Wallet** uses `Loyalty` class for ALL 10 types (unified approach, not per-type classes)
+- **Apple Wallet** uses 3 PKPass styles: `storeCard`, `eventTicket`, `generic`
+- **Google Wallet** uses `Loyalty` class for ALL 6 types (unified approach, not per-type classes)
 - All passes include QR barcode, contact info back field, and Loyalshy branding
 - Strip image is optional per design; stamp grid PNGs are generated and uploaded to R2
 
@@ -32,12 +32,8 @@ How each of the 10 pass types maps to Apple/Google Wallet classes, field placeme
 | COUPON | COUPON | storeCard | Loyalty | Minigame support |
 | MEMBERSHIP | TIER | storeCard | Loyalty | Tier-based |
 | POINTS | POINTS | storeCard | Loyalty | Points catalog |
-| PREPAID | PREPAID | storeCard | Loyalty | Use counter |
 | GIFT_CARD | GIFT_CARD | storeCard | Loyalty | Currency balance |
 | TICKET | TICKET | eventTicket | Loyalty | Square corners, notch |
-| ACCESS | ACCESS | generic | Loyalty | Day/time restrictions |
-| TRANSIT | TRANSIT | boardingPass | Loyalty | Origin/destination |
-| BUSINESS_ID | BUSINESS_ID | generic | Loyalty | ID verification |
 
 ---
 
@@ -160,36 +156,7 @@ pointsLabel?: string (max 20)
 
 ---
 
-## 5. PREPAID
-
-### Config Schema
-```
-totalUses: number (1–1000)
-useLabel: string (1–30, e.g., "coffee pass")
-rechargeable: boolean
-rechargeAmount?: number (1–1000)
-validUntil?: string (ISO date)
-terms?: string (max 5000)
-```
-
-### Apple (storeCard)
-| Section | Fields |
-|---------|--------|
-| Header | organization |
-| Primary | remaining (e.g., "5 / 10 PASSES") |
-| Secondary | validUntil, totalUsed, customerName |
-| Back | prepaidDetails, prepaidExpiry, prepaidUsage, contact |
-
-### Google (Loyalty)
-| Section | Fields |
-|---------|--------|
-| Primary Points | REMAINING = "X / Y" |
-| Secondary Points | USED = int totalVisits |
-| Card Row | (remaining \| validUntil), (totalUsed \| memberSince) |
-
----
-
-## 6. GIFT_CARD
+## 5. GIFT_CARD
 
 ### Config Schema
 ```
@@ -216,7 +183,7 @@ expiryMonths?: number (1–120)
 
 ---
 
-## 7. TICKET
+## 6. TICKET
 
 ### Config Schema
 ```
@@ -246,95 +213,6 @@ maxScans: number (1–100)
 - **Apple:** Square corners (borderRadius: 0), notch cutout at top via CSS `mask-image: radial-gradient(ellipse)`, event name overlaid on strip image, no logo visible, smaller header fields (15px)
 - **Web renderer:** `DeviceFrameWrapper` gets `squareCorners` prop, `FieldSection` gets `small` prop
 - **Google renderer:** Event name as heading, 2-column field grid via `GoogleTicketFields` component
-
----
-
-## 8. ACCESS
-
-### Config Schema
-```
-accessLabel: string (1–100, e.g., "VIP Lounge Access")
-validDays?: string[] (e.g., ["mon", "tue"])
-validTimeStart?: string (HH:mm)
-validTimeEnd?: string (HH:mm)
-validDuration: "monthly" | "yearly" | "lifetime" | "custom"
-customDurationDays?: number (1–3650)
-maxDailyUses?: number (1–100)
-```
-
-### Apple (generic)
-| Section | Fields |
-|---------|--------|
-| Header | accessGranted (e.g., "12 TOTAL") |
-| Primary | accessLabel |
-| Secondary | customerName, memberSince |
-| Back | accessDetails (label, total, daily limit, valid days, time range), contact |
-
-### Google (Loyalty)
-| Section | Fields |
-|---------|--------|
-| Primary Points | accessLabel = "Active" |
-| Secondary Points | TOTAL GRANTED = int |
-| Card Row | (accessLabel \| totalGranted) |
-
----
-
-## 9. TRANSIT
-
-### Config Schema
-```
-transitType: "bus" | "train" | "ferry" | "flight" | "other"
-originName?: string (max 200)
-destinationName?: string (max 200)
-departureDateTime?: string (ISO datetime)
-barcodeType: "qr" | "code128" | "pdf417" | "aztec"
-```
-
-### Apple (boardingPass)
-| Section | Fields |
-|---------|--------|
-| Header | boardingStatus ("BOARDED" / "NOT BOARDED") |
-| Primary | origin |
-| Secondary | destination, transitType |
-| Auxiliary | customerName |
-| Special | `pass.transitType = "PKTransitTypeGeneric"` |
-| Back | transitDetails (origin, destination, type, departure), contact |
-
-### Google (Loyalty)
-| Section | Fields |
-|---------|--------|
-| Primary Points | STATUS = boarding status |
-| Secondary Points | TYPE = transitType.toUpperCase() |
-| Card Row | (origin \| destination), (transitType \| boardingStatus) |
-
----
-
-## 10. BUSINESS_ID
-
-### Config Schema
-```
-idLabel: string (1–100, e.g., "Employee ID", "Student ID")
-showTitle?: boolean
-showPhoto?: boolean
-showEmployeeId?: boolean
-validDuration: "monthly" | "yearly" | "lifetime" | "custom"
-customDurationDays?: number (1–3650)
-```
-
-### Apple (generic)
-| Section | Fields |
-|---------|--------|
-| Header | verifications (e.g., "5 VERIFICATIONS") |
-| Primary | idLabel |
-| Secondary | organization, memberSince |
-| Back | idDetails (label, name, verifications), contact |
-
-### Google (Loyalty)
-| Section | Fields |
-|---------|--------|
-| Primary Points | idLabel = contactName |
-| Secondary Points | VERIFICATIONS = int |
-| Card Row | (idLabel \| verifications) |
 
 ---
 

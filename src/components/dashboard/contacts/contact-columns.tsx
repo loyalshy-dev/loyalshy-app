@@ -221,26 +221,6 @@ export function getContactColumns(
           )
         }
 
-        if (programType === "PREPAID") {
-          const remaining = (piData.remainingUses as number) ?? 0
-          const total = (piConfig.totalUses as number) ?? 0
-          const pct = total > 0 ? Math.min((remaining / total) * 100, 100) : 0
-
-          return (
-            <div className="flex items-center gap-2">
-              <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-brand transition-all"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-              <span className="text-[13px] tabular-nums text-muted-foreground">
-                {remaining}/{total}
-              </span>
-            </div>
-          )
-        }
-
         if (programType === "GIFT_CARD") {
           const balanceCents = (piData.balanceCents as number) ?? 0
           return (
@@ -257,12 +237,6 @@ export function getContactColumns(
             <span className="text-[13px] tabular-nums text-muted-foreground">
               {scansUsed}/{maxScans} {t("scans")}
             </span>
-          )
-        }
-
-        if (programType === "ACCESS" || programType === "BUSINESS_ID" || programType === "TRANSIT") {
-          return (
-            <span className="text-[12px] text-muted-foreground">{t("ready")}</span>
           )
         }
 

@@ -64,7 +64,6 @@ import {
   parseCouponConfig,
   parseMembershipConfig,
   parsePointsConfig,
-  parsePrepaidConfig,
   formatCouponValue,
 } from "@/lib/pass-config"
 import type { PassInstanceListItem, PassInstanceStats } from "@/server/template-actions"
@@ -121,12 +120,8 @@ function getProgressColumnHeader(passType: string, t: TranslationFn): string {
     case "COUPON": return t("status")
     case "MEMBERSHIP": return t("checkIns")
     case "POINTS": return t("balance")
-    case "PREPAID": return t("remaining")
     case "GIFT_CARD": return t("balance")
     case "TICKET": return t("scans")
-    case "ACCESS": return t("granted")
-    case "TRANSIT": return t("status")
-    case "BUSINESS_ID": return t("verified")
     default: return t("activity")
   }
 }
@@ -162,15 +157,6 @@ function getProgressValue(
       const label = config?.pointsLabel ?? "pts"
       return { text: `${balance.toLocaleString()} ${label}` }
     }
-    case "PREPAID": {
-      const remaining = (d.remainingUses as number) ?? 0
-      const config = parsePrepaidConfig(templateConfig)
-      const total = config?.totalUses ?? 0
-      return {
-        text: `${remaining}/${total}`,
-        progress: total > 0 ? remaining / total : 0,
-      }
-    }
     case "GIFT_CARD": {
       const balanceCents = (d.balanceCents as number) ?? 0
       const currency = (d.currency as string) ?? "USD"
@@ -179,18 +165,6 @@ function getProgressValue(
     case "TICKET": {
       const scans = (d.scanCount as number) ?? 0
       return { text: `${scans}` }
-    }
-    case "ACCESS": {
-      const granted = (d.totalGranted as number) ?? 0
-      return { text: `${granted}` }
-    }
-    case "TRANSIT": {
-      const isBoarded = d.isBoarded as boolean
-      return { text: isBoarded ? "In transit" : "Idle" }
-    }
-    case "BUSINESS_ID": {
-      const verifications = (d.totalVerifications as number) ?? 0
-      return { text: `${verifications}` }
     }
     default:
       return { text: "—" }
@@ -412,7 +386,7 @@ function EditContactSheet({
 
 // ─── Row actions ───────────────────────────────────────────────
 
-const HOLDER_PHOTO_PASS_TYPES = ["BUSINESS_ID", "MEMBERSHIP", "ACCESS"]
+const HOLDER_PHOTO_PASS_TYPES = ["MEMBERSHIP"]
 
 function RowActions({
   passInstanceId,

@@ -6,19 +6,15 @@ import {
   Trophy,
   Crown,
   Ticket,
-  CreditCard,
   Coins,
   CalendarDays,
-  ShieldCheck,
-  Bus,
-  BadgeCheck,
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { useTranslations } from "next-intl"
 import type { ActivityItem } from "@/server/analytics"
 import { Card } from "@/components/ui/card"
 
-type ActivityVerbKey = "stamp" | "checkIn" | "passUse" | "pointsEarn" | "recharge" | "giftUse" | "ticketScan" | "access" | "board" | "verify" | "rewardEarned" | "rewardRedeemed" | "couponRedeemed"
+type ActivityVerbKey = "stamp" | "checkIn" | "pointsEarn" | "giftUse" | "ticketScan" | "rewardEarned" | "rewardRedeemed" | "couponRedeemed"
 
 const ACTIVITY_CONFIG: Record<
   ActivityItem["type"],
@@ -36,23 +32,11 @@ const ACTIVITY_CONFIG: Record<
     color: "text-brand",
     bg: "bg-brand/10",
   },
-  prepaid_use: {
-    icon: CreditCard,
-    verbKey: "passUse",
-    color: "text-brand",
-    bg: "bg-brand/10",
-  },
   points_earned: {
     icon: Coins,
     verbKey: "pointsEarn",
     color: "text-brand",
     bg: "bg-brand/10",
-  },
-  prepaid_recharge: {
-    icon: CreditCard,
-    verbKey: "recharge",
-    color: "text-success",
-    bg: "bg-success/10",
   },
   gift_charge: {
     icon: Gift,
@@ -63,24 +47,6 @@ const ACTIVITY_CONFIG: Record<
   ticket_scan: {
     icon: CalendarDays,
     verbKey: "ticketScan",
-    color: "text-brand",
-    bg: "bg-brand/10",
-  },
-  access_grant: {
-    icon: ShieldCheck,
-    verbKey: "access",
-    color: "text-brand",
-    bg: "bg-brand/10",
-  },
-  transit_board: {
-    icon: Bus,
-    verbKey: "board",
-    color: "text-brand",
-    bg: "bg-brand/10",
-  },
-  id_verify: {
-    icon: BadgeCheck,
-    verbKey: "verify",
     color: "text-brand",
     bg: "bg-brand/10",
   },

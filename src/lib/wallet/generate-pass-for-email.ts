@@ -75,7 +75,6 @@ export async function generateApplePassForEmail(
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalInteractions = (instanceData.totalVisits as number) ?? (instanceData.totalInteractions as number) ?? 0
   const pointsBalance = (instanceData.pointsBalance as number) ?? 0
-  const remainingUses = (instanceData.remainingUses as number) ?? 0
 
   const templateConfig = (template.config ?? {}) as Record<string, unknown>
   const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
@@ -115,7 +114,6 @@ export async function generateApplePassForEmail(
       programType: template.passType,
       programConfig: template.config,
       pointsBalance,
-      remainingUses,
       holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       passInstanceId: passInstance.id,
       organizationSlug: organization.slug,
