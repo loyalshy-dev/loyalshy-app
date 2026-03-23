@@ -39,6 +39,12 @@ export function FieldSection({ fields, textColor, labelColor, format = "apple", 
   const labelSize = small ? 9 : (format === "google" ? 10 : appleLabelSize)
   const baseValueSize = small ? 14 : (format === "google" ? 12 : appleBaseValueSize)
 
+  // Apple: use the MINIMUM dynamic size across all fields in the row
+  // so all fields render at the same size (matches real Apple Wallet behavior)
+  const valueSize = format === "apple" && !small
+    ? Math.min(...fields.map((f) => dynamicValueSize(baseValueSize, f.value)))
+    : baseValueSize
+
   return (
     <div
       style={{
@@ -47,47 +53,40 @@ export function FieldSection({ fields, textColor, labelColor, format = "apple", 
         flexWrap: "wrap",
       }}
     >
-      {fields.map((field, i) => {
-        // Per-field dynamic sizing based on value length (Apple style)
-        const valueSize = format === "apple" && !small
-          ? dynamicValueSize(baseValueSize, field.value)
-          : baseValueSize
-
-        return (
-          <div key={i} style={{ flex: 1, minWidth: 0, textAlign: i === fields.length - 1 && fields.length > 1 ? "right" : undefined }}>
-            <div
-              data-color-zone="labels"
-              style={{
-                fontSize: labelSize,
-                fontWeight: format === "google" ? 500 : 700,
-                color: format === "google" ? textColor : (labelColor ?? textColor),
-                opacity: format === "google" ? 1 : (labelColor ? 1 : 0.6),
-                textTransform: "uppercase",
-                letterSpacing: format === "google" ? "0.02em" : "0.04em",
-                marginBottom: 0,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {field.label}
-            </div>
-            <div
-              data-color-zone="text"
-              style={{
-                fontSize: valueSize,
-                fontWeight: format === "google" ? 500 : 300,
-                color: textColor,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {field.value}
-            </div>
+      {fields.map((field, i) => (
+        <div key={i} style={{ flex: 1, minWidth: 0, textAlign: i === fields.length - 1 && fields.length > 1 ? "right" : undefined }}>
+          <div
+            data-color-zone="labels"
+            style={{
+              fontSize: labelSize,
+              fontWeight: format === "google" ? 500 : 700,
+              color: format === "google" ? textColor : (labelColor ?? textColor),
+              opacity: format === "google" ? 1 : (labelColor ? 1 : 0.6),
+              textTransform: "uppercase",
+              letterSpacing: format === "google" ? "0.02em" : "0.04em",
+              marginBottom: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {field.label}
           </div>
-        )
-      })}
+          <div
+            data-color-zone="text"
+            style={{
+              fontSize: valueSize,
+              fontWeight: format === "google" ? 500 : 300,
+              color: textColor,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {field.value}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

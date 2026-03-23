@@ -462,13 +462,17 @@ export function WalletPassRenderer({
       </div>
 
       {/* Right side: Header fields (Apple Wallet style — right-aligned) */}
-      {isApple && headerFields.length > 0 && (
-        <div style={{ textAlign: "right", flexShrink: 0, maxWidth: "55%" }}>
-          {headerFields.map((f, i) => {
-            const baseSize = isTicket ? 18 : 22
+      {isApple && headerFields.length > 0 && (() => {
+        const baseSize = isTicket ? 18 : 22
+        const headerValueSize = Math.min(
+          ...headerFields.map((f) => {
             const len = f.value.length
-            const headerValueSize = len <= 8 ? baseSize : len <= 14 ? Math.max(baseSize - 4, 14) : Math.max(baseSize - 8, 11)
-            return (
+            return len <= 8 ? baseSize : len <= 14 ? Math.max(baseSize - 4, 14) : Math.max(baseSize - 8, 11)
+          })
+        )
+        return (
+          <div style={{ textAlign: "right", flexShrink: 0, maxWidth: "55%" }}>
+            {headerFields.map((f, i) => (
               <div key={i}>
                 <div
                   data-color-zone="labels"
@@ -488,10 +492,10 @@ export function WalletPassRenderer({
                   {f.value}
                 </div>
               </div>
-            )
-          })}
-        </div>
-      )}
+            ))}
+          </div>
+        )
+      })()}
 
       {/* Apple Wallet logo indicator (only when no header fields) */}
       {isApple && headerFields.length === 0 && (
@@ -566,6 +570,12 @@ export function WalletPassRenderer({
 
   // Primary field overlay on strip (non-stamp types, when showPrimaryField is enabled)
   const showPrimaryOnStrip = useStrip && !isStampType && design.showPrimaryField !== false && primaryFields.length > 0
+  const stripOverlaySize = showPrimaryOnStrip
+    ? Math.min(...primaryFields.map((f) => {
+        const len = f.value.length
+        return len <= 6 ? 46 : len <= 10 ? 36 : len <= 16 ? 28 : len <= 22 ? 22 : 18
+      }))
+    : 46
   const primaryOverlay = showPrimaryOnStrip ? (
     <div
       style={{
@@ -581,15 +591,12 @@ export function WalletPassRenderer({
         pointerEvents: "none",
       }}
     >
-      {primaryFields.map((f, i) => {
-        const len = f.value.length
-        const stripPrimarySize = len <= 6 ? 46 : len <= 10 ? 36 : len <= 16 ? 28 : len <= 22 ? 22 : 18
-        return (
+      {primaryFields.map((f, i) => (
         <div key={i} style={{ pointerEvents: "auto", textAlign: "left", width: "100%" }}>
           <div
             data-color-zone="text"
             style={{
-              fontSize: stripPrimarySize,
+              fontSize: stripOverlaySize,
               fontWeight: 400,
               letterSpacing: "0.02em",
               lineHeight: 1.2,
@@ -615,8 +622,7 @@ export function WalletPassRenderer({
             {f.label}
           </div>
         </div>
-        )
-      })}
+      ))}
     </div>
   ) : null
 
@@ -747,44 +753,46 @@ export function WalletPassRenderer({
 
   // When show on strip is off: primary fields merge into secondary row (not a big standalone section)
   const primaryHiddenFromStrip = useStrip && !isStampType && design.showPrimaryField === false
+  const dynPrimarySize = (!useStrip && primaryFields.length > 0)
+    ? Math.min(...primaryFields.map((f) => {
+        const len = f.value.length
+        return len <= 8 ? primaryFontSize : len <= 14 ? Math.max(primaryFontSize - 4, 16) : Math.max(primaryFontSize - 8, 12)
+      }))
+    : primaryFontSize
   const primarySection = (!useStrip && primaryFields.length > 0) ? (
     <div style={{ padding: primaryPadding }}>
-      {primaryFields.map((f, i) => {
-        const len = f.value.length
-        const dynPrimarySize = len <= 8 ? primaryFontSize : len <= 14 ? Math.max(primaryFontSize - 4, 16) : Math.max(primaryFontSize - 8, 12)
-        return (
-          <div key={i}>
-            <div
-              data-color-zone="labels"
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: design.labelColor ?? undefined,
-                opacity: design.labelColor ? 1 : 0.6,
-                textTransform: "uppercase",
-                letterSpacing: "0.04em",
-                marginBottom: 0,
-              }}
-            >
-              {f.label}
-            </div>
-            <div
-              data-color-zone="text"
-              style={{
-                fontSize: dynPrimarySize,
-                fontWeight: 700,
-                letterSpacing: design.progressStyle === "NUMBERS" ? "0.02em" : "0.08em",
-                lineHeight: 1.2,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {f.value}
-            </div>
+      {primaryFields.map((f, i) => (
+        <div key={i}>
+          <div
+            data-color-zone="labels"
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: design.labelColor ?? undefined,
+              opacity: design.labelColor ? 1 : 0.6,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              marginBottom: 0,
+            }}
+          >
+            {f.label}
           </div>
-        )
-      })}
+          <div
+            data-color-zone="text"
+            style={{
+              fontSize: dynPrimarySize,
+              fontWeight: 700,
+              letterSpacing: design.progressStyle === "NUMBERS" ? "0.02em" : "0.08em",
+              lineHeight: 1.2,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {f.value}
+          </div>
+        </div>
+      ))}
     </div>
   ) : null
 
