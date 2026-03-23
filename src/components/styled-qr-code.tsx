@@ -46,6 +46,28 @@ export function StyledQrCode({
   )
 }
 
+/**
+ * Parse a hex color (#rgb or #rrggbb) and return relative luminance (0–1).
+ * Returns null for non-hex values (e.g. CSS variables).
+ */
+function hexLuminance(hex: string): number | null {
+  const m = hex.match(/^#([0-9a-f]{3,8})$/i)
+  if (!m) return null
+  let r: number, g: number, b: number
+  if (m[1].length === 3) {
+    r = parseInt(m[1][0] + m[1][0], 16) / 255
+    g = parseInt(m[1][1] + m[1][1], 16) / 255
+    b = parseInt(m[1][2] + m[1][2], 16) / 255
+  } else {
+    r = parseInt(m[1].slice(0, 2), 16) / 255
+    g = parseInt(m[1].slice(2, 4), 16) / 255
+    b = parseInt(m[1].slice(4, 6), 16) / 255
+  }
+  // sRGB relative luminance
+  const toLinear = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4))
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
+}
+
 export function renderStyledQr(
   modules: { size: number; data: Uint8Array },
   size: number,
@@ -53,8 +75,14 @@ export function renderStyledQr(
   colors?: { bg: string; fg: string },
   logoUrl?: string
 ): string {
-  const bg = colors?.bg ?? "var(--foreground)"
-  const fg = colors?.fg ?? "var(--background)"
+  let bg = colors?.bg ?? "var(--foreground)"
+  let fg = colors?.fg ?? "var(--background)"
+
+  // If background is very light, swap to dark dots so the QR stays visible
+  const lum = hexLuminance(bg)
+  if (lum !== null && lum > 0.7) {
+    fg = "#1a1a2e"
+  }
 
   const moduleCount = modules.size
   const padding = 2.5
