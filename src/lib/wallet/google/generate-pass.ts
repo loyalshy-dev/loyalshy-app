@@ -344,6 +344,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   const pointsConfig = input.passType === "POINTS" ? parsePointsConfig(input.templateConfig) : null
   const giftCardConfig = input.passType === "GIFT_CARD" ? parseGiftCardConfig(input.templateConfig) : null
   const ticketConfig = input.passType === "TICKET" ? parseTicketConfig(input.templateConfig) : null
+  const businessCardConfig = input.passType === "BUSINESS_CARD" ? parseBusinessCardConfig(input.templateConfig) : null
   const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Custom field labels from editorConfig
@@ -380,6 +381,12 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     eventDate: { id: "eventDate", header: lbl("eventDate", "DATE"), body: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
     eventVenue: { id: "eventVenue", header: lbl("eventVenue", "VENUE"), body: ticketConfig?.eventVenue ?? "" },
     scanStatus: { id: "scanStatus", header: lbl("scanStatus", "SCANS"), body: `${input.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
+    // BUSINESS_CARD
+    contactName: { id: "contactName", header: lbl("contactName", "NAME"), body: businessCardConfig?.contactName ?? input.contactName },
+    jobTitle: { id: "jobTitle", header: lbl("jobTitle", "TITLE"), body: businessCardConfig?.jobTitle ?? "" },
+    phone: { id: "phone", header: lbl("phone", "PHONE"), body: businessCardConfig?.phone ?? "" },
+    email: { id: "email", header: lbl("email", "EMAIL"), body: businessCardConfig?.email ?? "" },
+    website: { id: "website", header: lbl("website", "WEBSITE"), body: businessCardConfig?.website ?? "" },
   }
 
   // Build textModulesData from user-configured unified fields

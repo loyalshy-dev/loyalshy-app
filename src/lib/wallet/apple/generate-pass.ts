@@ -186,8 +186,9 @@ export async function generateApplePass(
   const isGenericPassType = input.programType === "MEMBERSHIP" || input.programType === "BUSINESS_CARD"
 
   // For generic passes: holder photo takes priority as thumbnail, otherwise use strip image as thumbnail
+  // BUSINESS_CARD: no thumbnail — just logo + fields
   const thumbnailUrl = isGenericPassType
-    ? (input.holderPhotoUrl ?? stripImageUrl)
+    ? (input.programType === "BUSINESS_CARD" ? null : (input.holderPhotoUrl ?? stripImageUrl))
     : null
 
   const icons = await getIconBuffers(
@@ -342,7 +343,12 @@ export async function generateApplePass(
     // Generic fields
     title: { key: "title", label: lbl("title", "TITLE"), value: input.programName ?? "" },
     description: { key: "description", label: lbl("description", "DESCRIPTION"), value: input.rewardDescription },
-    contactName: { key: "contactName", label: lbl("contactName", "NAME"), value: input.customerName },
+    // BUSINESS_CARD fields (from template config, not from contact/recipient)
+    contactName: { key: "contactName", label: lbl("contactName", "NAME"), value: businessCardConfig?.contactName ?? input.customerName },
+    jobTitle: { key: "jobTitle", label: lbl("jobTitle", "TITLE"), value: businessCardConfig?.jobTitle ?? "" },
+    phone: { key: "phone", label: lbl("phone", "PHONE"), value: businessCardConfig?.phone ?? "" },
+    email: { key: "email", label: lbl("email", "EMAIL"), value: businessCardConfig?.email ?? "" },
+    website: { key: "website", label: lbl("website", "WEBSITE"), value: businessCardConfig?.website ?? "" },
   }
 
   // User-configurable field layout for all pass types
