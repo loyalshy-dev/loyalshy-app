@@ -402,8 +402,8 @@ export async function generateApplePass(
 
   // ── Back fields: Program info, T&C, contact, card design extras ──
 
-  // If programName is provided, add a "Program" back field
-  if (input.programName) {
+  // If programName is provided, add a "Program" back field (skip for business cards)
+  if (input.programName && input.programType !== "BUSINESS_CARD") {
     pass.backFields.push({
       key: "program",
       label: "Program",
@@ -497,6 +497,8 @@ export async function generateApplePass(
         value: `${input.ticketScanCount ?? 0} of ${ticketConfig.maxScans} scans used.`,
       }
     )
+  } else if (input.programType === "BUSINESS_CARD") {
+    // Business card: only contact details on back, no loyalty program info
   } else {
     // STAMP_CARD (default)
     pass.backFields.push(
