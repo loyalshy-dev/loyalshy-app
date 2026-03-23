@@ -89,7 +89,7 @@ export function PassTypesCarousel() {
   const current = PASS_TYPES[active]
 
   return (
-    <section className="relative py-32 overflow-hidden" style={{ background: "var(--mk-bg)" }}>
+    <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden" style={{ background: "var(--mk-bg)" }}>
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Scrollable pill bar */}
         <FadeIn delay={0.15}>
@@ -124,7 +124,7 @@ export function PassTypesCarousel() {
 
         {/* Glass container card */}
         <FadeIn delay={0.25}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mk-card-glass p-12 rounded-[3rem]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center mk-card-glass p-6 sm:p-12 rounded-2xl sm:rounded-[3rem]">
 
             {/* Screenshot — all stacked, crossfade on switch */}
             <div

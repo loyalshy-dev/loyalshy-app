@@ -46,7 +46,7 @@ export async function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="relative py-32 overflow-hidden mk-mesh-bg"
+      className="relative py-16 sm:py-24 md:py-32 overflow-hidden mk-mesh-bg"
       style={{ background: "var(--mk-surface)" }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -60,45 +60,19 @@ export async function HowItWorks() {
                   {/* Oversized faded step number */}
                   <span
                     aria-hidden="true"
-                    className="absolute -top-10 -left-6 text-[9rem] font-black leading-none select-none pointer-events-none"
+                    className="absolute -top-10 -left-6 text-[9rem] font-black leading-none select-none pointer-events-none hidden md:block"
                     style={{ color: "oklch(0.55 0.2 265 / 0.04)" }}
                   >
                     {step.number}
                   </span>
 
-                  <div className="relative z-10 flex flex-col gap-6">
-                    {/* Icon box */}
+                  <div className="relative z-10 flex flex-col gap-4">
+                    {/* Screenshot first on mobile for visual hook */}
                     <div
-                      className="flex size-14 items-center justify-center rounded-2xl text-white"
-                      style={{
-                        background: iconStyle.bg,
-                        boxShadow: `0 8px 24px ${iconStyle.shadow}`,
-                      }}
-                    >
-                      <Icon className="size-6" strokeWidth={1.5} />
-                    </div>
-
-                    {/* Title + description */}
-                    <h3
-                      className="text-2xl font-bold tracking-tight"
-                      style={{ color: "var(--mk-text)" }}
-                    >
-                      {step.title}
-                    </h3>
-                    <p
-                      className="text-base leading-relaxed"
-                      style={{ color: "var(--mk-text-muted)" }}
-                    >
-                      {step.description}
-                    </p>
-
-                    {/* Screenshot with hover lift */}
-                    <div
-                      className="mt-4 rounded-xl overflow-hidden transition-transform duration-500 group-hover:-translate-y-2"
+                      className={`rounded-xl overflow-hidden transition-transform duration-500 group-hover:-translate-y-2 md:order-last ${i === 0 ? "md:rotate-2" : i === 1 ? "md:-rotate-2" : ""}`}
                       style={{
                         border: "1px solid var(--mk-border)",
                         boxShadow: "0 8px 32px oklch(0 0 0 / 0.08)",
-                        transform: i === 1 ? "rotate(-2deg)" : i === 0 ? "rotate(2deg)" : undefined,
                       }}
                     >
                       <Image
@@ -110,6 +84,31 @@ export async function HowItWorks() {
                         loading="lazy"
                       />
                     </div>
+
+                    {/* Icon + title + description */}
+                    <div className="flex items-center gap-3 mt-2">
+                      <div
+                        className="flex size-10 shrink-0 items-center justify-center rounded-xl text-white"
+                        style={{
+                          background: iconStyle.bg,
+                          boxShadow: `0 4px 12px ${iconStyle.shadow}`,
+                        }}
+                      >
+                        <Icon className="size-5" strokeWidth={1.5} />
+                      </div>
+                      <h3
+                        className="text-lg font-bold tracking-tight"
+                        style={{ color: "var(--mk-text)" }}
+                      >
+                        {step.title}
+                      </h3>
+                    </div>
+                    <p
+                      className="text-sm leading-relaxed"
+                      style={{ color: "var(--mk-text-muted)" }}
+                    >
+                      {step.description}
+                    </p>
                   </div>
                 </div>
               </StaggerItem>

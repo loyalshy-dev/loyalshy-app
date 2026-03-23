@@ -169,12 +169,12 @@ export async function ApiSection() {
 
   return (
     <section
-      className="relative py-32 overflow-hidden"
+      className="relative py-16 sm:py-24 md:py-32 overflow-hidden"
       style={{ background: "oklch(0.1 0.005 285)", color: "oklch(0.95 0 0)" }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <FadeIn>
-          <div className="grid grid-cols-1 gap-24 lg:grid-cols-2 items-center">
+          <div className="grid grid-cols-1 gap-12 lg:gap-24 lg:grid-cols-2 items-center">
             {/* Left — heading + feature items */}
             <div className="flex flex-col gap-8">
               <p

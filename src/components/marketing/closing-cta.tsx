@@ -8,9 +8,9 @@ export async function ClosingCTA() {
   const tCommon = await getTranslations("common")
 
   return (
-    <section className="py-32 px-6">
+    <section className="py-16 sm:py-24 md:py-32 px-4 sm:px-6">
       <div
-        className="relative mx-auto max-w-7xl rounded-[4rem] p-16 md:p-24 overflow-hidden flex flex-col items-center text-center gap-12"
+        className="relative mx-auto max-w-7xl rounded-3xl sm:rounded-[4rem] p-8 sm:p-16 md:p-24 overflow-hidden flex flex-col items-center text-center gap-12"
       >
         {/* Gradient overlay background */}
         <div

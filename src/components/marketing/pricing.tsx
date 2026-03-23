@@ -230,7 +230,7 @@ function PlanCard({
       {highlighted && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
           <span
-            className="inline-flex items-center rounded-full px-4 py-1 text-[11px] font-bold tracking-wide uppercase"
+            className="inline-flex items-center rounded-full px-4 py-1 text-xs font-bold tracking-wide uppercase"
             style={{
               background:
                 "linear-gradient(135deg, oklch(0.55 0.2 265), oklch(0.55 0.17 155))",
@@ -359,14 +359,14 @@ export function Pricing() {
   return (
     <section
       id="pricing"
-      className="relative py-32 px-4 sm:px-6 overflow-hidden mk-mesh-bg"
+      className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden mk-mesh-bg"
       style={{ background: "var(--mk-surface)" }}
     >
       <div className="relative mx-auto max-w-6xl">
         <FadeIn>
           <div className="text-center mb-10">
             <p
-              className="mb-3 inline-flex items-center rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.08em] uppercase"
+              className="mb-3 inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold tracking-[0.08em] uppercase"
               style={{
                 border: "1px solid var(--mk-border)",
                 background: "var(--mk-card)",

@@ -20,7 +20,7 @@ export async function WalletPreview() {
       style={{ background: "var(--mk-surface)" }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
           {/* Text column */}
           <FadeIn direction="left" className="order-2 lg:order-1 flex flex-col gap-8">
             <p

@@ -121,7 +121,7 @@ export async function Features() {
   return (
     <section
       id="features"
-      className="relative py-32 overflow-hidden"
+      className="relative py-16 sm:py-24 md:py-32 overflow-hidden"
       style={{ background: "var(--mk-bg)" }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">

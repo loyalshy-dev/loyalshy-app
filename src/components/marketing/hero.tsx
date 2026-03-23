@@ -16,7 +16,7 @@ export async function Hero() {
     >
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         {/* Asymmetric 7/5 grid layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
           {/* Left: Text content */}
           <div className="lg:col-span-7 flex flex-col items-start gap-8">
             {/* Badge */}

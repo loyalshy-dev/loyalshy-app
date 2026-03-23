@@ -134,13 +134,13 @@ export function MarketingNavbar() {
           className="fixed inset-0 z-[100] flex flex-col md:hidden"
           style={{ background: "var(--mk-bg)" }}
         >
-          {/* Close button — top right */}
-          <div className="flex justify-end px-6 pt-5">
+          {/* Close button — top right, respects notch */}
+          <div className="flex justify-end px-6 safe-area-top" style={{ paddingTop: "max(env(safe-area-inset-top, 1.25rem), 1.25rem)" }}>
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
               aria-label={t("closeMenu")}
-              className="p-2 transition-opacity hover:opacity-60"
+              className="p-3 -mr-3 transition-opacity hover:opacity-60"
               style={{ color: "var(--mk-text-muted)" }}
             >
               <X className="size-6" />
@@ -149,7 +149,7 @@ export function MarketingNavbar() {
 
           {/* Nav links — large, spacious */}
           <nav
-            className="flex flex-1 flex-col gap-2 px-8 pt-8"
+            className="flex flex-1 flex-col gap-2 px-8 pt-6"
             aria-label="Mobile navigation"
           >
             {NAV_LINKS.map((link) => (
