@@ -352,8 +352,8 @@ export async function generateApplePass(
     email: { key: "email", label: lbl("email", "EMAIL"), value: businessCardConfig?.email ?? "" },
     website: { key: "website", label: lbl("website", "WEBSITE"), value: businessCardConfig?.website ?? "" },
     linkedin: { key: "linkedin", label: lbl("linkedin", "LINKEDIN"), value: businessCardConfig?.linkedinUrl ?? "" },
-    twitter: { key: "twitter", label: lbl("twitter", "X"), value: businessCardConfig?.twitterUrl ?? "" },
-    instagram: { key: "instagram", label: lbl("instagram", "INSTAGRAM"), value: businessCardConfig?.instagramUrl ?? "" },
+    twitter: { key: "twitter", label: lbl("twitter", "X"), value: businessCardConfig?.twitterUrl || design?.socialLinks.x || "" },
+    instagram: { key: "instagram", label: lbl("instagram", "INSTAGRAM"), value: businessCardConfig?.instagramUrl || design?.socialLinks.instagram || "" },
   }
 
   // User-configurable field layout for all pass types

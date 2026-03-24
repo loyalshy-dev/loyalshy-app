@@ -237,15 +237,15 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
                 showHolderPhoto={membershipConfig?.showHolderPhoto}
                 holderPhotoPosition={membershipConfig?.holderPhotoPosition}
                 holderPhotoUrl={holderPhotoUrl}
-                // Business card props
+                // Business card props (config fields, design socialLinks as fallback for matching platforms)
                 contactName={businessCardConfig?.contactName}
                 jobTitle={businessCardConfig?.jobTitle}
                 contactPhone={businessCardConfig?.phone}
                 contactEmail={businessCardConfig?.email}
                 contactWebsite={businessCardConfig?.website}
-                contactLinkedin={businessCardConfig?.linkedinUrl}
-                contactTwitter={businessCardConfig?.twitterUrl}
-                contactInstagram={businessCardConfig?.instagramUrl}
+                contactLinkedin={businessCardConfig?.linkedinUrl || undefined}
+                contactTwitter={businessCardConfig?.twitterUrl || socialLinks?.x || undefined}
+                contactInstagram={businessCardConfig?.instagramUrl || socialLinks?.instagram || undefined}
               />
               </div>
               </InteractiveCardWrapper>
