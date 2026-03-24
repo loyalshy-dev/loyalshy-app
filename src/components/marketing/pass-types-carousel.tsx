@@ -163,7 +163,7 @@ export function PassTypesCarousel() {
                 ) : (
                   <div
                     key={type.id}
-                    className="flex flex-col items-center justify-center gap-3 aspect-[4/3] w-full rounded-xl transition-opacity duration-300 ease-out"
+                    className="flex flex-col items-center justify-center gap-3 aspect-4/3 w-full rounded-xl transition-opacity duration-300 ease-out"
                     style={{
                       opacity: active === i ? 1 : 0,
                       position: active === i ? "relative" : "absolute",
