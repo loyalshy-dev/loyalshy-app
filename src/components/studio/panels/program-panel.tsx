@@ -661,15 +661,19 @@ export function ProgramPanel({ store, passType }: Props) {
       {/* Schedule — not applicable for business cards (permanent, not time-bound) */}
       {passType !== "BUSINESS_CARD" && <ScheduleFields store={store} />}
 
-      <SectionHeader>{t("termsSection")}</SectionHeader>
-      <TextArea
-        label={t("terms")}
-        value={terms}
-        onChange={(v) => set("terms", v)}
-        placeholder={t("termsPlaceholder")}
-        rows={3}
-        maxLength={5000}
-      />
+      {passType !== "BUSINESS_CARD" && (
+        <>
+          <SectionHeader>{t("termsSection")}</SectionHeader>
+          <TextArea
+            label={t("terms")}
+            value={terms}
+            onChange={(v) => set("terms", v)}
+            placeholder={t("termsPlaceholder")}
+            rows={3}
+            maxLength={5000}
+          />
+        </>
+      )}
 
     </div>
   )
