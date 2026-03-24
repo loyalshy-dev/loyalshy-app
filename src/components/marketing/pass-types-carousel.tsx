@@ -9,6 +9,7 @@ import {
   Coins,
   Gift,
   CalendarDays,
+  ContactRound,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -23,6 +24,7 @@ const PASS_TYPES = [
   { id: "points", icon: Coins, image: null },
   { id: "giftCard", icon: Gift, image: null },
   { id: "ticket", icon: CalendarDays, image: "/pass-types/ticket-google.webp" },
+  { id: "businessCard", icon: ContactRound, image: null },
 ] as const
 
 export function PassTypesCarousel() {
@@ -83,6 +85,24 @@ export function PassTypesCarousel() {
   return (
     <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden" style={{ background: "var(--mk-bg)" }}>
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Section heading */}
+        <FadeIn>
+          <div className="text-center mb-12">
+            <h2
+              className="mk-clamp-h2 font-black tracking-tight"
+              style={{ color: "var(--mk-text)" }}
+            >
+              {t("title")}
+            </h2>
+            <p
+              className="mt-4 text-lg leading-relaxed max-w-2xl mx-auto"
+              style={{ color: "var(--mk-text-muted)" }}
+            >
+              {t("subtitle")}
+            </p>
+          </div>
+        </FadeIn>
+
         {/* Scrollable pill bar */}
         <FadeIn delay={0.15}>
           <div className="flex flex-wrap justify-center gap-2 mb-16">
@@ -120,8 +140,7 @@ export function PassTypesCarousel() {
 
             {/* Screenshot — all stacked, crossfade on switch */}
             <div
-              className="relative overflow-hidden rounded-xl"
- 
+              className="relative overflow-hidden rounded-xl max-w-sm mx-auto"
             >
               {PASS_TYPES.map((type, i) => (
                 type.image ? (
@@ -129,8 +148,8 @@ export function PassTypesCarousel() {
                     key={type.id}
                     src={type.image}
                     alt={t(`types.${type.id}.alt`)}
-                    width={800}
-                    height={600}
+                    width={600}
+                    height={400}
                     className="w-full h-auto transition-opacity duration-300 ease-out"
                     style={{
                       opacity: active === i ? 1 : 0,

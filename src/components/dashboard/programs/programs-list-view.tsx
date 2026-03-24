@@ -14,6 +14,14 @@ import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import type { TemplateListItem } from "@/server/template-actions"
 import type { PassType as PlanPassType } from "@/lib/plans"
 
@@ -116,38 +124,32 @@ export function TemplatesListView({
           </p>
         </div>
         {isOwner && (
-          <Button
-            size="sm"
-            className="gap-1.5"
-            onClick={() => setShowCreate(!showCreate)}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            {t("createProgram")}
-          </Button>
+          <Dialog open={showCreate} onOpenChange={setShowCreate}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-1.5">
+                <Plus className="h-3.5 w-3.5" />
+                {t("createProgram")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{t("newProgram")}</DialogTitle>
+                <DialogDescription>
+                  {t("newProgramDescription")}
+                </DialogDescription>
+              </DialogHeader>
+              <CreateProgramForm
+                organizationId={organizationId}
+                allowedPassTypes={allowedPassTypes}
+                onCreated={() => {
+                  setShowCreate(false)
+                  router.refresh()
+                }}
+              />
+            </DialogContent>
+          </Dialog>
         )}
       </div>
-
-      {/* Create form */}
-      {showCreate && (
-        <Card>
-          <div className="border-b border-border px-6 py-4">
-            <h2 className="text-sm font-semibold">{t("newProgram")}</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {t("newProgramDescription")}
-            </p>
-          </div>
-          <div className="p-6">
-            <CreateProgramForm
-              organizationId={organizationId}
-              allowedPassTypes={allowedPassTypes}
-              onCreated={() => {
-                setShowCreate(false)
-                router.refresh()
-              }}
-            />
-          </div>
-        </Card>
-      )}
 
       {/* Type filter tabs */}
       {hasMultipleTypes && (

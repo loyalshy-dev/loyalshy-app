@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { Plus, Layers, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -18,11 +19,22 @@ import {
 } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import type { TemplateListItem } from "@/server/template-actions"
 import type { PassType as PlanPassType } from "@/lib/plans"
 
 
-function getTypeSubtitle(template: TemplateListItem): string {
+function getTypeSubtitle(
+  template: TemplateListItem,
+  t: (key: string, values?: Record<string, string | number>) => string,
+): string {
   const type = template.passType as PassType
   const count = template.passInstanceCount
   const cfg = (template.config as Record<string, unknown>) ?? {}
@@ -31,25 +43,27 @@ function getTypeSubtitle(template: TemplateListItem): string {
     case "STAMP_CARD": {
       const stampsRequired =
         (cfg as { stampsRequired?: number }).stampsRequired ?? 10
-      return `${stampsRequired} stamps | ${count} active`
+      return t("stampSubtitle", { stamps: stampsRequired, count })
     }
     case "COUPON": {
       const config = parseCouponConfig(template.config)
       const discount = config ? formatCouponValue(config) : ""
-      return `${discount} | ${count} claimed`
+      return t("couponSubtitle", { discount, count })
     }
     case "MEMBERSHIP": {
       const config = parseMembershipConfig(template.config)
       const tier = config?.membershipTier ?? "Member"
-      return `${tier} | ${count} members`
+      return t("membershipSubtitle", { tier, count })
     }
     case "POINTS": {
       const pConfig = parsePointsConfig(template.config)
-      const subtitle = pConfig ? `${pConfig.pointsPerVisit} pts/visit` : "Points"
-      return `${subtitle} | ${count} active`
+      if (pConfig) {
+        return t("pointsSubtitle", { points: pConfig.pointsPerVisit, count })
+      }
+      return t("pointsDefault", { count })
     }
     default:
-      return `${count} passes`
+      return t("defaultSubtitle", { count })
   }
 }
 
@@ -79,6 +93,7 @@ export function TemplatesGridView({
   isOwner,
   allowedPassTypes,
 }: TemplatesGridViewProps) {
+  const t = useTranslations("dashboard.programs")
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showCreate, setShowCreate] = useState(
@@ -100,7 +115,7 @@ export function TemplatesGridView({
 
   // Build filter tabs from actual data
   const filterTabs: { key: TypeFilter; label: string }[] = [
-    { key: "ALL", label: "All" },
+    { key: "ALL", label: t("all") },
   ]
   const typeOrder: TypeFilter[] = [
     "STAMP_CARD",
@@ -126,46 +141,39 @@ export function TemplatesGridView({
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Your Programs
+            {t("title")}
           </h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">
-            Manage your programs, pass designs, and distribution.
+            {t("subtitle")}
           </p>
         </div>
         {isOwner && (
-          <Button
-            size="sm"
-            className="gap-1.5"
-            onClick={() => setShowCreate(!showCreate)}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            New Program
-          </Button>
+          <Dialog open={showCreate} onOpenChange={setShowCreate}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-1.5">
+                <Plus className="h-3.5 w-3.5" />
+                {t("createProgram")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{t("newProgram")}</DialogTitle>
+                <DialogDescription>
+                  {t("newProgramDescription")}
+                </DialogDescription>
+              </DialogHeader>
+              <CreateProgramForm
+                organizationId={organizationId}
+                allowedPassTypes={allowedPassTypes}
+                onCreated={() => {
+                  setShowCreate(false)
+                  router.refresh()
+                }}
+              />
+            </DialogContent>
+          </Dialog>
         )}
       </div>
-
-      {/* Create form */}
-      {showCreate && (
-        <Card>
-          <div className="border-b border-border px-6 py-4">
-            <h2 className="text-sm font-semibold">New Program</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Choose a pass type and configure it. It starts as a draft —
-              activate it when ready.
-            </p>
-          </div>
-          <div className="p-6">
-            <CreateProgramForm
-              organizationId={organizationId}
-              allowedPassTypes={allowedPassTypes}
-              onCreated={() => {
-                setShowCreate(false)
-                router.refresh()
-              }}
-            />
-          </div>
-        </Card>
-      )}
 
       {/* Type filter tabs */}
       {hasMultipleTypes && (
@@ -199,13 +207,10 @@ export function TemplatesGridView({
             <Layers className="h-5 w-5 text-muted-foreground" />
           </div>
           <h2 className="text-sm font-semibold">
-            {typeFilter === "ALL"
-              ? "No programs yet"
-              : `No ${filterTabs.find((t) => t.key === typeFilter)?.label.toLowerCase() ?? "programs"} yet`}
+            {t("noPrograms")}
           </h2>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-            Create your first program to start issuing digital wallet
-            passes.
+            {t("createFirst")}
           </p>
           {isOwner && typeFilter === "ALL" && (
             <Button
@@ -214,7 +219,7 @@ export function TemplatesGridView({
               onClick={() => setShowCreate(true)}
             >
               <Plus className="h-3.5 w-3.5" />
-              New Program
+              {t("createProgram")}
             </Button>
           )}
         </Card>
@@ -270,7 +275,7 @@ export function TemplatesGridView({
                   <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      {getTypeSubtitle(template)}
+                      {getTypeSubtitle(template, t)}
                     </span>
                   </div>
                 </div>

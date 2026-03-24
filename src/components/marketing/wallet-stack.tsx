@@ -161,14 +161,14 @@ export function WalletStack() {
     return () => clearTimeout(resumeTimer)
   }, [])
 
-  const cardW = compact ? 220 : 260
+  const cardW = compact ? 260 : 320
   const cardH = Math.round(cardW * (1455 / 960)) // match tallest image ratio (Google 960×1455)
 
   return (
     <div
       className="relative"
       style={{
-        width: compact ? 280 : 340,
+        width: compact ? 320 : 400,
         height: compact ? cardH + 30 : cardH + 40,
       }}
     >

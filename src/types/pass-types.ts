@@ -131,6 +131,7 @@ export type PassTypeMeta = {
   description: string
   defaultCardType: DesignCardType
   category: PassTypeCategory
+  image: string | null
 }
 
 export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
@@ -141,6 +142,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     description: "Reward contacts after a set number of visits",
     defaultCardType: "STAMP",
     category: "loyalty",
+    image: "/pass-types/stamp-apple.webp",
   },
   COUPON: {
     label: "Coupon / Voucher",
@@ -149,6 +151,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     description: "Offer discounts or free items contacts can redeem",
     defaultCardType: "COUPON",
     category: "loyalty",
+    image: "/pass-types/coupon-google.webp",
   },
   MEMBERSHIP: {
     label: "Membership Card",
@@ -157,6 +160,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     description: "Digital ID card for gyms, clubs, libraries, and more",
     defaultCardType: "TIER",
     category: "identity",
+    image: "/pass-types/memebership-apple.webp",
   },
   POINTS: {
     label: "Points Program",
@@ -165,6 +169,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     description: "Earn points per visit, redeem from a reward catalog",
     defaultCardType: "POINTS",
     category: "loyalty",
+    image: null,
   },
   GIFT_CARD: {
     label: "Gift Card",
@@ -173,6 +178,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     description: "Stored-value card with balance tracking",
     defaultCardType: "GIFT_CARD",
     category: "commerce",
+    image: null,
   },
   TICKET: {
     label: "Event Ticket",
@@ -181,6 +187,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     description: "Digital ticket for events, concerts, conferences",
     defaultCardType: "TICKET",
     category: "event",
+    image: "/pass-types/ticket-google.webp",
   },
   BUSINESS_CARD: {
     label: "Business Card",
@@ -189,5 +196,6 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     description: "Digital business card for Apple & Google Wallet",
     defaultCardType: "GENERIC",
     category: "identity",
+    image: null,
   },
 }

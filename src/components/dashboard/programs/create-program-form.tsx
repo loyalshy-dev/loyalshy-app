@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
+import Image from "next/image"
 import { ArrowLeft, Loader2, Lock, Plus, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,46 +32,60 @@ function TypeSelector({
   ]
 
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
-        {t("chooseType")}
-      </p>
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+    <div className="space-y-4">
+      <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
         {types.map((type) => {
           const meta = PASS_TYPE_META[type]
           const Icon = meta.icon
           const isLocked = allowedPassTypes && !allowedPassTypes.includes(type as PlanPassType)
           return (
-            <Card asChild key={type}>
             <button
+              key={type}
               type="button"
               onClick={() => !isLocked && onSelect(type)}
               disabled={isLocked}
-              className={`flex flex-col items-start gap-2 p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              className={`group relative flex flex-col rounded-xl border border-border bg-card text-left transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring overflow-hidden ${
                 isLocked
                   ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-muted/30 hover:shadow-md"
+                  : "hover:border-foreground/20 hover:shadow-lg hover:-translate-y-0.5"
               }`}
             >
-              <div className="flex items-center justify-between w-full">
-                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${isLocked ? "bg-muted" : "bg-brand/10"}`}>
-                  <Icon className={`h-4.5 w-4.5 ${isLocked ? "text-muted-foreground" : "text-brand"}`} />
-                </div>
+              {/* Image / Icon area */}
+              <div className="relative w-full aspect-[4/3] bg-muted/40 overflow-hidden">
+                {meta.image ? (
+                  <Image
+                    src={meta.image}
+                    alt={meta.label}
+                    fill
+                    className="object-contain p-2 transition-transform duration-150 group-hover:scale-105"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <Icon className="size-10 text-muted-foreground/40" strokeWidth={1.5} />
+                  </div>
+                )}
                 {isLocked && (
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1 text-muted-foreground">
-                    <Lock className="h-2.5 w-2.5" />
-                    {t("upgrade")}
-                  </Badge>
+                  <div className="absolute top-2 right-2">
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1 text-muted-foreground bg-background/80 backdrop-blur-sm">
+                      <Lock className="h-2.5 w-2.5" />
+                      {t("upgrade")}
+                    </Badge>
+                  </div>
                 )}
               </div>
-              <div>
-                <p className="text-sm font-semibold">{meta.label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+
+              {/* Text area */}
+              <div className="flex flex-col gap-1 p-3">
+                <div className="flex items-center gap-2">
+                  <Icon className={`h-3.5 w-3.5 shrink-0 ${isLocked ? "text-muted-foreground" : "text-brand"}`} />
+                  <p className="text-[13px] font-semibold truncate">{meta.label}</p>
+                </div>
+                <p className="text-[11px] leading-snug text-muted-foreground line-clamp-2">
                   {meta.description}
                 </p>
               </div>
             </button>
-            </Card>
           )
         })}
       </div>
