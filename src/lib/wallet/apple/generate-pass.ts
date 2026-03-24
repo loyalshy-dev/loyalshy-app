@@ -616,17 +616,20 @@ export async function generateApplePass(
     })
   }
 
-  const socialParts: string[] = []
-  if (design?.socialLinks.instagram) socialParts.push(`Instagram: ${design.socialLinks.instagram}`)
-  if (design?.socialLinks.facebook) socialParts.push(`Facebook: ${design.socialLinks.facebook}`)
-  if (design?.socialLinks.tiktok) socialParts.push(`TikTok: ${design.socialLinks.tiktok}`)
-  if (design?.socialLinks.x) socialParts.push(`X: ${design.socialLinks.x}`)
-  if (socialParts.length > 0) {
-    pass.backFields.push({
-      key: "socials",
-      label: "Social Media",
-      value: socialParts.join("\n"),
-    })
+  // Social links on back — skip for BUSINESS_CARD (already shown as card fields on front)
+  if (input.programType !== "BUSINESS_CARD") {
+    const socialParts: string[] = []
+    if (design?.socialLinks.instagram) socialParts.push(`Instagram: ${design.socialLinks.instagram}`)
+    if (design?.socialLinks.facebook) socialParts.push(`Facebook: ${design.socialLinks.facebook}`)
+    if (design?.socialLinks.tiktok) socialParts.push(`TikTok: ${design.socialLinks.tiktok}`)
+    if (design?.socialLinks.x) socialParts.push(`X: ${design.socialLinks.x}`)
+    if (socialParts.length > 0) {
+      pass.backFields.push({
+        key: "socials",
+        label: "Social Media",
+        value: socialParts.join("\n"),
+      })
+    }
   }
 
   // Prize reveal link — shown when an unrevealed prize is pending

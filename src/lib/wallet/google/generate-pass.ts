@@ -208,33 +208,36 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   }
 
   // Social links from card design — normalize handles to full URLs
-  if (design?.socialLinks.instagram) {
-    linksUris.push({
-      uri: normalizeSocialUrl(design.socialLinks.instagram, "instagram"),
-      description: "Instagram",
-      id: "instagram",
-    })
-  }
-  if (design?.socialLinks.facebook) {
-    linksUris.push({
-      uri: normalizeSocialUrl(design.socialLinks.facebook, "facebook"),
-      description: "Facebook",
-      id: "facebook",
-    })
-  }
-  if (design?.socialLinks.tiktok) {
-    linksUris.push({
-      uri: normalizeSocialUrl(design.socialLinks.tiktok, "tiktok"),
-      description: "TikTok",
-      id: "tiktok",
-    })
-  }
-  if (design?.socialLinks.x) {
-    linksUris.push({
-      uri: normalizeSocialUrl(design.socialLinks.x, "x"),
-      description: "X",
-      id: "x",
-    })
+  // Skip for BUSINESS_CARD (already shown as text module fields on front)
+  if (input.passType !== "BUSINESS_CARD") {
+    if (design?.socialLinks.instagram) {
+      linksUris.push({
+        uri: normalizeSocialUrl(design.socialLinks.instagram, "instagram"),
+        description: "Instagram",
+        id: "instagram",
+      })
+    }
+    if (design?.socialLinks.facebook) {
+      linksUris.push({
+        uri: normalizeSocialUrl(design.socialLinks.facebook, "facebook"),
+        description: "Facebook",
+        id: "facebook",
+      })
+    }
+    if (design?.socialLinks.tiktok) {
+      linksUris.push({
+        uri: normalizeSocialUrl(design.socialLinks.tiktok, "tiktok"),
+        description: "TikTok",
+        id: "tiktok",
+      })
+    }
+    if (design?.socialLinks.x) {
+      linksUris.push({
+        uri: normalizeSocialUrl(design.socialLinks.x, "x"),
+        description: "X",
+        id: "x",
+      })
+    }
   }
 
   // Map address link
