@@ -1164,6 +1164,8 @@ function ConfirmStep({
   const isTicket = passInstance.passType === "TICKET"
   const isBusinessCard = passInstance.passType === "BUSINESS_CARD"
   const businessCardCfg = isBusinessCard ? parseBusinessCardConfig(passInstance.templateConfig) : null
+  const bcEditorCfg = isBusinessCard ? (cardDesign?.editorConfig as Record<string, unknown>) ?? {} : {}
+  const bcMapAddress = (bcEditorCfg.ma as string) ?? undefined
   const confirmData = passInstance.data as Record<string, unknown> | null ?? {}
   const confirmConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
   const filled = (confirmData.currentCycleVisits as number) ?? 0
@@ -1255,6 +1257,7 @@ function ConfirmStep({
             contactPhone={businessCardCfg?.phone}
             contactEmail={businessCardCfg?.email}
             contactWebsite={businessCardCfg?.website}
+            contactAddress={bcMapAddress}
             contactLinkedin={businessCardCfg?.linkedinUrl}
             contactTwitter={businessCardCfg?.twitterUrl}
             contactInstagram={businessCardCfg?.instagramUrl}

@@ -141,6 +141,7 @@ function getRendererProps(passInstance: PassInstanceDetail) {
   }
   if (passInstance.passType === "BUSINESS_CARD") {
     const config = parseBusinessCardConfig(passInstance.templateConfig)
+    const ec = (passInstance.passDesign?.editorConfig as Record<string, unknown>) ?? {}
     return {
       currentVisits: 0,
       totalVisits: 0,
@@ -150,6 +151,7 @@ function getRendererProps(passInstance: PassInstanceDetail) {
       contactPhone: config?.phone,
       contactEmail: config?.email,
       contactWebsite: config?.website,
+      contactAddress: (ec.ma as string) ?? undefined,
       contactLinkedin: config?.linkedinUrl,
       contactTwitter: config?.twitterUrl,
       contactInstagram: config?.instagramUrl,

@@ -77,7 +77,7 @@ type TemplateCardPreviewProps = {
 
 // ─── Helper: build all type-specific renderer props from config ──
 
-function buildTypeProps(passType: string, config: unknown) {
+function buildTypeProps(passType: string, config: unknown, editorConfig?: unknown) {
   const props: Record<string, unknown> = {}
 
   switch (passType) {
@@ -144,6 +144,8 @@ function buildTypeProps(passType: string, config: unknown) {
         props.contactTwitter = c.twitterUrl
         props.contactInstagram = c.instagramUrl
       }
+      const ec = (editorConfig as Record<string, unknown>) ?? {}
+      if (ec.ma) props.contactAddress = ec.ma as string
       break
     }
   }
@@ -174,7 +176,7 @@ export function TemplateCardPreview({
   memberSince,
 }: TemplateCardPreviewProps) {
   const design = buildWalletPassDesign(template.passDesign)
-  const typeProps = buildTypeProps(template.passType, template.config)
+  const typeProps = buildTypeProps(template.passType, template.config, template.passDesign?.editorConfig)
 
   // holderPhotoUrl is per-instance, not template-level — preview shows placeholder only
 
