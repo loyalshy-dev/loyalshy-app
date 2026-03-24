@@ -39,9 +39,9 @@ export function FieldSection({ fields, textColor, labelColor, format = "apple", 
   const labelSize = small ? 9 : (format === "google" ? 10 : appleLabelSize)
   const baseValueSize = small ? 14 : (format === "google" ? 12 : appleBaseValueSize)
 
-  // Apple: use the MINIMUM dynamic size across all fields in the row
-  // so all fields render at the same size (matches real Apple Wallet behavior)
-  const valueSize = format === "apple" && !small
+  // Use the MINIMUM dynamic size across all fields in the row
+  // so all fields render at the same size (matches real wallet behavior)
+  const valueSize = !small
     ? Math.min(...fields.map((f) => dynamicValueSize(baseValueSize, f.value)))
     : baseValueSize
 

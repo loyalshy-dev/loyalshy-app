@@ -1053,6 +1053,14 @@ export function WalletPassRenderer({
 
 // ─── Google Ticket Fields (2-column grid) ───
 
+function googleDynamicSize(baseSize: number, value: string): number {
+  const len = value.length
+  if (len <= 10) return baseSize
+  if (len <= 16) return Math.max(baseSize - 1, 9)
+  if (len <= 24) return Math.max(baseSize - 2, 8)
+  return Math.max(baseSize - 3, 7)
+}
+
 function GoogleFieldRows({
   fields,
   textColor,
@@ -1085,41 +1093,45 @@ function GoogleFieldRows({
 
   return (
     <div style={{ padding: "4px 16px" }}>
-      {rows.map((row, ri) => (
-        <div key={ri} style={{ display: "flex", gap: 16, marginBottom: ri < rows.length - 1 ? 10 : 0 }}>
-          {row.map((field, fi) => (
-            <div key={fi} style={{ flex: 1, textAlign: row.length === 2 && fi === 1 ? "right" : row.length === 3 && fi === 2 ? "right" : row.length === 3 && fi === 1 ? "center" : undefined }}>
-              <div
-                data-color-zone="labels"
-                style={{
-                  fontSize: 10,
-                  fontWeight: 500,
-                  color: labelColor ?? textColor,
-                  opacity: labelColor ? 1 : 0.7,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.02em",
-                  marginBottom: 1,
-                }}
-              >
-                {field.label}
+      {rows.map((row, ri) => {
+        // Uniform size per row — determined by longest value in the row
+        const rowValueSize = Math.min(...row.map((f) => googleDynamicSize(12, f.value)))
+        return (
+          <div key={ri} style={{ display: "flex", gap: 16, marginBottom: ri < rows.length - 1 ? 10 : 0 }}>
+            {row.map((field, fi) => (
+              <div key={fi} style={{ flex: 1, minWidth: 0, textAlign: row.length === 2 && fi === 1 ? "right" : row.length === 3 && fi === 2 ? "right" : row.length === 3 && fi === 1 ? "center" : undefined }}>
+                <div
+                  data-color-zone="labels"
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 500,
+                    color: labelColor ?? textColor,
+                    opacity: labelColor ? 1 : 0.7,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.02em",
+                    marginBottom: 1,
+                  }}
+                >
+                  {field.label}
+                </div>
+                <div
+                  data-color-zone="text"
+                  style={{
+                    fontSize: rowValueSize,
+                    fontWeight: 500,
+                    color: textColor,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {field.value}
+                </div>
               </div>
-              <div
-                data-color-zone="text"
-                style={{
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: textColor,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {field.value}
-              </div>
-            </div>
-          ))}
-        </div>
-      ))}
+            ))}
+          </div>
+        )
+      })}
     </div>
   )
 }
