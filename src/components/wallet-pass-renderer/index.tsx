@@ -929,50 +929,111 @@ export function WalletPassRenderer({
           <>
             {isTicket ? (
               <>
-                {/* Ticket layout: header fields above strip, event name ON strip */}
-                {headerSection}
-                {/* Strip with event name overlay */}
-                {useStrip ? (
-                  <div style={{ position: "relative" }}>
-                    {stripSection}
-                    {/* Event name overlay on strip */}
+                {/* Ticket background image — mimics Apple eventTicket background.png behavior.
+                    iOS applies a Gaussian blur to background images automatically.
+                    The image covers the entire card behind all content. */}
+                {useStrip && design.stripImageUrl && (() => {
+                  const pos = design.stripImagePosition ?? { x: 0.5, y: 0.5 }
+                  const zoom = design.stripImageZoom ?? 1
+                  const anchor = `${pos.x * 100}% ${pos.y * 100}%`
+                  return (
                     <div
                       style={{
                         position: "absolute",
                         inset: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-start",
-                        padding: "0 16px",
-                        zIndex: 2,
+                        zIndex: 0,
+                        overflow: "hidden",
                       }}
                     >
-                      <div
-                        data-color-zone="text"
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={design.stripImageUrl}
+                        alt=""
                         style={{
-                          fontSize: 36,
-                          fontWeight: 300,
-                          color: design.textColor,
-                          textShadow: "0 2px 8px rgba(0,0,0,0.5)",
-                          lineHeight: 1.1,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
                           width: "100%",
-                          letterSpacing: "-0.01em",
+                          height: "100%",
+                          objectFit: "cover",
+                          objectPosition: anchor,
+                          transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+                          transformOrigin: anchor,
+                          opacity: design.stripOpacity ?? 1,
+                          filter: `blur(6px)${design.stripGrayscale ? " grayscale(1)" : ""}`,
                         }}
-                      >
-                        {eventName || programName}
-                      </div>
+                      />
+                      {/* Dark overlay for text legibility */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          backgroundColor: "rgba(0,0,0,0.35)",
+                        }}
+                      />
+                    </div>
+                  )
+                })()}
+                {/* Ticket background fallback: strip enabled but no image — gradient/pattern/flat fill */}
+                {useStrip && !design.stripImageUrl && (() => {
+                  const sc1 = design.stripColor1 ?? design.primaryColor
+                  const sc2 = design.stripColor2 ?? design.secondaryColor
+                  const isFlat = (design.stripFill ?? "gradient") === "flat"
+                  const pc = design.patternColor ?? sc2
+                  return (
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        zIndex: 0,
+                        overflow: "hidden",
+                      }}
+                    >
+                      {design.patternStyle !== "NONE" ? (
+                        <PatternFill
+                          pattern={design.patternStyle}
+                          primaryColor={sc1}
+                          secondaryColor={pc}
+                        />
+                      ) : isFlat ? (
+                        <div style={{ width: "100%", height: "100%", backgroundColor: sc1 }} />
+                      ) : (
+                        <div
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            background: `linear-gradient(135deg, ${sc1} 0%, ${sc2} 100%)`,
+                          }}
+                        />
+                      )}
+                    </div>
+                  )
+                })()}
+                {/* Ticket content — all on top of background (z-index 1) */}
+                <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", flex: 1 }}>
+                  {headerSection}
+                  {/* Event name — large display, replaces strip overlay */}
+                  <div style={{ padding: "8px 16px 4px" }}>
+                    <div
+                      data-color-zone="text"
+                      style={{
+                        fontSize: 36,
+                        fontWeight: 300,
+                        color: design.textColor,
+                        textShadow: useStrip && design.stripImageUrl ? "0 2px 8px rgba(0,0,0,0.5)" : undefined,
+                        lineHeight: 1.1,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        width: "100%",
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
+                      {eventName || programName}
                     </div>
                   </div>
-                ) : (
-                  primarySection
-                )}
-                {secondarySection}
-                {auxiliarySection}
-                <div style={{ flex: 1 }} />
-                {qrSection}
+                  {secondarySection}
+                  {auxiliarySection}
+                  <div style={{ flex: 1 }} />
+                  {qrSection}
+                </div>
               </>
             ) : (
               <>

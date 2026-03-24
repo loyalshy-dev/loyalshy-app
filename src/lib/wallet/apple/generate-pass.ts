@@ -182,37 +182,110 @@ export async function generateApplePass(
     }
   }
 
-  // Apple generic pass type (MEMBERSHIP) does NOT render strip images.
-  // It renders thumbnail images instead (displayed on the right side of the pass front).
-  // For these types, redirect strip content → thumbnail, and use holder photo as thumbnail if available.
-  const isGenericPassType = input.programType === "MEMBERSHIP" || input.programType === "BUSINESS_CARD"
+  // Apple eventTicket (TICKET) supports background images instead of strip.
+  // iOS applies a Gaussian blur to background.png automatically, creating a frosted glass effect.
+  // When a strip image is set for tickets, route it to background instead of strip.
+  const isTicketType = input.programType === "TICKET"
 
-  // For generic passes: holder photo takes priority as thumbnail, otherwise use strip image as thumbnail
-  // BUSINESS_CARD: never show thumbnail — clean text-only card, logo is enough branding
-  const thumbnailUrl = isGenericPassType
-    ? (input.programType === "BUSINESS_CARD"
-      ? null
-      : (input.holderPhotoUrl ?? stripImageUrl))
-    : null
+  // For tickets: route strip image to background, not strip
+  const effectiveStripUrl = isTicketType ? null : stripImageUrl
+  const backgroundImageUrl = isTicketType ? stripImageUrl : null
 
   const icons = await getIconBuffers(
     input.organizationLogoApple ?? input.organizationLogo,
-    isGenericPassType ? null : stripImageUrl, // Don't pass strip for generic — Apple ignores it
+    effectiveStripUrl,
     stripFilters.logoAppleZoom,
-    thumbnailUrl,
+    null, // no thumbnail — all types use storeCard with native strip
+    backgroundImageUrl,
   )
 
-  // If we have a dynamically generated stamp grid buffer, inject it directly
+  // If we have a dynamically generated strip buffer, inject it directly
   if (stampGridStripBuffer) {
-    if (isGenericPassType) {
-      // For generic passes, use as thumbnail instead of strip
-      icons["thumbnail.png"] = stampGridStripBuffer
-      icons["thumbnail@2x.png"] = stampGridStripBuffer
-      icons["thumbnail@3x.png"] = stampGridStripBuffer
+    if (isTicketType) {
+      // For tickets, use as background instead of strip (iOS blurs it automatically)
+      icons["background.png"] = stampGridStripBuffer
+      icons["background@2x.png"] = stampGridStripBuffer
+      icons["background@3x.png"] = stampGridStripBuffer
     } else {
       icons["strip.png"] = stampGridStripBuffer
       icons["strip@2x.png"] = stampGridStripBuffer
       icons["strip@3x.png"] = stampGridStripBuffer
+    }
+  }
+
+  // Membership: composite holder photo onto strip image (circular avatar overlay)
+  // Mirrors the card renderer's CSS overlay behavior for real Apple Wallet passes.
+  if (input.programType === "MEMBERSHIP" && input.holderPhotoUrl && showStrip) {
+    const membershipCfg = parseMembershipConfig(input.programConfig)
+    if (membershipCfg?.showHolderPhoto) {
+      try {
+        const { default: sharp } = await import("sharp")
+        const { APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
+
+        // Fetch holder photo
+        const photoRes = await fetch(input.holderPhotoUrl, { signal: AbortSignal.timeout(5000) })
+        if (photoRes.ok) {
+          const photoBuffer = Buffer.from(await photoRes.arrayBuffer())
+          const avatarSize = 120 // circular avatar diameter in pixels (@3x)
+
+          // Create circular mask
+          const circleMask = Buffer.from(
+            `<svg width="${avatarSize}" height="${avatarSize}"><circle cx="${avatarSize / 2}" cy="${avatarSize / 2}" r="${avatarSize / 2}" fill="white"/></svg>`
+          )
+          const circularAvatar = await sharp(photoBuffer)
+            .resize(avatarSize, avatarSize, { fit: "cover", position: "centre" })
+            .composite([{ input: circleMask, blend: "dest-in" }])
+            .png()
+            .toBuffer()
+
+          // Add subtle border ring
+          const borderSize = avatarSize + 6
+          const borderRing = Buffer.from(
+            `<svg width="${borderSize}" height="${borderSize}"><circle cx="${borderSize / 2}" cy="${borderSize / 2}" r="${borderSize / 2}" fill="rgba(255,255,255,0.25)"/></svg>`
+          )
+          const avatarWithBorder = await sharp(borderRing)
+            .composite([{
+              input: circularAvatar,
+              left: 3,
+              top: 3,
+            }])
+            .png()
+            .toBuffer()
+
+          // Calculate horizontal position
+          const position = membershipCfg.holderPhotoPosition ?? "right"
+          const left = position === "left" ? 72
+            : position === "right" ? APPLE_STRIP_WIDTH - borderSize - 72
+            : Math.round((APPLE_STRIP_WIDTH - borderSize) / 2)
+          const top = Math.round((APPLE_STRIP_HEIGHT - borderSize) / 2)
+
+          // Get the current strip buffer (either generated or fetched)
+          let baseStrip: Buffer | null = icons["strip.png"] ?? stampGridStripBuffer ?? null
+          if (!baseStrip && stripImageUrl) {
+            // Strip was set via URL but not yet as buffer — fetch it
+            const stripRes = await fetch(stripImageUrl, { signal: AbortSignal.timeout(5000) })
+            if (stripRes.ok) baseStrip = Buffer.from(await stripRes.arrayBuffer())
+          }
+          if (!baseStrip) {
+            // No strip image — create solid color background
+            const bgColor = stripPrimary
+            baseStrip = await sharp({ create: { width: APPLE_STRIP_WIDTH, height: APPLE_STRIP_HEIGHT, channels: 4, background: bgColor } }).png().toBuffer()
+          }
+
+          // Composite avatar onto strip
+          const composited = await sharp(baseStrip)
+            .resize(APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, { fit: "cover" })
+            .composite([{ input: avatarWithBorder, left, top }])
+            .png()
+            .toBuffer()
+
+          icons["strip.png"] = composited
+          icons["strip@2x.png"] = composited
+          icons["strip@3x.png"] = composited
+        }
+      } catch {
+        // Skip holder photo compositing on failure — pass still works without it
+      }
     }
   }
   const colors = getPassColors(
@@ -255,9 +328,7 @@ export async function generateApplePass(
   // Apple Wallet pass type mapping
   switch (input.programType) {
     case "TICKET": pass.type = "eventTicket"; break
-    case "MEMBERSHIP": pass.type = "generic"; break
-    case "BUSINESS_CARD": pass.type = "generic"; break
-    default: pass.type = "storeCard"; break // STAMP_CARD, COUPON, POINTS, GIFT_CARD
+    default: pass.type = "storeCard"; break // STAMP_CARD, COUPON, POINTS, GIFT_CARD, MEMBERSHIP, BUSINESS_CARD
   }
 
   // Apple Watch notes:

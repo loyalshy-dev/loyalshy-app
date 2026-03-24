@@ -19,6 +19,10 @@ type IconBuffers = Record<string, Buffer>
  * If a strip image URL is provided, it is fetched and included as
  * strip.png / strip@2x.png / strip@3x.png for storeCard type passes.
  *
+ * If a background image URL is provided (eventTicket passes), it is fetched
+ * and included as background.png / background@2x.png / background@3x.png.
+ * Apple automatically applies a blur effect to background images on iOS.
+ *
  * Thumbnail: Portrait — 90x90 (@1x), 180x180 (@2x), 270x270 (@3x)
  * Used by generic pass type (MEMBERSHIP) instead of strip.
  * If thumbnailUrl is provided, it is fetched and included as thumbnail.png.
@@ -28,6 +32,7 @@ export async function getIconBuffers(
   stripImageUrl?: string | null,
   logoZoom?: number,
   thumbnailUrl?: string | null,
+  backgroundImageUrl?: string | null,
 ): Promise<IconBuffers> {
   const zoom = Math.max(0.5, Math.min(3, logoZoom ?? 1))
   let rawLogoBuffer = PLACEHOLDER_PNG
@@ -122,7 +127,7 @@ export async function getIconBuffers(
     }
   }
 
-  // Add thumbnail image if provided (used by generic pass type: MEMBERSHIP)
+  // Add thumbnail image if provided
   // Apple Wallet generic passes display thumbnail on the right side of the pass front.
   if (thumbnailUrl) {
     try {
@@ -149,6 +154,24 @@ export async function getIconBuffers(
       }
     } catch {
       // Skip thumbnail if fetch fails
+    }
+  }
+
+  // Add background image if provided (used by eventTicket pass type: TICKET)
+  // Apple Wallet applies a Gaussian blur to background images automatically on iOS.
+  if (backgroundImageUrl) {
+    try {
+      const response = await fetch(backgroundImageUrl, {
+        signal: AbortSignal.timeout(10000),
+      })
+      if (response.ok) {
+        const bgBuffer = Buffer.from(await response.arrayBuffer())
+        buffers["background.png"] = bgBuffer
+        buffers["background@2x.png"] = bgBuffer
+        buffers["background@3x.png"] = bgBuffer
+      }
+    } catch {
+      // Skip background image if fetch fails
     }
   }
 
