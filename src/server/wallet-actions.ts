@@ -135,6 +135,7 @@ export async function issueAppleWalletPass(
       hasUnrevealedPrize,
       passInstanceId: passInstance.id,
       organizationSlug: organization.slug,
+      templateId: passInstance.passTemplate.id,
     })
 
     // Update pass instance with wallet pass fields

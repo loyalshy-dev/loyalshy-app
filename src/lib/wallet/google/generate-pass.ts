@@ -496,7 +496,9 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     secondaryLoyaltyPoints,
     barcode: {
       type: "QR_CODE",
-      value: input.walletPassId,
+      value: input.passType === "BUSINESS_CARD" && input.organizationSlug
+        ? `${process.env.BETTER_AUTH_URL ?? "https://www.loyalshy.com"}/join/${input.organizationSlug}${input.templateId ? `?program=${input.templateId}` : ""}`
+        : input.walletPassId,
     },
     textModulesData,
     // Group passes from the same organization together

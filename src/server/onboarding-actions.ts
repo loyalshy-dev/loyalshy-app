@@ -774,6 +774,7 @@ async function issuePassForInstance(
         holderPhotoUrl: instance.holderPhotoUrl ?? undefined,
         passInstanceId: instance.passInstanceId,
         organizationSlug: organization.slug,
+        templateId: template.id,
       })
 
       // Store wallet fields on PassInstance

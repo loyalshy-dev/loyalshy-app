@@ -57,6 +57,8 @@ export type PassGenerationInput = {
   // Pass instance + org slug for generating card page links (prize reveal)
   passInstanceId?: string
   organizationSlug?: string
+  // Template ID for join URL (used in BUSINESS_CARD QR)
+  templateId?: string
   // Whether there is an unrevealed prize to reveal
   hasUnrevealedPrize?: boolean
 }
@@ -263,10 +265,16 @@ export async function generateApplePass(
   // - Back fields are accessible via the (i) button on Watch.
   // - Keep important info in text fields (primary/secondary/auxiliary), not just the strip.
 
-  // ── Barcode: QR code encoding the walletPassId (auth token) ──
+  // ── Barcode: QR code ──
+  // BUSINESS_CARD: encode the join URL so recipients can scan → open → add to their own wallet
+  // Other types: encode the walletPassId (auth token) for staff scanning
+  const baseUrl = process.env.BETTER_AUTH_URL ?? "https://www.loyalshy.com"
+  const qrMessage = input.programType === "BUSINESS_CARD" && input.organizationSlug
+    ? `${baseUrl}/join/${input.organizationSlug}${input.templateId ? `?program=${input.templateId}` : ""}`
+    : input.authenticationToken
   pass.setBarcodes({
     format: "PKBarcodeFormatQR",
-    message: input.authenticationToken,
+    message: qrMessage,
     messageEncoding: "iso-8859-1",
   })
 
