@@ -390,6 +390,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     phone: { id: "phone", header: lbl("phone", "PHONE"), body: businessCardConfig?.phone ?? "" },
     email: { id: "email", header: lbl("email", "EMAIL"), body: businessCardConfig?.email ?? "" },
     website: { id: "website", header: lbl("website", "WEBSITE"), body: businessCardConfig?.website ?? "" },
+    address: { id: "address", header: lbl("address", "ADDRESS"), body: design?.mapAddress ?? "" },
     linkedin: { id: "linkedin", header: lbl("linkedin", "LINKEDIN"), body: businessCardConfig?.linkedinUrl ?? "" },
     twitter: { id: "twitter", header: lbl("twitter", "X"), body: businessCardConfig?.twitterUrl || design?.socialLinks?.x || "" },
     instagram: { id: "instagram", header: lbl("instagram", "INSTAGRAM"), body: businessCardConfig?.instagramUrl || design?.socialLinks?.instagram || "" },

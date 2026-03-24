@@ -31,6 +31,7 @@ type CanvasPanelProps = {
   businessHours?: string
   socialLinks?: SocialLinks
   customMessage?: string
+  mapAddress?: string
   // Holder photo (membership)
   holderPhotoUrl?: string | null
   // Store for interactive color overlay
@@ -57,6 +58,7 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
   businessHours,
   socialLinks,
   customMessage,
+  mapAddress,
   holderPhotoUrl,
   store,
 }, ref) {
@@ -243,6 +245,7 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
                 contactPhone={businessCardConfig?.phone}
                 contactEmail={businessCardConfig?.email}
                 contactWebsite={businessCardConfig?.website}
+                contactAddress={mapAddress || undefined}
                 contactLinkedin={businessCardConfig?.linkedinUrl || undefined}
                 contactTwitter={businessCardConfig?.twitterUrl || socialLinks?.x || undefined}
                 contactInstagram={businessCardConfig?.instagramUrl || socialLinks?.instagram || undefined}

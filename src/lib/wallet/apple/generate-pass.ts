@@ -359,6 +359,7 @@ export async function generateApplePass(
     phone: { key: "phone", label: lbl("phone", "PHONE"), value: businessCardConfig?.phone ?? "" },
     email: { key: "email", label: lbl("email", "EMAIL"), value: businessCardConfig?.email ?? "" },
     website: { key: "website", label: lbl("website", "WEBSITE"), value: businessCardConfig?.website ?? "" },
+    address: { key: "address", label: lbl("address", "ADDRESS"), value: design?.mapAddress ?? "" },
     linkedin: { key: "linkedin", label: lbl("linkedin", "LINKEDIN"), value: businessCardConfig?.linkedinUrl ?? "" },
     twitter: { key: "twitter", label: lbl("twitter", "X"), value: businessCardConfig?.twitterUrl || design?.socialLinks.x || "" },
     instagram: { key: "instagram", label: lbl("instagram", "INSTAGRAM"), value: businessCardConfig?.instagramUrl || design?.socialLinks.instagram || "" },
@@ -608,7 +609,8 @@ export async function generateApplePass(
     })
   }
 
-  if (design?.mapAddress) {
+  // Address on back — skip for BUSINESS_CARD (available as front card field)
+  if (design?.mapAddress && input.programType !== "BUSINESS_CARD") {
     pass.backFields.push({
       key: "mapAddress",
       label: "Address",

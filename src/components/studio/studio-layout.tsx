@@ -677,6 +677,7 @@ export function StudioLayout({
               businessHours={wallet.businessHours || undefined}
               socialLinks={wallet.socialLinks}
               customMessage={wallet.customMessage || undefined}
+              mapAddress={wallet.mapAddress || undefined}
               holderPhotoUrl={wallet.holderPhotoUrl}
               store={store}
             />

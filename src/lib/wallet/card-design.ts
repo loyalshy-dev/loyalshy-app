@@ -190,6 +190,7 @@ const FIELD_CONFIG_MAP: Record<string, FieldConfigEntry> = {
       { id: "phone", label: "Phone" },
       { id: "email", label: "Email" },
       { id: "website", label: "Website" },
+      { id: "address", label: "Address" },
       { id: "linkedin", label: "LinkedIn" },
       { id: "twitter", label: "X (Twitter)" },
       { id: "instagram", label: "Instagram" },

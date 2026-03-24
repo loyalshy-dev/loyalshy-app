@@ -98,6 +98,7 @@ type WalletPassRendererProps = {
   contactPhone?: string      // phone number
   contactEmail?: string      // email address
   contactWebsite?: string    // website URL
+  contactAddress?: string    // business address
   contactLinkedin?: string   // LinkedIn URL
   contactTwitter?: string    // X/Twitter URL
   contactInstagram?: string  // Instagram URL
@@ -165,6 +166,7 @@ export function WalletPassRenderer({
   contactPhone,
   contactEmail,
   contactWebsite,
+  contactAddress,
   contactLinkedin,
   contactTwitter,
   contactInstagram,
@@ -309,6 +311,9 @@ export function WalletPassRenderer({
         break
       case "website":
         resolved = { label: lbl("WEBSITE"), value: contactWebsite ?? "—" }
+        break
+      case "address":
+        resolved = { label: lbl("ADDRESS"), value: contactAddress ?? "—" }
         break
       case "linkedin":
         resolved = { label: lbl("LINKEDIN"), value: contactLinkedin ?? "—" }

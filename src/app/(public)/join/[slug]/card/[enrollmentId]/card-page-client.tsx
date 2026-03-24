@@ -96,6 +96,8 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
 
   // Business card-specific props
   const businessCardConfig = data.template.passType === "BUSINESS_CARD" ? parseBusinessCardConfig(data.template.config) : null
+  const editorCfg = (data.template.passDesign?.editorConfig as Record<string, unknown>) ?? {}
+  const mapAddress = (editorCfg.ma as string) ?? undefined
 
   // Holder photo — per-instance, supported by MEMBERSHIP
   const holderPhotoUrl = data.holderPhotoUrl ?? undefined
@@ -237,6 +239,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
             contactPhone={businessCardConfig?.phone}
             contactEmail={businessCardConfig?.email}
             contactWebsite={businessCardConfig?.website}
+            contactAddress={mapAddress}
             contactLinkedin={businessCardConfig?.linkedinUrl}
             contactTwitter={businessCardConfig?.twitterUrl}
             contactInstagram={businessCardConfig?.instagramUrl}
