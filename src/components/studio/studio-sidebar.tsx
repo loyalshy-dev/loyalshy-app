@@ -219,7 +219,7 @@ export function StudioSidebar({
       </Section>
 
       <Section title="Back of Pass" isOpen={openSections.has("details")} onToggle={() => toggle("details")}>
-        <DetailsPanel store={store} />
+        <DetailsPanel store={store} passType={passType} />
       </Section>
     </div>
   )

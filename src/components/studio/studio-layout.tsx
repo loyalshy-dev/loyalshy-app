@@ -572,7 +572,7 @@ export function StudioLayout({
       case "notifications":
         return <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
       case "details":
-        return <DetailsPanel store={store} />
+        return <DetailsPanel store={store} passType={passType} />
       case "prize":
         return <PrizeRevealPanel store={store} />
       case "avatar":

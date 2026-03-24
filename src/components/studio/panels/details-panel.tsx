@@ -59,9 +59,9 @@ function TextInput({
   )
 }
 
-type Props = { store: CardDesignStoreApi }
+type Props = { store: CardDesignStoreApi; passType?: string }
 
-export function DetailsPanel({ store }: Props) {
+export function DetailsPanel({ store, passType }: Props) {
   const t = useTranslations("studio.details")
   const businessHours = useStore(store, (s) => s.wallet.businessHours)
   const socialLinks = useStore(store, (s) => s.wallet.socialLinks)
@@ -96,35 +96,40 @@ export function DetailsPanel({ store }: Props) {
         }}
       />
 
-      <SectionHeader>{t("socialLinks")}</SectionHeader>
-      <TextInput
-        label={t("instagram")}
-        value={socialLinks.instagram ?? ""}
-        onChange={(v) => store.getState().patchSocialLinks({ instagram: v || undefined })}
-        placeholder={t("handlePlaceholder")}
-        maxLength={200}
-      />
-      <TextInput
-        label={t("facebook")}
-        value={socialLinks.facebook ?? ""}
-        onChange={(v) => store.getState().patchSocialLinks({ facebook: v || undefined })}
-        placeholder={t("facebookPlaceholder")}
-        maxLength={200}
-      />
-      <TextInput
-        label={t("tiktok")}
-        value={socialLinks.tiktok ?? ""}
-        onChange={(v) => store.getState().patchSocialLinks({ tiktok: v || undefined })}
-        placeholder={t("handlePlaceholder")}
-        maxLength={200}
-      />
-      <TextInput
-        label={t("twitter")}
-        value={socialLinks.x ?? ""}
-        onChange={(v) => store.getState().patchSocialLinks({ x: v || undefined })}
-        placeholder={t("handlePlaceholder")}
-        maxLength={200}
-      />
+      {/* Social links — hidden for BUSINESS_CARD (managed in Program panel instead) */}
+      {passType !== "BUSINESS_CARD" && (
+        <>
+          <SectionHeader>{t("socialLinks")}</SectionHeader>
+          <TextInput
+            label={t("instagram")}
+            value={socialLinks.instagram ?? ""}
+            onChange={(v) => store.getState().patchSocialLinks({ instagram: v || undefined })}
+            placeholder={t("handlePlaceholder")}
+            maxLength={200}
+          />
+          <TextInput
+            label={t("facebook")}
+            value={socialLinks.facebook ?? ""}
+            onChange={(v) => store.getState().patchSocialLinks({ facebook: v || undefined })}
+            placeholder={t("facebookPlaceholder")}
+            maxLength={200}
+          />
+          <TextInput
+            label={t("tiktok")}
+            value={socialLinks.tiktok ?? ""}
+            onChange={(v) => store.getState().patchSocialLinks({ tiktok: v || undefined })}
+            placeholder={t("handlePlaceholder")}
+            maxLength={200}
+          />
+          <TextInput
+            label={t("twitter")}
+            value={socialLinks.x ?? ""}
+            onChange={(v) => store.getState().patchSocialLinks({ x: v || undefined })}
+            placeholder={t("handlePlaceholder")}
+            maxLength={200}
+          />
+        </>
+      )}
 
       <SectionHeader>{t("customMessage")}</SectionHeader>
       <textarea

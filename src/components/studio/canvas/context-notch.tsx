@@ -736,7 +736,7 @@ export function ContextPanel({ store, passType, organizationId, organizationName
           <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
         )}
         {mode === "tool" && activeTool === "details" && (
-          <DetailsPanel store={store} />
+          <DetailsPanel store={store} passType={passType} />
         )}
 
         {/* ── Zone panels (from card clicks) ── */}
