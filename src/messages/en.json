@@ -33,11 +33,11 @@
     "switchLanguage": "Switch language"
   },
   "hero": {
-    "badge": "The modern loyalty platform",
-    "title1": "Digital loyalty cards",
+    "badge": "The digital wallet platform",
+    "title1": "Digital wallet passes",
     "title2": "your customers",
     "titleHighlight": "actually use",
-    "subtitle": "Replace paper punch cards with Apple & Google Wallet passes. Set up in 5 minutes. No app required for your customers.",
+    "subtitle": "From loyalty cards to event tickets and business cards — create beautiful Apple & Google Wallet passes in minutes. No app required.",
     "seeHowItWorks": "See How It Works",
     "freeForever": "Free forever",
     "noCreditCard": "No credit card required",
@@ -156,7 +156,7 @@
   },
   "passTypesCarousel": {
     "sectionLabel": "Pass Types",
-    "title": "One platform, six pass types",
+    "title": "One platform, seven pass types",
     "subtitle": "From stamp cards to event tickets — create the exact digital wallet pass your business needs.",
     "prev": "Previous pass type",
     "next": "Next pass type",
@@ -225,6 +225,17 @@
           "Conferences",
           "Festivals",
           "Sports events"
+        ]
+      },
+      "businessCard": {
+        "label": "Business Card",
+        "description": "Digital business cards that live in your contacts' wallets. Share your name, title, phone, email, and website — one scan and they have your details forever.",
+        "alt": "Digital business card pass with contact details",
+        "useCases": [
+          "Freelancers",
+          "Sales teams",
+          "Networking events",
+          "Consultants"
         ]
       }
     }
@@ -705,6 +716,12 @@
       "giftCards": "Gift Cards",
       "tickets": "Tickets",
       "businessCards": "Business Cards",
+      "stampSubtitle": "{stamps} stamps | {count} active",
+      "couponSubtitle": "{discount} | {count} claimed",
+      "membershipSubtitle": "{tier} | {count} members",
+      "pointsSubtitle": "{points} pts/visit | {count} active",
+      "pointsDefault": "Points | {count} active",
+      "defaultSubtitle": "{count} passes",
       "noPrograms": "No programs yet",
       "createFirst": "Create your first loyalty program to start rewarding your customers.",
       "createToStart": "Create a new program to get started.",
@@ -932,7 +949,13 @@
       "embedSnippet": "Website Embed",
       "embedDescription": "Add this HTML snippet to your website to let visitors save your business card directly.",
       "embedButtonText": "Save Business Card",
-      "copySnippet": "Copy snippet"
+      "copySnippet": "Copy snippet",
+      "nfcTitle": "NFC Tag",
+      "nfcDescription": "Program an NFC tag with this URL so people can tap to join. Works with any NFC sticker, card, or phone case.",
+      "nfcCopyUrl": "Copy URL",
+      "nfcStep1": "Get an NFC tag (sticker, card, or desk stand)",
+      "nfcStep2": "Use an NFC writer app to program this URL into the tag",
+      "nfcStep3": "People tap the tag with their phone to add the pass"
     },
     "programSettings": {
       "title": "Settings",

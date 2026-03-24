@@ -33,11 +33,11 @@
     "switchLanguage": "Changer de langue"
   },
   "hero": {
-    "badge": "La plateforme de fidélité moderne",
-    "title1": "Cartes de fidélité digitales",
-    "title2": "tes clients",
+    "badge": "La plateforme de passes numériques",
+    "title1": "Des passes numériques",
+    "title2": "que tes clients",
     "titleHighlight": "utilisent vraiment",
-    "subtitle": "Remplace les cartes tampons papier par des passes Apple & Google Wallet. Mise en place en 5 minutes. Aucune app requise pour tes clients.",
+    "subtitle": "Des cartes de fidélité aux billets d'événements et cartes de visite — crée de superbes passes Apple & Google Wallet en minutes. Aucune app requise.",
     "seeHowItWorks": "Voir comment ça marche",
     "freeForever": "Gratuit pour toujours",
     "noCreditCard": "Aucune carte bancaire requise",
@@ -225,6 +225,17 @@
           "Conférences",
           "Festivals",
           "Événements sportifs"
+        ]
+      },
+      "businessCard": {
+        "label": "Carte de Visite",
+        "description": "Cartes de visite numériques qui vivent dans le portefeuille de vos contacts. Partagez votre nom, titre, téléphone, email et site web — un scan et ils ont vos coordonnées pour toujours.",
+        "alt": "Pass carte de visite numérique avec coordonnées",
+        "useCases": [
+          "Freelances",
+          "Équipes commerciales",
+          "Événements de networking",
+          "Consultants"
         ]
       }
     }
@@ -688,6 +699,12 @@
       "giftCards": "Cartes Cadeaux",
       "tickets": "Billets",
       "businessCards": "Cartes de Visite",
+      "stampSubtitle": "{stamps} tampons | {count} actifs",
+      "couponSubtitle": "{discount} | {count} utilisés",
+      "membershipSubtitle": "{tier} | {count} membres",
+      "pointsSubtitle": "{points} pts/visite | {count} actifs",
+      "pointsDefault": "Points | {count} actifs",
+      "defaultSubtitle": "{count} passes",
       "noPrograms": "Aucun programme",
       "createFirst": "Créez votre premier programme de fidélité pour commencer à récompenser vos clients.",
       "createToStart": "Créez un nouveau programme pour commencer.",
@@ -915,7 +932,13 @@
       "embedSnippet": "Intégrer sur le Web",
       "embedDescription": "Ajoutez ce code HTML à votre site pour permettre aux visiteurs d'enregistrer votre carte de visite.",
       "embedButtonText": "Enregistrer la Carte de Visite",
-      "copySnippet": "Copier le code"
+      "copySnippet": "Copier le code",
+      "nfcTitle": "Tag NFC",
+      "nfcDescription": "Programmez un tag NFC avec cette URL pour que les gens puissent s'inscrire en touchant. Fonctionne avec tout autocollant, carte ou coque NFC.",
+      "nfcCopyUrl": "Copier l'URL",
+      "nfcStep1": "Procurez-vous un tag NFC (autocollant, carte ou support de bureau)",
+      "nfcStep2": "Utilisez une app d'écriture NFC pour programmer cette URL dans le tag",
+      "nfcStep3": "Les gens touchent le tag avec leur téléphone pour ajouter le pass"
     },
     "programSettings": {
       "title": "Paramètres",

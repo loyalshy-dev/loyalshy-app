@@ -9,6 +9,7 @@ import { ShareLinkSection } from "@/components/dashboard/programs/distribution-s
 import { DistributionStats } from "@/components/dashboard/programs/distribution-stats"
 import { JoinModeToggle } from "@/components/dashboard/programs/join-mode-toggle"
 import { EmbedSnippetSection } from "@/components/dashboard/programs/embed-snippet-section"
+import { NfcSection } from "@/components/dashboard/programs/nfc-section"
 
 export default async function ProgramDistributionPage(props: {
   params: Promise<{ id: string }>
@@ -138,6 +139,9 @@ export default async function ProgramDistributionPage(props: {
             templateId={program.id}
             templateName={program.name}
           />
+          {isOpen && (
+            <NfcSection joinUrl={joinUrl} />
+          )}
           {program.passType === "BUSINESS_CARD" && isOpen && (
             <EmbedSnippetSection
               joinUrl={joinUrl}

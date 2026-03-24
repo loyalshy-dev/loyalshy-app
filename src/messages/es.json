@@ -33,11 +33,11 @@
     "switchLanguage": "Cambiar idioma"
   },
   "hero": {
-    "badge": "La plataforma de fidelización moderna",
-    "title1": "Tarjetas de fidelización digitales",
+    "badge": "La plataforma de pases digitales",
+    "title1": "Pases digitales",
     "title2": "que tus clientes",
     "titleHighlight": "realmente usan",
-    "subtitle": "Sustituye las tarjetas de sellos de papel por pases de Apple y Google Wallet. Configúralo en 5 minutos. Sin app para tus clientes.",
+    "subtitle": "Desde tarjetas de fidelización hasta entradas y tarjetas de visita — crea pases para Apple y Google Wallet en minutos. Sin app necesaria.",
     "seeHowItWorks": "Cómo Funciona",
     "freeForever": "Gratis para siempre",
     "noCreditCard": "Sin tarjeta de crédito",
@@ -225,6 +225,17 @@
           "Conferencias",
           "Festivales",
           "Eventos deportivos"
+        ]
+      },
+      "businessCard": {
+        "label": "Tarjeta de Visita",
+        "description": "Tarjetas de visita digitales que viven en el wallet de tus contactos. Comparte tu nombre, cargo, teléfono, email y web — un escaneo y tienen tus datos para siempre.",
+        "alt": "Pase de tarjeta de visita digital con datos de contacto",
+        "useCases": [
+          "Freelancers",
+          "Equipos de ventas",
+          "Eventos de networking",
+          "Consultores"
         ]
       }
     }
@@ -705,6 +716,12 @@
       "giftCards": "Tarjetas Regalo",
       "tickets": "Entradas",
       "businessCards": "Tarjetas de Visita",
+      "stampSubtitle": "{stamps} sellos | {count} activos",
+      "couponSubtitle": "{discount} | {count} canjeados",
+      "membershipSubtitle": "{tier} | {count} miembros",
+      "pointsSubtitle": "{points} pts/visita | {count} activos",
+      "pointsDefault": "Puntos | {count} activos",
+      "defaultSubtitle": "{count} pases",
       "noPrograms": "Sin programas todavía",
       "createFirst": "Crea tu primer programa de fidelización para empezar a recompensar a tus clientes.",
       "createToStart": "Crea un nuevo programa para empezar.",
@@ -931,7 +948,13 @@
       "embedSnippet": "Insertar en Web",
       "embedDescription": "Añade este código HTML a tu web para que los visitantes guarden tu tarjeta de visita.",
       "embedButtonText": "Guardar Tarjeta de Visita",
-      "copySnippet": "Copiar código"
+      "copySnippet": "Copiar código",
+      "nfcTitle": "Etiqueta NFC",
+      "nfcDescription": "Programa una etiqueta NFC con esta URL para que la gente pueda unirse tocando. Funciona con cualquier pegatina, tarjeta o funda NFC.",
+      "nfcCopyUrl": "Copiar URL",
+      "nfcStep1": "Consigue una etiqueta NFC (pegatina, tarjeta o soporte de mesa)",
+      "nfcStep2": "Usa una app de escritura NFC para programar esta URL en la etiqueta",
+      "nfcStep3": "La gente toca la etiqueta con su móvil para añadir el pase"
     },
     "programSettings": {
       "title": "Ajustes",
