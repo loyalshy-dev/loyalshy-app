@@ -658,7 +658,8 @@ export function ProgramPanel({ store, passType }: Props) {
       {passType === "TICKET" && <TicketFields store={store} />}
       {passType === "BUSINESS_CARD" && <BusinessCardFields store={store} />}
 
-      <ScheduleFields store={store} />
+      {/* Schedule — not applicable for business cards (permanent, not time-bound) */}
+      {passType !== "BUSINESS_CARD" && <ScheduleFields store={store} />}
 
       <SectionHeader>{t("termsSection")}</SectionHeader>
       <TextArea
