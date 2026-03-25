@@ -6,7 +6,7 @@ import { getTemplatesList } from "@/server/template-actions"
 import { TemplatesGridView } from "@/components/dashboard/templates-grid"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getAllowedPassTypes, ALL_PASS_TYPES, type PlanId } from "@/lib/plans"
-import { COMING_SOON_PASS_TYPES } from "@/lib/feature-flags"
+import { getDisabledPassTypes } from "@/lib/feature-flags"
 
 export default async function ProgramsPage() {
   await connection()
@@ -52,7 +52,7 @@ async function ProgramsSection() {
     ? ALL_PASS_TYPES
     : getAllowedPassTypes(organization.plan as PlanId)
   // Admins bypass feature flags too
-  const comingSoonPassTypes = isAdmin ? [] : COMING_SOON_PASS_TYPES
+  const comingSoonPassTypes = isAdmin ? [] : await getDisabledPassTypes()
 
   return (
     <TemplatesGridView

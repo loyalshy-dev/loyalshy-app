@@ -1813,7 +1813,8 @@
       "overview": "Resumen",
       "users": "Usuarios",
       "organizations": "Organizaciones",
-      "auditLog": "Registro de auditoría"
+      "auditLog": "Registro de auditoría",
+      "featureFlags": "Feature Flags"
     },
     "overview": {
       "title": "Resumen de la plataforma",
@@ -1935,6 +1936,15 @@
       "actionBulkBan": "Baneo masivo",
       "actionBulkStatusChange": "Cambio de estado masivo",
       "actionBulkExport": "Exportación masiva"
+    },
+    "featureFlags": {
+      "title": "Feature Flags",
+      "description": "Controla qué tipos de pase están disponibles para los usuarios. Los tipos deshabilitados muestran una etiqueta \"Próximamente\".",
+      "save": "Guardar cambios",
+      "saved": "Feature flags actualizados.",
+      "comingSoon": "Próximamente",
+      "toggle": "activar/desactivar disponibilidad",
+      "hint": "Los roles de administrador siempre evitan los feature flags y pueden crear cualquier tipo de pase independientemente de esta configuración."
     },
     "roles": {
       "user": "Usuario",

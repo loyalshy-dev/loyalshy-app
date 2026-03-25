@@ -1814,7 +1814,8 @@
       "overview": "Overview",
       "users": "Users",
       "organizations": "Organizations",
-      "auditLog": "Audit Log"
+      "auditLog": "Audit Log",
+      "featureFlags": "Feature Flags"
     },
     "overview": {
       "title": "Platform Overview",
@@ -1936,6 +1937,15 @@
       "actionBulkBan": "Bulk Ban",
       "actionBulkStatusChange": "Bulk Status Change",
       "actionBulkExport": "Bulk Export"
+    },
+    "featureFlags": {
+      "title": "Feature Flags",
+      "description": "Control which pass types are available to users. Disabled types show a \"Coming Soon\" badge.",
+      "save": "Save Changes",
+      "saved": "Feature flags updated.",
+      "comingSoon": "Coming Soon",
+      "toggle": "availability toggle",
+      "hint": "Admin roles always bypass feature flags and can create any pass type regardless of these settings."
     },
     "roles": {
       "user": "User",

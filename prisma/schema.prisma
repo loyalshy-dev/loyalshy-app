@@ -725,3 +725,13 @@ model AdminAuditLog {
   @@index([createdAt])
   @@map("admin_audit_log")
 }
+
+// ─── Platform Config (single-row) ──────────────────────────────
+
+model PlatformConfig {
+  id                   String   @id @default("singleton")
+  disabledPassTypes    String[] @default([])
+  updatedAt            DateTime @updatedAt
+
+  @@map("platform_config")
+}

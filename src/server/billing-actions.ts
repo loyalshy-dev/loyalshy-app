@@ -272,7 +272,7 @@ export async function checkPassTypeAllowed(organizationId: string, passType: str
 
   // Check feature flag — coming soon types are blocked for regular users
   const { isComingSoon } = await import("@/lib/feature-flags")
-  if (isComingSoon(passType as import("@/lib/plans").PassType)) return false
+  if (await isComingSoon(passType as import("@/lib/plans").PassType)) return false
 
   const organization = await db.organization.findUnique({
     where: { id: organizationId },

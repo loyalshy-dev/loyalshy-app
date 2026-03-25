@@ -1797,7 +1797,8 @@
       "overview": "Aperçu",
       "users": "Utilisateurs",
       "organizations": "Organisations",
-      "auditLog": "Journal d'audit"
+      "auditLog": "Journal d'audit",
+      "featureFlags": "Feature Flags"
     },
     "overview": {
       "title": "Aperçu de la plateforme",
@@ -1919,6 +1920,15 @@
       "actionBulkBan": "Bannissement en masse",
       "actionBulkStatusChange": "Changement de statut en masse",
       "actionBulkExport": "Export en masse"
+    },
+    "featureFlags": {
+      "title": "Feature Flags",
+      "description": "Contrôlez quels types de pass sont disponibles pour les utilisateurs. Les types désactivés affichent un badge \"Bientôt disponible\".",
+      "save": "Enregistrer",
+      "saved": "Feature flags mis à jour.",
+      "comingSoon": "Bientôt disponible",
+      "toggle": "activer/désactiver la disponibilité",
+      "hint": "Les rôles d'administrateur contournent toujours les feature flags et peuvent créer n'importe quel type de pass indépendamment de ces paramètres."
     },
     "roles": {
       "user": "Utilisateur",
