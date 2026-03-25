@@ -6,6 +6,7 @@ import { getTemplatesList } from "@/server/template-actions"
 import { TemplatesGridView } from "@/components/dashboard/templates-grid"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getAllowedPassTypes, ALL_PASS_TYPES, type PlanId } from "@/lib/plans"
+import { COMING_SOON_PASS_TYPES } from "@/lib/feature-flags"
 
 export default async function ProgramsPage() {
   await connection()
@@ -45,10 +46,13 @@ async function ProgramsSection() {
   ])
 
   const isOwner = member?.role === "owner"
+  const isAdmin = isAdminRole(currentUser?.user.role ?? "")
   // Admin-tier roles bypass plan pass type restrictions
-  const allowedPassTypes = isAdminRole(currentUser?.user.role ?? "")
+  const allowedPassTypes = isAdmin
     ? ALL_PASS_TYPES
     : getAllowedPassTypes(organization.plan as PlanId)
+  // Admins bypass feature flags too
+  const comingSoonPassTypes = isAdmin ? [] : COMING_SOON_PASS_TYPES
 
   return (
     <TemplatesGridView
@@ -58,6 +62,7 @@ async function ProgramsSection() {
       organizationLogo={organization.logoApple ?? organization.logo ?? null}
       isOwner={isOwner}
       allowedPassTypes={allowedPassTypes}
+      comingSoonPassTypes={comingSoonPassTypes}
     />
   )
 }

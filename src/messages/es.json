@@ -1273,6 +1273,7 @@
     },
     "createProgram": {
       "chooseType": "Elige un tipo de programa para empezar.",
+      "comingSoon": "Próximamente",
       "upgrade": "Pro",
       "backToTypeSelection": "Volver a selección de tipo",
       "programName": "Nombre del Programa",

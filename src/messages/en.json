@@ -1274,6 +1274,7 @@
     },
     "createProgram": {
       "chooseType": "Choose a program type to get started.",
+      "comingSoon": "Coming Soon",
       "upgrade": "Pro",
       "backToTypeSelection": "Back to type selection",
       "programName": "Program Name",

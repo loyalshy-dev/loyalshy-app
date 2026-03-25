@@ -83,6 +83,7 @@ type TemplatesGridViewProps = {
   organizationLogo: string | null
   isOwner: boolean
   allowedPassTypes?: PlanPassType[]
+  comingSoonPassTypes?: PlanPassType[]
 }
 
 export function TemplatesGridView({
@@ -92,6 +93,7 @@ export function TemplatesGridView({
   organizationLogo,
   isOwner,
   allowedPassTypes,
+  comingSoonPassTypes,
 }: TemplatesGridViewProps) {
   const t = useTranslations("dashboard.programs")
   const router = useRouter()
@@ -165,6 +167,7 @@ export function TemplatesGridView({
               <CreateProgramForm
                 organizationId={organizationId}
                 allowedPassTypes={allowedPassTypes}
+                comingSoonPassTypes={comingSoonPassTypes}
                 onCreated={() => {
                   setShowCreate(false)
                   router.refresh()

@@ -266,9 +266,13 @@ export async function checkTemplateLimit(organizationId: string): Promise<{
 }
 
 export async function checkPassTypeAllowed(organizationId: string, passType: string): Promise<boolean> {
-  // Super admins bypass plan restrictions
+  // Super admins bypass plan restrictions AND feature flags
   const currentUser = await getCurrentUser()
   if (isAdminRole(currentUser?.user.role ?? "")) return true
+
+  // Check feature flag — coming soon types are blocked for regular users
+  const { isComingSoon } = await import("@/lib/feature-flags")
+  if (isComingSoon(passType as import("@/lib/plans").PassType)) return false
 
   const organization = await db.organization.findUnique({
     where: { id: organizationId },

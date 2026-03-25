@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import Image from "next/image"
-import { ArrowLeft, Loader2, Lock, Plus, Trash2 } from "lucide-react"
+import { ArrowLeft, Clock, Loader2, Lock, Plus, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -21,9 +21,11 @@ import type { PassType as PlanPassType } from "@/lib/plans"
 function TypeSelector({
   onSelect,
   allowedPassTypes,
+  comingSoonPassTypes,
 }: {
   onSelect: (type: PassType) => void
   allowedPassTypes?: PlanPassType[]
+  comingSoonPassTypes?: PlanPassType[]
 }) {
   const t = useTranslations("dashboard.createProgram")
   const types: PassType[] = [
@@ -37,15 +39,17 @@ function TypeSelector({
         {types.map((type) => {
           const meta = PASS_TYPE_META[type]
           const Icon = meta.icon
-          const isLocked = allowedPassTypes && !allowedPassTypes.includes(type as PlanPassType)
+          const isComingSoon = comingSoonPassTypes?.includes(type as PlanPassType)
+          const isLocked = !isComingSoon && allowedPassTypes && !allowedPassTypes.includes(type as PlanPassType)
+          const isDisabled = isLocked || isComingSoon
           return (
             <button
               key={type}
               type="button"
-              onClick={() => !isLocked && onSelect(type)}
-              disabled={isLocked}
+              onClick={() => !isDisabled && onSelect(type)}
+              disabled={isDisabled}
               className={`group relative flex flex-col rounded-xl border border-border bg-card text-left transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring overflow-hidden ${
-                isLocked
+                isDisabled
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:border-foreground/20 hover:shadow-lg hover:-translate-y-0.5"
               }`}
@@ -65,6 +69,14 @@ function TypeSelector({
                     <Icon className="size-10 text-muted-foreground/40" strokeWidth={1.5} />
                   </div>
                 )}
+                {isComingSoon && (
+                  <div className="absolute top-2 right-2">
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1 text-muted-foreground bg-background/80 backdrop-blur-sm border-brand/30">
+                      <Clock className="h-2.5 w-2.5" />
+                      {t("comingSoon")}
+                    </Badge>
+                  </div>
+                )}
                 {isLocked && (
                   <div className="absolute top-2 right-2">
                     <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1 text-muted-foreground bg-background/80 backdrop-blur-sm">
@@ -78,7 +90,7 @@ function TypeSelector({
               {/* Text area */}
               <div className="flex flex-col gap-1 p-3">
                 <div className="flex items-center gap-2">
-                  <Icon className={`h-3.5 w-3.5 shrink-0 ${isLocked ? "text-muted-foreground" : "text-brand"}`} />
+                  <Icon className={`h-3.5 w-3.5 shrink-0 ${isDisabled ? "text-muted-foreground" : "text-brand"}`} />
                   <p className="text-[13px] font-semibold truncate">{meta.label}</p>
                 </div>
                 <p className="text-[11px] leading-snug text-muted-foreground line-clamp-2">
@@ -1244,15 +1256,17 @@ export function CreateProgramForm({
   organizationId,
   onCreated,
   allowedPassTypes,
+  comingSoonPassTypes,
 }: {
   organizationId: string
   onCreated: () => void
   allowedPassTypes?: PlanPassType[]
+  comingSoonPassTypes?: PlanPassType[]
 }) {
   const [selectedType, setSelectedType] = useState<PassType | null>(null)
 
   if (!selectedType) {
-    return <TypeSelector onSelect={setSelectedType} allowedPassTypes={allowedPassTypes} />
+    return <TypeSelector onSelect={setSelectedType} allowedPassTypes={allowedPassTypes} comingSoonPassTypes={comingSoonPassTypes} />
   }
 
   const formProps = {
