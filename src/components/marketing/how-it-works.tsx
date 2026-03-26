@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Building2, QrCode, Smartphone } from "lucide-react"
+import { Palette, Send, ScanLine } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { Stagger, StaggerItem } from "./motion"
 
@@ -19,27 +19,27 @@ export async function HowItWorks() {
   const steps = [
     {
       number: "01",
-      icon: Building2,
-      title: t("steps.setup.title"),
-      description: t("steps.setup.description"),
+      icon: Palette,
+      title: t("steps.design.title"),
+      description: t("steps.design.description"),
       image: "/platform/studio.webp",
-      alt: t("steps.setup.alt"),
+      alt: t("steps.design.alt"),
     },
     {
       number: "02",
-      icon: QrCode,
-      title: t("steps.qr.title"),
-      description: t("steps.qr.description"),
+      icon: Send,
+      title: t("steps.issue.title"),
+      description: t("steps.issue.description"),
       image: "/platform/distribution.webp",
-      alt: t("steps.qr.alt"),
+      alt: t("steps.issue.alt"),
     },
     {
       number: "03",
-      icon: Smartphone,
-      title: t("steps.earn.title"),
-      description: t("steps.earn.description"),
+      icon: ScanLine,
+      title: t("steps.scan.title"),
+      description: t("steps.scan.description"),
       image: "/platform/passes.webp",
-      alt: t("steps.earn.alt"),
+      alt: t("steps.scan.alt"),
     },
   ]
 
@@ -69,7 +69,7 @@ export async function HowItWorks() {
                   <div className="relative z-10 flex flex-col gap-4">
                     {/* Screenshot first on mobile for visual hook */}
                     <div
-                      className={`rounded-xl overflow-hidden transition-transform duration-500 group-hover:-translate-y-2 md:order-last ${i === 0 ? "md:rotate-2" : i === 1 ? "md:-rotate-2" : ""}`}
+                      className="rounded-xl overflow-hidden transition-transform duration-500 group-hover:-translate-y-2 md:order-last"
                       style={{
                         border: "1px solid var(--mk-border)",
                         boxShadow: "0 8px 32px oklch(0 0 0 / 0.08)",

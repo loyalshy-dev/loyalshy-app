@@ -100,20 +100,20 @@
     "title": "Three steps to launch",
     "subtitle": "Go from zero to live loyalty program in under 5 minutes",
     "steps": {
-      "setup": {
-        "title": "Set up your business",
-        "description": "Create your account, customize your brand and loyalty program in minutes.",
-        "alt": "Card design studio — customize your loyalty card"
+      "design": {
+        "title": "Design your pass",
+        "description": "Choose from 7 pass types and customize every detail — colors, logos, fields, and rewards — in our visual studio.",
+        "alt": "Card design studio — customize your wallet pass"
       },
-      "qr": {
-        "title": "Print your QR code",
-        "description": "Download your unique QR code and place it at your counter or on tables.",
-        "alt": "Distribution page with printable QR code and shareable link"
+      "issue": {
+        "title": "Issue passes to contacts",
+        "description": "Distribute passes via QR code scan, shareable link, direct issue, bulk CSV import, or REST API.",
+        "alt": "Distribution page with QR code, manual issue, and API options"
       },
-      "earn": {
-        "title": "Customers scan & earn",
-        "description": "Customers scan, get a digital wallet pass, and start earning rewards instantly.",
-        "alt": "Pass management showing issued loyalty passes"
+      "scan": {
+        "title": "Scan to update passes",
+        "description": "Scan a pass to stamp, check in, redeem, or add points — updates sync instantly to Apple and Google Wallet.",
+        "alt": "Scanning a wallet pass to record an interaction"
       }
     }
   },

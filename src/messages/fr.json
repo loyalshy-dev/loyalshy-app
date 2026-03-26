@@ -100,20 +100,20 @@
     "title": "Trois étapes pour te lancer",
     "subtitle": "Passe de zéro à un programme de fidélité opérationnel en moins de 5 minutes",
     "steps": {
-      "setup": {
-        "title": "Configure ton entreprise",
-        "description": "Crée ton compte, personnalise ta marque et ton programme de fidélité en quelques minutes.",
-        "alt": "Studio de design de cartes — personnalise ta carte de fidélité"
+      "design": {
+        "title": "Conçois ton pass",
+        "description": "Choisis parmi 7 types de pass et personnalise chaque détail — couleurs, logos, champs et récompenses — dans notre studio visuel.",
+        "alt": "Studio de design de cartes — personnalise ton pass digital"
       },
-      "qr": {
-        "title": "Imprime ton QR code",
-        "description": "Télécharge ton QR code unique et place-le à ton comptoir ou sur les tables.",
-        "alt": "Page de distribution avec QR code imprimable et lien partageable"
+      "issue": {
+        "title": "Émets des passes aux contacts",
+        "description": "Distribue des passes par QR code, lien partageable, émission directe, import CSV en masse ou API REST.",
+        "alt": "Page de distribution avec QR code, émission manuelle et options API"
       },
-      "earn": {
-        "title": "Les clients scannent et gagnent",
-        "description": "Les clients scannent, reçoivent un pass digital et commencent à cumuler des récompenses instantanément.",
-        "alt": "Gestion des passes montrant les passes de fidélité émis"
+      "scan": {
+        "title": "Scanne pour mettre à jour les passes",
+        "description": "Scanne un pass pour tamponner, enregistrer une visite, échanger ou ajouter des points — synchronisation instantanée avec Apple et Google Wallet.",
+        "alt": "Scan d'un pass digital pour enregistrer une interaction"
       }
     }
   },

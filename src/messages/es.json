@@ -100,20 +100,20 @@
     "title": "Tres pasos para empezar",
     "subtitle": "De cero a programa de fidelización activo en menos de 5 minutos",
     "steps": {
-      "setup": {
-        "title": "Configura tu negocio",
-        "description": "Crea tu cuenta, personaliza tu marca y programa de fidelización en minutos.",
-        "alt": "Estudio de diseño de tarjetas — personaliza tu tarjeta"
+      "design": {
+        "title": "Diseña tu pase",
+        "description": "Elige entre 7 tipos de pase y personaliza cada detalle — colores, logos, campos y recompensas — en nuestro estudio visual.",
+        "alt": "Estudio de diseño de tarjetas — personaliza tu pase digital"
       },
-      "qr": {
-        "title": "Imprime tu código QR",
-        "description": "Descarga tu código QR único y colócalo en tu mostrador o mesas.",
-        "alt": "Página de distribución con código QR imprimible y enlace compartible"
+      "issue": {
+        "title": "Emite pases a contactos",
+        "description": "Distribuye pases mediante código QR, enlace compartible, emisión directa, importación CSV masiva o API REST.",
+        "alt": "Página de distribución con código QR, emisión manual y opciones de API"
       },
-      "earn": {
-        "title": "Los clientes escanean y ganan",
-        "description": "Los clientes escanean, reciben un pase digital y empiezan a ganar recompensas al instante.",
-        "alt": "Gestión de pases mostrando pases de fidelización emitidos"
+      "scan": {
+        "title": "Escanea para actualizar pases",
+        "description": "Escanea un pase para sellar, registrar visita, canjear o sumar puntos — se sincroniza al instante con Apple y Google Wallet.",
+        "alt": "Escaneando un pase digital para registrar una interacción"
       }
     }
   },
