@@ -55,7 +55,7 @@ function TypeSelector({
               }`}
             >
               {/* Image / Icon area */}
-              <div className="relative w-full aspect-[4/3] bg-muted/40 overflow-hidden">
+              <div className="relative w-full aspect-4/3 bg-muted/40 overflow-hidden">
                 {meta.image ? (
                   <Image
                     src={meta.image}
