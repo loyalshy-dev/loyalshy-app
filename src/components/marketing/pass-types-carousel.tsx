@@ -24,7 +24,7 @@ const PASS_TYPES = [
   { id: "points", icon: Coins, image: null },
   { id: "giftCard", icon: Gift, image: null },
   { id: "ticket", icon: CalendarDays, image: "/pass-types/ticket-google.webp" },
-  { id: "businessCard", icon: ContactRound, image: null },
+  { id: "businessCard", icon: ContactRound, image: "/pass-types/business-apple.webp" },
 ] as const
 
 export function PassTypesCarousel() {

@@ -23,6 +23,7 @@ const CARD_IMAGES = [
   { src: "/pass-types/stamp-apple.webp", alt: "Stamp card — Apple Wallet" },
   { src: "/pass-types/coupon-apple.webp", alt: "Coupon — Apple Wallet" },
   { src: "/pass-types/ticket-apple.webp", alt: "Ticket — Apple Wallet" },
+  { src: "/pass-types/business-apple.webp", alt: "Business Card — Apple Wallet" },
 ] as const
 
 /* ─── Status bar icons ─────────────────────────────────────────────── */

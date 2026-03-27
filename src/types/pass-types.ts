@@ -196,6 +196,6 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     description: "Digital business card for Apple & Google Wallet",
     defaultCardType: "GENERIC",
     category: "identity",
-    image: null,
+    image: "/pass-types/business-apple.webp",
   },
 }
