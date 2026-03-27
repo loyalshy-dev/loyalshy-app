@@ -233,7 +233,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase P1 — Schema & Core Data Layer (new Prisma schema with PassTemplate/PassInstance/Contact/Interaction/Organization, type definitions, DAL rewrite)
 - [x] Phase P2 — Server Actions for loyalty types (stamp, coupon, membership, points actions)
 - [x] Phase P3 — Server Actions for new types (gift card, ticket actions)
-- [x] Phase P4 — Wallet Pass Generators (Apple pass: storeCard/eventTicket/generic; Google pass: Loyalty/GiftCard/EventTicket/Generic classes)
+- [x] Phase P4 — Wallet Pass Generators (Apple pass: storeCard/eventTicket; Google pass: Loyalty/GiftCard/EventTicket/Generic classes)
 - [x] Phase P5 — Dashboard UI entity renames (Restaurant→Organization, Customer→Contact, Program→Template, Enrollment→PassInstance throughout all dashboard components, settings, register dialog, wallet renderer, Trigger.dev emails)
 - [x] Phase P6 — Public Pages & Onboarding (marketing copy restaurant→business, restaurantName→businessName type rename)
 - [x] Phase P7 — Studio & Card Renderer (all type panels, field configs, Apple/Google generators, renderer support)
@@ -285,7 +285,7 @@ Update the "Current Progress" section above to track what's done.
 6. Member (userId + organizationId + role)
 7. Invitation (Better Auth's org invite — separate from StaffInvitation)
 
-**Application (14):**
+**Application (15):**
 8. PassTemplate (passType: 7 types, joinMode: OPEN/INVITE_ONLY, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
 9. PassInstance (pivot: Contact × PassTemplate — wallet pass, status, data JSON for type-specific state)
 10. Contact (end user — identity + denormalized totalInteractions + sequential memberNumber per org)
@@ -300,6 +300,7 @@ Update the "Current Progress" section above to track what's done.
 19. WebhookEndpoint (org-scoped, HMAC secret, event subscriptions, auto-disable on failures)
 20. WebhookDelivery (delivery log per endpoint, status code, response body, attempts)
 21. ApiRequestLog (batched request logging — method, path, status, latency, API key)
+22. PlatformConfig (singleton row — platform-level settings: `disabledPassTypes` for feature flags)
 
 ## Quality Checklist (Verify After Each Phase)
 
@@ -366,6 +367,17 @@ Update the "Current Progress" section above to track what's done.
 - `/admin/users` — user management (search, filters: all/banned/admins/super_admins, ban/unban, role change, impersonation, session revoke)
 - `/admin/organizations` — organization management (search, subscription status filters, detail sheet with team/stats/Stripe link)
 - `/admin/audit-log` — immutable audit trail of all admin actions (action/target type filters, search by target)
+- `/admin/feature-flags` — toggle pass types on/off for regular users (ADMIN_OPS+), stored in PlatformConfig DB table
+
+### Feature Flags
+- **Model**: `PlatformConfig` singleton row with `disabledPassTypes: String[]`
+- **Config file**: `src/lib/feature-flags.ts` — `getDisabledPassTypes()` (cached per-request), `isComingSoon()`, fallback defaults
+- **Server enforcement**: `checkPassTypeAllowed()` in `billing-actions.ts` rejects disabled types for non-admins
+- **UI**: Disabled types show "Coming Soon" badge (clock icon) in program creation form, distinct from plan-locked "Upgrade" badge
+- **Admin bypass**: All admin roles (`isAdminRole()`) bypass feature flags — can create any pass type
+- **Admin UI**: `/admin/feature-flags` — toggle switches per pass type, requires ADMIN_OPS, changes audit-logged
+- **i18n**: `admin.featureFlags.*` namespace + `dashboard.createProgram.comingSoon` (3 locales)
+
 ## Design Direction
 
 - **Linear/Vercel aesthetic** — NOT generic shadcn defaults. Premium, refined, professional.

@@ -1,0 +1,1 @@
+- Zoom on strip image card design is not fidel to filan wallet card (only seen on apple wallet)
