@@ -64,7 +64,7 @@ export async function TryDemo() {
           >
             {/* Card preview */}
             <Image
-              src="/pass-types/coupon-apple.webp"
+              src="/pass-types/business-apple.webp"
               alt={t("cardPreviewAlt")}
               width={283}
               height={308}
