@@ -56,11 +56,6 @@ export async function TryDemo() {
         <FadeIn delay={0.15}>
           <div
             className="mx-auto max-w-md flex flex-col items-center gap-8 rounded-2xl p-8 sm:p-10"
-            style={{
-              background: "var(--mk-card)",
-              border: "1px solid var(--mk-border)",
-              boxShadow: "0 4px 24px oklch(0 0 0 / 0.06)",
-            }}
           >
             {/* Card preview */}
             <Image
