@@ -1,0 +1,130 @@
+import crypto from "node:crypto"
+import { NextRequest, NextResponse } from "next/server"
+import { OAuth2Client } from "google-auth-library"
+import { db } from "@/lib/db"
+import { withCorsHeaders, handlePreflight } from "@/lib/api-cors"
+import { publicFormLimiter } from "@/lib/rate-limit"
+
+let _googleClient: OAuth2Client | null = null
+function getGoogleClient() {
+  if (!_googleClient) {
+    _googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+  }
+  return _googleClient
+}
+
+export function OPTIONS() {
+  return handlePreflight()
+}
+
+/**
+ * POST /api/v1/auth/google-mobile
+ * Authenticate with a Google ID token from expo-auth-session.
+ * Body: { idToken: string }
+ * Returns session token + user + organizations.
+ */
+export async function POST(req: NextRequest) {
+  try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
+    const rl = publicFormLimiter.check(ip)
+    if (!rl.success) {
+      return withCorsHeaders(
+        NextResponse.json({ error: "Too many requests" }, { status: 429 })
+      )
+    }
+
+    const body = await req.json().catch(() => null)
+    const idToken = body?.idToken
+    if (!idToken || typeof idToken !== "string") {
+      return withCorsHeaders(
+        NextResponse.json({ error: "idToken is required" }, { status: 400 })
+      )
+    }
+
+    // Verify the Google ID token
+    let payload
+    try {
+      const ticket = await getGoogleClient().verifyIdToken({
+        idToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      })
+      payload = ticket.getPayload()
+    } catch {
+      return withCorsHeaders(
+        NextResponse.json({ error: "Invalid Google ID token" }, { status: 401 })
+      )
+    }
+
+    if (!payload?.email) {
+      return withCorsHeaders(
+        NextResponse.json({ error: "No email in Google token" }, { status: 400 })
+      )
+    }
+
+    // Find user by email
+    const user = await db.user.findUnique({
+      where: { email: payload.email.toLowerCase() },
+      select: { id: true, name: true, email: true, image: true, banned: true },
+    })
+
+    if (!user) {
+      return withCorsHeaders(
+        NextResponse.json(
+          { error: "No account found with this email. Please sign up on the web first." },
+          { status: 404 }
+        )
+      )
+    }
+
+    if (user.banned) {
+      return withCorsHeaders(
+        NextResponse.json({ error: "Account is suspended" }, { status: 403 })
+      )
+    }
+
+    // Get memberships
+    const memberships = await db.member.findMany({
+      where: { userId: user.id },
+      select: {
+        role: true,
+        organization: { select: { id: true, name: true } },
+      },
+    })
+
+    const organizations = memberships.map((m) => ({
+      id: m.organization.id,
+      name: m.organization.name,
+      role: m.role,
+    }))
+
+    // Create session
+    const sessionToken = crypto.randomBytes(32).toString("base64url")
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+
+    // Auto-set activeOrganizationId if exactly one org
+    const activeOrgId = organizations.length === 1 ? organizations[0].id : null
+
+    await db.session.create({
+      data: {
+        token: sessionToken,
+        userId: user.id,
+        expiresAt,
+        activeOrganizationId: activeOrgId,
+        ipAddress: ip,
+        userAgent: req.headers.get("user-agent"),
+      },
+    })
+
+    return withCorsHeaders(
+      NextResponse.json({
+        token: sessionToken,
+        user: { id: user.id, name: user.name, email: user.email, image: user.image },
+        organizations,
+      })
+    )
+  } catch {
+    return withCorsHeaders(
+      NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    )
+  }
+}

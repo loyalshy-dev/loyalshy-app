@@ -19,7 +19,7 @@ export function logApiRequest(
     .create({
       data: {
         organizationId: ctx.organizationId,
-        apiKeyId: ctx.apiKeyId,
+        apiKeyId: ctx.apiKeyId ?? "session",
         requestId: ctx.requestId,
         method: req.method,
         path: req.nextUrl.pathname,

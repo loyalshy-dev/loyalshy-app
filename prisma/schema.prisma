@@ -238,6 +238,7 @@ model User {
   redeemedRewards       Reward[]      @relation("RedeemedBy")
   createdApiKeys        ApiKey[]      @relation("CreatedApiKeys")
   adminAuditLogs        AdminAuditLog[] @relation("AdminAuditLogs")
+  devicePairingTokens   DevicePairingToken[] @relation("DevicePairingTokens")
 
   @@map("user")
 }
@@ -329,7 +330,8 @@ model Organization {
   analyticsSnapshots AnalyticsSnapshot[]
   apiKeys            ApiKey[]
   webhookEndpoints   WebhookEndpoint[]
-  apiRequestLogs     ApiRequestLog[]
+  apiRequestLogs      ApiRequestLog[]
+  devicePairingTokens DevicePairingToken[]
 
   @@map("organization")
 }
@@ -734,4 +736,22 @@ model PlatformConfig {
   updatedAt            DateTime @updatedAt
 
   @@map("platform_config")
+}
+
+// ─── Device Pairing Token (mobile app QR login) ───────────────
+
+model DevicePairingToken {
+  id              String    @id @default(dbgenerated("uuidv7()::text"))
+  organizationId  String
+  createdByUserId String
+  token           String    @unique
+  expiresAt       DateTime
+  claimedAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdByUser  User       @relation("DevicePairingTokens", fields: [createdByUserId], references: [id])
+
+  @@index([organizationId])
+  @@map("device_pairing_token")
 }

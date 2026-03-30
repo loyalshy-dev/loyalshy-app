@@ -8,6 +8,7 @@ type InvitationEmailPayload = {
   organizationName: string
   role: "owner" | "staff"
   inviteUrl: string
+  mobileDeepLink?: string
 }
 
 // ─── Send Invitation Email ──────────────────────────────────
@@ -40,6 +41,7 @@ export const sendInvitationEmailTask = task({
           <a href="${payload.inviteUrl}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;margin:16px 0;">
             Accept Invitation
           </a>
+          ${payload.mobileDeepLink ? `<a href="${payload.mobileDeepLink}" style="display:inline-block;padding:10px 20px;background:#fff;color:#171717;text-decoration:none;border-radius:6px;font-size:13px;font-weight:500;border:1px solid #e5e5e5;">Open in Staff App</a>` : ""}
           <p style="color:#a3a3a3;font-size:13px;margin-top:24px;">This invitation expires in 7 days.</p>
           <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
           <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital Loyalty Cards</p>

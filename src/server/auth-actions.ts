@@ -82,7 +82,9 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
   })
 
   // Dispatch invitation email
-  const inviteUrl = `${process.env.BETTER_AUTH_URL}/invite/${token}`
+  const siteUrl = process.env.BETTER_AUTH_URL || "http://localhost:3000"
+  const inviteUrl = `${siteUrl}/invite/${token}`
+  const mobileDeepLink = `loyalshystaff://invite/${token}?url=${encodeURIComponent(siteUrl)}`
   const organizationName = org?.name ?? "An organization"
 
   await sendInvitationEmail({
@@ -90,6 +92,7 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     organizationName,
     role: parsed.role,
     inviteUrl,
+    mobileDeepLink,
   })
 
   return { success: true, invitationId: invitation.id }
@@ -101,6 +104,7 @@ export async function sendInvitationEmail(payload: {
   organizationName: string
   role: "owner" | "staff"
   inviteUrl: string
+  mobileDeepLink?: string
 }) {
   if (process.env.TRIGGER_SECRET_KEY) {
     const { tasks } = await import("@trigger.dev/sdk")
@@ -125,6 +129,7 @@ export async function sendInvitationEmail(payload: {
           <a href="${payload.inviteUrl}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;margin:16px 0;">
             Accept Invitation
           </a>
+          ${payload.mobileDeepLink ? `<a href="${payload.mobileDeepLink}" style="display:inline-block;padding:10px 20px;background:#fff;color:#171717;text-decoration:none;border-radius:6px;font-size:13px;font-weight:500;border:1px solid #e5e5e5;">Open in Staff App</a>` : ""}
           <p style="color:#a3a3a3;font-size:13px;margin-top:24px;">This invitation expires in 7 days.</p>
           <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
           <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital Wallet Passes</p>

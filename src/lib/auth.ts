@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
-import { organization, admin, emailOTP } from "better-auth/plugins"
+import { organization, admin, emailOTP, bearer } from "better-auth/plugins"
 import { adminAc, userAc } from "better-auth/plugins/admin/access"
 import { nextCookies } from "better-auth/next-js"
 import { Resend } from "resend"
@@ -132,6 +132,7 @@ export const auth = betterAuth({
         })
       },
     }),
+    bearer(),
     nextCookies(),
   ],
 
@@ -140,6 +141,7 @@ export const auth = betterAuth({
     "https://loyalshy.com",
     "https://www.loyalshy.com",
     "http://localhost:3000",
+    "loyalshystaff://",
   ],
 })
 
