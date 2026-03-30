@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { withCorsHeaders, handlePreflight } from "@/lib/api-cors"
 import { auth } from "@/lib/auth"
-import { headers } from "next/headers"
 
 export function OPTIONS() {
   return handlePreflight()
@@ -17,7 +16,7 @@ export function OPTIONS() {
 export async function POST(req: NextRequest) {
   try {
     // Authenticate via cookie session (this is called from the web dashboard)
-    const session = await auth.api.getSession({ headers: await headers() })
+    const session = await auth.api.getSession({ headers: req.headers })
     if (!session?.session?.activeOrganizationId) {
       return withCorsHeaders(
         NextResponse.json({ error: "Not authenticated or no active organization" }, { status: 401 })
