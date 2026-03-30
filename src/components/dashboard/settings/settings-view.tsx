@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { Building2, Users, CreditCard, Key } from "lucide-react"
 import { GeneralSettingsForm } from "./general-settings-form"
 import { TeamManagement } from "./team-management"
+import { ConnectDevice } from "./connect-device"
 import { BillingSettings } from "./billing-settings"
 import { ApiKeysSection } from "./api-keys-section"
 import { WebhookSection } from "./webhook-section"
@@ -135,12 +136,15 @@ export function SettingsView({
         <GeneralSettingsForm organization={organization} />
       )}
       {currentTab === "team" && (
-        <TeamManagement
-          organization={organization}
-          members={members}
-          pendingInvitations={pendingInvitations}
-          currentUserId={currentUserId}
-        />
+        <div className="space-y-6">
+          <TeamManagement
+            organization={organization}
+            members={members}
+            pendingInvitations={pendingInvitations}
+            currentUserId={currentUserId}
+          />
+          <ConnectDevice organizationName={organization.name} />
+        </div>
       )}
       {currentTab === "billing" && (
         billingData ? (
