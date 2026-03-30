@@ -125,6 +125,8 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - Mapped enums with `@map` for clean DB values
 - `db.ts` uses a lazy Proxy so PrismaClient is not constructed at import time
 - **Runtime adapter required**: Prisma v7 datasource URL is build-time only (`prisma.config.ts`). At runtime, `PrismaClient` MUST use `new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) })` — bare `new PrismaClient()` will fail. This applies to both `src/lib/db.ts` and `src/trigger/db.ts`.
+- **Shadow database & uuidv7()**: The `uuidv7()` function is defined in the init migration (`20260323124202_init/migration.sql`). This ensures Prisma's shadow database (used by `prisma migrate dev`) has the function available. Never remove it from the init migration.
+- **Migration workflow**: `prisma migrate dev --name describe-change` locally → commit migration files → Vercel runs `prisma migrate deploy` on build. If `migrate dev` fails due to drift from prior `db push`, create the migration SQL manually and use `prisma migrate resolve --applied <name>` to mark it as applied.
 
 ## Folder Structure
 
@@ -255,6 +257,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase CONTACT — Contact form: `/contact` public page with Zod-validated server action, Resend email (team notification + sender confirmation), Upstash Redis rate limiting (3/hr per IP with in-memory fallback), honeypot spam protection, inquiry type routing (general/sales/partnership/support), URL param pre-selection (`?type=sales` from Enterprise pricing CTA), i18n `contact` namespace (~38 keys × 3 locales), navbar/footer/pricing/closing CTA links updated, email header injection protection
 - [x] Phase 6.1 — Production deployment (Vercel, public domain)
 - [x] Phase BUSINESS_CARD — 7th pass type: digital business card (BUSINESS_CARD enum, BusinessCardConfig, one-per-org constraint, Apple Generic / Google Loyalty pass, studio panel, create form, vCard .vcf download, website embed snippet, i18n 3 locales)
+- [x] Phase STAFF-APP — Mobile staff app auth infrastructure: Better Auth `bearer()` plugin, dual auth in `apiHandler()` (API key via `lsk_live_` prefix OR session token), `DevicePairingToken` model, 6 new REST endpoints (`/api/v1/auth/me`, `/select-org`, `/invite` GET+POST, `/device-pair/create`, `/device-pair/claim`, `/google-mobile`), invitation email deep link (`loyalshystaff://invite/{token}?url=`), "Connect Device" QR dialog in Settings > Team (`connect-device.tsx`)
 
 ## Conversation Strategy
 
