@@ -2025,5 +2025,36 @@
         "description": "Aide avec votre compte, intégration API, problèmes de pass ou questions de facturation."
       }
     }
+  },
+  "staffApp": {
+    "sectionLabel": "App staff",
+    "title": "Donnez les moyens à votre équipe sur le terrain",
+    "subtitle": "Offrez à votre personnel une application mobile dédiée pour scanner les pass, ajouter des tampons, utiliser des coupons et gérer les actions de fidélité — tout depuis leur téléphone.",
+    "screenshots": {
+      "scanner": "Écran de scan QR",
+      "action": "Action de pass — ajouter des points",
+      "dashboard": "Accueil avec contacts et activité récente",
+      "login": "Écran de connexion"
+    },
+    "features": {
+      "scan": {
+        "title": "Scan QR instantané",
+        "description": "Pointez et scannez le pass d'un client en moins d'une seconde."
+      },
+      "activity": {
+        "title": "Activité en temps réel",
+        "description": "Consultez les interactions récentes de tous vos programmes en temps réel."
+      },
+      "pairing": {
+        "title": "Configuration par QR",
+        "description": "Scannez un code QR depuis le tableau de bord pour vous connecter en quelques secondes — sans mot de passe."
+      },
+      "secure": {
+        "title": "Accès par rôle",
+        "description": "Le personnel ne voit que ce dont il a besoin. Les propriétaires gardent le contrôle total depuis le tableau de bord."
+      }
+    },
+    "downloadAppStore": "Télécharger sur l'App Store",
+    "downloadPlayStore": "Disponible sur Google Play"
   }
 }

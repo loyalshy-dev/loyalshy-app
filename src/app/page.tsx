@@ -14,6 +14,7 @@ import { Pricing } from "@/components/marketing/pricing"
 import { FAQ } from "@/components/marketing/faq"
 import { ClosingCTA } from "@/components/marketing/closing-cta"
 import { TryDemo } from "@/components/marketing/try-demo"
+import { StaffApp } from "@/components/marketing/staff-app"
 import { SocialProof } from "@/components/marketing/social-proof"
 import { MarketingFooter } from "@/components/marketing/footer"
 
@@ -99,7 +100,7 @@ function JsonLd() {
 const MARKETING_NAMESPACES = [
   "common", "nav", "hero", "socialProof", "featureShowcase", "howItWorks",
   "features", "apiSection", "passTypesCarousel", "walletPreview", "testimonials", "pricing",
-  "faq", "tryDemo", "closingCta", "footer",
+  "faq", "tryDemo", "staffApp", "closingCta", "footer",
 ] as const
 
 export default async function LandingPage() {
@@ -124,6 +125,7 @@ export default async function LandingPage() {
           <Features />
           <ApiSection />
           <PassTypesCarousel />
+          <StaffApp />
           {/* <Testimonials /> */}
           <Pricing />
           <FAQ />

@@ -2042,5 +2042,36 @@
         "description": "Help with your account, API integration, wallet pass issues, or billing questions."
       }
     }
+  },
+  "staffApp": {
+    "sectionLabel": "Staff App",
+    "title": "Empower your team on the floor",
+    "subtitle": "Give your staff a dedicated mobile app to scan passes, add stamps, redeem coupons, and manage loyalty actions — all from their phone.",
+    "screenshots": {
+      "scanner": "QR code scanner screen",
+      "action": "Pass action — add points",
+      "dashboard": "Staff home with contacts and activity",
+      "login": "Staff app login screen"
+    },
+    "features": {
+      "scan": {
+        "title": "Instant QR scanning",
+        "description": "Point and scan any customer's wallet pass in under a second."
+      },
+      "activity": {
+        "title": "Live activity feed",
+        "description": "See recent interactions across all your programs in real time."
+      },
+      "pairing": {
+        "title": "QR pairing setup",
+        "description": "Scan a QR code from the dashboard to connect in seconds — no passwords needed."
+      },
+      "secure": {
+        "title": "Role-based access",
+        "description": "Staff see only what they need. Owners keep full control from the dashboard."
+      }
+    },
+    "downloadAppStore": "Download on the App Store",
+    "downloadPlayStore": "Get it on Google Play"
   }
 }

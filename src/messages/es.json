@@ -2041,5 +2041,36 @@
         "description": "Ayuda con tu cuenta, integración de API, problemas con pases o preguntas de facturación."
       }
     }
+  },
+  "staffApp": {
+    "sectionLabel": "App para staff",
+    "title": "Potencia a tu equipo en el punto de venta",
+    "subtitle": "Ofrece a tu personal una app móvil dedicada para escanear pases, añadir sellos, canjear cupones y gestionar acciones de fidelización — todo desde su teléfono.",
+    "screenshots": {
+      "scanner": "Pantalla de escáner QR",
+      "action": "Acción de pase — añadir puntos",
+      "dashboard": "Inicio con contactos y actividad reciente",
+      "login": "Pantalla de inicio de sesión"
+    },
+    "features": {
+      "scan": {
+        "title": "Escaneo QR instantáneo",
+        "description": "Apunta y escanea el pase de cualquier cliente en menos de un segundo."
+      },
+      "activity": {
+        "title": "Actividad en tiempo real",
+        "description": "Consulta las interacciones recientes de todos tus programas al instante."
+      },
+      "pairing": {
+        "title": "Configuración por QR",
+        "description": "Escanea un código QR desde el panel para conectarte en segundos — sin contraseñas."
+      },
+      "secure": {
+        "title": "Acceso por roles",
+        "description": "El personal solo ve lo necesario. Los propietarios mantienen el control total desde el panel."
+      }
+    },
+    "downloadAppStore": "Descargar en la App Store",
+    "downloadPlayStore": "Disponible en Google Play"
   }
 }

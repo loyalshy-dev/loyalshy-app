@@ -2,6 +2,7 @@ import type React from "react"
 import { Smartphone, Wallet, BarChart3, Users, Palette, QrCode, Zap, Bell } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { Stagger, StaggerItem } from "./motion"
+import { FeaturesCarouselMobile } from "./features-carousel-mobile"
 
 /* ─── Bento card ──────────────────────────────────────────────────── */
 
@@ -125,8 +126,9 @@ export async function Features() {
       style={{ background: "var(--mk-bg)" }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Desktop/tablet: bento grid */}
         <Stagger
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4 md:grid-rows-2"
+          className="hidden sm:grid sm:grid-cols-2 md:grid-cols-4 md:grid-rows-2 gap-6"
           stagger={0.07}
         >
           {features.map((feature) => (
@@ -140,6 +142,15 @@ export async function Features() {
             </StaggerItem>
           ))}
         </Stagger>
+
+        {/* Mobile: horizontal scroll carousel */}
+        <FeaturesCarouselMobile
+          features={features.map((f) => ({
+            title: f.title,
+            description: f.description,
+            iconName: f.icon.displayName ?? f.icon.name,
+          }))}
+        />
       </div>
     </section>
   )
