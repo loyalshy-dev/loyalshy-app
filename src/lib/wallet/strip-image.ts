@@ -415,7 +415,7 @@ function buildStampSlotSvg(opts: {
   rewardFilledStyle?: StampGridConfig["filledStyle"]
 }): string {
   const { x, y, size, slotIndex, currentVisits, isRewardSlot, hasReward, iconSvgPaths, rewardIcon, stampShape, filledStyle, stampIconScale, primaryColor, secondaryColor, textColor, customStampIconDataUri, customRewardIconDataUri, customEmptyIconDataUri, useUniformIcon, stampIcon } = opts
-  const isFilled = slotIndex < currentVisits
+  const isFilled = hasReward || slotIndex < currentVisits
   const cx = x + size / 2
   const cy = y + size / 2
   const padding = size * 0.08
@@ -444,7 +444,6 @@ function buildStampSlotSvg(opts: {
 
   // Reward slot
   if (isRewardSlot) {
-    const isFilled = slotIndex < currentVisits
     const rewardFilled = hasReward || isFilled
     const rBg = opts.rewardSlotBg === "transparent" ? "none" : (opts.rewardSlotBg ?? secondaryColor)
     const rStroke = opts.rewardSlotColor ?? primaryColor
@@ -470,7 +469,7 @@ function buildStampSlotSvg(opts: {
             break
         }
         const checkSize = innerSize * 0.35
-        return `<g>${solidShape}<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${checkSize}" fill="${rStroke}" font-weight="bold">\u2713</text></g>`
+        return `<g>${solidShape}<text x="${cx}" y="${cy}" text-anchor="middle" dy="0.35em" font-size="${checkSize}" font-family="sans-serif" fill="${rStroke}" font-weight="bold">\u2713</text></g>`
       }
 
       // icon or icon-with-border
@@ -546,7 +545,7 @@ function buildStampSlotSvg(opts: {
           break
       }
       const checkSize = innerSize * 0.35
-      fillContent = `${solidShape}<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${checkSize}" fill="${primaryColor}" font-weight="bold">\u2713</text>`
+      fillContent = `${solidShape}<text x="${cx}" y="${cy}" text-anchor="middle" dy="0.35em" font-size="${checkSize}" font-family="sans-serif" fill="${primaryColor}" font-weight="bold">\u2713</text>`
     } else {
       // icon or icon-with-border — render shape bg + icon (custom image or Lucide SVG)
       let shapeBg: string
@@ -607,7 +606,7 @@ function buildStampSlotSvg(opts: {
     const uniformPaths = getStampIconPaths(stampIcon)
     return `<g>${clipPath}${emptyShape}<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${emptyIconStroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="${emptyOpacity}">${uniformPaths}</svg></g>`
   }
-  return `<g>${emptyShape}<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${numSize}" font-family="system-ui, sans-serif" font-weight="500" fill="${emptyNumColor}" opacity="0.5">${slotIndex + 1}</text></g>`
+  return `<g>${emptyShape}<text x="${cx}" y="${cy}" text-anchor="middle" dy="0.35em" font-size="${numSize}" font-family="sans-serif" font-weight="500" fill="${emptyNumColor}" opacity="0.5">${slotIndex + 1}</text></g>`
 }
 
 /** Generate a stamp grid strip/hero image as a PNG buffer */
@@ -812,14 +811,13 @@ export async function generateProgressStripImage(opts: {
   const escapeXml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 
   const textSvg = `
-    <text x="${cx}" y="${cy - valueFontSize * 0.15}" text-anchor="middle" dominant-baseline="central"
-      font-family="system-ui, -apple-system, sans-serif" font-size="${valueFontSize}" font-weight="700"
-      fill="${textColor}" opacity="0.95"
-      style="text-shadow: 0 2px 8px rgba(0,0,0,0.4)">${escapeXml(progressValue)}</text>
-    <text x="${cx}" y="${cy - valueFontSize * 0.7 - labelFontSize * 0.4}" text-anchor="middle" dominant-baseline="central"
-      font-family="system-ui, -apple-system, sans-serif" font-size="${labelFontSize}" font-weight="700"
+    <text x="${cx}" y="${cy - valueFontSize * 0.15}" text-anchor="middle" dy="0.35em"
+      font-family="sans-serif" font-size="${valueFontSize}" font-weight="700"
+      fill="${textColor}" opacity="0.95">${escapeXml(progressValue)}</text>
+    <text x="${cx}" y="${cy - valueFontSize * 0.7 - labelFontSize * 0.4}" text-anchor="middle" dy="0.35em"
+      font-family="sans-serif" font-size="${labelFontSize}" font-weight="700"
       fill="${labelColor}" opacity="0.85"
-      letter-spacing="0.06em" text-transform="uppercase">${escapeXml(progressLabel)}</text>`
+      letter-spacing="0.06em">${escapeXml(progressLabel)}</text>`
 
   const useStripBg = !!stripImageUrl
 
