@@ -124,7 +124,8 @@ async function authenticateWithSession(
     throw new ForbiddenError("You are not a member of this organization.")
   }
 
-  checkOrgAccess(org)
+  // Skip API access plan check for session-based auth (staff app).
+  // The apiAccess gate is for third-party API key consumers, not first-party usage.
 
   return {
     apiKeyId: null,

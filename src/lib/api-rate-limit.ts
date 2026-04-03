@@ -82,10 +82,17 @@ function checkMemoryRateLimit(
 /**
  * Check rate limits for an API request. Throws RateLimitError if exceeded.
  * Uses Upstash Redis in production, in-memory fallback in dev.
+ * Session-based auth (staff app) is exempt — rate limits apply to API key consumers only.
  */
 export async function checkApiRateLimit(
   ctx: ApiContext
 ): Promise<RateLimitResult> {
+  // Session-based auth (staff app) bypasses API rate limits.
+  // These limits protect against third-party API abuse, not first-party usage.
+  if (!ctx.apiKeyId) {
+    return { limit: 0, remaining: 0, reset: 0 }
+  }
+
   const planDef = PLANS[ctx.organization.plan as PlanId]
   if (!planDef?.apiAccess) {
     throw new RateLimitError(0)
