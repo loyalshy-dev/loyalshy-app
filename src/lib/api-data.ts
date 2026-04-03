@@ -724,7 +724,10 @@ export async function queryPassInstanceDetail(
 ) {
   return db.passInstance.findFirst({
     where: {
-      id: passInstanceId,
+      OR: [
+        { id: passInstanceId },
+        { walletPassId: passInstanceId },
+      ],
       passTemplate: { organizationId },
     },
     include: {
