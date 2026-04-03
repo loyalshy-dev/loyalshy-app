@@ -41,12 +41,18 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Verify the Google ID token
+    // Verify the Google ID token — accept web, iOS, and Android client IDs
+    const allowedClientIds = [
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_ID_IOS,
+      process.env.GOOGLE_CLIENT_ID_ANDROID,
+    ].filter(Boolean) as string[]
+
     let payload
     try {
       const ticket = await getGoogleClient().verifyIdToken({
         idToken,
-        audience: process.env.GOOGLE_CLIENT_ID,
+        audience: allowedClientIds,
       })
       payload = ticket.getPayload()
     } catch {
