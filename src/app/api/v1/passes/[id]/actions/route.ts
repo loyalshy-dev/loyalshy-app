@@ -51,6 +51,9 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     throw new NotFoundError(`Pass instance with ID ${passId} was not found.`)
   }
 
+  // Use the real pass instance ID (passId from URL could be a walletPassId)
+  const realPassId = pass.id
+
   // Validate action matches pass type
   const expectedType = ACTION_TO_PASS_TYPE[action.action]
   if (pass.passTemplate.passType !== expectedType) {
@@ -64,51 +67,51 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
 
   switch (action.action) {
     case "stamp":
-      result = await performStamp(ctx.organizationId, passId)
+      result = await performStamp(ctx.organizationId, realPassId)
       break
     case "redeem":
       result = await performCouponRedeem(
         ctx.organizationId,
-        passId,
+        realPassId,
         action.value
       )
       break
     case "check_in":
-      result = await performCheckIn(ctx.organizationId, passId)
+      result = await performCheckIn(ctx.organizationId, realPassId)
       break
     case "earn_points":
       result = await performEarnPoints(
         ctx.organizationId,
-        passId,
+        realPassId,
         action.points
       )
       break
     case "redeem_points":
       result = await performRedeemPoints(
         ctx.organizationId,
-        passId,
+        realPassId,
         action.points
       )
       break
     case "charge":
       result = await performGiftCardCharge(
         ctx.organizationId,
-        passId,
+        realPassId,
         action.amountCents
       )
       break
     case "refund":
       result = await performGiftCardRefund(
         ctx.organizationId,
-        passId,
+        realPassId,
         action.amountCents
       )
       break
     case "scan":
-      result = await performTicketScan(ctx.organizationId, passId)
+      result = await performTicketScan(ctx.organizationId, realPassId)
       break
     case "void":
-      result = await performTicketVoid(ctx.organizationId, passId)
+      result = await performTicketVoid(ctx.organizationId, realPassId)
       break
   }
 
@@ -150,7 +153,7 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     import("@trigger.dev/sdk")
       .then(({ tasks }) =>
         tasks.trigger("update-wallet-pass", {
-          passInstanceId: passId,
+          passInstanceId: realPassId,
           updateType: walletUpdateTypes[action.action] ?? "VISIT",
         })
       )
@@ -158,7 +161,7 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
   }
 
   // Re-fetch and return the updated pass detail (staff app needs full pass state)
-  const updatedPass = await queryPassInstanceDetail(ctx.organizationId, passId)
+  const updatedPass = await queryPassInstanceDetail(ctx.organizationId, realPassId)
   if (!updatedPass) {
     throw new NotFoundError("Pass instance not found after action.")
   }
