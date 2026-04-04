@@ -737,6 +737,18 @@ export async function queryPassInstanceDetail(
       contact: {
         select: { id: true, fullName: true, email: true },
       },
+      rewards: {
+        where: { status: "AVAILABLE" },
+        orderBy: { earnedAt: "desc" },
+        select: {
+          id: true,
+          status: true,
+          description: true,
+          earnedAt: true,
+          expiresAt: true,
+          revealedAt: true,
+        },
+      },
       interactions: {
         orderBy: { createdAt: "desc" },
         take: 20,

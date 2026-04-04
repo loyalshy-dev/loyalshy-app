@@ -302,8 +302,18 @@ export type ApiWalletUrls = {
   googleWalletUrl: string
 }
 
+export type ApiRewardItem = {
+  id: string
+  status: string
+  description: string | null
+  earnedAt: string
+  expiresAt: string
+  revealedAt: string | null
+}
+
 export type ApiPassInstanceDetail = ApiPassInstance & {
   contact: { id: string; fullName: string; email: string | null }
+  rewards: ApiRewardItem[]
   recentInteractions: ApiInteractionSummary[]
   walletUrls?: ApiWalletUrls
   emailSent?: boolean
@@ -318,8 +328,16 @@ export function serializePassInstanceDetail(instance: {
   issuedAt: DateLike
   expiresAt: DateLike
   createdAt: DateLike
-  passTemplate: { id: string; name: string; passType: string }
+  passTemplate: { id: string; name: string; passType: string; config?: unknown }
   contact: { id: string; fullName: string; email: string | null }
+  rewards?: Array<{
+    id: string
+    status: string
+    description: string | null
+    earnedAt: DateLike
+    expiresAt: DateLike
+    revealedAt: DateLike
+  }>
   interactions: Array<{
     id: string
     type: string
@@ -334,6 +352,14 @@ export function serializePassInstanceDetail(instance: {
       fullName: instance.contact.fullName,
       email: instance.contact.email,
     },
+    rewards: (instance.rewards ?? []).map((r) => ({
+      id: r.id,
+      status: r.status,
+      description: r.description,
+      earnedAt: toISO(r.earnedAt)!,
+      expiresAt: toISO(r.expiresAt)!,
+      revealedAt: toISO(r.revealedAt),
+    })),
     recentInteractions: instance.interactions.map((i) => ({
       id: i.id,
       type: i.type,
