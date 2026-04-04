@@ -5,6 +5,52 @@ import type { PatternStyle, ProgressStyle, StampGridConfig } from "./card-design
 import { formatProgressValue } from "./card-design"
 import { getStampIconPaths, getRewardIconPaths } from "./stamp-icons"
 
+// ─── Font-free SVG text rendering ───────────────────────────
+// Sharp/librsvg on serverless (Vercel) often has no fonts installed,
+// so <text> elements render blank. These helpers draw glyphs as pure
+// <path> elements — zero font dependency.
+
+/** SVG path data for digits 0-9, designed for a 0 0 10 14 viewBox */
+const DIGIT_PATHS: Record<string, string> = {
+  "0": "M5 1C2.8 1 1 3.1 1 5.8v2.4C1 10.9 2.8 13 5 13s4-2.1 4-4.8V5.8C9 3.1 7.2 1 5 1zm0 2c1.1 0 2 1.2 2 2.8v2.4C7 9.8 6.1 11 5 11S3 9.8 3 8.2V5.8C3 4.2 3.9 3 5 3z",
+  "1": "M4 1L2 3v1h2v7H2v2h6v-2H6V1z",
+  "2": "M1.5 4.5C1.5 2.6 3 1 5 1s3.5 1.6 3.5 3.5c0 1.2-.5 2.1-1.5 3L3 11h5.5v2h-7v-2l5-5c.6-.6.9-1.2.9-1.8C7.4 3.3 6.4 2.6 5 2.6S2.8 3.5 2.8 4.5z",
+  "3": "M2 1h6l-3 4.5c1.7.2 3 1.6 3 3.5 0 2-1.6 3.5-3.5 3.5C2.8 12.5 1.2 11.2 1 9.5h2c.2.8.8 1.4 1.5 1.4.9 0 1.5-.7 1.5-1.5s-.7-1.5-1.5-1.5H3.2L3 7l2.5-4H2z",
+  "4": "M6 1L1 8.5V10h5v3h2v-3h1.5V8H8V1zm0 3v4H3.2z",
+  "5": "M2 1h6v2H3.5L3 5.5c.5-.3 1.2-.5 2-.5 2 0 3.5 1.3 3.5 3.5S7 12 5 12C3 12 1.5 10.8 1 9h2c.3.7 1 1.2 2 1.2 1.1 0 2-.8 2-1.8s-.8-1.8-2-1.8c-.7 0-1.3.3-1.6.7L1.5 7z",
+  "6": "M5.5 1L2 6.5C1.4 7.2 1 8.1 1 9c0 2.2 1.8 4 4 4s4-1.8 4-4-1.8-4-4-4c-.7 0-1.4.2-2 .5L5.5 1zM5 7c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z",
+  "7": "M1 1h8v1.5L5 13H3l4-9.5H1z",
+  "8": "M5 1C3.1 1 1.5 2.3 1.5 4c0 1 .5 1.9 1.3 2.5C1.7 7.2 1 8.2 1 9.5 1 11.4 2.8 13 5 13s4-1.6 4-3.5c0-1.3-.7-2.3-1.8-3C8 5.9 8.5 5 8.5 4 8.5 2.3 6.9 1 5 1zm0 2c.8 0 1.5.6 1.5 1.3S5.8 5.5 5 5.5 3.5 5 3.5 4.3 4.2 3 5 3zm0 4.5c1 0 2 .7 2 1.7S6 11 5 11s-2-.7-2-1.7.9-1.8 2-1.8z",
+  "9": "M5 1C2.8 1 1 2.8 1 5s1.8 4 4 4c.7 0 1.4-.2 2-.5L4.5 13h2.2L9 7.5C9.6 6.8 10 5.9 10 5c0-2.2-1.8-4-4-4zM5 3c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z",
+}
+
+/** Render a number (1-99) as SVG paths, centered at (cx, cy) with given height */
+function renderNumberSvg(n: number, cx: number, cy: number, height: number, fill: string, opacity: number): string {
+  const str = String(n)
+  const charW = height * (10 / 14) // aspect ratio of the 10x14 viewBox
+  const gap = height * 0.05
+  const totalW = str.length * charW + (str.length - 1) * gap
+  let x = cx - totalW / 2
+
+  const parts: string[] = []
+  for (const ch of str) {
+    const d = DIGIT_PATHS[ch]
+    if (d) {
+      parts.push(`<path d="${d}" transform="translate(${x},${cy - height / 2}) scale(${charW / 10},${height / 14})" fill="${fill}" opacity="${opacity}" />`)
+    }
+    x += charW + gap
+  }
+  return parts.join("")
+}
+
+/** Render a checkmark as SVG path, centered at (cx, cy) with given size */
+function renderCheckmarkSvg(cx: number, cy: number, size: number, fill: string): string {
+  // Simple checkmark polyline rendered as a filled path
+  const half = size / 2
+  const sw = size * 0.15 // stroke width
+  return `<polyline points="${cx - half},${cy} ${cx - half * 0.3},${cy + half * 0.6} ${cx + half},${cy - half * 0.5}" fill="none" stroke="${fill}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" />`
+}
+
 // ─── Dimensions ─────────────────────────────────────────────
 
 export const APPLE_STRIP_WIDTH = 1125
@@ -469,7 +515,7 @@ function buildStampSlotSvg(opts: {
             break
         }
         const checkSize = innerSize * 0.35
-        return `<g>${solidShape}<text x="${cx}" y="${cy}" text-anchor="middle" dy="0.35em" font-size="${checkSize}" font-family="sans-serif" fill="${rStroke}" font-weight="bold">\u2713</text></g>`
+        return `<g>${solidShape}${renderCheckmarkSvg(cx, cy, checkSize, rStroke)}</g>`
       }
 
       // icon or icon-with-border
@@ -545,7 +591,7 @@ function buildStampSlotSvg(opts: {
           break
       }
       const checkSize = innerSize * 0.35
-      fillContent = `${solidShape}<text x="${cx}" y="${cy}" text-anchor="middle" dy="0.35em" font-size="${checkSize}" font-family="sans-serif" fill="${primaryColor}" font-weight="bold">\u2713</text>`
+      fillContent = `${solidShape}${renderCheckmarkSvg(cx, cy, checkSize, primaryColor)}`
     } else {
       // icon or icon-with-border — render shape bg + icon (custom image or Lucide SVG)
       let shapeBg: string
@@ -606,7 +652,7 @@ function buildStampSlotSvg(opts: {
     const uniformPaths = getStampIconPaths(stampIcon)
     return `<g>${clipPath}${emptyShape}<svg x="${x + padding + iconPad}" y="${y + padding + iconPad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${emptyIconStroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="${emptyOpacity}">${uniformPaths}</svg></g>`
   }
-  return `<g>${emptyShape}<text x="${cx}" y="${cy}" text-anchor="middle" dy="0.35em" font-size="${numSize}" font-family="sans-serif" font-weight="500" fill="${emptyNumColor}" opacity="0.5">${slotIndex + 1}</text></g>`
+  return `<g>${emptyShape}${renderNumberSvg(slotIndex + 1, cx, cy, numSize, emptyNumColor, 0.5)}</g>`
 }
 
 /** Generate a stamp grid strip/hero image as a PNG buffer */
@@ -810,6 +856,8 @@ export async function generateProgressStripImage(opts: {
   // Escape XML entities
   const escapeXml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 
+  // Progress overlay uses <text> (handles letters, Unicode symbols, etc.)
+  // The stamp grid numbers use path-based rendering instead (see buildStampSlotSvg)
   const textSvg = `
     <text x="${cx}" y="${cy - valueFontSize * 0.15}" text-anchor="middle" dy="0.35em"
       font-family="sans-serif" font-size="${valueFontSize}" font-weight="700"
