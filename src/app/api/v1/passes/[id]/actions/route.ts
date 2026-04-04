@@ -14,7 +14,8 @@ import {
   performTicketScan,
   performTicketVoid,
 } from "@/lib/api-data"
-import { apiCreated } from "@/lib/api-response"
+import { serializePassInstanceDetail } from "@/lib/api-serializers"
+import { apiSuccess, apiCreated } from "@/lib/api-response"
 import {
   ValidationError,
   NotFoundError,
@@ -115,7 +116,8 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     throw new UnprocessableError(result.error)
   }
 
-  const responseData = {
+  // Webhook event payload (action result shape)
+  const webhookData = {
     action: result.action,
     passInstanceId: result.passInstanceId,
     result: result.result,
@@ -126,9 +128,40 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     },
   }
 
+  // Dispatch webhook event (fire-and-forget)
   import("@/lib/api-events").then(({ dispatchWebhookEvent }) =>
-    dispatchWebhookEvent(ctx.organizationId, "interaction.created", responseData)
+    dispatchWebhookEvent(ctx.organizationId, "interaction.created", webhookData)
   ).catch(() => {})
 
-  return apiCreated(responseData)
+  // Trigger wallet pass update (fire-and-forget)
+  const walletUpdateTypes: Record<string, string> = {
+    stamp: "STAMP",
+    redeem: "VISIT",
+    check_in: "CHECK_IN",
+    earn_points: "POINTS_EARNED",
+    redeem_points: "POINTS_REDEEMED",
+    charge: "GIFT_CHARGE",
+    refund: "GIFT_REFUND",
+    scan: "TICKET_SCAN",
+    void: "TICKET_VOID",
+  }
+
+  if (process.env.TRIGGER_SECRET_KEY) {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) =>
+        tasks.trigger("update-wallet-pass", {
+          passInstanceId: passId,
+          updateType: walletUpdateTypes[action.action] ?? "VISIT",
+        })
+      )
+      .catch(() => {})
+  }
+
+  // Re-fetch and return the updated pass detail (staff app needs full pass state)
+  const updatedPass = await queryPassInstanceDetail(ctx.organizationId, passId)
+  if (!updatedPass) {
+    throw new NotFoundError("Pass instance not found after action.")
+  }
+
+  return apiSuccess(serializePassInstanceDetail(updatedPass))
 })

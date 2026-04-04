@@ -732,7 +732,7 @@ export async function queryPassInstanceDetail(
     },
     include: {
       passTemplate: {
-        select: { id: true, name: true, passType: true },
+        select: { id: true, name: true, passType: true, config: true },
       },
       contact: {
         select: { id: true, fullName: true, email: true },

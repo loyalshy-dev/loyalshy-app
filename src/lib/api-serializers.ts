@@ -255,6 +255,7 @@ export type ApiPassInstance = {
   passType: string
   status: string
   data: unknown
+  templateConfig: unknown
   walletProvider: string
   issuedAt: string
   expiresAt: string | null
@@ -274,6 +275,7 @@ export function serializePassInstance(instance: {
     id: string
     name: string
     passType: string
+    config?: unknown
   }
 }): ApiPassInstance {
   return {
@@ -284,6 +286,7 @@ export function serializePassInstance(instance: {
     passType: instance.passTemplate.passType,
     status: instance.status,
     data: instance.data,
+    templateConfig: instance.passTemplate.config ?? null,
     walletProvider: instance.walletProvider,
     issuedAt: toISO(instance.issuedAt)!,
     expiresAt: toISO(instance.expiresAt),
