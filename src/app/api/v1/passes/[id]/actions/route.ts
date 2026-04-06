@@ -157,6 +157,15 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
           updateType: walletUpdateTypes[action.action] ?? "VISIT",
         })
       )
+      .then(() => console.log(`[wallet-update] Triggered for ${realPassId}`))
+      .catch((err) => console.error(`[wallet-update] Failed to trigger:`, err instanceof Error ? err.message : err))
+  } else if (pass.walletProvider === "GOOGLE") {
+    import("@/lib/wallet/google/update-pass")
+      .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(realPassId))
+      .catch(() => {})
+  } else if (pass.walletProvider === "APPLE") {
+    import("@/lib/wallet/apple/update-pass")
+      .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(realPassId))
       .catch(() => {})
   }
 
