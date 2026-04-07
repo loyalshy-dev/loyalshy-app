@@ -1062,6 +1062,20 @@ export async function performStamp(
   const newTotalVisits = totalVisits + 1
   const wasRewardEarned = newCycleVisits >= visitsRequired
 
+  // Prevent double-stamp within 1 minute (matches webapp behavior)
+  const oneMinuteAgo = new Date(Date.now() - 60_000)
+  const recentStamp = await db.interaction.findFirst({
+    where: {
+      passInstanceId: pi.id,
+      type: "STAMP",
+      createdAt: { gte: oneMinuteAgo },
+    },
+    select: { id: true },
+  })
+  if (recentStamp) {
+    return { error: "This pass was stamped less than a minute ago. Please wait before stamping again." }
+  }
+
   const txResult = await db.$transaction(async (tx) => {
     const interaction = await tx.interaction.create({
       data: {
