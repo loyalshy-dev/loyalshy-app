@@ -131,12 +131,13 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     },
   }
 
-  // Dispatch webhook event (fire-and-forget)
-  import("@/lib/api-events").then(({ dispatchWebhookEvent }) =>
-    dispatchWebhookEvent(ctx.organizationId, "interaction.created", webhookData)
-  ).catch(() => {})
+  // Dispatch webhook event (best-effort, don't block response)
+  try {
+    const { dispatchWebhookEvent } = await import("@/lib/api-events")
+    await dispatchWebhookEvent(ctx.organizationId, "interaction.created", webhookData)
+  } catch { /* webhook dispatch is non-critical */ }
 
-  // Trigger wallet pass update (fire-and-forget)
+  // Trigger wallet pass update
   const walletUpdateTypes: Record<string, string> = {
     stamp: "STAMP",
     redeem: "VISIT",
@@ -149,25 +150,21 @@ export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
     void: "TICKET_VOID",
   }
 
-  if (process.env.TRIGGER_SECRET_KEY) {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) =>
-        tasks.trigger("update-wallet-pass", {
-          passInstanceId: realPassId,
-          updateType: walletUpdateTypes[action.action] ?? "VISIT",
-        })
-      )
-      .then(() => console.log(`[wallet-update] Triggered for ${realPassId}`))
-      .catch((err) => console.error(`[wallet-update] Failed to trigger:`, err instanceof Error ? err.message : err))
-  } else if (pass.walletProvider === "GOOGLE") {
-    import("@/lib/wallet/google/update-pass")
-      .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(realPassId))
-      .catch(() => {})
-  } else if (pass.walletProvider === "APPLE") {
-    import("@/lib/wallet/apple/update-pass")
-      .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(realPassId))
-      .catch(() => {})
-  }
+  try {
+    if (process.env.TRIGGER_SECRET_KEY) {
+      const { tasks } = await import("@trigger.dev/sdk")
+      await tasks.trigger("update-wallet-pass", {
+        passInstanceId: realPassId,
+        updateType: walletUpdateTypes[action.action] ?? "VISIT",
+      })
+    } else if (pass.walletProvider === "GOOGLE") {
+      const { notifyGooglePassUpdate } = await import("@/lib/wallet/google/update-pass")
+      await notifyGooglePassUpdate(realPassId)
+    } else if (pass.walletProvider === "APPLE") {
+      const { notifyApplePassUpdate } = await import("@/lib/wallet/apple/update-pass")
+      await notifyApplePassUpdate(realPassId)
+    }
+  } catch { /* wallet update is non-critical */ }
 
   // Re-fetch and return the updated pass detail (staff app needs full pass state)
   const updatedPass = await queryPassInstanceDetail(ctx.organizationId, realPassId)
