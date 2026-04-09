@@ -95,7 +95,7 @@ export function DashboardShell({
               <Clock className="h-3.5 w-3.5 shrink-0" />
               <span>
                 {t("trialDaysLeft", { count: trialDaysRemaining ?? 0 })}{" "}
-                <Link href="/dashboard/settings?tab=billing" className="underline underline-offset-2 font-medium hover:text-amber-900 dark:hover:text-amber-300">
+                <Link href="/dashboard/settings?tab=billing" prefetch={true} className="underline underline-offset-2 font-medium hover:text-amber-900 dark:hover:text-amber-300">
                   {t("upgradeNow")}
                 </Link>
               </span>
@@ -112,7 +112,7 @@ export function DashboardShell({
               <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
               <span>
                 {t("pastDue")}{" "}
-                <Link href="/dashboard/settings?tab=billing" className="underline underline-offset-2 font-medium hover:text-red-900 dark:hover:text-red-300">
+                <Link href="/dashboard/settings?tab=billing" prefetch={true} className="underline underline-offset-2 font-medium hover:text-red-900 dark:hover:text-red-300">
                   {t("updateBilling")}
                 </Link>
               </span>
@@ -137,7 +137,7 @@ export function DashboardShell({
                 using Loyalshy and access your dashboard.
               </p>
               <Button asChild className="mt-6">
-                <Link href="/dashboard/settings?tab=billing">
+                <Link href="/dashboard/settings?tab=billing" prefetch={true}>
                   Choose a plan
                 </Link>
               </Button>

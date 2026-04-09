@@ -108,6 +108,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={true}
               onMouseEnter={handlePrefetch(item.href)}
               className={cn(
                 "flex items-center gap-3 rounded-md px-2.5 h-8 text-[13px] font-medium transition-colors",

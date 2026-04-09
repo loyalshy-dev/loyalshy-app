@@ -49,7 +49,33 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <div className="flex h-svh">
+          <div className="hidden md:flex w-[240px] flex-col border-r bg-sidebar">
+            <div className="p-4 space-y-4">
+              <div className="h-8 w-32 rounded-md bg-muted animate-pulse" />
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="h-8 rounded-md bg-muted/50 animate-pulse" />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col min-w-0">
+            <div className="h-14 border-b" />
+            <div className="flex-1 p-6">
+              <div className="h-8 w-64 rounded bg-muted animate-pulse mb-6" />
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="h-24 rounded-lg bg-muted/50 animate-pulse" />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    >
       <AdminLayoutInner>{children}</AdminLayoutInner>
     </Suspense>
   )

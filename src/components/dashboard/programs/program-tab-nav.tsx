@@ -1,6 +1,6 @@
 "use client"
 
-import { useTransition } from "react"
+import { useState, useTransition, useCallback } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
@@ -43,7 +43,9 @@ export function ProgramTabNav({
   const tnav = useTranslations("dashboard.nav")
   const pathname = usePathname()
   const router = useRouter()
-  const [isActivating, startTransition] = useTransition()
+  const [isActivating, startActivateTransition] = useTransition()
+  const [isNavigating, startNavTransition] = useTransition()
+  const [pendingHref, setPendingHref] = useState<string | null>(null)
   const basePath = `/dashboard/programs/${templateId}`
 
   function getPassesTabLabel(type: string): string {
@@ -71,7 +73,7 @@ export function ProgramTabNav({
   }
 
   function handleActivate() {
-    startTransition(async () => {
+    startActivateTransition(async () => {
       const result = await activateProgram(organizationId, templateId)
       if ("error" in result) {
         toast.error(String(result.error))
@@ -106,9 +108,23 @@ export function ProgramTabNav({
 
   const visibleTabs = tabs.filter((t) => !t.ownerOnly || isOwner)
 
+  const handleTabClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      e.preventDefault()
+      setPendingHref(href)
+      startNavTransition(() => {
+        router.push(href)
+        setPendingHref(null)
+      })
+    },
+    [router, startNavTransition]
+  )
+
   function isActive(href: string) {
-    if (href === basePath) return pathname === basePath
-    return pathname.startsWith(href)
+    // Show pending tab as active immediately
+    const effectivePath = pendingHref ?? pathname
+    if (href === basePath) return effectivePath === basePath
+    return effectivePath.startsWith(href)
   }
 
   const cfg = statusConfig[templateStatus] ?? statusConfig.DRAFT
@@ -170,6 +186,8 @@ export function ProgramTabNav({
             <Link
               key={tab.href}
               href={tab.href}
+              prefetch={true}
+              onClick={(e) => handleTabClick(e, tab.href)}
               className={cn(
                 "px-4 py-2.5 text-[13px] font-medium border-b-2 transition-colors -mb-px whitespace-nowrap",
                 active

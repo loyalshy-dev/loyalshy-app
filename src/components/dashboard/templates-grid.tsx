@@ -237,6 +237,7 @@ export function TemplatesGridView({
               <Card asChild key={template.id}>
               <Link
                 href={`/dashboard/programs/${template.id}`}
+                prefetch={true}
                 className="group overflow-hidden transition-all hover:bg-muted/30 hover:shadow-md"
               >
                 {/* Card preview */}

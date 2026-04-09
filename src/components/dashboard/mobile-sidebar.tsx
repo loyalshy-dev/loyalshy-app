@@ -102,6 +102,7 @@ export function MobileSidebar({
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
                 onClick={() => onOpenChange(false)}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-2.5 h-9 text-[13px] font-medium transition-colors",

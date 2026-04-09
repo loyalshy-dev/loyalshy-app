@@ -133,6 +133,7 @@ export function OnboardingChecklist({
           <Link
             key={item.id}
             href={item.href}
+            prefetch={true}
             className="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-muted/50 transition-colors group"
           >
             <div

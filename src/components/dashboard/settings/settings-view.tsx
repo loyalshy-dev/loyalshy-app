@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Building2, Users, CreditCard, Key } from "lucide-react"
@@ -75,6 +76,8 @@ export function SettingsView({
   const t = useTranslations("dashboard.settings")
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [, startNavTransition] = useTransition()
+  const [pendingTab, setPendingTab] = useState<Tab | null>(null)
 
   const baseTabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: "general", label: t("general"), icon: Building2 },
@@ -93,6 +96,7 @@ export function SettingsView({
   const currentTab = (tabs.find((tab) => tab.id === resolvedTab)?.id ?? "general") as Tab
 
   function setTab(tab: Tab) {
+    setPendingTab(tab)
     const params = new URLSearchParams(searchParams.toString())
     if (tab === "general") {
       params.delete("tab")
@@ -100,7 +104,10 @@ export function SettingsView({
       params.set("tab", tab)
     }
     const query = params.toString()
-    router.push(`/dashboard/settings${query ? `?${query}` : ""}`)
+    startNavTransition(() => {
+      router.push(`/dashboard/settings${query ? `?${query}` : ""}`)
+      setPendingTab(null)
+    })
   }
 
   return (
@@ -109,7 +116,7 @@ export function SettingsView({
       <div className="flex gap-1 border-b border-border overflow-x-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon
-          const isActive = currentTab === tab.id
+          const isActive = (pendingTab ?? currentTab) === tab.id
           return (
             <button
               key={tab.id}

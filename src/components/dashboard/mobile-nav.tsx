@@ -35,6 +35,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
       <div className="flex items-end justify-around px-2 pt-1 pb-1">
         <Link
           href="/dashboard"
+          prefetch={true}
           className={cn(
             "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-11 rounded-md transition-colors",
             isOverviewActive() ? "text-foreground" : "text-muted-foreground"
@@ -49,6 +50,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
 
         <Link
           href="/dashboard/contacts"
+          prefetch={true}
           className={cn(
             "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-11 rounded-md transition-colors",
             isContactsActive() ? "text-foreground" : "text-muted-foreground"
@@ -78,6 +80,7 @@ export function MobileNav({ onOpenRegisterVisit, onOpenMore }: MobileNavProps) {
 
         <Link
           href="/dashboard/programs"
+          prefetch={true}
           className={cn(
             "flex flex-col items-center justify-center gap-0.5 flex-1 min-h-11 rounded-md transition-colors",
             isProgramsActive() ? "text-foreground" : "text-muted-foreground"

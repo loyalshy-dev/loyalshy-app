@@ -45,6 +45,7 @@ export function ProgramsSummary({ programs }: ProgramsSummaryProps) {
           </p>
           <Link
             href="/dashboard/programs"
+            prefetch={true}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand/80 transition-colors"
           >
             <Plus className="size-3.5" />
@@ -69,6 +70,7 @@ export function ProgramsSummary({ programs }: ProgramsSummaryProps) {
             <Link
               key={program.id}
               href={`/dashboard/programs/${program.id}`}
+              prefetch={true}
               className="flex items-center gap-3 py-2.5 border-b border-border last:border-0 group hover:bg-muted/50 -mx-2 px-2 rounded transition-colors"
             >
               <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand/10">
