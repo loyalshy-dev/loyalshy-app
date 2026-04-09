@@ -133,6 +133,7 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
                   >
                     <Link
                       href={item.href}
+                      prefetch={true}
                       onMouseEnter={handlePrefetch(item.href)}
                     >
                       <item.icon strokeWidth={1.75} />
