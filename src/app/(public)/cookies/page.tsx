@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 export default async function CookiesPage() {
   const t = await getTranslations("cookies")
+  const tCommon = await getTranslations("common")
 
   return (
     <div className="min-h-screen" style={{ background: "var(--mk-bg, #fafafa)" }}>
@@ -40,6 +41,13 @@ export default async function CookiesPage() {
           className="prose prose-sm max-w-none space-y-8 text-[15px] leading-relaxed"
           style={{ color: "var(--mk-text-muted, #444)" }}
         >
+          <section>
+            <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--mk-text, #111)" }}>{tCommon("companyInfo.title")}</h2>
+            <p><strong>{tCommon("companyInfo.name")}</strong></p>
+            <p>{tCommon("companyInfo.vatLabel")}: {tCommon("companyInfo.vat")}</p>
+            <p>{tCommon("companyInfo.address")}</p>
+          </section>
+
           <section>
             <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--mk-text, #111)" }}>{t("section1Title")}</h2>
             <p>{t("section1P1")}</p>

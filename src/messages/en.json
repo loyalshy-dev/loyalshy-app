@@ -20,7 +20,15 @@
     "search": "Search...",
     "noResults": "No results found",
     "perMonth": "€/mo",
-    "backToHome": "← Back to Loyalshy"
+    "backToHome": "← Back to Loyalshy",
+    "companyInfo": {
+      "title": "Company Information",
+      "name": "HEX CONCEPTS STUDIO, S.L.",
+      "vatLabel": "VAT",
+      "vat": "B27646645",
+      "address": "Av. Convent 11, 25123 Torrefarrera (Lleida), Spain",
+      "footerLine": "HEX CONCEPTS STUDIO, S.L. · VAT B27646645 · Av. Convent 11, 25123 Torrefarrera (Lleida), Spain"
+    }
   },
   "nav": {
     "features": "Features",
