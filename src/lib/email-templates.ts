@@ -79,7 +79,8 @@ export function buildPassIssuedEmailHtml(payload: {
         Bookmark the link above to access your pass anytime.
       </p>
       <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
-      <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital Wallet Passes</p>
+      <p style="color:#a3a3a3;font-size:12px;margin:0;">Loyalshy — Digital Wallet Passes</p>
+      <p style="color:#a3a3a3;font-size:11px;margin:4px 0 0 0;">HEX CONCEPTS STUDIO, S.L. · VAT B27646645 · Av. Convent 11, 25123 Torrefarrera (Lleida), Spain</p>
     </div>
   `
 }

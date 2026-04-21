@@ -44,7 +44,8 @@ export const sendInvitationEmailTask = task({
           ${payload.mobileDeepLink ? `<a href="${payload.mobileDeepLink}" style="display:inline-block;padding:10px 20px;background:#fff;color:#171717;text-decoration:none;border-radius:6px;font-size:13px;font-weight:500;border:1px solid #e5e5e5;">Open in Staff App</a>` : ""}
           <p style="color:#a3a3a3;font-size:13px;margin-top:24px;">This invitation expires in 7 days.</p>
           <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
-          <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital Loyalty Cards</p>
+          <p style="color:#a3a3a3;font-size:12px;margin:0;">Loyalshy — Digital Loyalty Cards</p>
+          <p style="color:#a3a3a3;font-size:11px;margin:4px 0 0 0;">HEX CONCEPTS STUDIO, S.L. · VAT B27646645 · Av. Convent 11, 25123 Torrefarrera (Lleida), Spain</p>
         </div>
       `,
     })
