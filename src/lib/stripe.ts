@@ -11,7 +11,7 @@ export type { PlanId, PlanDefinition, PassType as PlanPassType } from "./plans"
 function getStripeClient(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error("STRIPE_SECRET_KEY is not set")
-  return new Stripe(key, { apiVersion: "2026-02-25.clover" as Stripe.LatestApiVersion })
+  return new Stripe(key, { apiVersion: "2026-03-25.dahlia" })
 }
 
 // Lazy singleton — avoid construction at import time (build safety)

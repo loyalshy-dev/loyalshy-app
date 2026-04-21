@@ -13,7 +13,7 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 | Prisma ORM | 7.4 | Rust-free TS client, `prisma.config.ts` |
 | PostgreSQL | 18 | `uuidv7()` for all PKs |
 | Better Auth | 1.4.x | Replaces NextAuth — Prisma adapter, org plugin, emailOTP plugin |
-| Stripe | 20.x (node) / 8.x (stripe-js) | API version 2026-01-28.clover |
+| Stripe | 22.x (node) / 8.x (stripe-js) | API version 2026-03-25.dahlia |
 | Trigger.dev | 4.x (v4 GA) | Warm machine reuse, queues defined in code |
 | Tailwind CSS | 4.2 | CSS-native `@theme`, no tailwind.config.js |
 | shadcn/ui | 3.8.5 | New York style, unified Radix UI |
