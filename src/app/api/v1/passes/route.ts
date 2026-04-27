@@ -1,140 +1,42 @@
-import { type NextRequest } from "next/server"
-import { apiHandler } from "@/lib/api-handler"
-import { handlePreflight } from "@/lib/api-cors"
-import { passListParamsSchema, issuePassBodySchema } from "@/lib/api-schemas"
-import {
-  queryPassInstances,
-  issuePass,
-  queryPassInstanceDetail,
-  findOrCreateContact,
-  buildWalletUrls,
-  sendPassIssuedEmail,
-} from "@/lib/api-data"
-import { serializePassInstance, serializePassInstanceDetail } from "@/lib/api-serializers"
-import { apiPaginated, apiCreated } from "@/lib/api-response"
-import { ValidationError, ConflictError, UnprocessableError } from "@/lib/api-errors"
-import type { ApiContext } from "@/lib/api-auth"
+import { NextRequest } from "next/server"
+import type { Prisma } from "@prisma/client"
+import { db } from "@/lib/db"
+import { sessionHandler, handlePreflight } from "@/lib/api-session"
+import { toApiPassInstance } from "@/lib/api-serializers"
 
-export const OPTIONS = handlePreflight
+export function OPTIONS() {
+  return handlePreflight()
+}
 
-// GET /api/v1/passes — List pass instances
-export const GET = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
-  const params = Object.fromEntries(req.nextUrl.searchParams)
-  const parsed = passListParamsSchema.safeParse(params)
+export async function GET(req: NextRequest) {
+  return sessionHandler(req, async (ctx) => {
+    const url = new URL(req.url)
+    const contactId = url.searchParams.get("contactId") ?? undefined
+    const templateId = url.searchParams.get("templateId") ?? undefined
+    const status = url.searchParams.get("status") ?? undefined
+    const page = Math.max(1, Number(url.searchParams.get("page") ?? 1) || 1)
+    const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 20) || 20))
 
-  if (!parsed.success) {
-    throw new ValidationError(
-      parsed.error.issues.map((i) => ({
-        field: i.path.join("."),
-        message: i.message,
-      }))
-    )
-  }
+    const where: Prisma.PassInstanceWhereInput = {
+      passTemplate: { organizationId: ctx.organizationId },
+      ...(contactId ? { contactId } : {}),
+      ...(templateId ? { passTemplateId: templateId } : {}),
+      ...(status ? { status: status as Prisma.PassInstanceWhereInput["status"] } : {}),
+    }
 
-  const { page, per_page, contact_id, template_id, status, pass_type } = parsed.data
-  const result = await queryPassInstances(ctx.organizationId, {
-    page,
-    perPage: per_page,
-    contactId: contact_id,
-    templateId: template_id,
-    status,
-    passType: pass_type,
+    const [passes, total] = await Promise.all([
+      db.passInstance.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          passTemplate: { select: { id: true, name: true, passType: true, config: true } },
+        },
+      }),
+      db.passInstance.count({ where }),
+    ])
+
+    return { data: passes.map(toApiPassInstance), pagination: { page, pageSize, total } }
   })
-
-  return apiPaginated(result.instances.map(serializePassInstance), {
-    page,
-    perPage: per_page,
-    total: result.total,
-    pageCount: result.pageCount,
-  })
-})
-
-// POST /api/v1/passes — Issue a pass
-export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
-  const body = await req.json()
-  const parsed = issuePassBodySchema.safeParse(body)
-
-  if (!parsed.success) {
-    throw new ValidationError(
-      parsed.error.issues.map((i) => ({
-        field: i.path.join("."),
-        message: i.message,
-      }))
-    )
-  }
-
-  const { templateId, sendEmail } = parsed.data
-  let contactId = parsed.data.contactId
-  let contactCreated = false
-
-  // Check contact limit before potential contact creation
-  if (!contactId && parsed.data.contact) {
-    const { checkContactLimit } = await import("@/server/billing-actions")
-    const limitCheck = await checkContactLimit(ctx.organizationId)
-    if (!limitCheck.allowed) {
-      throw new UnprocessableError(
-        `Contact limit reached (${limitCheck.limit}). Upgrade your plan to add more contacts.`
-      )
-    }
-  }
-
-  // Resolve contact: inline creation or existing contactId
-  if (!contactId && parsed.data.contact) {
-    const contactResult = await findOrCreateContact(
-      ctx.organizationId,
-      parsed.data.contact
-    )
-    contactId = contactResult.contactId
-    contactCreated = contactResult.created
-  }
-
-  const result = await issuePass(ctx.organizationId, templateId, contactId!)
-
-  if (!result.success) {
-    if (result.error.includes("already issued")) {
-      throw new ConflictError(result.error)
-    }
-    throw new UnprocessableError(result.error)
-  }
-
-  // Fetch the created pass instance for response
-  const detail = await queryPassInstanceDetail(ctx.organizationId, result.passInstanceId)
-  if (!detail) throw new Error("Created pass instance not found")
-
-  const serialized = serializePassInstanceDetail(detail)
-
-  // Always build wallet URLs
-  const walletUrls = await buildWalletUrls(result.passInstanceId, ctx.organizationId)
-  serialized.walletUrls = walletUrls
-
-  // Send email if requested (fire-and-forget — don't fail the request)
-  let emailSent = false
-  if (sendEmail && detail.contact.email) {
-    const emailResult = await sendPassIssuedEmail(
-      result.passInstanceId,
-      ctx.organizationId
-    )
-    emailSent = emailResult.emailSent
-
-    // Refresh Apple wallet URL if pass was just generated
-    if (emailSent) {
-      const refreshedUrls = await buildWalletUrls(result.passInstanceId, ctx.organizationId)
-      serialized.walletUrls = refreshedUrls
-    }
-  }
-  serialized.emailSent = emailSent
-
-  // Dispatch webhooks asynchronously
-  import("@/lib/api-events").then(({ dispatchWebhookEvent }) => {
-    if (contactCreated) {
-      dispatchWebhookEvent(ctx.organizationId, "contact.created", {
-        contact: serialized.contact,
-      }).catch(() => {})
-    }
-    dispatchWebhookEvent(ctx.organizationId, "pass.issued", {
-      pass: serialized,
-    }).catch(() => {})
-  }).catch(() => {})
-
-  return apiCreated(serialized)
-})
+}

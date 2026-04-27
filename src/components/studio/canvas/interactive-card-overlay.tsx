@@ -115,14 +115,6 @@ function InteractiveLayer({
       // Clear menu tool when clicking card zones directly
       if (state.ui.activeTool) state.setActiveTool(null)
 
-      // Check if avatar was clicked — open avatar tool
-      const avatarEl = target.closest<HTMLElement>("[data-avatar-zone]")
-      if (avatarEl) {
-        state.setSelectedColorZone(null)
-        state.setActiveTool(state.ui.activeTool === "avatar" ? null : "avatar")
-        return
-      }
-
       // Check if logo was clicked — open logo tool
       const logoEl = target.closest<HTMLElement>("[data-logo-zone]")
       if (logoEl) {

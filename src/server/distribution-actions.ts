@@ -17,11 +17,8 @@ import { generateApplePassForEmail } from "@/lib/wallet/generate-pass-for-email"
 import { sanitizeText } from "@/lib/sanitize"
 import {
   parseCouponConfig,
-  parseMembershipConfig,
-  computeMembershipExpiresAt,
   parseMinigameConfig,
   weightedRandomPrize,
-  parseGiftCardConfig,
 } from "@/lib/pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -77,10 +74,6 @@ const issuePassSchema = z.object({
 const PASS_TYPE_LABELS: Record<string, string> = {
   STAMP_CARD: "Stamp Card",
   COUPON: "Coupon",
-  MEMBERSHIP: "Membership Card",
-  POINTS: "Points Card",
-  GIFT_CARD: "Gift Card",
-  TICKET: "Event Ticket",
 }
 
 // ─── Search Contacts for Direct Issue ───────────────────────
@@ -227,79 +220,66 @@ export async function issuePassToContacts(
       totalInteractions: 0,
     }
 
-    // Type-specific data initialization
-    let expiresAt: Date | null = null
+    const expiresAt: Date | null = null
 
-    if (template.passType === "MEMBERSHIP") {
-      const membershipConfig = parseMembershipConfig(template.config)
-      if (membershipConfig) {
-        expiresAt = computeMembershipExpiresAt(membershipConfig)
-      }
-    }
-
-    if (template.passType === "GIFT_CARD") {
-      const giftCardConfig = parseGiftCardConfig(template.config)
-      if (giftCardConfig) {
-        instanceDataObj.balanceCents = giftCardConfig.initialBalanceCents
-        instanceDataObj.currency = giftCardConfig.currency
-        if (giftCardConfig.expiryMonths) {
-          const d = new Date()
-          d.setMonth(d.getMonth() + giftCardConfig.expiryMonths)
-          expiresAt = d
-        }
-      }
-    }
-
-    if (template.passType === "TICKET") {
-      instanceDataObj.scanCount = 0
-    }
-
-    if (template.passType === "POINTS") {
-      instanceDataObj.pointsBalance = 0
-    }
-
-    // Atomic creation of pass instance + coupon reward
-    const passInstance = await db.$transaction(async (tx) => {
-      const pi = await tx.passInstance.create({
-        data: {
-          contactId: contact.id,
-          passTemplateId: template.id,
-          walletPassId,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          data: instanceDataObj as any,
-          ...(expiresAt ? { expiresAt } : {}),
-        },
-        select: { id: true },
-      })
-
-      // Auto-create coupon reward
-      if (template.passType === "COUPON") {
-        const couponConfig = parseCouponConfig(template.config)
-        const couponExpiresAt = couponConfig?.validUntil
-          ? new Date(couponConfig.validUntil)
-          : rewardExpiryDays > 0
-            ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
-            : new Date(Date.now() + 365 * 86_400_000)
-
-        const mgConfig = parseMinigameConfig(template.config)
-        const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
-        const selectedPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
-
-        await tx.reward.create({
+    // Atomic creation of pass instance + coupon reward. The unique constraint
+    // on (contactId, passTemplateId) is the real race guard — the upfront
+    // findUnique above is just a fast path. If a concurrent caller wins the
+    // race, the create throws P2002 and we report "already_exists".
+    let passInstance: { id: string }
+    try {
+      passInstance = await db.$transaction(async (tx) => {
+        const pi = await tx.passInstance.create({
           data: {
             contactId: contact.id,
-            organizationId: organization.id,
             passTemplateId: template.id,
-            passInstanceId: pi.id,
-            status: "AVAILABLE",
-            expiresAt: couponExpiresAt,
-            ...(selectedPrize ? { description: selectedPrize, revealedAt: null } : {}),
+            walletPassId,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            data: instanceDataObj as any,
+            ...(expiresAt ? { expiresAt } : {}),
           },
+          select: { id: true },
         })
-      }
 
-      return pi
-    })
+        if (template.passType === "COUPON") {
+          const couponConfig = parseCouponConfig(template.config)
+          const couponExpiresAt = couponConfig?.validUntil
+            ? new Date(couponConfig.validUntil)
+            : rewardExpiryDays > 0
+              ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
+              : new Date(Date.now() + 365 * 86_400_000)
+
+          const mgConfig = parseMinigameConfig(template.config)
+          const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
+          const selectedPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
+
+          await tx.reward.create({
+            data: {
+              contactId: contact.id,
+              organizationId: organization.id,
+              passTemplateId: template.id,
+              passInstanceId: pi.id,
+              status: "AVAILABLE",
+              expiresAt: couponExpiresAt,
+              ...(selectedPrize ? { description: selectedPrize, revealedAt: null } : {}),
+            },
+          })
+        }
+
+        return pi
+      })
+    } catch (err) {
+      if (err && typeof err === "object" && "code" in err && (err as { code: string }).code === "P2002") {
+        skippedCount++
+        results.push({
+          contactId: contact.id,
+          contactName: contact.fullName,
+          status: "already_exists",
+        })
+        continue
+      }
+      throw err
+    }
 
     // Send email notification if contact has email
     if (contact.email) {
@@ -312,37 +292,46 @@ export async function issuePassToContacts(
         // Generate Apple pass and upload to R2 for direct wallet add from email
         const applePass = await generateApplePassForEmail(passInstance.id)
 
+        const idempotencyKey = `pass-issued:${passInstance.id}`
         if (process.env.TRIGGER_SECRET_KEY) {
           const { tasks } = await import("@trigger.dev/sdk")
-          await tasks.trigger("send-pass-issued-email", {
-            email: contact.email,
-            contactName: contact.fullName,
-            organizationName: organization.name,
-            templateName: template.name,
-            passTypeLabel,
-            cardUrl,
-            appleWalletUrl: applePass?.url,
-            googleWalletUrl,
-          })
+          await tasks.trigger(
+            "send-pass-issued-email",
+            {
+              email: contact.email,
+              contactName: contact.fullName,
+              organizationName: organization.name,
+              templateName: template.name,
+              passTypeLabel,
+              cardUrl,
+              appleWalletUrl: applePass?.url,
+              googleWalletUrl,
+              idempotencyKey,
+            },
+            { idempotencyKey },
+          )
         } else {
           const { Resend } = await import("resend")
           const resend = new Resend(process.env.RESEND_API_KEY)
           const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
 
-          const { error: resendError } = await resend.emails.send({
-            from: getEmailFrom(),
-            to: contact.email,
-            subject: `Your ${passTypeLabel} from ${organization.name}`,
-            html: buildPassIssuedEmailHtml({
-              contactName: contact.fullName,
-              organizationName: organization.name,
-              templateName: template.name,
-              passTypeLabel,
-              cardUrl: `${baseUrl}${cardUrl}`,
-              appleWalletUrl: applePass?.url,
-              googleWalletUrl: `${baseUrl}${googleWalletUrl}`,
-            }),
-          })
+          const { error: resendError } = await resend.emails.send(
+            {
+              from: getEmailFrom(),
+              to: contact.email,
+              subject: `Your ${passTypeLabel} from ${organization.name}`,
+              html: buildPassIssuedEmailHtml({
+                contactName: contact.fullName,
+                organizationName: organization.name,
+                templateName: template.name,
+                passTypeLabel,
+                cardUrl: `${baseUrl}${cardUrl}`,
+                appleWalletUrl: applePass?.url,
+                googleWalletUrl: `${baseUrl}${googleWalletUrl}`,
+              }),
+            },
+            { idempotencyKey },
+          )
           if (resendError) {
             console.error("Resend error (direct issue):", resendError.message)
           }
@@ -640,40 +629,33 @@ export async function bulkImportAndIssue(
         totalInteractions: 0,
       }
 
-      let expiresAt: Date | null = null
+      const expiresAt: Date | null = null
 
-      if (template.passType === "MEMBERSHIP") {
-        const membershipConfig = parseMembershipConfig(template.config)
-        if (membershipConfig) expiresAt = computeMembershipExpiresAt(membershipConfig)
-      }
-
-      if (template.passType === "GIFT_CARD") {
-        const giftCardConfig = parseGiftCardConfig(template.config)
-        if (giftCardConfig) {
-          instanceDataObj.balanceCents = giftCardConfig.initialBalanceCents
-          instanceDataObj.currency = giftCardConfig.currency
-          if (giftCardConfig.expiryMonths) {
-            const d = new Date()
-            d.setMonth(d.getMonth() + giftCardConfig.expiryMonths)
-            expiresAt = d
-          }
+      let passInstance: { id: string }
+      try {
+        passInstance = await db.passInstance.create({
+          data: {
+            contactId: contact.id,
+            passTemplateId: template.id,
+            walletPassId,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            data: instanceDataObj as any,
+            ...(expiresAt ? { expiresAt } : {}),
+          },
+          select: { id: true },
+        })
+      } catch (err) {
+        if (err && typeof err === "object" && "code" in err && (err as { code: string }).code === "P2002") {
+          skippedCount++
+          results.push({
+            contactId: contact.id,
+            contactName: contact.fullName,
+            status: "already_exists",
+          })
+          continue
         }
+        throw err
       }
-
-      if (template.passType === "TICKET") instanceDataObj.scanCount = 0
-      if (template.passType === "POINTS") instanceDataObj.pointsBalance = 0
-
-      const passInstance = await db.passInstance.create({
-        data: {
-          contactId: contact.id,
-          passTemplateId: template.id,
-          walletPassId,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          data: instanceDataObj as any,
-          ...(expiresAt ? { expiresAt } : {}),
-        },
-        select: { id: true },
-      })
 
       // Auto-create coupon reward
       if (template.passType === "COUPON") {
@@ -711,37 +693,46 @@ export async function bulkImportAndIssue(
         try {
           const applePass = await generateApplePassForEmail(passInstance.id)
 
+          const idempotencyKey = `pass-issued:${passInstance.id}`
           if (process.env.TRIGGER_SECRET_KEY) {
             const { tasks } = await import("@trigger.dev/sdk")
-            await tasks.trigger("send-pass-issued-email", {
-              email: contact.email,
-              contactName: contact.fullName,
-              organizationName: organization.name,
-              templateName: template.name,
-              passTypeLabel,
-              cardUrl,
-              appleWalletUrl: applePass?.url,
-              googleWalletUrl,
-            })
+            await tasks.trigger(
+              "send-pass-issued-email",
+              {
+                email: contact.email,
+                contactName: contact.fullName,
+                organizationName: organization.name,
+                templateName: template.name,
+                passTypeLabel,
+                cardUrl,
+                appleWalletUrl: applePass?.url,
+                googleWalletUrl,
+                idempotencyKey,
+              },
+              { idempotencyKey },
+            )
           } else {
             const { Resend } = await import("resend")
             const resend = new Resend(process.env.RESEND_API_KEY)
             const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
 
-            const { error: resendError } = await resend.emails.send({
-              from: getEmailFrom(),
-              to: contact.email,
-              subject: `Your ${passTypeLabel} from ${organization.name}`,
-              html: buildPassIssuedEmailHtml({
-                contactName: contact.fullName,
-                organizationName: organization.name,
-                templateName: template.name,
-                passTypeLabel,
-                cardUrl: `${baseUrl}${cardUrl}`,
-                appleWalletUrl: applePass?.url,
-                googleWalletUrl: `${baseUrl}${googleWalletUrl}`,
-              }),
-            })
+            const { error: resendError } = await resend.emails.send(
+              {
+                from: getEmailFrom(),
+                to: contact.email,
+                subject: `Your ${passTypeLabel} from ${organization.name}`,
+                html: buildPassIssuedEmailHtml({
+                  contactName: contact.fullName,
+                  organizationName: organization.name,
+                  templateName: template.name,
+                  passTypeLabel,
+                  cardUrl: `${baseUrl}${cardUrl}`,
+                  appleWalletUrl: applePass?.url,
+                  googleWalletUrl: `${baseUrl}${googleWalletUrl}`,
+                }),
+              },
+              { idempotencyKey },
+            )
             if (resendError) {
               console.error("Resend error (bulk import):", resendError.message)
             }
@@ -948,132 +939,5 @@ export async function sendPassEmail(
     console.error("Failed to send pass email:", message)
     return { success: false, error: message }
   }
-}
-
-// ─── Holder Photo (per-instance) ─────────────────────────────
-
-const HOLDER_PHOTO_PASS_TYPES = ["MEMBERSHIP"]
-
-export async function uploadInstanceHolderPhoto(
-  formData: FormData
-): Promise<{ success?: boolean; url?: string; error?: string }> {
-  const t = await getTranslations("serverErrors")
-  const passInstanceId = formData.get("passInstanceId") as string
-  const file = formData.get("file") as File
-
-  if (!passInstanceId || !file) return { error: t("missingPassOrFile") }
-
-  await assertAuthenticated()
-  const organization = await getOrganizationForUser()
-  if (!organization) return { error: t("noOrganization") }
-
-  const passInstance = await db.passInstance.findFirst({
-    where: {
-      id: passInstanceId,
-      passTemplate: { organizationId: organization.id },
-    },
-    select: {
-      id: true,
-      data: true,
-      passTemplate: { select: { id: true, passType: true } },
-    },
-  })
-
-  if (!passInstance) return { error: t("passInstanceNotFound") }
-  if (!HOLDER_PHOTO_PASS_TYPES.includes(passInstance.passTemplate.passType)) {
-    return { error: t("passTypeNoPhoto") }
-  }
-
-  await assertOrganizationRole(organization.id, "owner")
-
-  const maxSize = 2 * 1024 * 1024
-  if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
-
-  const validTypes = ["image/png", "image/jpeg", "image/webp"]
-  if (!validTypes.includes(file.type)) return { error: t("invalidFileType") }
-
-  const rawBuffer = Buffer.from(await file.arrayBuffer())
-  let processedBuffer: Buffer = rawBuffer
-  try {
-    const { default: sharp } = await import("sharp")
-    processedBuffer = await sharp(rawBuffer)
-      .resize(256, 256, { fit: "cover" })
-      .png()
-      .toBuffer()
-  } catch { /* use original */ }
-
-  let url: string
-  try {
-    const { uploadFile, deleteFile } = await import("@/lib/storage")
-    // Delete old photo if exists
-    const existingData = (passInstance.data as Record<string, unknown>) ?? {}
-    if (typeof existingData.holderPhotoUrl === "string") {
-      await deleteFile(existingData.holderPhotoUrl)
-    }
-    url = await uploadFile(
-      processedBuffer,
-      `holder-photos/${passInstance.id}/${Date.now()}.png`,
-      "image/png"
-    )
-  } catch {
-    url = `data:image/png;base64,${processedBuffer.toString("base64")}`
-  }
-
-  // Store in PassInstance.data
-  const existingData = (passInstance.data as Record<string, unknown>) ?? {}
-  await db.passInstance.update({
-    where: { id: passInstance.id },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { data: { ...existingData, holderPhotoUrl: url } as any },
-  })
-
-  revalidatePath(`/dashboard/programs/${passInstance.passTemplate.id}`)
-  revalidatePath("/dashboard/contacts")
-  return { success: true, url }
-}
-
-export async function deleteInstanceHolderPhoto(
-  passInstanceId: string
-): Promise<{ success?: boolean; error?: string }> {
-  const t = await getTranslations("serverErrors")
-  if (!passInstanceId) return { error: t("missingPassId") }
-
-  await assertAuthenticated()
-  const organization = await getOrganizationForUser()
-  if (!organization) return { error: t("noOrganization") }
-
-  const passInstance = await db.passInstance.findFirst({
-    where: {
-      id: passInstanceId,
-      passTemplate: { organizationId: organization.id },
-    },
-    select: {
-      id: true,
-      data: true,
-      passTemplate: { select: { id: true, passType: true } },
-    },
-  })
-
-  if (!passInstance) return { error: t("passInstanceNotFound") }
-  await assertOrganizationRole(organization.id, "owner")
-
-  const existingData = (passInstance.data as Record<string, unknown>) ?? {}
-  if (typeof existingData.holderPhotoUrl === "string") {
-    try {
-      const { deleteFile } = await import("@/lib/storage")
-      await deleteFile(existingData.holderPhotoUrl)
-    } catch { /* ignore storage errors */ }
-  }
-
-  const { holderPhotoUrl: _, ...rest } = existingData
-  await db.passInstance.update({
-    where: { id: passInstance.id },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { data: rest as any },
-  })
-
-  revalidatePath(`/dashboard/programs/${passInstance.passTemplate.id}`)
-  revalidatePath("/dashboard/contacts")
-  return { success: true }
 }
 

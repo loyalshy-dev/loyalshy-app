@@ -93,6 +93,10 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     role: parsed.role,
     inviteUrl,
     mobileDeepLink,
+    // Initial send: dedupe across Trigger.dev/Resend retries. The manual
+    // "resend invitation" flow intentionally omits this key so each click
+    // produces a fresh email.
+    idempotencyKey: `invite:${invitation.id}`,
   })
 
   return { success: true, invitationId: invitation.id }
@@ -105,10 +109,15 @@ export async function sendInvitationEmail(payload: {
   role: "owner" | "staff"
   inviteUrl: string
   mobileDeepLink?: string
+  idempotencyKey?: string
 }) {
   if (process.env.TRIGGER_SECRET_KEY) {
     const { tasks } = await import("@trigger.dev/sdk")
-    await tasks.trigger("send-invitation-email", payload)
+    await tasks.trigger(
+      "send-invitation-email",
+      payload,
+      payload.idempotencyKey ? { idempotencyKey: payload.idempotencyKey } : undefined,
+    )
   } else {
     const { Resend } = await import("resend")
     const resend = new Resend(process.env.RESEND_API_KEY)
@@ -116,7 +125,8 @@ export async function sendInvitationEmail(payload: {
 
     const roleLabel = payload.role === "owner" ? "an owner" : "a staff member"
 
-    await resend.emails.send({
+    await resend.emails.send(
+      {
       from: getEmailFrom(),
       to: payload.email,
       subject: `You've been invited to ${payload.organizationName} on Loyalshy`,
@@ -135,7 +145,9 @@ export async function sendInvitationEmail(payload: {
           <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital Wallet Passes</p>
         </div>
       `,
-    })
+      },
+      payload.idempotencyKey ? { idempotencyKey: payload.idempotencyKey } : undefined,
+    )
   }
 }
 

@@ -127,15 +127,9 @@ export async function issueAppleWalletPass(
       cardDesign,
       programType: passInstance.passTemplate.passType,
       programConfig: passInstance.passTemplate.config,
-      pointsBalance: (instanceData.pointsBalance as number) ?? 0,
-      giftBalanceCents: (instanceData.balanceCents as number) ?? undefined,
-      giftCurrency: (instanceData.currency as string) ?? undefined,
-      ticketScanCount: (instanceData.scanCount as number) ?? 0,
-      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       hasUnrevealedPrize,
       passInstanceId: passInstance.id,
       organizationSlug: organization.slug,
-      templateId: passInstance.passTemplate.id,
     })
 
     // Update pass instance with wallet pass fields
@@ -281,11 +275,6 @@ export async function issueGoogleWalletPass(
       templateEndsAt: passInstance.passTemplate.endsAt,
       passType: passInstance.passTemplate.passType,
       templateConfig: passInstance.passTemplate.config,
-      pointsBalance: (instanceData.pointsBalance as number) ?? 0,
-      giftBalanceCents: (instanceData.balanceCents as number) ?? undefined,
-      giftCurrency: (instanceData.currency as string) ?? undefined,
-      ticketScanCount: (instanceData.scanCount as number) ?? 0,
-      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
     })

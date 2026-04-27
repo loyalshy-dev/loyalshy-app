@@ -1,8 +1,10 @@
-# Loyalshy — Digital Wallet Pass Platform
+# Loyalshy — Digital Loyalty Platform for Small Businesses
 
 ## Project Overview
 
-Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple/Google Wallet integration. Supports 7 pass types: stamp cards, coupons, memberships, points, gift cards, tickets, and business cards. Contacts receive wallet passes via QR code scan, shareable link, direct issue, bulk CSV import, email, or REST API.
+Multi-tenant SaaS for cafés, salons, and small retail to run digital loyalty programs in Apple/Google Wallet. **Two pass types only**: STAMP_CARD (reward after N visits) and COUPON (one-time or unlimited redeemable offers). Contacts receive wallet passes via QR code scan, shareable link, direct issue, bulk CSV import, or email.
+
+**Strategic pivot 2026-04-27**: cut from 7 pass types + public REST API to 2 types + staff-app-only API. See `.claude/memory/project_pivot_loyalty_only.md` for the full context.
 
 ## Stack (Verified Mar 2026)
 
@@ -69,20 +71,22 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Note**: Impersonation END is not logged — during impersonation the session belongs to the impersonated user, so admin auth checks fail. Only the START is logged (the security-critical event).
 - **Viewer**: `/admin/audit-log` page with action type, target type, and search filters
 
-### Public REST API
-- **Auth**: Bearer token (`lsk_live_` prefix), SHA-256 hashed storage, org-scoped
-- **Rate limiting**: Upstash Redis sliding window (per-org per-minute + per-day), in-memory fallback
-- **Errors**: RFC 7807 Problem Details format
-- **Response envelope**: `{ data, meta: { requestId, pagination? } }`
-- **CORS**: `Access-Control-Allow-Origin: *` (safe with Bearer token auth)
-- **Idempotency**: Redis-backed for POST/PATCH via `Idempotency-Key` header (24h TTL)
-- **Webhooks**: HMAC-SHA256 signed payloads with timestamp replay protection, delivered via Trigger.dev with 5 retries + exponential backoff, auto-disable after 10 consecutive failures
-- **Composable handler**: `apiHandler()` wraps auth → rate limit → idempotency → handler → CORS → logging
-- **Inline contact + email on POST /passes**: `contactId` OR inline `contact: { fullName, email?, phone? }` (find-or-create), `sendEmail: true` triggers pass-issued email via Trigger.dev/Resend, response always includes `walletUrls` (cardUrl, appleWalletUrl, googleWalletUrl) for embedding in venue confirmation emails
-- **Key files**: `api-auth.ts`, `api-handler.ts`, `api-rate-limit.ts`, `api-errors.ts`, `api-response.ts`, `api-cors.ts`, `api-data.ts` (shared data layer + `findOrCreateContact`, `buildWalletUrls`, `sendPassIssuedEmail`), `api-schemas.ts` (Zod), `api-serializers.ts`, `api-events.ts` (webhook dispatch), `api-openapi.ts` (OpenAPI spec + use case guides), `api-keys.ts` (key generation/validation), `api-logger.ts` (fire-and-forget request logging)
-- **Server actions**: `api-key-actions.ts` (dashboard key + webhook CRUD)
-- **Docs**: `/api/v1/docs` (Scalar interactive reference with use case guides: venue ticketing, loyalty stamps, gym membership, bulk import, webhook sync), `/api/v1/openapi.json` (spec)
-- **Plan limits**: Free: 5 req/min, 100/day, 1 key, 1 webhook | Pro (STARTER): 20 req/min, 1k/day, 2 keys, 1 webhook | Business (GROWTH): 60/min, 10k/day, 10 keys, 5 webhooks | Scale: 300/min, 100k/day, 25 keys, 10 webhooks | Enterprise: 600/min, unlimited, 50 keys, 25 webhooks
+### Staff-App API (`/api/v1/**`)
+The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app uses these endpoints, and only with **session-token auth** (no API keys, no rate limits, no webhooks, no idempotency, no request logging, no OpenAPI/Scalar docs).
+- **Auth**: `Authorization: Bearer {sessionToken}` — token from Better Auth session table. `apiHandler()` is gone; use `sessionHandler()` from `src/lib/api-session.ts`. Wrapper extracts token → loads session → checks active org → invokes handler with `{userId, organizationId, role, requestId}`.
+- **Errors**: RFC 7807 Problem Details (`{type, status, title, detail, requestId?}`)
+- **Response envelope**: `{ data, meta: { requestId, pagination? } }`. Handlers return either `T` (auto-wrapped) or `{ data: T, pagination: {...} }` for paginated lists.
+- **CORS**: `Access-Control-Allow-Origin: *` from `src/lib/api-cors.ts`. Every route exports `OPTIONS` returning `handlePreflight()`.
+- **Errors thrown inside handlers**: `throw notFound("...")` / `throw badRequest("...")` / `throw forbidden(...)` / `throw new ApiError(409, "Conflict", "...")` from `api-session.ts`.
+- **Live endpoints** (8 routes total):
+  - `GET /api/v1/contacts` (search + paginated), `GET /api/v1/contacts/[id]`
+  - `GET /api/v1/passes` (filter by contactId/templateId/status, paginated), `GET /api/v1/passes/[id]` (looks up by `id` OR `walletPassId` since wallet QRs encode `walletPassId`)
+  - `POST /api/v1/passes/[id]/actions` — only `{action:"stamp"}` (STAMP_CARD pass) and `{action:"redeem"}` (COUPON pass). All other action types from the old API are gone.
+  - `POST /api/v1/rewards/[id]/redeem`
+  - `GET /api/v1/interactions` (paginated)
+  - `GET /api/v1/templates` (filter by status)
+- **Auth-only endpoints** (also session-based): `/api/v1/auth/{me,select-org,email-signin,google-mobile,invite,device-pair/create,device-pair/claim}`. These predate the wrapper and use raw fetch + their own bearer-token check.
+- **Key files**: `src/lib/api-session.ts` (sessionHandler + ApiError), `src/lib/api-serializers.ts` (toApiContact, toApiPassInstance, toApiPassInstanceDetail, toApiReward, toApiInteraction, toApiTemplate), `src/lib/api-cors.ts`. Action transactions are inlined in the route files (not in shared `api-data.ts` — the old shared layer is gone).
 
 ### Next.js 16 Rules
 - Use `proxy.ts` NOT `middleware.ts`
@@ -114,10 +118,10 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - **Language switcher**: `src/components/language-switcher.tsx` — sets `locale` cookie and reloads, placed in marketing navbar and dashboard topbar
 - **Adding a new locale**: Add to `locales` array in `config.ts`, create `src/messages/{locale}.json`, add `localeNames` entry
 - **Server actions**: use `getTranslations("serverErrors")` from `next-intl/server` for error/validation messages
-- **Studio panels**: all use `useTranslations("studio.*")` — panels, colors, strip, notifications, details, prize, avatar, template, canvas
+- **Studio panels**: all use `useTranslations("studio.*")` — panels, colors, strip, notifications, details, prize, template, canvas (no avatar — holder photos are gone)
 - **Public join pages**: `/join/[slug]` and `/join/[slug]/card/[id]` wrap in local `NextIntlClientProvider` with `common` + `join` namespaces (same pattern as landing page)
-- **Coverage**: 100% — 82 files, ~1,370 strings across marketing, auth, dashboard, studio, server actions, legal pages, public join/card pages, and contact form
-- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, apiSection, passTypesCarousel, walletPreview, testimonials, pricing, faq, tryDemo, staffApp, closingCta, footer, cookieBanner, auth.login, auth.register, auth.forgotPassword, auth.invite, auth.error, dashboard.nav, dashboard.overview, dashboard.activity, dashboard.topContacts, dashboard.programsSummary, dashboard.contacts, dashboard.addContact, dashboard.contactDetail, dashboard.contactColumns, dashboard.contactTable, dashboard.programs, dashboard.passInstances, dashboard.distribution, dashboard.programSettings, dashboard.programEditor, dashboard.settings, dashboard.settingsForms, dashboard.registerVisit, dashboard.shell, dashboard.rewards, dashboard.jobsHistory, dashboard.onboarding, dashboard.status, dashboard.chart, errors, privacy, terms, cookies, studio.panels, studio.colors, studio.strip, studio.logo, studio.notifications, studio.details, studio.prize, studio.avatar, studio.template, studio.canvas, serverErrors, admin (admin.nav, admin.overview, admin.users, admin.organizations, admin.auditLog, admin.roles, admin.impersonation, admin.common), join (join.card), contact
+- **Coverage post-pivot**: en/es/fr each ~1,720 lines (down ~349 lines per locale from pre-pivot). Dead namespaces (`apiSection`, `passTypesCarousel`, `admin.featureFlags`, `studio.avatar`) and per-type subkeys (membership/points/giftCard/ticket/businessCard) are removed.
+- **Namespaces**: common, nav, hero, socialProof, featureShowcase, howItWorks, features, walletPreview, testimonials, pricing, faq, tryDemo, staffApp, closingCta, footer, cookieBanner, auth.{login,register,forgotPassword,invite,error}, dashboard.{nav,overview,activity,topContacts,programsSummary,contacts,addContact,contactDetail,contactColumns,contactTable,programs,passInstances,distribution,programSettings,programEditor,settings,settingsForms,registerVisit,shell,rewards,jobsHistory,onboarding,status,chart}, errors, privacy, terms, cookies, studio.{panels,colors,strip,logo,notifications,details,prize,template,canvas}, serverErrors, admin.{nav,overview,users,organizations,auditLog,roles,impersonation,common}, join.{card}, contact
 
 ### Prisma v7 Rules
 - Use `prisma.config.ts` for configuration (datasource URL lives here, NOT in schema.prisma)
@@ -125,8 +129,9 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 - Mapped enums with `@map` for clean DB values
 - `db.ts` uses a lazy Proxy so PrismaClient is not constructed at import time
 - **Runtime adapter required**: Prisma v7 datasource URL is build-time only (`prisma.config.ts`). At runtime, `PrismaClient` MUST use `new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) })` — bare `new PrismaClient()` will fail. This applies to both `src/lib/db.ts` and `src/trigger/db.ts`.
-- **Shadow database & uuidv7()**: The `uuidv7()` function is defined in the init migration (`20260323124202_init/migration.sql`). This ensures Prisma's shadow database (used by `prisma migrate dev`) has the function available. Never remove it from the init migration.
+- **Shadow database & uuidv7()**: The `uuidv7()` function is defined in the init migration (`20260427000000_init/migration.sql`). This ensures Prisma's shadow database (used by `prisma migrate dev`) has the function available. Never remove it from the init migration.
 - **Migration workflow**: `prisma migrate dev --name describe-change` locally → commit migration files → Vercel runs `prisma migrate deploy` on build. If `migrate dev` fails due to drift from prior `db push`, create the migration SQL manually and use `prisma migrate resolve --applied <name>` to mark it as applied.
+- **Pivot reset 2026-04-27**: dev DB was reset via `prisma migrate reset --force` (single init migration `20260427000000_init` reflects the post-pivot schema with PassType enum = `STAMP_CARD | COUPON` only, no `joinMode`, no `PlatformConfig`, no API key/webhook/request log tables). When invoking destructive Prisma commands as an AI agent, set `PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION` to the user's exact consent message.
 
 ## Folder Structure
 
@@ -148,15 +153,13 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
     /(studio)       → Redirects to /programs/[id]/design (studio now embedded)
     /(public)       → Landing, pricing, QR scan, card view, contact pages
     /api            → API routes
-      /api/v1       → Public REST API (Bearer token auth)
-        /contacts, /contacts/[id], /contacts/bulk
-        /templates, /templates/[id], /templates/[id]/stats
-        /passes, /passes/[id], /passes/[id]/actions, /passes/[id]/interactions, /passes/bulk
-        /interactions, /interactions/[id]
-        /stats, /stats/daily
-        /webhooks, /webhooks/[id], /webhooks/[id]/test, /webhooks/[id]/rotate-secret
-        /openapi.json → OpenAPI 3.1 spec
-        /docs         → Interactive API reference (Scalar)
+      /api/v1       → Staff-app REST API (session token only, no public API key)
+        /auth/{me,select-org,email-signin,google-mobile,invite,device-pair/{create,claim}}
+        /contacts, /contacts/[id]
+        /passes, /passes/[id], /passes/[id]/actions
+        /rewards/[id]/redeem
+        /interactions
+        /templates
       /api/image-proxy → Same-origin proxy for R2 images (CORS bypass for PNG export)
   /components       → Reusable UI components
     /ui             → Shadcn components
@@ -167,12 +170,12 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
       /overview     → Analytics: stat cards, activity chart, busiest days, recent activity, top contacts, programs summary, skeletons
       /contacts     → Contact table, columns (stacked type icons), filters, detail sheet (passes/visits/rewards tabs, issue pass), empty state
       /programs     → Program list view, tab nav, pass instances, settings
-    /marketing      → Landing page components (hero, features, pricing, FAQ, testimonials, social proof, pass types carousel, motion animations)
+    /marketing      → Landing page components (hero, features, pricing, FAQ, social proof, motion animations)
       motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn) — used below-fold only; Hero/SocialProof use CSS animations
       contact-form.tsx → Contact form client component (Zod validation, honeypot, inquiry type pre-selection from URL params)
-      pass-types-carousel.tsx → Auto-playing carousel showcasing all 7 pass types with screenshots, descriptions, and use case tags
       staff-app.tsx → Staff app promotional section with phone mockup, screenshot carousel, feature cards, store badges
       features-carousel-mobile.tsx → Mobile horizontal scroll carousel for features section (client component extracted from server component)
+      (deleted in pivot: api-section.tsx, pass-types-carousel.tsx)
     /wallet         → Wallet pass components
   /i18n             → Internationalization config
     config.ts       → Locale definitions (en, es, fr)
@@ -191,27 +194,21 @@ Multi-tenant SaaS platform for businesses to create and manage digital wallet pa
 /e2e                → Playwright E2E tests
 ```
 
-## Entity Naming (Post-Rewrite)
+## Entity Naming
 
-| Old Name | New Name | Notes |
-|----------|----------|-------|
-| Restaurant | Organization | Better Auth Organization IS the tenant |
-| Customer | Contact | End user receiving passes |
-| LoyaltyProgram | PassTemplate | Generic template for any pass type |
-| Enrollment | PassInstance | Issued pass (Contact × PassTemplate) |
-| Visit | Interaction | Single table with InteractionType discriminator |
-| ProgramType | PassType | 7 types (see below) |
+| Name | Notes |
+|------|-------|
+| Organization | Better Auth Organization IS the tenant |
+| Contact | End user receiving passes |
+| PassTemplate | Program blueprint (a single org has multiple templates) |
+| PassInstance | Issued pass (Contact × PassTemplate) |
+| Interaction | Single table with InteractionType discriminator |
 
-### Pass Types (7)
-STAMP_CARD, COUPON, MEMBERSHIP, POINTS, GIFT_CARD, TICKET, BUSINESS_CARD
+### Pass Types (2)
+`STAMP_CARD`, `COUPON`. The other 5 (MEMBERSHIP, POINTS, GIFT_CARD, TICKET, BUSINESS_CARD) were deleted in the 2026-04-27 pivot. There is no `joinMode` — every program is open self-join via `/join/[slug]`.
 
-### Join Mode (per PassTemplate)
-- **OPEN** (default for STAMP_CARD, COUPON, POINTS, MEMBERSHIP, BUSINESS_CARD): contacts self-join via QR code or shareable link on `/join/[slug]`
-- **INVITE_ONLY** (default for TICKET, GIFT_CARD): passes issued by org only (Direct Issue, CSV Import, API). Public join page filters out INVITE_ONLY templates; `joinTemplate` server action rejects them server-side.
-- Owners can override the default per program in the Distribution tab.
-
-### Interaction Types
-STAMP, COUPON_REDEEM, CHECK_IN, POINTS_EARN, POINTS_REDEEM, GIFT_CHARGE, GIFT_REFUND, TICKET_SCAN, TICKET_VOID, STATUS_CHANGE, REWARD_EARNED, REWARD_REDEEMED, NOTE
+### Interaction Types (6)
+`STAMP`, `COUPON_REDEEM`, `STATUS_CHANGE`, `REWARD_EARNED`, `REWARD_REDEEMED`, `NOTE`
 
 ## Development Phases
 
@@ -260,6 +257,10 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] Phase 6.1 — Production deployment (Vercel, public domain)
 - [x] Phase BUSINESS_CARD — 7th pass type: digital business card (BUSINESS_CARD enum, BusinessCardConfig, one-per-org constraint, Apple Generic / Google Loyalty pass, studio panel, create form, vCard .vcf download, website embed snippet, i18n 3 locales)
 - [x] Phase STAFF-APP — Mobile staff app auth infrastructure: Better Auth `bearer()` plugin, dual auth in `apiHandler()` (API key via `lsk_live_` prefix OR session token), `DevicePairingToken` model, 6 new REST endpoints (`/api/v1/auth/me`, `/select-org`, `/invite` GET+POST, `/device-pair/create`, `/device-pair/claim`, `/google-mobile`), invitation email deep link (`loyalshystaff://invite/{token}?url=`), "Connect Device" QR dialog in Settings > Team (`connect-device.tsx`)
+- [x] **Phase PIVOT-2026-04-27** — Strategic cut from 7 pass types to 2 (STAMP_CARD + COUPON). Deleted: MEMBERSHIP/POINTS/GIFT_CARD/TICKET/BUSINESS_CARD enum values, server actions (gift-card-actions, ticket-actions, points/membership flows), studio Avatar/Membership/Points/GiftCard/Ticket/BusinessCard panels, vcard library + route, joinMode field, public REST API surface (kept only auth + staff-app endpoints), API key/webhook/feature-flag/PlatformConfig models. Webapp: ~175 → 0 tsc errors, 125/125 vitest pass, `next build` clean. i18n trimmed ~349 lines per locale across en/es/fr. Marketing repositioned around "digital loyalty for small businesses". Hero/SEO meta/JSON-LD/pricing tiers/FAQ all rewritten.
+- [x] **Phase STAFF-API-RESTORE** — After the pivot accidentally broke the staff-app data flow, restored 8 session-only `/api/v1/**` endpoints (no API key, no rate limit, no idempotency, no webhooks, no logging): `GET /contacts`, `/contacts/[id]`, `/passes`, `/passes/[id]`, `POST /passes/[id]/actions` (stamp + redeem only), `POST /rewards/[id]/redeem`, `GET /interactions`, `GET /templates`. Built around `src/lib/api-session.ts` (`sessionHandler`) + `src/lib/api-serializers.ts`. Staff-app types trimmed to 2 pass types, NumericKeypad deleted, demo data + i18n cleaned. Both apps tsc-clean, lint clean.
+- [x] **DB reset 2026-04-27** — `prisma migrate reset --force` against Neon dev DB; single init migration `20260427000000_init` reflects post-pivot schema. Build chain (`prisma generate && prisma migrate deploy && next build`) succeeds end-to-end.
+- [x] **Phase IDEMPOTENCY-2026-04-27** — Concurrency + retry hardening across the staff API and background jobs. **Row locks** (`SELECT … FOR UPDATE`) on `pass_instance` for stamp + coupon redeem (`src/app/api/v1/passes/[id]/actions/route.ts`) and on `reward` for reward redeem (`src/app/api/v1/rewards/[id]/redeem/route.ts`); unlimited-coupon redeems gain a 60s `redeemedAt` debounce. **Atomic device-pair claim**: replaced check-then-update with `updateMany({ where: { id, claimedAt: null } })` so two concurrent QR claims can't both mint sessions. **Stripe webhook dedupe** now matches `Prisma.PrismaClientKnownRequestError.code === "P2002"` (was string-match) and returns 500 on transient DB errors so Stripe retries. **Email idempotency keys** (Resend `Idempotency-Key` + Trigger.dev `idempotencyKey`) on `send-pass-issued-email` (`pass-issued:{passInstanceId}`), `send-welcome-email` (`welcome:{orgId}`), `send-invitation-email` (`invite:{invitationId}`); the manual "resend invitation"/"resend pass email" flows intentionally omit the key. **`expire-rewards`** rewritten as a single atomic `UPDATE … WHERE status='available'::reward_status AND "expiresAt" < now() RETURNING` so a concurrent redeem can't get clobbered. **WalletPassLog dedupe** via deterministic PK derived from `ctx.run.id` (Trigger.dev) — new `createWalletPassLog()` helper in `src/lib/wallet/apple/update-pass.ts`; `notifyApplePassUpdate(id, dedupeKey?)` and `notifyGooglePassUpdate(id, dedupeKey?)` accept the key. **Pass-issuance race** (`distribution-actions.ts`, both call sites) now catches P2002 and reports `already_exists` instead of letting the unique-constraint hit propagate. **`addContact`** P2002 fallback extracts violated field from `err.meta.target` so the UI gets `duplicateField: "email"|"phone"`. **Google PATCH error log** includes `passInstanceId` + `objectId`. **Apple `updatedAt` landmine** documented in `src/trigger/update-wallet-pass.ts` so future refactors don't accidentally double-touch. **10 new vitest regressions** in `src/app/api/v1/passes/[id]/actions/route.test.ts` (lock ordering, double-stamp rejection, single-use coupon rejection, unlimited debounce window) and `src/app/api/v1/auth/device-pair/claim/route.test.ts` (lost-race 410, winning-path session create, upfront-claimed 410). Mock DB extended with `$queryRaw`/`$executeRaw` on tx and a `devicePairingToken` model. 135/135 vitest pass, tsc clean, lint clean.
 
 ## Conversation Strategy
 
@@ -290,22 +291,21 @@ Update the "Current Progress" section above to track what's done.
 6. Member (userId + organizationId + role)
 7. Invitation (Better Auth's org invite — separate from StaffInvitation)
 
-**Application (15):**
-8. PassTemplate (passType: 7 types, joinMode: OPEN/INVITE_ONLY, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt)
-9. PassInstance (pivot: Contact × PassTemplate — wallet pass, status, data JSON for type-specific state)
+**Application (post-pivot):**
+8. PassTemplate (passType: `STAMP_CARD | COUPON`, status: DRAFT/ACTIVE/ARCHIVED, config JSON, startsAt, endsAt — no `joinMode`, all programs are open self-join)
+9. PassInstance (pivot: Contact × PassTemplate — wallet pass, status, data JSON for stamp counters / coupon redemption flag)
 10. Contact (end user — identity + denormalized totalInteractions + sequential memberNumber per org)
-11. Interaction (type discriminator, metadata JSON, linked to PassInstance)
+11. Interaction (type discriminator: STAMP/COUPON_REDEEM/STATUS_CHANGE/REWARD_EARNED/REWARD_REDEEMED/NOTE)
 12. Reward (linked to PassInstance; `revealedAt` nullable — null means prize minigame not yet played)
-13. PassDesign (per PassTemplate; typed columns for wallet passes + `editorConfig` JSON for rich studio editor; `cardType`: STAMP/POINTS/TIER/COUPON/GIFT_CARD/TICKET/GENERIC; per-program logos: `logoUrl`/`logoAppleUrl`/`logoGoogleUrl` with fallback to Organization logos)
+13. PassDesign (per PassTemplate; typed columns for wallet passes + `editorConfig` JSON; `cardType`: `STAMP | COUPON`; per-program logos: `logoUrl`/`logoAppleUrl`/`logoGoogleUrl` with fallback to Organization logos)
 14. WalletPassLog (linked to PassInstance)
 15. StaffInvitation (custom invite flow with tokens — NOT Better Auth's Invitation)
 16. DeviceRegistration (Apple Wallet push, linked to PassInstance)
 17. AnalyticsSnapshot (pre-computed daily metrics)
-18. ApiKey (org-scoped, SHA-256 hashed key, prefix for display, scopes, expiry, revocation)
-19. WebhookEndpoint (org-scoped, HMAC secret, event subscriptions, auto-disable on failures)
-20. WebhookDelivery (delivery log per endpoint, status code, response body, attempts)
-21. ApiRequestLog (batched request logging — method, path, status, latency, API key)
-22. PlatformConfig (singleton row — platform-level settings: `disabledPassTypes` for feature flags)
+18. DevicePairingToken (staff app QR pairing)
+19. AdminAuditLog (immutable trail of admin actions)
+
+**Deleted in pivot:** ApiKey, WebhookEndpoint, WebhookDelivery, ApiRequestLog, PlatformConfig.
 
 ## Quality Checklist (Verify After Each Phase)
 
@@ -329,20 +329,20 @@ Update the "Current Progress" section above to track what's done.
 - `src/lib/dal.ts` — Data Access Layer (REAL security boundary)
 - `proxy.ts` — Optimistic cookie redirect (UX only)
 - `src/server/auth-actions.ts` — Staff invitation server actions (email via Trigger.dev, email-verified acceptance, rate-limited token validation)
-- `src/lib/api-auth.ts` — API key authentication (Bearer token → ApiContext with orgId, plan check)
-- `src/lib/api-keys.ts` — API key generation (`lsk_live_` prefix) and SHA-256 validation
+- `src/lib/api-session.ts` — Session-token Bearer auth wrapper for `/api/v1/**` staff-app endpoints (`sessionHandler`, `ApiError`, `notFound`, `badRequest`, `forbidden`)
+- `src/lib/api-serializers.ts` — Prisma row → JSON shape converters mirroring `loyalshy-staff/lib/types.ts`
 
 ## Pricing & Plans
 
 | Display Name | PlanId (DB) | Monthly | Annual | Contacts | Staff | Programs |
 |---|---|---|---|---|---|---|
-| Free | FREE | €0 | €0 | 50 | 1 | 1 (stamp card, coupon, or business card) |
+| Free | FREE | €0 | €0 | 50 | 1 | 1 (stamp card or coupon) |
 | Pro | STARTER | €29 | €24 | 500 | 2 | 2 |
 | Business | GROWTH | €49 | €39 | 2,500 | 5 | 5 |
 | Scale | SCALE | €99 | €79 | Unlimited | 25 | Unlimited |
 | Enterprise | ENTERPRISE | Custom | Custom | Unlimited | Unlimited | Unlimited |
 
-**Important:** PlanId values (`FREE`, `STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, API rate limiting, and throughout the codebase. Display names ("Free", "Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc. Free users have no Stripe customer — Stripe customer is created on-demand at first paid checkout. Subscription cancellation downgrades to FREE. Free plan allows only STAMP_CARD, COUPON, and BUSINESS_CARD pass types (`allowedPassTypes` in plans.ts); paid plans allow all 7. No default program is created at signup — users choose their first program type from the dashboard. All plans include API access — Free plan has tight limits (5 req/min, 100/day, 1 key, 1 webhook) for testing and evaluation.
+**Important:** PlanId values (`FREE`, `STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, and throughout the codebase. Display names ("Free", "Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc. Free users have no Stripe customer — created on-demand at first paid checkout. Subscription cancellation downgrades to FREE. **Plans no longer gate by pass type** (post-pivot only 2 types exist; both are available on every plan). `checkPassTypeAllowed()` just verifies the type is `STAMP_CARD` or `COUPON`. No default program at signup.
 
 ## Dashboard Navigation
 
@@ -355,15 +355,15 @@ Update the "Current Progress" section above to track what's done.
 - `/dashboard/programs/[id]` — program overview with stat cards (layout provides tab nav)
 - `/dashboard/programs/[id]/passes` — type-aware pass instances with stat cards, progress columns, status filters, row actions, issue pass sheet, edit contact, send pass email
 - `/dashboard/programs/[id]/design` — canvas-first card design studio with floating icon toolbar + floating context panel (owner only)
-- `/dashboard/programs/[id]/distribution` — Distribution: join mode toggle, QR/NFC self-service link, direct issue to contacts, bulk CSV import (owner only)
+- `/dashboard/programs/[id]/distribution` — Distribution: QR/NFC self-service link, direct issue to contacts, bulk CSV import (owner only). No join-mode toggle — every program is open self-join.
 - `/dashboard/programs/[id]/settings` — status management (activate/archive/reactivate) + delete (owner only)
 
 ### Settings (account-level only)
 - General (organization profile)
 - Team (members, invitations)
 - Billing (Stripe subscription)
-- API (API keys + webhook endpoints — all plans, owner only)
 - Jobs (background jobs — super_admin only, hidden from UI, accessible via direct URL)
+- (Removed in pivot: API keys + webhooks tab.)
 
 **Note:** `/dashboard/rewards` still works (command palette, direct URL) but is not in sidebar. `/dashboard/programs/[id]/studio` redirects to `/dashboard/programs/[id]/design`.
 
@@ -372,16 +372,7 @@ Update the "Current Progress" section above to track what's done.
 - `/admin/users` — user management (search, filters: all/banned/admins/super_admins, ban/unban, role change, impersonation, session revoke)
 - `/admin/organizations` — organization management (search, subscription status filters, detail sheet with team/stats/Stripe link)
 - `/admin/audit-log` — immutable audit trail of all admin actions (action/target type filters, search by target)
-- `/admin/feature-flags` — toggle pass types on/off for regular users (ADMIN_OPS+), stored in PlatformConfig DB table
-
-### Feature Flags
-- **Model**: `PlatformConfig` singleton row with `disabledPassTypes: String[]`
-- **Config file**: `src/lib/feature-flags.ts` — `getDisabledPassTypes()` (cached per-request), `isComingSoon()`, fallback defaults
-- **Server enforcement**: `checkPassTypeAllowed()` in `billing-actions.ts` rejects disabled types for non-admins
-- **UI**: Disabled types show "Coming Soon" badge (clock icon) in program creation form, distinct from plan-locked "Upgrade" badge
-- **Admin bypass**: All admin roles (`isAdminRole()`) bypass feature flags — can create any pass type
-- **Admin UI**: `/admin/feature-flags` — toggle switches per pass type, requires ADMIN_OPS, changes audit-logged
-- **i18n**: `admin.featureFlags.*` namespace + `dashboard.createProgram.comingSoon` (3 locales)
+- (Removed in pivot: `/admin/feature-flags` — only 2 pass types now, no per-type gating needed.)
 
 ## Design Direction
 
@@ -410,7 +401,6 @@ Update the "Current Progress" section above to track what's done.
 | Payments | Stripe | Already configured (subscriptions, webhooks) |
 | Error Tracking | Sentry | Already configured (source maps) |
 | Analytics | Plausible | Already configured (privacy-first) |
-| API Docs | Scalar | Interactive API reference at `/api/v1/docs` |
 | DNS / CDN | Cloudflare | Free tier, pairs with R2 |
 
 For full deployment guide, checklist, and cost estimate, see **`docs/deployment-stack.md`**.

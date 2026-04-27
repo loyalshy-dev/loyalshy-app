@@ -41,11 +41,11 @@
     "switchLanguage": "Changer de langue"
   },
   "hero": {
-    "badge": "La plateforme de passes numériques",
-    "title1": "Des passes numériques",
-    "title2": "que tes clients",
-    "titleHighlight": "utilisent vraiment",
-    "subtitle": "Des cartes de fidélité aux billets d'événements et cartes de visite — crée de superbes passes Apple & Google Wallet en minutes. Aucune app requise.",
+    "badge": "La fidélité numérique pour les petits commerces",
+    "title1": "Cartes de fidélité",
+    "title2": "que vos clients",
+    "titleHighlight": "gardent vraiment",
+    "subtitle": "Remplacez les cartes de fidélité en papier par des cartes numériques dans Apple & Google Wallet. Récompensez vos clients fidèles avec des cartes à tampons et des coupons — aucune app requise.",
     "seeHowItWorks": "Voir comment ça marche",
     "freeForever": "Gratuit pour toujours",
     "noCreditCard": "Aucune carte bancaire requise",
@@ -53,8 +53,8 @@
     "browserUrl": "www.loyalshy.com/dashboard"
   },
   "socialProof": {
-    "headline": "Des passes de portefeuille digital pour les entreprises du monde entier",
-    "trustedBy": "La confiance des entreprises en croissance dans le monde entier",
+    "headline": "La fidélité numérique pour les petits commerces du monde entier",
+    "trustedBy": "Cafés, salons et boutiques nous font confiance",
     "stat1Value": "500+",
     "stat1Label": "entreprises",
     "stat2Value": "50K+",
@@ -83,7 +83,7 @@
       },
       "programs": {
         "label": "Programmes",
-        "description": "Gère tous tes programmes de fidélité au même endroit. Cartes tampons, coupons, abonnements, et plus encore.",
+        "description": "Gérez tous vos programmes de fidélité au même endroit. Cartes à tampons et coupons, côte à côte.",
         "alt": "Grille de programmes montrant différents types et designs de cartes de fidélité"
       },
       "passes": {
@@ -160,92 +160,6 @@
     "pushNotifications": {
       "title": "Notifications Push",
       "description": "Envoyez des mises à jour en temps réel sur l'écran de verrouillage de vos clients. Annoncez des offres, rappelez les passes expirants et stimulez l'engagement."
-    }
-  },
-  "passTypesCarousel": {
-    "sectionLabel": "Types de pass",
-    "title": "Une plateforme, sept types de pass",
-    "subtitle": "Des cartes tampons aux billets d'événements — créez le pass digital exact dont votre entreprise a besoin.",
-    "prev": "Type de pass précédent",
-    "next": "Type de pass suivant",
-    "types": {
-      "stampCard": {
-        "label": "Carte à Tampons",
-        "description": "Récompense tes clients après un certain nombre de visites. Des cartes de tampons numériques dans Apple et Google Wallet — fini les cartes papier perdues.",
-        "alt": "Pass carte à tampons montrant des tampons de fidélité",
-        "useCases": [
-          "Cafés",
-          "Boulangeries",
-          "Salons",
-          "Stations de lavage"
-        ]
-      },
-      "coupon": {
-        "label": "Coupon",
-        "description": "Propose des réductions en pourcentage ou en montant fixe que tes clients peuvent utiliser en un clic. Suivi des échanges et dates d'expiration automatiques.",
-        "alt": "Pass coupon numérique avec offre de réduction",
-        "useCases": [
-          "Magasins",
-          "Restaurants",
-          "E-commerce",
-          "Promotions"
-        ]
-      },
-      "membership": {
-        "label": "Adhésion",
-        "description": "Cartes de membre numériques avec avantages par niveau. Parfaites pour les clubs, salles de sport et niveaux de fidélité avec photo optionnelle du titulaire.",
-        "alt": "Pass adhésion avec niveau et détails du membre",
-        "useCases": [
-          "Salles de sport",
-          "Clubs",
-          "Bibliothèques",
-          "Espaces de coworking"
-        ]
-      },
-      "points": {
-        "label": "Programme de Points",
-        "description": "Accumule des points par visite ou achat, puis échange-les dans un catalogue de récompenses personnalisé. Valeurs et libellés de points flexibles.",
-        "alt": "Pass programme de points montrant le solde de points",
-        "useCases": [
-          "Chaînes de magasins",
-          "Restaurants",
-          "Hôtels",
-          "Compagnies aériennes"
-        ]
-      },
-      "giftCard": {
-        "label": "Carte Cadeau",
-        "description": "Cartes cadeaux avec suivi du solde en temps réel. Les clients consultent leur solde depuis leur portefeuille — charges et remboursements intégrés.",
-        "alt": "Pass carte cadeau montrant le solde actuel",
-        "useCases": [
-          "Magasins",
-          "Restaurants",
-          "Spas",
-          "Boutiques en ligne"
-        ]
-      },
-      "ticket": {
-        "label": "Billet d'Événement",
-        "description": "Billets numériques pour événements, concerts et conférences. Scan à l'entrée avec codes QR — inclut date, lieu et place.",
-        "alt": "Pass billet d'événement avec code QR et détails",
-        "useCases": [
-          "Concerts",
-          "Conférences",
-          "Festivals",
-          "Événements sportifs"
-        ]
-      },
-      "businessCard": {
-        "label": "Carte de Visite",
-        "description": "Cartes de visite numériques qui vivent dans le portefeuille de vos contacts. Partagez votre nom, titre, téléphone, email et site web — un scan et ils ont vos coordonnées pour toujours.",
-        "alt": "Pass carte de visite numérique avec coordonnées",
-        "useCases": [
-          "Freelances",
-          "Équipes commerciales",
-          "Événements de networking",
-          "Consultants"
-        ]
-      }
     }
   },
   "walletPreview": {
@@ -373,7 +287,6 @@
         "passTypes": "Les 7 types de passes",
         "brandColors": "Couleurs de marque sur les passes",
         "bulkImport": "Importation CSV en masse",
-        "webhooks": "Événements webhook",
         "onboarding": "Appel d'onboarding dédié",
         "api": "Accès API (300 req/min)"
       }
@@ -435,29 +348,6 @@
     "cardPreviewAlt": "Aperçu de la carte de démo",
     "or": "ou visite le lien ci-dessous",
     "openJoinPage": "Ouvrir la page du pass de démo"
-  },
-  "apiSection": {
-    "sectionLabel": "API développeur",
-    "title": "Construis sur Loyalshy",
-    "subtitle": "Automatise la création de passes depuis ton système de réservation, ta caisse ou n'importe quel backend. API REST complète avec webhooks en temps réel.",
-    "features": {
-      "restApi": {
-        "title": "API REST complète",
-        "description": "Crée des passes, gère les contacts et enregistre les interactions. Authentification Bearer, requêtes idempotentes et opérations en masse incluses."
-      },
-      "webhooks": {
-        "title": "Webhooks en temps réel",
-        "description": "Reçois des notifications quand des passes sont émis, des tampons accumulés ou des récompenses réclamées. Signés HMAC avec réessais automatiques."
-      },
-      "docs": {
-        "title": "Documentation interactive",
-        "description": "Spécification OpenAPI 3.1 avec explorateur interactif. Teste les endpoints directement depuis le navigateur avec ta clé API."
-      }
-    },
-    "exploreDocsLink": "Explorer la documentation API",
-    "codePreview": {
-      "filename": "issue-pass.ts"
-    }
   },
   "closingCta": {
     "title1": "Prêt à développer ta",
@@ -613,9 +503,6 @@
       "stamp": "a enregistré une visite",
       "checkIn": "s'est enregistré(e)",
       "passUse": "a utilisé un pass",
-      "pointsEarn": "a gagné des points",
-      "giftUse": "a utilisé une carte cadeau",
-      "ticketScan": "a scanné un billet",
       "rewardEarned": "a gagné une récompense",
       "rewardRedeemed": "a utilisé une récompense",
       "couponRedeemed": "a utilisé un coupon",
@@ -635,18 +522,8 @@
       "rewardsEarned": "récompenses gagnées",
       "issued": "émis",
       "redeemed": "utilisés",
-      "members": "membres",
-      "checkIns": "enregistrements",
       "uses": "utilisations",
-      "cards": "cartes",
-      "transactions": "transactions",
-      "tickets": "billets",
-      "scans": "scans",
-      "passes": "passes",
-      "accessLogs": "journaux d'accès",
-      "trips": "trajets",
-      "ids": "identifiants",
-      "verifications": "vérifications"
+      "passes": "passes"
     },
     "contacts": {
       "title": "Contacts",
@@ -702,16 +579,8 @@
       "all": "Tous",
       "stampCards": "Cartes tampons",
       "coupons": "Coupons",
-      "memberships": "Abonnements",
-      "points": "Points",
-      "giftCards": "Cartes Cadeaux",
-      "tickets": "Billets",
-      "businessCards": "Cartes de Visite",
       "stampSubtitle": "{stamps} tampons | {count} actifs",
       "couponSubtitle": "{discount} | {count} utilisés",
-      "membershipSubtitle": "{tier} | {count} membres",
-      "pointsSubtitle": "{points} pts/visite | {count} actifs",
-      "pointsDefault": "Points | {count} actifs",
       "defaultSubtitle": "{count} passes",
       "noPrograms": "Aucun programme",
       "createFirst": "Créez votre premier programme de fidélité pour commencer à récompenser vos clients.",
@@ -743,8 +612,6 @@
       "general": "Général",
       "team": "Équipe",
       "billing": "Facturation",
-      "api": "API",
-      "jobs": "Tâches",
       "orgProfile": "Profil de l'organisation",
       "orgProfileDescription": "Informations de base sur votre organisation.",
       "orgName": "Nom de l'organisation",
@@ -754,17 +621,7 @@
       "addressPlaceholder": "12 Rue de la Paix, 75002 Paris",
       "inviteTeam": "Inviter des membres d'équipe",
       "inviteSent": "Invitation envoyée à {email}",
-      "memberRemoved": "{name} a été retiré(e)",
-      "apiKeys": "Clés API",
-      "apiKeysDescription": "Gérez les clés API pour un accès programmatique.",
-      "viewApiDocs": "Voir la documentation API",
-      "createKey": "Créer une clé",
-      "noApiKeys": "Aucune clé API. Créez-en une pour commencer.",
-      "expired": "Expiré",
-      "copied": "Copié dans le presse-papiers.",
-      "keyRevoked": "Clé API révoquée.",
-      "backgroundJobs": "Tâches en arrière-plan",
-      "backgroundJobsDescription": "Mises à jour récentes des passes et activité des tâches en arrière-plan."
+      "memberRemoved": "{name} a été retiré(e)"
     },
     "onboarding": {
       "title": "Premiers pas avec Loyalshy",
@@ -852,7 +709,6 @@
       "visit": "Visite",
       "couponRedeemed": "Coupon échangé",
       "readyToRedeem": "Prêt à échanger",
-      "activeMember": "Membre actif",
       "suspended": "Suspendu",
       "expired": "Expiré",
       "expires": "Expire",
@@ -864,9 +720,7 @@
       "appleWallet": "Apple Wallet",
       "googleWallet": "Google Wallet",
       "stampCard": "Carte de tampons",
-      "coupon": "Coupon",
-      "membership": "Abonnement",
-      "points": "Points"
+      "coupon": "Coupon"
     },
     "contactColumns": {
       "name": "Nom",
@@ -994,34 +848,6 @@
       "programsUsed": "{used} sur {limit} programmes",
       "staffUsed": "{used} sur {limit} membres d'équipe",
       "unlimited": "Illimité",
-      "webhooks": "Webhooks",
-      "webhooksDescription": "Recevez des notifications en temps réel lorsque des événements se produisent.",
-      "addWebhook": "Ajouter un webhook",
-      "webhookUrl": "URL du point de terminaison",
-      "webhookUrlPlaceholder": "https://votre-serveur.com/webhook",
-      "webhookUrlHttps": "L'URL doit utiliser HTTPS.",
-      "webhookEvents": "Événements",
-      "selectEvents": "Sélectionnez au moins un événement.",
-      "webhookCreated": "Point de terminaison webhook créé",
-      "webhookDeleted": "Point de terminaison webhook supprimé",
-      "webhookEnabled": "Webhook activé",
-      "webhookDisabled": "Webhook désactivé",
-      "testWebhook": "Envoyer un test",
-      "testSent": "Webhook de test envoyé",
-      "rotateSecret": "Renouveler le secret",
-      "secretRotated": "Secret du webhook renouvelé",
-      "events": {
-        "contactCreated": "Contact créé",
-        "contactUpdated": "Contact mis à jour",
-        "contactDeleted": "Contact supprimé",
-        "passIssued": "Pass émis",
-        "passCompleted": "Pass terminé",
-        "passSuspended": "Pass suspendu",
-        "passRevoked": "Pass révoqué",
-        "interactionCreated": "Interaction créée",
-        "rewardEarned": "Récompense gagnée",
-        "rewardRedeemed": "Récompense utilisée"
-      },
       "statusTrial": "Essai",
       "statusActive": "Actif",
       "statusPastDue": "En retard de paiement",
@@ -1044,26 +870,10 @@
     "registerVisit": {
       "title": "Enregistrer une interaction",
       "scanQr": "Scanner un QR Code",
-      "scanDescription": "Scannez le QR code du pass du client",
-      "orEnterManually": "Ou saisir manuellement",
-      "selectContact": "Sélectionner un contact",
-      "selectProgram": "Sélectionner un programme",
       "registerStamp": "Enregistrer une visite",
       "redeemCoupon": "Utiliser le coupon",
-      "checkIn": "Enregistrer l'arrivée",
-      "addPoints": "Ajouter des points",
-      "redeemPoints": "Utiliser des points",
-      "charge": "Débiter",
-      "scanTicket": "Scanner le billet",
-      "amount": "Montant",
-      "points": "Points",
-      "note": "Note",
-      "notePlaceholder": "Note optionnelle...",
-      "success": "Interaction enregistrée",
       "stampAdded": "Visite enregistrée pour {name}",
-      "couponRedeemed": "Coupon utilisé pour {name}",
-      "pointsAdded": "{points} points ajoutés pour {name}",
-      "error": "Échec de l'enregistrement de l'interaction"
+      "couponRedeemed": "Coupon utilisé pour {name}"
     },
     "shell": {
       "trialDaysLeft": "{count, plural, one {# jour} other {# jours}} restant(s) dans votre essai.",
@@ -1101,8 +911,6 @@
       "details": "Détails",
       "stamps": "Tampons",
       "coupon": "Coupon",
-      "membership": "Abonnement",
-      "points": "Points",
       "schedule": "Planification",
       "terms": "Conditions",
       "prizeReveal": "Révélation du prix",
@@ -1128,7 +936,6 @@
       "discountTypeFixed": "Montant fixe de réduction",
       "discountTypeFreebie": "Article offert",
       "discountPercent": "Réduction (%)",
-      "discountAmount": "Montant de la réduction",
       "couponDescription": "Description",
       "couponDescriptionRequired": "La description est requise",
       "couponDescriptionPlaceholder": "ex. Obtenez 20 % sur votre prochaine commande",
@@ -1139,34 +946,6 @@
       "redemptionLimit": "Limite d'utilisation",
       "redemptionSingle": "Usage unique",
       "redemptionUnlimited": "Illimité",
-      "membershipConfiguration": "Configuration de l'abonnement",
-      "membershipConfigDesc": "Définissez les niveaux d'abonnement, la durée et les avantages.",
-      "membershipTier": "Niveau d'abonnement",
-      "membershipTierPlaceholder": "ex. VIP, Gold, Premium",
-      "membershipTierRequired": "Le nom du niveau est requis",
-      "duration": "Durée",
-      "durationMonthly": "Mensuel",
-      "durationYearly": "Annuel",
-      "durationLifetime": "À vie",
-      "durationCustom": "Personnalisé",
-      "customDurationDays": "Durée personnalisée (jours)",
-      "benefits": "Avantages",
-      "benefitsRequired": "Les avantages sont requis",
-      "benefitsPlaceholder": "Listez les avantages pour les membres...",
-      "pointsConfiguration": "Configuration des points",
-      "pointsConfigDesc": "Définissez comment les points sont gagnés et contre quoi ils peuvent être échangés.",
-      "pointsPerVisit": "Points par visite",
-      "pointsPerVisitHint": "Points attribués aux clients à chaque visite (1–90).",
-      "rewardCatalog": "Catalogue de récompenses",
-      "rewardCatalogDesc": "Articles que les clients peuvent obtenir avec leurs points (jusqu'à 20).",
-      "addItem": "Ajouter un article",
-      "noCatalogItems": "Aucun article dans le catalogue. Ajoutez au moins une récompense à échanger pour les clients.",
-      "rewardName": "Nom de la récompense",
-      "rewardNamePlaceholder": "ex. Café offert",
-      "pointsCost": "Coût en points",
-      "descriptionOptional": "Description (optionnel)",
-      "descriptionPlaceholder": "Courte description...",
-      "removeCatalogItem": "Supprimer l'article du catalogue",
       "scheduleSection": "Planification",
       "scheduleDesc": "Contrôlez quand le programme est actif et accepte des clients.",
       "status": "Statut",
@@ -1229,44 +1008,10 @@
       "generalSection": "Général",
       "stampsSuffix": "tampons",
       "rewardExpirySuffix": "jours (0 = jamais)",
-      "autoRenew": "Renouvellement automatique",
-      "autoRenewDesc": "Renouveler automatiquement l'adhésion à l'expiration",
-      "pointsLabel": "Libellé des points",
-      "pointsLabelPlaceholder": "pts",
-      "giftCardConfiguration": "Carte Cadeau",
-      "currency": "Devise",
-      "currencyPlaceholder": "EUR",
-      "initialBalanceCents": "Solde initial (centimes)",
-      "partialRedemption": "Utilisation partielle",
-      "partialRedemptionDesc": "Permettre de dépenser une partie du solde",
-      "expiryMonths": "Expiration (mois)",
-      "ticketConfiguration": "Billet d'Événement",
-      "eventName": "Nom de l'événement",
-      "eventNamePlaceholder": "Festival de Musique d'Été",
-      "eventDate": "Date de l'événement",
-      "venue": "Lieu",
-      "venuePlaceholder": "Palais des Sports",
-      "maxScans": "Scans maximum",
-      "customDuration": "Durée personnalisée",
-      "daysSuffix": "jours",
-      "noEndDate": "Pas de date de fin — le programme fonctionne indéfiniment.",
-      "contactInformation": "Informations de Contact",
-      "contactName": "Nom du Contact",
-      "contactNamePlaceholder": "Jean Dupont",
-      "jobTitle": "Poste",
-      "jobTitlePlaceholder": "Directeur Commercial",
-      "phone": "Téléphone",
-      "phonePlaceholder": "+33 6 12 34 56 78",
-      "email": "Email",
-      "emailPlaceholder": "jean@entreprise.fr",
-      "website": "Site Web",
-      "websitePlaceholder": "https://entreprise.fr",
-      "socialLinks": "Réseaux Sociaux"
+      "noEndDate": "Pas de date de fin — le programme fonctionne indéfiniment."
     },
     "createProgram": {
       "chooseType": "Choisissez un type de programme pour commencer.",
-      "comingSoon": "Bientôt disponible",
-      "upgrade": "Pro",
       "backToTypeSelection": "Retour à la sélection du type",
       "programName": "Nom du programme",
       "programNameRequired": "Le nom du programme est requis",
@@ -1297,76 +1042,7 @@
       "termsOptional": "Conditions générales (optionnel)",
       "termsPlaceholder": "Conditions optionnelles...",
       "createCoupon": "Créer un coupon",
-      "couponCreated": "Programme de coupon créé",
-      "memberProgramNamePlaceholder": "ex. Club VIP, Abonnement Gold",
-      "membershipTier": "Niveau d'abonnement",
-      "membershipTierPlaceholder": "ex. VIP, Gold, Premium",
-      "membershipTierRequired": "Le nom du niveau est requis",
-      "duration": "Durée",
-      "durationMonthly": "Mensuel",
-      "durationYearly": "Annuel",
-      "durationLifetime": "À vie",
-      "durationCustom": "Personnalisé",
-      "customDurationDays": "Durée personnalisée (jours)",
-      "benefits": "Avantages",
-      "benefitsRequired": "Les avantages sont requis",
-      "benefitsPlaceholder": "Listez les avantages pour les membres...",
-      "createMembership": "Créer un abonnement",
-      "membershipCreated": "Programme d'abonnement créé",
-      "pointsProgramNamePlaceholder": "ex. Points fidélité, Points récompense",
-      "pointsPerVisit": "Points par visite",
-      "rewardExpiryDays": "Expiration de la récompense (jours)",
-      "rewardCatalog": "Catalogue de récompenses",
-      "catalogCount": "{count}/20 articles",
-      "catalogName": "Nom",
-      "catalogNameRequired": "*",
-      "catalogNamePlaceholder": "ex. Café offert",
-      "catalogDescription": "Description",
-      "catalogDescriptionPlaceholder": "Optionnel",
-      "catalogPointsCost": "Coût en points",
-      "removeCatalogItem": "Supprimer l'article {index}",
-      "addCatalogItem": "Ajouter un article",
-      "catalogValidationError": "Tous les articles du catalogue doivent avoir un nom et un coût en points d'au moins 1",
-      "createPointsProgram": "Créer un programme de points",
-      "pointsProgramCreated": "Programme de points créé",
-      "useLabelRequired": "Le libellé d'utilisation est requis",
-      "giftCardName": "Nom de la carte",
-      "giftCardNameRequired": "Le nom de la carte est requis",
-      "giftCardNamePlaceholder": "ex. Carte cadeau boutique, Cadeau anniversaire",
-      "currency": "Devise",
-      "initialBalance": "Solde initial",
-      "partialRedemption": "Utilisation partielle",
-      "partialRedemptionYes": "Oui",
-      "partialRedemptionNo": "Non (solde complet uniquement)",
-      "expiryMonths": "Expiration (mois, 0 = jamais)",
-      "createGiftCard": "Créer une carte cadeau",
-      "giftCardCreated": "Carte cadeau créée",
-      "ticketProgramNamePlaceholder": "ex. Concert d'été 2026, Conférence VIP",
-      "eventName": "Nom de l'événement",
-      "eventNameRequired": "Le nom de l'événement est requis",
-      "eventNamePlaceholder": "ex. Festival de musique d'été",
-      "eventDate": "Date de l'événement",
-      "eventDateRequired": "La date de l'événement est requise",
-      "maxScans": "Scans maximum",
-      "venue": "Lieu",
-      "venueRequired": "Le lieu est requis",
-      "venuePlaceholder": "ex. Accor Arena",
-      "createTicket": "Créer un billet",
-      "ticketCreated": "Billet d'événement créé",
-      "businessCardNamePlaceholder": "Ma Carte de Visite",
-      "contactName": "Nom du Contact",
-      "contactNameRequired": "Le nom du contact est obligatoire",
-      "contactNamePlaceholder": "Jean Dupont",
-      "jobTitle": "Poste",
-      "jobTitlePlaceholder": "Directeur Commercial",
-      "phone": "Téléphone",
-      "phonePlaceholder": "+33 6 12 34 56 78",
-      "bcEmail": "Email",
-      "emailPlaceholder": "jean@entreprise.fr",
-      "bcWebsite": "Site Web",
-      "websitePlaceholder": "https://entreprise.fr",
-      "createBusinessCard": "Créer une Carte de Visite",
-      "businessCardCreated": "Carte de visite créée !"
+      "couponCreated": "Programme de coupon créé"
     },
     "studio": {
       "save": "Enregistrer",
@@ -1388,7 +1064,6 @@
       "details": "Détails",
       "notifications": "Alertes",
       "prize": "Prix",
-      "avatar": "Photo",
       "more": "Plus",
       "scratchCard": "Carte à gratter",
       "slotMachine": "Machine à sous",
@@ -1552,7 +1227,6 @@
       "stripImage": "Image du bandeau",
       "logo": "Logo",
       "prizeReveal": "Révélation du prix",
-      "holderPhoto": "Photo du titulaire",
       "notifications": "Notifications",
       "backOfPass": "Détails au verso du pass",
       "fields": "Champs et libellés",
@@ -1708,10 +1382,6 @@
       "rewardRevealGame": "Jeu de révélation de récompense",
       "showMinigame": "Afficher un mini-jeu amusant quand les clients gagnent une récompense"
     },
-    "avatar": {
-      "showHolderPhoto": "Afficher la photo du titulaire",
-      "overlayAvatar": "Superposer un avatar circulaire sur le bandeau"
-    },
     "template": {
       "cafe": "Café",
       "fineDining": "Gastronomique",
@@ -1754,7 +1424,6 @@
     "invalidFileType": "Le fichier doit être au format PNG, JPEG ou WebP",
     "invalidFileTypeSvg": "Le fichier doit être au format PNG, JPEG, WebP ou SVG",
     "templateLimitReached": "Limite de modèles atteinte ({limit}). Passez à un plan supérieur pour créer plus de modèles.",
-    "passTypeNotAllowed": "Ce type de pass n'est pas disponible avec votre plan actuel. Passez à un plan supérieur pour débloquer les 7 types de pass.",
     "templateNotFound": "Modèle de pass introuvable",
     "templateAlreadyArchived": "Le modèle est déjà archivé",
     "templateAlreadyActive": "Le modèle est déjà actif",
@@ -1783,13 +1452,8 @@
     "templateExpired": "Ce modèle de pass a expiré",
     "notACoupon": "Ce pass n'est pas un coupon",
     "couponAlreadyRedeemed": "Ce coupon a déjà été utilisé",
-    "notAMembership": "Ce pass n'est pas un abonnement",
-    "notAPointsCard": "Ce pass n'est pas une carte de points",
-    "rewardNotInCatalog": "Récompense introuvable dans le catalogue",
-    "notEnoughPoints": "Points insuffisants. Nécessaire : {needed}, disponible : {current}",
     "noRemainingUses": "Ce pass n'a plus d'utilisations restantes",
     "missingPassOrFile": "Instance de pass ou fichier manquant",
-    "passTypeNoPhoto": "Ce type de pass ne prend pas en charge les photos du titulaire",
     "missingPassId": "Identifiant de pass manquant",
     "csvName": "Nom",
     "csvEmail": "E-mail",
@@ -1797,16 +1461,14 @@
     "csvTotalInteractions": "Total des interactions",
     "csvActivePasses": "Passes actifs",
     "csvLastInteraction": "Dernière interaction",
-    "csvJoined": "Inscrit le",
-    "businessCardAlreadyExists": "Votre organisation possède déjà une carte de visite. Archivez l'existante pour en créer une nouvelle."
+    "csvJoined": "Inscrit le"
   },
   "admin": {
     "nav": {
       "overview": "Aperçu",
       "users": "Utilisateurs",
       "organizations": "Organisations",
-      "auditLog": "Journal d'audit",
-      "featureFlags": "Feature Flags"
+      "auditLog": "Journal d'audit"
     },
     "overview": {
       "title": "Aperçu de la plateforme",
@@ -1929,15 +1591,6 @@
       "actionBulkStatusChange": "Changement de statut en masse",
       "actionBulkExport": "Export en masse"
     },
-    "featureFlags": {
-      "title": "Feature Flags",
-      "description": "Contrôlez quels types de pass sont disponibles pour les utilisateurs. Les types désactivés affichent un badge \"Bientôt disponible\".",
-      "save": "Enregistrer",
-      "saved": "Feature flags mis à jour.",
-      "comingSoon": "Bientôt disponible",
-      "toggle": "activer/désactiver la disponibilité",
-      "hint": "Les rôles d'administrateur contournent toujours les feature flags et peuvent créer n'importe quel type de pass indépendamment de ces paramètres."
-    },
     "roles": {
       "user": "Utilisateur",
       "adminSupport": "Admin support",
@@ -1974,8 +1627,6 @@
     "welcomeBack": "Bienvenue ! Chargement de votre pass...",
     "somethingWentWrong": "Une erreur est survenue",
     "stampSubtitle": "{reward} après {visits} visites",
-    "pointsSubtitle": "Gagnez des points — {reward}",
-    "giftCardSubtitle": "Carte cadeau — {reward}",
     "card": {
       "title": "Carte de {name}",
       "rewardEarned": "Vous avez gagné une récompense !",

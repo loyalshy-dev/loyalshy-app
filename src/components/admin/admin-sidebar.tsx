@@ -11,7 +11,6 @@ import {
   LayoutDashboard,
   ScrollText,
   Shield,
-  ToggleRight,
   Users,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -61,7 +60,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
     { label: t("nav.users"), href: "/admin/users", icon: Users },
     { label: t("nav.organizations"), href: "/admin/organizations", icon: Building2 },
     { label: t("nav.auditLog"), href: "/admin/audit-log", icon: ScrollText },
-    { label: t("nav.featureFlags"), href: "/admin/feature-flags", icon: ToggleRight },
   ]
 
   function isActive(href: string) {

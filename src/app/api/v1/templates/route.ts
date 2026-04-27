@@ -1,41 +1,29 @@
-import { type NextRequest } from "next/server"
-import { apiHandler } from "@/lib/api-handler"
-import { handlePreflight } from "@/lib/api-cors"
-import { templateListParamsSchema } from "@/lib/api-schemas"
-import { queryTemplates } from "@/lib/api-data"
-import { serializeTemplate } from "@/lib/api-serializers"
-import { apiPaginated } from "@/lib/api-response"
-import { ValidationError } from "@/lib/api-errors"
-import type { ApiContext } from "@/lib/api-auth"
+import { NextRequest } from "next/server"
+import type { Prisma } from "@prisma/client"
+import { db } from "@/lib/db"
+import { sessionHandler, handlePreflight } from "@/lib/api-session"
+import { toApiTemplate } from "@/lib/api-serializers"
 
-export const OPTIONS = handlePreflight
+export function OPTIONS() {
+  return handlePreflight()
+}
 
-// GET /api/v1/templates — List templates
-export const GET = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
-  const params = Object.fromEntries(req.nextUrl.searchParams)
-  const parsed = templateListParamsSchema.safeParse(params)
+export async function GET(req: NextRequest) {
+  return sessionHandler(req, async (ctx) => {
+    const url = new URL(req.url)
+    const status = url.searchParams.get("status") ?? undefined
 
-  if (!parsed.success) {
-    throw new ValidationError(
-      parsed.error.issues.map((i) => ({
-        field: i.path.join("."),
-        message: i.message,
-      }))
-    )
-  }
+    const where: Prisma.PassTemplateWhereInput = {
+      organizationId: ctx.organizationId,
+      ...(status ? { status: status as Prisma.PassTemplateWhereInput["status"] } : {}),
+    }
 
-  const { page, per_page, status, pass_type } = parsed.data
-  const result = await queryTemplates(ctx.organizationId, {
-    page,
-    perPage: per_page,
-    status,
-    passType: pass_type,
+    const templates = await db.passTemplate.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: { _count: { select: { passInstances: true } } },
+    })
+
+    return templates.map(toApiTemplate)
   })
-
-  return apiPaginated(result.templates.map(serializeTemplate), {
-    page,
-    perPage: per_page,
-    total: result.total,
-    pageCount: result.pageCount,
-  })
-})
+}

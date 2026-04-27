@@ -14,11 +14,11 @@ datasource db {
 // ─── Enums ───────────────────────────────────────────────────
 
 enum UserRole {
-  USER           @map("user")
-  ADMIN_SUPPORT  @map("admin_support")
-  ADMIN_BILLING  @map("admin_billing")
-  ADMIN_OPS      @map("admin_ops")
-  SUPER_ADMIN    @map("super_admin")
+  USER          @map("user")
+  ADMIN_SUPPORT @map("admin_support")
+  ADMIN_BILLING @map("admin_billing")
+  ADMIN_OPS     @map("admin_ops")
+  SUPER_ADMIN   @map("super_admin")
 
   @@map("user_role")
 }
@@ -63,13 +63,8 @@ enum Plan {
 }
 
 enum PassType {
-  STAMP_CARD  @map("stamp_card")
-  COUPON      @map("coupon")
-  MEMBERSHIP  @map("membership")
-  POINTS      @map("points")
-  GIFT_CARD   @map("gift_card")
-  TICKET         @map("ticket")
-  BUSINESS_CARD  @map("business_card")
+  STAMP_CARD @map("stamp_card")
+  COUPON     @map("coupon")
 
   @@map("pass_type")
 }
@@ -82,20 +77,12 @@ enum TemplateStatus {
   @@map("template_status")
 }
 
-enum JoinMode {
-  OPEN        @map("open")
-  INVITE_ONLY @map("invite_only")
-
-  @@map("join_mode")
-}
-
 enum PassInstanceStatus {
   ACTIVE    @map("active")
   COMPLETED @map("completed")
   SUSPENDED @map("suspended")
   EXPIRED   @map("expired")
   REVOKED   @map("revoked")
-  VOIDED    @map("voided")
 
   @@map("pass_instance_status")
 }
@@ -109,23 +96,12 @@ enum WalletProvider {
 }
 
 enum InteractionType {
-  // Loyalty (stamp/coupon/membership/points)
-  STAMP            @map("stamp")
-  COUPON_REDEEM    @map("coupon_redeem")
-  CHECK_IN         @map("check_in")
-  POINTS_EARN      @map("points_earn")
-  POINTS_REDEEM    @map("points_redeem")
-  // Gift card
-  GIFT_CHARGE      @map("gift_charge")
-  GIFT_REFUND      @map("gift_refund")
-  // Ticket
-  TICKET_SCAN      @map("ticket_scan")
-  TICKET_VOID      @map("ticket_void")
-  // Generic
-  STATUS_CHANGE    @map("status_change")
-  REWARD_EARNED    @map("reward_earned")
-  REWARD_REDEEMED  @map("reward_redeemed")
-  NOTE             @map("note")
+  STAMP           @map("stamp")
+  COUPON_REDEEM   @map("coupon_redeem")
+  STATUS_CHANGE   @map("status_change")
+  REWARD_EARNED   @map("reward_earned")
+  REWARD_REDEEMED @map("reward_redeemed")
+  NOTE            @map("note")
 
   @@map("interaction_type")
 }
@@ -202,13 +178,8 @@ enum LabelFormat {
 }
 
 enum DesignCardType {
-  STAMP       @map("stamp")
-  POINTS      @map("points")
-  TIER        @map("tier")
-  COUPON      @map("coupon")
-  GIFT_CARD   @map("gift_card")
-  TICKET      @map("ticket")
-  GENERIC     @map("generic")
+  STAMP  @map("stamp")
+  COUPON @map("coupon")
 
   @@map("design_card_type")
 }
@@ -234,10 +205,9 @@ model User {
   accounts              Account[]
   members               Member[]
   invitations           Invitation[]
-  performedInteractions Interaction[] @relation("PerformedBy")
-  redeemedRewards       Reward[]      @relation("RedeemedBy")
-  createdApiKeys        ApiKey[]      @relation("CreatedApiKeys")
-  adminAuditLogs        AdminAuditLog[] @relation("AdminAuditLogs")
+  performedInteractions Interaction[]        @relation("PerformedBy")
+  redeemedRewards       Reward[]             @relation("RedeemedBy")
+  adminAuditLogs        AdminAuditLog[]      @relation("AdminAuditLogs")
   devicePairingTokens   DevicePairingToken[] @relation("DevicePairingTokens")
 
   @@map("user")
@@ -317,20 +287,17 @@ model Organization {
   address        String?
   phone          String?
   website        String?
-  timezone       String @default("UTC")
-  settings       Json   @default("{}")
+  timezone       String  @default("UTC")
+  settings       Json    @default("{}")
 
-  members            Member[]
-  invitations        Invitation[]
-  passTemplates      PassTemplate[]
-  contacts           Contact[]
-  interactions       Interaction[]
-  rewards            Reward[]
-  staffInvitations   StaffInvitation[]
-  analyticsSnapshots AnalyticsSnapshot[]
-  apiKeys            ApiKey[]
-  webhookEndpoints   WebhookEndpoint[]
-  apiRequestLogs      ApiRequestLog[]
+  members             Member[]
+  invitations         Invitation[]
+  passTemplates       PassTemplate[]
+  contacts            Contact[]
+  interactions        Interaction[]
+  rewards             Reward[]
+  staffInvitations    StaffInvitation[]
+  analyticsSnapshots  AnalyticsSnapshot[]
   devicePairingTokens DevicePairingToken[]
 
   @@map("organization")
@@ -376,7 +343,6 @@ model PassTemplate {
   name               String
   description        String?        @db.Text
   passType           PassType
-  joinMode           JoinMode       @default(OPEN)
   status             TemplateStatus @default(DRAFT)
   startsAt           DateTime       @default(now())
   endsAt             DateTime?
@@ -468,11 +434,11 @@ model Interaction {
   metadata       Json            @default("{}")
   createdAt      DateTime        @default(now())
 
-  contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  passTemplate PassTemplate @relation(fields: [passTemplateId], references: [id], onDelete: Cascade)
+  contact      Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  passTemplate PassTemplate  @relation(fields: [passTemplateId], references: [id], onDelete: Cascade)
   passInstance PassInstance? @relation(fields: [passInstanceId], references: [id], onDelete: SetNull)
-  performedBy  User?        @relation("PerformedBy", fields: [performedById], references: [id], onDelete: SetNull)
+  performedBy  User?         @relation("PerformedBy", fields: [performedById], references: [id], onDelete: SetNull)
 
   @@index([organizationId, createdAt])
   @@index([organizationId, type])
@@ -494,14 +460,13 @@ model Reward {
   expiresAt      DateTime
   redeemedById   String?
   description    String?
-  pointsCost     Int?
   revealedAt     DateTime?
 
-  contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  passTemplate PassTemplate @relation(fields: [passTemplateId], references: [id], onDelete: Cascade)
+  contact      Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  passTemplate PassTemplate  @relation(fields: [passTemplateId], references: [id], onDelete: Cascade)
   passInstance PassInstance? @relation(fields: [passInstanceId], references: [id], onDelete: SetNull)
-  redeemedBy   User?        @relation("RedeemedBy", fields: [redeemedById], references: [id], onDelete: SetNull)
+  redeemedBy   User?         @relation("RedeemedBy", fields: [redeemedById], references: [id], onDelete: SetNull)
 
   @@index([contactId])
   @@index([passInstanceId])
@@ -625,85 +590,6 @@ model AnalyticsSnapshot {
   @@map("analytics_snapshot")
 }
 
-// ─── API & Webhooks ─────────────────────────────────────────
-
-model ApiKey {
-  id             String    @id @default(dbgenerated("uuidv7()::text"))
-  organizationId String
-  name           String
-  keyPrefix      String
-  keyHash        String    @unique
-  scopes         String[]  @default([])
-  lastUsedAt     DateTime?
-  expiresAt      DateTime?
-  revokedAt      DateTime?
-  createdAt      DateTime  @default(now())
-  createdById    String
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdBy    User         @relation("CreatedApiKeys", fields: [createdById], references: [id])
-
-  @@index([organizationId])
-  @@index([keyHash])
-  @@map("api_key")
-}
-
-model WebhookEndpoint {
-  id             String    @id @default(dbgenerated("uuidv7()::text"))
-  organizationId String
-  url            String
-  secret         String
-  events         String[]  @default([])
-  enabled        Boolean   @default(true)
-  failureCount   Int       @default(0)
-  lastDeliveryAt DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  deliveries   WebhookDelivery[]
-
-  @@index([organizationId])
-  @@map("webhook_endpoint")
-}
-
-model WebhookDelivery {
-  id                String    @id @default(dbgenerated("uuidv7()::text"))
-  webhookEndpointId String
-  eventType         String
-  payload           Json
-  statusCode        Int?
-  responseBody      String?   @db.Text
-  attempts          Int       @default(0)
-  deliveredAt       DateTime?
-  createdAt         DateTime  @default(now())
-
-  webhookEndpoint WebhookEndpoint @relation(fields: [webhookEndpointId], references: [id], onDelete: Cascade)
-
-  @@index([webhookEndpointId, createdAt])
-  @@map("webhook_delivery")
-}
-
-model ApiRequestLog {
-  id             String   @id @default(dbgenerated("uuidv7()::text"))
-  organizationId String
-  apiKeyId       String
-  requestId      String
-  method         String
-  path           String
-  statusCode     Int
-  latencyMs      Int
-  userAgent      String?
-  ipAddress      String?
-  createdAt      DateTime @default(now())
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@index([organizationId, createdAt])
-  @@index([apiKeyId, createdAt])
-  @@map("api_request_log")
-}
-
 // ─── Admin Audit Log ──────────────────────────────────────────
 
 model AdminAuditLog {
@@ -728,16 +614,6 @@ model AdminAuditLog {
   @@map("admin_audit_log")
 }
 
-// ─── Platform Config (single-row) ──────────────────────────────
-
-model PlatformConfig {
-  id                   String   @id @default("singleton")
-  disabledPassTypes    String[] @default([])
-  updatedAt            DateTime @updatedAt
-
-  @@map("platform_config")
-}
-
 // ─── Device Pairing Token (mobile app QR login) ───────────────
 
 model DevicePairingToken {
@@ -749,8 +625,8 @@ model DevicePairingToken {
   claimedAt       DateTime?
   createdAt       DateTime  @default(now())
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdByUser  User       @relation("DevicePairingTokens", fields: [createdByUserId], references: [id])
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdByUser User         @relation("DevicePairingTokens", fields: [createdByUserId], references: [id])
 
   @@index([organizationId])
   @@map("device_pairing_token")

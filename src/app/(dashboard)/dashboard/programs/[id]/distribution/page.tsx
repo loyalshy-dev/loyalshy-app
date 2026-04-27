@@ -7,8 +7,6 @@ import { DirectIssueSection } from "@/components/dashboard/programs/direct-issue
 import { CsvImportSection } from "@/components/dashboard/programs/csv-import-section"
 import { ShareLinkSection } from "@/components/dashboard/programs/distribution-share-section"
 import { DistributionStats } from "@/components/dashboard/programs/distribution-stats"
-import { JoinModeToggle } from "@/components/dashboard/programs/join-mode-toggle"
-import { EmbedSnippetSection } from "@/components/dashboard/programs/embed-snippet-section"
 import { NfcSection } from "@/components/dashboard/programs/nfc-section"
 
 export default async function ProgramDistributionPage(props: {
@@ -37,7 +35,6 @@ export default async function ProgramDistributionPage(props: {
         id: true,
         name: true,
         passType: true,
-        joinMode: true,
         config: true,
         passDesign: {
           select: {
@@ -79,16 +76,8 @@ export default async function ProgramDistributionPage(props: {
   const joinPath = `/join/${organization.slug}?program=${program.id}`
   const joinUrl = origin ? `${origin}${joinPath}` : joinPath
 
-  const isOpen = program.joinMode === "OPEN"
-
   return (
     <div className="space-y-6">
-      <JoinModeToggle
-        organizationId={organization.id}
-        templateId={program.id}
-        initialJoinMode={program.joinMode}
-      />
-
       <DistributionStats
         totalIssued={totalIssued}
         issuedThisWeek={issuedThisWeek}
@@ -96,39 +85,34 @@ export default async function ProgramDistributionPage(props: {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* QR code + share link only for OPEN programs */}
-        {isOpen && (
-          <QrCodeDisplay
-            organization={{
-              name: organization.name,
-              slug: organization.slug,
-              logo: organization.logo,
-              logoApple: organization.logoApple ?? null,
-              logoGoogle: organization.logoGoogle ?? null,
-              brandColor: organization.brandColor,
-            }}
-            templates={[
-              {
-                id: program.id,
-                name: program.name,
-                passType: program.passType,
-                templateConfig: program.config,
-                rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
-                visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
-                cardDesign: program.passDesign ?? null,
-              },
-            ]}
-            joinUrl={joinUrl}
-          />
-        )}
+        <QrCodeDisplay
+          organization={{
+            name: organization.name,
+            slug: organization.slug,
+            logo: organization.logo,
+            logoApple: organization.logoApple ?? null,
+            logoGoogle: organization.logoGoogle ?? null,
+            brandColor: organization.brandColor,
+          }}
+          templates={[
+            {
+              id: program.id,
+              name: program.name,
+              passType: program.passType,
+              templateConfig: program.config,
+              rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
+              visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
+              cardDesign: program.passDesign ?? null,
+            },
+          ]}
+          joinUrl={joinUrl}
+        />
         <div className="space-y-6">
-          {isOpen && (
-            <ShareLinkSection
-              joinUrl={joinUrl}
-              templateName={program.name}
-              organizationName={organization.name}
-            />
-          )}
+          <ShareLinkSection
+            joinUrl={joinUrl}
+            templateName={program.name}
+            organizationName={organization.name}
+          />
           <DirectIssueSection
             templateId={program.id}
             templateName={program.name}
@@ -139,16 +123,7 @@ export default async function ProgramDistributionPage(props: {
             templateId={program.id}
             templateName={program.name}
           />
-          {isOpen && (
-            <NfcSection joinUrl={joinUrl} />
-          )}
-          {program.passType === "BUSINESS_CARD" && isOpen && (
-            <EmbedSnippetSection
-              joinUrl={joinUrl}
-              organizationName={organization.name}
-              templateName={program.name}
-            />
-          )}
+          <NfcSection joinUrl={joinUrl} />
         </div>
       </div>
 

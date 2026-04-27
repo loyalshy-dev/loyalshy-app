@@ -1,24 +1,36 @@
-import { type NextRequest } from "next/server"
-import { apiHandler } from "@/lib/api-handler"
-import { handlePreflight } from "@/lib/api-cors"
-import { queryPassInstanceDetail } from "@/lib/api-data"
-import { serializePassInstanceDetail } from "@/lib/api-serializers"
-import { apiSuccess } from "@/lib/api-response"
-import { NotFoundError } from "@/lib/api-errors"
-import type { ApiContext } from "@/lib/api-auth"
+import { NextRequest } from "next/server"
+import { db } from "@/lib/db"
+import { sessionHandler, handlePreflight, notFound } from "@/lib/api-session"
+import { toApiPassInstanceDetail } from "@/lib/api-serializers"
 
-export const OPTIONS = handlePreflight
+export function OPTIONS() {
+  return handlePreflight()
+}
 
-// GET /api/v1/passes/:id — Get pass instance detail
-export const GET = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
-  const segments = req.nextUrl.pathname.split("/")
-  const id = segments[segments.length - 1]!
-
-  const instance = await queryPassInstanceDetail(ctx.organizationId, id)
-
-  if (!instance) {
-    throw new NotFoundError(`Pass instance with ID ${id} was not found.`)
-  }
-
-  return apiSuccess(serializePassInstanceDetail(instance))
-})
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
+  return sessionHandler(req, async (ctx) => {
+    // Look up by id OR walletPassId (Apple/Google QRs encode walletPassId)
+    const pass = await db.passInstance.findFirst({
+      where: {
+        OR: [{ id }, { walletPassId: id }],
+        passTemplate: { organizationId: ctx.organizationId },
+      },
+      include: {
+        passTemplate: { select: { id: true, name: true, passType: true, config: true } },
+        contact: { select: { id: true, fullName: true, email: true } },
+        rewards: { orderBy: { earnedAt: "desc" } },
+        interactions: {
+          orderBy: { createdAt: "desc" },
+          take: 10,
+          include: { passTemplate: { select: { name: true, passType: true } } },
+        },
+      },
+    })
+    if (!pass) throw notFound("Pass not found")
+    return toApiPassInstanceDetail(pass)
+  })
+}

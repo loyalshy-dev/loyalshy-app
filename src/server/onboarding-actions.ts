@@ -10,7 +10,7 @@ import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { buildCardUrl } from "@/lib/card-access"
-import { parseCouponConfig, parseMembershipConfig, computeMembershipExpiresAt, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
+import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 import { verifyCardSignature } from "@/lib/card-access"
 import type { PublicTemplateInfo } from "@/types/pass-instance"
 import type { MinigameConfig } from "@/types/pass-types"
@@ -83,7 +83,7 @@ export async function getOrganizationBySlug(
       brandColor: true,
       secondaryColor: true,
       passTemplates: {
-        where: { status: "ACTIVE", joinMode: "OPEN" },
+        where: { status: "ACTIVE" },
         select: {
           id: true,
           name: true,
@@ -357,10 +357,9 @@ export async function joinTemplate(
   }
 
   const { organizationSlug, templateId } = parsed.data
-  let fullName = sanitizeText(parsed.data.fullName ?? "", 100)
-  let cleanEmail = sanitizeText(parsed.data.email ?? "", 255)
+  const fullName = sanitizeText(parsed.data.fullName ?? "", 100)
+  const cleanEmail = sanitizeText(parsed.data.email ?? "", 255)
 
-  // BUSINESS_CARD skips the form — defer email validation until after template fetch
   const deferEmailValidation = !cleanEmail
 
   // Fetch organization
@@ -380,28 +379,16 @@ export async function joinTemplate(
       organizationId: organization.id,
       status: "ACTIVE",
     },
-    select: { id: true, passType: true, config: true, joinMode: true },
+    select: { id: true, passType: true, config: true },
   })
 
   if (!template) {
     return { success: false, error: "No active pass template found" }
   }
 
-  // Reject self-join for invite-only programs
-  if (template.joinMode === "INVITE_ONLY") {
-    return { success: false, error: "This program is invite-only. Please contact the business to get a pass." }
-  }
-
-  // For non-BUSINESS_CARD types, email is required
-  if (deferEmailValidation && template.passType !== "BUSINESS_CARD") {
+  // Email is required for self-join
+  if (deferEmailValidation) {
     return { success: false, error: "Valid email address is required." }
-  }
-
-  // BUSINESS_CARD: generate anonymous contact identity
-  if (template.passType === "BUSINESS_CARD" && !cleanEmail) {
-    const uniqueId = crypto.randomUUID().slice(0, 8)
-    cleanEmail = `visitor-${uniqueId}@anonymous.loyalshy.com`
-    if (!fullName) fullName = "Visitor"
   }
 
   const templateConfig = (template.config as Record<string, unknown>) ?? {}
@@ -485,9 +472,6 @@ export async function joinTemplate(
     // Generate walletPassId upfront so the browser card page has a scannable QR
     const walletPassId = randomUUID()
 
-    // Type-specific instance data
-    const membershipConfig = template.passType === "MEMBERSHIP" ? parseMembershipConfig(template.config) : null
-
     const instanceDataObj: Record<string, unknown> = {
       currentCycleVisits: 0,
       totalInteractions: 0,
@@ -500,7 +484,6 @@ export async function joinTemplate(
         walletPassId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data: instanceDataObj as any,
-        ...(membershipConfig ? { expiresAt: computeMembershipExpiresAt(membershipConfig) } : {}),
       },
       select: {
         id: true,
@@ -769,12 +752,9 @@ async function issuePassForInstance(
         cardDesign,
         programType: template.passType,
         programConfig: template.config,
-        pointsBalance: instance.pointsBalance ?? 0,
         hasUnrevealedPrize: instance.hasUnrevealedPrize ?? false,
-        holderPhotoUrl: instance.holderPhotoUrl ?? undefined,
         passInstanceId: instance.passInstanceId,
         organizationSlug: organization.slug,
-        templateId: template.id,
       })
 
       // Store wallet fields on PassInstance
@@ -853,8 +833,6 @@ async function issuePassForInstance(
       templateEndsAt: template.endsAt,
       passType: template.passType,
       templateConfig: template.config,
-      pointsBalance: instance.pointsBalance ?? 0,
-      holderPhotoUrl: instance.holderPhotoUrl ?? undefined,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
     })

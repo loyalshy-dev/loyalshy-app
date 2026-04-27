@@ -10,8 +10,8 @@ import {
   WEB_SERVICE_BASE_URL,
 } from "./constants"
 import type { CardDesignData, CardType } from "../card-design"
-import { getFieldLayout, formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters, getFieldConfig, splitFieldsForApple } from "../card-design"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, parseBusinessCardConfig, getCheapestCatalogItem } from "../../pass-config"
+import { formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters, getFieldConfig, splitFieldsForApple } from "../card-design"
+import { parseCouponConfig, formatCouponValue } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -45,20 +45,9 @@ export type PassGenerationInput = {
   // Program type + config for type-specific pass content
   programType?: string
   programConfig?: unknown
-  // Points balance for POINTS program type
-  pointsBalance?: number
-  // Gift card data
-  giftBalanceCents?: number
-  giftCurrency?: string
-  // Ticket data
-  ticketScanCount?: number
-  // Holder photo URL (MEMBERSHIP — per-instance from PassInstance.data.holderPhotoUrl)
-  holderPhotoUrl?: string | null
   // Pass instance + org slug for generating card page links (prize reveal)
   passInstanceId?: string
   organizationSlug?: string
-  // Template ID for join URL (used in BUSINESS_CARD QR)
-  templateId?: string
   // Whether there is an unrevealed prize to reveal
   hasUnrevealedPrize?: boolean
 }
@@ -74,7 +63,6 @@ export async function generateApplePass(
   const showStrip = design?.showStrip ?? false
   const textColor = design?.textColor ?? null
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
-  const layout = getFieldLayout(cardType)
 
   // Determine strip image: dynamic stamp grid or static URL
   let stripImageUrl: string | null = null
@@ -88,7 +76,7 @@ export async function generateApplePass(
   const stripPrimary = stripFilters.stripColor1 ?? design?.primaryColor ?? input.brandColor ?? "#1a1a2e"
   const stripSecondary = stripFilters.stripColor2 ?? design?.secondaryColor ?? input.secondaryColor ?? "#ffffff"
 
-  const isStampType = cardType === "STAMP" || cardType === "POINTS"
+  const isStampType = cardType === "STAMP"
   if (showStrip && isStampGrid && design && isStampType) {
     // Generate stamp grid strip image dynamically for this enrollment
     const { generateStampGridImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
@@ -182,112 +170,21 @@ export async function generateApplePass(
     }
   }
 
-  // Apple eventTicket (TICKET) supports background images instead of strip.
-  // iOS applies a Gaussian blur to background.png automatically, creating a frosted glass effect.
-  // When a strip image is set for tickets, route it to background instead of strip.
-  const isTicketType = input.programType === "TICKET"
-
-  // For tickets: route strip image to background, not strip
-  const effectiveStripUrl = isTicketType ? null : stripImageUrl
-  const backgroundImageUrl = isTicketType ? stripImageUrl : null
-
   const icons = await getIconBuffers(
     input.organizationLogoApple ?? input.organizationLogo,
-    effectiveStripUrl,
+    stripImageUrl,
     stripFilters.logoAppleZoom,
-    null, // no thumbnail — all types use storeCard with native strip
-    backgroundImageUrl,
+    null,
+    null,
   )
 
   // If we have a dynamically generated strip buffer, inject it directly
   if (stampGridStripBuffer) {
-    if (isTicketType) {
-      // For tickets, use as background instead of strip (iOS blurs it automatically)
-      icons["background.png"] = stampGridStripBuffer
-      icons["background@2x.png"] = stampGridStripBuffer
-      icons["background@3x.png"] = stampGridStripBuffer
-    } else {
-      icons["strip.png"] = stampGridStripBuffer
-      icons["strip@2x.png"] = stampGridStripBuffer
-      icons["strip@3x.png"] = stampGridStripBuffer
-    }
+    icons["strip.png"] = stampGridStripBuffer
+    icons["strip@2x.png"] = stampGridStripBuffer
+    icons["strip@3x.png"] = stampGridStripBuffer
   }
 
-  // Membership: composite holder photo onto strip image (circular avatar overlay)
-  // Mirrors the card renderer's CSS overlay behavior for real Apple Wallet passes.
-  if (input.programType === "MEMBERSHIP" && input.holderPhotoUrl && showStrip) {
-    const membershipCfg = parseMembershipConfig(input.programConfig)
-    if (membershipCfg?.showHolderPhoto) {
-      try {
-        const { default: sharp } = await import("sharp")
-        const { APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
-
-        // Fetch holder photo
-        const photoRes = await fetch(input.holderPhotoUrl, { signal: AbortSignal.timeout(5000) })
-        if (photoRes.ok) {
-          const photoBuffer = Buffer.from(await photoRes.arrayBuffer())
-          const avatarSize = 120 // circular avatar diameter in pixels (@3x)
-
-          // Create circular mask
-          const circleMask = Buffer.from(
-            `<svg width="${avatarSize}" height="${avatarSize}"><circle cx="${avatarSize / 2}" cy="${avatarSize / 2}" r="${avatarSize / 2}" fill="white"/></svg>`
-          )
-          const circularAvatar = await sharp(photoBuffer)
-            .resize(avatarSize, avatarSize, { fit: "cover", position: "centre" })
-            .composite([{ input: circleMask, blend: "dest-in" }])
-            .png()
-            .toBuffer()
-
-          // Add subtle border ring
-          const borderSize = avatarSize + 6
-          const borderRing = Buffer.from(
-            `<svg width="${borderSize}" height="${borderSize}"><circle cx="${borderSize / 2}" cy="${borderSize / 2}" r="${borderSize / 2}" fill="rgba(255,255,255,0.25)"/></svg>`
-          )
-          const avatarWithBorder = await sharp(borderRing)
-            .composite([{
-              input: circularAvatar,
-              left: 3,
-              top: 3,
-            }])
-            .png()
-            .toBuffer()
-
-          // Calculate horizontal position
-          const position = membershipCfg.holderPhotoPosition ?? "right"
-          const left = position === "left" ? 72
-            : position === "right" ? APPLE_STRIP_WIDTH - borderSize - 72
-            : Math.round((APPLE_STRIP_WIDTH - borderSize) / 2)
-          const top = Math.round((APPLE_STRIP_HEIGHT - borderSize) / 2)
-
-          // Get the current strip buffer (either generated or fetched)
-          let baseStrip: Buffer | null = icons["strip.png"] ?? stampGridStripBuffer ?? null
-          if (!baseStrip && stripImageUrl) {
-            // Strip was set via URL but not yet as buffer — fetch it
-            const stripRes = await fetch(stripImageUrl, { signal: AbortSignal.timeout(5000) })
-            if (stripRes.ok) baseStrip = Buffer.from(await stripRes.arrayBuffer())
-          }
-          if (!baseStrip) {
-            // No strip image — create solid color background
-            const bgColor = stripPrimary
-            baseStrip = await sharp({ create: { width: APPLE_STRIP_WIDTH, height: APPLE_STRIP_HEIGHT, channels: 4, background: bgColor } }).png().toBuffer()
-          }
-
-          // Composite avatar onto strip
-          const composited = await sharp(baseStrip)
-            .resize(APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, { fit: "cover" })
-            .composite([{ input: avatarWithBorder, left, top }])
-            .png()
-            .toBuffer()
-
-          icons["strip.png"] = composited
-          icons["strip@2x.png"] = composited
-          icons["strip@3x.png"] = composited
-        }
-      } catch {
-        // Skip holder photo compositing on failure — pass still works without it
-      }
-    }
-  }
   const colors = getPassColors(
     design?.primaryColor ?? input.brandColor,
     design?.secondaryColor ?? input.secondaryColor,
@@ -298,15 +195,7 @@ export async function generateApplePass(
   // Type-aware pass description
   const passDescription = (() => {
     const name = input.programName ?? input.organizationName
-    switch (input.programType) {
-      case "COUPON": return `${name} Coupon`
-      case "MEMBERSHIP": return `${name} Membership`
-      case "POINTS": return `${name} Points Card`
-      case "GIFT_CARD": return `${name} Gift Card`
-      case "TICKET": return `${name} Ticket`
-      case "BUSINESS_CARD": return `${name} Business Card`
-      default: return `${name} Loyalty Card`
-    }
+    return input.programType === "COUPON" ? `${name} Coupon` : `${name} Loyalty Card`
   })()
 
   const pass = new PKPass(icons, certs, {
@@ -325,27 +214,18 @@ export async function generateApplePass(
     sharingProhibited: true,
   })
 
-  // Apple Wallet pass type mapping
-  switch (input.programType) {
-    case "TICKET": pass.type = "eventTicket"; break
-    default: pass.type = "storeCard"; break // STAMP_CARD, COUPON, POINTS, GIFT_CARD, MEMBERSHIP, BUSINESS_CARD
-  }
+  // Apple Wallet pass type — STAMP_CARD and COUPON both use storeCard
+  pass.type = "storeCard"
 
   // Apple Watch notes:
   // - Strip images are NOT displayed on Apple Watch — only back fields and text fields render.
   // - Back fields are accessible via the (i) button on Watch.
   // - Keep important info in text fields (primary/secondary/auxiliary), not just the strip.
 
-  // ── Barcode: QR code ──
-  // BUSINESS_CARD: encode the join URL so recipients can scan → open → add to their own wallet
-  // Other types: encode the walletPassId (auth token) for staff scanning
-  const baseUrl = process.env.BETTER_AUTH_URL ?? "https://www.loyalshy.com"
-  const qrMessage = input.programType === "BUSINESS_CARD" && input.organizationSlug
-    ? `${baseUrl}/join/${input.organizationSlug}${input.templateId ? `?program=${input.templateId}` : ""}`
-    : input.authenticationToken
+  // ── Barcode: QR code (encodes the walletPassId/auth token for staff scanning) ──
   pass.setBarcodes({
     format: "PKBarcodeFormatQR",
-    message: qrMessage,
+    message: input.authenticationToken,
     messageEncoding: "iso-8859-1",
   })
 
@@ -376,12 +256,6 @@ export async function generateApplePass(
 
   // Parse type-specific config for field data
   const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
-  const membershipConfig = input.programType === "MEMBERSHIP" ? parseMembershipConfig(input.programConfig) : null
-  const pointsConfig = input.programType === "POINTS" ? parsePointsConfig(input.programConfig) : null
-  const giftCardConfig = input.programType === "GIFT_CARD" ? parseGiftCardConfig(input.programConfig) : null
-  const ticketConfig = input.programType === "TICKET" ? parseTicketConfig(input.programConfig) : null
-  const businessCardConfig = input.programType === "BUSINESS_CARD" ? parseBusinessCardConfig(input.programConfig) : null
-  const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Custom field labels from editorConfig
   const customLabels = stripFilters.fieldLabels ?? {}
@@ -406,34 +280,10 @@ export async function generateApplePass(
       : { key: "discount", label: lbl("discount", "DISCOUNT"), value: couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription },
     validUntil: { key: "validUntil", label: lbl("validUntil", "VALID UNTIL"), value: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
     couponCode: { key: "couponCode", label: lbl("couponCode", "CODE"), value: couponConfig?.couponCode ?? "" },
-    // TIER/MEMBERSHIP fields
-    tierName: { key: "tierName", label: lbl("tierName", "TIER"), value: membershipConfig?.membershipTier ?? "" },
-    benefits: { key: "benefits", label: lbl("benefits", "BENEFITS"), value: membershipConfig?.benefits ?? "" },
-    // POINTS fields
-    pointsBalance: { key: "pointsBalance", label: lbl("pointsBalance", "POINTS"), value: String(input.pointsBalance ?? 0) },
-    nextRewardPoints: { key: "nextRewardPoints", label: lbl("nextRewardPoints", "NEXT REWARD"), value: cheapestItem ? `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` : "" },
-    earnRate: { key: "earnRate", label: lbl("earnRate", "EARN RATE"), value: pointsConfig ? `${pointsConfig.pointsPerVisit} pts/visit` : "" },
-    // GIFT_CARD fields
-    giftBalance: { key: "giftBalance", label: lbl("giftBalance", "BALANCE"), value: giftCardConfig ? `${giftCardConfig.currency} ${((input.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
-    giftInitial: { key: "giftInitial", label: lbl("giftInitial", "INITIAL VALUE"), value: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
-    // TICKET fields
-    eventName: { key: "eventName", label: lbl("eventName", "EVENT"), value: ticketConfig?.eventName ?? "" },
-    eventDate: { key: "eventDate", label: lbl("eventDate", "DATE"), value: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
-    eventVenue: { key: "eventVenue", label: lbl("eventVenue", "VENUE"), value: ticketConfig?.eventVenue ?? "" },
-    scanStatus: { key: "scanStatus", label: lbl("scanStatus", "SCANS"), value: `${input.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
     // Generic fields
     title: { key: "title", label: lbl("title", "TITLE"), value: input.programName ?? "" },
     description: { key: "description", label: lbl("description", "DESCRIPTION"), value: input.rewardDescription },
-    // BUSINESS_CARD fields (from template config, not from contact/recipient)
-    contactName: { key: "contactName", label: lbl("contactName", "NAME"), value: businessCardConfig?.contactName ?? input.customerName },
-    jobTitle: { key: "jobTitle", label: lbl("jobTitle", "TITLE"), value: businessCardConfig?.jobTitle ?? "" },
-    phone: { key: "phone", label: lbl("phone", "PHONE"), value: businessCardConfig?.phone ?? "" },
-    email: { key: "email", label: lbl("email", "EMAIL"), value: businessCardConfig?.email ?? "" },
-    website: { key: "website", label: lbl("website", "WEBSITE"), value: businessCardConfig?.website ?? "" },
     address: { key: "address", label: lbl("address", "ADDRESS"), value: design?.mapAddress ?? "" },
-    linkedin: { key: "linkedin", label: lbl("linkedin", "LINKEDIN"), value: businessCardConfig?.linkedinUrl ?? "" },
-    twitter: { key: "twitter", label: lbl("twitter", "X"), value: businessCardConfig?.twitterUrl || design?.socialLinks.x || "" },
-    instagram: { key: "instagram", label: lbl("instagram", "INSTAGRAM"), value: businessCardConfig?.instagramUrl || design?.socialLinks.instagram || "" },
   }
 
   // User-configurable field layout for all pass types
@@ -487,8 +337,8 @@ export async function generateApplePass(
 
   // ── Back fields: Program info, T&C, contact, card design extras ──
 
-  // If programName is provided, add a "Program" back field (skip for business cards)
-  if (input.programName && input.programType !== "BUSINESS_CARD") {
+  // If programName is provided, add a "Program" back field
+  if (input.programName) {
     pass.backFields.push({
       key: "program",
       label: "Program",
@@ -515,75 +365,6 @@ export async function generateApplePass(
       label: "How to Redeem",
       value: "Show this pass to staff when placing your order. The coupon will be applied at checkout.",
     })
-  } else if (input.programType === "MEMBERSHIP" && membershipConfig) {
-    pass.backFields.push({
-      key: "membershipTier",
-      label: "Membership Tier",
-      value: membershipConfig.membershipTier,
-    })
-    if (membershipConfig.benefits) {
-      pass.backFields.push({
-        key: "membershipBenefits",
-        label: "Benefits",
-        value: membershipConfig.benefits,
-      })
-    }
-    pass.backFields.push({
-      key: "membershipTerms",
-      label: "Membership",
-      value: `Show this pass when visiting to check in. Your membership entitles you to the benefits listed above.`,
-    })
-  } else if (input.programType === "POINTS" && pointsConfig) {
-    pass.backFields.push({
-      key: "pointsBalance",
-      label: "POINTS BALANCE",
-      value: String(input.pointsBalance ?? 0),
-    })
-    pass.backFields.push({
-      key: "earnRate",
-      label: "EARN RATE",
-      value: `${pointsConfig.pointsPerVisit} points per visit`,
-    })
-    const catalogText = pointsConfig.catalog.map(item => `${item.name}: ${item.pointsCost} pts`).join("\n")
-    pass.backFields.push({
-      key: "rewardCatalog",
-      label: "REWARD CATALOG",
-      value: catalogText,
-    })
-  } else if (input.programType === "GIFT_CARD" && giftCardConfig) {
-    const balanceCents = input.giftBalanceCents ?? giftCardConfig.initialBalanceCents
-    pass.backFields.push({
-      key: "giftDetails",
-      label: "Gift Card Details",
-      value: `Balance: ${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}\nInitial Value: ${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}${giftCardConfig.partialRedemption ? "\nPartial redemption is allowed." : "\nFull balance must be used at once."}`,
-    })
-    if (giftCardConfig.expiryMonths) {
-      pass.backFields.push({
-        key: "giftExpiry",
-        label: "Expiry",
-        value: `This gift card expires ${giftCardConfig.expiryMonths} months after issue.`,
-      })
-    }
-    pass.backFields.push({
-      key: "giftUsage",
-      label: "How to Use",
-      value: "Present this pass at checkout. Your balance will be deducted automatically.",
-    })
-  } else if (input.programType === "TICKET" && ticketConfig) {
-    pass.backFields.push(
-      {
-        key: "ticketEvent",
-        label: "Event",
-        value: `${ticketConfig.eventName}\n${new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}\n${ticketConfig.eventVenue}`,
-      },
-      {
-        key: "ticketScans",
-        label: "Scan Status",
-        value: `${input.ticketScanCount ?? 0} of ${ticketConfig.maxScans} scans used.`,
-      }
-    )
-  } else if (input.programType === "BUSINESS_CARD") {
-    // Business card: only contact details on back, no loyalty program info
   } else {
     // STAMP_CARD (default)
     pass.backFields.push(
@@ -615,38 +396,8 @@ export async function generateApplePass(
     )
   }
 
-  // Business card contact details back fields
-  if (input.programType === "BUSINESS_CARD" && businessCardConfig) {
-    if (businessCardConfig.contactName) {
-      pass.backFields.push({ key: "bcName", label: "Name", value: businessCardConfig.contactName })
-    }
-    if (businessCardConfig.jobTitle) {
-      pass.backFields.push({ key: "bcTitle", label: "Title", value: businessCardConfig.jobTitle })
-    }
-    if (businessCardConfig.phone) {
-      pass.backFields.push({ key: "bcPhone", label: "Phone", value: businessCardConfig.phone })
-    }
-    if (businessCardConfig.email) {
-      pass.backFields.push({ key: "bcEmail", label: "Email", value: businessCardConfig.email })
-    }
-    if (businessCardConfig.website) {
-      pass.backFields.push({ key: "bcWebsite", label: "Website", value: businessCardConfig.website })
-    }
-    const socialLines: string[] = []
-    if (businessCardConfig.linkedinUrl) socialLines.push(`LinkedIn: ${businessCardConfig.linkedinUrl}`)
-    if (businessCardConfig.twitterUrl) socialLines.push(`X: ${businessCardConfig.twitterUrl}`)
-    if (businessCardConfig.instagramUrl) socialLines.push(`Instagram: ${businessCardConfig.instagramUrl}`)
-    if (socialLines.length > 0) {
-      pass.backFields.push({ key: "bcSocials", label: "Social Media", value: socialLines.join("\n") })
-    }
-  }
-
   // T&C from program or type-specific config
-  const termsText = (
-    input.programType === "COUPON" ? couponConfig?.terms :
-    input.programType === "MEMBERSHIP" ? membershipConfig?.terms :
-    null
-  ) ?? input.termsAndConditions
+  const termsText = (input.programType === "COUPON" ? couponConfig?.terms : null) ?? input.termsAndConditions
   if (termsText) {
     pass.backFields.push({
       key: "terms",
@@ -680,8 +431,7 @@ export async function generateApplePass(
     })
   }
 
-  // Address on back — skip for BUSINESS_CARD (available as front card field)
-  if (design?.mapAddress && input.programType !== "BUSINESS_CARD") {
+  if (design?.mapAddress) {
     pass.backFields.push({
       key: "mapAddress",
       label: "Address",
@@ -697,8 +447,7 @@ export async function generateApplePass(
     })
   }
 
-  // Social links on back — skip for BUSINESS_CARD (already shown as card fields on front)
-  if (input.programType !== "BUSINESS_CARD") {
+  {
     const socialParts: string[] = []
     if (design?.socialLinks.instagram) socialParts.push(`Instagram: ${design.socialLinks.instagram}`)
     if (design?.socialLinks.facebook) socialParts.push(`Facebook: ${design.socialLinks.facebook}`)

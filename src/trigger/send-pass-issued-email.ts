@@ -14,6 +14,11 @@ type PassIssuedEmailPayload = {
   /** R2 public URL to the .pkpass file */
   appleWalletUrl?: string
   googleWalletUrl?: string
+  /**
+   * Forwarded to Resend's `Idempotency-Key` header so a Trigger.dev retry
+   * does not send a second copy of the same logical email to the customer.
+   */
+  idempotencyKey?: string
 }
 
 // ─── Send Pass Issued Email ─────────────────────────────────
@@ -34,20 +39,23 @@ export const sendPassIssuedEmailTask = task({
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
     const fullCardUrl = `${baseUrl}${payload.cardUrl}`
 
-    const result = await resend.emails.send({
-      from: getEmailFrom(),
-      to: payload.email,
-      subject: `Your ${payload.passTypeLabel} from ${payload.organizationName}`,
-      html: buildPassIssuedEmailHtml({
-        contactName: payload.contactName,
-        organizationName: payload.organizationName,
-        templateName: payload.templateName,
-        passTypeLabel: payload.passTypeLabel,
-        cardUrl: fullCardUrl,
-        appleWalletUrl: payload.appleWalletUrl,
-        googleWalletUrl: payload.googleWalletUrl ? `${baseUrl}${payload.googleWalletUrl}` : undefined,
-      }),
-    })
+    const result = await resend.emails.send(
+      {
+        from: getEmailFrom(),
+        to: payload.email,
+        subject: `Your ${payload.passTypeLabel} from ${payload.organizationName}`,
+        html: buildPassIssuedEmailHtml({
+          contactName: payload.contactName,
+          organizationName: payload.organizationName,
+          templateName: payload.templateName,
+          passTypeLabel: payload.passTypeLabel,
+          cardUrl: fullCardUrl,
+          appleWalletUrl: payload.appleWalletUrl,
+          googleWalletUrl: payload.googleWalletUrl ? `${baseUrl}${payload.googleWalletUrl}` : undefined,
+        }),
+      },
+      payload.idempotencyKey ? { idempotencyKey: payload.idempotencyKey } : undefined,
+    )
 
     return { emailId: result.data?.id ?? null }
   },

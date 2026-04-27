@@ -1,422 +1,146 @@
-// ─── API Resource Serializers ──────────────────────────────
-// Consistent serialization: ISO dates, camelCase, no internal fields.
+/**
+ * API serializers — Prisma rows → JSON shapes consumed by loyalshy-staff.
+ * Keep in sync with `loyalshy-staff/lib/types.ts`.
+ *
+ * Pivot constraint: only STAMP_CARD + COUPON pass types exist.
+ */
 
-type DateLike = Date | string | null | undefined
+import type {
+  Contact,
+  PassInstance,
+  PassTemplate,
+  Interaction,
+  Reward,
+} from "@prisma/client"
 
-function toISO(d: DateLike): string | null {
-  if (!d) return null
-  return d instanceof Date ? d.toISOString() : d
-}
+// ─── Contact ────────────────────────────────────────────────
 
-// ─── Contact ───────────────────────────────────────────────
+type ContactWithCount = Contact & { _count?: { passInstances: number } }
 
-export type ApiContact = {
-  id: string
-  fullName: string
-  email: string | null
-  phone: string | null
-  memberNumber: number
-  totalInteractions: number
-  lastInteractionAt: string | null
-  passInstanceCount: number
-  metadata: Record<string, unknown>
-  createdAt: string
-}
-
-export function serializeContact(contact: {
-  id: string
-  fullName: string
-  email: string | null
-  phone: string | null
-  memberNumber: number
-  totalInteractions: number
-  lastInteractionAt: DateLike
-  metadata?: unknown
-  createdAt: DateLike
-  _count?: { passInstances: number }
-  passInstances?: unknown[]
-}): ApiContact {
+export function toApiContact(c: ContactWithCount) {
   return {
-    id: contact.id,
-    fullName: contact.fullName,
-    email: contact.email,
-    phone: contact.phone,
-    memberNumber: contact.memberNumber,
-    totalInteractions: contact.totalInteractions,
-    lastInteractionAt: toISO(contact.lastInteractionAt),
-    passInstanceCount:
-      contact._count?.passInstances ?? contact.passInstances?.length ?? 0,
-    metadata: (contact.metadata as Record<string, unknown>) ?? {},
-    createdAt: toISO(contact.createdAt)!,
+    id: c.id,
+    fullName: c.fullName,
+    email: c.email,
+    phone: c.phone,
+    memberNumber: c.memberNumber,
+    totalInteractions: c.totalInteractions,
+    lastInteractionAt: c.lastInteractionAt?.toISOString() ?? null,
+    passInstanceCount: c._count?.passInstances ?? 0,
+    metadata: (c.metadata as Record<string, unknown>) ?? {},
+    createdAt: c.createdAt.toISOString(),
   }
 }
 
-// ─── Contact Detail ────────────────────────────────────────
+// ─── PassInstance ───────────────────────────────────────────
 
-export type ApiContactDetail = ApiContact & {
-  passInstances: ApiPassInstanceSummary[]
-  recentInteractions: ApiInteractionSummary[]
-  rewards: ApiRewardSummary[]
+type PassInstanceWithTemplate = PassInstance & {
+  passTemplate: Pick<PassTemplate, "id" | "name" | "passType" | "config">
 }
 
-type ApiPassInstanceSummary = {
-  id: string
-  templateId: string
-  templateName: string
-  passType: string
-  status: string
-  data: unknown
-  walletProvider: string
-  issuedAt: string
-  expiresAt: string | null
-}
-
-type ApiInteractionSummary = {
-  id: string
-  type: string
-  createdAt: string
-  templateName: string
-  passType: string
-}
-
-type ApiRewardSummary = {
-  id: string
-  status: string
-  description: string | null
-  earnedAt: string
-  redeemedAt: string | null
-  expiresAt: string
-}
-
-export function serializeContactDetail(contact: {
-  id: string
-  fullName: string
-  email: string | null
-  phone: string | null
-  memberNumber: number
-  totalInteractions: number
-  lastInteractionAt: DateLike
-  metadata?: unknown
-  createdAt: DateLike
-  passInstances: Array<{
-    id: string
-    status: string
-    data: unknown
-    walletProvider: string
-    issuedAt: DateLike
-    expiresAt: DateLike
-    passTemplate: {
-      id: string
-      name: string
-      passType: string
-    }
-  }>
-  interactions: Array<{
-    id: string
-    type: string
-    createdAt: DateLike
-    passTemplate: { name: string; passType: string }
-  }>
-  rewards: Array<{
-    id: string
-    status: string
-    description: string | null
-    earnedAt: DateLike
-    redeemedAt: DateLike
-    expiresAt: DateLike
-  }>
-}): ApiContactDetail {
+export function toApiPassInstance(p: PassInstanceWithTemplate) {
   return {
-    ...serializeContact({
-      ...contact,
-      passInstances: contact.passInstances,
-    }),
-    passInstances: contact.passInstances.map((pi) => ({
-      id: pi.id,
-      templateId: pi.passTemplate.id,
-      templateName: pi.passTemplate.name,
-      passType: pi.passTemplate.passType,
-      status: pi.status,
-      data: pi.data,
-      walletProvider: pi.walletProvider,
-      issuedAt: toISO(pi.issuedAt)!,
-      expiresAt: toISO(pi.expiresAt),
-    })),
-    recentInteractions: contact.interactions.map((i) => ({
-      id: i.id,
-      type: i.type,
-      createdAt: toISO(i.createdAt)!,
-      templateName: i.passTemplate.name,
-      passType: i.passTemplate.passType,
-    })),
-    rewards: contact.rewards.map((r) => ({
-      id: r.id,
-      status: r.status,
-      description: r.description,
-      earnedAt: toISO(r.earnedAt)!,
-      redeemedAt: toISO(r.redeemedAt),
-      expiresAt: toISO(r.expiresAt)!,
-    })),
+    id: p.id,
+    contactId: p.contactId,
+    templateId: p.passTemplateId,
+    templateName: p.passTemplate.name,
+    passType: p.passTemplate.passType,
+    status: p.status,
+    data: (p.data as Record<string, unknown>) ?? {},
+    templateConfig: (p.passTemplate.config as Record<string, unknown>) ?? null,
+    walletProvider: p.walletProvider,
+    issuedAt: p.issuedAt.toISOString(),
+    expiresAt: p.expiresAt?.toISOString() ?? null,
+    createdAt: p.createdAt.toISOString(),
   }
 }
 
-// ─── Template ──────────────────────────────────────────────
-
-export type ApiTemplate = {
-  id: string
-  name: string
-  description: string | null
-  passType: string
-  joinMode: string
-  status: string
-  config: unknown
-  startsAt: string
-  endsAt: string | null
-  passInstanceCount: number
-  createdAt: string
+type PassInstanceDetail = PassInstanceWithTemplate & {
+  contact: Pick<Contact, "id" | "fullName" | "email">
+  rewards?: Reward[]
+  interactions?: (Interaction & {
+    passTemplate: Pick<PassTemplate, "name" | "passType">
+  })[]
 }
 
-export function serializeTemplate(template: {
-  id: string
-  name: string
-  description: string | null
-  passType: string
-  joinMode: string
-  status: string
-  config: unknown
-  startsAt: DateLike
-  endsAt: DateLike
-  createdAt: DateLike
-  _count?: { passInstances: number }
-}): ApiTemplate {
+export function toApiPassInstanceDetail(p: PassInstanceDetail) {
   return {
-    id: template.id,
-    name: template.name,
-    description: template.description,
-    passType: template.passType,
-    joinMode: template.joinMode,
-    status: template.status,
-    config: template.config,
-    startsAt: toISO(template.startsAt)!,
-    endsAt: toISO(template.endsAt),
-    passInstanceCount: template._count?.passInstances ?? 0,
-    createdAt: toISO(template.createdAt)!,
-  }
-}
-
-// ─── Template Detail ───────────────────────────────────────
-
-export type ApiTemplateDetail = ApiTemplate & {
-  termsAndConditions: string | null
-  stats: {
-    activeInstances: number
-    totalInteractions: number
-    availableRewards: number
-    redeemedRewards: number
-  }
-}
-
-export function serializeTemplateDetail(
-  template: {
-    id: string
-    name: string
-    description: string | null
-    passType: string
-    joinMode: string
-    status: string
-    config: unknown
-    startsAt: DateLike
-    endsAt: DateLike
-    createdAt: DateLike
-    termsAndConditions: string | null
-    _count?: { passInstances: number }
-  },
-  stats: {
-    activeInstances: number
-    totalInteractions: number
-    availableRewards: number
-    redeemedRewards: number
-  }
-): ApiTemplateDetail {
-  return {
-    ...serializeTemplate(template),
-    termsAndConditions: template.termsAndConditions,
-    stats,
-  }
-}
-
-// ─── Pass Instance ─────────────────────────────────────────
-
-export type ApiPassInstance = {
-  id: string
-  contactId: string
-  templateId: string
-  templateName: string
-  passType: string
-  status: string
-  data: unknown
-  templateConfig: unknown
-  walletProvider: string
-  issuedAt: string
-  expiresAt: string | null
-  createdAt: string
-}
-
-export function serializePassInstance(instance: {
-  id: string
-  contactId: string
-  status: string
-  data: unknown
-  walletProvider: string
-  issuedAt: DateLike
-  expiresAt: DateLike
-  createdAt: DateLike
-  passTemplate: {
-    id: string
-    name: string
-    passType: string
-    config?: unknown
-  }
-}): ApiPassInstance {
-  return {
-    id: instance.id,
-    contactId: instance.contactId,
-    templateId: instance.passTemplate.id,
-    templateName: instance.passTemplate.name,
-    passType: instance.passTemplate.passType,
-    status: instance.status,
-    data: instance.data,
-    templateConfig: instance.passTemplate.config ?? null,
-    walletProvider: instance.walletProvider,
-    issuedAt: toISO(instance.issuedAt)!,
-    expiresAt: toISO(instance.expiresAt),
-    createdAt: toISO(instance.createdAt)!,
-  }
-}
-
-// ─── Pass Instance Detail ──────────────────────────────────
-
-export type ApiWalletUrls = {
-  cardUrl: string
-  appleWalletUrl: string | null
-  googleWalletUrl: string
-}
-
-export type ApiRewardItem = {
-  id: string
-  status: string
-  description: string | null
-  earnedAt: string
-  expiresAt: string
-  revealedAt: string | null
-}
-
-export type ApiPassInstanceDetail = ApiPassInstance & {
-  contact: { id: string; fullName: string; email: string | null }
-  rewards: ApiRewardItem[]
-  recentInteractions: ApiInteractionSummary[]
-  walletUrls?: ApiWalletUrls
-  emailSent?: boolean
-}
-
-export function serializePassInstanceDetail(instance: {
-  id: string
-  contactId: string
-  status: string
-  data: unknown
-  walletProvider: string
-  issuedAt: DateLike
-  expiresAt: DateLike
-  createdAt: DateLike
-  passTemplate: { id: string; name: string; passType: string; config?: unknown }
-  contact: { id: string; fullName: string; email: string | null }
-  rewards?: Array<{
-    id: string
-    status: string
-    description: string | null
-    earnedAt: DateLike
-    expiresAt: DateLike
-    revealedAt: DateLike
-  }>
-  interactions: Array<{
-    id: string
-    type: string
-    createdAt: DateLike
-    passTemplate: { name: string; passType: string }
-  }>
-}): ApiPassInstanceDetail {
-  return {
-    ...serializePassInstance(instance),
+    ...toApiPassInstance(p),
     contact: {
-      id: instance.contact.id,
-      fullName: instance.contact.fullName,
-      email: instance.contact.email,
+      id: p.contact.id,
+      fullName: p.contact.fullName,
+      email: p.contact.email,
     },
-    rewards: (instance.rewards ?? []).map((r) => ({
-      id: r.id,
-      status: r.status,
-      description: r.description,
-      earnedAt: toISO(r.earnedAt)!,
-      expiresAt: toISO(r.expiresAt)!,
-      revealedAt: toISO(r.revealedAt),
-    })),
-    recentInteractions: instance.interactions.map((i) => ({
-      id: i.id,
-      type: i.type,
-      createdAt: toISO(i.createdAt)!,
-      templateName: i.passTemplate.name,
-      passType: i.passTemplate.passType,
-    })),
+    rewards: p.rewards?.map(toApiReward),
+    recentInteractions:
+      p.interactions?.map((i) => ({
+        id: i.id,
+        type: i.type,
+        createdAt: i.createdAt.toISOString(),
+        templateName: i.passTemplate.name,
+        passType: i.passTemplate.passType,
+      })) ?? [],
   }
 }
 
-// ─── Interaction ───────────────────────────────────────────
+// ─── Reward ─────────────────────────────────────────────────
 
-export type ApiInteraction = {
-  id: string
-  type: string
-  metadata: unknown
-  createdAt: string
-  pass: {
-    id: string
-    templateName: string
-    passType: string
-    status: string
-  } | null
-  contact: {
-    id: string
-    fullName: string
-  }
-}
-
-export function serializeInteraction(interaction: {
-  id: string
-  type: string
-  metadata: unknown
-  createdAt: DateLike
-  passInstance: {
-    id: string
-    status: string
-    passTemplate: { name: string; passType: string }
-  } | null
-  contact: { id: string; fullName: string }
-}): ApiInteraction {
+export function toApiReward(r: Reward) {
   return {
-    id: interaction.id,
-    type: interaction.type,
-    metadata: interaction.metadata,
-    createdAt: toISO(interaction.createdAt)!,
-    pass: interaction.passInstance
+    id: r.id,
+    status: r.status,
+    description: r.description,
+    earnedAt: r.earnedAt.toISOString(),
+    expiresAt: r.expiresAt.toISOString(),
+    revealedAt: r.revealedAt?.toISOString() ?? null,
+  }
+}
+
+// ─── Interaction ────────────────────────────────────────────
+
+type InteractionWithRefs = Interaction & {
+  passInstance: (Pick<PassInstance, "id" | "status"> & {
+    passTemplate: Pick<PassTemplate, "name" | "passType">
+  }) | null
+  contact: Pick<Contact, "id" | "fullName">
+}
+
+export function toApiInteraction(i: InteractionWithRefs) {
+  return {
+    id: i.id,
+    type: i.type,
+    metadata: (i.metadata as Record<string, unknown>) ?? {},
+    createdAt: i.createdAt.toISOString(),
+    pass: i.passInstance
       ? {
-          id: interaction.passInstance.id,
-          templateName: interaction.passInstance.passTemplate.name,
-          passType: interaction.passInstance.passTemplate.passType,
-          status: interaction.passInstance.status,
+          id: i.passInstance.id,
+          templateName: i.passInstance.passTemplate.name,
+          passType: i.passInstance.passTemplate.passType,
+          status: i.passInstance.status,
         }
       : null,
     contact: {
-      id: interaction.contact.id,
-      fullName: interaction.contact.fullName,
+      id: i.contact.id,
+      fullName: i.contact.fullName,
     },
+  }
+}
+
+// ─── Template ───────────────────────────────────────────────
+
+type TemplateWithCount = PassTemplate & { _count?: { passInstances: number } }
+
+export function toApiTemplate(t: TemplateWithCount) {
+  return {
+    id: t.id,
+    name: t.name,
+    description: t.description,
+    passType: t.passType,
+    status: t.status,
+    config: (t.config as Record<string, unknown>) ?? {},
+    startsAt: t.startsAt.toISOString(),
+    endsAt: t.endsAt?.toISOString() ?? null,
+    passInstanceCount: t._count?.passInstances ?? 0,
+    createdAt: t.createdAt.toISOString(),
   }
 }

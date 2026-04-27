@@ -2,11 +2,7 @@ import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import {
   parseCouponConfig,
-  parseMembershipConfig,
   formatCouponValue,
-  parseGiftCardConfig,
-  parseTicketConfig,
-  parseBusinessCardConfig,
 } from "@/lib/pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -77,7 +73,7 @@ type TemplateCardPreviewProps = {
 
 // ─── Helper: build all type-specific renderer props from config ──
 
-function buildTypeProps(passType: string, config: unknown, editorConfig?: unknown) {
+function buildTypeProps(passType: string, config: unknown) {
   const props: Record<string, unknown> = {}
 
   switch (passType) {
@@ -99,53 +95,6 @@ function buildTypeProps(passType: string, config: unknown, editorConfig?: unknow
           ? new Date(c.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
           : "No expiry"
       }
-      break
-    }
-    case "MEMBERSHIP": {
-      const c = parseMembershipConfig(config)
-      if (c) {
-        props.tierName = c.membershipTier
-        props.benefits = c.benefits
-        props.showHolderPhoto = c.showHolderPhoto
-        props.holderPhotoPosition = c.holderPhotoPosition
-      }
-      break
-    }
-    case "GIFT_CARD": {
-      const c = parseGiftCardConfig(config)
-      if (c) {
-        const formatted = `${c.currency} ${(c.initialBalanceCents / 100).toFixed(2)}`
-        props.giftBalance = formatted
-        props.giftInitialValue = formatted
-      }
-      break
-    }
-    case "TICKET": {
-      const c = parseTicketConfig(config)
-      if (c) {
-        props.eventName = c.eventName
-        props.eventDate = c.eventDate
-          ? new Date(c.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-          : undefined
-        props.eventVenue = c.eventVenue
-        props.scanStatus = `0 / ${c.maxScans}`
-      }
-      break
-    }
-    case "BUSINESS_CARD": {
-      const c = parseBusinessCardConfig(config)
-      if (c) {
-        props.contactName = c.contactName
-        props.jobTitle = c.jobTitle
-        props.contactPhone = c.phone
-        props.contactEmail = c.email
-        props.contactWebsite = c.website
-        props.contactLinkedin = c.linkedinUrl
-        props.contactTwitter = c.twitterUrl
-        props.contactInstagram = c.instagramUrl
-      }
-      const ec = (editorConfig as Record<string, unknown>) ?? {}
-      if (ec.ma) props.contactAddress = ec.ma as string
       break
     }
   }
@@ -176,7 +125,7 @@ export function TemplateCardPreview({
   memberSince,
 }: TemplateCardPreviewProps) {
   const design = buildWalletPassDesign(template.passDesign)
-  const typeProps = buildTypeProps(template.passType, template.config, template.passDesign?.editorConfig)
+  const typeProps = buildTypeProps(template.passType, template.config)
 
   // holderPhotoUrl is per-instance, not template-level — preview shows placeholder only
 

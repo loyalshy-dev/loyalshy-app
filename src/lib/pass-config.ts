@@ -3,11 +3,6 @@ import type {
   PassType,
   StampCardConfig,
   CouponConfig,
-  MembershipConfig,
-  PointsConfig,
-  GiftCardConfig,
-  TicketConfig,
-  BusinessCardConfig,
   MinigameConfig,
   PassTemplateConfig,
 } from "@/types/pass-types"
@@ -57,56 +52,6 @@ export const couponConfigSchema = z.object({
     .optional(),
 })
 
-export const membershipConfigSchema = z.object({
-  membershipTier: z.string().min(1).max(50),
-  benefits: z.string().max(2000),
-  validDuration: z.enum(["monthly", "yearly", "lifetime", "custom"]),
-  customDurationDays: z.number().int().min(1).max(3650).optional(),
-  autoRenew: z.boolean().optional(),
-  showHolderPhoto: z.boolean().optional(),
-  holderPhotoPosition: z.enum(["left", "center", "right"]).optional(),
-  terms: z.string().max(5000).optional(),
-})
-
-export const pointsCatalogItemSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1).max(100),
-  description: z.string().max(200).optional(),
-  pointsCost: z.number().int().min(1).max(100000),
-})
-
-export const pointsConfigSchema = z.object({
-  pointsPerVisit: z.number().int().min(1).max(100),
-  catalog: z.array(pointsCatalogItemSchema).min(1).max(20),
-  pointsLabel: z.string().max(20).optional(),
-})
-
-export const giftCardConfigSchema = z.object({
-  currency: z.string().min(1).max(3),
-  initialBalanceCents: z.number().int().min(100).max(100_000_00),
-  partialRedemption: z.boolean(),
-  expiryMonths: z.number().int().min(1).max(120).optional(),
-})
-
-export const ticketConfigSchema = z.object({
-  eventName: z.string().min(1).max(200),
-  eventDate: z.string().min(1),
-  eventVenue: z.string().min(1).max(200),
-  barcodeType: z.enum(["qr", "code128", "pdf417", "aztec"]),
-  maxScans: z.number().int().min(1).max(100),
-})
-
-export const businessCardConfigSchema = z.object({
-  contactName: z.string().min(1).max(100),
-  jobTitle: z.string().max(100).optional(),
-  phone: z.string().max(30).optional(),
-  email: z.string().email().max(255).or(z.literal("")).optional(),
-  website: z.string().url().max(200).or(z.literal("")).optional(),
-  linkedinUrl: z.string().max(200).optional(),
-  twitterUrl: z.string().max(200).optional(),
-  instagramUrl: z.string().max(200).optional(),
-})
-
 export const prizeItemSchema = z.object({
   name: z.string().min(1).max(100),
   weight: z.number().int().min(1).max(10),
@@ -136,26 +81,6 @@ export function parseCouponConfig(config: unknown): CouponConfig | null {
   return safeParse(couponConfigSchema, config)
 }
 
-export function parseMembershipConfig(config: unknown): MembershipConfig | null {
-  return safeParse(membershipConfigSchema, config)
-}
-
-export function parsePointsConfig(config: unknown): PointsConfig | null {
-  return safeParse(pointsConfigSchema, config)
-}
-
-export function parseGiftCardConfig(config: unknown): GiftCardConfig | null {
-  return safeParse(giftCardConfigSchema, config)
-}
-
-export function parseTicketConfig(config: unknown): TicketConfig | null {
-  return safeParse(ticketConfigSchema, config)
-}
-
-export function parseBusinessCardConfig(config: unknown): BusinessCardConfig | null {
-  return safeParse(businessCardConfigSchema, config)
-}
-
 export function parseMinigameConfig(config: unknown): MinigameConfig | null {
   if (!config || typeof config !== "object") return null
   const obj = config as Record<string, unknown>
@@ -175,26 +100,6 @@ export function isCouponConfig(config: unknown): config is CouponConfig {
   return parseCouponConfig(config) !== null
 }
 
-export function isMembershipConfig(config: unknown): config is MembershipConfig {
-  return parseMembershipConfig(config) !== null
-}
-
-export function isPointsConfig(config: unknown): config is PointsConfig {
-  return parsePointsConfig(config) !== null
-}
-
-export function isGiftCardConfig(config: unknown): config is GiftCardConfig {
-  return parseGiftCardConfig(config) !== null
-}
-
-export function isTicketConfig(config: unknown): config is TicketConfig {
-  return parseTicketConfig(config) !== null
-}
-
-export function isBusinessCardConfig(config: unknown): config is BusinessCardConfig {
-  return parseBusinessCardConfig(config) !== null
-}
-
 // ─── Type-dispatch validator ────────────────────────────────
 
 export function validateTemplateConfig(
@@ -204,11 +109,6 @@ export function validateTemplateConfig(
   const schemaMap: Record<PassType, z.ZodType<PassTemplateConfig>> = {
     STAMP_CARD: stampCardConfigSchema as z.ZodType<PassTemplateConfig>,
     COUPON: couponConfigSchema as z.ZodType<PassTemplateConfig>,
-    MEMBERSHIP: membershipConfigSchema as z.ZodType<PassTemplateConfig>,
-    POINTS: pointsConfigSchema as z.ZodType<PassTemplateConfig>,
-    GIFT_CARD: giftCardConfigSchema as z.ZodType<PassTemplateConfig>,
-    TICKET: ticketConfigSchema as z.ZodType<PassTemplateConfig>,
-    BUSINESS_CARD: businessCardConfigSchema as z.ZodType<PassTemplateConfig>,
   }
 
   const schema = schemaMap[passType]
@@ -246,79 +146,6 @@ export function formatCouponValue(config: CouponConfig): string {
     case "freebie":
       return "Free item"
   }
-}
-
-export function formatMembershipDuration(config: MembershipConfig): string {
-  switch (config.validDuration) {
-    case "monthly":
-      return "Monthly"
-    case "yearly":
-      return "Yearly"
-    case "lifetime":
-      return "Lifetime"
-    case "custom":
-      return config.customDurationDays ? `${config.customDurationDays} days` : "Custom"
-  }
-}
-
-export function formatDuration(validDuration: string, customDurationDays?: number): string {
-  switch (validDuration) {
-    case "monthly":
-      return "Monthly"
-    case "yearly":
-      return "Yearly"
-    case "lifetime":
-      return "Lifetime"
-    case "custom":
-      return customDurationDays ? `${customDurationDays} days` : "Custom"
-    default:
-      return validDuration
-  }
-}
-
-export function formatPointsValue(config: PointsConfig): string {
-  return `${config.pointsPerVisit} pts/visit`
-}
-
-export function formatGiftCardValue(config: GiftCardConfig): string {
-  return `${config.currency} ${(config.initialBalanceCents / 100).toFixed(2)}`
-}
-
-export function getCheapestCatalogItem(config: PointsConfig) {
-  return [...config.catalog].sort((a, b) => a.pointsCost - b.pointsCost)[0] ?? null
-}
-
-// ─── Expiry calculator ──────────────────────────────────────
-
-export function computeDurationExpiresAt(
-  validDuration: "monthly" | "yearly" | "lifetime" | "custom",
-  customDurationDays?: number,
-  from: Date = new Date()
-): Date | null {
-  switch (validDuration) {
-    case "monthly": {
-      const d = new Date(from)
-      d.setMonth(d.getMonth() + 1)
-      return d
-    }
-    case "yearly": {
-      const d = new Date(from)
-      d.setFullYear(d.getFullYear() + 1)
-      return d
-    }
-    case "lifetime":
-      return null
-    case "custom": {
-      if (!customDurationDays) return null
-      const d = new Date(from)
-      d.setDate(d.getDate() + customDurationDays)
-      return d
-    }
-  }
-}
-
-export function computeMembershipExpiresAt(config: MembershipConfig, from: Date = new Date()): Date | null {
-  return computeDurationExpiresAt(config.validDuration, config.customDurationDays, from)
 }
 
 export function getWalletRewardText(config: unknown, fallbackDescription: string): string {

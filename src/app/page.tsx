@@ -6,8 +6,6 @@ import { Hero } from "@/components/marketing/hero"
 import { FeatureShowcase } from "@/components/marketing/dashboard-preview"
 import { HowItWorks } from "@/components/marketing/how-it-works"
 import { Features } from "@/components/marketing/features"
-import { ApiSection } from "@/components/marketing/api-section"
-import { PassTypesCarousel } from "@/components/marketing/pass-types-carousel"
 import { WalletPreview } from "@/components/marketing/wallet-preview"
 import { Testimonials } from "@/components/marketing/testimonials"
 import { Pricing } from "@/components/marketing/pricing"
@@ -47,7 +45,7 @@ function JsonLd() {
           addressCountry: "ES",
         },
         description:
-          "Digital wallet pass platform for businesses. Create and manage Apple and Google Wallet passes from one dashboard.",
+          "Digital loyalty platform for small businesses. Create and manage stamp cards and coupons in Apple and Google Wallet.",
       },
       {
         "@type": "WebSite",
@@ -61,7 +59,7 @@ function JsonLd() {
         "@type": "WebPage",
         "@id": `${siteUrl}/#webpage`,
         url: siteUrl,
-        name: "Loyalshy — Digital Wallet Passes for Apple & Google Wallet",
+        name: "Loyalshy — Digital Loyalty Cards for Small Businesses",
         isPartOf: { "@id": `${siteUrl}/#website` },
         about: { "@id": `${siteUrl}/#software` },
         inLanguage: "en",
@@ -74,7 +72,7 @@ function JsonLd() {
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         description:
-          "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, points, gift cards, tickets, and more — all from one platform.",
+          "Replace paper stamp cards with digital ones in Apple and Google Wallet. Reward repeat customers with stamp cards and coupons — no app required.",
         offers: {
           "@type": "AggregateOffer",
           priceCurrency: "EUR",
@@ -83,12 +81,8 @@ function JsonLd() {
           offerCount: "4",
         },
         featureList: [
-          "Stamp cards",
-          "Coupons",
-          "Memberships",
-          "Points programs",
-          "Gift cards",
-          "Tickets",
+          "Digital stamp cards",
+          "Digital coupons",
           "Apple Wallet integration",
           "Google Wallet integration",
           "QR code onboarding",
@@ -110,7 +104,7 @@ function JsonLd() {
 
 const MARKETING_NAMESPACES = [
   "common", "nav", "hero", "socialProof", "featureShowcase", "howItWorks",
-  "features", "apiSection", "passTypesCarousel", "walletPreview", "testimonials", "pricing",
+  "features", "walletPreview", "testimonials", "pricing",
   "faq", "tryDemo", "staffApp", "closingCta", "footer",
 ] as const
 
@@ -134,8 +128,6 @@ export default async function LandingPage() {
           <HowItWorks />
           <WalletPreview />
           <Features />
-          <ApiSection />
-          <PassTypesCarousel />
           <StaffApp />
           {/* <Testimonials /> */}
           <Pricing />

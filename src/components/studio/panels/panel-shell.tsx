@@ -22,7 +22,6 @@ export function PanelShell({ activeTool, onClose, children }: PanelShellProps) {
     strip: t("stripImage"),
     logo: t("logo"),
     prize: t("prizeReveal"),
-    avatar: t("holderPhoto"),
     notifications: t("notifications"),
     details: t("backOfPass"),
   }

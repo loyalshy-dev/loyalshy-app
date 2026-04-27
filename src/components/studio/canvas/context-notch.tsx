@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 import type { ColorZone, StudioTool } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
-import { Wand2, Loader2, SlidersHorizontal, Palette, BarChart3, ImagePlus, Image, Bell, FileText, Gift, UserCircle, TextCursorInput } from "lucide-react"
+import { Wand2, Loader2, SlidersHorizontal, Palette, BarChart3, ImagePlus, Image, Bell, FileText, Gift, TextCursorInput } from "lucide-react"
 import { toast } from "sonner"
 import { computeTextColor, getFieldConfig, type ProgressStyle, type StampGridConfig } from "@/lib/wallet/card-design"
 import { STAMP_ICONS, REWARD_ICONS } from "@/lib/wallet/stamp-icons"
@@ -29,7 +29,6 @@ import { LogoPanel } from "../panels/logo-panel"
 import { DetailsPanel } from "../panels/details-panel"
 import { NotificationsPanel } from "../panels/notifications-panel"
 import { PrizeRevealPanel } from "../panels/prize-reveal-panel"
-import { AvatarPanel } from "../panels/avatar-panel"
 
 // ─── Resolved zone: merge labels + text into "fields" ───────
 
@@ -385,19 +384,16 @@ export function FloatingToolMenu({ store, cardType }: { store: CardDesignStoreAp
     { id: "strip", label: tPanels("stripImage"), icon: <ImagePlus size={18} /> },
     { id: "logo", label: tPanels("logo"), icon: <Image size={18} /> },
     { id: "prize", label: tPanels("prizeReveal"), icon: <Gift size={18} /> },
-    { id: "avatar", label: tPanels("holderPhoto"), icon: <UserCircle size={18} /> },
     { id: "notifications", label: tPanels("notifications"), icon: <Bell size={18} /> },
     { id: "details", label: tPanels("backOfPass"), icon: <FileText size={18} /> },
   ]
   const selectedZone = useStore(store, (s) => s.ui.selectedColorZone)
 
-  const hasProgress = cardType === "STAMP" || cardType === "POINTS"
+  const hasProgress = cardType === "STAMP"
   const hasPrize = cardType === "STAMP" || cardType === "COUPON"
-  const hasAvatar = cardType === "TIER"
   const items = TOOL_MENU_ITEMS.filter((t) => {
     if (t.id === "progress" && !hasProgress) return false
     if (t.id === "prize" && !hasPrize) return false
-    if (t.id === "avatar" && !hasAvatar) return false
     return true
   })
 
@@ -514,7 +510,6 @@ export function ContextPanel({ store, passType, organizationId, organizationName
     strip: tPanels("stripImage"),
     logo: tPanels("logo"),
     prize: tPanels("prizeReveal"),
-    avatar: tPanels("holderPhoto"),
     notifications: tPanels("notifications"),
     details: tPanels("backOfPass"),
   }
@@ -729,14 +724,11 @@ export function ContextPanel({ store, passType, organizationId, organizationName
         {mode === "tool" && activeTool === "prize" && (
           <PrizeRevealPanel store={store} />
         )}
-        {mode === "tool" && activeTool === "avatar" && (
-          <AvatarPanel store={store} programId={templateId} />
-        )}
         {mode === "tool" && activeTool === "notifications" && (
           <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
         )}
         {mode === "tool" && activeTool === "details" && (
-          <DetailsPanel store={store} passType={passType} />
+          <DetailsPanel store={store} />
         )}
 
         {/* ── Zone panels (from card clicks) ── */}

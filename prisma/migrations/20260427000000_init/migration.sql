@@ -1,4 +1,4 @@
--- Extensions & Functions (required before any table using uuidv7)
+-- ─── Extensions & uuidv7() function (required before any table) ───
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE OR REPLACE FUNCTION uuidv7() RETURNS uuid AS $$
@@ -14,6 +14,9 @@ BEGIN
 END
 $$ LANGUAGE plpgsql VOLATILE;
 
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateEnum
 CREATE TYPE "user_role" AS ENUM ('user', 'admin_support', 'admin_billing', 'admin_ops', 'super_admin');
 
@@ -27,22 +30,19 @@ CREATE TYPE "subscription_status" AS ENUM ('trialing', 'active', 'past_due', 'ca
 CREATE TYPE "plan" AS ENUM ('free', 'starter', 'growth', 'scale', 'enterprise');
 
 -- CreateEnum
-CREATE TYPE "pass_type" AS ENUM ('stamp_card', 'coupon', 'membership', 'points', 'gift_card', 'ticket');
+CREATE TYPE "pass_type" AS ENUM ('stamp_card', 'coupon');
 
 -- CreateEnum
 CREATE TYPE "template_status" AS ENUM ('draft', 'active', 'archived');
 
 -- CreateEnum
-CREATE TYPE "join_mode" AS ENUM ('open', 'invite_only');
-
--- CreateEnum
-CREATE TYPE "pass_instance_status" AS ENUM ('active', 'completed', 'suspended', 'expired', 'revoked', 'voided');
+CREATE TYPE "pass_instance_status" AS ENUM ('active', 'completed', 'suspended', 'expired', 'revoked');
 
 -- CreateEnum
 CREATE TYPE "wallet_provider" AS ENUM ('apple', 'google', 'none');
 
 -- CreateEnum
-CREATE TYPE "interaction_type" AS ENUM ('stamp', 'coupon_redeem', 'check_in', 'points_earn', 'points_redeem', 'gift_charge', 'gift_refund', 'ticket_scan', 'ticket_void', 'status_change', 'reward_earned', 'reward_redeemed', 'note');
+CREATE TYPE "interaction_type" AS ENUM ('stamp', 'coupon_redeem', 'status_change', 'reward_earned', 'reward_redeemed', 'note');
 
 -- CreateEnum
 CREATE TYPE "reward_status" AS ENUM ('available', 'redeemed', 'expired');
@@ -66,7 +66,7 @@ CREATE TYPE "font_family" AS ENUM ('sans', 'serif', 'rounded', 'mono');
 CREATE TYPE "label_format" AS ENUM ('uppercase', 'title_case', 'lowercase');
 
 -- CreateEnum
-CREATE TYPE "design_card_type" AS ENUM ('stamp', 'points', 'tier', 'coupon', 'gift_card', 'ticket', 'generic');
+CREATE TYPE "design_card_type" AS ENUM ('stamp', 'coupon');
 
 -- CreateTable
 CREATE TABLE "user" (
@@ -189,7 +189,6 @@ CREATE TABLE "pass_template" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "passType" "pass_type" NOT NULL,
-    "joinMode" "join_mode" NOT NULL DEFAULT 'open',
     "status" "template_status" NOT NULL DEFAULT 'draft',
     "startsAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "endsAt" TIMESTAMP(3),
@@ -267,7 +266,6 @@ CREATE TABLE "reward" (
     "expiresAt" TIMESTAMP(3) NOT NULL,
     "redeemedById" TEXT,
     "description" TEXT,
-    "pointsCost" INTEGER,
     "revealedAt" TIMESTAMP(3),
 
     CONSTRAINT "reward_pkey" PRIMARY KEY ("id")
@@ -375,71 +373,6 @@ CREATE TABLE "analytics_snapshot" (
 );
 
 -- CreateTable
-CREATE TABLE "api_key" (
-    "id" TEXT NOT NULL DEFAULT uuidv7()::text,
-    "organizationId" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "keyPrefix" TEXT NOT NULL,
-    "keyHash" TEXT NOT NULL,
-    "scopes" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "lastUsedAt" TIMESTAMP(3),
-    "expiresAt" TIMESTAMP(3),
-    "revokedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "createdById" TEXT NOT NULL,
-
-    CONSTRAINT "api_key_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "webhook_endpoint" (
-    "id" TEXT NOT NULL DEFAULT uuidv7()::text,
-    "organizationId" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
-    "secret" TEXT NOT NULL,
-    "events" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "enabled" BOOLEAN NOT NULL DEFAULT true,
-    "failureCount" INTEGER NOT NULL DEFAULT 0,
-    "lastDeliveryAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "webhook_endpoint_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "webhook_delivery" (
-    "id" TEXT NOT NULL DEFAULT uuidv7()::text,
-    "webhookEndpointId" TEXT NOT NULL,
-    "eventType" TEXT NOT NULL,
-    "payload" JSONB NOT NULL,
-    "statusCode" INTEGER,
-    "responseBody" TEXT,
-    "attempts" INTEGER NOT NULL DEFAULT 0,
-    "deliveredAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "webhook_delivery_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "api_request_log" (
-    "id" TEXT NOT NULL DEFAULT uuidv7()::text,
-    "organizationId" TEXT NOT NULL,
-    "apiKeyId" TEXT NOT NULL,
-    "requestId" TEXT NOT NULL,
-    "method" TEXT NOT NULL,
-    "path" TEXT NOT NULL,
-    "statusCode" INTEGER NOT NULL,
-    "latencyMs" INTEGER NOT NULL,
-    "userAgent" TEXT,
-    "ipAddress" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "api_request_log_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "admin_audit_log" (
     "id" TEXT NOT NULL DEFAULT uuidv7()::text,
     "adminId" TEXT NOT NULL,
@@ -454,6 +387,19 @@ CREATE TABLE "admin_audit_log" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "admin_audit_log_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "device_pairing_token" (
+    "id" TEXT NOT NULL DEFAULT uuidv7()::text,
+    "organizationId" TEXT NOT NULL,
+    "createdByUserId" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "claimedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "device_pairing_token_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -601,27 +547,6 @@ CREATE INDEX "analytics_snapshot_organizationId_date_idx" ON "analytics_snapshot
 CREATE UNIQUE INDEX "analytics_snapshot_organizationId_date_key" ON "analytics_snapshot"("organizationId", "date");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "api_key_keyHash_key" ON "api_key"("keyHash");
-
--- CreateIndex
-CREATE INDEX "api_key_organizationId_idx" ON "api_key"("organizationId");
-
--- CreateIndex
-CREATE INDEX "api_key_keyHash_idx" ON "api_key"("keyHash");
-
--- CreateIndex
-CREATE INDEX "webhook_endpoint_organizationId_idx" ON "webhook_endpoint"("organizationId");
-
--- CreateIndex
-CREATE INDEX "webhook_delivery_webhookEndpointId_createdAt_idx" ON "webhook_delivery"("webhookEndpointId", "createdAt");
-
--- CreateIndex
-CREATE INDEX "api_request_log_organizationId_createdAt_idx" ON "api_request_log"("organizationId", "createdAt");
-
--- CreateIndex
-CREATE INDEX "api_request_log_apiKeyId_createdAt_idx" ON "api_request_log"("apiKeyId", "createdAt");
-
--- CreateIndex
 CREATE INDEX "admin_audit_log_adminId_createdAt_idx" ON "admin_audit_log"("adminId", "createdAt");
 
 -- CreateIndex
@@ -632,6 +557,12 @@ CREATE INDEX "admin_audit_log_action_createdAt_idx" ON "admin_audit_log"("action
 
 -- CreateIndex
 CREATE INDEX "admin_audit_log_createdAt_idx" ON "admin_audit_log"("createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "device_pairing_token_token_key" ON "device_pairing_token"("token");
+
+-- CreateIndex
+CREATE INDEX "device_pairing_token_organizationId_idx" ON "device_pairing_token"("organizationId");
 
 -- AddForeignKey
 ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -709,19 +640,11 @@ ALTER TABLE "device_registration" ADD CONSTRAINT "device_registration_serialNumb
 ALTER TABLE "analytics_snapshot" ADD CONSTRAINT "analytics_snapshot_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "api_key" ADD CONSTRAINT "api_key_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "api_key" ADD CONSTRAINT "api_key_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "webhook_endpoint" ADD CONSTRAINT "webhook_endpoint_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "webhook_delivery" ADD CONSTRAINT "webhook_delivery_webhookEndpointId_fkey" FOREIGN KEY ("webhookEndpointId") REFERENCES "webhook_endpoint"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "api_request_log" ADD CONSTRAINT "api_request_log_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "admin_audit_log" ADD CONSTRAINT "admin_audit_log_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "device_pairing_token" ADD CONSTRAINT "device_pairing_token_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "device_pairing_token" ADD CONSTRAINT "device_pairing_token_createdByUserId_fkey" FOREIGN KEY ("createdByUserId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+

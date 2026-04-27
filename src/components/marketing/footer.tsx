@@ -19,7 +19,6 @@ export async function MarketingFooter() {
         { label: tNav("features"), href: "#features" },
         { label: tNav("pricing"), href: "#pricing" },
         { label: tNav("faq"), href: "#faq" },
-        { label: tNav("apiDocs"), href: "/api/v1/docs" },
       ],
     },
     {

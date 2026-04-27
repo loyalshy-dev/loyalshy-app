@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db"
 import { assertOrganizationRole, getOrganizationForUser, getCurrentUser, isAdminRole } from "@/lib/dal"
-import { stripe, PLANS, getPlanLimits, isPassTypeAllowed, isActiveSubscription, type PlanId } from "@/lib/stripe"
+import { stripe, PLANS, getPlanLimits, isActiveSubscription, type PlanId } from "@/lib/stripe"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -265,21 +265,9 @@ export async function checkTemplateLimit(organizationId: string): Promise<{
   }
 }
 
-export async function checkPassTypeAllowed(organizationId: string, passType: string): Promise<boolean> {
-  // Super admins bypass plan restrictions AND feature flags
-  const currentUser = await getCurrentUser()
-  if (isAdminRole(currentUser?.user.role ?? "")) return true
-
-  // Check feature flag — coming soon types are blocked for regular users
-  const { isComingSoon } = await import("@/lib/feature-flags")
-  if (await isComingSoon(passType as import("@/lib/plans").PassType)) return false
-
-  const organization = await db.organization.findUnique({
-    where: { id: organizationId },
-    select: { plan: true },
-  })
-  if (!organization) return false
-  return isPassTypeAllowed(organization.plan as PlanId, passType)
+export async function checkPassTypeAllowed(_organizationId: string, passType: string): Promise<boolean> {
+  // Only STAMP_CARD and COUPON are supported. Plans no longer gate by pass type.
+  return passType === "STAMP_CARD" || passType === "COUPON"
 }
 
 export async function checkStaffLimit(organizationId: string): Promise<{

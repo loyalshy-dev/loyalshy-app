@@ -18,93 +18,38 @@ import { DetailsPanel } from "./panels/details-panel"
 import { NotificationsPanel } from "./panels/notifications-panel"
 import { LogoPanel } from "./panels/logo-panel"
 import { PrizeRevealPanel } from "./panels/prize-reveal-panel"
-import { AvatarPanel } from "./panels/avatar-panel"
 import { ScratchCard, SlotMachine, WheelOfFortune } from "@/components/minigames"
 import { savePassDesign as saveCardDesign, updatePassTemplate, updateMinigameConfig } from "@/server/org-settings-actions"
 import type { StudioTool, PreviewFormat } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 import type { ProgramConfigState } from "@/lib/stores/card-design-store"
-import { Save, Download, Smartphone, Tablet, Palette, BarChart3, ImagePlus, SlidersHorizontal, Undo2, Redo2, TextCursorInput, CircleUserRound, FileText, Bell, Gift, Camera } from "lucide-react"
+import { Save, Download, Smartphone, Tablet, Palette, BarChart3, ImagePlus, SlidersHorizontal, Undo2, Redo2, TextCursorInput, CircleUserRound, FileText, Bell, Gift } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 /** Map PassType → CardType for visual rendering */
 function passTypeToCardType(passType: string): CardType {
-  switch (passType) {
-    case "COUPON": return "COUPON"
-    case "MEMBERSHIP": return "TIER"
-    case "POINTS": return "POINTS"
-    case "GIFT_CARD": return "GIFT_CARD"
-    case "TICKET": return "TICKET"
-    case "BUSINESS_CARD": return "GENERIC"
-    default: return "STAMP"
-  }
+  return passType === "COUPON" ? "COUPON" : "STAMP"
 }
 
 /** Build the type-specific config JSON from store state */
 function buildConfigPayload(passType: string, pc: ProgramConfigState): Record<string, unknown> {
-  switch (passType) {
-    case "STAMP_CARD":
-      return {
-        stampsRequired: pc.stampsRequired,
-        rewardDescription: pc.rewardDescription,
-        rewardExpiryDays: pc.rewardExpiryDays,
-      }
-    case "COUPON":
-      return {
-        discountType: pc.discountType,
-        discountValue: pc.discountValue,
-        couponCode: pc.couponCode || undefined,
-        couponDescription: pc.couponDescription || undefined,
-        validUntil: pc.validUntil || undefined,
-        redemptionLimit: pc.redemptionLimit,
-        rewardDescription: pc.rewardDescription || undefined,
-        terms: pc.terms || undefined,
-      }
-    case "MEMBERSHIP":
-      return {
-        membershipTier: pc.membershipTier,
-        benefits: pc.benefits,
-        validDuration: pc.validDuration,
-        customDurationDays: pc.validDuration === "custom" ? pc.customDurationDays : undefined,
-        autoRenew: pc.autoRenew,
-        showHolderPhoto: pc.showHolderPhoto,
-        holderPhotoPosition: pc.holderPhotoPosition,
-        terms: pc.terms || undefined,
-      }
-    case "POINTS":
-      return {
-        pointsPerVisit: pc.pointsPerVisit,
-        pointsLabel: pc.pointsLabel,
-      }
-    case "GIFT_CARD":
-      return {
-        currency: pc.currency,
-        initialBalanceCents: pc.initialBalanceCents,
-        partialRedemption: pc.partialRedemption,
-        expiryMonths: pc.expiryMonths || undefined,
-      }
-    case "TICKET":
-      return {
-        eventName: pc.eventName,
-        eventDate: pc.eventDate || undefined,
-        eventVenue: pc.eventVenue,
-        barcodeType: pc.barcodeType,
-        maxScans: pc.maxScans,
-      }
-    case "BUSINESS_CARD":
-      return {
-        contactName: pc.contactName,
-        jobTitle: pc.jobTitle || undefined,
-        phone: pc.bcPhone || undefined,
-        email: pc.bcEmail || undefined,
-        website: pc.bcWebsite || undefined,
-        linkedinUrl: pc.linkedinUrl || undefined,
-        twitterUrl: pc.twitterUrl || undefined,
-        instagramUrl: pc.instagramUrl || undefined,
-      }
-    default:
-      return {}
+  if (passType === "COUPON") {
+    return {
+      discountType: pc.discountType,
+      discountValue: pc.discountValue,
+      couponCode: pc.couponCode || undefined,
+      couponDescription: pc.couponDescription || undefined,
+      validUntil: pc.validUntil || undefined,
+      redemptionLimit: pc.redemptionLimit,
+      rewardDescription: pc.rewardDescription || undefined,
+      terms: pc.terms || undefined,
+    }
+  }
+  return {
+    stampsRequired: pc.stampsRequired,
+    rewardDescription: pc.rewardDescription,
+    rewardExpiryDays: pc.rewardExpiryDays,
   }
 }
 
@@ -170,8 +115,8 @@ export function StudioLayout({
     if (walletData) {
       store.getState().hydrate(walletData as Partial<WalletState>)
     }
-    // Strip is mandatory for stamp/points cards (progress baked into strip image)
-    if (cardType === "STAMP" || cardType === "POINTS") {
+    // Strip is mandatory for stamp cards (progress baked into strip image)
+    if (cardType === "STAMP") {
       store.getState().setWalletField("showStrip", true)
     }
     // Prefer program-level logos, fall back to organization logos
@@ -309,7 +254,7 @@ export function StudioLayout({
         promises.push(
           saveCardDesign({
             templateId,
-            cardType: state.wallet.cardType as CardType,
+            cardType: state.wallet.cardType === "COUPON" ? "COUPON" : "STAMP",
             showStrip: state.wallet.showStrip,
             primaryColor: state.wallet.primaryColor,
             secondaryColor: state.wallet.secondaryColor,
@@ -566,17 +511,15 @@ export function StudioLayout({
       case "progress":
         return <ProgressPanel store={store} programId={templateId} visitsRequired={programConfig.stampsRequired} />
       case "strip":
-        return <StripPanel store={store} programId={templateId} forceStrip={cardType === "STAMP" || cardType === "POINTS"} organizationId={organizationId} />
+        return <StripPanel store={store} programId={templateId} forceStrip={cardType === "STAMP"} organizationId={organizationId} />
       case "logo":
         return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} organizationLogoApple={organizationLogoApple} organizationLogoGoogle={organizationLogoGoogle} templateId={templateId} />
       case "notifications":
         return <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
       case "details":
-        return <DetailsPanel store={store} passType={passType} />
+        return <DetailsPanel store={store} />
       case "prize":
         return <PrizeRevealPanel store={store} />
-      case "avatar":
-        return <AvatarPanel store={store} programId={templateId} />
       default:
         return null
     }
@@ -997,7 +940,6 @@ function MobileBottomSheet({
     strip: t("stripImage"),
     logo: t("logo"),
     prize: t("prizeReveal"),
-    avatar: t("holderPhoto"),
     notifications: t("notifications"),
     details: t("backOfPass"),
   }
@@ -1187,7 +1129,6 @@ function MobileToolBar({
     { id: "details", label: t("details"), icon: <FileText size={20} /> },
     { id: "notifications", label: t("notifications"), icon: <Bell size={20} /> },
     { id: "prize", label: t("prize"), icon: <Gift size={20} />, condition: passType === "STAMP_CARD" || passType === "COUPON" },
-    { id: "avatar", label: t("avatar"), icon: <Camera size={20} />, condition: passType === "MEMBERSHIP" },
   ]
 
   const visibleTools = ALL_TOOLS.filter((tool) => tool.condition === undefined || tool.condition)

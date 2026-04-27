@@ -11,12 +11,7 @@ import { TemplateCardPreview } from "@/components/template-card-preview"
 import { statusConfig } from "./programs/program-status"
 import { CreateProgramForm } from "./programs/create-program-form"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
-import {
-  parseCouponConfig,
-  parseMembershipConfig,
-  formatCouponValue,
-  parsePointsConfig,
-} from "@/lib/pass-config"
+import { parseCouponConfig, formatCouponValue } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import {
@@ -28,7 +23,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import type { TemplateListItem } from "@/server/template-actions"
-import type { PassType as PlanPassType } from "@/lib/plans"
 
 
 function getTypeSubtitle(
@@ -50,31 +44,12 @@ function getTypeSubtitle(
       const discount = config ? formatCouponValue(config) : ""
       return t("couponSubtitle", { discount, count })
     }
-    case "MEMBERSHIP": {
-      const config = parseMembershipConfig(template.config)
-      const tier = config?.membershipTier ?? "Member"
-      return t("membershipSubtitle", { tier, count })
-    }
-    case "POINTS": {
-      const pConfig = parsePointsConfig(template.config)
-      if (pConfig) {
-        return t("pointsSubtitle", { points: pConfig.pointsPerVisit, count })
-      }
-      return t("pointsDefault", { count })
-    }
     default:
       return t("defaultSubtitle", { count })
   }
 }
 
-type TypeFilter =
-  | "ALL"
-  | "STAMP_CARD"
-  | "COUPON"
-  | "MEMBERSHIP"
-  | "POINTS"
-  | "GIFT_CARD"
-  | "TICKET"
+type TypeFilter = "ALL" | "STAMP_CARD" | "COUPON"
 
 type TemplatesGridViewProps = {
   templates: TemplateListItem[]
@@ -82,8 +57,6 @@ type TemplatesGridViewProps = {
   organizationName: string
   organizationLogo: string | null
   isOwner: boolean
-  allowedPassTypes?: PlanPassType[]
-  comingSoonPassTypes?: PlanPassType[]
 }
 
 export function TemplatesGridView({
@@ -92,8 +65,6 @@ export function TemplatesGridView({
   organizationName,
   organizationLogo,
   isOwner,
-  allowedPassTypes,
-  comingSoonPassTypes,
 }: TemplatesGridViewProps) {
   const t = useTranslations("dashboard.programs")
   const router = useRouter()
@@ -119,14 +90,7 @@ export function TemplatesGridView({
   const filterTabs: { key: TypeFilter; label: string }[] = [
     { key: "ALL", label: t("all") },
   ]
-  const typeOrder: TypeFilter[] = [
-    "STAMP_CARD",
-    "COUPON",
-    "MEMBERSHIP",
-    "POINTS",
-    "GIFT_CARD",
-    "TICKET",
-  ]
+  const typeOrder: TypeFilter[] = ["STAMP_CARD", "COUPON"]
   for (const t of typeOrder) {
     if (typeCounts.has(t)) {
       const meta = PASS_TYPE_META[t as PassType]
@@ -166,8 +130,6 @@ export function TemplatesGridView({
               </DialogHeader>
               <CreateProgramForm
                 organizationId={organizationId}
-                allowedPassTypes={allowedPassTypes}
-                comingSoonPassTypes={comingSoonPassTypes}
                 onCreated={() => {
                   setShowCreate(false)
                   router.refresh()

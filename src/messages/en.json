@@ -41,11 +41,11 @@
     "switchLanguage": "Switch language"
   },
   "hero": {
-    "badge": "The digital wallet platform",
-    "title1": "Digital wallet passes",
+    "badge": "Digital loyalty for small businesses",
+    "title1": "Loyalty cards",
     "title2": "your customers",
-    "titleHighlight": "actually use",
-    "subtitle": "From loyalty cards to event tickets and business cards — create beautiful Apple & Google Wallet passes in minutes. No app required.",
+    "titleHighlight": "actually keep",
+    "subtitle": "Replace paper stamp cards with digital ones in Apple & Google Wallet. Reward repeat customers with stamp cards and coupons — no app required.",
     "seeHowItWorks": "See How It Works",
     "freeForever": "Free forever",
     "noCreditCard": "No credit card required",
@@ -53,8 +53,8 @@
     "browserUrl": "www.loyalshy.com/dashboard"
   },
   "socialProof": {
-    "headline": "Powering digital wallet passes for businesses worldwide",
-    "trustedBy": "Trusted by growing businesses worldwide",
+    "headline": "Powering digital loyalty for small businesses worldwide",
+    "trustedBy": "Trusted by cafés, salons, and shops worldwide",
     "stat1Value": "500+",
     "stat1Label": "businesses",
     "stat2Value": "50K+",
@@ -83,7 +83,7 @@
       },
       "programs": {
         "label": "Programs",
-        "description": "Manage all your loyalty programs in one place. Stamp cards, coupons, memberships, and more.",
+        "description": "Manage all your loyalty programs in one place. Stamp cards and coupons, side by side.",
         "alt": "Programs grid showing different loyalty card types and designs"
       },
       "passes": {
@@ -110,17 +110,17 @@
     "steps": {
       "design": {
         "title": "Design your pass",
-        "description": "Choose from 7 pass types and customize every detail — colors, logos, fields, and rewards — in our visual studio.",
+        "description": "Pick stamp card or coupon, then customize every detail — colors, logos, fields, and rewards — in our visual studio.",
         "alt": "Card design studio — customize your wallet pass"
       },
       "issue": {
         "title": "Issue passes to contacts",
-        "description": "Distribute passes via QR code scan, shareable link, direct issue, bulk CSV import, or REST API.",
-        "alt": "Distribution page with QR code, manual issue, and API options"
+        "description": "Distribute passes via QR code scan, shareable link, direct issue, or bulk CSV import.",
+        "alt": "Distribution page with QR code and manual issue"
       },
       "scan": {
         "title": "Scan to update passes",
-        "description": "Scan a pass to stamp, check in, redeem, or add points — updates sync instantly to Apple and Google Wallet.",
+        "description": "Scan a pass to add a stamp or redeem a coupon — updates sync instantly to Apple and Google Wallet.",
         "alt": "Scanning a wallet pass to record an interaction"
       }
     }
@@ -154,98 +154,12 @@
       "description": "Invite staff with role-based access. Owners and staff see different views."
     },
     "passTypes": {
-      "title": "6 Pass Types",
-      "description": "Stamp cards, coupons, memberships, points, gift cards, and tickets."
+      "title": "Stamp Cards & Coupons",
+      "description": "Two types built for everyday loyalty — punch cards that reward repeat visits, and coupons that drive a single redemption."
     },
     "pushNotifications": {
       "title": "Push Notifications",
       "description": "Send real-time updates to your customers' lock screens. Announce offers, remind about expiring passes, and drive engagement."
-    }
-  },
-  "passTypesCarousel": {
-    "sectionLabel": "Pass Types",
-    "title": "One platform, seven pass types",
-    "subtitle": "From stamp cards to event tickets — create the exact digital wallet pass your business needs.",
-    "prev": "Previous pass type",
-    "next": "Next pass type",
-    "types": {
-      "stampCard": {
-        "label": "Stamp Card",
-        "description": "Reward your customers after a set number of visits. Digital punch cards that live in Apple & Google Wallet — no more lost paper cards.",
-        "alt": "Stamp card pass showing coffee shop loyalty stamps",
-        "useCases": [
-          "Coffee shops",
-          "Bakeries",
-          "Salons",
-          "Car washes"
-        ]
-      },
-      "coupon": {
-        "label": "Coupon",
-        "description": "Offer percentage or fixed discounts your customers can redeem in one tap. Track redemptions and set expiry dates automatically.",
-        "alt": "Digital coupon pass with discount offer",
-        "useCases": [
-          "Retail stores",
-          "Restaurants",
-          "E-commerce",
-          "Promotions"
-        ]
-      },
-      "membership": {
-        "label": "Membership",
-        "description": "Digital membership cards with tier-based benefits. Perfect for clubs, gyms, and loyalty tiers with optional holder photos.",
-        "alt": "Membership card pass with tier and member details",
-        "useCases": [
-          "Gyms",
-          "Clubs",
-          "Libraries",
-          "Co-working spaces"
-        ]
-      },
-      "points": {
-        "label": "Points Program",
-        "description": "Earn points per visit or purchase, then redeem from a custom reward catalog. Flexible point values and labels for any industry.",
-        "alt": "Points program pass showing earned points balance",
-        "useCases": [
-          "Retail chains",
-          "Restaurants",
-          "Hotels",
-          "Airlines"
-        ]
-      },
-      "giftCard": {
-        "label": "Gift Card",
-        "description": "Stored-value gift cards with real-time balance tracking. Customers check their balance right from their wallet — charges and refunds built in.",
-        "alt": "Gift card pass showing current balance",
-        "useCases": [
-          "Retail stores",
-          "Restaurants",
-          "Spas",
-          "Online shops"
-        ]
-      },
-      "ticket": {
-        "label": "Event Ticket",
-        "description": "Digital tickets for events, concerts, and conferences. Scan at the door with QR codes — includes date, venue, and seat details.",
-        "alt": "Event ticket pass with QR code and event details",
-        "useCases": [
-          "Concerts",
-          "Conferences",
-          "Festivals",
-          "Sports events"
-        ]
-      },
-      "businessCard": {
-        "label": "Business Card",
-        "description": "Digital business cards that live in your contacts' wallets. Share your name, title, phone, email, and website — one scan and they have your details forever.",
-        "alt": "Digital business card pass with contact details",
-        "useCases": [
-          "Freelancers",
-          "Sales teams",
-          "Networking events",
-          "Consultants"
-        ]
-      }
     }
   },
   "walletPreview": {
@@ -327,7 +241,7 @@
       "description": "Try Loyalshy with your first customers",
       "features": {
         "contacts": "Up to 50 contacts",
-        "programs": "1 program (stamp card, coupon, or business card)",
+        "programs": "1 program (stamp card or coupon)",
         "staff": "1 staff member",
         "wallet": "Apple & Google Wallet passes",
         "studio": "Card design studio",
@@ -342,11 +256,9 @@
         "contacts": "Up to 500 contacts",
         "staff": "2 staff members",
         "programs": "Up to 2 programs",
-        "passTypes": "All 7 pass types",
         "wallet": "Apple & Google Wallet passes",
         "studio": "Card design studio",
-        "analytics": "Dashboard analytics",
-        "api": "API access (20 req/min)"
+        "analytics": "Dashboard analytics"
       }
     },
     "growth": {
@@ -356,11 +268,9 @@
         "contacts": "Up to 2,500 contacts",
         "staff": "5 staff members",
         "programs": "Up to 5 programs",
-        "passTypes": "All 7 pass types",
         "brandColors": "Custom brand colors on passes",
         "bulkImport": "Bulk CSV import",
-        "support": "Priority email support",
-        "api": "API access (60 req/min)"
+        "support": "Priority email support"
       }
     },
     "scale": {
@@ -370,12 +280,9 @@
         "contacts": "Unlimited contacts",
         "staff": "25 staff members",
         "programs": "Unlimited programs",
-        "passTypes": "All 7 pass types",
         "brandColors": "Custom brand colors on passes",
         "bulkImport": "Bulk CSV import",
-        "webhooks": "Webhook events",
-        "onboarding": "Dedicated onboarding call",
-        "api": "API access (300 req/min)"
+        "onboarding": "Dedicated onboarding call"
       }
     },
     "enterprise": {
@@ -406,11 +313,11 @@
       },
       "passTypes": {
         "question": "What types of passes can I create?",
-        "answer": "Loyalshy supports 6 pass types: stamp cards, coupons, memberships, points programs, gift cards, and tickets. Each type has its own set of features and interactions."
+        "answer": "Loyalshy focuses on two pass types: digital stamp cards (reward customers after a set number of visits) and digital coupons (one-time or unlimited redeemable offers). Both live in Apple and Google Wallet."
       },
       "freePlan": {
         "question": "Is there a free plan?",
-        "answer": "Yes! Our Free plan lets you get started with up to 50 contacts and 1 program — choose a stamp card, coupon, or business card. No credit card required, free forever. Upgrade anytime when you need more."
+        "answer": "Yes! Our Free plan lets you get started with up to 50 contacts and 1 program — choose a stamp card or coupon. No credit card required, free forever. Upgrade anytime when you need more."
       },
       "cancel": {
         "question": "How do I cancel?",
@@ -435,29 +342,6 @@
     "cardPreviewAlt": "Demo loyalty card preview",
     "or": "or visit the link below",
     "openJoinPage": "Open demo pass page"
-  },
-  "apiSection": {
-    "sectionLabel": "Developer API",
-    "title": "Build on top of Loyalshy",
-    "subtitle": "Automate pass creation from your booking system, POS, or any backend. Full REST API with real-time webhooks.",
-    "features": {
-      "restApi": {
-        "title": "Full REST API",
-        "description": "Create passes, manage contacts, and track interactions. Bearer token auth, idempotent requests, and bulk operations included."
-      },
-      "webhooks": {
-        "title": "Real-time Webhooks",
-        "description": "Get notified when passes are issued, stamps are earned, or rewards are claimed. HMAC-signed with automatic retries."
-      },
-      "docs": {
-        "title": "Interactive Documentation",
-        "description": "OpenAPI 3.1 spec with an interactive explorer. Try endpoints directly from the browser with your API key."
-      }
-    },
-    "exploreDocsLink": "Explore API Documentation",
-    "codePreview": {
-      "filename": "issue-pass.ts"
-    }
   },
   "closingCta": {
     "title1": "Ready to grow your",
@@ -630,9 +514,6 @@
       "stamp": "registered a visit",
       "checkIn": "checked in",
       "passUse": "used a pass",
-      "pointsEarn": "earned points",
-      "giftUse": "used gift card",
-      "ticketScan": "scanned ticket",
       "rewardEarned": "earned a reward",
       "rewardRedeemed": "redeemed a reward",
       "couponRedeemed": "redeemed a coupon",
@@ -652,18 +533,8 @@
       "rewardsEarned": "rewards earned",
       "issued": "issued",
       "redeemed": "redeemed",
-      "members": "members",
-      "checkIns": "check-ins",
       "uses": "uses",
-      "cards": "cards",
-      "transactions": "transactions",
-      "tickets": "tickets",
-      "scans": "scans",
-      "passes": "passes",
-      "accessLogs": "access logs",
-      "trips": "trips",
-      "ids": "IDs",
-      "verifications": "verifications"
+      "passes": "passes"
     },
     "contacts": {
       "title": "Contacts",
@@ -719,16 +590,8 @@
       "all": "All",
       "stampCards": "Stamp Cards",
       "coupons": "Coupons",
-      "memberships": "Memberships",
-      "points": "Points",
-      "giftCards": "Gift Cards",
-      "tickets": "Tickets",
-      "businessCards": "Business Cards",
       "stampSubtitle": "{stamps} stamps | {count} active",
       "couponSubtitle": "{discount} | {count} claimed",
-      "membershipSubtitle": "{tier} | {count} members",
-      "pointsSubtitle": "{points} pts/visit | {count} active",
-      "pointsDefault": "Points | {count} active",
       "defaultSubtitle": "{count} passes",
       "noPrograms": "No programs yet",
       "createFirst": "Create your first loyalty program to start rewarding your customers.",
@@ -760,8 +623,6 @@
       "general": "General",
       "team": "Team",
       "billing": "Billing",
-      "api": "API",
-      "jobs": "Jobs",
       "orgProfile": "Organization Profile",
       "orgProfileDescription": "Basic information about your organization.",
       "orgName": "Organization Name",
@@ -771,17 +632,7 @@
       "addressPlaceholder": "123 Main St, City, State",
       "inviteTeam": "Invite team members",
       "inviteSent": "Invitation sent to {email}",
-      "memberRemoved": "{name} has been removed",
-      "apiKeys": "API Keys",
-      "apiKeysDescription": "Manage API keys for programmatic access.",
-      "viewApiDocs": "View API docs",
-      "createKey": "Create key",
-      "noApiKeys": "No API keys yet. Create one to get started.",
-      "expired": "Expired",
-      "copied": "Copied to clipboard.",
-      "keyRevoked": "API key revoked.",
-      "backgroundJobs": "Background Jobs",
-      "backgroundJobsDescription": "Recent wallet pass updates and background job activity."
+      "memberRemoved": "{name} has been removed"
     },
     "onboarding": {
       "title": "Get started with Loyalshy",
@@ -869,7 +720,6 @@
       "visit": "Visit",
       "couponRedeemed": "Coupon redeemed",
       "readyToRedeem": "Ready to redeem",
-      "activeMember": "Active member",
       "suspended": "Suspended",
       "expired": "Expired",
       "expires": "Expires",
@@ -881,9 +731,7 @@
       "appleWallet": "Apple Wallet",
       "googleWallet": "Google Wallet",
       "stampCard": "Stamp Card",
-      "coupon": "Coupon",
-      "membership": "Membership",
-      "points": "Points"
+      "coupon": "Coupon"
     },
     "contactColumns": {
       "name": "Name",
@@ -1011,34 +859,6 @@
       "programsUsed": "{used} of {limit} programs",
       "staffUsed": "{used} of {limit} staff members",
       "unlimited": "Unlimited",
-      "webhooks": "Webhooks",
-      "webhooksDescription": "Receive real-time notifications when events occur.",
-      "addWebhook": "Add Webhook",
-      "webhookUrl": "Endpoint URL",
-      "webhookUrlPlaceholder": "https://your-server.com/webhook",
-      "webhookUrlHttps": "URL must use HTTPS.",
-      "webhookEvents": "Events",
-      "selectEvents": "Select at least one event.",
-      "webhookCreated": "Webhook endpoint created",
-      "webhookDeleted": "Webhook endpoint deleted",
-      "webhookEnabled": "Webhook enabled",
-      "webhookDisabled": "Webhook disabled",
-      "testWebhook": "Send Test",
-      "testSent": "Test webhook sent",
-      "rotateSecret": "Rotate Secret",
-      "secretRotated": "Webhook secret rotated",
-      "events": {
-        "contactCreated": "Contact created",
-        "contactUpdated": "Contact updated",
-        "contactDeleted": "Contact deleted",
-        "passIssued": "Pass issued",
-        "passCompleted": "Pass completed",
-        "passSuspended": "Pass suspended",
-        "passRevoked": "Pass revoked",
-        "interactionCreated": "Interaction created",
-        "rewardEarned": "Reward earned",
-        "rewardRedeemed": "Reward redeemed"
-      },
       "statusTrial": "Trial",
       "statusActive": "Active",
       "statusPastDue": "Past Due",
@@ -1061,26 +881,10 @@
     "registerVisit": {
       "title": "Register Interaction",
       "scanQr": "Scan QR Code",
-      "scanDescription": "Scan the customer's wallet pass QR code",
-      "orEnterManually": "Or enter manually",
-      "selectContact": "Select contact",
-      "selectProgram": "Select program",
       "registerStamp": "Register Visit",
       "redeemCoupon": "Redeem Coupon",
-      "checkIn": "Check In",
-      "addPoints": "Add Points",
-      "redeemPoints": "Redeem Points",
-      "charge": "Charge",
-      "scanTicket": "Scan Ticket",
-      "amount": "Amount",
-      "points": "Points",
-      "note": "Note",
-      "notePlaceholder": "Optional note...",
-      "success": "Interaction registered",
       "stampAdded": "Visit registered for {name}",
-      "couponRedeemed": "Coupon redeemed for {name}",
-      "pointsAdded": "{points} points added for {name}",
-      "error": "Failed to register interaction"
+      "couponRedeemed": "Coupon redeemed for {name}"
     },
     "shell": {
       "trialDaysLeft": "{count, plural, one {# day} other {# days}} left in your trial.",
@@ -1118,8 +922,6 @@
       "details": "Details",
       "stamps": "Stamps",
       "coupon": "Coupon",
-      "membership": "Membership",
-      "points": "Points",
       "schedule": "Schedule",
       "terms": "Terms",
       "prizeReveal": "Prize Reveal",
@@ -1145,7 +947,6 @@
       "discountTypeFixed": "Fixed Amount Off",
       "discountTypeFreebie": "Free Item",
       "discountPercent": "Discount (%)",
-      "discountAmount": "Discount Amount",
       "couponDescription": "Description",
       "couponDescriptionRequired": "Description is required",
       "couponDescriptionPlaceholder": "e.g., Get 20% off your next order",
@@ -1156,34 +957,6 @@
       "redemptionLimit": "Redemption Limit",
       "redemptionSingle": "Single Use",
       "redemptionUnlimited": "Unlimited",
-      "membershipConfiguration": "Membership Configuration",
-      "membershipConfigDesc": "Define membership tiers, duration, and benefits.",
-      "membershipTier": "Membership Tier",
-      "membershipTierPlaceholder": "e.g., VIP, Gold, Premium",
-      "membershipTierRequired": "Tier name is required",
-      "duration": "Duration",
-      "durationMonthly": "Monthly",
-      "durationYearly": "Yearly",
-      "durationLifetime": "Lifetime",
-      "durationCustom": "Custom",
-      "customDurationDays": "Custom Duration (Days)",
-      "benefits": "Benefits",
-      "benefitsRequired": "Benefits are required",
-      "benefitsPlaceholder": "List the perks members receive...",
-      "pointsConfiguration": "Points Configuration",
-      "pointsConfigDesc": "Set how points are earned and what they can be redeemed for.",
-      "pointsPerVisit": "Points Per Visit",
-      "pointsPerVisitHint": "Points awarded to customers each time they visit (1–90).",
-      "rewardCatalog": "Reward Catalog",
-      "rewardCatalogDesc": "Items customers can redeem with their points (up to 20).",
-      "addItem": "Add Item",
-      "noCatalogItems": "No catalog items yet. Add at least one reward for customers to redeem.",
-      "rewardName": "Reward Name",
-      "rewardNamePlaceholder": "e.g., Free Coffee",
-      "pointsCost": "Points Cost",
-      "descriptionOptional": "Description (optional)",
-      "descriptionPlaceholder": "Short description...",
-      "removeCatalogItem": "Remove catalog item",
       "scheduleSection": "Schedule",
       "scheduleDesc": "Control when the program is active and accepting customers.",
       "status": "Status",
@@ -1246,44 +1019,10 @@
       "generalSection": "General",
       "stampsSuffix": "stamps",
       "rewardExpirySuffix": "days (0 = never)",
-      "autoRenew": "Auto-renew",
-      "autoRenewDesc": "Automatically renew membership when it expires",
-      "pointsLabel": "Points Label",
-      "pointsLabelPlaceholder": "pts",
-      "giftCardConfiguration": "Gift Card",
-      "currency": "Currency",
-      "currencyPlaceholder": "USD",
-      "initialBalanceCents": "Initial balance (cents)",
-      "partialRedemption": "Partial redemption",
-      "partialRedemptionDesc": "Allow spending part of the balance",
-      "expiryMonths": "Expiry (months)",
-      "ticketConfiguration": "Event Ticket",
-      "eventName": "Event name",
-      "eventNamePlaceholder": "Summer Music Festival",
-      "eventDate": "Event date",
-      "venue": "Venue",
-      "venuePlaceholder": "Madison Square Garden",
-      "maxScans": "Max scans",
-      "customDuration": "Custom duration",
-      "daysSuffix": "days",
-      "noEndDate": "No end date — program runs indefinitely.",
-      "contactInformation": "Contact Information",
-      "contactName": "Contact Name",
-      "contactNamePlaceholder": "John Doe",
-      "jobTitle": "Job Title",
-      "jobTitlePlaceholder": "Sales Manager",
-      "phone": "Phone",
-      "phonePlaceholder": "+34 612 345 678",
-      "email": "Email",
-      "emailPlaceholder": "john@company.com",
-      "website": "Website",
-      "websitePlaceholder": "https://company.com",
-      "socialLinks": "Social Links"
+      "noEndDate": "No end date — program runs indefinitely."
     },
     "createProgram": {
       "chooseType": "Choose a program type to get started.",
-      "comingSoon": "Coming Soon",
-      "upgrade": "Pro",
       "backToTypeSelection": "Back to type selection",
       "programName": "Program Name",
       "programNameRequired": "Program name is required",
@@ -1314,76 +1053,7 @@
       "termsOptional": "Terms & Conditions (Optional)",
       "termsPlaceholder": "Optional terms...",
       "createCoupon": "Create Coupon",
-      "couponCreated": "Coupon program created",
-      "memberProgramNamePlaceholder": "e.g., VIP Club, Gold Membership",
-      "membershipTier": "Membership Tier",
-      "membershipTierPlaceholder": "e.g., VIP, Gold, Premium",
-      "membershipTierRequired": "Tier name is required",
-      "duration": "Duration",
-      "durationMonthly": "Monthly",
-      "durationYearly": "Yearly",
-      "durationLifetime": "Lifetime",
-      "durationCustom": "Custom",
-      "customDurationDays": "Custom Duration (Days)",
-      "benefits": "Benefits",
-      "benefitsRequired": "Benefits are required",
-      "benefitsPlaceholder": "List the perks members receive...",
-      "createMembership": "Create Membership",
-      "membershipCreated": "Membership program created",
-      "pointsProgramNamePlaceholder": "e.g., Reward Points, Loyalty Points",
-      "pointsPerVisit": "Points Per Visit",
-      "rewardExpiryDays": "Reward Expiry (Days)",
-      "rewardCatalog": "Reward Catalog",
-      "catalogCount": "{count}/20 items",
-      "catalogName": "Name",
-      "catalogNameRequired": "*",
-      "catalogNamePlaceholder": "e.g., Free Coffee",
-      "catalogDescription": "Description",
-      "catalogDescriptionPlaceholder": "Optional",
-      "catalogPointsCost": "Points Cost",
-      "removeCatalogItem": "Remove catalog item {index}",
-      "addCatalogItem": "Add Catalog Item",
-      "catalogValidationError": "All catalog items must have a name and a points cost of at least 1",
-      "createPointsProgram": "Create Points Program",
-      "pointsProgramCreated": "Points program created",
-      "useLabelRequired": "Use label is required",
-      "giftCardName": "Card Name",
-      "giftCardNameRequired": "Card name is required",
-      "giftCardNamePlaceholder": "e.g., Store Gift Card, Birthday Gift",
-      "currency": "Currency",
-      "initialBalance": "Initial Balance",
-      "partialRedemption": "Partial Redemption",
-      "partialRedemptionYes": "Yes",
-      "partialRedemptionNo": "No (full balance only)",
-      "expiryMonths": "Expiry (Months, 0 = never)",
-      "createGiftCard": "Create Gift Card",
-      "giftCardCreated": "Gift card created",
-      "ticketProgramNamePlaceholder": "e.g., Summer Concert 2026, Conference VIP",
-      "eventName": "Event Name",
-      "eventNameRequired": "Event name is required",
-      "eventNamePlaceholder": "e.g., Summer Music Festival",
-      "eventDate": "Event Date",
-      "eventDateRequired": "Event date is required",
-      "maxScans": "Max Scans",
-      "venue": "Venue",
-      "venueRequired": "Venue is required",
-      "venuePlaceholder": "e.g., Madison Square Garden",
-      "createTicket": "Create Ticket",
-      "ticketCreated": "Event ticket created",
-      "businessCardNamePlaceholder": "My Business Card",
-      "contactName": "Contact Name",
-      "contactNameRequired": "Contact name is required",
-      "contactNamePlaceholder": "John Doe",
-      "jobTitle": "Job Title",
-      "jobTitlePlaceholder": "Sales Manager",
-      "phone": "Phone",
-      "phonePlaceholder": "+34 612 345 678",
-      "bcEmail": "Email",
-      "emailPlaceholder": "john@company.com",
-      "bcWebsite": "Website",
-      "websitePlaceholder": "https://company.com",
-      "createBusinessCard": "Create Business Card",
-      "businessCardCreated": "Business card created!"
+      "couponCreated": "Coupon program created"
     },
     "studio": {
       "save": "Save",
@@ -1405,7 +1075,6 @@
       "details": "Details",
       "notifications": "Alerts",
       "prize": "Prize",
-      "avatar": "Photo",
       "more": "More",
       "scratchCard": "Scratch Card",
       "slotMachine": "Slot Machine",
@@ -1441,7 +1110,7 @@
     "pageTitle": "Privacy Policy",
     "lastUpdated": "Last updated: March 2026",
     "section1Title": "1. Who We Are",
-    "section1P1": "Loyalshy (\"we\", \"us\", \"our\") operates a digital wallet pass platform at loyalshy.com. We help businesses create and manage Apple Wallet and Google Wallet passes for loyalty programs, memberships, coupons, tickets, and more.",
+    "section1P1": "Loyalshy (\"we\", \"us\", \"our\") operates a digital loyalty platform at loyalshy.com. We help small businesses create and manage Apple Wallet and Google Wallet passes for stamp-card and coupon loyalty programs.",
     "section1P2": "For privacy inquiries, contact us at",
     "section2Title": "2. Data We Collect",
     "section2AccountData": "Account data:",
@@ -1499,7 +1168,7 @@
     "section1Title": "1. Agreement",
     "section1P1": "By accessing or using Loyalshy (\"the Service\"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.",
     "section2Title": "2. Description of Service",
-    "section2P1": "Loyalshy is a digital wallet pass platform that enables businesses to create, manage, and distribute Apple Wallet and Google Wallet passes. The platform supports stamp cards, coupons, memberships, points programs, gift cards, and tickets.",
+    "section2P1": "Loyalshy is a digital loyalty platform that enables small businesses to create, manage, and distribute Apple Wallet and Google Wallet passes. The platform supports stamp cards and coupons.",
     "section3Title": "3. Accounts",
     "section3P1": "You must provide accurate information when creating an account. You are responsible for maintaining the security of your account credentials. You must notify us immediately of any unauthorized access.",
     "section3P2": "Each organization on Loyalshy operates as a separate tenant. Organization owners are responsible for managing team members and their access levels.",
@@ -1569,7 +1238,6 @@
       "stripImage": "Strip Image",
       "logo": "Logo",
       "prizeReveal": "Prize Reveal",
-      "holderPhoto": "Holder Photo",
       "notifications": "Notifications",
       "backOfPass": "Back-of-Pass Details",
       "fields": "Fields & Labels",
@@ -1725,10 +1393,6 @@
       "rewardRevealGame": "Reward reveal game",
       "showMinigame": "Show a fun minigame when customers earn a reward"
     },
-    "avatar": {
-      "showHolderPhoto": "Show holder photo",
-      "overlayAvatar": "Overlay a circular avatar on the strip"
-    },
     "template": {
       "cafe": "Cafe",
       "fineDining": "Fine Dining",
@@ -1771,7 +1435,6 @@
     "invalidFileType": "File must be PNG, JPEG, or WebP",
     "invalidFileTypeSvg": "File must be PNG, JPEG, WebP, or SVG",
     "templateLimitReached": "Template limit reached ({limit}). Upgrade your plan to create more templates.",
-    "passTypeNotAllowed": "This pass type is not available on your current plan. Upgrade to unlock all 6 pass types.",
     "templateNotFound": "Pass template not found",
     "templateAlreadyArchived": "Template is already archived",
     "templateAlreadyActive": "Template is already active",
@@ -1800,13 +1463,8 @@
     "templateExpired": "This pass template has expired",
     "notACoupon": "This pass is not a coupon",
     "couponAlreadyRedeemed": "This coupon has already been redeemed",
-    "notAMembership": "This pass is not a membership",
-    "notAPointsCard": "This pass is not a points card",
-    "rewardNotInCatalog": "Reward not found in catalog",
-    "notEnoughPoints": "Not enough points. Need {needed}, have {current}",
     "noRemainingUses": "This pass has no remaining uses",
     "missingPassOrFile": "Missing pass instance ID or file",
-    "passTypeNoPhoto": "Pass type does not support holder photos",
     "missingPassId": "Missing pass instance ID",
     "csvName": "Name",
     "csvEmail": "Email",
@@ -1814,16 +1472,14 @@
     "csvTotalInteractions": "Total Interactions",
     "csvActivePasses": "Active Passes",
     "csvLastInteraction": "Last Interaction",
-    "csvJoined": "Joined",
-    "businessCardAlreadyExists": "Your organization already has a business card. Archive the existing one to create a new one."
+    "csvJoined": "Joined"
   },
   "admin": {
     "nav": {
       "overview": "Overview",
       "users": "Users",
       "organizations": "Organizations",
-      "auditLog": "Audit Log",
-      "featureFlags": "Feature Flags"
+      "auditLog": "Audit Log"
     },
     "overview": {
       "title": "Platform Overview",
@@ -1946,15 +1602,6 @@
       "actionBulkStatusChange": "Bulk Status Change",
       "actionBulkExport": "Bulk Export"
     },
-    "featureFlags": {
-      "title": "Feature Flags",
-      "description": "Control which pass types are available to users. Disabled types show a \"Coming Soon\" badge.",
-      "save": "Save Changes",
-      "saved": "Feature flags updated.",
-      "comingSoon": "Coming Soon",
-      "toggle": "availability toggle",
-      "hint": "Admin roles always bypass feature flags and can create any pass type regardless of these settings."
-    },
     "roles": {
       "user": "User",
       "adminSupport": "Support Admin",
@@ -1991,8 +1638,6 @@
     "welcomeBack": "Welcome back! Loading your pass...",
     "somethingWentWrong": "Something went wrong",
     "stampSubtitle": "{reward} after {visits} visits",
-    "pointsSubtitle": "Earn points — {reward}",
-    "giftCardSubtitle": "Gift card — {reward}",
     "card": {
       "title": "{name}'s Card",
       "rewardEarned": "You earned a reward!",

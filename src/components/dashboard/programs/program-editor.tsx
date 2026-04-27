@@ -46,8 +46,7 @@ import {
   deleteTemplate as deleteProgram,
 } from "@/server/org-settings-actions"
 import type { TemplateWithDesign, TemplateDeleteCounts } from "@/server/org-settings-actions"
-import { parseCouponConfig, parseMembershipConfig, parseMinigameConfig, parsePointsConfig } from "@/lib/pass-config"
-import type { PointsCatalogItem } from "@/types/pass-types"
+import { parseCouponConfig, parseMinigameConfig } from "@/lib/pass-config"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { PrizeRevealEditor } from "@/components/dashboard/programs/prize-reveal-editor"
 
@@ -132,11 +131,6 @@ type LoyaltyForm = {
   couponCode: string
   validUntil: string
   redemptionLimit: string
-  // Membership config fields
-  membershipTier: string
-  benefits: string
-  validDuration: string
-  customDurationDays: number
 }
 
 type Organization = {
@@ -174,8 +168,6 @@ export function ProgramEditor({
   const programType = (program.passType ?? "STAMP_CARD") as PassType
   const isStampCard = programType === "STAMP_CARD"
   const isCoupon = programType === "COUPON"
-  const isMembership = programType === "MEMBERSHIP"
-  const isPoints = programType === "POINTS"
 
   // Extract stamp-card flat fields from config JSON
   const stampConfig = program.config as Record<string, unknown> | null ?? {}
@@ -186,14 +178,6 @@ export function ProgramEditor({
   const couponConfig = isCoupon ? parseCouponConfig(program.config) : null
   const minigameConfig = (isStampCard || isCoupon) ? parseMinigameConfig(program.config) : null
   const hasPrizes = !!(minigameConfig?.enabled && minigameConfig.prizes?.length)
-  const membershipConfig = isMembership ? parseMembershipConfig(program.config) : null
-  const pointsConfig = isPoints ? parsePointsConfig(program.config) : null
-  const [pointsPerVisit, setPointsPerVisit] = useState<number>(
-    pointsConfig?.pointsPerVisit ?? 10
-  )
-  const [catalogItems, setCatalogItems] = useState<PointsCatalogItem[]>(
-    pointsConfig?.catalog ?? []
-  )
 
   const {
     register,
@@ -220,18 +204,12 @@ export function ProgramEditor({
       couponCode: couponConfig?.couponCode ?? "",
       validUntil: couponConfig?.validUntil ?? "",
       redemptionLimit: couponConfig?.redemptionLimit ?? "single",
-      // Membership defaults
-      membershipTier: membershipConfig?.membershipTier ?? "",
-      benefits: membershipConfig?.benefits ?? "",
-      validDuration: membershipConfig?.validDuration ?? "monthly",
-      customDurationDays: membershipConfig?.customDurationDays ?? 30,
     },
   })
 
   const visitsRequired = watch("visitsRequired")
   const visitsChanged =
     Number(visitsRequired) !== programVisitsRequired
-  const validDuration = watch("validDuration")
   const discountType = watch("discountType")
   function buildConfig(data: LoyaltyForm): Record<string, unknown> | undefined {
     if (isCoupon) {
@@ -243,23 +221,6 @@ export function ProgramEditor({
         validUntil: data.validUntil || undefined,
         redemptionLimit: data.redemptionLimit,
         terms: data.termsAndConditions || undefined,
-      }
-    }
-    if (isMembership) {
-      return {
-        membershipTier: data.membershipTier,
-        benefits: data.benefits,
-        validDuration: data.validDuration,
-        ...(data.validDuration === "custom"
-          ? { customDurationDays: data.customDurationDays }
-          : {}),
-        terms: data.termsAndConditions || undefined,
-      }
-    }
-    if (isPoints) {
-      return {
-        pointsPerVisit,
-        catalog: catalogItems,
       }
     }
     return undefined
@@ -366,8 +327,6 @@ export function ProgramEditor({
     { id: "details", label: t("details") },
     ...(isStampCard ? [{ id: "stamps", label: t("stamps") }] : []),
     ...(isCoupon ? [{ id: "coupon", label: t("coupon") }] : []),
-    ...(isMembership ? [{ id: "membership", label: t("membership") }] : []),
-    ...(isPoints ? [{ id: "points", label: t("points") }] : []),
     { id: "schedule", label: t("schedule") },
     { id: "terms", label: t("terms") },
     ...((isStampCard || isCoupon) ? [{ id: "prize-reveal", label: t("prizeReveal") }] : []),
@@ -558,261 +517,6 @@ export function ProgramEditor({
                     <option value="single">{t("redemptionSingle")}</option>
                     <option value="unlimited">{t("redemptionUnlimited")}</option>
                   </select>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Membership Config */}
-          {isMembership && (
-            <section id="membership" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
-              <div>
-                <h3 className="text-sm font-semibold">{t("membershipConfiguration")}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{t("membershipConfigDesc")}</p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor={`tier-${program.id}`}>{t("membershipTier")}</Label>
-                  <Input
-                    id={`tier-${program.id}`}
-                    {...register("membershipTier", { required: t("membershipTierRequired") })}
-                    placeholder={t("membershipTierPlaceholder")}
-                    disabled={isArchived}
-                  />
-                  {errors.membershipTier && (
-                    <p className="text-xs text-destructive">{errors.membershipTier.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`duration-${program.id}`}>{t("duration")}</Label>
-                  <select
-                    id={`duration-${program.id}`}
-                    {...register("validDuration")}
-                    disabled={isArchived}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="monthly">{t("durationMonthly")}</option>
-                    <option value="yearly">{t("durationYearly")}</option>
-                    <option value="lifetime">{t("durationLifetime")}</option>
-                    <option value="custom">{t("durationCustom")}</option>
-                  </select>
-                </div>
-                {validDuration === "custom" && (
-                  <div className="space-y-2">
-                    <Label htmlFor={`custom-days-${program.id}`}>{t("customDurationDays")}</Label>
-                    <Input
-                      id={`custom-days-${program.id}`}
-                      type="number"
-                      min={1}
-                      max={3650}
-                      {...register("customDurationDays", { valueAsNumber: true })}
-                      disabled={isArchived}
-                    />
-                  </div>
-                )}
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor={`benefits-${program.id}`}>{t("benefits")}</Label>
-                  <Textarea
-                    id={`benefits-${program.id}`}
-                    {...register("benefits", { required: t("benefitsRequired") })}
-                    placeholder={t("benefitsPlaceholder")}
-                    rows={3}
-                    disabled={isArchived}
-                  />
-                  {errors.benefits && (
-                    <p className="text-xs text-destructive">{errors.benefits.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor={`reward-${program.id}`}>{t("rewardDescription")}</Label>
-                  <Input
-                    id={`reward-${program.id}`}
-                    {...register("rewardDescription", {
-                      required: t("rewardDescriptionRequired"),
-                    })}
-                    placeholder="e.g., VIP Member"
-                    disabled={isArchived}
-                  />
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Points Config */}
-          {isPoints && (
-            <section id="points" className="scroll-mt-24 space-y-4 border-t border-border pt-6">
-              <div>
-                <h3 className="text-sm font-semibold">{t("pointsConfiguration")}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{t("pointsConfigDesc")}</p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor={`points-per-visit-${program.id}`}>{t("pointsPerVisit")}</Label>
-                  <Input
-                    id={`points-per-visit-${program.id}`}
-                    type="number"
-                    min={1}
-                    max={100}
-                    value={pointsPerVisit}
-                    onChange={(e) => setPointsPerVisit(Number(e.target.value))}
-                    disabled={isArchived}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {t("pointsPerVisitHint")}
-                  </p>
-                </div>
-
-                <div className="sm:col-span-2 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-sm font-medium">{t("rewardCatalog")}</Label>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {t("rewardCatalogDesc")}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={isArchived || catalogItems.length >= 20}
-                      onClick={() =>
-                        setCatalogItems((prev) => [
-                          ...prev,
-                          {
-                            id: crypto.randomUUID(),
-                            name: "",
-                            description: "",
-                            pointsCost: 100,
-                          },
-                        ])
-                      }
-                    >
-                      {t("addItem")}
-                    </Button>
-                  </div>
-
-                  {catalogItems.length === 0 && (
-                    <p className="text-xs text-muted-foreground border border-dashed border-border rounded-md px-3 py-4 text-center">
-                      {t("noCatalogItems")}
-                    </p>
-                  )}
-
-                  <div className="space-y-2">
-                    {catalogItems.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="rounded-md border border-border p-3 space-y-2"
-                      >
-                        {/* Row 1: Name + Points Cost */}
-                        <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
-                          <div className="space-y-1">
-                            <Label
-                              htmlFor={`catalog-name-${item.id}`}
-                              className="text-xs text-muted-foreground"
-                            >
-                              {t("rewardName")}
-                            </Label>
-                            <Input
-                              id={`catalog-name-${item.id}`}
-                              value={item.name}
-                              placeholder={t("rewardNamePlaceholder")}
-                              disabled={isArchived}
-                              onChange={(e) =>
-                                setCatalogItems((prev) =>
-                                  prev.map((ci, i) =>
-                                    i === index ? { ...ci, name: e.target.value } : ci
-                                  )
-                                )
-                              }
-                            />
-                          </div>
-                          <div className="space-y-1 w-28 shrink-0">
-                            <Label
-                              htmlFor={`catalog-cost-${item.id}`}
-                              className="text-xs text-muted-foreground"
-                            >
-                              {t("pointsCost")}
-                            </Label>
-                            <Input
-                              id={`catalog-cost-${item.id}`}
-                              type="number"
-                              min={1}
-                              max={100000}
-                              value={item.pointsCost}
-                              disabled={isArchived}
-                              onChange={(e) =>
-                                setCatalogItems((prev) =>
-                                  prev.map((ci, i) =>
-                                    i === index
-                                      ? { ...ci, pointsCost: Number(e.target.value) }
-                                      : ci
-                                  )
-                                )
-                              }
-                            />
-                          </div>
-                        </div>
-                        {/* Row 2: Description + Remove */}
-                        <div className="flex gap-2 items-end">
-                          <div className="space-y-1 flex-1">
-                            <Label
-                              htmlFor={`catalog-desc-${item.id}`}
-                              className="text-xs text-muted-foreground"
-                            >
-                              {t("descriptionOptional")}
-                            </Label>
-                            <Input
-                              id={`catalog-desc-${item.id}`}
-                              value={item.description ?? ""}
-                              placeholder={t("descriptionPlaceholder")}
-                              disabled={isArchived}
-                              onChange={(e) =>
-                                setCatalogItems((prev) =>
-                                  prev.map((ci, i) =>
-                                    i === index
-                                      ? { ...ci, description: e.target.value }
-                                      : ci
-                                  )
-                                )
-                              }
-                            />
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            disabled={isArchived}
-                            aria-label={t("removeCatalogItem")}
-                            onClick={() =>
-                              setCatalogItems((prev) =>
-                                prev.filter((_, i) => i !== index)
-                              )
-                            }
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor={`reward-${program.id}`}>{t("rewardDescription")}</Label>
-                  <Input
-                    id={`reward-${program.id}`}
-                    {...register("rewardDescription", {
-                      required: t("rewardDescriptionRequired"),
-                    })}
-                    placeholder="e.g., Redeem points for free items"
-                    disabled={isArchived}
-                  />
-                  {errors.rewardDescription && (
-                    <p className="text-xs text-destructive">
-                      {errors.rewardDescription.message}
-                    </p>
-                  )}
                 </div>
               </div>
             </section>

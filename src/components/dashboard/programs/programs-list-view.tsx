@@ -11,7 +11,7 @@ import { TemplateCardPreview } from "@/components/template-card-preview"
 import { statusConfig } from "./program-status"
 import { CreateProgramForm } from "./create-program-form"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parsePointsConfig } from "@/lib/pass-config"
+import { parseCouponConfig, formatCouponValue } from "@/lib/pass-config"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import {
@@ -23,7 +23,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import type { TemplateListItem } from "@/server/template-actions"
-import type { PassType as PlanPassType } from "@/lib/plans"
 
 
 function getTypeSubtitle(program: TemplateListItem): string {
@@ -41,22 +40,12 @@ function getTypeSubtitle(program: TemplateListItem): string {
       const discount = config ? formatCouponValue(config) : rewardDesc
       return `${discount} | ${count} claimed`
     }
-    case "MEMBERSHIP": {
-      const config = parseMembershipConfig(program.config)
-      const tier = config?.membershipTier ?? "Member"
-      return `${tier} | ${count} members`
-    }
-    case "POINTS": {
-      const pConfig = parsePointsConfig(program.config)
-      const subtitle = pConfig ? `${pConfig.pointsPerVisit} pts/visit` : "Points"
-      return `${subtitle} | ${count} enrolled`
-    }
     default:
       return `${count} enrolled`
   }
 }
 
-type TypeFilter = "ALL" | "STAMP_CARD" | "COUPON" | "MEMBERSHIP" | "POINTS" | "GIFT_CARD" | "TICKET" | "BUSINESS_CARD"
+type TypeFilter = "ALL" | "STAMP_CARD" | "COUPON"
 
 type TemplatesListViewProps = {
   programs: TemplateListItem[]
@@ -64,7 +53,6 @@ type TemplatesListViewProps = {
   organizationName: string
   organizationLogo: string | null
   isOwner: boolean
-  allowedPassTypes?: PlanPassType[]
 }
 
 export function TemplatesListView({
@@ -73,7 +61,6 @@ export function TemplatesListView({
   organizationName,
   organizationLogo,
   isOwner,
-  allowedPassTypes,
 }: TemplatesListViewProps) {
   const t = useTranslations("dashboard.programs")
   const router = useRouter()
@@ -85,11 +72,6 @@ export function TemplatesListView({
     ALL: programs.length,
     STAMP_CARD: programs.filter((p) => p.passType === "STAMP_CARD").length,
     COUPON: programs.filter((p) => p.passType === "COUPON").length,
-    MEMBERSHIP: programs.filter((p) => p.passType === "MEMBERSHIP").length,
-    POINTS: programs.filter((p) => p.passType === "POINTS").length,
-    GIFT_CARD: programs.filter((p) => p.passType === "GIFT_CARD").length,
-    TICKET: programs.filter((p) => p.passType === "TICKET").length,
-    BUSINESS_CARD: programs.filter((p) => p.passType === "BUSINESS_CARD").length,
   }
 
   const filteredPrograms =
@@ -101,11 +83,6 @@ export function TemplatesListView({
     { key: "ALL", label: t("all") },
     { key: "STAMP_CARD", label: t("stampCards") },
     { key: "COUPON", label: t("coupons") },
-    { key: "MEMBERSHIP", label: t("memberships") },
-    { key: "POINTS", label: t("points") },
-    { key: "GIFT_CARD", label: t("giftCards") },
-    { key: "TICKET", label: t("tickets") },
-    { key: "BUSINESS_CARD", label: t("businessCards") },
   ]
 
   // Only show filter tabs if there's more than one type
@@ -140,7 +117,6 @@ export function TemplatesListView({
               </DialogHeader>
               <CreateProgramForm
                 organizationId={organizationId}
-                allowedPassTypes={allowedPassTypes}
                 onCreated={() => {
                   setShowCreate(false)
                   router.refresh()

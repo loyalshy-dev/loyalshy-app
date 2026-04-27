@@ -11,7 +11,8 @@ import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConf
 import type { ProgressStyle, LabelFormat } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { getWalletRewardText, parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, getCheapestCatalogItem } from "../../pass-config"
+import { getWalletRewardText, parseCouponConfig, formatCouponValue } from "../../pass-config"
+import { createWalletPassLog } from "../apple/update-pass"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -22,7 +23,6 @@ type GooglePassUpdateData = {
   currentCycleVisits: number
   visitsRequired: number
   totalVisits: number
-  pointsBalance: number
   hasAvailableReward: boolean
   rewardDescription: string
   revealedPrize: string | null
@@ -40,11 +40,6 @@ type GooglePassUpdateData = {
   customProgressLabel: string | null
   heroImageUrl?: string | null
   revealLink?: string | null
-  // Gift card data
-  giftBalanceCents?: number
-  giftCurrency?: string
-  // Ticket data
-  ticketScanCount?: number
   // Pass instance status (for coupon redeemed display)
   passInstanceStatus?: string
   // Editor config for custom field labels
@@ -75,11 +70,6 @@ async function patchGoogleWalletObject(
 
   // Parse type-specific config
   const couponConfig = data.passType === "COUPON" ? parseCouponConfig(data.templateConfig) : null
-  const membershipConfig = data.passType === "MEMBERSHIP" ? parseMembershipConfig(data.templateConfig) : null
-  const pointsConfig = data.passType === "POINTS" ? parsePointsConfig(data.templateConfig) : null
-  const giftCardConfig = data.passType === "GIFT_CARD" ? parseGiftCardConfig(data.templateConfig) : null
-  const ticketConfig = data.passType === "TICKET" ? parseTicketConfig(data.templateConfig) : null
-  const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Custom field labels from editorConfig
   const stripFiltersUpd = parseStripFilters(data.editorConfig)
@@ -97,9 +87,6 @@ async function patchGoogleWalletObject(
   const couponDiscountValue = isRedeemed ? `${data.revealedPrize ?? couponPrizeText} (Used)` : (data.revealedPrize ?? couponPrizeText)
   const couponValidUntilText = couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"
 
-  // Membership status
-  const membershipStatusText = data.passInstanceStatus === "SUSPENDED" ? "Suspended" : data.passInstanceStatus === "EXPIRED" ? "Expired" : "Active"
-
   // All field data — IDs match field IDs from getFieldConfig
   const allFieldData: Record<string, { id: string; header: string; body: string }> = {
     organization: { id: "organization", header: lbl("organization", "ORG"), body: data.organizationName },
@@ -113,19 +100,6 @@ async function patchGoogleWalletObject(
     discount: { id: "discount", header: lbl("discount", couponDiscountLabel), body: couponDiscountValue },
     validUntil: { id: "validUntil", header: lbl("validUntil", isRedeemed ? "STATUS" : "VALID UNTIL"), body: isRedeemed ? "Redeemed" : couponValidUntilText },
     couponCode: { id: "couponCode", header: lbl("couponCode", "CODE"), body: couponConfig?.couponCode ?? "" },
-    // MEMBERSHIP
-    tierName: { id: "tierName", header: lbl("tierName", "TIER"), body: membershipConfig?.membershipTier ?? "" },
-    benefits: { id: "benefits", header: lbl("benefits", "BENEFITS"), body: membershipConfig?.benefits ?? "" },
-    // POINTS
-    earnRate: { id: "earnRate", header: lbl("earnRate", "EARN RATE"), body: pointsConfig ? `${pointsConfig.pointsPerVisit} points per visit` : "" },
-    // GIFT_CARD
-    giftBalance: { id: "giftBalance", header: lbl("giftBalance", "BALANCE"), body: giftCardConfig ? `${giftCardConfig.currency} ${((data.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
-    giftInitial: { id: "giftInitial", header: lbl("giftInitial", "INITIAL VALUE"), body: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
-    // TICKET
-    eventName: { id: "eventName", header: lbl("eventName", "EVENT"), body: ticketConfig?.eventName ?? "" },
-    eventDate: { id: "eventDate", header: lbl("eventDate", "DATE"), body: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
-    eventVenue: { id: "eventVenue", header: lbl("eventVenue", "VENUE"), body: ticketConfig?.eventVenue ?? "" },
-    scanStatus: { id: "scanStatus", header: lbl("scanStatus", "SCANS"), body: `${data.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
   }
 
   // Build textModulesData from user-configured unified fields
@@ -135,8 +109,8 @@ async function patchGoogleWalletObject(
       ? [...(stripFiltersUpd.headerFields ?? fieldConfig.defaultHeader), ...(stripFiltersUpd.secondaryFields ?? fieldConfig.defaultSecondary)]
       : null)
     ?? fieldConfig.defaultFields
-  // Only exclude "progress" for stamp/points — it's the native loyaltyPoints widget
-  const isStampTypeUpd = !data.passType || data.passType === "STAMP_CARD" || data.passType === "POINTS"
+  // Only exclude "progress" for stamp cards — it's the native loyaltyPoints widget
+  const isStampTypeUpd = !data.passType || data.passType === "STAMP_CARD"
   const googleExcludeUpd = new Set<string>()
   if (isStampTypeUpd) {
     googleExcludeUpd.add("progress")
@@ -153,21 +127,6 @@ async function patchGoogleWalletObject(
   if (data.passType === "COUPON" && couponConfig) {
     loyaltyPoints = { label: lbl("discount", couponDiscountLabel), balance: { string: couponDiscountValue } }
     secondaryLoyaltyPoints = { label: lbl("validUntil", isRedeemed ? "STATUS" : "VALID UNTIL"), balance: { string: isRedeemed ? "Redeemed" : couponValidUntilText } }
-  } else if (data.passType === "MEMBERSHIP" && membershipConfig) {
-    loyaltyPoints = { label: lbl("tierName", "TIER"), balance: { string: membershipConfig.membershipTier } }
-    secondaryLoyaltyPoints = { label: formatLabel("STATUS", labelFmt), balance: { string: membershipStatusText } }
-  } else if (data.passType === "POINTS" && pointsConfig) {
-    loyaltyPoints = { label: formatLabel("POINTS", labelFmt), balance: { int: data.pointsBalance ?? 0 } }
-    secondaryLoyaltyPoints = cheapestItem
-      ? { label: lbl("nextReward", "NEXT REWARD"), balance: { string: `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` } }
-      : { label: lbl("totalVisits", "TOTAL VISITS"), balance: { int: data.totalVisits } }
-  } else if (data.passType === "GIFT_CARD" && giftCardConfig) {
-    const balanceCents = data.giftBalanceCents ?? giftCardConfig.initialBalanceCents
-    loyaltyPoints = { label: lbl("giftBalance", "BALANCE"), balance: { string: `${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}` } }
-    secondaryLoyaltyPoints = { label: lbl("giftInitial", "INITIAL VALUE"), balance: { string: `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` } }
-  } else if (data.passType === "TICKET" && ticketConfig) {
-    loyaltyPoints = { label: lbl("eventName", "EVENT"), balance: { string: ticketConfig.eventName } }
-    secondaryLoyaltyPoints = { label: lbl("scanStatus", "SCANS"), balance: { string: `${data.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` } }
   } else {
     // STAMP_CARD (default)
     const progressValue = formatProgressValue(data.currentCycleVisits, data.visitsRequired, data.progressStyle, data.hasAvailableReward)
@@ -220,7 +179,7 @@ async function patchGoogleWalletObject(
   if (!response.ok) {
     const errorText = await response.text().catch(() => "Unable to read error body")
     console.error(
-      `Google Wallet PATCH failed (${response.status}):`,
+      `Google Wallet PATCH failed (${response.status}) passInstanceId=${data.passInstanceId} objectId=${objectId}:`,
       errorText.slice(0, 200)
     )
     // Don't throw — pass updates are best-effort
@@ -234,7 +193,8 @@ async function patchGoogleWalletObject(
  * Fetches current passInstance/contact/template/organization data and PATCHes the object.
  */
 export async function notifyGooglePassUpdate(
-  passInstanceId: string
+  passInstanceId: string,
+  dedupeKey?: string,
 ): Promise<void> {
   const passInstance = await db.passInstance.findUnique({
     where: { id: passInstanceId },
@@ -294,10 +254,6 @@ export async function notifyGooglePassUpdate(
   const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalVisits = (instanceData.totalVisits as number) ?? 0
-  const pointsBalance = (instanceData.pointsBalance as number) ?? 0
-  const giftBalanceCents = (instanceData.balanceCents as number) ?? undefined
-  const giftCurrency = (instanceData.currency as string) ?? undefined
-  const ticketScanCount = (instanceData.scanCount as number) ?? 0
 
   // Extract config values from PassTemplate.config JSON
   const templateConfig = (passInstance.passTemplate.config ?? {}) as Record<string, unknown>
@@ -362,10 +318,6 @@ export async function notifyGooglePassUpdate(
       currentCycleVisits,
       visitsRequired,
       totalVisits,
-      pointsBalance,
-      giftBalanceCents,
-      giftCurrency,
-      ticketScanCount,
       hasAvailableReward,
       rewardDescription: getWalletRewardText(passInstance.passTemplate.config, rewardDescription),
       revealedPrize: revealedReward?.description ?? null,
@@ -388,12 +340,11 @@ export async function notifyGooglePassUpdate(
     console.error("Failed to update Google Wallet pass:", error instanceof Error ? error.message : "Unknown error")
   }
 
-  // Log the update
-  await db.walletPassLog.create({
-    data: {
-      passInstanceId,
-      action: "UPDATED",
-      details: { trigger: "data_change", platform: "google" },
-    },
+  await createWalletPassLog({
+    passInstanceId,
+    action: "UPDATED",
+    platform: "google",
+    trigger: "data_change",
+    dedupeKey,
   })
 }

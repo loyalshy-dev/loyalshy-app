@@ -43,20 +43,11 @@ import {
 } from "@/server/stamp-actions"
 import {
   redeemCoupon,
-  checkInMember,
-  earnPoints,
-  redeemPoints,
   type RedeemCouponResult,
-  type CheckInResult,
-  type EarnPointsResult,
-  type RedeemPointsResult,
 } from "@/server/interaction-actions"
-import { chargeGiftCard, type ChargeGiftCardResult } from "@/server/gift-card-actions"
-import { scanTicket, type ScanTicketResult } from "@/server/ticket-actions"
 import type { PassInstanceSummary } from "@/types/pass-instance"
 import { QrScannerView } from "@/components/dashboard/qr-scanner-view"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
-import { parsePointsConfig, parseMembershipConfig, parseBusinessCardConfig, getCheapestCatalogItem } from "@/lib/pass-config"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -119,12 +110,6 @@ export function RegisterVisitDialog({
     programName: "",
   })
   const [couponResult, setCouponResult] = useState<RedeemCouponResult | null>(null)
-  const [checkInResult, setCheckInResult] = useState<CheckInResult | null>(null)
-  const [earnPointsResult, setEarnPointsResult] = useState<EarnPointsResult | null>(null)
-  const [redeemPointsResult, setRedeemPointsResult] = useState<RedeemPointsResult | null>(null)
-  const [giftCardResult, setGiftCardResult] = useState<ChargeGiftCardResult | null>(null)
-  const [ticketResult, setTicketResult] = useState<ScanTicketResult | null>(null)
-  const [giftCardAmount, setGiftCardAmount] = useState("")
   const [scanMode, setScanMode] = useState(false)
   const [scanError, setScanError] = useState<string | null>(null)
   const [isScanLooking, setIsScanLooking] = useState(false)
@@ -201,9 +186,6 @@ export function RegisterVisitDialog({
         setSelectedCustomer(null)
         setSelectedPassInstance(null)
         setCouponResult(null)
-        setCheckInResult(null)
-        setEarnPointsResult(null)
-        setRedeemPointsResult(null)
         setScanMode(false)
         setScanError(null)
         setIsScanLooking(false)
@@ -345,118 +327,6 @@ export function RegisterVisitDialog({
         setStep("success")
         autoDismiss()
       }
-    })
-  }
-
-  // Confirm membership check-in
-  function handleConfirmCheckIn() {
-    if (!selectedPassInstance) return
-
-    startRegister(async () => {
-      const result = await checkInMember(selectedPassInstance.passInstanceId)
-
-      if (!result.success) {
-        toast.error(result.error ?? "Failed to record check-in")
-        return
-      }
-
-      setCheckInResult(result)
-      setStep("success")
-
-      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-        navigator.vibrate(10)
-      }
-
-      toast.success(t("stampAdded", { name: selectedCustomer?.fullName ?? "" }))
-
-      autoDismiss()
-    })
-  }
-
-  // Earn points for a POINTS program visit
-  function handleEarnPoints() {
-    if (!selectedPassInstance) return
-
-    startRegister(async () => {
-      const result = await earnPoints(selectedPassInstance.passInstanceId)
-
-      if (!result.success) {
-        toast.error(result.error ?? "Failed to earn points")
-        return
-      }
-
-      setEarnPointsResult(result)
-
-      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-        navigator.vibrate(10)
-      }
-
-      toast.success(
-        t("pointsAdded", { points: result.pointsEarned ?? 0, name: selectedCustomer?.fullName ?? "" }),
-        { description: `New balance: ${result.newBalance} pts` }
-      )
-
-      setStep("success")
-      autoDismiss()
-    })
-  }
-
-  // Redeem a catalog item for a POINTS program
-  function handleRedeemPoints(catalogItemId: string) {
-    if (!selectedPassInstance) return
-
-    startRegister(async () => {
-      const result = await redeemPoints(selectedPassInstance.passInstanceId, catalogItemId)
-
-      if (!result.success) {
-        toast.error(result.error ?? "Failed to redeem reward")
-        return
-      }
-
-      setRedeemPointsResult(result)
-
-      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-        navigator.vibrate(10)
-      }
-
-      toast.success(
-        `Reward redeemed for ${selectedCustomer?.fullName}`,
-        { description: result.itemName }
-      )
-
-      setStep("success")
-      autoDismiss()
-    })
-  }
-
-  // Charge gift card
-  function handleChargeGiftCard() {
-    if (!selectedPassInstance) return
-    const amountCents = Math.round(parseFloat(giftCardAmount) * 100)
-    if (isNaN(amountCents) || amountCents <= 0) {
-      toast.error("Enter a valid amount")
-      return
-    }
-    startRegister(async () => {
-      const result = await chargeGiftCard(selectedPassInstance.passInstanceId, amountCents)
-      if (!result.success) { toast.error(result.error ?? "Failed to charge gift card"); return }
-      setGiftCardResult(result)
-      toast.success(`Charged ${(amountCents / 100).toFixed(2)} ${result.currency}`)
-      setStep("success")
-      autoDismiss()
-    })
-  }
-
-  // Scan ticket
-  function handleScanTicket() {
-    if (!selectedPassInstance) return
-    startRegister(async () => {
-      const result = await scanTicket(selectedPassInstance.passInstanceId)
-      if (!result.success) { toast.error(result.error ?? "Failed to scan ticket"); return }
-      setTicketResult(result)
-      toast.success(`Ticket scanned — ${result.eventName}`, { description: `Scan ${result.scanCount}/${result.maxScans}` })
-      setStep("success")
-      autoDismiss()
     })
   }
 
@@ -608,13 +478,6 @@ export function RegisterVisitDialog({
             isRegistering={isRegistering}
             onConfirm={handleConfirm}
             onConfirmCoupon={handleConfirmCoupon}
-            onConfirmCheckIn={handleConfirmCheckIn}
-            onEarnPoints={handleEarnPoints}
-            onRedeemPoints={handleRedeemPoints}
-            onChargeGiftCard={handleChargeGiftCard}
-            onScanTicket={handleScanTicket}
-            giftCardAmount={giftCardAmount}
-            onGiftCardAmountChange={setGiftCardAmount}
             onBack={handleBack}
             cardDesign={selectedPassInstance?.passDesign ?? null}
           />
@@ -628,11 +491,6 @@ export function RegisterVisitDialog({
             visitsRequired={resultVisits.visitsRequired}
             programName={resultVisits.programName}
             couponResult={couponResult}
-            checkInResult={checkInResult}
-            earnPointsResult={earnPointsResult}
-            redeemPointsResult={redeemPointsResult}
-            giftCardResult={giftCardResult}
-            ticketResult={ticketResult}
             onClose={() => onOpenChange(false)}
           />
         )}
@@ -975,25 +833,11 @@ function ProgramPickerStep({
           )}
           {activePassInstances.map((passInstance) => {
             const isCoupon = passInstance.passType === "COUPON"
-            const isMembership = passInstance.passType === "MEMBERSHIP"
-            const isPoints = passInstance.passType === "POINTS"
             const instanceData = passInstance.data as Record<string, unknown> | null ?? {}
             const templateConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
-            const pointsConfig = isPoints ? parsePointsConfig(passInstance.templateConfig) : null
-            const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
-            const pointsBalance = (instanceData.pointsBalance as number) ?? 0
             const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
             const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
-            const pct = isCoupon || isMembership
-              ? 100
-              : isPoints
-                ? cheapestItem
-                  ? Math.min((pointsBalance / cheapestItem.pointsCost) * 100, 100)
-                  : 0
-                : Math.min(
-                    (currentCycleVisits / visitsRequired) * 100,
-                    100
-                  )
+            const pct = isCoupon ? 100 : Math.min((currentCycleVisits / visitsRequired) * 100, 100)
 
             return (
               <Card asChild key={passInstance.passInstanceId}>
@@ -1003,16 +847,8 @@ function ProgramPickerStep({
                 onClick={() => onSelect(passInstance)}
               >
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand/10">
-                  {isMembership ? (
-                    <Crown className="size-5 text-brand" />
-                  ) : isCoupon ? (
+                  {isCoupon ? (
                     <Ticket className="size-5 text-brand" />
-                  ) : isPoints ? (
-                    <Coins className="size-5 text-brand" />
-                  ) : passInstance.passType === "GIFT_CARD" ? (
-                    <Gift className="size-5 text-brand" />
-                  ) : passInstance.passType === "TICKET" ? (
-                    <CalendarDays className="size-5 text-brand" />
                   ) : (
                     <Stamp className="size-5 text-brand" />
                   )}
@@ -1027,37 +863,11 @@ function ProgramPickerStep({
                         Coupon
                       </span>
                     )}
-                    {isMembership && (
-                      <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
-                        {passInstance.status === "SUSPENDED" ? "Suspended" : "Member"}
-                      </span>
-                    )}
-                    {isPoints && (
-                      <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
-                        {pointsBalance} pts
-                      </span>
-                    )}
                   </div>
-                  {isMembership ? (
-                    <p className={`text-[12px] mt-1 ${passInstance.status === "SUSPENDED" ? "text-destructive" : "text-muted-foreground"}`}>
-                      {passInstance.status === "SUSPENDED" ? "Suspended" : "Member"}
-                    </p>
-                  ) : isCoupon ? (
+                  {isCoupon ? (
                     <p className="text-[12px] font-medium text-success mt-1">
                       Ready to redeem
                     </p>
-                  ) : isPoints ? (
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-30">
-                        <div
-                          className="h-full rounded-full bg-brand transition-all"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      <span className="text-[12px] font-medium tabular-nums text-muted-foreground">
-                        {cheapestItem ? `${pointsBalance}/${cheapestItem.pointsCost} for reward` : `${pointsBalance} pts`}
-                      </span>
-                    </div>
                   ) : (
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden max-w-30">
@@ -1105,13 +915,6 @@ function ConfirmStep({
   isRegistering,
   onConfirm,
   onConfirmCoupon,
-  onConfirmCheckIn,
-  onEarnPoints,
-  onRedeemPoints,
-  onChargeGiftCard,
-  onScanTicket,
-  giftCardAmount,
-  onGiftCardAmountChange,
   onBack,
   cardDesign = null,
 }: {
@@ -1120,13 +923,6 @@ function ConfirmStep({
   isRegistering: boolean
   onConfirm: () => void
   onConfirmCoupon: () => void
-  onConfirmCheckIn: () => void
-  onEarnPoints: () => void
-  onRedeemPoints: (catalogItemId: string) => void
-  onChargeGiftCard: () => void
-  onScanTicket: () => void
-  giftCardAmount: string
-  onGiftCardAmountChange: (val: string) => void
   onBack: () => void
   cardDesign?: ConfirmStepCardDesign
 }) {
@@ -1158,36 +954,15 @@ function ConfirmStep({
   }
 
   const isCoupon = passInstance.passType === "COUPON"
-  const isMembership = passInstance.passType === "MEMBERSHIP"
-  const isPoints = passInstance.passType === "POINTS"
-  const isGiftCard = passInstance.passType === "GIFT_CARD"
-  const isTicket = passInstance.passType === "TICKET"
-  const isBusinessCard = passInstance.passType === "BUSINESS_CARD"
-  const businessCardCfg = isBusinessCard ? parseBusinessCardConfig(passInstance.templateConfig) : null
-  const bcEditorCfg = isBusinessCard ? (cardDesign?.editorConfig as Record<string, unknown>) ?? {} : {}
-  const bcMapAddress = (bcEditorCfg.ma as string) ?? undefined
   const confirmData = passInstance.data as Record<string, unknown> | null ?? {}
   const confirmConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
   const filled = (confirmData.currentCycleVisits as number) ?? 0
   const nextVisit = filled + 1
   const visitsRequired = (confirmConfig.stampsRequired as number) ?? 10
   const totalVisitsFromData = (confirmData.totalVisits as number) ?? 0
-  const pointsConfig = isPoints ? parsePointsConfig(passInstance.templateConfig) : null
-  const pointsBalance = (confirmData.pointsBalance as number) ?? 0
-  const affordableCatalogItems = pointsConfig
-    ? pointsConfig.catalog.filter((item) => pointsBalance >= item.pointsCost)
-    : []
-  const giftBalanceCents = (confirmData.balanceCents as number) ?? 0
-  const giftCurrency = (confirmData.currency as string) ?? "USD"
-  const ticketScanCount = (confirmData.scanCount as number) ?? 0
-  const ticketMaxScans = (confirmConfig.maxScans as number) ?? 1
 
   // Build WalletPassDesign from card design data when available
   const design = cardDesign ? buildWalletPassDesign(cardDesign) : null
-  const membershipCfg = isMembership ? parseMembershipConfig(passInstance.templateConfig) : null
-  const holderPhotoUrl = isMembership
-    ? (typeof confirmData.holderPhotoUrl === "string" ? confirmData.holderPhotoUrl : undefined)
-    : undefined
 
   return (
     <div className="flex flex-col">
@@ -1203,7 +978,7 @@ function ConfirmStep({
           <ArrowLeft className="size-4" />
         </Button>
         <DialogTitle className="text-base">
-          {isMembership ? t("checkIn") : isCoupon ? t("redeemCoupon") : isPoints ? t("addPoints") : isGiftCard ? t("charge") : isTicket ? t("scanTicket") : t("registerStamp")}
+          {isCoupon ? t("redeemCoupon") : t("registerStamp")}
         </DialogTitle>
       </div>
 
@@ -1218,17 +993,9 @@ function ConfirmStep({
         <div className="text-center">
           <p className="text-[15px] font-semibold">{customer.fullName}</p>
           <p className="text-[12px] text-muted-foreground mt-0.5">
-            {isMembership
-              ? `${passInstance.templateName} — Member Check-in`
-              : isCoupon
-                ? `${passInstance.templateName} — Coupon Redemption`
-                : isPoints
-                  ? `${passInstance.templateName} — ${pointsBalance} pts balance`
-                  : isGiftCard
-                    ? `${passInstance.templateName} — ${(giftBalanceCents / 100).toFixed(2)} ${giftCurrency} balance`
-                    : isTicket
-                      ? `${passInstance.templateName} — ${ticketScanCount}/${ticketMaxScans} scans`
-                      : `${passInstance.templateName} — Visit #${totalVisitsFromData + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
+            {isCoupon
+              ? `${passInstance.templateName} — Coupon Redemption`
+              : `${passInstance.templateName} — Visit #${totalVisitsFromData + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
           </p>
         </div>
       </div>
@@ -1244,31 +1011,12 @@ function ConfirmStep({
             logoUrl={passInstance.passDesign?.logoUrl}
             logoAppleUrl={passInstance.passDesign?.logoAppleUrl}
             logoGoogleUrl={passInstance.passDesign?.logoGoogleUrl}
-            currentVisits={isCoupon || isMembership || isPoints ? 1 : nextVisit}
-            totalVisits={isCoupon || isMembership || isPoints ? 1 : visitsRequired}
+            currentVisits={isCoupon ? 1 : nextVisit}
+            totalVisits={isCoupon ? 1 : visitsRequired}
             rewardDescription=""
             compact
             width={280}
-            showHolderPhoto={membershipCfg?.showHolderPhoto}
-            holderPhotoPosition={membershipCfg?.holderPhotoPosition}
-            holderPhotoUrl={holderPhotoUrl}
-            contactName={businessCardCfg?.contactName}
-            jobTitle={businessCardCfg?.jobTitle}
-            contactPhone={businessCardCfg?.phone}
-            contactEmail={businessCardCfg?.email}
-            contactWebsite={businessCardCfg?.website}
-            contactAddress={bcMapAddress}
-            contactLinkedin={businessCardCfg?.linkedinUrl}
-            contactTwitter={businessCardCfg?.twitterUrl}
-            contactInstagram={businessCardCfg?.instagramUrl}
           />
-        </div>
-      ) : isMembership ? (
-        <div className="px-6">
-          <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-6">
-            <Crown className="size-10 text-brand" />
-            <p className="text-[13px] font-medium text-center">Member Check-in</p>
-          </div>
         </div>
       ) : isCoupon ? (
         <div className="px-6">
@@ -1277,135 +1025,26 @@ function ConfirmStep({
             <p className="text-[13px] font-medium text-center">Ready to redeem</p>
           </div>
         </div>
-      ) : isPoints ? (
-        <div className="px-6">
-          <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-4">
-            <Coins className="size-8 text-brand" />
-            <p className="text-[22px] font-bold tabular-nums text-brand">{pointsBalance} pts</p>
-            {pointsConfig && (
-              <p className="text-[12px] text-muted-foreground">
-                +{pointsConfig.pointsPerVisit} pts per visit
-              </p>
-            )}
-          </div>
-        </div>
       ) : (
         <StampCard filled={filled} total={visitsRequired} highlightNext />
       )}
 
-      {/* Confirm button(s) */}
-      {isPoints ? (
-        <div className="p-4 pt-4 space-y-3">
-          {/* Primary: earn points */}
-          <Button
-            className="w-full h-11 text-[14px] font-medium gap-2"
-            onClick={onEarnPoints}
-            disabled={isRegistering}
-          >
-            {isRegistering ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Coins className="size-4" />
-            )}
-            {pointsConfig ? `Earn +${pointsConfig.pointsPerVisit} pts` : "Earn Points"}
-          </Button>
-
-          {/* Secondary: redeem catalog */}
-          {pointsConfig && pointsConfig.catalog.length > 0 && (
-            <Card className="overflow-hidden">
-              <p className="px-3 py-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
-                Redeem a reward
-              </p>
-              <div className="divide-y divide-border">
-                {pointsConfig.catalog.map((item) => {
-                  const canAfford = pointsBalance >= item.pointsCost
-                  return (
-                    <div
-                      key={item.id}
-                      className={`flex items-center gap-3 px-3 py-2.5 ${canAfford ? "" : "opacity-50"}`}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-medium truncate">{item.name}</p>
-                        {item.description && (
-                          <p className="text-[11px] text-muted-foreground truncate">{item.description}</p>
-                        )}
-                        <p className="text-[11px] font-semibold text-brand tabular-nums">
-                          {item.pointsCost} pts
-                        </p>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant={canAfford ? "default" : "outline"}
-                        className="shrink-0 h-7 text-[12px] px-2.5"
-                        onClick={() => onRedeemPoints(item.id)}
-                        disabled={isRegistering || !canAfford}
-                      >
-                        {isRegistering ? (
-                          <Loader2 className="size-3 animate-spin" />
-                        ) : (
-                          "Redeem"
-                        )}
-                      </Button>
-                    </div>
-                  )
-                })}
-              </div>
-            </Card>
+      <div className="p-4 pt-6">
+        <Button
+          className="w-full h-11 text-[14px] font-medium gap-2"
+          onClick={isCoupon ? onConfirmCoupon : onConfirm}
+          disabled={isRegistering}
+        >
+          {isRegistering ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : isCoupon ? (
+            <Ticket className="size-4" />
+          ) : (
+            <Stamp className="size-4" />
           )}
-        </div>
-      ) : isGiftCard ? (
-        <div className="p-4 pt-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              step="0.01"
-              min="0.01"
-              placeholder={t("amount")}
-              value={giftCardAmount}
-              onChange={(e) => onGiftCardAmountChange(e.target.value)}
-              className="flex-1"
-            />
-            <span className="text-sm text-muted-foreground">{giftCurrency}</span>
-          </div>
-          <Button
-            className="w-full h-11 text-[14px] font-medium gap-2"
-            onClick={onChargeGiftCard}
-            disabled={isRegistering || giftBalanceCents <= 0}
-          >
-            {isRegistering ? <Loader2 className="size-4 animate-spin" /> : <Gift className="size-4" />}
-            {t("charge")}
-          </Button>
-        </div>
-      ) : (
-        <div className="p-4 pt-6">
-          <Button
-            className="w-full h-11 text-[14px] font-medium gap-2"
-            onClick={
-              isMembership ? onConfirmCheckIn
-              : isCoupon ? onConfirmCoupon
-              : isTicket ? onScanTicket
-              : onConfirm
-            }
-            disabled={isRegistering || (isTicket && ticketScanCount >= ticketMaxScans)}
-          >
-            {isRegistering ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : isMembership ? (
-              <Crown className="size-4" />
-            ) : isCoupon ? (
-              <Ticket className="size-4" />
-            ) : isTicket ? (
-              <CalendarDays className="size-4" />
-            ) : (
-              <Stamp className="size-4" />
-            )}
-            {isMembership ? t("checkIn")
-              : isCoupon ? t("redeemCoupon")
-              : isTicket ? (ticketScanCount >= ticketMaxScans ? "Max Scans Reached" : t("scanTicket"))
-              : t("registerStamp")}
-          </Button>
-        </div>
-      )}
+          {isCoupon ? t("redeemCoupon") : t("registerStamp")}
+        </Button>
+      </div>
     </div>
   )
 }
@@ -1474,11 +1113,6 @@ function SuccessStep({
   visitsRequired,
   programName,
   couponResult,
-  checkInResult,
-  earnPointsResult,
-  redeemPointsResult,
-  giftCardResult,
-  ticketResult,
   onClose,
 }: {
   customer: InteractionSearchResult
@@ -1488,11 +1122,6 @@ function SuccessStep({
   visitsRequired: number
   programName: string
   couponResult: RedeemCouponResult | null
-  checkInResult: CheckInResult | null
-  earnPointsResult: EarnPointsResult | null
-  redeemPointsResult: RedeemPointsResult | null
-  giftCardResult: ChargeGiftCardResult | null
-  ticketResult: ScanTicketResult | null
   onClose: () => void
 }) {
   return (
@@ -1500,20 +1129,7 @@ function SuccessStep({
       className="flex flex-col items-center py-10 px-6 cursor-pointer"
       onClick={onClose}
     >
-      {checkInResult ? (
-        <>
-          <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
-            <AnimatedCheckmark />
-          </div>
-          <p className="text-lg font-semibold mt-6">Check-in Recorded!</p>
-          <p className="text-[13px] text-muted-foreground mt-1">
-            {customer.fullName} — {checkInResult.templateName}
-          </p>
-          <p className="text-[12px] text-muted-foreground mt-0.5 tabular-nums">
-            {checkInResult.totalCheckIns} total check-in{checkInResult.totalCheckIns !== 1 ? "s" : ""}
-          </p>
-        </>
-      ) : couponResult ? (
+      {couponResult ? (
         <>
           <div className="relative">
             <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
@@ -1539,79 +1155,6 @@ function SuccessStep({
               A new coupon has been issued automatically
             </p>
           )}
-        </>
-      ) : redeemPointsResult ? (
-        <>
-          <div className="relative">
-            <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
-              <PartyPopper className="size-10 text-success animate-[bounce-in_0.5s_ease-out_0.2s_both]" />
-            </div>
-            <ConfettiDots />
-          </div>
-          <p className="text-xl font-bold mt-6">Reward Redeemed!</p>
-          <p className="text-[13px] text-muted-foreground mt-1 text-center">
-            {customer.fullName} — {redeemPointsResult.templateName}
-          </p>
-          {redeemPointsResult.itemName && (
-            <p className="text-[14px] font-semibold text-brand mt-2">
-              {redeemPointsResult.itemName}
-            </p>
-          )}
-          {redeemPointsResult.pointsSpent !== undefined && redeemPointsResult.newBalance !== undefined && (
-            <p className="text-[12px] text-muted-foreground mt-1 tabular-nums">
-              -{redeemPointsResult.pointsSpent} pts &mdash; {redeemPointsResult.newBalance} pts remaining
-            </p>
-          )}
-        </>
-      ) : earnPointsResult ? (
-        <>
-          <div className="flex size-20 items-center justify-center rounded-full bg-brand/10 animate-[scale-in_0.4s_ease-out]">
-            <Coins className="size-10 text-brand animate-[bounce-in_0.5s_ease-out_0.2s_both]" />
-          </div>
-          <p className="text-xl font-bold mt-6">Points Earned!</p>
-          <p className="text-[13px] text-muted-foreground mt-1 text-center">
-            {customer.fullName} — {earnPointsResult.templateName}
-          </p>
-          {earnPointsResult.pointsEarned !== undefined && (
-            <p className="text-[18px] font-bold text-brand mt-3 tabular-nums">
-              +{earnPointsResult.pointsEarned} pts
-            </p>
-          )}
-          {earnPointsResult.newBalance !== undefined && (
-            <p className="text-[12px] text-muted-foreground mt-1 tabular-nums">
-              New balance: {earnPointsResult.newBalance} pts
-            </p>
-          )}
-        </>
-      ) : giftCardResult ? (
-        <>
-          <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
-            <AnimatedCheckmark />
-          </div>
-          <p className="text-lg font-semibold mt-6">Gift Card Charged!</p>
-          <p className="text-[13px] text-muted-foreground mt-1">
-            {customer.fullName} — {giftCardResult.templateName}
-          </p>
-          <p className="text-[14px] font-semibold text-brand mt-2 tabular-nums">
-            {((giftCardResult.amountCharged ?? 0) / 100).toFixed(2)} {giftCardResult.currency}
-          </p>
-          <p className="text-[12px] text-muted-foreground mt-0.5 tabular-nums">
-            Remaining: {((giftCardResult.newBalanceCents ?? 0) / 100).toFixed(2)} {giftCardResult.currency}
-          </p>
-        </>
-      ) : ticketResult ? (
-        <>
-          <div className="flex size-20 items-center justify-center rounded-full bg-success/10 animate-[scale-in_0.4s_ease-out]">
-            <AnimatedCheckmark />
-          </div>
-          <p className="text-lg font-semibold mt-6">Ticket Scanned!</p>
-          <p className="text-[13px] text-muted-foreground mt-1">
-            {customer.fullName} — {ticketResult.eventName}
-          </p>
-          <p className="text-[12px] text-muted-foreground mt-0.5 tabular-nums">
-            Scan {ticketResult.scanCount}/{ticketResult.maxScans}
-            {ticketResult.isMaxedOut && " — Fully used"}
-          </p>
         </>
       ) : wasRewardEarned ? (
         <>

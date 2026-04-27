@@ -62,11 +62,22 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Create a new session for the user who generated the QR
+    // Atomically claim the token. Two concurrent claims race here; only one
+    // gets count === 1. The loser bails before any session is created.
+    const claimResult = await db.devicePairingToken.updateMany({
+      where: { id: pairing.id, claimedAt: null },
+      data: { claimedAt: new Date() },
+    })
+    if (claimResult.count === 0) {
+      return withCorsHeaders(
+        NextResponse.json({ error: "Pairing token already used" }, { status: 410 })
+      )
+    }
+
     const sessionToken = crypto.randomBytes(32).toString("base64url")
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
 
-    const [session, user, _] = await Promise.all([
+    const [, user] = await Promise.all([
       db.session.create({
         data: {
           token: sessionToken,
@@ -80,10 +91,6 @@ export async function POST(req: NextRequest) {
       db.user.findUnique({
         where: { id: pairing.createdByUserId },
         select: { id: true, name: true, email: true, image: true },
-      }),
-      db.devicePairingToken.update({
-        where: { id: pairing.id },
-        data: { claimedAt: new Date() },
       }),
     ])
 

@@ -3,8 +3,8 @@ import "server-only"
 import Stripe from "stripe"
 
 // Re-export plan definitions from shared (client-safe) module
-export { PLANS, getPlanLimits, getAllowedPassTypes, isPassTypeAllowed, isUpgrade, isActiveSubscription } from "./plans"
-export type { PlanId, PlanDefinition, PassType as PlanPassType } from "./plans"
+export { PLANS, getPlanLimits, isUpgrade, isActiveSubscription } from "./plans"
+export type { PlanId, PlanDefinition } from "./plans"
 
 // ─── Stripe Client ─────────────────────────────────────────
 

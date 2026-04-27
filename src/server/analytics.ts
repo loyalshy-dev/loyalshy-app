@@ -18,11 +18,6 @@ import {
 export type PassInstancesByType = {
   STAMP_CARD: number
   COUPON: number
-  MEMBERSHIP: number
-  POINTS: number
-  GIFT_CARD: number
-  TICKET: number
-  BUSINESS_CARD: number
 }
 
 export type OverviewStats = {
@@ -212,8 +207,7 @@ export async function getOverviewStats(): Promise<OverviewStats> {
       : rewardsRedeemedThisMonth > 0 ? 100 : 0
 
   const passInstancesByType: PassInstancesByType = {
-    STAMP_CARD: 0, COUPON: 0, MEMBERSHIP: 0, POINTS: 0,
-    GIFT_CARD: 0, TICKET: 0, BUSINESS_CARD: 0,
+    STAMP_CARD: 0, COUPON: 0,
   }
   let activePassInstances = 0
   for (const e of passInstancesByTypeRaw) {
@@ -454,15 +448,7 @@ export async function getRecentActivity(): Promise<ActivityItem[]> {
 
   for (const i of recentInteractions) {
     const pType = i.passTemplate.passType
-    const typeMap: Record<string, ActivityItem["type"]> = {
-      STAMP_CARD: "stamp",
-      COUPON: "stamp",
-      MEMBERSHIP: "check_in",
-      POINTS: "points_earned",
-      GIFT_CARD: "gift_charge",
-      TICKET: "ticket_scan",
-    }
-    const type = typeMap[pType] ?? "stamp"
+    const type: ActivityItem["type"] = "stamp"
 
     const interactionMetadata = (i.metadata as Record<string, unknown>) ?? {}
     const detail = pType === "STAMP_CARD"
@@ -604,30 +590,9 @@ export async function getTopContacts(): Promise<TopContactItem[]> {
     const instanceData = (instance?.data as Record<string, unknown>) ?? {}
 
     let engagementLabel = `${c.totalInteractions} interactions`
-    if (instance) {
-      switch (pType) {
-        case "POINTS":
-          engagementLabel = `${instanceData.pointsBalance ?? 0} pts`
-          break
-        case "STAMP_CARD": {
-          const visitsRequired = (instance.passTemplate.config as { stampsRequired?: number } | null)?.stampsRequired ?? 10
-          engagementLabel = `${instanceData.currentCycleVisits ?? 0}/${visitsRequired} stamps`
-          break
-        }
-        case "MEMBERSHIP":
-          engagementLabel = `${c.totalInteractions} check-ins`
-          break
-        case "GIFT_CARD": {
-          const balanceCents = (instanceData.balanceCents as number) ?? 0
-          engagementLabel = `${(balanceCents / 100).toFixed(2)} balance`
-          break
-        }
-        case "TICKET":
-          engagementLabel = `${(instanceData.scansUsed as number) ?? 0} scans`
-          break
-        default:
-          engagementLabel = `${c.totalInteractions} interactions`
-      }
+    if (instance && pType === "STAMP_CARD") {
+      const visitsRequired = (instance.passTemplate.config as { stampsRequired?: number } | null)?.stampsRequired ?? 10
+      engagementLabel = `${instanceData.currentCycleVisits ?? 0}/${visitsRequired} stamps`
     }
 
     return {

@@ -1,6 +1,6 @@
 // ─── Card Types ────────────────────────────────────────────
 
-export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "GIFT_CARD" | "TICKET" | "GENERIC"
+export type CardType = "STAMP" | "COUPON"
 
 // ─── Studio UI Types ──────────────────────────────────────
 
@@ -12,7 +12,6 @@ export type StudioTool =
   | "strip"
   | "logo"
   | "prize"
-  | "avatar"
   | "notifications"
   | "details"
 

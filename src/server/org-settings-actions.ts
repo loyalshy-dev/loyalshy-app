@@ -1,7 +1,6 @@
 "use server"
 
 import { z } from "zod"
-import crypto from "crypto"
 import { revalidatePath } from "next/cache"
 import { addDays } from "date-fns"
 import { getTranslations } from "next-intl/server"
@@ -20,7 +19,6 @@ export type TemplateWithDesign = {
   id: string
   name: string
   passType: string
-  joinMode: string
   config: unknown
   termsAndConditions: string | null
   status: string
@@ -78,15 +76,9 @@ const updatePassTemplateSchema = z.object({
   config: z.record(z.string(), z.unknown()).optional(),
 })
 
-const inviteTeamMemberSchema = z.object({
-  organizationId: z.string().min(1),
-  email: z.string().email("Invalid email"),
-  role: z.enum(["owner", "staff"]),
-})
-
 const savePassDesignSchema = z.object({
   templateId: z.string().min(1),
-  cardType: z.enum(["STAMP", "POINTS", "TIER", "COUPON", "GIFT_CARD", "TICKET", "GENERIC"]).optional().default("STAMP"),
+  cardType: z.enum(["STAMP", "COUPON"]).optional().default("STAMP"),
   showStrip: z.boolean(),
   primaryColor: z.string().max(20).optional().default(""),
   secondaryColor: z.string().max(20).optional().default(""),
@@ -152,7 +144,7 @@ const savePassDesignSchema = z.object({
   }).optional(),
 })
 
-const PASS_TYPE_ENUM = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET", "BUSINESS_CARD"] as const
+const PASS_TYPE_ENUM = ["STAMP_CARD", "COUPON"] as const
 
 const createPassTemplateSchema = z.object({
   organizationId: z.string().min(1),
@@ -230,7 +222,6 @@ export async function getSettingsData() {
     id: t.id,
     name: t.name,
     passType: t.passType,
-    joinMode: t.joinMode,
     config: t.config,
     termsAndConditions: t.termsAndConditions,
     status: t.status,
@@ -343,39 +334,19 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
     return { error: t("passTypeNotAllowed") }
   }
 
-  // Map pass type to default card type
-  const PASS_TO_CARD: Record<string, string> = {
-    STAMP_CARD: "STAMP", COUPON: "COUPON", MEMBERSHIP: "TIER",
-    POINTS: "POINTS", GIFT_CARD: "GIFT_CARD",
-    TICKET: "TICKET", BUSINESS_CARD: "GENERIC",
-  }
-  const defaultCardType = (PASS_TO_CARD[parsed.passType] ?? "STAMP") as "STAMP"
-
-  // One business card per organization
-  if (parsed.passType === "BUSINESS_CARD") {
-    const existing = await db.passTemplate.findFirst({
-      where: { organizationId: parsed.organizationId, passType: "BUSINESS_CARD", status: { not: "ARCHIVED" } },
-      select: { id: true },
-    })
-    if (existing) return { error: t("businessCardAlreadyExists") }
-  }
-
-  // Default join mode: OPEN for self-service types, INVITE_ONLY for org-issued types
-  const INVITE_ONLY_TYPES = new Set(["TICKET", "GIFT_CARD"])
-  const defaultJoinMode = INVITE_ONLY_TYPES.has(parsed.passType) ? "INVITE_ONLY" : "OPEN"
+  const defaultCardType = parsed.passType === "COUPON" ? "COUPON" : "STAMP"
 
   const template = await db.passTemplate.create({
     data: {
       organizationId: parsed.organizationId,
       name: sanitizeText(parsed.name, 100),
       passType: parsed.passType,
-      joinMode: defaultJoinMode as "OPEN",
       config: JSON.parse(JSON.stringify(parsed.config ?? {})),
       status: "DRAFT",
       passDesign: {
         create: {
           cardType: defaultCardType,
-          showStrip: parsed.passType !== "BUSINESS_CARD",
+          showStrip: true,
           patternStyle: "NONE",
           progressStyle: "NUMBERS",
           labelFormat: "UPPERCASE",
@@ -469,34 +440,6 @@ export async function archivePassTemplate(organizationId: string, templateId: st
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard/programs")
   revalidatePath("/dashboard")
-  return { success: true }
-}
-
-// ─── Update Template Join Mode ──────────────────────────────
-
-export async function updateTemplateJoinMode(
-  organizationId: string,
-  templateId: string,
-  joinMode: "OPEN" | "INVITE_ONLY"
-): Promise<{ success: true } | { error: string }> {
-  await assertOrganizationRole(organizationId, "owner")
-
-  const template = await db.passTemplate.findFirst({
-    where: { id: templateId, organizationId },
-    select: { id: true },
-  })
-
-  if (!template) {
-    return { error: "Template not found" }
-  }
-
-  await db.passTemplate.update({
-    where: { id: templateId },
-    data: { joinMode },
-  })
-
-  revalidatePath(`/dashboard/programs/${templateId}/settings`)
-  revalidatePath(`/dashboard/programs/${templateId}/distribution`)
   return { success: true }
 }
 

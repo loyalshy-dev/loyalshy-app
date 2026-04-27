@@ -367,7 +367,6 @@ export async function getTemplateForSettings(templateId: string): Promise<Templa
     id: template.id,
     name: template.name,
     passType: template.passType,
-    joinMode: template.joinMode,
     config: template.config,
     termsAndConditions: template.termsAndConditions,
     status: template.status,

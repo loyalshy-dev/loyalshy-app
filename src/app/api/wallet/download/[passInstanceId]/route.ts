@@ -77,7 +77,7 @@ export async function GET(
     },
   })
 
-  if (!passInstance || passInstance.status === "REVOKED" || passInstance.status === "VOIDED") {
+  if (!passInstance) {
     return NextResponse.json({ error: "Pass not found" }, { status: 404 })
   }
 
@@ -88,7 +88,6 @@ export async function GET(
   const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalInteractions = (instanceData.totalInteractions as number) ?? 0
-  const pointsBalance = (instanceData.pointsBalance as number) ?? 0
 
   const templateConfig = (template.config ?? {}) as Record<string, unknown>
   const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
@@ -129,8 +128,6 @@ export async function GET(
         cardDesign,
         programType: template.passType,
         programConfig: template.config,
-        pointsBalance,
-        holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
         passInstanceId: passInstance.id,
         organizationSlug: organization.slug,
       })
@@ -200,8 +197,6 @@ export async function GET(
       templateEndsAt: template.endsAt,
       passType: template.passType,
       templateConfig: template.config,
-      pointsBalance,
-      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
     })

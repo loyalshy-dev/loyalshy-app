@@ -3,10 +3,10 @@ import "server-only"
 import { buildClassId, buildObjectId, buildProgramClassId, buildEnrollmentObjectId } from "./constants"
 import { buildSaveUrl } from "./jwt-utils"
 import type { CardDesignData, CardType } from "../card-design"
-import { getFieldLayout, formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig } from "../card-design"
+import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parsePointsConfig, parseGiftCardConfig, parseTicketConfig, parseBusinessCardConfig, getCheapestCatalogItem, getWalletRewardText } from "../../pass-config"
+import { parseCouponConfig, formatCouponValue, getWalletRewardText } from "../../pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -43,14 +43,6 @@ export type GooglePassGenerationInput = {
   // Pass type + config for type-specific pass content
   passType?: string
   templateConfig?: unknown
-  pointsBalance?: number
-  // Gift card data
-  giftBalanceCents?: number
-  giftCurrency?: string
-  // Ticket data
-  ticketScanCount?: number
-  // Holder photo URL (MEMBERSHIP — per-instance from PassInstance.data.holderPhotoUrl)
-  holderPhotoUrl?: string | null
   // Prize reveal
   hasUnrevealedPrize?: boolean
   organizationSlug?: string
@@ -86,7 +78,6 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   const design = input.passDesign
   const hexBg = ensureHexColor(design?.primaryColor ?? input.brandColor, "#1a1a2e")
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
-  const layout = getFieldLayout(cardType)
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
   const stripFilters = parseStripFilters(design?.editorConfig)
 
@@ -99,8 +90,8 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
       : null)
     ?? fieldConfig.defaultFields
 
-  // Only exclude "progress" for stamp/points — it's the native loyaltyPoints widget
-  const isStampType = !input.passType || input.passType === "STAMP_CARD" || input.passType === "POINTS"
+  // Only exclude "progress" for stamp cards — it's the native loyaltyPoints widget
+  const isStampType = !input.passType || input.passType === "STAMP_CARD"
   const googleExclude = new Set<string>()
   if (isStampType) {
     googleExclude.add("progress")
@@ -133,15 +124,7 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   const programDisplayName = (() => {
     const name = input.templateName
     if (!name) return "Loyalty Card"
-    switch (input.passType) {
-      case "COUPON": return name
-      case "MEMBERSHIP": return `${name} Membership`
-      case "POINTS": return `${name} Points`
-      case "GIFT_CARD": return `${name} Gift Card`
-      case "TICKET": return `${name} Ticket`
-      case "BUSINESS_CARD": return `${name} Business Card`
-      default: return `${name} Loyalty`
-    }
+    return input.passType === "COUPON" ? name : `${name} Loyalty`
   })()
 
   // Prefer Google-specific logo, fall back to general
@@ -208,36 +191,33 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   }
 
   // Social links from card design — normalize handles to full URLs
-  // Skip for BUSINESS_CARD (already shown as text module fields on front)
-  if (input.passType !== "BUSINESS_CARD") {
-    if (design?.socialLinks.instagram) {
-      linksUris.push({
-        uri: normalizeSocialUrl(design.socialLinks.instagram, "instagram"),
-        description: "Instagram",
-        id: "instagram",
-      })
-    }
-    if (design?.socialLinks.facebook) {
-      linksUris.push({
-        uri: normalizeSocialUrl(design.socialLinks.facebook, "facebook"),
-        description: "Facebook",
-        id: "facebook",
-      })
-    }
-    if (design?.socialLinks.tiktok) {
-      linksUris.push({
-        uri: normalizeSocialUrl(design.socialLinks.tiktok, "tiktok"),
-        description: "TikTok",
-        id: "tiktok",
-      })
-    }
-    if (design?.socialLinks.x) {
-      linksUris.push({
-        uri: normalizeSocialUrl(design.socialLinks.x, "x"),
-        description: "X",
-        id: "x",
-      })
-    }
+  if (design?.socialLinks.instagram) {
+    linksUris.push({
+      uri: normalizeSocialUrl(design.socialLinks.instagram, "instagram"),
+      description: "Instagram",
+      id: "instagram",
+    })
+  }
+  if (design?.socialLinks.facebook) {
+    linksUris.push({
+      uri: normalizeSocialUrl(design.socialLinks.facebook, "facebook"),
+      description: "Facebook",
+      id: "facebook",
+    })
+  }
+  if (design?.socialLinks.tiktok) {
+    linksUris.push({
+      uri: normalizeSocialUrl(design.socialLinks.tiktok, "tiktok"),
+      description: "TikTok",
+      id: "tiktok",
+    })
+  }
+  if (design?.socialLinks.x) {
+    linksUris.push({
+      uri: normalizeSocialUrl(design.socialLinks.x, "x"),
+      description: "X",
+      id: "x",
+    })
   }
 
   // Map address link
@@ -343,12 +323,6 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
 
   // Parse type-specific config
   const couponConfig = input.passType === "COUPON" ? parseCouponConfig(input.templateConfig) : null
-  const membershipConfig = input.passType === "MEMBERSHIP" ? parseMembershipConfig(input.templateConfig) : null
-  const pointsConfig = input.passType === "POINTS" ? parsePointsConfig(input.templateConfig) : null
-  const giftCardConfig = input.passType === "GIFT_CARD" ? parseGiftCardConfig(input.templateConfig) : null
-  const ticketConfig = input.passType === "TICKET" ? parseTicketConfig(input.templateConfig) : null
-  const businessCardConfig = input.passType === "BUSINESS_CARD" ? parseBusinessCardConfig(input.templateConfig) : null
-  const cheapestItem = pointsConfig ? getCheapestCatalogItem(pointsConfig) : null
 
   // Custom field labels from editorConfig
   const objStripFilters = parseStripFilters(design?.editorConfig)
@@ -371,29 +345,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     discount: { id: "discount", header: lbl("discount", couponConfig ? (getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) !== formatCouponValue(couponConfig) ? "PRIZES" : "DISCOUNT") : "DISCOUNT"), body: couponConfig ? getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) : "" },
     validUntil: { id: "validUntil", header: lbl("validUntil", "VALID UNTIL"), body: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
     couponCode: { id: "couponCode", header: lbl("couponCode", "CODE"), body: couponConfig?.couponCode ?? "" },
-    // MEMBERSHIP
-    tierName: { id: "tierName", header: lbl("tierName", "TIER"), body: membershipConfig?.membershipTier ?? "" },
-    benefits: { id: "benefits", header: lbl("benefits", "BENEFITS"), body: membershipConfig?.benefits ?? "" },
-    // POINTS
-    earnRate: { id: "earnRate", header: lbl("earnRate", "EARN RATE"), body: pointsConfig ? `${pointsConfig.pointsPerVisit} points per visit` : "" },
-    // GIFT_CARD
-    giftBalance: { id: "giftBalance", header: lbl("giftBalance", "BALANCE"), body: giftCardConfig ? `${giftCardConfig.currency} ${((input.giftBalanceCents ?? giftCardConfig.initialBalanceCents) / 100).toFixed(2)}` : "" },
-    giftInitial: { id: "giftInitial", header: lbl("giftInitial", "INITIAL VALUE"), body: giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : "" },
-    // TICKET
-    eventName: { id: "eventName", header: lbl("eventName", "EVENT"), body: ticketConfig?.eventName ?? "" },
-    eventDate: { id: "eventDate", header: lbl("eventDate", "DATE"), body: ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "" },
-    eventVenue: { id: "eventVenue", header: lbl("eventVenue", "VENUE"), body: ticketConfig?.eventVenue ?? "" },
-    scanStatus: { id: "scanStatus", header: lbl("scanStatus", "SCANS"), body: `${input.ticketScanCount ?? 0} / ${ticketConfig?.maxScans ?? 1}` },
-    // BUSINESS_CARD
-    contactName: { id: "contactName", header: lbl("contactName", "NAME"), body: businessCardConfig?.contactName ?? input.contactName },
-    jobTitle: { id: "jobTitle", header: lbl("jobTitle", "TITLE"), body: businessCardConfig?.jobTitle ?? "" },
-    phone: { id: "phone", header: lbl("phone", "PHONE"), body: businessCardConfig?.phone ?? "" },
-    email: { id: "email", header: lbl("email", "EMAIL"), body: businessCardConfig?.email ?? "" },
-    website: { id: "website", header: lbl("website", "WEBSITE"), body: businessCardConfig?.website ?? "" },
     address: { id: "address", header: lbl("address", "ADDRESS"), body: design?.mapAddress ?? "" },
-    linkedin: { id: "linkedin", header: lbl("linkedin", "LINKEDIN"), body: businessCardConfig?.linkedinUrl ?? "" },
-    twitter: { id: "twitter", header: lbl("twitter", "X"), body: businessCardConfig?.twitterUrl || design?.socialLinks?.x || "" },
-    instagram: { id: "instagram", header: lbl("instagram", "INSTAGRAM"), body: businessCardConfig?.instagramUrl || design?.socialLinks?.instagram || "" },
   }
 
   // Build textModulesData from user-configured unified fields
@@ -403,9 +355,9 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       ? [...(objStripFilters.headerFields ?? googleFieldConfig.defaultHeader), ...(objStripFilters.secondaryFields ?? googleFieldConfig.defaultSecondary)]
       : null)
     ?? googleFieldConfig.defaultFields
-  // Only exclude "progress" for stamp/points — it's the native loyaltyPoints widget
+  // Only exclude "progress" for stamp cards — it's the native loyaltyPoints widget
   const googleExcludeObj = new Set<string>()
-  const isStampTypeObj = !input.passType || input.passType === "STAMP_CARD" || input.passType === "POINTS"
+  const isStampTypeObj = !input.passType || input.passType === "STAMP_CARD"
   if (isStampTypeObj) {
     googleExcludeObj.add("progress")
   }
@@ -429,52 +381,6 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       label: lbl("validUntil", "VALID UNTIL"),
       balance: { string: couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
     }
-  } else if (input.passType === "MEMBERSHIP" && membershipConfig) {
-    loyaltyPoints = {
-      label: lbl("tierName", "TIER"),
-      balance: { string: membershipConfig.membershipTier },
-    }
-    secondaryLoyaltyPoints = {
-      label: formatLabel("CHECK-INS", labelFmt),
-      balance: { int: input.totalVisits },
-    }
-  } else if (input.passType === "POINTS" && pointsConfig) {
-    loyaltyPoints = {
-      label: formatLabel("POINTS", labelFmt),
-      balance: { int: input.pointsBalance ?? 0 },
-    }
-    secondaryLoyaltyPoints = cheapestItem
-      ? { label: lbl("nextReward", "NEXT REWARD"), balance: { string: `${cheapestItem.name} (${cheapestItem.pointsCost} pts)` } }
-      : { label: lbl("totalVisits", "TOTAL VISITS"), balance: { int: input.totalVisits } }
-  } else if (input.passType === "GIFT_CARD" && giftCardConfig) {
-    const balanceCents = input.giftBalanceCents ?? giftCardConfig.initialBalanceCents
-    loyaltyPoints = {
-      label: lbl("giftBalance", "BALANCE"),
-      balance: { string: `${giftCardConfig.currency} ${(balanceCents / 100).toFixed(2)}` },
-    }
-    secondaryLoyaltyPoints = {
-      label: lbl("giftInitial", "INITIAL VALUE"),
-      balance: { string: `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` },
-    }
-  } else if (input.passType === "TICKET" && ticketConfig) {
-    loyaltyPoints = {
-      label: lbl("eventName", "EVENT"),
-      balance: { string: ticketConfig.eventName },
-    }
-    secondaryLoyaltyPoints = {
-      label: lbl("scanStatus", "SCANS"),
-      balance: { string: `${input.ticketScanCount ?? 0} / ${ticketConfig.maxScans}` },
-    }
-  } else if (input.passType === "BUSINESS_CARD") {
-    const bcConfig = parseBusinessCardConfig(input.templateConfig)
-    loyaltyPoints = {
-      label: formatLabel("CONTACT", labelFmt),
-      balance: { string: bcConfig?.contactName ?? input.organizationName },
-    }
-    secondaryLoyaltyPoints = {
-      label: formatLabel("TITLE", labelFmt),
-      balance: { string: bcConfig?.jobTitle ?? "Business Card" },
-    }
   } else {
     // STAMP_CARD (default)
     loyaltyPoints = {
@@ -497,9 +403,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     secondaryLoyaltyPoints,
     barcode: {
       type: "QR_CODE",
-      value: input.passType === "BUSINESS_CARD" && input.organizationSlug
-        ? `${process.env.BETTER_AUTH_URL ?? "https://www.loyalshy.com"}/join/${input.organizationSlug}${input.templateId ? `?program=${input.templateId}` : ""}`
-        : input.walletPassId,
+      value: input.walletPassId,
     },
     textModulesData,
     // Group passes from the same organization together
@@ -530,7 +434,7 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   // Hero image (on object — shows as banner strip on the pass)
   const googleLogo = input.organizationLogoGoogle ?? input.organizationLogo
   const showStrip = design?.showStrip ?? false
-  const isStampType = cardType === "STAMP" || cardType === "POINTS"
+  const isStampType = cardType === "STAMP"
   let heroImageUrl: string | null = null
   if (showStrip) {
     const stripFiltersG = parseStripFilters(design?.editorConfig)
@@ -541,14 +445,8 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
       heroImageUrl = design?.stripImageGoogle ?? design?.generatedStripGoogle ?? googleLogo
     }
   } else if (isStampType) {
-    // Only use logo as hero for stamp/points cards — for coupon/membership it looks oversized
+    // Only use logo as hero for stamp cards — for coupon it looks oversized
     heroImageUrl = googleLogo
-  }
-
-  // For generic pass types (MEMBERSHIP): use holder photo as hero image if available and no strip is set
-  const isGenericType = input.passType === "MEMBERSHIP"
-  if (isGenericType && input.holderPhotoUrl && !heroImageUrl) {
-    heroImageUrl = input.holderPhotoUrl
   }
 
   // Google validates image URLs server-side — skip non-HTTPS URLs (local dev, private IPs)

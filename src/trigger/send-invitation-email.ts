@@ -9,6 +9,8 @@ type InvitationEmailPayload = {
   role: "owner" | "staff"
   inviteUrl: string
   mobileDeepLink?: string
+  /** Forwarded to Resend so a Trigger.dev retry doesn't resend the invitation. */
+  idempotencyKey?: string
 }
 
 // ─── Send Invitation Email ──────────────────────────────────
@@ -28,7 +30,8 @@ export const sendInvitationEmailTask = task({
 
     const roleLabel = payload.role === "owner" ? "an owner" : "a staff member"
 
-    const result = await resend.emails.send({
+    const result = await resend.emails.send(
+      {
       from: "Loyalshy <noreply@loyalshy.com>",
       to: payload.email,
       subject: `You've been invited to ${payload.organizationName} on Loyalshy`,
@@ -48,7 +51,9 @@ export const sendInvitationEmailTask = task({
           <p style="color:#a3a3a3;font-size:11px;margin:4px 0 0 0;">HEX CONCEPTS STUDIO, S.L. · VAT B27646645 · Av. Convent 11, 25123 Torrefarrera (Lleida), Spain</p>
         </div>
       `,
-    })
+      },
+      payload.idempotencyKey ? { idempotencyKey: payload.idempotencyKey } : undefined,
+    )
 
     return { emailId: result.data?.id ?? null }
   },

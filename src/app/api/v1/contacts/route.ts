@@ -1,92 +1,44 @@
-import { type NextRequest } from "next/server"
-import { apiHandler } from "@/lib/api-handler"
-import { handlePreflight } from "@/lib/api-cors"
-import { contactListParamsSchema, createContactBodySchema } from "@/lib/api-schemas"
-import { queryContacts, createContact } from "@/lib/api-data"
-import { serializeContact } from "@/lib/api-serializers"
-import { apiPaginated, apiCreated } from "@/lib/api-response"
-import { ValidationError, ConflictError } from "@/lib/api-errors"
-import type { ApiContext } from "@/lib/api-auth"
+import { NextRequest } from "next/server"
+import { db } from "@/lib/db"
+import { sessionHandler, handlePreflight } from "@/lib/api-session"
+import { toApiContact } from "@/lib/api-serializers"
 
-export const OPTIONS = handlePreflight
+export function OPTIONS() {
+  return handlePreflight()
+}
 
-// GET /api/v1/contacts — List contacts (paginated)
-export const GET = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
-  const params = Object.fromEntries(req.nextUrl.searchParams)
-  const parsed = contactListParamsSchema.safeParse(params)
+export async function GET(req: NextRequest) {
+  return sessionHandler(req, async (ctx) => {
+    const url = new URL(req.url)
+    const search = url.searchParams.get("search")?.trim() ?? ""
+    const page = Math.max(1, Number(url.searchParams.get("page") ?? 1) || 1)
+    const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 20) || 20))
 
-  if (!parsed.success) {
-    throw new ValidationError(
-      parsed.error.issues.map((i) => ({
-        field: i.path.join("."),
-        message: i.message,
-      }))
-    )
-  }
+    const where = {
+      organizationId: ctx.organizationId,
+      deletedAt: null,
+      ...(search
+        ? {
+            OR: [
+              { fullName: { contains: search, mode: "insensitive" as const } },
+              { email: { contains: search, mode: "insensitive" as const } },
+              { phone: { contains: search, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    }
 
-  const { page, per_page, search, sort, order, pass_type } = parsed.data
-  const result = await queryContacts(ctx.organizationId, {
-    page,
-    perPage: per_page,
-    search,
-    sort,
-    order,
-    passType: pass_type,
+    const [contacts, total] = await Promise.all([
+      db.contact.findMany({
+        where,
+        orderBy: { lastInteractionAt: { sort: "desc", nulls: "last" } },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { _count: { select: { passInstances: true } } },
+      }),
+      db.contact.count({ where }),
+    ])
+
+    return { data: contacts.map(toApiContact), pagination: { page, pageSize, total } }
   })
-
-  return apiPaginated(result.contacts.map(serializeContact), {
-    page,
-    perPage: per_page,
-    total: result.total,
-    pageCount: result.pageCount,
-  })
-})
-
-// POST /api/v1/contacts — Create contact
-export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
-  const body = await req.json()
-  const parsed = createContactBodySchema.safeParse(body)
-
-  if (!parsed.success) {
-    throw new ValidationError(
-      parsed.error.issues.map((i) => ({
-        field: i.path.join("."),
-        message: i.message,
-      }))
-    )
-  }
-
-  // Check plan contact limit
-  const { checkContactLimit } = await import("@/server/billing-actions")
-  const limitCheck = await checkContactLimit(ctx.organizationId)
-  if (!limitCheck.allowed) {
-    throw new ConflictError(
-      `Contact limit (${limitCheck.limit}) reached for your plan. Upgrade to add more.`
-    )
-  }
-
-  const result = await createContact(ctx.organizationId, parsed.data)
-
-  if (!result.success) {
-    throw new ConflictError(result.error)
-  }
-
-  // Fetch the created contact for response
-  const { queryContactDetail } = await import("@/lib/api-data")
-  const contact = await queryContactDetail(ctx.organizationId, result.contactId)
-  if (!contact) {
-    throw new Error("Created contact not found")
-  }
-
-  const serialized = serializeContact({
-    ...contact,
-    _count: { passInstances: contact.passInstances.length },
-  })
-
-  // Fire-and-forget webhook
-  import("@/lib/api-events").then(({ dispatchWebhookEvent }) =>
-    dispatchWebhookEvent(ctx.organizationId, "contact.created", { contact: serialized })
-  ).catch(() => {})
-
-  return apiCreated(serialized)
-})
+}

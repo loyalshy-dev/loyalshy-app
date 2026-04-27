@@ -32,6 +32,8 @@ export function createMockDb() {
     passTemplate: createMockModel(),
     passInstance: createMockModel(),
     passDesign: createMockModel(),
+    $queryRaw: vi.fn(),
+    $executeRaw: vi.fn(),
   }
 
   return {
@@ -48,6 +50,7 @@ export function createMockDb() {
     user: createMockModel(),
     analyticsSnapshot: createMockModel(),
     deviceRegistration: createMockModel(),
+    devicePairingToken: createMockModel(),
     webhookEvent: createMockModel(),
     invitation: createMockModel(),
     session: createMockModel(),

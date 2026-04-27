@@ -7,7 +7,7 @@ import { createDb } from "./db"
 
 type UpdateWalletPassPayload = {
   passInstanceId: string
-  updateType: "STAMP" | "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "TEMPLATE_CHANGE" | "PASS_INSTANCE_SUSPENDED" | "CHECK_IN" | "POINTS_EARNED" | "POINTS_REDEEMED" | "GIFT_CHARGE" | "GIFT_REFUND" | "TICKET_SCAN" | "TICKET_VOID"
+  updateType: "STAMP" | "VISIT" | "REWARD_EARNED" | "REWARD_REDEEMED" | "REWARD_EXPIRED" | "DESIGN_CHANGE" | "TEMPLATE_CHANGE" | "PASS_INSTANCE_SUSPENDED"
 }
 
 // ─── Task ───────────────────────────────────────────────────
@@ -21,8 +21,11 @@ export const updateWalletPassTask = task({
     minTimeoutInMs: 1_000,
     maxTimeoutInMs: 30_000,
   },
-  run: async (payload: UpdateWalletPassPayload) => {
+  run: async (payload: UpdateWalletPassPayload, { ctx }) => {
     const db = createDb()
+    // Stable across retries of the same trigger — used to dedupe the
+    // WalletPassLog row so a retry doesn't double-log.
+    const dedupeKey = ctx.run.id
 
     try {
       const passInstance = await db.passInstance.findUnique({
@@ -87,6 +90,11 @@ export const updateWalletPassTask = task({
 
       if (passInstance.walletProvider === "APPLE" && passInstance.walletPassSerialNumber) {
         // ── Apple Wallet: Touch updatedAt + send APNs push ──
+        // NOTE: This intentionally inlines the same updatedAt + APNs flow as
+        // notifyApplePassUpdate() in src/lib/wallet/apple/update-pass.ts —
+        // both must update updatedAt so Apple's "list serials updated since"
+        // endpoint picks the pass up. Don't add a call to the helper here
+        // without removing this block, or you'll touch updatedAt twice.
         await db.passInstance.update({
           where: { id: passInstance.id },
           data: { updatedAt: new Date() },
@@ -102,21 +110,30 @@ export const updateWalletPassTask = task({
           pushResult = await sendApnsPush(pushTokens)
         }
 
-        // Log the update
-        await db.walletPassLog.create({
-          data: {
-            passInstanceId: passInstance.id,
-            action: pushTokens.length > 0 ? "PUSH_SENT" : "UPDATED",
-            details: {
-              trigger: payload.updateType,
-              platform: "apple",
-              devicesNotified: pushTokens.length,
-              pushSent: pushResult.sent,
-              pushFailed: pushResult.failed,
-              ...(pushResult.errors.length > 0 && { apnsErrors: pushResult.errors }),
+        // Dedupe the log on retry by deriving the PK from the run id.
+        const action = pushTokens.length > 0 ? "PUSH_SENT" : "UPDATED"
+        try {
+          await db.walletPassLog.create({
+            data: {
+              id: `wpl_${dedupeKey}_${action}`,
+              passInstanceId: passInstance.id,
+              action,
+              details: {
+                trigger: payload.updateType,
+                platform: "apple",
+                devicesNotified: pushTokens.length,
+                pushSent: pushResult.sent,
+                pushFailed: pushResult.failed,
+                ...(pushResult.errors.length > 0 && { apnsErrors: pushResult.errors }),
+              },
             },
-          },
-        })
+          })
+        } catch (err) {
+          if (!(err && typeof err === "object" && "code" in err && (err as { code: string }).code === "P2002")) {
+            throw err
+          }
+          // P2002 = retry of the same run; the original log row is already there.
+        }
 
         return {
           platform: "apple",
@@ -128,7 +145,7 @@ export const updateWalletPassTask = task({
       } else if (passInstance.walletProvider === "GOOGLE") {
         // ── Google Wallet: Use the full update function that respects card design fields ──
         const { notifyGooglePassUpdate } = await import("@/lib/wallet/google/update-pass")
-        await notifyGooglePassUpdate(passInstance.id)
+        await notifyGooglePassUpdate(passInstance.id, dedupeKey)
 
         return { platform: "google", status: 200 }
       }

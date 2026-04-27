@@ -13,42 +13,27 @@ export const expireRewardsTask = schedules.task({
     const db = createDb()
 
     try {
-      const now = new Date()
+      // Atomic UPDATE … RETURNING: only flip rows that are still AVAILABLE at
+      // the moment the row is locked. A concurrent redeem won't be clobbered
+      // because its UPDATE sees the same row and only one of the two writers
+      // wins. We then trigger wallet updates for exactly the rows we expired.
+      const expired = await db.$queryRaw<Array<{ id: string; passInstanceId: string | null }>>`
+        UPDATE reward
+        SET status = 'expired'::reward_status
+        WHERE status = 'available'::reward_status AND "expiresAt" < now()
+        RETURNING id, "passInstanceId"
+      `
 
-      // Find all expired rewards still marked as AVAILABLE
-      const expiredRewards = await db.reward.findMany({
-        where: {
-          status: "AVAILABLE",
-          expiresAt: { lt: now },
-        },
-        select: {
-          id: true,
-          passInstanceId: true,
-        },
-      })
-
-      if (expiredRewards.length === 0) {
+      if (expired.length === 0) {
         return { expired: 0, passInstancesAffected: 0 }
       }
 
-      // Batch update to EXPIRED
-      const result = await db.reward.updateMany({
-        where: {
-          id: { in: expiredRewards.map((r: { id: string }) => r.id) },
-        },
-        data: { status: "EXPIRED" },
-      })
-
-      // Collect unique pass instance IDs for wallet pass updates
       const passInstanceIdSet = new Set<string>()
-      for (const r of expiredRewards) {
-        if (r.passInstanceId) {
-          passInstanceIdSet.add(r.passInstanceId)
-        }
+      for (const r of expired) {
+        if (r.passInstanceId) passInstanceIdSet.add(r.passInstanceId)
       }
       const passInstanceIds = [...passInstanceIdSet]
 
-      // Batch trigger wallet pass updates for affected pass instances
       if (passInstanceIds.length > 0) {
         await tasks.batchTrigger<typeof updateWalletPassTask>(
           "update-wallet-pass",
@@ -59,7 +44,7 @@ export const expireRewardsTask = schedules.task({
       }
 
       return {
-        expired: result.count,
+        expired: expired.length,
         passInstancesAffected: passInstanceIds.length,
       }
     } finally {

@@ -11,7 +11,7 @@ import { TemplateCardPreview } from "@/components/template-card-preview"
 import { StyledQrCode, renderStyledQr } from "@/components/styled-qr-code"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue } from "@/lib/pass-config"
+import { parseCouponConfig, formatCouponValue } from "@/lib/pass-config"
 
 type SizePreset = {
   id: string
@@ -103,7 +103,6 @@ export function QrCodeDisplay({
   const activeTemplateType = activeTemplate?.passType
   const activeTemplateConfig = activeTemplate?.templateConfig
   const couponConfig = activeTemplateType === "COUPON" ? parseCouponConfig(activeTemplateConfig) : null
-  const membershipConfig = activeTemplateType === "MEMBERSHIP" ? parseMembershipConfig(activeTemplateConfig) : null
 
   const previewTemplate = activeTemplate
     ? {
@@ -318,9 +317,7 @@ export function QrCodeDisplay({
       ctx.font = `400 ${rewardFontSize}px -apple-system, 'Segoe UI', sans-serif`
       const rewardText = activeTemplateType === "COUPON" && couponConfig
         ? formatCouponValue(couponConfig)
-        : activeTemplateType === "MEMBERSHIP" && membershipConfig
-          ? `${membershipConfig.membershipTier} membership`
-          : `Earn a free ${rewardDescription} after ${visitsRequired} visits`
+        : `Earn a free ${rewardDescription} after ${visitsRequired} visits`
       ctx.fillText(
         rewardText,
         canvas.width / 2,
@@ -391,9 +388,7 @@ export function QrCodeDisplay({
                     <p className="text-[11px] text-muted-foreground/60">
                       {activeTemplateType === "COUPON" && couponConfig
                         ? formatCouponValue(couponConfig)
-                        : activeTemplateType === "MEMBERSHIP" && membershipConfig
-                          ? `${membershipConfig.membershipTier} membership`
-                          : `${activeTemplate.rewardDescription} after ${activeTemplate.visitsRequired} visits`}
+                        : `${activeTemplate.rewardDescription} after ${activeTemplate.visitsRequired} visits`}
                     </p>
                   </>
                 )}

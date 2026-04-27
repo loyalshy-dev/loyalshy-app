@@ -1,124 +1,123 @@
-import { type NextRequest } from "next/server"
-import { apiHandler } from "@/lib/api-handler"
-import { handlePreflight } from "@/lib/api-cors"
-import { queryPassInstanceDetail } from "@/lib/api-data"
-import { serializePassInstanceDetail } from "@/lib/api-serializers"
-import { apiSuccess } from "@/lib/api-response"
-import { NotFoundError, UnprocessableError } from "@/lib/api-errors"
-import { parseCouponConfig } from "@/lib/pass-config"
+import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
-import type { ApiContext } from "@/lib/api-auth"
+import { sessionHandler, handlePreflight, notFound, ApiError } from "@/lib/api-session"
+import { toApiPassInstanceDetail } from "@/lib/api-serializers"
+import { parseCouponConfig } from "@/lib/pass-config"
 
-export const OPTIONS = handlePreflight
+export function OPTIONS() {
+  return handlePreflight()
+}
 
-// POST /api/v1/rewards/:rewardId/redeem — Redeem an available reward
-export const POST = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
-  const segments = req.nextUrl.pathname.split("/")
-  // /api/v1/rewards/[id]/redeem → id is at index -2
-  const rewardId = segments[segments.length - 2]!
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
 
-  // Find reward with org ownership check
-  const reward = await db.reward.findFirst({
-    where: {
-      id: rewardId,
-      organizationId: ctx.organizationId,
-    },
-    select: {
-      id: true,
-      status: true,
-      contactId: true,
-      passInstanceId: true,
-      expiresAt: true,
-      revealedAt: true,
-      passInstance: {
-        select: {
-          passTemplate: {
-            select: { passType: true, config: true },
+  return sessionHandler(req, async (ctx) => {
+    const reward = await db.reward.findFirst({
+      where: { id, organizationId: ctx.organizationId },
+      select: {
+        id: true,
+        status: true,
+        contactId: true,
+        passInstanceId: true,
+        expiresAt: true,
+        revealedAt: true,
+        passInstance: {
+          select: {
+            walletProvider: true,
+            passTemplate: { select: { passType: true, config: true } },
           },
         },
       },
-    },
-  })
-
-  if (!reward) {
-    throw new NotFoundError("Reward not found.")
-  }
-
-  if (reward.status !== "AVAILABLE") {
-    throw new UnprocessableError(
-      `This reward has already been ${reward.status.toLowerCase()}.`
-    )
-  }
-
-  if (reward.expiresAt < new Date()) {
-    await db.reward.update({
-      where: { id: rewardId },
-      data: { status: "EXPIRED" },
-    })
-    throw new UnprocessableError("This reward has expired.")
-  }
-
-  // Check if single-use coupon
-  const isCoupon = reward.passInstance?.passTemplate?.passType === "COUPON"
-  const couponConfig = isCoupon
-    ? parseCouponConfig(reward.passInstance?.passTemplate?.config)
-    : null
-  const isSingleUse = couponConfig?.redemptionLimit === "single"
-
-  // Redeem in transaction
-  await db.$transaction(async (tx) => {
-    await tx.reward.update({
-      where: { id: rewardId },
-      data: {
-        status: "REDEEMED",
-        redeemedAt: new Date(),
-        redeemedById: ctx.userId,
-        ...(!reward.revealedAt ? { revealedAt: new Date() } : {}),
-      },
     })
 
-    if (reward.passInstanceId) {
-      const currentInstance = await tx.passInstance.findUnique({
-        where: { id: reward.passInstanceId },
-        select: { data: true },
-      })
-      const instanceData =
-        (currentInstance?.data as Record<string, unknown>) ?? {}
-      const totalRewardsRedeemed =
-        ((instanceData.totalRewardsRedeemed as number) ?? 0) + 1
+    if (!reward) throw notFound("Reward not found")
+    if (reward.status !== "AVAILABLE") {
+      throw new ApiError(409, "Conflict", `Reward is already ${reward.status.toLowerCase()}`)
+    }
+    if (reward.expiresAt < new Date()) {
+      await db.reward.update({ where: { id: reward.id }, data: { status: "EXPIRED" } })
+      throw new ApiError(409, "Conflict", "Reward has expired")
+    }
 
-      await tx.passInstance.update({
-        where: { id: reward.passInstanceId },
+    const isCoupon = reward.passInstance?.passTemplate?.passType === "COUPON"
+    const couponConfig = isCoupon ? parseCouponConfig(reward.passInstance?.passTemplate?.config) : null
+    const isSingleUse = couponConfig?.redemptionLimit === "single"
+
+    await db.$transaction(async (tx) => {
+      // Serialize concurrent redeems on the same reward — second caller waits
+      // here, then sees status="REDEEMED" via the conditional update below.
+      const locked = await tx.$queryRaw<Array<{ status: string }>>`
+        SELECT status FROM reward WHERE id = ${reward.id} FOR UPDATE
+      `
+      if (locked[0]?.status !== "AVAILABLE") {
+        throw new ApiError(409, "Conflict", `Reward is already ${(locked[0]?.status ?? "unavailable").toLowerCase()}`)
+      }
+
+      await tx.reward.update({
+        where: { id: reward.id },
         data: {
-          data: { ...instanceData, totalRewardsRedeemed },
-          ...(isSingleUse ? { status: "COMPLETED" } : {}),
+          status: "REDEEMED",
+          redeemedAt: new Date(),
+          redeemedById: ctx.userId,
+          ...(!reward.revealedAt ? { revealedAt: new Date() } : {}),
         },
       })
-    }
-  })
 
-  // Trigger wallet pass update (fire-and-forget)
-  if (reward.passInstanceId && process.env.TRIGGER_SECRET_KEY) {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) =>
-        tasks.trigger("update-wallet-pass", {
-          passInstanceId: reward.passInstanceId,
-          updateType: "REWARD_REDEEMED",
+      if (reward.passInstanceId) {
+        const cur = await tx.passInstance.findUnique({
+          where: { id: reward.passInstanceId },
+          select: { data: true },
         })
-      )
-      .catch(() => {})
-  }
+        const data = (cur?.data as Record<string, unknown>) ?? {}
+        await tx.passInstance.update({
+          where: { id: reward.passInstanceId },
+          data: {
+            data: { ...data, totalRewardsRedeemed: ((data.totalRewardsRedeemed as number) ?? 0) + 1 },
+            ...(isSingleUse ? { status: "COMPLETED" } : {}),
+          },
+        })
+      }
+    })
 
-  // Return updated pass detail
-  if (reward.passInstanceId) {
-    const updatedPass = await queryPassInstanceDetail(
-      ctx.organizationId,
-      reward.passInstanceId
-    )
-    if (updatedPass) {
-      return apiSuccess(serializePassInstanceDetail(updatedPass))
+    if (reward.passInstanceId && reward.passInstance?.walletProvider) {
+      dispatchWalletUpdate(reward.passInstanceId, reward.passInstance.walletProvider)
     }
-  }
 
-  return apiSuccess({ rewardId, status: "REDEEMED" })
-})
+    if (!reward.passInstanceId) throw notFound("Pass instance not found for reward")
+    const refreshed = await db.passInstance.findUnique({
+      where: { id: reward.passInstanceId },
+      include: {
+        passTemplate: { select: { id: true, name: true, passType: true, config: true } },
+        contact: { select: { id: true, fullName: true, email: true } },
+        rewards: { orderBy: { earnedAt: "desc" } },
+        interactions: {
+          orderBy: { createdAt: "desc" },
+          take: 10,
+          include: { passTemplate: { select: { name: true, passType: true } } },
+        },
+      },
+    })
+    if (!refreshed) throw notFound("Pass instance not found")
+    return toApiPassInstanceDetail(refreshed)
+  })
+}
+
+function dispatchWalletUpdate(passInstanceId: string, walletProvider: string) {
+  if (walletProvider === "NONE") return
+  if (process.env.TRIGGER_SECRET_KEY) {
+    import("@trigger.dev/sdk")
+      .then(({ tasks }) => tasks.trigger("update-wallet-pass", { passInstanceId, updateType: "REWARD_REDEEMED" }))
+      .catch((err: unknown) => console.error("Wallet update failed:", err instanceof Error ? err.message : err))
+  } else if (walletProvider === "GOOGLE") {
+    import("@/lib/wallet/google/update-pass")
+      .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(passInstanceId))
+      .catch((err: unknown) => console.error("Google update failed:", err instanceof Error ? err.message : err))
+  } else if (walletProvider === "APPLE") {
+    import("@/lib/wallet/apple/update-pass")
+      .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(passInstanceId))
+      .catch((err: unknown) => console.error("Apple update failed:", err instanceof Error ? err.message : err))
+  }
+}

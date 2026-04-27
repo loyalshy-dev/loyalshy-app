@@ -7,8 +7,14 @@ import { db } from "@/lib/db"
  * Notifies that a contact's Apple Wallet pass needs updating.
  * Touches passInstance.updatedAt, fetches device registrations,
  * and sends APNs HTTP/2 push so the device fetches the updated pass.
+ *
+ * `dedupeKey`, when provided (e.g. a Trigger.dev run id), is used as the
+ * WalletPassLog primary key so a task retry collapses to one log row.
  */
-export async function notifyApplePassUpdate(passInstanceId: string): Promise<void> {
+export async function notifyApplePassUpdate(
+  passInstanceId: string,
+  dedupeKey?: string,
+): Promise<void> {
   // Touch updatedAt so the "list serials updated since" endpoint picks it up
   const passInstance = await db.passInstance.update({
     where: { id: passInstanceId },
@@ -27,20 +33,52 @@ export async function notifyApplePassUpdate(passInstanceId: string): Promise<voi
     pushResult = await sendApnsPush(pushTokens)
   }
 
-  // Log the update
-  await db.walletPassLog.create({
-    data: {
-      passInstanceId,
-      action: pushTokens.length > 0 ? "PUSH_SENT" : "UPDATED",
-      details: {
-        trigger: "data_change",
-        platform: "apple",
-        devicesNotified: pushTokens.length,
-        pushSent: pushResult.sent,
-        pushFailed: pushResult.failed,
-      },
+  await createWalletPassLog({
+    passInstanceId,
+    action: pushTokens.length > 0 ? "PUSH_SENT" : "UPDATED",
+    platform: "apple",
+    trigger: "data_change",
+    dedupeKey,
+    extra: {
+      devicesNotified: pushTokens.length,
+      pushSent: pushResult.sent,
+      pushFailed: pushResult.failed,
     },
   })
+}
+
+/**
+ * Inserts a WalletPassLog row, deduping retries when a `dedupeKey` is supplied
+ * by deriving the primary key from it. The second insert hits a PK collision
+ * (P2002) which we swallow.
+ */
+export async function createWalletPassLog(args: {
+  passInstanceId: string
+  action: "PUSH_SENT" | "UPDATED"
+  platform: "apple" | "google"
+  trigger: string
+  dedupeKey?: string
+  extra?: Record<string, unknown>
+}): Promise<void> {
+  try {
+    await db.walletPassLog.create({
+      data: {
+        ...(args.dedupeKey ? { id: `wpl_${args.dedupeKey}_${args.action}` } : {}),
+        passInstanceId: args.passInstanceId,
+        action: args.action,
+        details: {
+          trigger: args.trigger,
+          platform: args.platform,
+          ...(args.extra ?? {}),
+        },
+      },
+    })
+  } catch (err) {
+    if (err && typeof err === "object" && "code" in err && (err as { code: string }).code === "P2002") {
+      return // duplicate from a retry — exactly what dedupeKey is for
+    }
+    throw err
+  }
 }
 
 /**

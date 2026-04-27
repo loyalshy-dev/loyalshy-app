@@ -89,7 +89,6 @@ export async function GET(request: Request, { params }: { params: Params }) {
   const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalVisits = (instanceData.totalVisits as number) ?? 0
-  const pointsBalance = (instanceData.pointsBalance as number) ?? 0
 
   // Extract config values from PassTemplate.config JSON
   const templateConfig = (template.config ?? {}) as Record<string, unknown>
@@ -129,8 +128,6 @@ export async function GET(request: Request, { params }: { params: Params }) {
       cardDesign: passDesign,
       programType: template.passType,
       programConfig: template.config,
-      pointsBalance,
-      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       passInstanceId: passInstance.id,
       organizationSlug: organization.slug,
       hasUnrevealedPrize: passInstance.rewards.some(

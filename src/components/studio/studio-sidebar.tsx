@@ -13,7 +13,6 @@ import { LogoPanel } from "./panels/logo-panel"
 import { DetailsPanel } from "./panels/details-panel"
 import { NotificationsPanel } from "./panels/notifications-panel"
 import { PrizeRevealPanel } from "./panels/prize-reveal-panel"
-import { AvatarPanel } from "./panels/avatar-panel"
 
 // ─── Collapsible Section ─────────────────────────────────
 
@@ -95,7 +94,7 @@ export function StudioSidebar({
   const stampsRequired = useStore(store, (s) => s.programConfig.stampsRequired)
   const selectedColorZone = useStore(store, (s) => s.ui.selectedColorZone)
   const isStampType = cardType === "STAMP"
-  const hasProgress = cardType === "STAMP" || cardType === "POINTS"
+  const hasProgress = cardType === "STAMP"
 
   // Track which sections are open — Program open by default
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(["program"]))
@@ -208,18 +207,12 @@ export function StudioSidebar({
         </Section>
       )}
 
-      {passType === "MEMBERSHIP" && (
-        <Section title="Holder Photo" isOpen={openSections.has("avatar")} onToggle={() => toggle("avatar")}>
-          <AvatarPanel store={store} programId={templateId} />
-        </Section>
-      )}
-
       <Section title="Notifications" isOpen={openSections.has("notifications")} onToggle={() => toggle("notifications")}>
         <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
       </Section>
 
       <Section title="Back of Pass" isOpen={openSections.has("details")} onToggle={() => toggle("details")}>
-        <DetailsPanel store={store} passType={passType} />
+        <DetailsPanel store={store} />
       </Section>
     </div>
   )

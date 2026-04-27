@@ -8,6 +8,8 @@ type WelcomeEmailPayload = {
   ownerName: string
   organizationName: string
   organizationSlug: string
+  /** Forwarded to Resend so a Trigger.dev retry doesn't resend the welcome. */
+  idempotencyKey?: string
 }
 
 // ─── Send Welcome Email ─────────────────────────────────────
@@ -30,7 +32,8 @@ export const sendWelcomeEmailTask = task({
     const qrUrl = `${baseUrl}/dashboard/settings/qr-code`
     const joinUrl = `${baseUrl}/join/${payload.organizationSlug}`
 
-    const result = await resend.emails.send({
+    const result = await resend.emails.send(
+      {
       from: "Loyalshy <noreply@loyalshy.com>",
       to: payload.email,
       subject: `Welcome to Loyalshy, ${payload.ownerName}!`,
@@ -64,7 +67,9 @@ export const sendWelcomeEmailTask = task({
           <p style="color:#a3a3a3;font-size:11px;margin:4px 0 0 0;">HEX CONCEPTS STUDIO, S.L. · VAT B27646645 · Av. Convent 11, 25123 Torrefarrera (Lleida), Spain</p>
         </div>
       `,
-    })
+      },
+      payload.idempotencyKey ? { idempotencyKey: payload.idempotencyKey } : undefined,
+    )
 
     return { emailId: result.data?.id ?? null }
   },

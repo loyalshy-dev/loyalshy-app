@@ -12,9 +12,6 @@ import {
   Globe,
   Stamp,
   Tag,
-  Users,
-  Star,
-  Ticket,
 } from "lucide-react"
 import { joinTemplate, requestWalletPass } from "@/server/onboarding-actions"
 import type { OrganizationPublicInfo, JoinResult } from "@/server/onboarding-actions"
@@ -39,10 +36,6 @@ function getPassTypeIcon(passType: string) {
   switch (passType) {
     case "STAMP_CARD": return Stamp
     case "COUPON": return Tag
-    case "MEMBERSHIP": return Users
-    case "POINTS": return Star
-    case "GIFT_CARD": return Gift
-    case "TICKET": return Ticket
     default: return CreditCard
   }
 }
@@ -53,13 +46,6 @@ function getProgramSubtitle(p: PublicTemplateInfo, t: ReturnType<typeof useTrans
     case "STAMP_CARD":
       return t("stampSubtitle", { reward, visits: getVisitsRequired(p) })
     case "COUPON":
-    case "MEMBERSHIP":
-      return reward
-    case "POINTS":
-      return t("pointsSubtitle", { reward })
-    case "GIFT_CARD":
-      return t("giftCardSubtitle", { reward })
-    case "TICKET":
       return reward
     default:
       return reward
@@ -71,12 +57,7 @@ function shouldShowInfoBadge(passType: string): boolean {
   switch (passType) {
     case "STAMP_CARD":
     case "COUPON":
-    case "POINTS":
-    case "GIFT_CARD":
-    case "MEMBERSHIP":
       return true
-    case "TICKET":
-      return false
     default:
       return false
   }
@@ -153,21 +134,12 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
   }
   const webFont = fontFamilyCss[design?.fontFamily ?? "SANS"] ?? "inherit"
 
-  const isBusinessCard = activeProgram?.passType === "BUSINESS_CARD"
-
   function handleProgramSelect(program: PublicTemplateInfo) {
     setSelectedProgram(program)
     setStep("form")
   }
 
   function getFormData(): FormData | null {
-    // BUSINESS_CARD skips the form — build FormData programmatically
-    if (isBusinessCard) {
-      const fd = new FormData()
-      fd.set("organizationSlug", organization.slug)
-      if (selectedProgram) fd.set("templateId", selectedProgram.id)
-      return fd
-    }
     const form = formRef.current
     if (!form) return null
     if (!form.reportValidity()) return null
@@ -411,46 +383,41 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
           ref={formRef}
           onSubmit={(e) => {
             e.preventDefault()
-            const formData = isBusinessCard ? getFormData() : new FormData(e.currentTarget)
+            const formData = new FormData(e.currentTarget)
             if (formData) handleSubmitAndAddToWallet(formData, platform)
           }}
           className="space-y-4"
         >
-          {/* Name + Email — hidden for BUSINESS_CARD (anonymous contact) */}
-          {!isBusinessCard && (
-            <>
-              <div className="space-y-1.5">
-                <label htmlFor="fullName" className="text-[13px] font-medium text-foreground">
-                  {t("yourName")} <span className="text-destructive">*</span>
-                </label>
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  required
-                  autoComplete="name"
-                  placeholder={t("namePlaceholder")}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="flex h-10 w-full rounded-full border border-input bg-background px-4 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label htmlFor="email" className="text-[13px] font-medium text-foreground">
-                  {t("email")} <span className="text-destructive">*</span>
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  placeholder={t("emailPlaceholder")}
-                  className="flex h-10 w-full rounded-full border border-input bg-background px-4 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
-                />
-              </div>
-            </>
-          )}
+          <div className="space-y-1.5">
+            <label htmlFor="fullName" className="text-[13px] font-medium text-foreground">
+              {t("yourName")} <span className="text-destructive">*</span>
+            </label>
+            <input
+              id="fullName"
+              name="fullName"
+              type="text"
+              required
+              autoComplete="name"
+              placeholder={t("namePlaceholder")}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="flex h-10 w-full rounded-full border border-input bg-background px-4 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="text-[13px] font-medium text-foreground">
+              {t("email")} <span className="text-destructive">*</span>
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              placeholder={t("emailPlaceholder")}
+              className="flex h-10 w-full rounded-full border border-input bg-background px-4 py-2 text-base sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-foreground/30 transition-colors"
+            />
+          </div>
 
           {/* Error */}
           {error && (

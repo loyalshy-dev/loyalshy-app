@@ -1,45 +1,40 @@
-import { type NextRequest } from "next/server"
-import { apiHandler } from "@/lib/api-handler"
-import { handlePreflight } from "@/lib/api-cors"
-import { interactionListParamsSchema } from "@/lib/api-schemas"
-import { queryInteractions } from "@/lib/api-data"
-import { serializeInteraction } from "@/lib/api-serializers"
-import { apiPaginated } from "@/lib/api-response"
-import { ValidationError } from "@/lib/api-errors"
-import type { ApiContext } from "@/lib/api-auth"
+import { NextRequest } from "next/server"
+import { db } from "@/lib/db"
+import { sessionHandler, handlePreflight } from "@/lib/api-session"
+import { toApiInteraction } from "@/lib/api-serializers"
 
-export const OPTIONS = handlePreflight
+export function OPTIONS() {
+  return handlePreflight()
+}
 
-// GET /api/v1/interactions — List all interactions (cross-pass)
-export const GET = apiHandler(async (req: NextRequest, ctx: ApiContext) => {
-  const params = Object.fromEntries(req.nextUrl.searchParams)
-  const parsed = interactionListParamsSchema.safeParse(params)
+export async function GET(req: NextRequest) {
+  return sessionHandler(req, async (ctx) => {
+    const url = new URL(req.url)
+    const page = Math.max(1, Number(url.searchParams.get("page") ?? 1) || 1)
+    const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 20) || 20))
 
-  if (!parsed.success) {
-    throw new ValidationError(
-      parsed.error.issues.map((i) => ({
-        field: i.path.join("."),
-        message: i.message,
-      }))
-    )
-  }
+    const where = { organizationId: ctx.organizationId }
 
-  const { page, per_page, type, contact_id, template_id, since, until } =
-    parsed.data
-  const result = await queryInteractions(ctx.organizationId, {
-    page,
-    perPage: per_page,
-    type,
-    contactId: contact_id,
-    templateId: template_id,
-    since,
-    until,
+    const [interactions, total] = await Promise.all([
+      db.interaction.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          contact: { select: { id: true, fullName: true } },
+          passInstance: {
+            select: {
+              id: true,
+              status: true,
+              passTemplate: { select: { name: true, passType: true } },
+            },
+          },
+        },
+      }),
+      db.interaction.count({ where }),
+    ])
+
+    return { data: interactions.map(toApiInteraction), pagination: { page, pageSize, total } }
   })
-
-  return apiPaginated(result.interactions.map(serializeInteraction), {
-    page,
-    perPage: per_page,
-    total: result.total,
-    pageCount: result.pageCount,
-  })
-})
+}

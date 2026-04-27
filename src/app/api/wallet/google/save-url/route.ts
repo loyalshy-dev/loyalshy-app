@@ -122,7 +122,6 @@ export async function POST(request: Request) {
     const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
     const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
     const totalVisits = (instanceData.totalVisits as number) ?? 0
-    const pointsBalance = (instanceData.pointsBalance as number) ?? 0
 
     // Extract config values from PassTemplate.config JSON
     const templateConfig = (template.config ?? {}) as Record<string, unknown>
@@ -167,8 +166,6 @@ export async function POST(request: Request) {
       templateEndsAt: template.endsAt,
       passType: template.passType,
       templateConfig: template.config,
-      pointsBalance,
-      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
     })

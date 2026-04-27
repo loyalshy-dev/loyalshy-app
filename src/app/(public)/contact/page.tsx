@@ -13,7 +13,7 @@ const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://loyalshy.com
 export const metadata: Metadata = {
   title: "Contact Us — Loyalshy",
   description:
-    "Get in touch with the Loyalshy team. Questions about our digital wallet pass platform, enterprise plans, or partnerships — we'd love to hear from you.",
+    "Get in touch with the Loyalshy team. Questions about our digital loyalty platform, enterprise plans, or partnerships — we'd love to hear from you.",
   alternates: { canonical: `${siteUrl}/contact` },
   robots: { index: true, follow: true },
 }

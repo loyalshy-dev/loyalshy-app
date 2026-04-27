@@ -6,7 +6,7 @@ import type { PreviewFormat, DeviceFrame } from "@/types/editor"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { DeviceFrameWrapper } from "./device-frame"
 import { InteractiveCardWrapper } from "./interactive-card-overlay"
-import { parseCouponConfig, parseMembershipConfig, formatCouponValue, parseGiftCardConfig, parseTicketConfig, parseBusinessCardConfig } from "@/lib/pass-config"
+import { parseCouponConfig, formatCouponValue } from "@/lib/pass-config"
 import type { SocialLinks } from "@/lib/wallet/card-design"
 import type { CardDesignStoreApi } from "@/lib/stores/card-design-store"
 
@@ -80,14 +80,9 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
     { id: "redeemed", label: t("redeemed") },
   ]
 
-  const MEMBERSHIP_PREVIEW_STATES: PreviewStateOption[] = [
-    { id: "active", label: t("active") },
-  ]
-
   const previewStates: PreviewStateOption[] =
     passType === "COUPON" ? COUPON_PREVIEW_STATES
-    : passType === "MEMBERSHIP" ? MEMBERSHIP_PREVIEW_STATES
-    : passType === "STAMP_CARD" || passType === "POINTS" ? STAMP_PREVIEW_STATES
+    : passType === "STAMP_CARD" ? STAMP_PREVIEW_STATES
     : []
 
   const [previewState, setPreviewState] = useState<PreviewState>(previewStates[0]?.id ?? "default")
@@ -117,20 +112,6 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
     const discountLabel = config?.discountType === "freebie" ? "OFFER" : undefined
     return { discountText, discountLabel, validUntil, couponCode }
   }, [passType, templateConfig, rewardDescription])
-
-  // Membership-specific preview data
-  const membershipConfig = useMemo(() => passType === "MEMBERSHIP" ? parseMembershipConfig(templateConfig) : null, [passType, templateConfig])
-  const membershipPreview = useMemo(() => {
-    if (!membershipConfig) return {}
-    return { tierName: membershipConfig.membershipTier ?? "Member", benefits: membershipConfig.benefits ?? "Exclusive perks" }
-  }, [membershipConfig])
-
-  // Gift card
-  const giftCardConfig = useMemo(() => passType === "GIFT_CARD" ? parseGiftCardConfig(templateConfig) : null, [passType, templateConfig])
-  // Ticket
-  const ticketConfig = useMemo(() => passType === "TICKET" ? parseTicketConfig(templateConfig) : null, [passType, templateConfig])
-  // Business card
-  const businessCardConfig = useMemo(() => passType === "BUSINESS_CARD" ? parseBusinessCardConfig(templateConfig) : null, [passType, templateConfig])
 
   // Check if back has any content
   const hasBackContent = !!(businessHours || customMessage ||
@@ -198,7 +179,7 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
         >
           {/* Front — wallet pass */}
           <div style={{ backfaceVisibility: "hidden" }}>
-            <DeviceFrameWrapper frame={deviceFrame} squareCorners={passType === "TICKET" && format === "apple"} format={format}>
+            <DeviceFrameWrapper frame={deviceFrame} squareCorners={false} format={format}>
               <InteractiveCardWrapper
                 store={store}
                 format={format}
@@ -225,30 +206,7 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
                 discountLabel={couponPreview.discountLabel}
                 couponCode={couponPreview.couponCode}
                 validUntil={couponPreview.validUntil}
-                // Membership props
-                tierName={membershipPreview.tierName}
-                benefits={membershipPreview.benefits}
-                // Gift card props
-                giftBalance={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
-                giftInitialValue={giftCardConfig ? `${giftCardConfig.currency} ${(giftCardConfig.initialBalanceCents / 100).toFixed(2)}` : undefined}
-                // Ticket props
-                eventName={ticketConfig?.eventName}
-                eventDate={ticketConfig?.eventDate ? new Date(ticketConfig.eventDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : undefined}
-                eventVenue={ticketConfig?.eventVenue}
-                scanStatus={ticketConfig ? `0 / ${ticketConfig.maxScans}` : undefined}
-                showHolderPhoto={membershipConfig?.showHolderPhoto}
-                holderPhotoPosition={membershipConfig?.holderPhotoPosition}
                 holderPhotoUrl={holderPhotoUrl}
-                // Business card props (config fields, design socialLinks as fallback for matching platforms)
-                contactName={businessCardConfig?.contactName}
-                jobTitle={businessCardConfig?.jobTitle}
-                contactPhone={businessCardConfig?.phone}
-                contactEmail={businessCardConfig?.email}
-                contactWebsite={businessCardConfig?.website}
-                contactAddress={mapAddress || undefined}
-                contactLinkedin={businessCardConfig?.linkedinUrl || undefined}
-                contactTwitter={businessCardConfig?.twitterUrl || socialLinks?.x || undefined}
-                contactInstagram={businessCardConfig?.instagramUrl || socialLinks?.instagram || undefined}
               />
               </div>
               </InteractiveCardWrapper>

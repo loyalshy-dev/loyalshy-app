@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useTransition, useCallback } from "react"
-import { Loader2, Bookmark, CheckCircle2, Gift, UserRoundPlus } from "lucide-react"
+import { Loader2, Bookmark, CheckCircle2, Gift } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { requestWalletPass, revealPrize } from "@/server/onboarding-actions"
 import type { PassInstanceCardData } from "@/server/onboarding-actions"
@@ -9,7 +9,7 @@ import { computeTextColor } from "@/lib/wallet/card-design"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { MinigameStep } from "@/components/minigames"
-import { parseCouponConfig, formatCouponValue, parseMembershipConfig, parseBusinessCardConfig } from "@/lib/pass-config"
+import { parseCouponConfig, formatCouponValue } from "@/lib/pass-config"
 
 type Platform = "apple" | "google"
 
@@ -89,18 +89,6 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
     ? new Date(couponConfig.validUntil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
     : undefined
 
-  // Membership-specific props
-  const membershipConfig = data.template.passType === "MEMBERSHIP" ? parseMembershipConfig(data.template.config) : null
-  const tierName = membershipConfig?.membershipTier ?? undefined
-  const benefits = membershipConfig?.benefits ?? undefined
-
-  // Business card-specific props
-  const businessCardConfig = data.template.passType === "BUSINESS_CARD" ? parseBusinessCardConfig(data.template.config) : null
-  const editorCfg = (data.template.passDesign?.editorConfig as Record<string, unknown>) ?? {}
-  const mapAddress = (editorCfg.ma as string) ?? undefined
-
-  // Holder photo — per-instance, supported by MEMBERSHIP
-  const holderPhotoUrl = data.holderPhotoUrl ?? undefined
 
   function handleAddToWallet(chosenPlatform: Platform) {
     setError(null)
@@ -228,21 +216,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
             discountLabel={discountLabel}
             couponCode={couponCode}
             validUntil={validUntil}
-            tierName={tierName}
-            benefits={benefits}
             memberNumber={data.memberNumber != null ? `${data.memberNumber}` : "—"}
-            showHolderPhoto={membershipConfig?.showHolderPhoto}
-            holderPhotoPosition={membershipConfig?.holderPhotoPosition}
-            holderPhotoUrl={holderPhotoUrl}
-            contactName={businessCardConfig?.contactName}
-            jobTitle={businessCardConfig?.jobTitle}
-            contactPhone={businessCardConfig?.phone}
-            contactEmail={businessCardConfig?.email}
-            contactWebsite={businessCardConfig?.website}
-            contactAddress={mapAddress}
-            contactLinkedin={businessCardConfig?.linkedinUrl}
-            contactTwitter={businessCardConfig?.twitterUrl}
-            contactInstagram={businessCardConfig?.instagramUrl}
           />
         </div>
 
@@ -316,18 +290,6 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
             </button>
           )}
         </div>
-
-        {/* vCard download for business cards */}
-        {data.template.passType === "BUSINESS_CARD" && (
-          <a
-            href={`/api/vcard/${passInstanceId}`}
-            download
-            className="flex w-full items-center justify-center gap-2 h-10 rounded-lg text-sm font-medium border border-border hover:bg-muted/50 transition-colors"
-          >
-            <UserRoundPlus className="w-4 h-4" aria-hidden="true" />
-            {t("saveToContacts")}
-          </a>
-        )}
 
         {/* Bookmark hint */}
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">

@@ -33,36 +33,35 @@ const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://loyalshy.com
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Loyalshy — Digital Wallet Passes for Any Business",
+    default: "Loyalshy — Digital Loyalty Cards for Small Businesses",
     template: "%s — Loyalshy",
   },
   description:
-    "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, points, gift cards, tickets, and more — all from one platform.",
+    "Replace paper stamp cards with digital ones in Apple and Google Wallet. Reward repeat customers with stamp cards and coupons — no app required.",
   keywords: [
-    "digital wallet passes",
+    "digital loyalty cards",
     "Apple Wallet",
     "Google Wallet",
-    "loyalty cards",
-    "membership cards",
-    "digital coupons",
     "stamp cards",
-    "event tickets",
-    "gift cards",
-    "points programs",
+    "digital coupons",
+    "loyalty program",
+    "small business loyalty",
+    "café loyalty",
+    "salon loyalty",
   ],
   openGraph: {
     type: "website",
     siteName: "Loyalshy",
-    title: "Loyalshy — Digital Wallet Passes for Any Business",
+    title: "Loyalshy — Digital Loyalty Cards for Small Businesses",
     description:
-      "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, points, gift cards, tickets, and more.",
+      "Replace paper stamp cards with digital ones in Apple and Google Wallet. Reward repeat customers — no app required.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Loyalshy — Digital Wallet Passes for Any Business",
+    title: "Loyalshy — Digital Loyalty Cards for Small Businesses",
     description:
-      "Create digital wallet passes for Apple and Google Wallet. Stamp cards, memberships, coupons, points, gift cards, tickets, and more.",
+      "Replace paper stamp cards with digital ones in Apple and Google Wallet. Reward repeat customers — no app required.",
   },
   robots: {
     index: true,

@@ -146,7 +146,7 @@ export async function getContacts(
   }
 
   // Filter by pass type
-  const validTypes = ["STAMP_CARD", "COUPON", "MEMBERSHIP", "POINTS", "GIFT_CARD", "TICKET", "BUSINESS_CARD"]
+  const validTypes = ["STAMP_CARD", "COUPON"]
   if (passType !== "all" && validTypes.includes(passType)) {
     where.passInstances = {
       some: {
@@ -538,8 +538,18 @@ export async function addContact(
     if (err instanceof Error && "duplicateField" in err) {
       return { success: false, error: err.message, duplicateField: (err as unknown as { duplicateField: "email" | "phone" }).duplicateField }
     }
-    // Prisma unique constraint violation (P2002) — race condition fallback
+    // Prisma unique constraint violation (P2002) — race condition fallback.
+    // Extract which field collided so the UI can highlight it just like the
+    // upfront check would have.
     if (err && typeof err === "object" && "code" in err && (err as { code: string }).code === "P2002") {
+      const target = (err as { meta?: { target?: string[] | string } }).meta?.target
+      const targets = Array.isArray(target) ? target : typeof target === "string" ? [target] : []
+      if (targets.some((t) => t === "email" || t.endsWith("_email"))) {
+        return { success: false, error: t("contactEmailExists", { email: cleanEmail ?? "" }), duplicateField: "email" }
+      }
+      if (targets.some((t) => t === "phone" || t.endsWith("_phone"))) {
+        return { success: false, error: t("contactPhoneExists", { phone: cleanPhone ?? "" }), duplicateField: "phone" }
+      }
       return { success: false, error: t("contactAlreadyExists") }
     }
     throw err

@@ -108,15 +108,23 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
       data: { activeOrganizationId: result.id },
     })
 
-    // Dispatch welcome email via Trigger.dev (non-blocking)
+    // Dispatch welcome email via Trigger.dev (non-blocking). Idempotency key
+    // dedupes both the trigger and the Resend send so a Trigger.dev retry can't
+    // mail the new owner twice.
+    const welcomeIdempotencyKey = `welcome:${result.id}`
     import("@trigger.dev/sdk")
       .then(({ tasks }) =>
-        tasks.trigger("send-welcome-email", {
-          email: session.user.email,
-          name: session.user.name,
-          organizationName: name,
-          slug,
-        })
+        tasks.trigger(
+          "send-welcome-email",
+          {
+            email: session.user.email,
+            name: session.user.name,
+            organizationName: name,
+            slug,
+            idempotencyKey: welcomeIdempotencyKey,
+          },
+          { idempotencyKey: welcomeIdempotencyKey },
+        )
       )
       .catch(() => {})
 

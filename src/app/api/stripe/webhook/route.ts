@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
+import { Prisma } from "@prisma/client"
 import { db } from "@/lib/db"
 import { stripe, mapSubscriptionStatus, getSubscriptionIdFromInvoice } from "@/lib/stripe"
 
@@ -40,7 +41,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
-  // DB-backed idempotency check
+  // DB-backed idempotency check. The unique index on stripeEventId is the
+  // dedupe primitive; the create's success/P2002 outcome is what we trust.
   try {
     await db.webhookEvent.create({
       data: {
@@ -49,12 +51,14 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (err) {
-    // Unique constraint violation = already processed
-    if (err instanceof Error && err.message.includes("Unique constraint")) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
       return NextResponse.json({ received: true, deduplicated: true })
     }
-    // Other DB errors — log but continue processing (better to double-process than miss)
+    // Any other DB error means we don't know whether this event has been
+    // processed before. Fail the webhook so Stripe retries — re-processing on
+    // a transient blip is worse than missing the event entirely.
     console.error("Idempotency check error:", err instanceof Error ? err.message : "Unknown error")
+    return NextResponse.json({ error: "Idempotency check failed" }, { status: 500 })
   }
 
   try {

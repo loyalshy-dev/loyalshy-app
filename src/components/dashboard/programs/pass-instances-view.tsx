@@ -27,7 +27,6 @@ import {
   MailX,
   Pencil,
   AlertCircle,
-  UserCircle,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -62,8 +61,6 @@ import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import {
   parseCouponConfig,
-  parseMembershipConfig,
-  parsePointsConfig,
   formatCouponValue,
 } from "@/lib/pass-config"
 import type { PassInstanceListItem, PassInstanceStats } from "@/server/template-actions"
@@ -73,7 +70,6 @@ import {
   searchContactsForIssue,
   issuePassToContacts,
   createContactAndIssuePass,
-  uploadInstanceHolderPhoto,
   type DirectIssueContact,
   type IssueContactResult,
 } from "@/server/distribution-actions"
@@ -118,10 +114,6 @@ function getProgressColumnHeader(passType: string, t: TranslationFn): string {
   switch (passType) {
     case "STAMP_CARD": return t("progress")
     case "COUPON": return t("status")
-    case "MEMBERSHIP": return t("checkIns")
-    case "POINTS": return t("balance")
-    case "GIFT_CARD": return t("balance")
-    case "TICKET": return t("scans")
     default: return t("activity")
   }
 }
@@ -146,25 +138,6 @@ function getProgressValue(
     case "COUPON": {
       const redeemed = d.redeemed as boolean
       return { text: redeemed ? "Redeemed" : "Available" }
-    }
-    case "MEMBERSHIP": {
-      const checkIns = (d.totalCheckIns as number) ?? 0
-      return { text: `${checkIns}` }
-    }
-    case "POINTS": {
-      const balance = (d.pointsBalance as number) ?? 0
-      const config = parsePointsConfig(templateConfig)
-      const label = config?.pointsLabel ?? "pts"
-      return { text: `${balance.toLocaleString()} ${label}` }
-    }
-    case "GIFT_CARD": {
-      const balanceCents = (d.balanceCents as number) ?? 0
-      const currency = (d.currency as string) ?? "USD"
-      return { text: `${(balanceCents / 100).toFixed(2)} ${currency}` }
-    }
-    case "TICKET": {
-      const scans = (d.scanCount as number) ?? 0
-      return { text: `${scans}` }
     }
     default:
       return { text: "—" }
@@ -386,25 +359,20 @@ function EditContactSheet({
 
 // ─── Row actions ───────────────────────────────────────────────
 
-const HOLDER_PHOTO_PASS_TYPES = ["MEMBERSHIP"]
-
 function RowActions({
   passInstanceId,
   currentStatus,
   contactEmail,
-  passType,
   onStatusChange,
   onEditContact,
 }: {
   passInstanceId: string
   currentStatus: string
   contactEmail: string | null
-  passType: string
   onStatusChange: () => void
   onEditContact: () => void
 }) {
   const [isPending, startTransition] = useTransition()
-  const photoInputRef = useRef<HTMLInputElement>(null)
 
   function handleAction(newStatus: "ACTIVE" | "SUSPENDED" | "REVOKED") {
     startTransition(async () => {
@@ -430,35 +398,8 @@ function RowActions({
     })
   }
 
-  function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    startTransition(async () => {
-      const fd = new FormData()
-      fd.append("passInstanceId", passInstanceId)
-      fd.append("file", file)
-      const result = await uploadInstanceHolderPhoto(fd)
-      if (result.error) {
-        toast.error(result.error)
-      } else {
-        toast.success("Holder photo uploaded")
-        onStatusChange()
-      }
-    })
-    if (photoInputRef.current) photoInputRef.current.value = ""
-  }
-
   return (
     <>
-      {HOLDER_PHOTO_PASS_TYPES.includes(passType) && (
-        <input
-          ref={photoInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          className="hidden"
-          onChange={handlePhotoUpload}
-        />
-      )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -476,12 +417,6 @@ function RowActions({
             <Pencil className="size-3.5 mr-2" />
             Edit contact
           </DropdownMenuItem>
-          {HOLDER_PHOTO_PASS_TYPES.includes(passType) && (
-            <DropdownMenuItem onClick={() => photoInputRef.current?.click()}>
-              <UserCircle className="size-3.5 mr-2" />
-              Upload holder photo
-            </DropdownMenuItem>
-          )}
           <DropdownMenuItem
             onClick={handleSendEmail}
             disabled={!contactEmail}
@@ -532,7 +467,6 @@ function IssuePassSheet({
   onIssued: () => void
 }) {
   const [mode, setMode] = useState<"existing" | "new">("existing")
-  const supportsHolderPhoto = HOLDER_PHOTO_PASS_TYPES.includes(passType)
 
   // ── Existing contact state ──
   const [selectedContacts, setSelectedContacts] = useState<DirectIssueContact[]>([])
@@ -548,9 +482,6 @@ function IssuePassSheet({
   const [newName, setNewName] = useState("")
   const [newEmail, setNewEmail] = useState("")
   const [newPhone, setNewPhone] = useState("")
-  const [holderPhotoFile, setHolderPhotoFile] = useState<File | null>(null)
-  const [holderPhotoPreview, setHolderPhotoPreview] = useState<string | null>(null)
-  const holderPhotoInputRef = useRef<HTMLInputElement>(null)
   const [fieldError, setFieldError] = useState<{ field?: string; message: string } | null>(null)
 
   const handleSearch = useCallback(
@@ -647,23 +578,10 @@ function IssuePassSheet({
         return
       }
 
-      // Upload holder photo if provided
-      if (holderPhotoFile && result.passInstanceId) {
-        const fd = new FormData()
-        fd.append("passInstanceId", result.passInstanceId)
-        fd.append("file", holderPhotoFile)
-        const photoResult = await uploadInstanceHolderPhoto(fd)
-        if (photoResult.error) {
-          toast.warning(`Pass issued but photo upload failed: ${photoResult.error}`)
-        }
-      }
-
       toast.success(`Pass issued to ${result.contactName}`)
       setNewName("")
       setNewEmail("")
       setNewPhone("")
-      setHolderPhotoFile(null)
-      setHolderPhotoPreview(null)
       onIssued()
     })
   }
@@ -677,8 +595,6 @@ function IssuePassSheet({
       setNewName("")
       setNewEmail("")
       setNewPhone("")
-      setHolderPhotoFile(null)
-      setHolderPhotoPreview(null)
       setFieldError(null)
       setMode("existing")
     }
@@ -958,68 +874,6 @@ function IssuePassSheet({
                   )}
                 </div>
 
-                {/* Holder photo upload for eligible types */}
-                {supportsHolderPhoto && (
-                  <div className="space-y-1.5">
-                    <Label className="text-[13px]">Holder Photo</Label>
-                    <input
-                      ref={holderPhotoInputRef}
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (!file) return
-                        if (file.size > 2 * 1024 * 1024) {
-                          toast.error("File must be under 2MB")
-                          return
-                        }
-                        setHolderPhotoFile(file)
-                        const url = URL.createObjectURL(file)
-                        setHolderPhotoPreview(url)
-                      }}
-                    />
-                    <div
-                      onClick={() => holderPhotoInputRef.current?.click()}
-                      className="flex items-center gap-3 p-2.5 rounded-lg border border-dashed border-border cursor-pointer hover:bg-accent/50 transition-colors"
-                    >
-                      <div className="size-10 rounded-full bg-muted border-2 border-border overflow-hidden flex items-center justify-center shrink-0">
-                        {holderPhotoPreview ? (
-                          <img
-                            src={holderPhotoPreview}
-                            alt="Holder photo preview"
-                            className="size-full object-cover"
-                          />
-                        ) : (
-                          <UserCircle className="size-5 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-medium">
-                          {holderPhotoFile ? holderPhotoFile.name : "Upload photo"}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">
-                          {holderPhotoFile ? "Click to replace" : "PNG, JPEG, or WebP · 2MB max"}
-                        </p>
-                      </div>
-                      {holderPhotoFile && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setHolderPhotoFile(null)
-                            if (holderPhotoPreview) URL.revokeObjectURL(holderPhotoPreview)
-                            setHolderPhotoPreview(null)
-                          }}
-                          className="p-1 rounded-md hover:bg-muted-foreground/20 transition-colors"
-                          aria-label="Remove photo"
-                        >
-                          <X className="size-3.5 text-muted-foreground" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Actions */}
@@ -1264,7 +1118,6 @@ export function PassInstancesView({
                             passInstanceId={pi.id}
                             currentStatus={pi.status}
                             contactEmail={pi.contact.email}
-                            passType={passType}
                             onStatusChange={() => router.refresh()}
                             onEditContact={() => setEditingContact(pi.contact)}
                           />

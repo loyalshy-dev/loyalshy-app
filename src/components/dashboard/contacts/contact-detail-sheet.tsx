@@ -6,8 +6,6 @@ import { formatDistanceToNow, format } from "date-fns"
 import {
   Stamp,
   Ticket,
-  Crown,
-  Coins,
   Gift,
   CalendarDays,
   Pencil,
@@ -62,7 +60,7 @@ import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import type { PassInstanceDetail } from "@/types/pass-instance"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { buildWalletPassDesign } from "@/lib/wallet/build-wallet-pass-design"
-import { parsePointsConfig, getCheapestCatalogItem, getWalletRewardText, parseMembershipConfig, parseBusinessCardConfig } from "@/lib/pass-config"
+import { getWalletRewardText } from "@/lib/pass-config"
 
 // Deterministic avatar color from name
 function getAvatarColor(name: string): string {
@@ -102,10 +100,6 @@ const rewardStatusClassNames: Record<string, string> = {
 const passTypeIcons: Record<string, typeof Stamp> = {
   STAMP_CARD: Stamp,
   COUPON: Ticket,
-  MEMBERSHIP: Crown,
-  POINTS: Coins,
-  GIFT_CARD: Gift,
-  TICKET: CalendarDays,
 }
 
 function buildWalletDesign(passInstance: PassInstanceDetail) {
@@ -114,49 +108,6 @@ function buildWalletDesign(passInstance: PassInstanceDetail) {
 
 function getRendererProps(passInstance: PassInstanceDetail) {
   const data = passInstance.data as Record<string, unknown> | null ?? {}
-  if (passInstance.passType === "POINTS") {
-    const config = parsePointsConfig(passInstance.templateConfig)
-    const cheapest = config ? getCheapestCatalogItem(config) : null
-    const balance = (data as { pointsBalance?: number }).pointsBalance ?? 0
-    return {
-      currentVisits: balance,
-      totalVisits: cheapest?.pointsCost ?? 100,
-      rewardDescription: cheapest?.name ?? "",
-    }
-  }
-  if (passInstance.passType === "MEMBERSHIP") {
-    const config = parseMembershipConfig(passInstance.templateConfig)
-    const instanceHolderPhoto = typeof (data as Record<string, unknown>).holderPhotoUrl === "string"
-      ? (data as Record<string, unknown>).holderPhotoUrl as string : undefined
-    return {
-      currentVisits: 0,
-      totalVisits: 0,
-      rewardDescription: "",
-      tierName: config?.membershipTier,
-      benefits: config?.benefits,
-      showHolderPhoto: config?.showHolderPhoto,
-      holderPhotoPosition: config?.holderPhotoPosition,
-      holderPhotoUrl: instanceHolderPhoto,
-    }
-  }
-  if (passInstance.passType === "BUSINESS_CARD") {
-    const config = parseBusinessCardConfig(passInstance.templateConfig)
-    const ec = (passInstance.passDesign?.editorConfig as Record<string, unknown>) ?? {}
-    return {
-      currentVisits: 0,
-      totalVisits: 0,
-      rewardDescription: "",
-      contactName: config?.contactName,
-      jobTitle: config?.jobTitle,
-      contactPhone: config?.phone,
-      contactEmail: config?.email,
-      contactWebsite: config?.website,
-      contactAddress: (ec.ma as string) ?? undefined,
-      contactLinkedin: config?.linkedinUrl,
-      contactTwitter: config?.twitterUrl,
-      contactInstagram: config?.instagramUrl,
-    }
-  }
   const cycleData = data as { currentCycleVisits?: number }
   const stampConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
   const currentCycleVisits = cycleData.currentCycleVisits ?? 0
@@ -172,23 +123,14 @@ function getRendererProps(passInstance: PassInstanceDetail) {
 function getProgressText(passInstance: PassInstanceDetail, t: (key: string) => string): string {
   const data = passInstance.data as Record<string, unknown> | null ?? {}
   const stampConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
-  switch (passInstance.passType) {
-    case "COUPON":
-      return passInstance.status === "COMPLETED" ? t("couponRedeemed") : t("readyToRedeem")
-    case "MEMBERSHIP":
-      return passInstance.status === "SUSPENDED" ? t("suspended") : passInstance.status === "EXPIRED" ? t("expired") : t("activeMember")
-    case "POINTS": {
-      const balance = (data as { pointsBalance?: number }).pointsBalance ?? 0
-      return `${balance} pts`
-    }
-    default: {
-      const currentCycleVisits = (data as { currentCycleVisits?: number }).currentCycleVisits ?? 0
-      const visitsRequired = (stampConfig as { stampsRequired?: number }).stampsRequired ?? 10
-      const rewardDescription = (stampConfig as { rewardDescription?: string }).rewardDescription ?? ""
-      const remaining = visitsRequired - currentCycleVisits
-      return `${remaining} visit${remaining !== 1 ? "s" : ""} until ${getWalletRewardText(passInstance.templateConfig, rewardDescription)}`
-    }
+  if (passInstance.passType === "COUPON") {
+    return passInstance.status === "COMPLETED" ? t("couponRedeemed") : t("readyToRedeem")
   }
+  const currentCycleVisits = (data as { currentCycleVisits?: number }).currentCycleVisits ?? 0
+  const visitsRequired = (stampConfig as { stampsRequired?: number }).stampsRequired ?? 10
+  const rewardDescription = (stampConfig as { rewardDescription?: string }).rewardDescription ?? ""
+  const remaining = visitsRequired - currentCycleVisits
+  return `${remaining} visit${remaining !== 1 ? "s" : ""} until ${getWalletRewardText(passInstance.templateConfig, rewardDescription)}`
 }
 
 
@@ -746,13 +688,8 @@ export function ContactDetailSheet({
               {/* Actions — pinned at bottom */}
               <div className="shrink-0 p-4 border-t border-border flex flex-wrap items-center gap-2">
                 {onRegisterVisit && (() => {
-                  const ActionIcon = primaryPassType === "MEMBERSHIP" ? Crown
-                    : primaryPassType === "COUPON" ? Ticket
-                    : primaryPassType === "POINTS" ? Coins
-                    : Stamp
-                  const actionLabel = primaryPassType === "MEMBERSHIP" ? t("actionCheckIn")
-                    : primaryPassType === "COUPON" ? t("actionRedeemCoupon")
-                    : t("actionRegisterVisit")
+                  const ActionIcon = primaryPassType === "COUPON" ? Ticket : Stamp
+                  const actionLabel = primaryPassType === "COUPON" ? t("actionRedeemCoupon") : t("actionRegisterVisit")
                   return (
                     <Button
                       size="sm"
@@ -857,10 +794,6 @@ export function ContactDetailSheet({
 const typeLabels: Record<string, string> = {
   STAMP_CARD: "Stamp Card",
   COUPON: "Coupon",
-  MEMBERSHIP: "Membership",
-  POINTS: "Points",
-  GIFT_CARD: "Gift Card",
-  TICKET: "Ticket",
 }
 
 function PassInstanceCard({
@@ -884,8 +817,6 @@ function PassInstanceCard({
   const stampConfig = passInstance.templateConfig as Record<string, unknown> | null ?? {}
   const currentCycleVisits = (data as { currentCycleVisits?: number }).currentCycleVisits ?? 0
   const visitsRequired = (stampConfig as { stampsRequired?: number }).stampsRequired ?? 10
-  const pointsBalance = (data as { pointsBalance?: number }).pointsBalance ?? 0
-  const membershipData = data as { totalCheckIns?: number }
 
   return (
     <div className={`rounded-lg border border-border p-3 ${isInactive ? "opacity-60" : ""}`}>
@@ -948,41 +879,6 @@ function PassInstanceCard({
               {passInstance.status === "COMPLETED" ? t("couponRedeemed") : t("readyToRedeem")}
             </p>
           )}
-
-          {passInstance.passType === "MEMBERSHIP" && (
-            <div className="space-y-0.5">
-              {passInstance.expiresAt && (
-                <p className="text-[11px] text-muted-foreground">
-                  {passInstance.status === "EXPIRED" ? t("expired") : t("expires")} {format(new Date(passInstance.expiresAt), "MMM d, yyyy")}
-                </p>
-              )}
-              {passInstance.status === "SUSPENDED" && passInstance.suspendedAt && (
-                <p className="text-[11px] text-warning">
-                  {t("suspended")} {format(new Date(passInstance.suspendedAt), "MMM d, yyyy")}
-                </p>
-              )}
-              {passInstance.status === "ACTIVE" && (
-                <p className="text-[11px] text-muted-foreground">
-                  {t("checkIns", { count: membershipData.totalCheckIns ?? 0 })}
-                </p>
-              )}
-            </div>
-          )}
-
-          {passInstance.passType === "POINTS" && (() => {
-            const config = parsePointsConfig(passInstance.templateConfig)
-            const cheapest = config ? getCheapestCatalogItem(config) : null
-            return (
-              <div className="space-y-0.5">
-                <p className="text-base font-semibold tabular-nums leading-tight">{pointsBalance} <span className="text-[11px] font-normal text-muted-foreground">pts</span></p>
-                {cheapest && (
-                  <p className="text-[11px] text-muted-foreground">
-                    Next: {cheapest.name} ({cheapest.pointsCost} pts)
-                  </p>
-                )}
-              </div>
-            )
-          })()}
 
 
           {/* Footer: wallet indicator + issued date */}
