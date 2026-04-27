@@ -230,23 +230,13 @@
     "save20": "Save 20%",
     "savedPerYear": "saved per year",
     "mostPopular": "Most Popular",
-    "upTo": "Up to",
-    "contacts": "contacts",
-    "staffMembers": "{count, plural, one {# staff member} other {# staff members}}",
-    "programs": "{count} programs",
-    "unlimitedContacts": "Unlimited contacts",
-    "unlimitedPrograms": "Unlimited programs",
     "free": {
       "name": "Free",
       "description": "Try Loyalshy with your first customers",
       "features": {
         "contacts": "Up to 50 contacts",
         "programs": "1 program (stamp card or coupon)",
-        "staff": "1 staff member",
-        "wallet": "Apple & Google Wallet passes",
-        "studio": "Card design studio",
-        "analytics": "Dashboard analytics",
-        "branding": "Includes \"Powered by Loyalshy\" on passes"
+        "staff": "1 staff member"
       }
     },
     "starter": {
@@ -254,11 +244,8 @@
       "description": "For small businesses ready to grow",
       "features": {
         "contacts": "Up to 500 contacts",
-        "staff": "2 staff members",
         "programs": "Up to 2 programs",
-        "wallet": "Apple & Google Wallet passes",
-        "studio": "Card design studio",
-        "analytics": "Dashboard analytics"
+        "staff": "2 staff members"
       }
     },
     "growth": {
@@ -266,11 +253,8 @@
       "description": "For growing businesses with multiple programs",
       "features": {
         "contacts": "Up to 2,500 contacts",
-        "staff": "5 staff members",
         "programs": "Up to 5 programs",
-        "brandColors": "Custom brand colors on passes",
-        "bulkImport": "Bulk CSV import",
-        "support": "Priority email support"
+        "staff": "5 staff members"
       }
     },
     "scale": {
@@ -278,11 +262,8 @@
       "description": "For serious loyalty programs at scale",
       "features": {
         "contacts": "Unlimited contacts",
-        "staff": "25 staff members",
         "programs": "Unlimited programs",
-        "brandColors": "Custom brand colors on passes",
-        "bulkImport": "Bulk CSV import",
-        "onboarding": "Dedicated onboarding call"
+        "staff": "25 staff members"
       }
     },
     "enterprise": {

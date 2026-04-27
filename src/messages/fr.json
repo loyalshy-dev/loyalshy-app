@@ -230,23 +230,13 @@
     "save20": "Économise 20 %",
     "savedPerYear": "économisé par an",
     "mostPopular": "Le plus populaire",
-    "upTo": "Jusqu'à",
-    "contacts": "contacts",
-    "staffMembers": "{count, plural, one {# membre d'équipe} other {# membres d'équipe}}",
-    "programs": "{count} programmes",
-    "unlimitedContacts": "Contacts illimités",
-    "unlimitedPrograms": "Programmes illimités",
     "free": {
       "name": "Gratuit",
       "description": "Essaie Loyalshy avec tes premiers clients",
       "features": {
         "contacts": "Jusqu'à 50 contacts",
         "programs": "1 programme (carte tampons ou coupon)",
-        "staff": "1 membre d'équipe",
-        "wallet": "Passes Apple & Google Wallet",
-        "studio": "Studio de design de cartes",
-        "analytics": "Analytiques du tableau de bord",
-        "branding": "Inclut « Propulsé par Loyalshy » sur les passes"
+        "staff": "1 membre d'équipe"
       }
     },
     "starter": {
@@ -254,11 +244,8 @@
       "description": "Pour les petites entreprises prêtes à grandir",
       "features": {
         "contacts": "Jusqu'à 500 contacts",
-        "staff": "2 membres d'équipe",
         "programs": "Jusqu'à 2 programmes",
-        "wallet": "Passes Apple & Google Wallet",
-        "studio": "Studio de design de cartes",
-        "analytics": "Analytiques du tableau de bord"
+        "staff": "2 membres d'équipe"
       }
     },
     "growth": {
@@ -266,11 +253,8 @@
       "description": "Pour les entreprises en croissance avec plusieurs programmes",
       "features": {
         "contacts": "Jusqu'à 2 500 contacts",
-        "staff": "5 membres d'équipe",
         "programs": "Jusqu'à 5 programmes",
-        "brandColors": "Couleurs de marque sur les passes",
-        "bulkImport": "Importation CSV en masse",
-        "support": "Support email prioritaire"
+        "staff": "5 membres d'équipe"
       }
     },
     "scale": {
@@ -278,11 +262,8 @@
       "description": "Pour les programmes de fidélité à grande échelle",
       "features": {
         "contacts": "Contacts illimités",
-        "staff": "25 membres d'équipe",
         "programs": "Programmes illimités",
-        "brandColors": "Couleurs de marque sur les passes",
-        "bulkImport": "Importation CSV en masse",
-        "onboarding": "Appel d'onboarding dédié"
+        "staff": "25 membres d'équipe"
       }
     },
     "enterprise": {

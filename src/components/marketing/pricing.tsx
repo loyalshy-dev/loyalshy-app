@@ -84,9 +84,6 @@ function FreePlanCard() {
     t("free.features.contacts"),
     t("free.features.programs"),
     t("free.features.staff"),
-    t("free.features.wallet"),
-    t("free.features.studio"),
-    t("free.features.analytics"),
   ] as const
 
   return (
@@ -166,13 +163,6 @@ function FreePlanCard() {
           </li>
         ))}
       </ul>
-
-      <p
-        className="mt-6 text-[13px]"
-        style={{ color: "var(--mk-text-dimmed)" }}
-      >
-        {t("free.features.branding")}
-      </p>
     </div>
   )
 }
@@ -201,13 +191,6 @@ function PlanCard({
   const plan = PLANS[planKey]
   const tKey = PLAN_KEY_MAP[planKey]
   const price = period === "annual" ? plan.annualPrice : plan.price
-
-  const contactsLabel =
-    plan.customerLimit === Infinity
-      ? t("unlimitedContacts")
-      : `${t("upTo")} ${plan.customerLimit} ${t("contacts")}`
-
-  const staffLabel = t("staffMembers", { count: plan.staffLimit })
 
   const features = Object.values(
     t.raw(`${tKey}.features`) as Record<string, string>
@@ -338,13 +321,6 @@ function PlanCard({
           </li>
         ))}
       </ul>
-
-      <p
-        className="mt-6 text-[13px]"
-        style={{ color: "var(--mk-text-dimmed)" }}
-      >
-        {contactsLabel} &middot; {staffLabel}
-      </p>
     </div>
   )
 }

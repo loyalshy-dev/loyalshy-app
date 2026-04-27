@@ -28,8 +28,6 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       "Up to 50 contacts",
       "1 program (stamp card or coupon)",
       "1 staff member",
-      "Apple & Google Wallet",
-      "Card design studio",
     ],
   },
   STARTER: {
@@ -43,11 +41,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: 2,
     features: [
       "Up to 500 contacts",
-      "2 staff members",
       "Up to 2 programs",
-      "Apple & Google Wallet passes",
-      "Card design studio",
-      "Dashboard analytics",
+      "2 staff members",
     ],
   },
   GROWTH: {
@@ -61,11 +56,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: 5,
     features: [
       "Up to 2,500 contacts",
-      "5 staff members",
       "Up to 5 programs",
-      "Custom brand colors on passes",
-      "Bulk CSV import",
-      "Priority email support",
+      "5 staff members",
     ],
   },
   SCALE: {
@@ -79,11 +71,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: Infinity,
     features: [
       "Unlimited contacts",
-      "25 staff members",
       "Unlimited programs",
-      "Custom brand colors on passes",
-      "Bulk CSV import",
-      "Dedicated onboarding call",
+      "25 staff members",
     ],
   },
   ENTERPRISE: {
