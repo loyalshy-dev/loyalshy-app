@@ -154,8 +154,8 @@
       "description": "Invita al personal con acceso por roles. Propietarios y empleados ven vistas diferentes."
     },
     "passTypes": {
-      "title": "7 tipos de pases",
-      "description": "Sellos, cupones, membresías, puntos, tarjetas regalo y entradas."
+      "title": "Tarjetas de sellos y cupones",
+      "description": "Dos tipos pensados para la fidelización diaria — tarjetas de sellos que premian las visitas recurrentes y cupones que generan un canje único."
     },
     "pushNotifications": {
       "title": "Notificaciones Push",
@@ -241,7 +241,7 @@
       "description": "Prueba Loyalshy con tus primeros clientes",
       "features": {
         "contacts": "Hasta 50 contactos",
-        "programs": "1 programa (sellos, cupón o tarjeta de visita)",
+        "programs": "1 programa (tarjeta de sellos o cupón)",
         "staff": "1 miembro del equipo",
         "wallet": "Pases de Apple y Google Wallet",
         "studio": "Estudio de diseño de tarjetas",
@@ -256,11 +256,9 @@
         "contacts": "Hasta 500 contactos",
         "staff": "2 miembros del equipo",
         "programs": "Hasta 2 programas",
-        "passTypes": "Los 7 tipos de pases",
         "wallet": "Pases de Apple y Google Wallet",
         "studio": "Estudio de diseño de tarjetas",
-        "analytics": "Analíticas del panel",
-        "api": "Acceso API (20 pet/min)"
+        "analytics": "Analíticas del panel"
       }
     },
     "growth": {
@@ -270,11 +268,9 @@
         "contacts": "Hasta 2.500 contactos",
         "staff": "5 miembros del equipo",
         "programs": "Hasta 5 programas",
-        "passTypes": "Los 7 tipos de pases",
         "brandColors": "Colores de marca en los pases",
         "bulkImport": "Importación masiva CSV",
-        "support": "Soporte prioritario por email",
-        "api": "Acceso API (60 pet/min)"
+        "support": "Soporte prioritario por email"
       }
     },
     "scale": {
@@ -284,11 +280,9 @@
         "contacts": "Contactos ilimitados",
         "staff": "25 miembros del equipo",
         "programs": "Programas ilimitados",
-        "passTypes": "Los 7 tipos de pases",
         "brandColors": "Colores de marca en los pases",
         "bulkImport": "Importación masiva CSV",
-        "onboarding": "Llamada de onboarding dedicada",
-        "api": "Acceso API (300 pet/min)"
+        "onboarding": "Llamada de onboarding dedicada"
       }
     },
     "enterprise": {
@@ -319,11 +313,11 @@
       },
       "passTypes": {
         "question": "¿Qué tipos de pases puedo crear?",
-        "answer": "Loyalshy soporta 7 tipos de pases: tarjetas de sellos, cupones, membresías, programas de puntos, tarjetas regalo, entradas y tarjetas de visita. Cada tipo tiene sus propias funciones e interacciones."
+        "answer": "Loyalshy se centra en dos tipos de pases: tarjetas de sellos digitales (premian a los clientes tras un número determinado de visitas) y cupones digitales (ofertas canjeables únicas o ilimitadas). Ambos viven en Apple y Google Wallet."
       },
       "freePlan": {
         "question": "¿Hay un plan gratuito?",
-        "answer": "¡Sí! Nuestro plan Gratis te permite empezar con hasta 50 contactos y 1 programa — elige entre sellos, cupón o tarjeta de visita. Sin tarjeta de crédito, gratis para siempre. Mejora cuando necesites más."
+        "answer": "¡Sí! Nuestro plan Gratis te permite empezar con hasta 50 contactos y 1 programa — elige entre tarjeta de sellos o cupón. Sin tarjeta de crédito, gratis para siempre. Mejora cuando necesites más."
       },
       "cancel": {
         "question": "¿Cómo cancelo?",

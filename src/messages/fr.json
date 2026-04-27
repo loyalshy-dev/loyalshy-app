@@ -154,8 +154,8 @@
       "description": "Invite du personnel avec un accès basé sur les rôles. Propriétaires et personnel voient des vues différentes."
     },
     "passTypes": {
-      "title": "7 types de passes",
-      "description": "Cartes tampons, coupons, abonnements, points, cartes cadeaux et billets."
+      "title": "Cartes tampons et coupons",
+      "description": "Deux types pensés pour la fidélisation au quotidien — cartes tampons qui récompensent les visites répétées et coupons qui déclenchent un seul échange."
     },
     "pushNotifications": {
       "title": "Notifications Push",
@@ -241,7 +241,7 @@
       "description": "Essaie Loyalshy avec tes premiers clients",
       "features": {
         "contacts": "Jusqu'à 50 contacts",
-        "programs": "1 programme (carte tampons, coupon ou carte de visite)",
+        "programs": "1 programme (carte tampons ou coupon)",
         "staff": "1 membre d'équipe",
         "wallet": "Passes Apple & Google Wallet",
         "studio": "Studio de design de cartes",
@@ -256,11 +256,9 @@
         "contacts": "Jusqu'à 500 contacts",
         "staff": "2 membres d'équipe",
         "programs": "Jusqu'à 2 programmes",
-        "passTypes": "Les 7 types de passes",
         "wallet": "Passes Apple & Google Wallet",
         "studio": "Studio de design de cartes",
-        "analytics": "Analytiques du tableau de bord",
-        "api": "Accès API (20 req/min)"
+        "analytics": "Analytiques du tableau de bord"
       }
     },
     "growth": {
@@ -270,11 +268,9 @@
         "contacts": "Jusqu'à 2 500 contacts",
         "staff": "5 membres d'équipe",
         "programs": "Jusqu'à 5 programmes",
-        "passTypes": "Les 7 types de passes",
         "brandColors": "Couleurs de marque sur les passes",
         "bulkImport": "Importation CSV en masse",
-        "support": "Support email prioritaire",
-        "api": "Accès API (60 req/min)"
+        "support": "Support email prioritaire"
       }
     },
     "scale": {
@@ -284,11 +280,9 @@
         "contacts": "Contacts illimités",
         "staff": "25 membres d'équipe",
         "programs": "Programmes illimités",
-        "passTypes": "Les 7 types de passes",
         "brandColors": "Couleurs de marque sur les passes",
         "bulkImport": "Importation CSV en masse",
-        "onboarding": "Appel d'onboarding dédié",
-        "api": "Accès API (300 req/min)"
+        "onboarding": "Appel d'onboarding dédié"
       }
     },
     "enterprise": {
@@ -319,11 +313,11 @@
       },
       "passTypes": {
         "question": "Quels types de passes puis-je créer ?",
-        "answer": "Loyalshy prend en charge 7 types de passes : cartes tampons, coupons, abonnements, programmes de points, cartes cadeaux, billets et cartes de visite. Chaque type a son propre ensemble de fonctionnalités et d'interactions."
+        "answer": "Loyalshy se concentre sur deux types de passes : cartes tampons numériques (récompensent les clients après un nombre défini de visites) et coupons numériques (offres échangeables uniques ou illimitées). Les deux vivent dans Apple et Google Wallet."
       },
       "freePlan": {
         "question": "Y a-t-il un plan gratuit ?",
-        "answer": "Oui ! Notre plan Gratuit te permet de démarrer avec jusqu'à 50 contacts et 1 programme — choisis entre carte tampons, coupon ou carte de visite. Aucune carte bancaire requise, gratuit pour toujours. Passe à la version supérieure quand tu veux."
+        "answer": "Oui ! Notre plan Gratuit te permet de démarrer avec jusqu'à 50 contacts et 1 programme — choisis entre carte tampons ou coupon. Aucune carte bancaire requise, gratuit pour toujours. Passe à la version supérieure quand tu veux."
       },
       "cancel": {
         "question": "Comment résilier ?",
