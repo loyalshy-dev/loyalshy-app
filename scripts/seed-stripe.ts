@@ -22,7 +22,7 @@ const plans = [
   {
     loyalshyPlan: "STARTER",
     name: "Loyalshy Pro",
-    description: "Up to 500 contacts, 2 staff, all 6 pass types, card design studio.",
+    description: "Up to 500 contacts, 2 staff, 2 programs, card design studio.",
     prices: [
       { amount: 2900, interval: "month" as const, lookupKey: "starter_monthly" },
       { amount: 2400, interval: "month" as const, lookupKey: "starter_annual", intervalCount: 12 },
@@ -31,7 +31,7 @@ const plans = [
   {
     loyalshyPlan: "GROWTH",
     name: "Loyalshy Business",
-    description: "Up to 2,500 contacts, 5 staff, custom brand colors, bulk CSV import.",
+    description: "Up to 2,500 contacts, 5 staff, 5 programs, custom branding, bulk CSV import.",
     prices: [
       { amount: 4900, interval: "month" as const, lookupKey: "growth_monthly" },
       { amount: 3900, interval: "month" as const, lookupKey: "growth_annual", intervalCount: 12 },
@@ -40,7 +40,7 @@ const plans = [
   {
     loyalshyPlan: "SCALE",
     name: "Loyalshy Scale",
-    description: "Unlimited contacts, 25 staff, unlimited programs, webhook events.",
+    description: "Unlimited contacts, 25 staff, unlimited programs, priority support.",
     prices: [
       { amount: 9900, interval: "month" as const, lookupKey: "scale_monthly" },
       { amount: 7900, interval: "month" as const, lookupKey: "scale_annual", intervalCount: 12 },
