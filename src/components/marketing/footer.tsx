@@ -118,12 +118,6 @@ export async function MarketingFooter() {
             {t("builtWith")}
           </p>
         </div>
-        <p
-          className="mt-3 text-[12px] leading-relaxed"
-          style={{ color: "oklch(0.35 0.008 285)" }}
-        >
-          {tCommon("companyInfo.footerLine")}
-        </p>
       </div>
     </footer>
   )

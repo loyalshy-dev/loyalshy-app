@@ -26,8 +26,7 @@
       "name": "HEX CONCEPTS STUDIO, S.L.",
       "vatLabel": "TVA",
       "vat": "B27646645",
-      "address": "Av. Convent 11, 25123 Torrefarrera (Lleida), Espagne",
-      "footerLine": "HEX CONCEPTS STUDIO, S.L. · TVA B27646645 · Av. Convent 11, 25123 Torrefarrera (Lleida), Espagne"
+      "address": "Av. Convent 11, 25123 Torrefarrera (Lleida), Espagne"
     }
   },
   "nav": {
@@ -340,7 +339,7 @@
     "termsOfService": "Conditions d'utilisation",
     "cookiePolicy": "Politique des cookies",
     "tagline": "Cartes de fidélité digitales pour les entreprises modernes.",
-    "copyright": "© 2026 Loyalshy. Tous droits réservés.",
+    "copyright": "© 2026 Loyalshy, un produit de HEX CONCEPTS STUDIO, S.L. Tous droits réservés.",
     "builtWith": "Conçu avec soin pour les chefs d'entreprise."
   },
   "cookieBanner": {

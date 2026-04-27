@@ -26,8 +26,7 @@
       "name": "HEX CONCEPTS STUDIO, S.L.",
       "vatLabel": "NIF",
       "vat": "B27646645",
-      "address": "Av. Convent 11, 25123 Torrefarrera (Lleida), España",
-      "footerLine": "HEX CONCEPTS STUDIO, S.L. · NIF B27646645 · Av. Convent 11, 25123 Torrefarrera (Lleida), España"
+      "address": "Av. Convent 11, 25123 Torrefarrera (Lleida), España"
     }
   },
   "nav": {
@@ -340,7 +339,7 @@
     "termsOfService": "Términos de Servicio",
     "cookiePolicy": "Política de Cookies",
     "tagline": "Tarjetas de fidelización digitales para negocios modernos.",
-    "copyright": "© 2026 Loyalshy. Todos los derechos reservados.",
+    "copyright": "© 2026 Loyalshy, un producto de HEX CONCEPTS STUDIO, S.L. Todos los derechos reservados.",
     "builtWith": "Hecho con cariño para dueños de negocios."
   },
   "cookieBanner": {
