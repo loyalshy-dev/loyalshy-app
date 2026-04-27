@@ -78,6 +78,15 @@ async function main() {
     }
 
     for (const priceConfig of plan.prices) {
+      const isAnnual = Boolean(priceConfig.intervalCount)
+      // Stripe stores the actual charge per billing cycle. Marketing copy
+      // shows "€X/month billed annually", but the customer is charged
+      // monthly×12 once per year, so annual unit_amount must be multiplied.
+      const unitAmount = isAnnual ? priceConfig.amount * 12 : priceConfig.amount
+      const recurring: Stripe.PriceCreateParams.Recurring = isAnnual
+        ? { interval: "year" }
+        : { interval: priceConfig.interval }
+
       // Check if price with lookup_key exists
       const prices = await stripe.prices.list({
         product: product.id,
@@ -85,24 +94,32 @@ async function main() {
         lookup_keys: [priceConfig.lookupKey],
       })
 
-      if (prices.data.length > 0) {
-        console.log(`  Price "${priceConfig.lookupKey}" already exists: ${prices.data[0].id}`)
-      } else {
-        const recurring: Stripe.PriceCreateParams.Recurring = priceConfig.intervalCount
-          ? { interval: "year" }
-          : { interval: priceConfig.interval }
-
-        const price = await stripe.prices.create({
-          product: product.id,
-          unit_amount: priceConfig.amount,
-          currency: "eur",
-          recurring,
-          lookup_key: priceConfig.lookupKey,
-          transfer_lookup_key: true,
-        })
-        const label = priceConfig.intervalCount ? `€${priceConfig.amount / 100}/mo (annual)` : `€${priceConfig.amount / 100}/month`
-        console.log(`  Created price "${priceConfig.lookupKey}": ${price.id} (${label})`)
+      const existing = prices.data[0]
+      if (existing && existing.unit_amount === unitAmount) {
+        console.log(`  Price "${priceConfig.lookupKey}" already exists: ${existing.id}`)
+        continue
       }
+
+      if (existing) {
+        // Wrong amount on the existing price — archive it so the lookup_key
+        // is freed before we recreate. (Stripe prices are immutable; you
+        // archive and replace, you don't update unit_amount.)
+        await stripe.prices.update(existing.id, { active: false })
+        console.log(`  Archived stale price "${priceConfig.lookupKey}": ${existing.id} (was €${(existing.unit_amount ?? 0) / 100})`)
+      }
+
+      const price = await stripe.prices.create({
+        product: product.id,
+        unit_amount: unitAmount,
+        currency: "eur",
+        recurring,
+        lookup_key: priceConfig.lookupKey,
+        transfer_lookup_key: true,
+      })
+      const label = isAnnual
+        ? `€${unitAmount / 100}/year (€${priceConfig.amount / 100}/mo billed annually)`
+        : `€${unitAmount / 100}/month`
+      console.log(`  Created price "${priceConfig.lookupKey}": ${price.id} (${label})`)
     }
 
     console.log()
@@ -115,6 +132,22 @@ async function main() {
     if (configs.data.length > 0) {
       console.log(`Portal configuration already exists: ${configs.data[0].id}`)
     } else {
+      // Restrict subscription_update to ONLY the recurring prices we just
+      // seeded — without `products`, Stripe lets customers switch to any
+      // active price on the account, which is rarely what you want.
+      const productConfigs = await Promise.all(
+        plans.map(async (plan) => {
+          const product = (
+            await stripe.products.search({
+              query: `metadata["loyalshy_plan"]:"${plan.loyalshyPlan}"`,
+            })
+          ).data[0]
+          if (!product) throw new Error(`Product for plan ${plan.loyalshyPlan} not found — re-run product seeding first`)
+          const prices = await stripe.prices.list({ product: product.id, active: true })
+          return { product: product.id, prices: prices.data.map((p) => p.id) }
+        }),
+      )
+
       const config = await stripe.billingPortal.configurations.create({
         business_profile: {
           headline: "Manage your Loyalshy subscription",
@@ -124,6 +157,7 @@ async function main() {
             enabled: true,
             default_allowed_updates: ["price"],
             proration_behavior: "create_prorations",
+            products: productConfigs,
           },
           subscription_cancel: {
             enabled: true,
@@ -140,7 +174,16 @@ async function main() {
       console.log(`Created portal configuration: ${config.id}`)
     }
   } catch (err) {
-    console.log("Portal configuration may require product price IDs — configure manually if needed.")
+    const stripeErr = err as Stripe.errors.StripeError & { raw?: { message?: string; code?: string; param?: string } }
+    console.error("\nPortal configuration FAILED:")
+    console.error(`  type:    ${stripeErr.type ?? "(unknown)"}`)
+    console.error(`  code:    ${stripeErr.code ?? stripeErr.raw?.code ?? "(none)"}`)
+    console.error(`  param:   ${stripeErr.param ?? stripeErr.raw?.param ?? "(none)"}`)
+    console.error(`  message: ${stripeErr.message ?? stripeErr.raw?.message ?? String(err)}`)
+    console.error("\nMost common fixes:")
+    console.error("  - Set a business name in Stripe Dashboard → Settings → Business → Public details")
+    console.error("  - Activate the Customer Portal in Stripe Dashboard → Settings → Billing → Customer portal")
+    process.exitCode = 1
   }
 
   console.log("\nDone! Stripe is seeded.")
