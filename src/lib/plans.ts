@@ -26,7 +26,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: 1,
     features: [
       "Up to 50 contacts",
-      "1 program (stamp card or coupon)",
+      "1 program",
       "1 staff member",
     ],
   },
