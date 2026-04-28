@@ -4,7 +4,6 @@ import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } f
 import { db } from "@/lib/db"
 import { QrCodeDisplay } from "@/components/dashboard/settings/qr-code-display"
 import { DirectIssueSection } from "@/components/dashboard/programs/direct-issue-section"
-import { CsvImportSection } from "@/components/dashboard/programs/csv-import-section"
 import { ShareLinkSection } from "@/components/dashboard/programs/distribution-share-section"
 import { DistributionStats } from "@/components/dashboard/programs/distribution-stats"
 import { NfcSection } from "@/components/dashboard/programs/nfc-section"
@@ -118,10 +117,6 @@ export default async function ProgramDistributionPage(props: {
             templateName={program.name}
             passType={program.passType}
             eligibleCount={eligibleContacts}
-          />
-          <CsvImportSection
-            templateId={program.id}
-            templateName={program.name}
           />
           <NfcSection joinUrl={joinUrl} />
         </div>

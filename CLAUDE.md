@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Multi-tenant SaaS for cafés, salons, and small retail to run digital loyalty programs in Apple/Google Wallet. **Two pass types only**: STAMP_CARD (reward after N visits) and COUPON (one-time or unlimited redeemable offers). Contacts receive wallet passes via QR code scan, shareable link, direct issue, bulk CSV import, or email.
+Multi-tenant SaaS for cafés, salons, and small retail to run digital loyalty programs in Apple/Google Wallet. **Two pass types only**: STAMP_CARD (reward after N visits) and COUPON (one-time or unlimited redeemable offers). Contacts receive wallet passes via QR code scan, shareable link, direct issue, or email.
 
 **Strategic pivot 2026-04-27**: cut from 7 pass types + public REST API to 2 types + staff-app-only API. See `.claude/memory/project_pivot_loyalty_only.md` for the full context.
 
@@ -358,7 +358,7 @@ Update the "Current Progress" section above to track what's done.
 - `/dashboard/programs/[id]` — program overview with stat cards (layout provides tab nav)
 - `/dashboard/programs/[id]/passes` — type-aware pass instances with stat cards, progress columns, status filters, row actions, issue pass sheet, edit contact, send pass email
 - `/dashboard/programs/[id]/design` — canvas-first card design studio with floating icon toolbar + floating context panel (owner only)
-- `/dashboard/programs/[id]/distribution` — Distribution: QR/NFC self-service link, direct issue to contacts, bulk CSV import (owner only). No join-mode toggle — every program is open self-join.
+- `/dashboard/programs/[id]/distribution` — Distribution: QR/NFC self-service link, direct issue to contacts (owner only). No join-mode toggle — every program is open self-join.
 - `/dashboard/programs/[id]/settings` — status management (activate/archive/reactivate) + delete (owner only)
 
 ### Settings (account-level only)
