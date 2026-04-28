@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import Image from "next/image"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Percent, Euro, Gift } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,34 @@ import { Textarea } from "@/components/ui/textarea"
 import { createPassTemplate } from "@/server/org-settings-actions"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { useTranslations } from "next-intl"
+import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
+
+const STAMP_PREVIEW_DESIGN: WalletPassDesign = {
+  cardType: "STAMP",
+  showStrip: true,
+  primaryColor: "#1f2937",
+  secondaryColor: "#3b82f6",
+  textColor: "#ffffff",
+  progressStyle: "STAMPS",
+  labelFormat: "UPPERCASE",
+  customProgressLabel: null,
+  stripImageUrl: null,
+  patternStyle: "NONE",
+  useStampGrid: true,
+}
+
+const COUPON_PREVIEW_DESIGN: WalletPassDesign = {
+  cardType: "COUPON",
+  showStrip: true,
+  primaryColor: "#0f172a",
+  secondaryColor: "#f59e0b",
+  textColor: "#ffffff",
+  progressStyle: "NUMBERS",
+  labelFormat: "UPPERCASE",
+  customProgressLabel: null,
+  stripImageUrl: null,
+  patternStyle: "NONE",
+}
 
 // ─── Step 1: Type selector ─────────────────────────────────
 
@@ -97,6 +125,7 @@ function StampCardForm({
     register,
     handleSubmit,
     formState: { errors },
+    watch,
     reset,
   } = useForm<StampFormData>({
     defaultValues: {
@@ -106,6 +135,14 @@ function StampCardForm({
       rewardExpiryDays: 90,
     },
   })
+
+  const watchedName = watch("name")
+  const watchedReward = watch("rewardDescription")
+  const watchedVisits = watch("visitsRequired")
+  const previewVisitsRaw = Number(watchedVisits)
+  const previewVisits = Number.isFinite(previewVisitsRaw) && previewVisitsRaw > 0
+    ? Math.min(Math.max(Math.round(previewVisitsRaw), 1), 30)
+    : 10
 
   function onSubmit(data: StampFormData) {
     startTransition(async () => {
@@ -139,54 +176,94 @@ function StampCardForm({
         <ArrowLeft className="h-3 w-3" />
         {t("backToTypeSelection")}
       </button>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="stamp-name">{t("programName")}</Label>
-          <Input
-            id="stamp-name"
-            {...register("name", { required: t("programNameRequired") })}
-            placeholder={t("stampNamePlaceholder")}
-          />
-          {errors.name && (
-            <p className="text-xs text-destructive">{errors.name.message}</p>
-          )}
+
+      <div className="grid gap-5 lg:grid-cols-[1fr_240px]">
+        {/* Form fields */}
+        <div className="grid gap-4 sm:grid-cols-2 content-start">
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="stamp-name">{t("programName")}</Label>
+            <Input
+              id="stamp-name"
+              {...register("name", { required: t("programNameRequired") })}
+              placeholder={t("stampNamePlaceholder")}
+            />
+            {errors.name && (
+              <p className="text-xs text-destructive">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="stamp-visits">{t("visitsRequired")}</Label>
+            <div className="relative">
+              <Input
+                id="stamp-visits"
+                type="number"
+                min={3}
+                max={30}
+                className="pr-14"
+                {...register("visitsRequired", { valueAsNumber: true })}
+              />
+              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[11px] text-muted-foreground">
+                {t("stampsSuffix")}
+              </span>
+            </div>
+            <p className="text-[11px] text-muted-foreground">{t("visitsRequiredHint")}</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="stamp-expiry">{t("rewardExpiry")}</Label>
+            <div className="relative">
+              <Input
+                id="stamp-expiry"
+                type="number"
+                min={0}
+                max={365}
+                className="pr-12"
+                {...register("rewardExpiryDays", { valueAsNumber: true })}
+              />
+              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[11px] text-muted-foreground">
+                {t("daysSuffix")}
+              </span>
+            </div>
+            <p className="text-[11px] text-muted-foreground">{t("rewardExpiryHint")}</p>
+          </div>
+
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="stamp-reward">{t("rewardDescription")}</Label>
+            <Input
+              id="stamp-reward"
+              {...register("rewardDescription", {
+                required: t("rewardDescriptionRequired"),
+              })}
+              placeholder={t("rewardDescriptionPlaceholder")}
+            />
+            {errors.rewardDescription && (
+              <p className="text-xs text-destructive">
+                {errors.rewardDescription.message}
+              </p>
+            )}
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="stamp-visits">{t("visitsRequired")}</Label>
-          <Input
-            id="stamp-visits"
-            type="number"
-            min={3}
-            max={30}
-            {...register("visitsRequired", { valueAsNumber: true })}
+
+        {/* Live preview */}
+        <div className="hidden lg:flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 p-3">
+          <p className="self-start text-[10px] uppercase tracking-wider text-muted-foreground">
+            {t("previewLabel")}
+          </p>
+          <WalletPassRenderer
+            design={STAMP_PREVIEW_DESIGN}
+            format="apple"
+            programName={watchedName?.trim() || t("previewDefaultName")}
+            rewardDescription={watchedReward?.trim() || t("previewDefaultReward")}
+            currentVisits={0}
+            totalVisits={previewVisits}
+            compact
+            width={210}
+            height={295}
           />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="stamp-expiry">{t("rewardExpiry")}</Label>
-          <Input
-            id="stamp-expiry"
-            type="number"
-            min={0}
-            max={365}
-            {...register("rewardExpiryDays", { valueAsNumber: true })}
-          />
-        </div>
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="stamp-reward">{t("rewardDescription")}</Label>
-          <Input
-            id="stamp-reward"
-            {...register("rewardDescription", {
-              required: t("rewardDescriptionRequired"),
-            })}
-            placeholder={t("rewardDescriptionPlaceholder")}
-          />
-          {errors.rewardDescription && (
-            <p className="text-xs text-destructive">
-              {errors.rewardDescription.message}
-            </p>
-          )}
         </div>
       </div>
+
       <div className="flex justify-end">
         <Button type="submit" size="sm" disabled={isPending}>
           {isPending ? (
@@ -219,6 +296,7 @@ function CouponForm({
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
     reset,
   } = useForm<CouponFormData>({
     defaultValues: {
@@ -233,6 +311,31 @@ function CouponForm({
   })
 
   const discountType = watch("discountType")
+  const watchedName = watch("name")
+  const watchedDescription = watch("couponDescription")
+  const watchedValue = watch("discountValue")
+  const watchedValidUntil = watch("validUntil")
+  const watchedRedemptionLimit = watch("redemptionLimit")
+
+  const today = new Date().toISOString().slice(0, 10)
+
+  const discountTypeOptions = [
+    { value: "percentage" as const, icon: Percent, label: t("discountTypePercentage"), desc: t("discountTypePercentageDesc") },
+    { value: "fixed" as const, icon: Euro, label: t("discountTypeFixed"), desc: t("discountTypeFixedDesc") },
+    { value: "freebie" as const, icon: Gift, label: t("discountTypeFreebie"), desc: t("discountTypeFreebieDesc") },
+  ]
+
+  // Build preview text from current form state
+  const numericValue = Number.isFinite(Number(watchedValue)) ? Number(watchedValue) : 0
+  const previewDiscountText = discountType === "percentage"
+    ? `${Math.max(1, Math.min(numericValue || 1, 100))}% OFF`
+    : discountType === "fixed"
+      ? `${Math.max(1, Math.min(numericValue || 1, 10000))}€ OFF`
+      : (watchedDescription?.trim() || t("previewDefaultDiscount"))
+  const previewDiscountLabel = discountType === "freebie" ? t("previewFreebieLabel") : undefined
+  const previewValidUntil = watchedValidUntil
+    ? new Date(watchedValidUntil).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+    : undefined
 
   function onSubmit(data: CouponFormData) {
     startTransition(async () => {
@@ -245,11 +348,10 @@ function CouponForm({
         terms: data.terms || undefined,
       }
 
-      // Build a readable reward description from config
       const rewardDesc = data.discountType === "percentage"
         ? `${data.discountValue}% off`
         : data.discountType === "fixed"
-          ? `$${data.discountValue} off`
+          ? `€${data.discountValue} off`
           : "Free item"
 
       const result = await createPassTemplate({
@@ -281,81 +383,146 @@ function CouponForm({
         <ArrowLeft className="h-3 w-3" />
         {t("backToTypeSelection")}
       </button>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="coupon-name">{t("couponName")}</Label>
-          <Input
-            id="coupon-name"
-            {...register("name", { required: t("couponNameRequired") })}
-            placeholder={t("couponNamePlaceholder")}
-          />
-          {errors.name && (
-            <p className="text-xs text-destructive">{errors.name.message}</p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="coupon-discount-type">{t("discountType")}</Label>
-          <select
-            id="coupon-discount-type"
-            {...register("discountType")}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <option value="percentage">{t("discountTypePercentage")}</option>
-            <option value="fixed">{t("discountTypeFixed")}</option>
-            <option value="freebie">{t("discountTypeFreebie")}</option>
-          </select>
-        </div>
-        {discountType !== "freebie" && (
-          <div className="space-y-2">
-            <Label htmlFor="coupon-discount-value">
-              {discountType === "percentage" ? t("discountPercent") : t("discountDollar")}
-            </Label>
+
+      <div className="grid gap-5 lg:grid-cols-[1fr_240px]">
+        {/* Form fields */}
+        <div className="grid gap-4 sm:grid-cols-2 content-start">
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="coupon-name">{t("couponName")}</Label>
             <Input
-              id="coupon-discount-value"
-              type="number"
-              min={1}
-              max={discountType === "percentage" ? 100 : 10000}
-              {...register("discountValue", { valueAsNumber: true })}
+              id="coupon-name"
+              {...register("name", { required: t("couponNameRequired") })}
+              placeholder={t("couponNamePlaceholder")}
+            />
+            {errors.name && (
+              <p className="text-xs text-destructive">{errors.name.message}</p>
+            )}
+          </div>
+
+          {/* Discount type — visual radio cards */}
+          <div className="space-y-2 sm:col-span-2">
+            <Label>{t("discountType")}</Label>
+            <input type="hidden" {...register("discountType")} />
+            <div role="radiogroup" className="grid grid-cols-3 gap-2">
+              {discountTypeOptions.map((opt) => {
+                const Icon = opt.icon
+                const selected = discountType === opt.value
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => setValue("discountType", opt.value, { shouldDirty: true })}
+                    className={`group flex flex-col items-start gap-1.5 rounded-lg border p-2.5 text-left transition-all ${
+                      selected
+                        ? "border-brand bg-brand/5 ring-1 ring-brand/40"
+                        : "border-border bg-card hover:border-foreground/20"
+                    }`}
+                  >
+                    <Icon className={`h-4 w-4 ${selected ? "text-brand" : "text-muted-foreground"}`} strokeWidth={2} />
+                    <p className="text-[12px] font-semibold leading-tight">{opt.label}</p>
+                    <p className="text-[10px] leading-snug text-muted-foreground line-clamp-2">{opt.desc}</p>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {discountType !== "freebie" && (
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="coupon-discount-value">
+                {discountType === "percentage" ? t("discountPercent") : t("discountDollar")}
+              </Label>
+              <div className="relative">
+                <Input
+                  id="coupon-discount-value"
+                  type="number"
+                  min={1}
+                  max={discountType === "percentage" ? 100 : 10000}
+                  className="pr-10"
+                  {...register("discountValue", { valueAsNumber: true })}
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[12px] font-medium text-muted-foreground">
+                  {discountType === "percentage" ? "%" : "€"}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {discountType === "percentage" ? t("discountValueHintPercent") : t("discountValueHintCurrency")}
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="coupon-desc">{t("couponDescription")}</Label>
+            <Input
+              id="coupon-desc"
+              {...register("couponDescription")}
+              placeholder={
+                discountType === "freebie"
+                  ? t("couponDescriptionFreebiePlaceholder")
+                  : t("couponDescriptionPlaceholder")
+              }
             />
           </div>
-        )}
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="coupon-desc">{t("couponDescription")}</Label>
-          <Input
-            id="coupon-desc"
-            {...register("couponDescription")}
-            placeholder={t("couponDescriptionPlaceholder")}
-          />
+
+          <div className="space-y-2">
+            <Label htmlFor="coupon-valid-until">{t("validUntilOptional")}</Label>
+            <Input
+              id="coupon-valid-until"
+              type="date"
+              min={today}
+              {...register("validUntil")}
+            />
+            <p className="text-[11px] text-muted-foreground">{t("validUntilHint")}</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="coupon-limit">{t("redemptionLimit")}</Label>
+            <select
+              id="coupon-limit"
+              {...register("redemptionLimit")}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <option value="single">{t("redemptionSingle")}</option>
+              <option value="unlimited">{t("redemptionUnlimited")}</option>
+            </select>
+            <p className="text-[11px] text-muted-foreground">
+              {watchedRedemptionLimit === "single" ? t("redemptionSingleHint") : t("redemptionUnlimitedHint")}
+            </p>
+          </div>
+
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="coupon-terms">{t("termsOptional")}</Label>
+            <Textarea
+              id="coupon-terms"
+              {...register("terms")}
+              placeholder={t("termsPlaceholder")}
+              rows={3}
+            />
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="coupon-valid-until">{t("validUntilOptional")}</Label>
-          <Input
-            id="coupon-valid-until"
-            type="date"
-            {...register("validUntil")}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="coupon-limit">{t("redemptionLimit")}</Label>
-          <select
-            id="coupon-limit"
-            {...register("redemptionLimit")}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[13px] shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <option value="single">{t("redemptionSingle")}</option>
-            <option value="unlimited">{t("redemptionUnlimited")}</option>
-          </select>
-        </div>
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="coupon-terms">{t("termsOptional")}</Label>
-          <Textarea
-            id="coupon-terms"
-            {...register("terms")}
-            placeholder={t("termsPlaceholder")}
-            rows={3}
+
+        {/* Live preview */}
+        <div className="hidden lg:flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 p-3">
+          <p className="self-start text-[10px] uppercase tracking-wider text-muted-foreground">
+            {t("previewLabel")}
+          </p>
+          <WalletPassRenderer
+            design={COUPON_PREVIEW_DESIGN}
+            format="apple"
+            programName={watchedName?.trim() || t("previewDefaultCouponName")}
+            rewardDescription={watchedDescription?.trim() || ""}
+            discountText={previewDiscountText}
+            discountLabel={previewDiscountLabel}
+            validUntil={previewValidUntil}
+            compact
+            width={210}
+            height={295}
           />
         </div>
       </div>
+
       <div className="flex justify-end">
         <Button type="submit" size="sm" disabled={isPending}>
           {isPending ? (
