@@ -11,7 +11,7 @@ export async function Hero() {
 
   return (
     <section
-      className="relative overflow-hidden py-24 md:py-32 mk-mesh-bg lg:flex lg:flex-col lg:justify-center lg:min-h-[calc(100svh-4rem)]"
+      className="relative overflow-hidden py-24 md:py-32 mk-mesh-bg lg:flex lg:flex-col lg:justify-center lg:min-h-[calc(100svh-5rem)]"
       style={{ background: "var(--mk-bg)" }}
     >
       <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-8">

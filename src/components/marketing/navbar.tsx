@@ -59,7 +59,7 @@ export function MarketingNavbar() {
             : "border-b border-transparent bg-transparent"
         )}
       >
-        <div className="mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-8 lg:px-10">
+        <div className="mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-8 lg:h-20 lg:px-12">
           {/* Logo */}
           <Link
             href="/"
@@ -67,18 +67,18 @@ export function MarketingNavbar() {
             aria-label={t("home")}
           >
             <Image
-              src="/logo.svg"
+              src="/logo-nobg.png"
               alt={tCommon("loyalshy")}
               width={160}
               height={44}
-              className="h-14 w-auto dark:invert"
+              className="h-18 w-auto lg:h-22"
               priority
             />
           </Link>
 
           {/* Center nav links — desktop only */}
           <nav
-            className="hidden md:flex md:items-center md:gap-3"
+            className="hidden md:flex md:items-center md:gap-3 lg:gap-4"
             aria-label="Main navigation"
           >
             {NAV_LINKS.map((link) => (
@@ -86,7 +86,7 @@ export function MarketingNavbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded-md px-5 py-2.5 text-base font-medium transition-colors duration-150",
+                  "rounded-md px-5 py-2.5 text-base font-medium transition-colors duration-150 lg:px-6 lg:py-3 lg:text-lg",
                   "hover:text-(--mk-text)",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 )}
@@ -98,19 +98,19 @@ export function MarketingNavbar() {
           </nav>
 
           {/* Right side actions — desktop */}
-          <div className="hidden items-center gap-5 md:flex">
+          <div className="hidden items-center gap-5 md:flex lg:gap-7">
             <LanguageSwitcher />
             <ThemeToggle />
             <Link
               href="/login"
-              className="text-base font-medium transition-colors"
+              className="text-base font-medium transition-colors lg:text-lg"
               style={{ color: "var(--mk-text-muted)" }}
             >
               {tCommon("logIn")}
             </Link>
             <Link
               href="/register"
-              className="mk-btn-primary py-3! px-8! text-base!"
+              className="mk-btn-primary py-3! px-8! text-base! lg:py-3.5! lg:px-10! lg:text-lg!"
             >
               {tCommon("getStarted")}
             </Link>
