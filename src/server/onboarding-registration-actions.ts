@@ -118,9 +118,9 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
           "send-welcome-email",
           {
             email: session.user.email,
-            name: session.user.name,
+            ownerName: session.user.name,
             organizationName: name,
-            slug,
+            organizationSlug: slug,
             idempotencyKey: welcomeIdempotencyKey,
           },
           { idempotencyKey: welcomeIdempotencyKey },
