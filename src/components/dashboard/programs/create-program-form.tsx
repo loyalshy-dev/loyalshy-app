@@ -12,34 +12,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { createPassTemplate } from "@/server/org-settings-actions"
 import { PASS_TYPE_META, type PassType } from "@/types/pass-types"
 import { useTranslations } from "next-intl"
-import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
-
-const STAMP_PREVIEW_DESIGN: WalletPassDesign = {
-  cardType: "STAMP",
-  showStrip: true,
-  primaryColor: "#1f2937",
-  secondaryColor: "#3b82f6",
-  textColor: "#ffffff",
-  progressStyle: "STAMPS",
-  labelFormat: "UPPERCASE",
-  customProgressLabel: null,
-  stripImageUrl: null,
-  patternStyle: "NONE",
-  useStampGrid: true,
-}
-
-const COUPON_PREVIEW_DESIGN: WalletPassDesign = {
-  cardType: "COUPON",
-  showStrip: true,
-  primaryColor: "#0f172a",
-  secondaryColor: "#f59e0b",
-  textColor: "#ffffff",
-  progressStyle: "NUMBERS",
-  labelFormat: "UPPERCASE",
-  customProgressLabel: null,
-  stripImageUrl: null,
-  patternStyle: "NONE",
-}
 
 // ─── Step 1: Type selector ─────────────────────────────────
 
@@ -125,7 +97,6 @@ function StampCardForm({
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     reset,
   } = useForm<StampFormData>({
     defaultValues: {
@@ -135,14 +106,6 @@ function StampCardForm({
       rewardExpiryDays: 90,
     },
   })
-
-  const watchedName = watch("name")
-  const watchedReward = watch("rewardDescription")
-  const watchedVisits = watch("visitsRequired")
-  const previewVisitsRaw = Number(watchedVisits)
-  const previewVisits = Number.isFinite(previewVisitsRaw) && previewVisitsRaw > 0
-    ? Math.min(Math.max(Math.round(previewVisitsRaw), 1), 30)
-    : 10
 
   function onSubmit(data: StampFormData) {
     startTransition(async () => {
@@ -245,22 +208,22 @@ function StampCardForm({
           </div>
         </div>
 
-        {/* Live preview */}
+        {/* Preview */}
         <div className="hidden lg:flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 p-3">
           <p className="self-start text-[10px] uppercase tracking-wider text-muted-foreground">
             {t("previewLabel")}
           </p>
-          <WalletPassRenderer
-            design={STAMP_PREVIEW_DESIGN}
-            format="apple"
-            programName={watchedName?.trim() || t("previewDefaultName")}
-            rewardDescription={watchedReward?.trim() || t("previewDefaultReward")}
-            currentVisits={0}
-            totalVisits={previewVisits}
-            compact
-            width={210}
-            height={295}
-          />
+          {PASS_TYPE_META.STAMP_CARD.image && (
+            <div className="relative w-full aspect-[3/4]">
+              <Image
+                src={PASS_TYPE_META.STAMP_CARD.image}
+                alt={PASS_TYPE_META.STAMP_CARD.label}
+                fill
+                className="object-contain"
+                sizes="240px"
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -311,10 +274,6 @@ function CouponForm({
   })
 
   const discountType = watch("discountType")
-  const watchedName = watch("name")
-  const watchedDescription = watch("couponDescription")
-  const watchedValue = watch("discountValue")
-  const watchedValidUntil = watch("validUntil")
   const watchedRedemptionLimit = watch("redemptionLimit")
 
   const today = new Date().toISOString().slice(0, 10)
@@ -324,18 +283,6 @@ function CouponForm({
     { value: "fixed" as const, icon: Euro, label: t("discountTypeFixed"), desc: t("discountTypeFixedDesc") },
     { value: "freebie" as const, icon: Gift, label: t("discountTypeFreebie"), desc: t("discountTypeFreebieDesc") },
   ]
-
-  // Build preview text from current form state
-  const numericValue = Number.isFinite(Number(watchedValue)) ? Number(watchedValue) : 0
-  const previewDiscountText = discountType === "percentage"
-    ? `${Math.max(1, Math.min(numericValue || 1, 100))}% OFF`
-    : discountType === "fixed"
-      ? `${Math.max(1, Math.min(numericValue || 1, 10000))}€ OFF`
-      : (watchedDescription?.trim() || t("previewDefaultDiscount"))
-  const previewDiscountLabel = discountType === "freebie" ? t("previewFreebieLabel") : undefined
-  const previewValidUntil = watchedValidUntil
-    ? new Date(watchedValidUntil).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
-    : undefined
 
   function onSubmit(data: CouponFormData) {
     startTransition(async () => {
@@ -503,23 +450,22 @@ function CouponForm({
           </div>
         </div>
 
-        {/* Live preview */}
+        {/* Preview */}
         <div className="hidden lg:flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 p-3">
           <p className="self-start text-[10px] uppercase tracking-wider text-muted-foreground">
             {t("previewLabel")}
           </p>
-          <WalletPassRenderer
-            design={COUPON_PREVIEW_DESIGN}
-            format="apple"
-            programName={watchedName?.trim() || t("previewDefaultCouponName")}
-            rewardDescription={watchedDescription?.trim() || ""}
-            discountText={previewDiscountText}
-            discountLabel={previewDiscountLabel}
-            validUntil={previewValidUntil}
-            compact
-            width={210}
-            height={295}
-          />
+          {PASS_TYPE_META.COUPON.image && (
+            <div className="relative w-full aspect-[3/4]">
+              <Image
+                src={PASS_TYPE_META.COUPON.image}
+                alt={PASS_TYPE_META.COUPON.label}
+                fill
+                className="object-contain"
+                sizes="240px"
+              />
+            </div>
+          )}
         </div>
       </div>
 
