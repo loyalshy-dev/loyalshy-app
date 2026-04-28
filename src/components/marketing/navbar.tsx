@@ -136,8 +136,9 @@ export function MarketingNavbar() {
           className="fixed inset-0 z-[100] flex flex-col md:hidden"
           style={{ background: "var(--mk-bg)" }}
         >
-          {/* Close button — top right, respects notch */}
+          {/* Top row: language + theme switchers + close button, respects notch */}
           <div className="flex items-center justify-end gap-2 px-6 safe-area-top" style={{ paddingTop: "max(env(safe-area-inset-top, 1.25rem), 1.25rem)" }}>
+            <LanguageSwitcher />
             <ThemeToggle />
             <button
               type="button"
