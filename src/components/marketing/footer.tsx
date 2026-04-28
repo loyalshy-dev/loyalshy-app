@@ -45,7 +45,7 @@ export async function MarketingFooter() {
         color: "oklch(0.55 0.008 285)",
       }}
     >
-      <div className="mx-auto max-w-6xl px-6 pb-12 pt-16 sm:px-8 lg:px-10">
+      <div className="w-full px-6 pb-12 pt-16 sm:px-8 lg:px-12">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
           <div className="col-span-2 sm:col-span-2 lg:col-span-1">
@@ -55,11 +55,11 @@ export async function MarketingFooter() {
               aria-label="Loyalshy home"
             >
               <Image
-                src="/logo.svg"
+                src="/logo-nobg.png"
                 alt="Loyalshy"
                 width={120}
                 height={32}
-                className="h-10 w-auto invert"
+                className="h-14 w-auto"
               />
             </Link>
             <p
@@ -101,7 +101,7 @@ export async function MarketingFooter() {
       </div>
 
       <div
-        className="mx-auto max-w-6xl px-6 py-6 sm:px-8 lg:px-10"
+        className="w-full px-6 py-6 sm:px-8 lg:px-12"
         style={{ borderTop: "1px solid oklch(0.22 0.008 285)" }}
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
