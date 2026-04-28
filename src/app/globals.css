@@ -156,41 +156,44 @@
   letter-spacing: -0.02em;
 }
 
-/* Dark variant of the brand: ink background, cream text. */
+/* Dark variant of the brand: revert to the original cool dark palette.
+   Brand is a LIGHT-mode rebrand only. In dark mode, public surfaces look
+   like the original landing did pre-rebrand (cool near-black), with the
+   one exception of accent colors — coral stays as the hero/CTA tint. */
 .dark [data-brand="loyalshy"],
 [data-brand="loyalshy"].dark {
-  --background: oklch(0.187 0.021 38);
-  --foreground: oklch(0.96 0.011 81);
-  --card: oklch(0.22 0.02 38);
-  --card-foreground: oklch(0.96 0.011 81);
-  --popover: oklch(0.22 0.02 38);
-  --popover-foreground: oklch(0.96 0.011 81);
-  --primary: oklch(0.74 0.19 32);
-  --primary-foreground: oklch(0.187 0.021 38);
-  --secondary: oklch(0.25 0.018 38);
-  --secondary-foreground: oklch(0.96 0.011 81);
-  --muted: oklch(0.25 0.018 38);
-  --muted-foreground: oklch(0.7 0.012 50);
-  --accent: oklch(0.25 0.018 38);
-  --accent-foreground: oklch(0.96 0.011 81);
-  --border: oklch(0.28 0.018 38);
-  --input: oklch(0.28 0.018 38);
-  --ring: oklch(0.74 0.19 32);
+  --background: oklch(0.13 0.005 285);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.17 0.005 285);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.17 0.005 285);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.74 0.19 32);             /* Coral CTA stays */
+  --primary-foreground: oklch(0.13 0.005 285);
+  --secondary: oklch(0.22 0.008 285);
+  --secondary-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.22 0.008 285);
+  --muted-foreground: oklch(0.6 0.01 285);
+  --accent: oklch(0.22 0.008 285);
+  --accent-foreground: oklch(0.95 0 0);
+  --border: oklch(0.25 0.008 285);
+  --input: oklch(0.25 0.008 285);
+  --ring: oklch(0.74 0.19 32);                /* Coral focus ring stays */
   --brand: oklch(0.74 0.19 32);
 
-  --mk-bg: oklch(0.187 0.021 38);
-  --mk-surface: oklch(0.22 0.02 38);
-  --mk-card: oklch(0.25 0.018 38);
-  --mk-border: oklch(0.28 0.018 38);
-  --mk-border-hover: oklch(0.35 0.018 38);
-  --mk-text: oklch(0.96 0.011 81);
-  --mk-text-muted: oklch(0.7 0.012 50);
-  --mk-text-dimmed: oklch(0.6 0.012 50);
-  --mk-brand-purple: oklch(0.74 0.19 32);
-  --mk-brand-green: oklch(0.66 0.22 28);
-  --mk-footer-bg: oklch(0.14 0.018 38);
-  --mk-glass-bg: oklch(0.22 0.02 38 / 0.6);
-  --mk-glass-border: oklch(0.28 0.018 38 / 0.5);
+  --mk-bg: oklch(0.12 0.005 285);
+  --mk-surface: oklch(0.15 0.006 285);
+  --mk-card: oklch(0.18 0.007 285);
+  --mk-border: oklch(0.25 0.008 285);
+  --mk-border-hover: oklch(0.35 0.01 285);
+  --mk-text: oklch(0.95 0 0);
+  --mk-text-muted: oklch(0.65 0.01 285);
+  --mk-text-dimmed: oklch(0.55 0.008 285);
+  --mk-brand-purple: oklch(0.74 0.19 32);     /* Coral accent stays in dark mode */
+  --mk-brand-green: oklch(0.66 0.22 28);      /* Deeper coral for gradient endpoint */
+  --mk-footer-bg: oklch(0.1 0.004 285);
+  --mk-glass-bg: oklch(1 0 0 / 0.06);
+  --mk-glass-border: oklch(1 0 0 / 0.10);
 }
 
 .dark {
