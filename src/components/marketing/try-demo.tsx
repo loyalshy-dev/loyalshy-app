@@ -68,19 +68,20 @@ export async function TryDemo() {
             />
 
             {/* Wallet buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="flex flex-row flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Link
                 href={DEMO_JOIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={t("addToAppleWallet")}
+                className="shrink-0"
               >
                 <Image
                   src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg"
                   alt={t("addToAppleWallet")}
                   width={156}
                   height={48}
-                  className="h-12 w-auto"
+                  className="h-10 sm:h-12 w-auto"
                 />
               </Link>
               <Link
@@ -88,36 +89,32 @@ export async function TryDemo() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={t("addToGoogleWallet")}
+                className="shrink-0"
               >
                 <Image
                   src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg"
                   alt={t("addToGoogleWallet")}
                   width={180}
                   height={48}
-                  className="h-12 w-auto"
+                  className="h-10 sm:h-12 w-auto"
                 />
               </Link>
             </div>
 
             {/* Fallback link */}
-            <div className="flex items-center gap-2">
-              <span
-                className="text-[13px]"
-                style={{ color: "var(--mk-text-dimmed)" }}
-              >
-                {t("or")}
-              </span>
+            <p className="text-center text-[13px]" style={{ color: "var(--mk-text-dimmed)" }}>
+              {t("or")}{" "}
               <Link
                 href={DEMO_JOIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
+                className="font-medium transition-opacity hover:opacity-70"
                 style={{ color: "var(--mk-brand-purple)" }}
               >
                 {t("openJoinPage")}
-                <ExternalLink className="size-3" />
+                <ExternalLink className="inline size-3 ml-1 align-[-1px]" />
               </Link>
-            </div>
+            </p>
           </div>
         </FadeIn>
       </div>
