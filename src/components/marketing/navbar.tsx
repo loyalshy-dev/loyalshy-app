@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 
 interface NavLink {
@@ -99,6 +100,7 @@ export function MarketingNavbar() {
           {/* Right side actions — desktop */}
           <div className="hidden items-center gap-5 md:flex">
             <LanguageSwitcher />
+            <ThemeToggle />
             <Link
               href="/login"
               className="text-base font-medium transition-colors"
@@ -135,7 +137,8 @@ export function MarketingNavbar() {
           style={{ background: "var(--mk-bg)" }}
         >
           {/* Close button — top right, respects notch */}
-          <div className="flex justify-end px-6 safe-area-top" style={{ paddingTop: "max(env(safe-area-inset-top, 1.25rem), 1.25rem)" }}>
+          <div className="flex items-center justify-end gap-2 px-6 safe-area-top" style={{ paddingTop: "max(env(safe-area-inset-top, 1.25rem), 1.25rem)" }}>
+            <ThemeToggle />
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
