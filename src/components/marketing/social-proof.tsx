@@ -33,12 +33,19 @@ export async function SocialProof() {
     t("secureByDesign"),
   ]
 
-  // Duplicate the list so the -50% translation creates a seamless loop.
-  // The second copy is decorative — hidden from assistive tech.
-  const items = [
-    ...badges.map((label, i) => ({ key: `a-${i}`, label, ariaHidden: false })),
-    ...badges.map((label, i) => ({ key: `b-${i}`, label, ariaHidden: true })),
-  ]
+  // Render the list N times (N must be EVEN — `-50%` keyframe needs the first
+  // half to be byte-identical to the second half). N=6 keeps the first half
+  // (~3 copies × 4 badges = 12 items) wider than typical desktop viewports,
+  // which prevents the visible blank gap on wide screens.
+  // Only the first copy is exposed to assistive tech.
+  const COPIES = 6
+  const items = Array.from({ length: COPIES }, (_, copy) =>
+    badges.map((label, i) => ({
+      key: `${copy}-${i}`,
+      label,
+      ariaHidden: copy !== 0,
+    })),
+  ).flat()
 
   return (
     <section
