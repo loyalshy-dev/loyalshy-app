@@ -1,6 +1,7 @@
 "use server"
 
 import { z } from "zod"
+import type { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { addDays } from "date-fns"
 import { getTranslations } from "next-intl/server"
@@ -322,11 +323,8 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
   const parsed = createPassTemplateSchema.parse(input)
   await assertOrganizationRole(parsed.organizationId, "owner")
 
-  // Enforce plan template limit
-  const templateCheck = await checkTemplateLimit(parsed.organizationId)
-  if (!templateCheck.allowed) {
-    return { error: t("templateLimitReached", { limit: templateCheck.limit }) }
-  }
+  // Plan template limit applies to ACTIVE programs only (enforced in activateTemplate /
+  // reactivateTemplate). Drafts and archives are unrestricted.
 
   // Enforce allowed pass types for current plan
   const typeAllowed = await checkPassTypeAllowed(parsed.organizationId, parsed.passType)
@@ -335,6 +333,15 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
   }
 
   const defaultCardType = parsed.passType === "COUPON" ? "COUPON" : "STAMP"
+
+  // For stamp cards, seed a random preset strip image + enable the stamp grid
+  // so the user lands on a finished-looking card instead of a blank one.
+  let stripUrls: { stripImageUrl: string; stripImageApple: string; stripImageGoogle: string } | null = null
+  let editorConfig: Record<string, unknown> = {}
+  if (parsed.passType === "STAMP_CARD") {
+    editorConfig = { useStampGrid: true }
+    stripUrls = await pickRandomStripPreset()
+  }
 
   const template = await db.passTemplate.create({
     data: {
@@ -351,6 +358,8 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
           progressStyle: "NUMBERS",
           labelFormat: "UPPERCASE",
           designHash: "",
+          editorConfig: editorConfig as Prisma.InputJsonValue,
+          ...(stripUrls ?? {}),
         },
       },
     },
@@ -360,6 +369,44 @@ export async function createPassTemplate(input: z.infer<typeof createPassTemplat
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard/programs")
   return { success: true, templateId: template.id }
+}
+
+// Strip image presets shipped in /public/strip-images/. Kept in sync with
+// the studio's StripPanel preset list.
+const STRIP_PRESETS: { id: string; ext: string; mime: string }[] = [
+  { id: "burger", ext: "webp", mime: "image/webp" },
+  { id: "caffe-beans", ext: "webp", mime: "image/webp" },
+  { id: "pizza", ext: "webp", mime: "image/webp" },
+  { id: "club", ext: "webp", mime: "image/webp" },
+  { id: "gym", ext: "jpg", mime: "image/jpeg" },
+]
+
+async function pickRandomStripPreset(): Promise<
+  { stripImageUrl: string; stripImageApple: string; stripImageGoogle: string } | null
+> {
+  const preset = STRIP_PRESETS[Math.floor(Math.random() * STRIP_PRESETS.length)]
+  try {
+    const { readFile } = await import("node:fs/promises")
+    const path = await import("node:path")
+    const filePath = path.join(process.cwd(), "public", "strip-images", `${preset.id}.${preset.ext}`)
+    const originalBuffer = await readFile(filePath)
+
+    const { uploadFile } = await import("@/lib/storage")
+    const { processUploadedStripImage } = await import("@/lib/wallet/strip-image")
+    const { appleBuffer, googleBuffer } = await processUploadedStripImage(originalBuffer)
+
+    const ts = Date.now()
+    const [originalUrl, appleUrl, googleUrl] = await Promise.all([
+      uploadFile(originalBuffer, `strip-images/preset-${preset.id}-${ts}.${preset.ext}`, preset.mime),
+      uploadFile(appleBuffer, `strip-images/preset-${preset.id}-apple-${ts}.png`, "image/png"),
+      uploadFile(googleBuffer, `strip-images/preset-${preset.id}-google-${ts}.png`, "image/png"),
+    ])
+    return { stripImageUrl: originalUrl, stripImageApple: appleUrl, stripImageGoogle: googleUrl }
+  } catch {
+    // R2 / sharp / fs failure — fall back to a blank strip rather than blocking
+    // template creation.
+    return null
+  }
 }
 
 // ─── Archive Pass Template ────────────────────────────────
