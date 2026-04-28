@@ -75,8 +75,8 @@
   --input: oklch(0.915 0.005 285);
   --ring: oklch(0.21 0.006 285);
 
-  /* — Brand color (per-restaurant theming) — */
-  --brand: oklch(0.55 0.2 265);
+  /* — Brand color (per-organization theming, default = Loyalshy coral) — */
+  --brand: oklch(0.704 0.193 32);
   --brand-foreground: oklch(0.985 0 0);
 
   /* — Semantic colors — */
@@ -212,7 +212,7 @@
   --border: oklch(0.25 0.008 285);
   --input: oklch(0.25 0.008 285);
   --ring: oklch(0.55 0.01 285);
-  --brand: oklch(0.6 0.2 265);
+  --brand: oklch(0.74 0.19 32);
   --brand-foreground: oklch(0.985 0 0);
   --success: oklch(0.62 0.17 145);
   --success-foreground: oklch(0.985 0 0);
