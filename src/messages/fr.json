@@ -51,20 +51,6 @@
     "screenshotAlt": "Tableau de bord Loyalshy montrant les programmes de fidélité avec de superbes designs de cartes",
     "browserUrl": "www.loyalshy.com/dashboard"
   },
-  "socialProof": {
-    "headline": "La fidélité numérique pour les petits commerces du monde entier",
-    "trustedBy": "Cafés, salons et boutiques nous font confiance",
-    "stat1Value": "500+",
-    "stat1Label": "entreprises",
-    "stat2Value": "50K+",
-    "stat2Label": "passes émis",
-    "stat3Value": "12+",
-    "stat3Label": "pays",
-    "appleWallet": "Apple Wallet",
-    "googleWallet": "Google Wallet",
-    "gdprCompliant": "Conforme au RGPD",
-    "secureByDesign": "Sécurisé par conception"
-  },
   "featureShowcase": {
     "sectionLabel": "Plateforme",
     "title": "Tout au même endroit",

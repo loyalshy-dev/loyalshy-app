@@ -51,20 +51,6 @@
     "screenshotAlt": "Loyalshy dashboard showing loyalty programs with beautiful card designs",
     "browserUrl": "www.loyalshy.com/dashboard"
   },
-  "socialProof": {
-    "headline": "Powering digital loyalty for small businesses worldwide",
-    "trustedBy": "Trusted by cafés, salons, and shops worldwide",
-    "stat1Value": "500+",
-    "stat1Label": "businesses",
-    "stat2Value": "50K+",
-    "stat2Label": "passes issued",
-    "stat3Value": "12+",
-    "stat3Label": "countries",
-    "appleWallet": "Apple Wallet",
-    "googleWallet": "Google Wallet",
-    "gdprCompliant": "GDPR Compliant",
-    "secureByDesign": "Secure by Design"
-  },
   "featureShowcase": {
     "sectionLabel": "Platform",
     "title": "Everything in one place",

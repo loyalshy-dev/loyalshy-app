@@ -396,21 +396,6 @@
   .mk-carousel-track[data-paused="true"] {
     animation-play-state: paused;
   }
-
-  /* — Marquee (seamless loop, content duplicated 2x) — */
-  .mk-marquee-mask {
-    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-  }
-  .mk-marquee-track {
-    display: flex;
-    width: max-content;
-    animation: mk-marquee 30s linear infinite;
-    will-change: transform;
-  }
-  .mk-marquee-track:hover {
-    animation-play-state: paused;
-  }
 }
 
 /* — Hero CSS animations (no JS needed) — */
@@ -436,11 +421,6 @@
   50% { transform: translateY(-8px); }
 }
 
-@keyframes mk-marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
 @keyframes mk-carousel-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -453,9 +433,7 @@
   .mk-card-glass {
     transition: none !important;
   }
-  .mk-carousel-track,
-  .mk-marquee-track,
-  [data-mk-marquee] {
+  .mk-carousel-track {
     animation: none !important;
   }
   .hero-fade-in {

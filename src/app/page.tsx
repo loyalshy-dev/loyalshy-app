@@ -13,7 +13,6 @@ import { FAQ } from "@/components/marketing/faq"
 import { ClosingCTA } from "@/components/marketing/closing-cta"
 import { TryDemo } from "@/components/marketing/try-demo"
 import { StaffApp } from "@/components/marketing/staff-app"
-import { SocialProof } from "@/components/marketing/social-proof"
 import { MarketingFooter } from "@/components/marketing/footer"
 
 const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://loyalshy.com"
@@ -103,7 +102,7 @@ function JsonLd() {
 }
 
 const MARKETING_NAMESPACES = [
-  "common", "nav", "hero", "socialProof", "featureShowcase", "howItWorks",
+  "common", "nav", "hero", "featureShowcase", "howItWorks",
   "features", "walletPreview", "testimonials", "pricing",
   "faq", "tryDemo", "staffApp", "closingCta", "footer",
 ] as const
@@ -123,7 +122,6 @@ export default async function LandingPage() {
         <main>
           <Hero />
           <TryDemo />
-          <SocialProof />
           <FeatureShowcase />
           <HowItWorks />
           <WalletPreview />

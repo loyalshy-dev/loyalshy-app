@@ -51,20 +51,6 @@
     "screenshotAlt": "Panel de Loyalshy mostrando programas de fidelización con diseños de tarjetas",
     "browserUrl": "www.loyalshy.com/dashboard"
   },
-  "socialProof": {
-    "headline": "Impulsando la fidelización digital para pequeños negocios en todo el mundo",
-    "trustedBy": "Cafeterías, salones y tiendas confían en nosotros",
-    "stat1Value": "500+",
-    "stat1Label": "negocios",
-    "stat2Value": "50K+",
-    "stat2Label": "pases emitidos",
-    "stat3Value": "12+",
-    "stat3Label": "países",
-    "appleWallet": "Apple Wallet",
-    "googleWallet": "Google Wallet",
-    "gdprCompliant": "Conforme al RGPD",
-    "secureByDesign": "Seguro por diseño"
-  },
   "featureShowcase": {
     "sectionLabel": "Plataforma",
     "title": "Todo en un solo lugar",
