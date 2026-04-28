@@ -48,9 +48,9 @@ export default async function ContactPage() {
               className="pointer-events-none absolute inset-0 -z-10"
               style={{
                 background: `
-                  radial-gradient(ellipse 60% 50% at 70% 30%, oklch(0.55 0.2 265 / 0.07) 0%, transparent 70%),
-                  radial-gradient(ellipse 40% 60% at 20% 70%, oklch(0.55 0.17 155 / 0.05) 0%, transparent 70%),
-                  radial-gradient(ellipse 80% 40% at 50% 90%, oklch(0.55 0.2 265 / 0.03) 0%, transparent 70%)
+                  radial-gradient(ellipse 60% 50% at 70% 30%, oklch(0.704 0.193 32 / 0.07) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 60% at 20% 70%, oklch(0.704 0.193 32 / 0.05) 0%, transparent 70%),
+                  radial-gradient(ellipse 80% 40% at 50% 90%, oklch(0.704 0.193 32 / 0.03) 0%, transparent 70%)
                 `,
               }}
             />
@@ -154,7 +154,7 @@ export default async function ContactPage() {
                                 aria-hidden="true"
                                 className="absolute inset-x-0 top-0 h-px rounded-t-2xl opacity-0 transition-opacity duration-200 group-hover:opacity-100"
                                 style={{
-                                  background: "linear-gradient(90deg, transparent, oklch(0.55 0.2 265 / 0.4), transparent)",
+                                  background: "linear-gradient(90deg, transparent, oklch(0.704 0.193 32 / 0.4), transparent)",
                                 }}
                               />
                               <div
@@ -194,8 +194,8 @@ export default async function ContactPage() {
                     <div
                       className="mt-2 rounded-2xl p-5"
                       style={{
-                        background: "oklch(0.55 0.2 265 / 0.04)",
-                        border: "1px solid oklch(0.55 0.2 265 / 0.08)",
+                        background: "oklch(0.704 0.193 32 / 0.04)",
+                        border: "1px solid oklch(0.704 0.193 32 / 0.08)",
                       }}
                     >
                       <p

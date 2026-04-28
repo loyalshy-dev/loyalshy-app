@@ -117,7 +117,7 @@ export default async function LandingPage() {
   return (
     <NextIntlClientProvider messages={marketingMessages}>
       <JsonLd />
-      <div className="min-h-screen" style={{ background: "var(--mk-bg)", overscrollBehaviorY: "contain" }}>
+      <div data-brand="loyalshy" className="min-h-screen" style={{ background: "var(--mk-bg)", overscrollBehaviorY: "contain" }}>
         <MarketingNavbar />
         <main>
           <Hero />

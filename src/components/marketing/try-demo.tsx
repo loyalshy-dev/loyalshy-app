@@ -23,8 +23,8 @@ export async function TryDemo() {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background: `
-            radial-gradient(ellipse 50% 50% at 50% 40%, oklch(0.55 0.2 265 / 0.05) 0%, transparent 70%),
-            radial-gradient(ellipse 40% 40% at 70% 70%, oklch(0.55 0.17 155 / 0.04) 0%, transparent 70%)
+            radial-gradient(ellipse 50% 50% at 50% 40%, oklch(0.704 0.193 32 / 0.05) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 40% at 70% 70%, oklch(0.704 0.193 32 / 0.04) 0%, transparent 70%)
           `,
         }}
       />
@@ -33,7 +33,7 @@ export async function TryDemo() {
         <FadeIn>
           <div className="mx-auto max-w-2xl text-center mb-12 sm:mb-16">
             <p
-              className="text-[13px] font-medium uppercase tracking-widest mb-3"
+              className="text-[13px] font-medium tracking-wide mb-3"
               style={{ color: "var(--mk-brand-purple)" }}
             >
               {t("sectionLabel")}

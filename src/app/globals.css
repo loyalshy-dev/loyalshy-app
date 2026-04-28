@@ -103,6 +103,96 @@
   --sidebar-ring: oklch(0.21 0.006 285);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   Loyalshy brand override — scoped via [data-brand="loyalshy"]
+   Applied on landing, (public), and (auth) surfaces only.
+   Dashboard / studio / admin keep the neutral shadcn palette.
+   Palette: Cream #FFF8F1, Ink #1F1410, Coral #FF6B47.
+   ═══════════════════════════════════════════════════════════ */
+
+[data-brand="loyalshy"] {
+  /* Standard shadcn tokens (so any shadcn component inside inherits) */
+  --background: oklch(0.985 0.011 81);        /* Cream #FFF8F1 */
+  --foreground: oklch(0.187 0.021 38);        /* Ink #1F1410 */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.187 0.021 38);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.187 0.021 38);
+  --primary: oklch(0.704 0.193 32);           /* Coral #FF6B47 */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.96 0.011 81);
+  --secondary-foreground: oklch(0.187 0.021 38);
+  --muted: oklch(0.96 0.011 81);
+  --muted-foreground: oklch(0.45 0.015 38);
+  --accent: oklch(0.96 0.011 81);
+  --accent-foreground: oklch(0.187 0.021 38);
+  --border: oklch(0.92 0.012 81);
+  --input: oklch(0.92 0.012 81);
+  --ring: oklch(0.704 0.193 32);              /* Coral focus ring */
+  --brand: oklch(0.704 0.193 32);             /* Coral as brand */
+  --brand-foreground: oklch(1 0 0);
+
+  /* Marketing tokens */
+  --mk-bg: oklch(0.985 0.011 81);
+  --mk-surface: oklch(0.96 0.011 81);
+  --mk-card: oklch(1 0 0);
+  --mk-border: oklch(0.92 0.012 81);
+  --mk-border-hover: oklch(0.85 0.015 81);
+  --mk-text: oklch(0.187 0.021 38);
+  --mk-text-muted: oklch(0.45 0.015 38);
+  --mk-text-dimmed: oklch(0.55 0.014 50);
+  --mk-brand-purple: oklch(0.704 0.193 32);   /* Coral hero */
+  --mk-brand-green: oklch(0.62 0.215 28);     /* Deeper coral — gradient endpoint for hero highlight */
+  --mk-footer-bg: oklch(0.187 0.021 38);
+  --mk-glass-bg: oklch(1 0 0 / 0.7);
+  --mk-glass-border: oklch(0.92 0.012 81 / 0.6);
+
+  /* Body font: Inter. Headings inherit Cabinet Grotesk via the rule below. */
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+}
+
+[data-brand="loyalshy"] :is(h1, h2, h3, h4, .font-display) {
+  font-family: "Cabinet Grotesk", var(--font-inter), system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Dark variant of the brand: ink background, cream text. */
+.dark [data-brand="loyalshy"],
+[data-brand="loyalshy"].dark {
+  --background: oklch(0.187 0.021 38);
+  --foreground: oklch(0.96 0.011 81);
+  --card: oklch(0.22 0.02 38);
+  --card-foreground: oklch(0.96 0.011 81);
+  --popover: oklch(0.22 0.02 38);
+  --popover-foreground: oklch(0.96 0.011 81);
+  --primary: oklch(0.74 0.19 32);
+  --primary-foreground: oklch(0.187 0.021 38);
+  --secondary: oklch(0.25 0.018 38);
+  --secondary-foreground: oklch(0.96 0.011 81);
+  --muted: oklch(0.25 0.018 38);
+  --muted-foreground: oklch(0.7 0.012 50);
+  --accent: oklch(0.25 0.018 38);
+  --accent-foreground: oklch(0.96 0.011 81);
+  --border: oklch(0.28 0.018 38);
+  --input: oklch(0.28 0.018 38);
+  --ring: oklch(0.74 0.19 32);
+  --brand: oklch(0.74 0.19 32);
+
+  --mk-bg: oklch(0.187 0.021 38);
+  --mk-surface: oklch(0.22 0.02 38);
+  --mk-card: oklch(0.25 0.018 38);
+  --mk-border: oklch(0.28 0.018 38);
+  --mk-border-hover: oklch(0.35 0.018 38);
+  --mk-text: oklch(0.96 0.011 81);
+  --mk-text-muted: oklch(0.7 0.012 50);
+  --mk-text-dimmed: oklch(0.6 0.012 50);
+  --mk-brand-purple: oklch(0.74 0.19 32);
+  --mk-brand-green: oklch(0.66 0.22 28);
+  --mk-footer-bg: oklch(0.14 0.018 38);
+  --mk-glass-bg: oklch(0.22 0.02 38 / 0.6);
+  --mk-glass-border: oklch(0.28 0.018 38 / 0.5);
+}
+
 .dark {
   --background: oklch(0.13 0.005 285);
   --foreground: oklch(0.95 0 0);

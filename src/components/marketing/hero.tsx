@@ -22,10 +22,10 @@ export async function Hero() {
             {/* Badge */}
             <div className="hero-fade-in max-w-full" style={{ animationDelay: "0ms" }}>
               <div
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] sm:text-[13px] font-bold tracking-wider"
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] sm:text-[13px] font-semibold tracking-wide"
                 style={{
-                  background: "oklch(0.55 0.2 265 / 0.06)",
-                  border: "1px solid oklch(0.55 0.2 265 / 0.15)",
+                  background: "oklch(0.704 0.193 32 / 0.06)",
+                  border: "1px solid oklch(0.704 0.193 32 / 0.15)",
                   color: "var(--mk-brand-purple)",
                 }}
               >
@@ -85,7 +85,7 @@ export async function Hero() {
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 -z-10 scale-150 rounded-full blur-3xl"
                 style={{
-                  background: "radial-gradient(circle, oklch(0.55 0.2 265 / 0.1) 0%, transparent 70%)",
+                  background: "radial-gradient(circle, oklch(0.704 0.193 32 / 0.1) 0%, transparent 70%)",
                 }}
               />
               <WalletStack />

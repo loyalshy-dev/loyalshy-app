@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
@@ -19,6 +19,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Inter loads globally but only applies on surfaces marked `data-brand="loyalshy"`.
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -103,8 +110,17 @@ async function IntlProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        {/* Cabinet Grotesk (Indian Type Foundry / Fontshare) — applied only on
+            surfaces marked data-brand="loyalshy" via globals.css. */}
+        <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
+        <link
+          rel="stylesheet"
+          href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap"
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
       >
         <NextIntlClientProvider messages={pickMessages(messages, SHARED_NAMESPACES)}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>

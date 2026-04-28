@@ -24,7 +24,7 @@ export async function WalletPreview() {
           {/* Text column */}
           <FadeIn direction="left" className="order-2 lg:order-1 flex flex-col gap-8">
             <p
-              className="text-[13px] font-black uppercase tracking-[0.2em]"
+              className="text-[13px] font-bold tracking-wide"
               style={{ color: "var(--mk-brand-green)" }}
             >
               {t("sectionLabel")}
@@ -41,7 +41,7 @@ export async function WalletPreview() {
                 <li key={text} className="flex gap-4">
                   <div
                     className="flex size-6 shrink-0 items-center justify-center rounded-full"
-                    style={{ background: "oklch(0.55 0.17 155 / 0.15)" }}
+                    style={{ background: "oklch(0.704 0.193 32 / 0.15)" }}
                   >
                     <Check
                       className="size-3.5"
@@ -77,7 +77,7 @@ export async function WalletPreview() {
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 -z-10 scale-125 rounded-full blur-3xl"
                 style={{
-                  background: "radial-gradient(circle, oklch(0.55 0.2 265 / 0.08) 0%, transparent 70%)",
+                  background: "radial-gradient(circle, oklch(0.704 0.193 32 / 0.08) 0%, transparent 70%)",
                 }}
               />
               <PhoneMockupInteractive />

@@ -9,7 +9,7 @@ const AVATAR_COLORS: { bg: string; text: string }[] = [
   { bg: "oklch(0.65 0.12 145 / 0.12)", text: "oklch(0.48 0.12 145)" },
   { bg: "oklch(0.70 0.14 75 / 0.12)", text: "oklch(0.55 0.14 75)" },
   { bg: "oklch(0.60 0.18 330 / 0.12)", text: "oklch(0.50 0.16 330)" },
-  { bg: "oklch(0.55 0.2 265 / 0.12)", text: "oklch(0.50 0.18 265)" },
+  { bg: "oklch(0.704 0.193 32 / 0.12)", text: "oklch(0.66 0.18 32)" },
 ]
 
 function getAvatarColor(name: string): { bg: string; text: string } {
@@ -71,7 +71,7 @@ function QuoteIcon({ className }: { className?: string }) {
       viewBox="0 0 20 16"
       fill="currentColor"
       className={className}
-      style={{ color: "oklch(0.55 0.2 265 / 0.2)" }}
+      style={{ color: "oklch(0.704 0.193 32 / 0.2)" }}
     >
       <path d="M0 16V9.5C0 5.9 2.3 2.9 6.9 0l1.4 1.8C5.8 3.3 4.4 5.2 4 8h3.5V16H0zm10 0V9.5C10 5.9 12.3 2.9 16.9 0l1.4 1.8C15.8 3.3 14.4 5.2 14 8h3.5V16H10z" />
     </svg>
@@ -170,9 +170,9 @@ function FeaturedTestimonialCard({ name, role, quote, stat, statLabel, avatarAlt
     <div
       className="relative flex flex-col gap-6 p-8 sm:p-10 rounded-2xl overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, oklch(0.55 0.2 265 / 0.04), oklch(0.55 0.17 155 / 0.03))",
-        border: "1px solid oklch(0.55 0.2 265 / 0.12)",
-        boxShadow: "0 4px 24px oklch(0 0 0 / 0.06), 0 0 60px oklch(0.55 0.2 265 / 0.03)",
+        background: "linear-gradient(135deg, oklch(0.704 0.193 32 / 0.04), oklch(0.704 0.193 32 / 0.03))",
+        border: "1px solid oklch(0.704 0.193 32 / 0.12)",
+        boxShadow: "0 4px 24px oklch(0 0 0 / 0.06), 0 0 60px oklch(0.704 0.193 32 / 0.03)",
       }}
     >
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -259,7 +259,7 @@ export async function Testimonials() {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background: `
-            radial-gradient(ellipse 50% 40% at 50% 30%, oklch(0.55 0.2 265 / 0.04) 0%, transparent 70%)
+            radial-gradient(ellipse 50% 40% at 50% 30%, oklch(0.704 0.193 32 / 0.04) 0%, transparent 70%)
           `,
         }}
       />
@@ -268,7 +268,7 @@ export async function Testimonials() {
         <FadeIn>
           <div className="mx-auto max-w-2xl text-center mb-14 sm:mb-16">
             <p
-              className="text-[13px] font-medium uppercase tracking-widest mb-3"
+              className="text-[13px] font-medium tracking-wide mb-3"
               style={{ color: "var(--mk-brand-purple)" }}
             >
               {t("sectionLabel")}

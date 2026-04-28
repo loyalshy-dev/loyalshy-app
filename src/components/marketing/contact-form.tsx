@@ -72,13 +72,13 @@ export function ContactForm() {
         <div
           className="mb-6 flex size-14 items-center justify-center rounded-2xl"
           style={{
-            background: "oklch(0.55 0.2 265 / 0.08)",
-            border: "1px solid oklch(0.55 0.2 265 / 0.12)",
+            background: "oklch(0.704 0.193 32 / 0.08)",
+            border: "1px solid oklch(0.704 0.193 32 / 0.12)",
           }}
         >
           <CheckCircle2
             className="size-7"
-            style={{ color: "oklch(0.55 0.2 265)" }}
+            style={{ color: "oklch(0.704 0.193 32)" }}
           />
         </div>
         <h2
@@ -255,7 +255,7 @@ function FormField({
       >
         {label}
         {required && (
-          <span className="ml-0.5" style={{ color: "oklch(0.55 0.2 265)" }}>
+          <span className="ml-0.5" style={{ color: "oklch(0.704 0.193 32)" }}>
             *
           </span>
         )}

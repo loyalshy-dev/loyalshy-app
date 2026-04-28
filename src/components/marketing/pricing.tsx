@@ -63,7 +63,7 @@ function BillingToggle({
         <span
           className="absolute -top-2.5 -right-8 sm:-right-12 rounded-full px-2 py-0.5 text-[10px] font-bold whitespace-nowrap"
           style={{
-            background: "oklch(0.55 0.17 155 / 0.12)",
+            background: "oklch(0.704 0.193 32 / 0.12)",
             color: "oklch(0.45 0.17 155)",
           }}
         >
@@ -97,7 +97,7 @@ function FreePlanCard() {
     >
       <div className="mb-5">
         <p
-          className="text-[13px] font-semibold uppercase tracking-widest mb-1"
+          className="text-[13px] font-semibold tracking-wide mb-1"
           style={{ color: "var(--mk-text-dimmed)" }}
         >
           {t("free.name")}
@@ -146,7 +146,7 @@ function FreePlanCard() {
           <li key={feature} className="flex items-start gap-3">
             <div
               className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"
-              style={{ background: "oklch(0.55 0.17 155 / 0.1)" }}
+              style={{ background: "oklch(0.704 0.193 32 / 0.1)" }}
             >
               <Check
                 className="size-3"
@@ -202,10 +202,10 @@ function PlanCard({
       style={{
         background: "var(--mk-card)",
         border: highlighted
-          ? "1px solid oklch(0.55 0.2 265 / 0.3)"
+          ? "1px solid oklch(0.704 0.193 32 / 0.3)"
           : "1px solid var(--mk-border)",
         boxShadow: highlighted
-          ? "0 0 0 1px oklch(0.55 0.2 265 / 0.15), 0 20px 60px oklch(0 0 0 / 0.10), 0 0 100px oklch(0.55 0.2 265 / 0.06)"
+          ? "0 0 0 1px oklch(0.704 0.193 32 / 0.15), 0 20px 60px oklch(0 0 0 / 0.10), 0 0 100px oklch(0.704 0.193 32 / 0.06)"
           : "0 1px 3px oklch(0 0 0 / 0.04)",
         transform: highlighted ? "scale(1.04)" : "scale(1)",
       }}
@@ -213,13 +213,13 @@ function PlanCard({
       {highlighted && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
           <span
-            className="inline-flex items-center rounded-full px-4 py-1 text-xs font-bold tracking-wide uppercase"
+            className="inline-flex items-center rounded-full px-4 py-1 text-xs font-bold tracking-wide"
             style={{
               background:
-                "linear-gradient(135deg, oklch(0.55 0.2 265), oklch(0.55 0.17 155))",
+                "linear-gradient(135deg, oklch(0.704 0.193 32), oklch(0.704 0.193 32))",
               color: "oklch(0.99 0 0)",
               letterSpacing: "0.08em",
-              boxShadow: "0 2px 12px oklch(0.55 0.2 265 / 0.3)",
+              boxShadow: "0 2px 12px oklch(0.704 0.193 32 / 0.3)",
             }}
           >
             {t("mostPopular")}
@@ -229,7 +229,7 @@ function PlanCard({
 
       <div className="mb-5">
         <p
-          className="text-[13px] font-semibold uppercase tracking-widest mb-1"
+          className="text-[13px] font-semibold tracking-wide mb-1"
           style={{ color: "var(--mk-text-dimmed)" }}
         >
           {t(`${tKey}.name`)}
@@ -298,8 +298,8 @@ function PlanCard({
               className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"
               style={{
                 background: highlighted
-                  ? "oklch(0.55 0.2 265 / 0.1)"
-                  : "oklch(0.55 0.17 155 / 0.1)",
+                  ? "oklch(0.704 0.193 32 / 0.1)"
+                  : "oklch(0.704 0.193 32 / 0.1)",
               }}
             >
               <Check
@@ -307,7 +307,7 @@ function PlanCard({
                 strokeWidth={2.5}
                 style={{
                   color: highlighted
-                    ? "oklch(0.55 0.2 265)"
+                    ? "oklch(0.704 0.193 32)"
                     : "oklch(0.50 0.16 145)",
                 }}
               />
@@ -342,7 +342,7 @@ export function Pricing() {
         <FadeIn>
           <div className="text-center mb-10">
             <p
-              className="mb-3 inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold tracking-[0.08em] uppercase"
+              className="mb-3 inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold tracking-wide"
               style={{
                 border: "1px solid var(--mk-border)",
                 background: "var(--mk-card)",
@@ -398,7 +398,7 @@ export function Pricing() {
               background: "var(--mk-card)",
               border: "1px solid transparent",
               backgroundClip: "padding-box",
-              boxShadow: "0 0 0 1px oklch(0.55 0.2 265 / 0.15), 0 4px 16px oklch(0 0 0 / 0.06)",
+              boxShadow: "0 0 0 1px oklch(0.704 0.193 32 / 0.15), 0 4px 16px oklch(0 0 0 / 0.06)",
             }}
           >
             <div>

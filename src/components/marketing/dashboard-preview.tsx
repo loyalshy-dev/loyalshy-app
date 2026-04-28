@@ -72,7 +72,7 @@ export function FeatureShowcase() {
         <FadeIn>
           <div className="mx-auto max-w-2xl text-center mb-10">
             <p
-              className="text-[13px] font-black uppercase tracking-[0.2em] mb-4"
+              className="text-[13px] font-bold tracking-wide mb-4"
               style={{ color: "var(--mk-brand-purple)" }}
             >
               {t("sectionLabel")}

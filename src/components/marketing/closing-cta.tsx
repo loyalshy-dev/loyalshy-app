@@ -17,7 +17,7 @@ export async function ClosingCTA() {
           aria-hidden="true"
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(135deg, oklch(0.45 0.2 265), oklch(0.55 0.2 265), oklch(0.55 0.17 155))",
+            background: "linear-gradient(135deg, oklch(0.6 0.18 32), oklch(0.704 0.193 32), oklch(0.704 0.193 32))",
             opacity: 0.9,
           }}
         />
@@ -36,7 +36,7 @@ export async function ClosingCTA() {
             </h2>
             <p
               className="text-xl max-w-2xl font-medium"
-              style={{ color: "oklch(0.85 0.08 265)" }}
+              style={{ color: "oklch(1 0 0 / 0.85)" }}
             >
               {t("subtitle")}
             </p>
@@ -46,7 +46,7 @@ export async function ClosingCTA() {
                 className="inline-flex items-center justify-center gap-2 rounded-full px-10 py-5 text-lg font-bold transition-all active:scale-95"
                 style={{
                   background: "oklch(0.99 0 0)",
-                  color: "oklch(0.55 0.2 265)",
+                  color: "oklch(0.704 0.193 32)",
                 }}
               >
                 {tCommon("getStartedFree")}

@@ -41,8 +41,8 @@ export function StaffApp() {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background: `
-            radial-gradient(ellipse 50% 50% at 30% 40%, oklch(0.55 0.2 265 / 0.06) 0%, transparent 70%),
-            radial-gradient(ellipse 40% 40% at 70% 60%, oklch(0.55 0.17 155 / 0.04) 0%, transparent 70%)
+            radial-gradient(ellipse 50% 50% at 30% 40%, oklch(0.704 0.193 32 / 0.06) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 40% at 70% 60%, oklch(0.704 0.193 32 / 0.04) 0%, transparent 70%)
           `,
         }}
       />
@@ -67,7 +67,7 @@ export function StaffApp() {
             </div>
 
             <p
-              className="text-[13px] font-black uppercase tracking-[0.2em] mb-4"
+              className="text-[13px] font-bold tracking-wide mb-4"
               style={{ color: "var(--mk-brand-purple)" }}
             >
               {t("sectionLabel")}
@@ -257,7 +257,7 @@ function FeatureCard({
     >
       <div
         className="size-10 rounded-lg flex items-center justify-center mb-3"
-        style={{ background: "oklch(0.55 0.2 265 / 0.1)" }}
+        style={{ background: "oklch(0.704 0.193 32 / 0.1)" }}
       >
         <Icon
           className="size-5"

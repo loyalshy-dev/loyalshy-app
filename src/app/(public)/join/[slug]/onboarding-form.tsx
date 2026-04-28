@@ -123,7 +123,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
 
   const activeProgram = selectedProgram ?? programs[0]
   const design = activeProgram?.passDesign
-  const brandColor = design?.primaryColor ?? organization.brandColor ?? "oklch(0.55 0.2 265)"
+  const brandColor = design?.primaryColor ?? organization.brandColor ?? "oklch(0.704 0.193 32)"
 
 
   const fontFamilyCss: Record<string, string> = {

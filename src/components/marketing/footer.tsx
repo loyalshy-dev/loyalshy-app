@@ -74,7 +74,7 @@ export async function MarketingFooter() {
           {FOOTER_COLUMNS.map((column) => (
             <div key={column.heading}>
               <h2
-                className="mb-4 text-xs font-semibold uppercase tracking-widest"
+                className="mb-4 text-xs font-semibold tracking-wide"
                 style={{ color: "oklch(0.97 0 0)" }}
               >
                 {column.heading}

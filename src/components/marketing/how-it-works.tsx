@@ -6,8 +6,8 @@ import { Stagger, StaggerItem } from "./motion"
 /* ─── Icon colors per step ───────────────────────────────────────── */
 
 const STEP_ICON_STYLES = [
-  { bg: "oklch(0.55 0.2 265)", shadow: "oklch(0.55 0.2 265 / 0.2)" },
-  { bg: "oklch(0.55 0.17 155)", shadow: "oklch(0.55 0.17 155 / 0.2)" },
+  { bg: "oklch(0.704 0.193 32)", shadow: "oklch(0.704 0.193 32 / 0.2)" },
+  { bg: "oklch(0.704 0.193 32)", shadow: "oklch(0.704 0.193 32 / 0.2)" },
   { bg: "oklch(0.2 0.005 285)", shadow: "oklch(0 0 0 / 0.2)" },
 ]
 
@@ -61,7 +61,7 @@ export async function HowItWorks() {
                   <span
                     aria-hidden="true"
                     className="absolute -top-10 -left-6 text-[9rem] font-black leading-none select-none pointer-events-none hidden md:block"
-                    style={{ color: "oklch(0.55 0.2 265 / 0.04)" }}
+                    style={{ color: "oklch(0.704 0.193 32 / 0.04)" }}
                   >
                     {step.number}
                   </span>

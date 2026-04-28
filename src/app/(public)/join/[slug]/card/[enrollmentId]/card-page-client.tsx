@@ -69,7 +69,7 @@ export function CardPageClient({ data, passInstanceId, organizationSlug, signatu
     }
   }, [])
 
-  const brandColor = data.template.passDesign?.primaryColor ?? data.organization.brandColor ?? "oklch(0.55 0.2 265)"
+  const brandColor = data.template.passDesign?.primaryColor ?? data.organization.brandColor ?? "oklch(0.704 0.193 32)"
   const textOnBrand = data.template.passDesign?.textColor ?? computeTextColor(
     /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : "#4F46E5"
   )

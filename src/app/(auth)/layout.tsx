@@ -79,7 +79,7 @@ export default async function AuthLayout({
 
   return (
     <NextIntlClientProvider messages={authMessages}>
-    <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-muted p-4">
+    <div data-brand="loyalshy" className="relative flex min-h-svh items-center justify-center overflow-hidden bg-muted p-4">
       {/* Grid pattern */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]"
