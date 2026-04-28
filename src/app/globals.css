@@ -393,25 +393,25 @@
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--mk-glass-border);
     border-radius: 1rem;
-    box-shadow: 0 20px 40px -10px oklch(0.55 0.2 265 / 0.06);
+    box-shadow: 0 20px 40px -10px color-mix(in oklch, var(--mk-brand-purple) 6%, transparent);
     transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
   }
   .mk-card-glass:hover {
     border-color: var(--mk-border-hover);
-    box-shadow: 0 20px 40px -10px oklch(0.55 0.2 265 / 0.10);
+    box-shadow: 0 20px 40px -10px color-mix(in oklch, var(--mk-brand-purple) 10%, transparent);
   }
 
   /* — Mesh background utility — */
   .mk-mesh-bg {
-    background-image: radial-gradient(at 0% 0%, oklch(0.55 0.2 265 / 0.05) 0px, transparent 50%),
-                       radial-gradient(at 100% 100%, oklch(0.55 0.17 155 / 0.05) 0px, transparent 50%);
+    background-image: radial-gradient(at 0% 0%, color-mix(in oklch, var(--mk-brand-purple) 5%, transparent) 0px, transparent 50%),
+                       radial-gradient(at 100% 100%, color-mix(in oklch, var(--mk-brand-green) 5%, transparent) 0px, transparent 50%);
   }
 
   /* — Fluid heading sizes — */
   .mk-clamp-h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); }
   .mk-clamp-h2 { font-size: clamp(2rem, 5vw, 3rem); }
 
-  /* — Primary Button (dark, Figma-style: border-radius morph + translate) — */
+  /* — Primary Button (coral, brand-driven; adapts to light/dark via tokens) — */
   .mk-btn-primary {
     display: inline-flex;
     align-items: center;
@@ -420,17 +420,19 @@
     font-size: 0.875rem;
     font-weight: 600;
     color: oklch(0.99 0 0);
-    background: oklch(0.13 0.005 285);
+    background: var(--mk-brand-purple);
     border: none;
     border-radius: 9999px;
     cursor: pointer;
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 0.25s;
-    box-shadow: 0 1px 4px oklch(0 0 0 / 0.12);
+                box-shadow 0.25s,
+                filter 0.2s;
+    box-shadow: 0 1px 4px color-mix(in oklch, var(--mk-brand-purple) 30%, transparent);
   }
   .mk-btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px oklch(0 0 0 / 0.18);
+    filter: brightness(1.05);
+    box-shadow: 0 6px 20px color-mix(in oklch, var(--mk-brand-purple) 40%, transparent);
   }
 
   /* — Ghost / Outline Button — */
@@ -453,7 +455,7 @@
   .mk-btn-ghost:hover {
     transform: translateY(-2px);
     border-color: var(--mk-border-hover);
-    background: oklch(0 0 0 / 0.03);
+    background: color-mix(in oklch, var(--mk-text) 5%, transparent);
   }
 
   /* — Marketing Input — */
@@ -468,8 +470,8 @@
   }
   .mk-input:focus,
   .mk-input:focus-within {
-    border-color: oklch(0.55 0.2 265 / 0.5);
-    box-shadow: 0 0 0 3px oklch(0.55 0.2 265 / 0.08);
+    border-color: color-mix(in oklch, var(--mk-brand-purple) 60%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--mk-brand-purple) 12%, transparent);
     outline: none;
   }
   .mk-input::placeholder {
