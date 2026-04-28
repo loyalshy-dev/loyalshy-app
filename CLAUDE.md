@@ -345,6 +345,8 @@ Update the "Current Progress" section above to track what's done.
 
 **Important:** PlanId values (`FREE`, `STARTER`, `GROWTH`, `SCALE`, `ENTERPRISE`) are used in Prisma enum, Stripe lookup keys, and throughout the codebase. Display names ("Free", "Pro", "Business") are set in `PLANS` object in `src/lib/plans.ts`. Stripe lookup keys remain `starter_monthly`, `growth_monthly`, etc. Free users have no Stripe customer — created on-demand at first paid checkout. Subscription cancellation downgrades to FREE. **Plans no longer gate by pass type** (post-pivot only 2 types exist; both are available on every plan). `checkPassTypeAllowed()` just verifies the type is `STAMP_CARD` or `COUPON`. No default program at signup.
 
+**Program limit semantics**: `programLimit` caps **ACTIVE** templates only — drafts and archives are unlimited. The gate fires at publish time (`activateTemplate`, `reactivateTemplate`), not at creation. New programs are always created as `DRAFT`, so `createPassTemplate` does not check `checkTemplateLimit`. `checkTemplateLimit` itself filters by `status: "ACTIVE"` (in `billing-actions.ts`). Result: a FREE user can hold any number of drafts/archives but only 1 ACTIVE program; to publish a second they must archive the first or upgrade.
+
 ## Dashboard Navigation
 
 **Sidebar (all users):** Overview, Contacts, Programs

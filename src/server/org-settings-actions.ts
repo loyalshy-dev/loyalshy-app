@@ -511,6 +511,11 @@ export async function activateTemplate(organizationId: string, templateId: strin
     return { error: t("cannotActivateArchived") }
   }
 
+  const templateCheck = await checkTemplateLimit(organizationId)
+  if (!templateCheck.allowed) {
+    return { error: t("templateLimitReached", { limit: templateCheck.limit }) }
+  }
+
   await db.passTemplate.update({
     where: { id: templateId },
     data: { status: "ACTIVE" },
