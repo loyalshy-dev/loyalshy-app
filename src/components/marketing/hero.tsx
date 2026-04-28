@@ -70,12 +70,6 @@ export async function Hero() {
                 <Link href="#features" className="mk-btn-ghost py-4! px-8! text-base! w-full sm:w-auto">
                   {t("seeHowItWorks")}
                 </Link>
-                <span
-                  className="text-sm sm:ml-2"
-                  style={{ color: "var(--mk-text-dimmed)" }}
-                >
-                  {t("freeForever")}
-                </span>
               </div>
             </div>
           </div>
