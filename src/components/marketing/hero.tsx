@@ -11,10 +11,10 @@ export async function Hero() {
 
   return (
     <section
-      className="relative overflow-hidden py-24 md:py-32 mk-mesh-bg"
+      className="relative overflow-hidden py-24 md:py-32 mk-mesh-bg lg:flex lg:flex-col lg:justify-center lg:min-h-[calc(100svh-4rem)]"
       style={{ background: "var(--mk-bg)" }}
     >
-      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-8">
         {/* Asymmetric 7/5 grid layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left: Text content */}
