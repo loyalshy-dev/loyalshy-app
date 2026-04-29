@@ -90,13 +90,14 @@ export async function POST(req: NextRequest) {
       where: { userId: user.id },
       select: {
         role: true,
-        organization: { select: { id: true, name: true } },
+        organization: { select: { id: true, name: true, slug: true } },
       },
     })
 
     const organizations = memberships.map((m) => ({
       id: m.organization.id,
       name: m.organization.name,
+      slug: m.organization.slug,
       role: m.role,
     }))
 

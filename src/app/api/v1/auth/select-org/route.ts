@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     const org = await db.organization.findUnique({
       where: { id: organizationId },
-      select: { id: true, name: true },
+      select: { id: true, name: true, slug: true },
     })
 
     if (!org) throw notFound("Organization not found")

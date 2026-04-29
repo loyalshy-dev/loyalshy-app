@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
         accepted: true,
         expiresAt: true,
         organizationId: true,
-        organization: { select: { id: true, name: true } },
+        organization: { select: { id: true, name: true, slug: true } },
       },
     })
 
@@ -171,6 +171,7 @@ export async function POST(req: NextRequest) {
         organization: {
           id: invitation.organization.id,
           name: invitation.organization.name,
+          slug: invitation.organization.slug,
         },
       }),
     )

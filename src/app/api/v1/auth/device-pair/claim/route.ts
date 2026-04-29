@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
     // Get org info
     const org = await db.organization.findUnique({
       where: { id: pairing.organizationId },
-      select: { id: true, name: true },
+      select: { id: true, name: true, slug: true },
     })
 
     // Get member role
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
         token: sessionToken,
         user,
         organizations: [
-          { id: org!.id, name: org!.name, role: member?.role ?? "member" },
+          { id: org!.id, name: org!.name, slug: org!.slug, role: member?.role ?? "member" },
         ],
       })
     )

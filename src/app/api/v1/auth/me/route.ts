@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         where: { userId: ctx.userId },
         select: {
           role: true,
-          organization: { select: { id: true, name: true } },
+          organization: { select: { id: true, name: true, slug: true } },
         },
       }),
     ])
@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
       organizations: memberships.map((m) => ({
         id: m.organization.id,
         name: m.organization.name,
+        slug: m.organization.slug,
         role: m.role,
       })),
     }
