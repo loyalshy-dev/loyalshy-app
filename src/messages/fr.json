@@ -404,6 +404,23 @@
       "noEmail": "Vous n'avez pas reçu l'e-mail ? Vérifiez votre dossier spam ou réessayez.",
       "tryDifferent": "Essayer un autre e-mail"
     },
+    "resetPassword": {
+      "title": "Réinitialiser votre mot de passe",
+      "subtitle": "Saisissez votre nouveau mot de passe ci-dessous",
+      "newPassword": "Nouveau mot de passe",
+      "newPasswordPlaceholder": "Entrez le nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez le nouveau mot de passe",
+      "submit": "Réinitialiser le mot de passe",
+      "backToLogin": "Retour à la connexion",
+      "mismatch": "Les mots de passe ne correspondent pas",
+      "tooShort": "Le mot de passe doit contenir au moins 8 caractères",
+      "failed": "Échec de la réinitialisation. Le lien a peut-être expiré.",
+      "success": "Mot de passe réinitialisé avec succès ! Vous pouvez maintenant vous connecter.",
+      "invalidTitle": "Lien de réinitialisation invalide",
+      "invalidDescription": "Ce lien de réinitialisation est invalide ou a expiré.",
+      "requestNewLink": "Demander un nouveau lien"
+    },
     "invite": {
       "joinOrg": "Rejoindre {organizationName}",
       "invitedAs": "Vous avez été invité(e) en tant que {role}.",

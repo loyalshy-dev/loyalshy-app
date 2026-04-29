@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { sessionHandler, handlePreflight, notFound, ApiError } from "@/lib/api-session"
 import { toApiPassInstanceDetail } from "@/lib/api-serializers"
 import { parseCouponConfig } from "@/lib/pass-config"
+import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
 
 export function OPTIONS() {
   return handlePreflight()
@@ -83,7 +84,7 @@ export async function POST(
     })
 
     if (reward.passInstanceId && reward.passInstance?.walletProvider) {
-      dispatchWalletUpdate(reward.passInstanceId, reward.passInstance.walletProvider)
+      dispatchWalletUpdate(reward.passInstanceId, reward.passInstance.walletProvider, "REWARD_REDEEMED")
     }
 
     if (!reward.passInstanceId) throw notFound("Pass instance not found for reward")
@@ -105,19 +106,3 @@ export async function POST(
   })
 }
 
-function dispatchWalletUpdate(passInstanceId: string, walletProvider: string) {
-  if (walletProvider === "NONE") return
-  if (process.env.TRIGGER_SECRET_KEY) {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) => tasks.trigger("update-wallet-pass", { passInstanceId, updateType: "REWARD_REDEEMED" }))
-      .catch((err: unknown) => console.error("Wallet update failed:", err instanceof Error ? err.message : err))
-  } else if (walletProvider === "GOOGLE") {
-    import("@/lib/wallet/google/update-pass")
-      .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(passInstanceId))
-      .catch((err: unknown) => console.error("Google update failed:", err instanceof Error ? err.message : err))
-  } else if (walletProvider === "APPLE") {
-    import("@/lib/wallet/apple/update-pass")
-      .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(passInstanceId))
-      .catch((err: unknown) => console.error("Apple update failed:", err instanceof Error ? err.message : err))
-  }
-}

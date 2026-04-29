@@ -558,7 +558,7 @@ export function ContactDetailSheet({
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-[13px] font-medium">
-                                  {visit.passType === "MEMBERSHIP" ? t("checkIn") : t("visit")}
+                                  {t("visit")}
                                   {!visitTemplateFilter && visitTemplates.length > 1 && (
                                     <span className="text-[11px] text-muted-foreground font-normal ml-1.5">
                                       {visit.templateName}

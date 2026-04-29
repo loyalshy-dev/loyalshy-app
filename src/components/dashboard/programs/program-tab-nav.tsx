@@ -28,7 +28,7 @@ type Tab = {
 }
 
 function hasRewardsTab(passType: string): boolean {
-  return ["STAMP_CARD", "COUPON", "POINTS"].includes(passType)
+  return passType === "STAMP_CARD" || passType === "COUPON"
 }
 
 export function ProgramTabNav({
@@ -48,28 +48,12 @@ export function ProgramTabNav({
   const [pendingHref, setPendingHref] = useState<string | null>(null)
   const basePath = `/dashboard/programs/${templateId}`
 
-  function getPassesTabLabel(type: string): string {
-    switch (type) {
-      case "TICKET":
-        return t("attendees")
-      case "MEMBERSHIP":
-        return t("members")
-      case "GIFT_CARD":
-        return t("cardsTab")
-      default:
-        return t("passes")
-    }
+  function getPassesTabLabel(_type: string): string {
+    return t("passes")
   }
 
   function getRewardsTabLabel(type: string): string {
-    switch (type) {
-      case "COUPON":
-        return t("redemptions")
-      case "POINTS":
-        return t("catalog")
-      default:
-        return t("rewards")
-    }
+    return type === "COUPON" ? t("redemptions") : t("rewards")
   }
 
   function handleActivate() {

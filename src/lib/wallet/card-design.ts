@@ -2,7 +2,7 @@ import crypto from "crypto"
 
 // ─── Types ──────────────────────────────────────────────────
 
-export type CardType = "STAMP" | "POINTS" | "TIER" | "COUPON" | "GIFT_CARD" | "TICKET" | "GENERIC"
+export type CardType = "STAMP" | "COUPON"
 export type PatternStyle = "NONE" | "DOTS" | "WAVES" | "GEOMETRIC" | "CHEVRON" | "CROSSHATCH" | "DIAMONDS" | "CONFETTI" | "SOLID_PRIMARY" | "SOLID_SECONDARY" | "STAMP_GRID"
 export type ProgressStyle = "NUMBERS" | "CIRCLES" | "SQUARES" | "STARS" | "STAMPS" | "PERCENTAGE" | "REMAINING"
 export type LabelFormat = "UPPERCASE" | "TITLE_CASE" | "LOWERCASE"
@@ -117,20 +117,6 @@ const FIELD_CONFIG_MAP: Record<string, FieldConfigEntry> = {
     defaultSecondary: ["nextReward", "totalVisits", "memberSince", "customerName"],
     defaultFields: ["organization", "memberNumber", "nextReward", "totalVisits", "memberSince", "customerName"],
   },
-  POINTS: {
-    availableFields: [
-      { id: "organization", label: "Organization" },
-      { id: "memberNumber", label: "Member #" },
-      { id: "registeredAt", label: "Registered" },
-      { id: "nextReward", label: "Next Reward" },
-      { id: "totalVisits", label: "Total Visits" },
-      { id: "memberSince", label: "Since" },
-      { id: "customerName", label: "Name" },
-    ] as const,
-    defaultHeader: ["organization", "memberNumber"],
-    defaultSecondary: ["nextReward", "totalVisits", "memberSince", "customerName"],
-    defaultFields: ["organization", "memberNumber", "nextReward", "totalVisits", "memberSince", "customerName"],
-  },
   COUPON: {
     availableFields: [
       { id: "organization", label: "Organization" },
@@ -143,61 +129,6 @@ const FIELD_CONFIG_MAP: Record<string, FieldConfigEntry> = {
     defaultHeader: ["organization"],
     defaultSecondary: ["validUntil", "couponCode", "customerName"],
     defaultFields: ["organization", "validUntil", "couponCode", "customerName"],
-  },
-  MEMBERSHIP: {
-    availableFields: [
-      { id: "organization", label: "Organization" },
-      { id: "tierName", label: "Tier" },
-      { id: "benefits", label: "Benefits" },
-      { id: "memberSince", label: "Since" },
-      { id: "customerName", label: "Name" },
-      { id: "registeredAt", label: "Registered" },
-    ] as const,
-    defaultHeader: ["organization"],
-    defaultSecondary: ["benefits", "memberSince", "customerName"],
-    defaultFields: ["organization", "benefits", "memberSince", "customerName"],
-  },
-  GIFT_CARD: {
-    availableFields: [
-      { id: "organization", label: "Organization" },
-      { id: "giftBalance", label: "Balance" },
-      { id: "giftInitial", label: "Initial" },
-      { id: "customerName", label: "Name" },
-      { id: "memberSince", label: "Since" },
-    ] as const,
-    defaultHeader: ["organization"],
-    defaultSecondary: ["giftInitial", "customerName"],
-    defaultFields: ["organization", "giftInitial", "customerName"],
-  },
-  TICKET: {
-    availableFields: [
-      { id: "organization", label: "Organization" },
-      { id: "eventName", label: "Event" },
-      { id: "eventDate", label: "Date" },
-      { id: "eventVenue", label: "Venue" },
-      { id: "scanStatus", label: "Status" },
-      { id: "customerName", label: "Name" },
-    ] as const,
-    defaultHeader: ["scanStatus"],
-    defaultSecondary: ["eventDate", "eventVenue", "customerName"],
-    defaultFields: ["scanStatus", "eventDate", "eventVenue", "customerName"],
-  },
-  BUSINESS_CARD: {
-    availableFields: [
-      { id: "organization", label: "Organization" },
-      { id: "contactName", label: "Name" },
-      { id: "jobTitle", label: "Title" },
-      { id: "phone", label: "Phone" },
-      { id: "email", label: "Email" },
-      { id: "website", label: "Website" },
-      { id: "address", label: "Address" },
-      { id: "linkedin", label: "LinkedIn" },
-      { id: "twitter", label: "X (Twitter)" },
-      { id: "instagram", label: "Instagram" },
-    ] as const,
-    defaultHeader: ["organization"],
-    defaultSecondary: ["contactName", "jobTitle", "phone", "email"],
-    defaultFields: ["organization", "contactName", "jobTitle", "phone", "email"],
   },
 }
 
@@ -215,7 +146,7 @@ export function splitFieldsForApple(fields: string[]): { header: string[]; secon
   }
 }
 
-/** Available fields for STAMP/POINTS card type field customization (backward compat alias) */
+/** Available fields for STAMP card type field customization (backward compat alias) */
 export const STAMP_CARD_AVAILABLE_FIELDS = FIELD_CONFIG_MAP.STAMP_CARD.availableFields
 
 export const DEFAULT_HEADER_FIELDS = FIELD_CONFIG_MAP.STAMP_CARD.defaultHeader
@@ -599,10 +530,8 @@ export type PassFieldLayout = {
  * One fixed layout per card type (INFO_RICH base — shows all data).
  * Strip visibility is controlled separately via `showStrip` on CardDesign.
  *
- * STAMP/POINTS: header=organization+memberNumber, primary=progress, secondary=nextReward+totalVisits+memberSince, auxiliary=customerName
+ * STAMP: header=organization+memberNumber, primary=progress, secondary=nextReward+totalVisits+memberSince, auxiliary=customerName
  * COUPON: header=organization, primary=discount, secondary=validUntil+couponCode+customerName
- * TIER: header=organization, primary=tierName, secondary=benefits+memberSince+customerName
- * GENERIC: header=organization, primary=title, secondary=description+customerName
  */
 export function getFieldLayout(cardType?: CardType): PassFieldLayout {
   if (cardType === "COUPON") {
@@ -620,67 +549,7 @@ export function getFieldLayout(cardType?: CardType): PassFieldLayout {
     }
   }
 
-  if (cardType === "TIER") {
-    return {
-      apple: {
-        header: ["organization"],
-        primary: ["tierName"],
-        secondary: ["benefits", "memberSince", "customerName"],
-        auxiliary: [],
-      },
-      google: {
-        rows: 1,
-        fields: ["tierName", "benefits", "memberSince", "customerName"],
-      },
-    }
-  }
-
-  if (cardType === "GIFT_CARD") {
-    return {
-      apple: {
-        header: ["organization"],
-        primary: ["giftBalance"],
-        secondary: ["giftInitial", "customerName"],
-        auxiliary: [],
-      },
-      google: {
-        rows: 1,
-        fields: ["giftBalance", "giftInitial", "customerName"],
-      },
-    }
-  }
-
-  if (cardType === "TICKET") {
-    return {
-      apple: {
-        header: ["scanStatus"],
-        primary: ["eventName"],
-        secondary: ["eventDate", "eventVenue", "customerName"],
-        auxiliary: [],
-      },
-      google: {
-        rows: 1,
-        fields: ["eventDate", "eventVenue", "scanStatus", "customerName"],
-      },
-    }
-  }
-
-  if (cardType === "GENERIC") {
-    return {
-      apple: {
-        header: ["organization"],
-        primary: ["title"],
-        secondary: ["description", "customerName"],
-        auxiliary: [],
-      },
-      google: {
-        rows: 1,
-        fields: ["title", "description", "customerName"],
-      },
-    }
-  }
-
-  // STAMP / POINTS (default)
+  // STAMP (default)
   return {
     apple: {
       header: ["organization", "memberNumber"],

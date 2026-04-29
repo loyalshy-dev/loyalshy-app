@@ -218,8 +218,7 @@ export async function issuePassToContacts(
             contactId: contact.id,
             passTemplateId: template.id,
             walletPassId,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            data: instanceDataObj as any,
+            data: instanceDataObj as import("@prisma/client").Prisma.InputJsonValue,
             ...(expiresAt ? { expiresAt } : {}),
           },
           select: { id: true },

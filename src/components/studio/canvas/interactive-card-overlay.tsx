@@ -21,12 +21,11 @@ type StripZone = { top: number; height: number }
 function getStripZone(
   format: PreviewFormat,
   showStrip: boolean,
-  cardType: string,
+  _cardType: string,
   cardHeight: number,
 ): StripZone | null {
   if (!showStrip) return null
-  const isTicket = cardType === "TICKET"
-  const h = getStripHeight(format, isTicket)
+  const h = getStripHeight(format, false)
   if (format === "apple") return { top: HEADER_HEIGHT, height: h }
   return { top: cardHeight - h, height: h }
 }

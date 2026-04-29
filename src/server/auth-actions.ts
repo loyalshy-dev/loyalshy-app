@@ -7,6 +7,7 @@ import { headers } from "next/headers"
 import { db } from "@/lib/db"
 import { assertOrganizationRole, assertAuthenticated } from "@/lib/dal"
 import { publicFormLimiter } from "@/lib/rate-limit"
+import { hashToken } from "@/lib/token-hash"
 
 // ─── Schemas ────────────────────────────────────────────────
 
@@ -163,7 +164,7 @@ export async function validateInvitationToken(token: string) {
   }
 
   const invitation = await db.staffInvitation.findUnique({
-    where: { token },
+    where: { token: hashToken(token) },
     include: { organization: true },
   })
 
@@ -201,7 +202,7 @@ export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitati
   const session = await assertAuthenticated()
 
   const invitation = await db.staffInvitation.findUnique({
-    where: { token: parsed.token },
+    where: { token: hashToken(parsed.token) },
   })
 
   if (!invitation || invitation.accepted || invitation.expiresAt < new Date()) {

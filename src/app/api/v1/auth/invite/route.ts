@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { withCorsHeaders, handlePreflight } from "@/lib/api-cors"
-import { publicFormLimiter } from "@/lib/rate-limit"
+import { checkInviteValidateLimit } from "@/lib/auth-rate-limit"
+import { hashToken } from "@/lib/token-hash"
 
 export function OPTIONS() {
   return handlePreflight()
@@ -14,7 +15,7 @@ export function OPTIONS() {
 export async function GET(req: NextRequest) {
   try {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-    const rl = publicFormLimiter.check(ip)
+    const rl = await checkInviteValidateLimit(ip)
     if (!rl.success) {
       return withCorsHeaders(
         NextResponse.json({ error: "Too many requests" }, { status: 429 })
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
     }
 
     const invitation = await db.staffInvitation.findUnique({
-      where: { token },
+      where: { token: hashToken(token) },
       select: {
         id: true,
         email: true,
@@ -67,7 +68,8 @@ export async function GET(req: NextRequest) {
         organizationId: invitation.organizationId,
       })
     )
-  } catch {
+  } catch (err) {
+    console.error("[auth/invite GET] error:", err)
     return withCorsHeaders(
       NextResponse.json({ error: "Internal server error" }, { status: 500 })
     )
@@ -94,13 +96,25 @@ export async function POST(req: NextRequest) {
         id: true,
         userId: true,
         expiresAt: true,
-        user: { select: { email: true } },
+        user: { select: { email: true, emailVerified: true } },
       },
     })
 
     if (!session || session.expiresAt < new Date()) {
       return withCorsHeaders(
         NextResponse.json({ error: "Invalid or expired session" }, { status: 401 })
+      )
+    }
+
+    // Mirror the web onboarding gate — invite acceptance must come from a
+    // verified mailbox, otherwise anyone who can guess an invited email
+    // can hijack the invitation by signing up with that address.
+    if (!session.user.emailVerified) {
+      return withCorsHeaders(
+        NextResponse.json(
+          { error: "Please verify your email before accepting an invitation." },
+          { status: 403 }
+        )
       )
     }
 
@@ -113,7 +127,7 @@ export async function POST(req: NextRequest) {
     }
 
     const invitation = await db.staffInvitation.findUnique({
-      where: { token },
+      where: { token: hashToken(token) },
       select: {
         id: true,
         email: true,
@@ -169,7 +183,8 @@ export async function POST(req: NextRequest) {
         },
       })
     )
-  } catch {
+  } catch (err) {
+    console.error("[auth/invite POST] error:", err)
     return withCorsHeaders(
       NextResponse.json({ error: "Internal server error" }, { status: 500 })
     )

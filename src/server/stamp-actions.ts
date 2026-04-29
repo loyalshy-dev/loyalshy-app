@@ -548,6 +548,11 @@ export async function registerStamp(
 
   try {
   await db.$transaction(async (tx) => {
+    // Lock the pass row to serialize concurrent stamps from the dashboard
+    // (e.g. flaky double-click). Mirrors the staff API at
+    // /api/v1/passes/[id]/actions which holds the same lock.
+    await tx.$queryRaw`SELECT id FROM pass_instance WHERE id = ${passInstance.id} FOR UPDATE`
+
     // Re-read pass instance data inside transaction for consistency
     const freshInstance = await tx.passInstance.findUnique({
       where: { id: passInstance.id },

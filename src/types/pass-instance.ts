@@ -6,7 +6,6 @@ import type { DesignCardType } from "./pass-types"
 export type StampCardData = {
   currentCycleVisits: number
   totalVisits: number
-  totalRewardsEarned: number
 }
 
 export type CouponData = {

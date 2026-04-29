@@ -207,39 +207,6 @@ export function getContactColumns(
           )
         }
 
-        if (programType === "MEMBERSHIP") {
-          return (
-            <span className="text-[12px] text-muted-foreground">{t("ready")}</span>
-          )
-        }
-
-        if (programType === "POINTS") {
-          return (
-            <span className="text-[13px] tabular-nums text-muted-foreground">
-              {(piData.pointsBalance as number) ?? 0} {t("pts")}
-            </span>
-          )
-        }
-
-        if (programType === "GIFT_CARD") {
-          const balanceCents = (piData.balanceCents as number) ?? 0
-          return (
-            <span className="text-[13px] tabular-nums text-muted-foreground">
-              {(balanceCents / 100).toFixed(2)} {t("balance")}
-            </span>
-          )
-        }
-
-        if (programType === "TICKET") {
-          const scansUsed = (piData.scansUsed as number) ?? 0
-          const maxScans = (piConfig.maxScans as number) ?? 1
-          return (
-            <span className="text-[13px] tabular-nums text-muted-foreground">
-              {scansUsed}/{maxScans} {t("scans")}
-            </span>
-          )
-        }
-
         // STAMP_CARD (default)
         const pct = Math.min((currentCycleVisits / visitsRequired) * 100, 100)
 

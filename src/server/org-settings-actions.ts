@@ -1,5 +1,6 @@
 "use server"
 
+import crypto from "node:crypto"
 import { z } from "zod"
 import type { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
@@ -11,6 +12,7 @@ import { sanitizeText } from "@/lib/sanitize"
 import { validateTemplateConfig } from "@/lib/pass-config"
 import { checkTemplateLimit, checkPassTypeAllowed } from "@/server/billing-actions"
 import { computeDesignHash, computeTextColor } from "@/lib/wallet/card-design"
+import { hashToken } from "@/lib/token-hash"
 import type { PatternStyle, ProgressStyle, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
 import type { DesignCardType } from "@/types/pass-types"
 
@@ -1680,8 +1682,7 @@ export async function updatePassTemplate(input: z.infer<typeof updatePassTemplat
 
   await db.passTemplate.update({
     where: { id: parsed.templateId },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: updateData as any,
+    data: updateData as Prisma.PassTemplateUpdateInput,
   })
 
   revalidatePath("/dashboard/programs")
@@ -1911,7 +1912,6 @@ export async function resendInvitation(organizationId: string, invitationId: str
       organizationId: true,
       email: true,
       role: true,
-      token: true,
       organization: { select: { name: true } },
     },
   })
@@ -1920,21 +1920,30 @@ export async function resendInvitation(organizationId: string, invitationId: str
     return { error: t("invitationNotFound") }
   }
 
-  // Extend expiry by 7 days
+  // Rotate the token on resend — DB only stores the hash, so we can't
+  // recover the original plaintext to email. Rotating also invalidates
+  // any old leaked link.
+  const plaintextToken = crypto.randomBytes(32).toString("hex")
   await db.staffInvitation.update({
     where: { id: invitationId },
-    data: { expiresAt: addDays(new Date(), 7) },
+    data: {
+      token: hashToken(plaintextToken),
+      expiresAt: addDays(new Date(), 7),
+    },
   })
 
   // Re-send the email
   const { sendInvitationEmail } = await import("@/server/auth-actions")
-  const inviteUrl = `${process.env.BETTER_AUTH_URL}/invite/${invitation.token}`
+  const siteUrl = process.env.BETTER_AUTH_URL || "http://localhost:3000"
+  const inviteUrl = `${siteUrl}/invite/${plaintextToken}`
+  const mobileDeepLink = `loyalshystaff://invite/${plaintextToken}?url=${encodeURIComponent(siteUrl)}`
 
   await sendInvitationEmail({
     email: invitation.email,
     organizationName: invitation.organization.name,
     role: invitation.role === "OWNER" ? "owner" : "staff",
     inviteUrl,
+    mobileDeepLink,
   })
 
   revalidatePath("/dashboard/settings")

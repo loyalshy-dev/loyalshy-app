@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { sessionHandler, handlePreflight, badRequest, notFound, ApiError } from "@/lib/api-session"
 import { toApiPassInstanceDetail } from "@/lib/api-serializers"
 import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
+import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
 
 export function OPTIONS() {
   return handlePreflight()
@@ -89,17 +90,28 @@ export async function POST(
 // route.test.ts. The route file is consumed by Next.js for HTTP exports only;
 // extra named exports are ignored by the framework.
 
-type PassForAction = Awaited<ReturnType<typeof loadPassForAction>>
+import type { Prisma } from "@prisma/client"
 
-async function loadPassForAction(passId: string) {
-  // Type alias holder — the actual lookup is in POST handler.
-  return db.passInstance.findUnique({
-    where: { id: passId },
-    include: {
-      passTemplate: { select: { id: true, name: true, passType: true, config: true, status: true, endsAt: true } },
-      contact: { select: { id: true, organizationId: true, deletedAt: true, totalInteractions: true } },
-    },
-  })
+// Narrow shape these handlers depend on — keeps test mocks small without
+// dragging in every PassInstance column. Mirrors the include used in the
+// POST handler above.
+type PassForAction = {
+  id: string
+  walletProvider: string
+  passTemplate: {
+    id: string
+    name: string
+    passType: "STAMP_CARD" | "COUPON"
+    config: Prisma.JsonValue
+    status: "DRAFT" | "ACTIVE" | "ARCHIVED"
+    endsAt: Date | null
+  }
+  contact: {
+    id: string
+    organizationId: string
+    deletedAt: Date | null
+    totalInteractions: number
+  }
 }
 
 export async function performStamp(pass: NonNullable<PassForAction>, performedByUserId: string) {
@@ -288,21 +300,3 @@ export async function performRedeemCoupon(pass: NonNullable<PassForAction>, perf
   dispatchWalletUpdate(pass.id, pass.walletProvider, "COUPON_REDEEM")
 }
 
-// ─── Wallet update dispatch ────────────────────────────────
-
-function dispatchWalletUpdate(passInstanceId: string, walletProvider: string, updateType: string) {
-  if (walletProvider === "NONE") return
-  if (process.env.TRIGGER_SECRET_KEY) {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) => tasks.trigger("update-wallet-pass", { passInstanceId, updateType }))
-      .catch((err: unknown) => console.error("Wallet update dispatch failed:", err instanceof Error ? err.message : err))
-  } else if (walletProvider === "GOOGLE") {
-    import("@/lib/wallet/google/update-pass")
-      .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(passInstanceId))
-      .catch((err: unknown) => console.error("Google update failed:", err instanceof Error ? err.message : err))
-  } else if (walletProvider === "APPLE") {
-    import("@/lib/wallet/apple/update-pass")
-      .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(passInstanceId))
-      .catch((err: unknown) => console.error("Apple update failed:", err instanceof Error ? err.message : err))
-  }
-}

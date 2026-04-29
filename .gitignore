@@ -23,7 +23,13 @@
 # misc
 .DS_Store
 *.pem
+*.p12
+*.key
+*.cer
 accounts.txt
+client_secret*.json
+*service-account*.json
+certificats/
 
 # claude code
 .claude/

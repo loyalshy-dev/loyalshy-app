@@ -2,7 +2,8 @@ import crypto from "node:crypto"
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { withCorsHeaders, handlePreflight } from "@/lib/api-cors"
-import { publicFormLimiter } from "@/lib/rate-limit"
+import { checkDevicePairClaimLimit } from "@/lib/auth-rate-limit"
+import { hashToken } from "@/lib/token-hash"
 
 export function OPTIONS() {
   return handlePreflight()
@@ -17,7 +18,8 @@ export function OPTIONS() {
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-    const rl = publicFormLimiter.check(ip)
+    const userAgent = req.headers.get("user-agent")
+    const rl = await checkDevicePairClaimLimit(ip)
     if (!rl.success) {
       return withCorsHeaders(
         NextResponse.json({ error: "Too many requests" }, { status: 429 })
@@ -32,9 +34,10 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Find and validate pairing token
+    // Look up by hash — the DB never sees plaintext.
+    const tokenHash = hashToken(token)
     const pairing = await db.devicePairingToken.findUnique({
-      where: { token },
+      where: { token: tokenHash },
       select: {
         id: true,
         organizationId: true,
@@ -85,7 +88,7 @@ export async function POST(req: NextRequest) {
           expiresAt,
           activeOrganizationId: pairing.organizationId,
           ipAddress: ip,
-          userAgent: req.headers.get("user-agent"),
+          userAgent,
         },
       }),
       db.user.findUnique({
@@ -93,6 +96,17 @@ export async function POST(req: NextRequest) {
         select: { id: true, name: true, email: true, image: true },
       }),
     ])
+
+    // Audit trail — captured by Sentry/log aggregation so the dashboard
+    // user can investigate a stolen QR (e.g. screenshare leak).
+    console.info("[device-pair/claim] claimed", {
+      pairingId: pairing.id,
+      organizationId: pairing.organizationId,
+      userId: pairing.createdByUserId,
+      userEmail: user?.email,
+      ipAddress: ip,
+      userAgent,
+    })
 
     // Get org info
     const org = await db.organization.findUnique({
@@ -115,7 +129,8 @@ export async function POST(req: NextRequest) {
         ],
       })
     )
-  } catch {
+  } catch (err) {
+    console.error("[device-pair/claim] error:", err)
     return withCorsHeaders(
       NextResponse.json({ error: "Internal server error" }, { status: 500 })
     )

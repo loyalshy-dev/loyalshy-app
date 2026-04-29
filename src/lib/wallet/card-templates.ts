@@ -446,103 +446,6 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     },
   },
 
-  // ── TIER: 5 Templates ────────────────────────────────────
-
-  {
-    id: "tier-gold-club",
-    name: "Gold Club",
-    description: "Classic black and gold shield — the mark of a premium member",
-    category: "fine-dining",
-    tags: ["gold", "shield", "premium", "classic"],
-    design: {
-      cardType: "TIER",
-      showStrip: true,
-      primaryColor: "#1a1a2e",
-      secondaryColor: "#c9a96e",
-      textColor: "#f5f0e8",
-      patternStyle: "GEOMETRIC",
-      progressStyle: "NUMBERS",
-      labelFormat: "UPPERCASE",
-      palettePreset: null,
-    },
-  },
-
-  {
-    id: "tier-vip-lounge",
-    name: "VIP Lounge",
-    description: "Dark purple with a star badge — for bars with elite regulars",
-    category: "bar",
-    tags: ["vip", "dark", "purple", "star", "nightlife"],
-    design: {
-      cardType: "TIER",
-      showStrip: true,
-      primaryColor: "#1a0030",
-      secondaryColor: "#9c27b0",
-      textColor: "#ffffff",
-      patternStyle: "NONE",
-      progressStyle: "NUMBERS",
-      labelFormat: "UPPERCASE",
-      palettePreset: null,
-    },
-  },
-
-  {
-    id: "tier-elite-status",
-    name: "Elite Status",
-    description: "Silver and navy with a circle badge — professional and versatile",
-    category: "general",
-    tags: ["silver", "navy", "circle", "professional"],
-    design: {
-      cardType: "TIER",
-      showStrip: false,
-      primaryColor: "#1a237e",
-      secondaryColor: "#90caf9",
-      textColor: "#ffffff",
-      patternStyle: "NONE",
-      progressStyle: "NUMBERS",
-      labelFormat: "UPPERCASE",
-      palettePreset: null,
-    },
-  },
-
-  {
-    id: "tier-crown-tier",
-    name: "Crown Tier",
-    description: "Burgundy and gold shield — regal and aspirational",
-    category: "fine-dining",
-    tags: ["burgundy", "gold", "regal", "shield", "exclusive"],
-    design: {
-      cardType: "TIER",
-      showStrip: true,
-      primaryColor: "#4a0010",
-      secondaryColor: "#c9a96e",
-      textColor: "#f5f0e8",
-      patternStyle: "NONE",
-      progressStyle: "NUMBERS",
-      labelFormat: "UPPERCASE",
-      palettePreset: null,
-    },
-  },
-
-  {
-    id: "tier-level-up",
-    name: "Level Up",
-    description: "Bold gradient with a star badge — gamified loyalty for casual spots",
-    category: "casual",
-    tags: ["gamified", "gradient", "star", "bold", "progress"],
-    design: {
-      cardType: "TIER",
-      showStrip: true,
-      primaryColor: "#1565c0",
-      secondaryColor: "#00bfa5",
-      textColor: "#ffffff",
-      patternStyle: "NONE",
-      progressStyle: "NUMBERS",
-      labelFormat: "TITLE_CASE",
-      palettePreset: null,
-    },
-  },
-
   // ── COUPON: 5 Templates ──────────────────────────────────
 
   {
@@ -656,25 +559,6 @@ export const CARD_TEMPLATES: CardTemplate[] = [
       progressStyle: "NUMBERS",
       labelFormat: "UPPERCASE",
       palettePreset: "charcoal",
-    },
-  },
-
-  {
-    id: "tier-modern-member",
-    name: "Modern Member",
-    description: "Dark teal and contemporary — a fresh take on membership cards",
-    category: "general",
-    tags: ["modern", "teal", "dark", "fresh", "member"],
-    design: {
-      cardType: "TIER",
-      showStrip: false,
-      primaryColor: "#0d3b3b",
-      secondaryColor: "#4db6ac",
-      textColor: "#ffffff",
-      patternStyle: "NONE",
-      progressStyle: "NUMBERS",
-      labelFormat: "UPPERCASE",
-      palettePreset: null,
     },
   },
 

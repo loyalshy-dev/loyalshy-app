@@ -129,7 +129,7 @@ export function ContextNotch({ store, passType, organizationId, organizationName
   const stampGridConfig = useStore(store, (s) => s.wallet.stampGridConfig)
 
   const isGoogle = previewFormat === "google"
-  const isStampType = passType === "STAMP_CARD" || passType === "POINTS"
+  const isStampType = passType === "STAMP_CARD"
   const hasLogo = !!(logoAppleUrl || logoGoogleUrl)
   const notchZone: NotchZone | null = selectedZone ? toNotchZone(selectedZone) : null
 
@@ -546,10 +546,10 @@ export function ContextPanel({ store, passType, organizationId, organizationName
   const stampsRequired = useStore(store, (s) => s.programConfig.stampsRequired)
 
   const isGoogle = previewFormat === "google"
-  const isStampType = passType === "STAMP_CARD" || passType === "POINTS"
+  const isStampType = passType === "STAMP_CARD"
   const hasLogo = !!(logoAppleUrl || logoGoogleUrl)
   const notchZone: NotchZone | null = selectedZone ? toNotchZone(selectedZone) : null
-  const hasProgress = cardType === "STAMP" || cardType === "POINTS"
+  const hasProgress = cardType === "STAMP"
 
   // activeTool (menu click) takes priority over zone (card click)
   const mode: "tool" | "zone" | null = activeTool ? "tool" : notchZone ? "zone" : null

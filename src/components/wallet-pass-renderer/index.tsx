@@ -88,9 +88,12 @@ type WalletPassRendererProps = {
   eventDate?: string         // formatted date string
   eventVenue?: string        // venue name
   scanStatus?: string        // e.g. "0 / 1"
-  showHolderPhoto?: boolean  // overlay holder avatar on strip
-  holderPhotoPosition?: "left" | "center" | "right" // avatar placement on strip
-  holderPhotoUrl?: string | null  // uploaded holder avatar image URL
+  // Accepted but unused post-pivot — kept on the prop type so existing
+  // callers (studio canvas) compile. Safe to remove once those callers stop
+  // passing them.
+  showHolderPhoto?: boolean
+  holderPhotoPosition?: "left" | "center" | "right"
+  holderPhotoUrl?: string | null
   memberNumber?: string      // unique member identifier (derived from pass instance ID)
   // Business card-specific
   contactName?: string       // contact person name
@@ -157,9 +160,6 @@ export function WalletPassRenderer({
   eventDate,
   eventVenue,
   scanStatus,
-  showHolderPhoto,
-  holderPhotoPosition = "center",
-  holderPhotoUrl,
   memberNumber,
   contactName,
   jobTitle,
@@ -172,13 +172,15 @@ export function WalletPassRenderer({
   contactInstagram,
 }: WalletPassRendererProps) {
   const cardType = design.cardType ?? "STAMP"
-  const isTicket = cardType === "TICKET"
+  // Post-pivot: only STAMP + COUPON. Kept for parity with branches that still
+  // reference ticket-style strip sizing — always false now.
+  const isTicket = false
   const defaultLayout = getFieldLayout(cardType)
   const isApple = format === "apple"
 
   // Unified field list → auto-split for Apple (first 2 = header, rest = secondary)
   const isStampGrid = design.useStampGrid && design.showStrip
-  const isStampType = !cardType || cardType === "STAMP" || cardType === "POINTS"
+  const isStampType = !cardType || cardType === "STAMP"
   const fieldConfig = getFieldConfig(cardType)
   // Resolve unified field list: prefer `fields`, fall back to legacy header+secondary, then defaults
   const unifiedFields = design.fields
@@ -208,7 +210,7 @@ export function WalletPassRenderer({
     ? (logoAppleUrl ?? logoUrl ?? null)
     : (logoGoogleUrl ?? logoUrl ?? null)
   const useStrip = design.showStrip
-  const stripHeight = isTicket && isApple ? 100 : isApple ? 130 : 125
+  const stripHeight = isApple ? 130 : 125
 
   // Dimensions — Google cards grow in height with content (no fixed height)
   const CARD_HEIGHT = isApple ? APPLE_CARD_HEIGHT : GOOGLE_CARD_HEIGHT
@@ -220,8 +222,8 @@ export function WalletPassRenderer({
   const outerW = compact ? baseW : CARD_WIDTH
   const outerH = compact ? baseH : (isApple ? CARD_HEIGHT : undefined)
 
-  // Build field values — stamp/points only
-  const progressText = cardType === "STAMP" || cardType === "POINTS"
+  // Build field values — stamp only
+  const progressText = cardType === "STAMP"
     ? formatProgressValue(
         currentVisits,
         totalVisits,
@@ -721,49 +723,6 @@ export function WalletPassRenderer({
 
         {/* Primary field overlay on strip (non-stamp types, e.g. Discount: Free item) */}
         {primaryOverlay}
-
-        {/* Holder photo overlay (Membership) */}
-        {showHolderPhoto && cardType === "TIER" && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: holderPhotoPosition === "left" ? "flex-start" : holderPhotoPosition === "right" ? "flex-end" : "center",
-              padding: holderPhotoPosition === "center" ? 0 : "0 24px",
-              pointerEvents: "none",
-            }}
-          >
-            <div
-              data-avatar-zone
-              style={{
-                width: isApple ? 72 : 64,
-                height: isApple ? 72 : 64,
-                borderRadius: 9999,
-                backgroundColor: "rgba(255,255,255,0.15)",
-                border: "2.5px solid rgba(255,255,255,0.5)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
-                overflow: "hidden",
-                backdropFilter: "blur(4px)",
-                pointerEvents: "auto",
-                cursor: "pointer",
-              }}
-            >
-              {holderPhotoUrl ? (
-                <img src={holderPhotoUrl} alt="Holder" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <svg width={isApple ? 32 : 28} height={isApple ? 32 : 28} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="8" r="4" />
-                  <path d="M20 21a8 8 0 1 0-16 0" />
-                </svg>
-              )}
-            </div>
-          </div>
-        )}
 
       </div>
     )

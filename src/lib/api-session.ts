@@ -133,6 +133,90 @@ export async function sessionHandler<T>(
   }
 }
 
+export type SessionContextNoOrg = {
+  sessionId: string
+  userId: string
+  activeOrganizationId: string | null
+  requestId: string
+}
+
+type HandlerNoOrg<T> = (ctx: SessionContextNoOrg, req: NextRequest) => Promise<HandlerResult<T>>
+
+/**
+ * Variant of {@link sessionHandler} that does NOT require an active
+ * organization. For routes that bootstrap the session (e.g. /auth/me,
+ * /auth/select-org) which run *before* the user has chosen an org.
+ *
+ * Same RFC 7807 error shape and `{ data, meta }` envelope as
+ * sessionHandler so clients only deal with one response contract.
+ */
+export async function sessionHandlerNoOrg<T>(
+  req: NextRequest,
+  handler: HandlerNoOrg<T>,
+): Promise<NextResponse> {
+  const requestId = randomUUID()
+  try {
+    const auth = req.headers.get("authorization")
+    if (!auth || !auth.startsWith("Bearer ")) {
+      return withCorsHeaders(
+        NextResponse.json(
+          { type: "about:blank", status: 401, title: "Unauthorized", detail: "Missing Authorization header" },
+          { status: 401 },
+        ),
+      )
+    }
+    const token = auth.slice(7)
+
+    const session = await db.session.findUnique({
+      where: { token },
+      select: {
+        id: true,
+        expiresAt: true,
+        activeOrganizationId: true,
+        user: { select: { id: true } },
+      },
+    })
+
+    if (!session || session.expiresAt < new Date()) {
+      return withCorsHeaders(
+        NextResponse.json(
+          { type: "about:blank", status: 401, title: "Unauthorized", detail: "Invalid or expired session" },
+          { status: 401 },
+        ),
+      )
+    }
+
+    const ctx: SessionContextNoOrg = {
+      sessionId: session.id,
+      userId: session.user.id,
+      activeOrganizationId: session.activeOrganizationId,
+      requestId,
+    }
+
+    const result = await handler(ctx, req)
+    const envelope: ApiEnvelope<T> = isPaginated(result)
+      ? { data: result.data, meta: { requestId, pagination: result.pagination } }
+      : { data: result, meta: { requestId } }
+    return withCorsHeaders(NextResponse.json(envelope))
+  } catch (err) {
+    if (err instanceof ApiError) {
+      return withCorsHeaders(
+        NextResponse.json(
+          { type: "about:blank", status: err.status, title: err.title, detail: err.detail, requestId },
+          { status: err.status },
+        ),
+      )
+    }
+    console.error(`[api/v1/auth] [${requestId}]`, err instanceof Error ? err.message : err)
+    return withCorsHeaders(
+      NextResponse.json(
+        { type: "about:blank", status: 500, title: "Internal Server Error", detail: "Unexpected error", requestId },
+        { status: 500 },
+      ),
+    )
+  }
+}
+
 /** Throwable error inside session handlers — sent as RFC 7807 problem JSON */
 export class ApiError extends Error {
   constructor(

@@ -107,7 +107,6 @@ export function createMockPassInstance(overrides?: Record<string, unknown>) {
     data: {
       currentCycleVisits: 3,
       totalVisits: 13,
-      totalRewardsEarned: 0,
     },
     contact: {
       id: "contact-1",
