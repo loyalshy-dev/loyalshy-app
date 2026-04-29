@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { sessionHandler, handlePreflight } from "@/lib/api-session"
+import { orgScope } from "@/lib/org-scope"
 import { toApiContact } from "@/lib/api-serializers"
 
 export function OPTIONS() {
@@ -14,8 +15,7 @@ export async function GET(req: NextRequest) {
     const page = Math.max(1, Number(url.searchParams.get("page") ?? 1) || 1)
     const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 20) || 20))
 
-    const where = {
-      organizationId: ctx.organizationId,
+    const where = orgScope.contact(ctx, {
       deletedAt: null,
       ...(search
         ? {
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
             ],
           }
         : {}),
-    }
+    })
 
     const [contacts, total] = await Promise.all([
       db.contact.findMany({

@@ -620,7 +620,14 @@ model DevicePairingToken {
   id              String    @id @default(dbgenerated("uuidv7()::text"))
   organizationId  String
   createdByUserId String
+  // sha256(plaintext token) — plaintext only ever leaves in the QR payload
   token           String    @unique
+  // 6-digit PIN (sha256 hex). Acts as a second factor: a leaked QR alone is
+  // useless without the PIN displayed beside it on the dashboard.
+  pinHash         String    @map("pin_hash")
+  // Bumped on each PIN mismatch. Tokens with >=5 are dead-letter regardless
+  // of TTL, so a stolen QR can't brute-force the PIN inside the 5-min window.
+  failedAttempts  Int       @default(0) @map("failed_attempts")
   expiresAt       DateTime
   claimedAt       DateTime?
   createdAt       DateTime  @default(now())

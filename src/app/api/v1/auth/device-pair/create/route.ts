@@ -42,6 +42,10 @@ export async function POST(req: NextRequest) {
     // Generate pairing token (32 bytes = 64 hex chars). Plaintext goes in
     // the QR; only the hash is persisted.
     const plaintextToken = crypto.randomBytes(32).toString("hex")
+    // 6-digit PIN — second factor displayed beside the QR. The staff types
+    // it into the mobile app after scanning; both must match for the claim
+    // to succeed.
+    const pin = generatePin()
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
 
     await db.devicePairingToken.create({
@@ -49,6 +53,7 @@ export async function POST(req: NextRequest) {
         organizationId: orgId,
         createdByUserId: userId,
         token: hashToken(plaintextToken),
+        pinHash: hashToken(pin),
         expiresAt,
       },
     })
@@ -57,7 +62,12 @@ export async function POST(req: NextRequest) {
     const qrData = `loyalshystaff://pair?token=${plaintextToken}&url=${encodeURIComponent(siteUrl)}`
 
     return withCorsHeaders(
-      NextResponse.json({ token: plaintextToken, expiresAt: expiresAt.toISOString(), qrData })
+      NextResponse.json({
+        token: plaintextToken,
+        pin,
+        expiresAt: expiresAt.toISOString(),
+        qrData,
+      })
     )
   } catch (err) {
     console.error("[device-pair/create] error:", err)
@@ -65,4 +75,10 @@ export async function POST(req: NextRequest) {
       NextResponse.json({ error: "Internal server error" }, { status: 500 })
     )
   }
+}
+
+/** 6-digit numeric PIN. Uses a uniform sample over [0, 1_000_000) so each
+ * PIN has equal probability — `randomInt` rejects biased samples internally. */
+function generatePin(): string {
+  return crypto.randomInt(0, 1_000_000).toString().padStart(6, "0")
 }

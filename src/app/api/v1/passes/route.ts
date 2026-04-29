@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import type { Prisma } from "@prisma/client"
 import { db } from "@/lib/db"
 import { sessionHandler, handlePreflight } from "@/lib/api-session"
+import { orgScope } from "@/lib/org-scope"
 import { toApiPassInstance } from "@/lib/api-serializers"
 
 export function OPTIONS() {
@@ -17,12 +18,11 @@ export async function GET(req: NextRequest) {
     const page = Math.max(1, Number(url.searchParams.get("page") ?? 1) || 1)
     const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 20) || 20))
 
-    const where: Prisma.PassInstanceWhereInput = {
-      passTemplate: { organizationId: ctx.organizationId },
+    const where = orgScope.passInstance(ctx, {
       ...(contactId ? { contactId } : {}),
       ...(templateId ? { passTemplateId: templateId } : {}),
       ...(status ? { status: status as Prisma.PassInstanceWhereInput["status"] } : {}),
-    }
+    })
 
     const [passes, total] = await Promise.all([
       db.passInstance.findMany({

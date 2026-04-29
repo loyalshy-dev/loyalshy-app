@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { z } from "zod"
 import { db } from "@/lib/db"
 import { sessionHandler, handlePreflight, badRequest, notFound, ApiError } from "@/lib/api-session"
+import { orgScope } from "@/lib/org-scope"
 import { toApiPassInstanceDetail } from "@/lib/api-serializers"
 import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
@@ -36,10 +37,9 @@ export async function POST(
 
     // Look up pass by id OR walletPassId (wallet QRs encode walletPassId)
     const pass = await db.passInstance.findFirst({
-      where: {
+      where: orgScope.passInstance(ctx, {
         OR: [{ id }, { walletPassId: id }],
-        passTemplate: { organizationId: ctx.organizationId },
-      },
+      }),
       include: {
         passTemplate: { select: { id: true, name: true, passType: true, config: true, status: true, endsAt: true } },
         contact: { select: { id: true, organizationId: true, deletedAt: true, totalInteractions: true } },

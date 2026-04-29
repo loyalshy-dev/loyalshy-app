@@ -22,12 +22,14 @@ export function ConnectDevice({ organizationName }: ConnectDeviceProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+  const [pin, setPin] = useState<string | null>(null)
   const [expiresAt, setExpiresAt] = useState<Date | null>(null)
   const [timeLeft, setTimeLeft] = useState("")
 
   const generateToken = useCallback(async () => {
     setLoading(true)
     setQrDataUrl(null)
+    setPin(null)
     try {
       const res = await fetch("/api/v1/auth/device-pair/create", {
         method: "POST",
@@ -45,6 +47,7 @@ export function ConnectDevice({ organizationName }: ConnectDeviceProps) {
         errorCorrectionLevel: "M",
       })
       setQrDataUrl(dataUrl)
+      setPin(data.pin)
       setExpiresAt(new Date(data.expiresAt))
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to generate QR code")
@@ -70,6 +73,7 @@ export function ConnectDevice({ organizationName }: ConnectDeviceProps) {
       if (diff <= 0) {
         setTimeLeft("Expired")
         setQrDataUrl(null)
+        setPin(null)
         return
       }
       const mins = Math.floor(diff / 60000)
@@ -85,6 +89,7 @@ export function ConnectDevice({ organizationName }: ConnectDeviceProps) {
   const handleClose = () => {
     setOpen(false)
     setQrDataUrl(null)
+    setPin(null)
     setExpiresAt(null)
     setTimeLeft("")
   }
@@ -116,7 +121,7 @@ export function ConnectDevice({ organizationName }: ConnectDeviceProps) {
           <DialogHeader>
             <DialogTitle>Connect Staff Device</DialogTitle>
             <DialogDescription>
-              Open the Loyalshy Staff app and tap &quot;Scan QR from Dashboard&quot; to connect.
+              Scan the QR with the Loyalshy Staff app, then enter the PIN below to confirm.
             </DialogDescription>
           </DialogHeader>
 
@@ -138,6 +143,19 @@ export function ConnectDevice({ organizationName }: ConnectDeviceProps) {
                     className="rounded-lg"
                   />
                 </div>
+                {pin && (
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                      Confirmation PIN
+                    </span>
+                    <span className="text-2xl font-mono font-semibold tracking-[0.3em] tabular-nums select-all">
+                      {pin}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">
+                      Type this into the staff app to finish pairing
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Timer className="size-3.5" />
                   <span>

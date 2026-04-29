@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { sessionHandler, handlePreflight, notFound, ApiError } from "@/lib/api-session"
+import { orgScope } from "@/lib/org-scope"
 import { toApiPassInstanceDetail } from "@/lib/api-serializers"
 import { parseCouponConfig } from "@/lib/pass-config"
 import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
@@ -17,7 +18,7 @@ export async function POST(
 
   return sessionHandler(req, async (ctx) => {
     const reward = await db.reward.findFirst({
-      where: { id, organizationId: ctx.organizationId },
+      where: orgScope.reward(ctx, { id }),
       select: {
         id: true,
         status: true,

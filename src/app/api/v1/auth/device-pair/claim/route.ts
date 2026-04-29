@@ -9,11 +9,19 @@ export function OPTIONS() {
   return handlePreflight()
 }
 
+const MAX_PIN_ATTEMPTS = 5
+const PIN_PATTERN = /^\d{6}$/
+
 /**
  * POST /api/v1/auth/device-pair/claim
- * Exchange a pairing token for a session. Called from mobile app after scanning QR.
- * Body: { token: string }
- * No auth required — the pairing token IS the auth.
+ * Exchange a pairing token + PIN for a session.
+ * Body: { token: string, pin: string }
+ *
+ * Two-factor: the QR carries the token, the PIN is shown beside the QR on
+ * the dashboard. A leaked QR alone is useless; an attacker also needs the
+ * PIN, and they get at most MAX_PIN_ATTEMPTS guesses before the token is
+ * dead-lettered (1M PIN space → 5/1M = 0.0005% blind-guess success rate
+ * inside the 5-min TTL, even ignoring the per-IP rate limit above).
  */
 export async function POST(req: NextRequest) {
   try {
@@ -28,9 +36,15 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json().catch(() => null)
     const token = body?.token
+    const pin = body?.pin
     if (!token || typeof token !== "string") {
       return withCorsHeaders(
         NextResponse.json({ error: "token is required" }, { status: 400 })
+      )
+    }
+    if (!pin || typeof pin !== "string" || !PIN_PATTERN.test(pin)) {
+      return withCorsHeaders(
+        NextResponse.json({ error: "pin must be 6 digits" }, { status: 400 })
       )
     }
 
@@ -42,6 +56,8 @@ export async function POST(req: NextRequest) {
         id: true,
         organizationId: true,
         createdByUserId: true,
+        pinHash: true,
+        failedAttempts: true,
         expiresAt: true,
         claimedAt: true,
       },
@@ -65,10 +81,50 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (pairing.failedAttempts >= MAX_PIN_ATTEMPTS) {
+      return withCorsHeaders(
+        NextResponse.json(
+          { error: "Too many incorrect PIN attempts. Generate a new QR code." },
+          { status: 410 }
+        )
+      )
+    }
+
+    // Constant-time PIN comparison via the hashes (both 64-byte hex strings,
+    // so equal-length is guaranteed and timingSafeEqual is safe).
+    const submittedPinHash = hashToken(pin)
+    const expected = Buffer.from(pairing.pinHash, "hex")
+    const submitted = Buffer.from(submittedPinHash, "hex")
+    const pinMatches =
+      expected.length === submitted.length &&
+      crypto.timingSafeEqual(expected, submitted)
+
+    if (!pinMatches) {
+      // Bump the counter atomically. If we just hit MAX, the token is dead.
+      const updated = await db.devicePairingToken.update({
+        where: { id: pairing.id },
+        data: { failedAttempts: { increment: 1 } },
+        select: { failedAttempts: true },
+      })
+      const remaining = Math.max(0, MAX_PIN_ATTEMPTS - updated.failedAttempts)
+      return withCorsHeaders(
+        NextResponse.json(
+          { error: "Incorrect PIN", remainingAttempts: remaining },
+          { status: 401 }
+        )
+      )
+    }
+
     // Atomically claim the token. Two concurrent claims race here; only one
-    // gets count === 1. The loser bails before any session is created.
+    // gets count === 1. The loser bails before any session is created. The
+    // failedAttempts < MAX guard mirrors the check above and closes a TOCTOU
+    // window with a parallel wrong-PIN request that would push us past MAX.
     const claimResult = await db.devicePairingToken.updateMany({
-      where: { id: pairing.id, claimedAt: null },
+      where: {
+        id: pairing.id,
+        claimedAt: null,
+        failedAttempts: { lt: MAX_PIN_ATTEMPTS },
+      },
       data: { claimedAt: new Date() },
     })
     if (claimResult.count === 0) {

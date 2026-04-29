@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { sessionHandler, handlePreflight, notFound } from "@/lib/api-session"
+import { orgScope } from "@/lib/org-scope"
 import { toApiPassInstanceDetail } from "@/lib/api-serializers"
 
 export function OPTIONS() {
@@ -15,10 +16,9 @@ export async function GET(
   return sessionHandler(req, async (ctx) => {
     // Look up by id OR walletPassId (Apple/Google QRs encode walletPassId)
     const pass = await db.passInstance.findFirst({
-      where: {
+      where: orgScope.passInstance(ctx, {
         OR: [{ id }, { walletPassId: id }],
-        passTemplate: { organizationId: ctx.organizationId },
-      },
+      }),
       include: {
         passTemplate: { select: { id: true, name: true, passType: true, config: true } },
         contact: { select: { id: true, fullName: true, email: true } },
@@ -34,3 +34,4 @@ export async function GET(
     return toApiPassInstanceDetail(pass)
   })
 }
+
