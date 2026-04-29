@@ -91,7 +91,6 @@ export default async function ProgramDesignPage(props: {
         customMessage: passDesign.customMessage ?? "",
         cardType: passDesign.cardType as string,
         stampGridConfig: parseStampGridConfig(passDesign.editorConfig),
-        holderPhotoUrl: null, // holderPhotoUrl is per-instance, not template-level
         programLogoUrl: passDesign.logoUrl ?? null,
         programLogoAppleUrl: passDesign.logoAppleUrl ?? null,
         programLogoGoogleUrl: passDesign.logoGoogleUrl ?? null,

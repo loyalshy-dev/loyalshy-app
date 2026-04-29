@@ -2,6 +2,7 @@ import crypto from "node:crypto"
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { withCorsHeaders, handlePreflight } from "@/lib/api-cors"
+import { problemJson } from "@/lib/api-session"
 import { checkDevicePairClaimLimit } from "@/lib/auth-rate-limit"
 import { hashToken } from "@/lib/token-hash"
 
@@ -29,23 +30,17 @@ export async function POST(req: NextRequest) {
     const userAgent = req.headers.get("user-agent")
     const rl = await checkDevicePairClaimLimit(ip)
     if (!rl.success) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Too many requests" }, { status: 429 })
-      )
+      return withCorsHeaders(problemJson(429, "Too Many Requests", "Too many requests"))
     }
 
     const body = await req.json().catch(() => null)
     const token = body?.token
     const pin = body?.pin
     if (!token || typeof token !== "string") {
-      return withCorsHeaders(
-        NextResponse.json({ error: "token is required" }, { status: 400 })
-      )
+      return withCorsHeaders(problemJson(400, "Bad Request", "token is required"))
     }
     if (!pin || typeof pin !== "string" || !PIN_PATTERN.test(pin)) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "pin must be 6 digits" }, { status: 400 })
-      )
+      return withCorsHeaders(problemJson(400, "Bad Request", "pin must be 6 digits"))
     }
 
     // Look up by hash — the DB never sees plaintext.
@@ -64,29 +59,24 @@ export async function POST(req: NextRequest) {
     })
 
     if (!pairing) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Invalid pairing token" }, { status: 404 })
-      )
+      return withCorsHeaders(problemJson(404, "Not Found", "Invalid pairing token"))
     }
 
     if (pairing.claimedAt) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Pairing token already used" }, { status: 410 })
-      )
+      return withCorsHeaders(problemJson(410, "Gone", "Pairing token already used"))
     }
 
     if (pairing.expiresAt < new Date()) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Pairing token expired" }, { status: 410 })
-      )
+      return withCorsHeaders(problemJson(410, "Gone", "Pairing token expired"))
     }
 
     if (pairing.failedAttempts >= MAX_PIN_ATTEMPTS) {
       return withCorsHeaders(
-        NextResponse.json(
-          { error: "Too many incorrect PIN attempts. Generate a new QR code." },
-          { status: 410 }
-        )
+        problemJson(
+          410,
+          "Gone",
+          "Too many incorrect PIN attempts. Generate a new QR code.",
+        ),
       )
     }
 
@@ -108,10 +98,7 @@ export async function POST(req: NextRequest) {
       })
       const remaining = Math.max(0, MAX_PIN_ATTEMPTS - updated.failedAttempts)
       return withCorsHeaders(
-        NextResponse.json(
-          { error: "Incorrect PIN", remainingAttempts: remaining },
-          { status: 401 }
-        )
+        problemJson(401, "Unauthorized", "Incorrect PIN", { remainingAttempts: remaining }),
       )
     }
 
@@ -128,9 +115,7 @@ export async function POST(req: NextRequest) {
       data: { claimedAt: new Date() },
     })
     if (claimResult.count === 0) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Pairing token already used" }, { status: 410 })
-      )
+      return withCorsHeaders(problemJson(410, "Gone", "Pairing token already used"))
     }
 
     const sessionToken = crypto.randomBytes(32).toString("base64url")
@@ -187,8 +172,6 @@ export async function POST(req: NextRequest) {
     )
   } catch (err) {
     console.error("[device-pair/claim] error:", err)
-    return withCorsHeaders(
-      NextResponse.json({ error: "Internal server error" }, { status: 500 })
-    )
+    return withCorsHeaders(problemJson(500, "Internal Server Error", "Unexpected error"))
   }
 }

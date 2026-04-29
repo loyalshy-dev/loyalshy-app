@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { withCorsHeaders, handlePreflight } from "@/lib/api-cors"
+import { problemJson } from "@/lib/api-session"
 import { checkInviteValidateLimit } from "@/lib/auth-rate-limit"
 import { hashToken } from "@/lib/token-hash"
 
@@ -17,15 +18,13 @@ export async function GET(req: NextRequest) {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
     const rl = await checkInviteValidateLimit(ip)
     if (!rl.success) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Too many requests" }, { status: 429 })
-      )
+      return withCorsHeaders(problemJson(429, "Too Many Requests", "Too many requests"))
     }
 
     const token = req.nextUrl.searchParams.get("token")
     if (!token) {
       return withCorsHeaders(
-        NextResponse.json({ error: "token parameter is required" }, { status: 400 })
+        problemJson(400, "Bad Request", "token parameter is required"),
       )
     }
 
@@ -43,21 +42,15 @@ export async function GET(req: NextRequest) {
     })
 
     if (!invitation) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Invitation not found" }, { status: 404 })
-      )
+      return withCorsHeaders(problemJson(404, "Not Found", "Invitation not found"))
     }
 
     if (invitation.accepted) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Invitation already accepted" }, { status: 410 })
-      )
+      return withCorsHeaders(problemJson(410, "Gone", "Invitation already accepted"))
     }
 
     if (invitation.expiresAt < new Date()) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Invitation expired" }, { status: 410 })
-      )
+      return withCorsHeaders(problemJson(410, "Gone", "Invitation expired"))
     }
 
     return withCorsHeaders(
@@ -66,13 +59,11 @@ export async function GET(req: NextRequest) {
         role: invitation.role,
         organizationName: invitation.organization.name,
         organizationId: invitation.organizationId,
-      })
+      }),
     )
   } catch (err) {
     console.error("[auth/invite GET] error:", err)
-    return withCorsHeaders(
-      NextResponse.json({ error: "Internal server error" }, { status: 500 })
-    )
+    return withCorsHeaders(problemJson(500, "Internal Server Error", "Unexpected error"))
   }
 }
 
@@ -86,7 +77,7 @@ export async function POST(req: NextRequest) {
     const sessionToken = req.headers.get("authorization")?.slice(7)
     if (!sessionToken) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Missing Authorization header" }, { status: 401 })
+        problemJson(401, "Unauthorized", "Missing Authorization header"),
       )
     }
 
@@ -102,7 +93,7 @@ export async function POST(req: NextRequest) {
 
     if (!session || session.expiresAt < new Date()) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Invalid or expired session" }, { status: 401 })
+        problemJson(401, "Unauthorized", "Invalid or expired session"),
       )
     }
 
@@ -111,19 +102,18 @@ export async function POST(req: NextRequest) {
     // can hijack the invitation by signing up with that address.
     if (!session.user.emailVerified) {
       return withCorsHeaders(
-        NextResponse.json(
-          { error: "Please verify your email before accepting an invitation." },
-          { status: 403 }
-        )
+        problemJson(
+          403,
+          "Forbidden",
+          "Please verify your email before accepting an invitation.",
+        ),
       )
     }
 
     const body = await req.json().catch(() => null)
     const token = body?.token
     if (!token || typeof token !== "string") {
-      return withCorsHeaders(
-        NextResponse.json({ error: "token is required" }, { status: 400 })
-      )
+      return withCorsHeaders(problemJson(400, "Bad Request", "token is required"))
     }
 
     const invitation = await db.staffInvitation.findUnique({
@@ -141,17 +131,18 @@ export async function POST(req: NextRequest) {
 
     if (!invitation || invitation.accepted || invitation.expiresAt < new Date()) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Invalid, expired, or already accepted invitation" }, { status: 400 })
+        problemJson(
+          400,
+          "Bad Request",
+          "Invalid, expired, or already accepted invitation",
+        ),
       )
     }
 
     // Verify email matches
     if (session.user.email.toLowerCase() !== invitation.email.toLowerCase()) {
       return withCorsHeaders(
-        NextResponse.json(
-          { error: "Your email does not match the invitation email" },
-          { status: 403 }
-        )
+        problemJson(403, "Forbidden", "Your email does not match the invitation email"),
       )
     }
 
@@ -181,12 +172,10 @@ export async function POST(req: NextRequest) {
           id: invitation.organization.id,
           name: invitation.organization.name,
         },
-      })
+      }),
     )
   } catch (err) {
     console.error("[auth/invite POST] error:", err)
-    return withCorsHeaders(
-      NextResponse.json({ error: "Internal server error" }, { status: 500 })
-    )
+    return withCorsHeaders(problemJson(500, "Internal Server Error", "Unexpected error"))
   }
 }

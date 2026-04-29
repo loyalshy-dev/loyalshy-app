@@ -122,7 +122,9 @@ describe("device-pair claim — PIN second factor", () => {
     const res = await POST(await makeRequest({ token: PLAINTEXT_TOKEN, pin: "12345" }))
     expect(res.status).toBe(400)
     const body = await res.json()
-    expect(body.error).toMatch(/6 digits/i)
+    // RFC 7807 envelope — `detail` is the human-readable message.
+    expect(body.detail).toMatch(/6 digits/i)
+    expect(body).toMatchObject({ type: "about:blank", status: 400, title: "Bad Request" })
   })
 
   it("rejects a wrong PIN, increments failedAttempts, and returns remainingAttempts", async () => {
@@ -142,7 +144,13 @@ describe("device-pair claim — PIN second factor", () => {
 
     expect(res.status).toBe(401)
     const body = await res.json()
-    expect(body).toMatchObject({ error: expect.any(String), remainingAttempts: 3 })
+    expect(body).toMatchObject({
+      type: "about:blank",
+      status: 401,
+      title: "Unauthorized",
+      detail: expect.any(String),
+      remainingAttempts: 3,
+    })
     expect(mockDb.devicePairingToken.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: "tok-1" },

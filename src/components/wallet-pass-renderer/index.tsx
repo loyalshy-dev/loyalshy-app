@@ -88,12 +88,6 @@ type WalletPassRendererProps = {
   eventDate?: string         // formatted date string
   eventVenue?: string        // venue name
   scanStatus?: string        // e.g. "0 / 1"
-  // Accepted but unused post-pivot — kept on the prop type so existing
-  // callers (studio canvas) compile. Safe to remove once those callers stop
-  // passing them.
-  showHolderPhoto?: boolean
-  holderPhotoPosition?: "left" | "center" | "right"
-  holderPhotoUrl?: string | null
   memberNumber?: string      // unique member identifier (derived from pass instance ID)
   // Business card-specific
   contactName?: string       // contact person name
@@ -532,7 +526,7 @@ export function WalletPassRenderer({
   const primaryPadding = useStrip ? "2px 16px 2px" : "12px 16px 8px"
   const primaryFontSize = useStrip ? 28 : 24
 
-  // Progress text overlay on strip — for non-stamp-grid STAMP/POINTS cards
+  // Progress text overlay on strip — for non-stamp-grid STAMP cards
   const showProgressOnStrip = useStrip && isStampType && !isStampGrid
   const progressOverlay = showProgressOnStrip ? (
     <div
@@ -718,7 +712,7 @@ export function WalletPassRenderer({
           />
         )}
 
-        {/* Progress text overlay on strip (non-stamp-grid STAMP/POINTS) */}
+        {/* Progress text overlay on strip (non-stamp-grid STAMP) */}
         {progressOverlay}
 
         {/* Primary field overlay on strip (non-stamp types, e.g. Discount: Free item) */}

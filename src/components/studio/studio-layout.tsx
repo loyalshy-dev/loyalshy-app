@@ -621,7 +621,6 @@ export function StudioLayout({
               socialLinks={wallet.socialLinks}
               customMessage={wallet.customMessage || undefined}
               mapAddress={wallet.mapAddress || undefined}
-              holderPhotoUrl={wallet.holderPhotoUrl}
               store={store}
             />
 

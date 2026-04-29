@@ -127,8 +127,6 @@ export function TemplateCardPreview({
   const design = buildWalletPassDesign(template.passDesign)
   const typeProps = buildTypeProps(template.passType, template.config)
 
-  // holderPhotoUrl is per-instance, not template-level — preview shows placeholder only
-
   // Derive defaults from stamp card config
   const cfg = (template.config as Record<string, unknown> | null) ?? {}
   const defaultTotalVisits = (cfg as { stampsRequired?: number }).stampsRequired ?? 10

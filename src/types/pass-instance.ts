@@ -14,47 +14,7 @@ export type CouponData = {
   selectedPrize?: string
 }
 
-export type MembershipData = {
-  totalCheckIns: number
-  lastCheckInAt?: string // ISO datetime
-  memberSince: string // ISO datetime
-  tier: string
-  benefits: string
-  holderPhotoUrl?: string
-}
-
-export type PointsData = {
-  pointsBalance: number
-  totalPointsEarned: number
-  totalPointsSpent: number
-}
-
-export type GiftCardData = {
-  currency: string
-  balanceCents: number
-  initialBalanceCents: number
-  totalChargedCents: number
-}
-
-export type TicketData = {
-  scanCount: number
-  firstScannedAt?: string // ISO datetime
-  lastScannedAt?: string // ISO datetime
-  voidedAt?: string // ISO datetime
-}
-
-export type BusinessCardData = {
-  addedToWalletAt?: string // ISO datetime
-}
-
-export type PassInstanceData =
-  | StampCardData
-  | CouponData
-  | MembershipData
-  | PointsData
-  | GiftCardData
-  | TicketData
-  | BusinessCardData
+export type PassInstanceData = StampCardData | CouponData
 
 // ─── Pass design snapshot (shared across instance types) ─────
 

@@ -32,8 +32,6 @@ type CanvasPanelProps = {
   socialLinks?: SocialLinks
   customMessage?: string
   mapAddress?: string
-  // Holder photo (membership)
-  holderPhotoUrl?: string | null
   // Store for interactive color overlay
   store?: CardDesignStoreApi
 }
@@ -59,7 +57,6 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
   socialLinks,
   customMessage,
   mapAddress,
-  holderPhotoUrl,
   store,
 }, ref) {
   const cardRef = useRef<HTMLDivElement>(null)
@@ -206,7 +203,6 @@ export const CanvasPanel = forwardRef<CanvasPanelHandle, CanvasPanelProps>(funct
                 discountLabel={couponPreview.discountLabel}
                 couponCode={couponPreview.couponCode}
                 validUntil={couponPreview.validUntil}
-                holderPhotoUrl={holderPhotoUrl}
               />
               </div>
               </InteractiveCardWrapper>

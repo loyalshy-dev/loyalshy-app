@@ -65,7 +65,6 @@ export type WalletState = {
   headerFields: string[] | null   // legacy — kept for backward compat
   secondaryFields: string[] | null // legacy — kept for backward compat
   programLogoUrl: string | null // program-level source logo (null = using org logo)
-  holderPhotoUrl: string | null // uploaded holder avatar image URL
   fields: string[] | null  // unified ordered field list (null = default)
   fieldLabels: Record<string, string> | null // custom label overrides per field ID (null = use defaults)
   showPrimaryField: boolean // show primary field on Apple Wallet strip (default true)
@@ -92,8 +91,6 @@ export type ProgramConfigState = {
   validDuration: string
   customDurationDays: number
   autoRenew: boolean
-  showHolderPhoto: boolean
-  holderPhotoPosition: "left" | "center" | "right"
   // POINTS
   pointsPerVisit: number
   pointsLabel: string
@@ -195,8 +192,6 @@ const DEFAULT_CONFIG: ProgramConfigState = {
   validDuration: "yearly",
   customDurationDays: 365,
   autoRenew: false,
-  showHolderPhoto: false,
-  holderPhotoPosition: "right",
   pointsPerVisit: 1,
   pointsLabel: "pts",
   currency: "USD",
@@ -275,7 +270,6 @@ export function createCardDesignStore() {
           logoAppleZoom: 1,
           logoGoogleZoom: 1,
           programLogoUrl: null,
-          holderPhotoUrl: null,
           headerFields: null,
           secondaryFields: null,
           fields: null,

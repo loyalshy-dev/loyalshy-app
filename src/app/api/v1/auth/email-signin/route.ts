@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { verifyPassword } from "better-auth/crypto"
 import { db } from "@/lib/db"
 import { withCorsHeaders, handlePreflight } from "@/lib/api-cors"
+import { problemJson } from "@/lib/api-session"
 import { checkEmailSigninLimit } from "@/lib/auth-rate-limit"
 
 export function OPTIONS() {
@@ -25,15 +26,13 @@ export async function POST(req: NextRequest) {
 
     if (!email || typeof email !== "string" || !password || typeof password !== "string") {
       return withCorsHeaders(
-        NextResponse.json({ error: "Email and password are required" }, { status: 400 })
+        problemJson(400, "Bad Request", "Email and password are required"),
       )
     }
 
     const rl = await checkEmailSigninLimit(email, ip)
     if (!rl.success) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Too many requests" }, { status: 429 })
-      )
+      return withCorsHeaders(problemJson(429, "Too Many Requests", "Too many requests"))
     }
 
     // Find user by email
@@ -54,15 +53,11 @@ export async function POST(req: NextRequest) {
     // Google-only account) collapse into the same generic 401 to avoid
     // account enumeration.
     if (user?.banned) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Account is suspended" }, { status: 403 })
-      )
+      return withCorsHeaders(problemJson(403, "Forbidden", "Account is suspended"))
     }
 
     if (!user) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
-      )
+      return withCorsHeaders(problemJson(401, "Unauthorized", "Invalid email or password"))
     }
 
     // Find the credential account and verify password.
@@ -79,19 +74,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (!account?.password || !valid) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
-      )
+      return withCorsHeaders(problemJson(401, "Unauthorized", "Invalid email or password"))
     }
 
     // Mirror the web onboarding gate: require verified email before issuing
     // a 30-day mobile session.
     if (!user.emailVerified) {
       return withCorsHeaders(
-        NextResponse.json(
-          { error: "Please verify your email before signing in." },
-          { status: 403 }
-        )
+        problemJson(403, "Forbidden", "Please verify your email before signing in."),
       )
     }
 
@@ -133,12 +123,10 @@ export async function POST(req: NextRequest) {
         token: sessionToken,
         user: { id: user.id, name: user.name, email: user.email, image: user.image },
         organizations,
-      })
+      }),
     )
   } catch (err) {
     console.error("[email-signin] error:", err)
-    return withCorsHeaders(
-      NextResponse.json({ error: "Internal server error" }, { status: 500 })
-    )
+    return withCorsHeaders(problemJson(500, "Internal Server Error", "Unexpected error"))
   }
 }

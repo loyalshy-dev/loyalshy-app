@@ -2,6 +2,7 @@ import crypto from "node:crypto"
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { withCorsHeaders, handlePreflight } from "@/lib/api-cors"
+import { problemJson } from "@/lib/api-session"
 import { auth } from "@/lib/auth"
 import { hashToken } from "@/lib/token-hash"
 
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
     const session = await auth.api.getSession({ headers: req.headers })
     if (!session?.session?.activeOrganizationId) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Not authenticated or no active organization" }, { status: 401 })
+        problemJson(401, "Unauthorized", "Not authenticated or no active organization"),
       )
     }
 
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
     })
     if (!member) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Not a member of this organization" }, { status: 403 })
+        problemJson(403, "Forbidden", "Not a member of this organization"),
       )
     }
 
@@ -71,9 +72,7 @@ export async function POST(req: NextRequest) {
     )
   } catch (err) {
     console.error("[device-pair/create] error:", err)
-    return withCorsHeaders(
-      NextResponse.json({ error: "Internal server error" }, { status: 500 })
-    )
+    return withCorsHeaders(problemJson(500, "Internal Server Error", "Unexpected error"))
   }
 }
 

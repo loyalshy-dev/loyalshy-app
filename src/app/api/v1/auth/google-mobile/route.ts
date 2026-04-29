@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { OAuth2Client } from "google-auth-library"
 import { db } from "@/lib/db"
 import { withCorsHeaders, handlePreflight } from "@/lib/api-cors"
+import { problemJson } from "@/lib/api-session"
 import { checkGoogleMobileLimit } from "@/lib/auth-rate-limit"
 
 let _googleClient: OAuth2Client | null = null
@@ -28,17 +29,13 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
     const rl = await checkGoogleMobileLimit(ip)
     if (!rl.success) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Too many requests" }, { status: 429 })
-      )
+      return withCorsHeaders(problemJson(429, "Too Many Requests", "Too many requests"))
     }
 
     const body = await req.json().catch(() => null)
     const idToken = body?.idToken
     if (!idToken || typeof idToken !== "string") {
-      return withCorsHeaders(
-        NextResponse.json({ error: "idToken is required" }, { status: 400 })
-      )
+      return withCorsHeaders(problemJson(400, "Bad Request", "idToken is required"))
     }
 
     // Mobile-only audiences. The web GOOGLE_CLIENT_ID is intentionally
@@ -53,7 +50,7 @@ export async function POST(req: NextRequest) {
     if (allowedClientIds.length === 0) {
       console.error("[google-mobile] no mobile client IDs configured")
       return withCorsHeaders(
-        NextResponse.json({ error: "Google sign-in is not configured" }, { status: 500 })
+        problemJson(500, "Internal Server Error", "Google sign-in is not configured"),
       )
     }
 
@@ -66,23 +63,16 @@ export async function POST(req: NextRequest) {
       payload = ticket.getPayload()
     } catch (err) {
       console.error("[google-mobile] verifyIdToken failed:", err)
-      return withCorsHeaders(
-        NextResponse.json({ error: "Invalid Google ID token" }, { status: 401 })
-      )
+      return withCorsHeaders(problemJson(401, "Unauthorized", "Invalid Google ID token"))
     }
 
     if (!payload?.email) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "No email in Google token" }, { status: 400 })
-      )
+      return withCorsHeaders(problemJson(400, "Bad Request", "No email in Google token"))
     }
 
     if (!payload.email_verified) {
       return withCorsHeaders(
-        NextResponse.json(
-          { error: "Please verify your email before signing in." },
-          { status: 403 }
-        )
+        problemJson(403, "Forbidden", "Please verify your email before signing in."),
       )
     }
 
@@ -101,25 +91,21 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return withCorsHeaders(
-        NextResponse.json(
-          { error: "No account found with this email. Please sign up on the web first." },
-          { status: 404 }
-        )
+        problemJson(
+          404,
+          "Not Found",
+          "No account found with this email. Please sign up on the web first.",
+        ),
       )
     }
 
     if (user.banned) {
-      return withCorsHeaders(
-        NextResponse.json({ error: "Account is suspended" }, { status: 403 })
-      )
+      return withCorsHeaders(problemJson(403, "Forbidden", "Account is suspended"))
     }
 
     if (!user.emailVerified) {
       return withCorsHeaders(
-        NextResponse.json(
-          { error: "Please verify your email before signing in." },
-          { status: 403 }
-        )
+        problemJson(403, "Forbidden", "Please verify your email before signing in."),
       )
     }
 
@@ -161,12 +147,10 @@ export async function POST(req: NextRequest) {
         token: sessionToken,
         user: { id: user.id, name: user.name, email: user.email, image: user.image },
         organizations,
-      })
+      }),
     )
   } catch (err) {
     console.error("[google-mobile] error:", err)
-    return withCorsHeaders(
-      NextResponse.json({ error: "Internal server error" }, { status: 500 })
-    )
+    return withCorsHeaders(problemJson(500, "Internal Server Error", "Unexpected error"))
   }
 }

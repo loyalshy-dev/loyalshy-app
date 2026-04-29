@@ -831,8 +831,6 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     }
   }
 
-  // holderPhotoUrl is now per-instance (stored in PassInstance.data), not template-level
-
   const newHash = computeDesignHash({
     showStrip: parsed.showStrip,
     primaryColor,
@@ -1248,99 +1246,6 @@ export async function deleteEmptyIcon(templateId: string) {
   return deleteStampIconGeneric(templateId, "customEmptyIconUrl")
 }
 
-// ─── Holder Photo Upload (Membership) ───────────────────────
-
-export async function uploadHolderPhoto(formData: FormData) {
-  const t = await getTranslations("serverErrors")
-  const templateId = formData.get("templateId") as string
-  const file = formData.get("file") as File
-
-  if (!templateId || !file) return { error: t("missingFields") }
-
-  const template = await db.passTemplate.findUnique({
-    where: { id: templateId },
-    select: { organizationId: true },
-  })
-  if (!template) return { error: t("templateNotFound") }
-  await assertOrganizationRole(template.organizationId, "owner")
-
-  const maxSize = 2 * 1024 * 1024
-  if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
-
-  const validTypes = ["image/png", "image/jpeg", "image/webp"]
-  if (!validTypes.includes(file.type)) return { error: t("invalidFileType") }
-
-  const rawBuffer = Buffer.from(await file.arrayBuffer())
-  let processedBuffer: Buffer = rawBuffer
-  try {
-    const { default: sharp } = await import("sharp")
-    processedBuffer = await sharp(rawBuffer)
-      .resize(256, 256, { fit: "cover" })
-      .png()
-      .toBuffer()
-  } catch { /* use original */ }
-
-  let url: string
-  try {
-    const { uploadFile, deleteFile } = await import("@/lib/storage")
-    // Delete old photo if exists
-    const existing = await db.passDesign.findUnique({
-      where: { passTemplateId: templateId },
-      select: { editorConfig: true },
-    })
-    if (existing?.editorConfig && typeof existing.editorConfig === "object") {
-      const cfg = existing.editorConfig as Record<string, unknown>
-      if (typeof cfg.holderPhotoUrl === "string") await deleteFile(cfg.holderPhotoUrl)
-    }
-    url = await uploadFile(processedBuffer, `holder-photos/${templateId}/${Date.now()}.png`, "image/png")
-  } catch {
-    url = `data:image/png;base64,${processedBuffer.toString("base64")}`
-  }
-
-  // Store in editorConfig
-  const existing = await db.passDesign.findUnique({
-    where: { passTemplateId: templateId },
-    select: { editorConfig: true },
-  })
-  const editorCfg = (existing?.editorConfig && typeof existing.editorConfig === "object" ? existing.editorConfig : {}) as Record<string, unknown>
-  await db.passDesign.update({
-    where: { passTemplateId: templateId },
-    data: { editorConfig: { ...editorCfg, holderPhotoUrl: url } as object },
-  })
-
-  revalidatePath("/dashboard/programs")
-  return { success: true, url }
-}
-
-export async function deleteHolderPhoto(templateId: string) {
-  const t = await getTranslations("serverErrors")
-  const template = await db.passTemplate.findUnique({
-    where: { id: templateId },
-    select: { organizationId: true },
-  })
-  if (!template) return { error: t("templateNotFound") }
-  await assertOrganizationRole(template.organizationId, "owner")
-
-  const existing = await db.passDesign.findUnique({
-    where: { passTemplateId: templateId },
-    select: { editorConfig: true },
-  })
-
-  if (existing?.editorConfig && typeof existing.editorConfig === "object") {
-    const editorCfg = existing.editorConfig as Record<string, unknown>
-    if (typeof editorCfg.holderPhotoUrl === "string") {
-      const { deleteFile } = await import("@/lib/storage")
-      await deleteFile(editorCfg.holderPhotoUrl)
-    }
-    await db.passDesign.update({
-      where: { passTemplateId: templateId },
-      data: { editorConfig: { ...editorCfg, holderPhotoUrl: null } as object },
-    })
-  }
-
-  revalidatePath("/dashboard/programs")
-  return { success: true }
-}
 
 // ─── Logo Processing Constants ──────────────────────────────
 

@@ -233,4 +233,22 @@ export const notFound = (detail = "Resource not found") => new ApiError(404, "No
 export const badRequest = (detail: string) => new ApiError(400, "Bad Request", detail)
 export const forbidden = (detail = "Forbidden") => new ApiError(403, "Forbidden", detail)
 
+/**
+ * Build a standalone RFC 7807 problem-details JSON response. For the auth
+ * routes that don't use sessionHandler/sessionHandlerNoOrg (because they
+ * run before a session exists or have a custom flow), so error shapes
+ * stay uniform with the rest of /api/v1.
+ */
+export function problemJson(
+  status: number,
+  title: string,
+  detail: string,
+  extra?: Record<string, unknown>,
+): NextResponse {
+  return NextResponse.json(
+    { type: "about:blank", status, title, detail, ...(extra ?? {}) },
+    { status },
+  )
+}
+
 export { handlePreflight }

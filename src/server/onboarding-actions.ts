@@ -189,7 +189,6 @@ export type PassInstanceCardData = {
     config: unknown
     passDesign: PublicTemplateInfo["passDesign"]
   }
-  holderPhotoUrl: string | null
   unrevealedReward: { rewardId: string; description: string } | null
   minigameConfig: MinigameConfig | null
 }
@@ -320,7 +319,6 @@ export async function getPassInstanceCardData(
           }
         : null,
     },
-    holderPhotoUrl: typeof instanceData.holderPhotoUrl === "string" ? instanceData.holderPhotoUrl : null,
     unrevealedReward: unrevealed
       ? { rewardId: unrevealed.id, description: unrevealed.description! }
       : null,
@@ -652,7 +650,6 @@ export async function requestWalletPass(
       hasUnrevealedPrize: passInstance.rewards.some(
         (r) => r.revealedAt === null && r.description != null
       ),
-      holderPhotoUrl: (instanceData.holderPhotoUrl as string) ?? undefined,
     },
     organization,
     {
@@ -689,7 +686,6 @@ type InstancePassData = {
   walletProvider: string
   hasAvailableReward: boolean
   hasUnrevealedPrize?: boolean
-  holderPhotoUrl?: string | null
 }
 
 async function issuePassForInstance(
