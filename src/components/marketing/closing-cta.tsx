@@ -27,8 +27,8 @@ export async function ClosingCTA() {
           <div className="relative z-10 flex flex-col items-center gap-8">
             {/* Biggest heading on the page */}
             <h2
-              className="mk-clamp-h1 font-black leading-[0.9] max-w-4xl"
-              style={{ color: "oklch(0.99 0 0)", letterSpacing: "-0.045em" }}
+              className="mk-clamp-h1 font-black leading-[0.9] max-w-4xl tracking-[-0.025em] sm:tracking-[-0.035em] lg:tracking-[-0.045em]"
+              style={{ color: "oklch(0.99 0 0)" }}
             >
               {t("title1")}{" "}
               <br />

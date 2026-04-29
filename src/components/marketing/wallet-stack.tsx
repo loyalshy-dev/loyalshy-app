@@ -76,7 +76,7 @@ function LoyaltyCard({
     <div
       role="img"
       aria-label={card.alt}
-      className="absolute left-0 top-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.55_0.2_265)] focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-2xl overflow-hidden"
+      className="absolute left-0 top-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-(--mk-brand-purple) focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-2xl overflow-hidden"
       style={{
         ...style,
         width: cardW,
@@ -105,7 +105,8 @@ function LoyaltyCard({
         width={cardW}
         height={cardH}
         className="w-full h-full object-contain"
-        priority
+        priority={index === 0}
+        loading={index === 0 ? undefined : "lazy"}
       />
     </div>
   )
@@ -118,7 +119,10 @@ export function WalletStack() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [hoveredIndex, setHoveredIndex] = useState(-1)
   const [reducedMotion, setReducedMotion] = useState(false)
-  const [compact, setCompact] = useState(false)
+  const [compact, setCompact] = useState(() => {
+    if (typeof window === "undefined") return false
+    return window.matchMedia("(max-width: 767px)").matches
+  })
   const interactedRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -132,7 +136,6 @@ export function WalletStack() {
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)")
-    setCompact(mq.matches)
     const handler = (e: MediaQueryListEvent) => setCompact(e.matches)
     mq.addEventListener("change", handler)
     return () => mq.removeEventListener("change", handler)

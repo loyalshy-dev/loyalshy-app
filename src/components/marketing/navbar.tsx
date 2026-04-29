@@ -72,7 +72,6 @@ export function MarketingNavbar() {
               width={160}
               height={44}
               className="h-18 w-auto lg:h-22"
-              priority
             />
           </Link>
 

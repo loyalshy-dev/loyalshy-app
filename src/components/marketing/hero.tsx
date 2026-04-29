@@ -11,7 +11,7 @@ export async function Hero() {
 
   return (
     <section
-      className="relative overflow-hidden py-24 md:py-32 mk-mesh-bg lg:flex lg:flex-col lg:justify-center lg:min-h-[calc(100svh-5rem)]"
+      className="relative overflow-hidden py-16 md:py-24 lg:py-32 mk-mesh-bg lg:flex lg:flex-col lg:justify-center lg:min-h-[calc(100svh-5rem)]"
       style={{ background: "var(--mk-bg)" }}
     >
       <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-8">
@@ -22,7 +22,7 @@ export async function Hero() {
             {/* Badge */}
             <div className="hero-fade-in max-w-full" style={{ animationDelay: "0ms" }}>
               <div
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] sm:text-[13px] font-semibold tracking-wide"
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs sm:text-sm font-semibold tracking-wide"
                 style={{
                   background: "oklch(0.704 0.193 32 / 0.06)",
                   border: "1px solid oklch(0.704 0.193 32 / 0.15)",
@@ -40,8 +40,8 @@ export async function Hero() {
             {/* Headline */}
             <div className="hero-fade-in" style={{ animationDelay: "100ms" }}>
               <h1
-                className="mk-clamp-h1 font-black leading-[0.95]"
-                style={{ color: "var(--mk-text)", letterSpacing: "-0.045em" }}
+                className="mk-clamp-h1 font-black leading-[0.95] tracking-[-0.025em] sm:tracking-[-0.035em] lg:tracking-[-0.045em]"
+                style={{ color: "var(--mk-text)" }}
               >
                 {t("title1")}{" "}
                 <br className="hidden sm:block" />

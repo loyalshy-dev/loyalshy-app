@@ -16,7 +16,7 @@ export async function WalletPreview() {
   return (
     <section
       id="customer-view"
-      className="relative py-24 overflow-hidden"
+      className="relative py-16 sm:py-24 md:py-32 overflow-hidden"
       style={{ background: "var(--mk-surface)" }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -46,7 +46,7 @@ export async function WalletPreview() {
                     <Check
                       className="size-3.5"
                       strokeWidth={2.5}
-                      style={{ color: "oklch(0.50 0.16 145)" }}
+                      style={{ color: "var(--mk-brand-purple)" }}
                     />
                   </div>
                   <p

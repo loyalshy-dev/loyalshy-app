@@ -105,7 +105,7 @@ export function FeaturesCarouselMobile({ features }: { features: FeatureItem[] }
             type="button"
             aria-label="Previous feature"
             onClick={() => scroll("left")}
-            className="absolute left-0 top-1/2 -translate-y-1/2 size-8 rounded-full flex items-center justify-center"
+            className="absolute left-0 top-1/2 -translate-y-1/2 size-10 rounded-full flex items-center justify-center"
             style={{
               background: "var(--mk-card)",
               border: "1px solid var(--mk-border)",
@@ -120,7 +120,7 @@ export function FeaturesCarouselMobile({ features }: { features: FeatureItem[] }
             type="button"
             aria-label="Next feature"
             onClick={() => scroll("right")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 size-8 rounded-full flex items-center justify-center"
+            className="absolute right-0 top-1/2 -translate-y-1/2 size-10 rounded-full flex items-center justify-center"
             style={{
               background: "var(--mk-card)",
               border: "1px solid var(--mk-border)",

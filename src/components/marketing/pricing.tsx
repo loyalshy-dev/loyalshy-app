@@ -61,10 +61,10 @@ function BillingToggle({
       >
         {t("annual")}
         <span
-          className="absolute -top-2.5 -right-8 sm:-right-12 rounded-full px-2 py-0.5 text-[10px] font-bold whitespace-nowrap"
+          className="absolute -top-2.5 -right-8 sm:-right-12 rounded-full px-2 py-0.5 text-[11px] font-bold whitespace-nowrap"
           style={{
             background: "oklch(0.704 0.193 32 / 0.12)",
-            color: "oklch(0.45 0.17 155)",
+            color: "var(--mk-brand-purple)",
           }}
         >
           {t("save20")}
@@ -151,7 +151,7 @@ function FreePlanCard() {
               <Check
                 className="size-3"
                 strokeWidth={2.5}
-                style={{ color: "oklch(0.50 0.16 145)" }}
+                style={{ color: "var(--mk-brand-purple)" }}
               />
             </div>
             <span
@@ -260,7 +260,7 @@ function PlanCard({
       {period === "annual" && plan.price !== null && (
         <p
           className="text-[13px] font-medium mb-5"
-          style={{ color: "oklch(0.45 0.17 155)" }}
+          style={{ color: "var(--mk-brand-purple)" }}
         >
           {(plan.price - (plan.annualPrice ?? 0)) * 12}&euro; {t("savedPerYear")}
         </p>
@@ -306,9 +306,7 @@ function PlanCard({
                 className="size-3"
                 strokeWidth={2.5}
                 style={{
-                  color: highlighted
-                    ? "oklch(0.704 0.193 32)"
-                    : "oklch(0.50 0.16 145)",
+                  color: "var(--mk-brand-purple)",
                 }}
               />
             </div>

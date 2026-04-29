@@ -14,7 +14,7 @@ export async function TryDemo() {
   return (
     <section
       id="try-demo"
-      className="relative py-24 sm:py-32 overflow-hidden"
+      className="relative py-16 sm:py-24 md:py-32 overflow-hidden"
       style={{ background: "var(--mk-surface)" }}
     >
       {/* Gradient mesh */}
