@@ -61,44 +61,43 @@ export function InviteForm({ token }: { token: string }) {
     if (!invitation) return
     setIsSubmitting(true)
 
-    // Create account via Better Auth
-    const { data, error: signUpError } = await authClient.signUp.email({
-      name,
-      email: invitation.email,
-      password,
-    })
+    try {
+      // Create account via Better Auth
+      const { data, error: signUpError } = await authClient.signUp.email({
+        name,
+        email: invitation.email,
+        password,
+      })
 
-    if (signUpError || !data) {
-      // Better Auth returns 422 USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL when an
-      // account with this email already exists. Auto-flip to sign-in mode so
-      // the worker can finish accepting the invitation with their existing
-      // password.
-      if (signUpError?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
-        toast.info(t("accountExists"))
-        setPassword("")
-        setMode("signin")
-        setIsSubmitting(false)
+      if (signUpError || !data) {
+        // Better Auth returns 422 USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL when
+        // an account with this email already exists. Auto-flip to sign-in
+        // mode so the worker can finish accepting the invitation.
+        if (signUpError?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
+          toast.info(t("accountExists"))
+          setPassword("")
+          setMode("signin")
+          return
+        }
+        toast.error(signUpError?.message || t("createFailed"))
         return
       }
-      toast.error(signUpError?.message || t("createFailed"))
+
+      const acceptResult = await acceptStaffInvitation({ token })
+      if (acceptResult.error) {
+        toast.error(acceptResult.error)
+        return
+      }
+
+      toast.success(t("welcome", { organizationName: invitation.organizationName }))
+      router.push("/dashboard")
+      router.refresh()
+    } catch (err) {
+      console.error("Invite signup failed:", err)
+      toast.error(err instanceof Error ? err.message : t("createFailed"))
+    } finally {
       setIsSubmitting(false)
-      return
     }
-
-    // Accept the invitation (link user to organization)
-    const acceptResult = await acceptStaffInvitation({
-      token,
-    })
-
-    if (acceptResult.error) {
-      toast.error(acceptResult.error)
-      setIsSubmitting(false)
-      return
-    }
-
-    toast.success(t("welcome", { organizationName: invitation.organizationName }))
-    router.push("/dashboard")
-    router.refresh()
   }
 
   async function handleSignIn(e: React.FormEvent) {
@@ -106,30 +105,32 @@ export function InviteForm({ token }: { token: string }) {
     if (!invitation) return
     setIsSubmitting(true)
 
-    const { data, error: signInError } = await authClient.signIn.email({
-      email: invitation.email,
-      password,
-    })
+    try {
+      const { data, error: signInError } = await authClient.signIn.email({
+        email: invitation.email,
+        password,
+      })
 
-    if (signInError || !data) {
-      toast.error(signInError?.message || t("invalidCredentials"))
+      if (signInError || !data) {
+        toast.error(signInError?.message || t("invalidCredentials"))
+        return
+      }
+
+      const acceptResult = await acceptStaffInvitation({ token })
+      if (acceptResult.error) {
+        toast.error(acceptResult.error)
+        return
+      }
+
+      toast.success(t("welcome", { organizationName: invitation.organizationName }))
+      router.push("/dashboard")
+      router.refresh()
+    } catch (err) {
+      console.error("Invite signin failed:", err)
+      toast.error(err instanceof Error ? err.message : t("invalidCredentials"))
+    } finally {
       setIsSubmitting(false)
-      return
     }
-
-    const acceptResult = await acceptStaffInvitation({
-      token,
-    })
-
-    if (acceptResult.error) {
-      toast.error(acceptResult.error)
-      setIsSubmitting(false)
-      return
-    }
-
-    toast.success(t("welcome", { organizationName: invitation.organizationName }))
-    router.push("/dashboard")
-    router.refresh()
   }
 
   if (isValidating) {
