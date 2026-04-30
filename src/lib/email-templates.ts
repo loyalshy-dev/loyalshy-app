@@ -25,6 +25,17 @@ const R2_ASSETS = (process.env.R2_PUBLIC_URL ?? "https://pub-7c8a43a8edf44acb9ce
 const WALLET_BADGE_APPLE = `${R2_ASSETS}/assets/add-to-apple-wallet-v2.png`
 const WALLET_BADGE_GOOGLE = `${R2_ASSETS}/assets/add-to-google-wallet-v2.png`
 
+/**
+ * Renders the legal footer (HR + product line + company info) for transactional emails.
+ * Single source of truth for the company name, VAT, and registered address.
+ */
+export function renderEmailFooter(productLine = "Loyalshy — Digital Wallet Passes"): string {
+  return `
+      <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
+      <p style="color:#a3a3a3;font-size:12px;margin:0;">${productLine}</p>
+  `
+}
+
 export function buildPassIssuedEmailHtml(payload: {
   contactName: string
   organizationName: string
@@ -78,9 +89,7 @@ export function buildPassIssuedEmailHtml(payload: {
       <p style="color:#a3a3a3;font-size:13px;margin-top:24px;">
         Bookmark the link above to access your pass anytime.
       </p>
-      <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
-      <p style="color:#a3a3a3;font-size:12px;margin:0;">Loyalshy — Digital Wallet Passes</p>
-      <p style="color:#a3a3a3;font-size:11px;margin:4px 0 0 0;">HEX CONCEPTS STUDIO, S.L. · VAT B27646645 · Av. Convent 11, 25123 Torrefarrera (Lleida), Spain</p>
+      ${renderEmailFooter()}
     </div>
   `
 }
