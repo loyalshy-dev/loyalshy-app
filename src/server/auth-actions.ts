@@ -172,15 +172,44 @@ export async function validateInvitationToken(token: string) {
   })
 
   if (!invitation) {
-    return { error: "Invalid invitation link" }
-  }
-
-  if (invitation.accepted) {
-    return { error: "This invitation has already been used" }
+    // Most common cause of a "not found" hit: the recipient clicked an
+    // older invitation email after the owner used "Resend invitation",
+    // which rotates the token. Tell them how to recover instead of just
+    // bailing with a generic error.
+    return { error: "stale_link" as const }
   }
 
   if (invitation.expiresAt < new Date()) {
-    return { error: "This invitation has expired" }
+    return { error: "expired" as const }
+  }
+
+  if (invitation.accepted) {
+    // If the currently-signed-in user is the recipient AND they're already
+    // a member of the org, treat this as "you're already in" — the invite
+    // form can route them straight to /dashboard. Closes the snappy-UX gap
+    // where re-clicking your own already-accepted invitation used to dead-
+    // end on a "this invitation has already been used" error card.
+    const { auth } = await import("@/lib/auth")
+    const session = await auth.api.getSession({ headers: headersList })
+    if (
+      session?.user?.email?.toLowerCase() === invitation.email.toLowerCase()
+    ) {
+      const member = await db.member.findFirst({
+        where: {
+          userId: session.user.id,
+          organizationId: invitation.organizationId,
+        },
+        select: { id: true },
+      })
+      if (member) {
+        return {
+          alreadyMember: true as const,
+          organizationId: invitation.organizationId,
+          organizationName: invitation.organization.name,
+        }
+      }
+    }
+    return { error: "already_used" as const }
   }
 
   return {
@@ -190,6 +219,7 @@ export async function validateInvitationToken(token: string) {
       role: invitation.role,
       organizationName: invitation.organization.name,
       organizationId: invitation.organizationId,
+      expiresAt: invitation.expiresAt.toISOString(),
     },
   }
 }
@@ -343,6 +373,23 @@ export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitati
   // Verify the authenticated user's email matches the invitation email
   if (session.user.email.toLowerCase() !== invitation.email.toLowerCase()) {
     return { error: "This invitation was sent to a different email address" }
+  }
+
+  // Mirror the mobile /api/v1/auth/invite gate: an unverified email can't
+  // accept. Closing the parity gap means the staff app and webapp enforce
+  // the same auth surface, so an attacker who guessed an invite link can't
+  // bypass verification just by going through the browser. The signup
+  // path lands users with emailVerified: true automatically; this check
+  // only fires for existing-account holders who never verified.
+  // (DAL's AuthUser projection strips emailVerified, so read it directly.)
+  const userRow = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { emailVerified: true },
+  })
+  if (!userRow?.emailVerified) {
+    return {
+      error: "Please verify your email address before accepting the invitation.",
+    }
   }
 
   // Idempotency guard: the action can re-run after a partial failure

@@ -28,7 +28,10 @@ type InvitationData = {
   role: string
   organizationName: string
   organizationId: string
+  expiresAt: string
 }
+
+type ValidationErrorCode = "stale_link" | "expired" | "already_used" | "rate_limited"
 
 export function InviteForm({ token }: { token: string }) {
   const router = useRouter()
@@ -36,7 +39,7 @@ export function InviteForm({ token }: { token: string }) {
   const t = useTranslations("auth.invite")
   const tAuth = useTranslations("auth.register")
   const [invitation, setInvitation] = useState<InvitationData | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [errorCode, setErrorCode] = useState<ValidationErrorCode | null>(null)
   const [isValidating, setIsValidating] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   // Default to signin when returning from a password reset (?reset=1) so the
@@ -50,15 +53,35 @@ export function InviteForm({ token }: { token: string }) {
   useEffect(() => {
     async function validate() {
       const result = await validateInvitationToken(token)
-      if (result.error) {
-        setError(result.error)
-      } else if (result.invitation) {
+      if ("alreadyMember" in result && result.alreadyMember) {
+        // Logged-in user re-clicked their own already-accepted invite.
+        // Skip the form entirely and route them straight to the dashboard.
+        toast.success(
+          t("welcome", { organizationName: result.organizationName }),
+        )
+        router.replace("/dashboard")
+        return
+      }
+      if ("error" in result && result.error) {
+        // Map known error codes; the rate-limit branch returns a free-form
+        // "Too many requests..." string so we collapse anything unknown
+        // into the rate-limit slot.
+        const known: ValidationErrorCode[] = [
+          "stale_link",
+          "expired",
+          "already_used",
+        ]
+        const code = (known as string[]).includes(result.error)
+          ? (result.error as ValidationErrorCode)
+          : "rate_limited"
+        setErrorCode(code)
+      } else if ("invitation" in result && result.invitation) {
         setInvitation(result.invitation)
       }
       setIsValidating(false)
     }
     validate()
-  }, [token])
+  }, [token, router, t])
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
@@ -139,12 +162,28 @@ export function InviteForm({ token }: { token: string }) {
     )
   }
 
-  if (error) {
+  if (errorCode) {
+    const titleKey =
+      errorCode === "already_used"
+        ? "alreadyUsedTitle"
+        : errorCode === "expired"
+          ? "expiredTitle"
+          : errorCode === "rate_limited"
+            ? "rateLimitedTitle"
+            : "staleLinkTitle"
+    const descKey =
+      errorCode === "already_used"
+        ? "alreadyUsedDesc"
+        : errorCode === "expired"
+          ? "expiredDesc"
+          : errorCode === "rate_limited"
+            ? "rateLimitedDesc"
+            : "staleLinkDesc"
     return (
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{t("invalid")}</CardTitle>
-          <CardDescription>{error}</CardDescription>
+          <CardTitle className="text-2xl font-bold">{t(titleKey)}</CardTitle>
+          <CardDescription>{t(descKey)}</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
           <Button variant="outline" onClick={() => router.push("/login")}>
