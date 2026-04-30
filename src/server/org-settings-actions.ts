@@ -1715,7 +1715,12 @@ export async function removeTeamMember(organizationId: string, memberId: string)
 
   const member = await db.member.findUnique({
     where: { id: memberId },
-    select: { organizationId: true, userId: true, role: true },
+    select: {
+      organizationId: true,
+      userId: true,
+      role: true,
+      user: { select: { email: true } },
+    },
   })
 
   if (!member || member.organizationId !== organizationId) {
@@ -1737,7 +1742,34 @@ export async function removeTeamMember(organizationId: string, memberId: string)
     }
   }
 
-  await db.member.delete({ where: { id: memberId } })
+  // Delete the membership AND any sessions the user had active in this org
+  // in a single transaction. Killing the sessions force-logs-out their
+  // mobile staff app + any browser session pinned to this org (Vercel/staff
+  // app see 401 on the next call → SecureStore is cleared, user lands on
+  // login). Sessions tied to other orgs they belong to survive.
+  const [, revoked] = await db.$transaction([
+    db.member.delete({ where: { id: memberId } }),
+    db.session.deleteMany({
+      where: {
+        userId: member.userId,
+        activeOrganizationId: organizationId,
+      },
+    }),
+  ])
+
+  // Owner-action audit trail. Org-level events don't fit AdminAuditLog (which
+  // is scoped to platform admins) so we emit a structured log line that's
+  // greppable from Vercel/Sentry until we ship a dedicated org audit table.
+  console.info("[org-action] member.removed", {
+    organizationId,
+    removedUserId: member.userId,
+    removedEmail: member.user.email,
+    removedRole: member.role,
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    revokedSessions: revoked.count,
+    timestamp: new Date().toISOString(),
+  })
 
   revalidatePath("/dashboard/settings")
   return { success: true }
