@@ -103,6 +103,15 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     idempotencyKey: `invite:${invitation.id}`,
   })
 
+  console.info("[org-action] invitation.sent", {
+    organizationId: parsed.organizationId,
+    invitationId: invitation.id,
+    inviteeEmail: parsed.email,
+    role: parsed.role,
+    expiresAt: expiresAt.toISOString(),
+    timestamp: new Date().toISOString(),
+  })
+
   return { success: true, invitationId: invitation.id }
 }
 
@@ -349,6 +358,16 @@ export async function signUpAndAcceptInvite(
     data: { activeOrganizationId: invitation.organizationId },
   })
 
+  console.info("[org-action] invitation.accepted", {
+    organizationId: invitation.organizationId,
+    invitationId: invitation.id,
+    userId,
+    inviteeEmail: invitation.email,
+    role: invitation.role,
+    path: "signup",
+    timestamp: new Date().toISOString(),
+  })
+
   return { success: true, organizationId: invitation.organizationId }
 }
 
@@ -453,6 +472,16 @@ export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitati
       data: { activeOrganizationId: invitation.organizationId },
     }),
   ])
+
+  console.info("[org-action] invitation.accepted", {
+    organizationId: invitation.organizationId,
+    invitationId: invitation.id,
+    userId: session.user.id,
+    inviteeEmail: invitation.email,
+    role: invitation.role,
+    path: "signin",
+    timestamp: new Date().toISOString(),
+  })
 
   return { success: true, organizationId: invitation.organizationId }
 }

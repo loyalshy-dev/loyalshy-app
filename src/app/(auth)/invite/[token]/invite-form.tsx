@@ -124,6 +124,13 @@ export function InviteForm({ token }: { token: string }) {
     if (!invitation) return
     setIsSubmitting(true)
 
+    // Track which leg is in flight: if signin succeeded but accept threw
+    // (DB blip / transient error), the user is now signed-in-to-nothing.
+    // We surface a specific "signed in, retry" message instead of the
+    // generic "invalid credentials" so they understand pressing the
+    // button again will recover (acceptStaffInvitation is idempotent).
+    let didSignIn = false
+
     try {
       const { data, error: signInError } = await authClient.signIn.email({
         email: invitation.email,
@@ -134,6 +141,7 @@ export function InviteForm({ token }: { token: string }) {
         toast.error(signInError?.message || t("invalidCredentials"))
         return
       }
+      didSignIn = true
 
       const acceptResult = await acceptStaffInvitation({ token })
       if (acceptResult.error) {
@@ -145,7 +153,11 @@ export function InviteForm({ token }: { token: string }) {
       router.replace("/dashboard")
     } catch (err) {
       console.error("Invite signin failed:", err)
-      toast.error(err instanceof Error ? err.message : t("invalidCredentials"))
+      if (didSignIn) {
+        toast.error(t("acceptFailedTryAgain"))
+      } else {
+        toast.error(err instanceof Error ? err.message : t("invalidCredentials"))
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -206,6 +218,7 @@ export function InviteForm({ token }: { token: string }) {
             ? t("createAccount")
             : t("signInToAccept")}
         </CardDescription>
+        <ExpiryHint expiresAt={invitation.expiresAt} />
       </CardHeader>
       <CardContent>
         {mode === "signup" ? (
@@ -308,6 +321,25 @@ export function InviteForm({ token }: { token: string }) {
         )}
       </CardContent>
     </Card>
+  )
+}
+
+function ExpiryHint({ expiresAt }: { expiresAt: string }) {
+  const t = useTranslations("auth.invite")
+  const expiry = new Date(expiresAt)
+  const now = new Date()
+  const ms = expiry.getTime() - now.getTime()
+  if (ms <= 0) return null
+  const hours = Math.floor(ms / 3_600_000)
+  const days = Math.floor(hours / 24)
+  // < 24h shows hours so a "1-day-left" notice doesn't lie about the actual
+  // window. ICU plurals handle the en/es/fr conjugation in the messages file.
+  const text =
+    days >= 1
+      ? t("expiresInDays", { count: days })
+      : t("expiresInHours", { count: Math.max(hours, 0) })
+  return (
+    <p className="mt-2 text-xs text-muted-foreground">{text}</p>
   )
 }
 

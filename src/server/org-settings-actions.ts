@@ -1822,11 +1822,11 @@ export async function changeTeamMemberRole(
 
 export async function cancelInvitation(organizationId: string, invitationId: string) {
   const t = await getTranslations("serverErrors")
-  await assertOrganizationRole(organizationId, "owner")
+  const { session } = await assertOrganizationRole(organizationId, "owner")
 
   const invitation = await db.staffInvitation.findUnique({
     where: { id: invitationId },
-    select: { organizationId: true },
+    select: { organizationId: true, email: true, role: true },
   })
 
   if (!invitation || invitation.organizationId !== organizationId) {
@@ -1835,13 +1835,23 @@ export async function cancelInvitation(organizationId: string, invitationId: str
 
   await db.staffInvitation.delete({ where: { id: invitationId } })
 
+  console.info("[org-action] invitation.cancelled", {
+    organizationId,
+    invitationId,
+    inviteeEmail: invitation.email,
+    role: invitation.role,
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    timestamp: new Date().toISOString(),
+  })
+
   revalidatePath("/dashboard/settings")
   return { success: true }
 }
 
 export async function resendInvitation(organizationId: string, invitationId: string) {
   const t = await getTranslations("serverErrors")
-  await assertOrganizationRole(organizationId, "owner")
+  const { session } = await assertOrganizationRole(organizationId, "owner")
 
   const invitation = await db.staffInvitation.findUnique({
     where: { id: invitationId },
@@ -1881,6 +1891,16 @@ export async function resendInvitation(organizationId: string, invitationId: str
     role: invitation.role === "OWNER" ? "owner" : "staff",
     inviteUrl,
     mobileDeepLink,
+  })
+
+  console.info("[org-action] invitation.resent", {
+    organizationId,
+    invitationId,
+    inviteeEmail: invitation.email,
+    role: invitation.role,
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    timestamp: new Date().toISOString(),
   })
 
   revalidatePath("/dashboard/settings")
