@@ -365,6 +365,7 @@
       "emailPlaceholder": "you@example.com",
       "password": "Password",
       "passwordHint": "At least 8 characters",
+      "passwordPlaceholder": "Enter your password",
       "submit": "Create account",
       "hasAccount": "Already have an account?",
       "signIn": "Sign in",
@@ -402,7 +403,8 @@
       "checkEmail": "Check your email",
       "emailSent": "We sent a password reset link to {email}",
       "noEmail": "Didn't receive the email? Check your spam folder or try again.",
-      "tryDifferent": "Try a different email"
+      "tryDifferent": "Try a different email",
+      "backToInvite": "Back to invitation"
     },
     "resetPassword": {
       "title": "Reset your password",
@@ -419,7 +421,9 @@
       "success": "Password reset successfully! You can now sign in.",
       "invalidTitle": "Invalid reset link",
       "invalidDescription": "This password reset link is invalid or has expired.",
-      "requestNewLink": "Request a new reset link"
+      "requestNewLink": "Request a new reset link",
+      "backToInvite": "Back to invitation",
+      "successInvite": "Password reset successfully! Sign in below to accept the invitation."
     },
     "invite": {
       "joinOrg": "Join {organizationName}",
@@ -437,7 +441,9 @@
       "goToSignIn": "Go to sign in",
       "welcome": "Welcome to {organizationName}!",
       "createFailed": "Failed to create account",
-      "invalidCredentials": "Invalid credentials"
+      "invalidCredentials": "Invalid credentials",
+      "accountExists": "An account with this email already exists. Sign in to accept the invitation.",
+      "forgotPassword": "Forgot password?"
     },
     "error": {
       "title": "Authentication error",

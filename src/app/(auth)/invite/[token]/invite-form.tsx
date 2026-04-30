@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
 import { validateInvitationToken, acceptStaffInvitation } from "@/server/auth-actions"
 import { Button } from "@/components/ui/button"
@@ -27,13 +28,18 @@ type InvitationData = {
 
 export function InviteForm({ token }: { token: string }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const t = useTranslations("auth.invite")
   const tAuth = useTranslations("auth.register")
   const [invitation, setInvitation] = useState<InvitationData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isValidating, setIsValidating] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [mode, setMode] = useState<"signup" | "signin">("signup")
+  // Default to signin when returning from a password reset (?reset=1) so the
+  // worker doesn't have to flip the form themselves.
+  const [mode, setMode] = useState<"signup" | "signin">(
+    searchParams.get("reset") === "1" ? "signin" : "signup",
+  )
   const [name, setName] = useState("")
   const [password, setPassword] = useState("")
 
@@ -63,6 +69,17 @@ export function InviteForm({ token }: { token: string }) {
     })
 
     if (signUpError || !data) {
+      // Better Auth returns 422 USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL when an
+      // account with this email already exists. Auto-flip to sign-in mode so
+      // the worker can finish accepting the invitation with their existing
+      // password.
+      if (signUpError?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
+        toast.info(t("accountExists"))
+        setPassword("")
+        setMode("signin")
+        setIsSubmitting(false)
+        return
+      }
       toast.error(signUpError?.message || t("createFailed"))
       setIsSubmitting(false)
       return
@@ -219,7 +236,15 @@ export function InviteForm({ token }: { token: string }) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">{tAuth("password")}</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{tAuth("password")}</Label>
+                <Link
+                  href={`/forgot-password?invite=${encodeURIComponent(token)}`}
+                  className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                >
+                  {t("forgotPassword")}
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"

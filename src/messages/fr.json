@@ -365,6 +365,7 @@
       "emailPlaceholder": "vous@exemple.com",
       "password": "Mot de passe",
       "passwordHint": "Au moins 8 caractères",
+      "passwordPlaceholder": "Saisissez votre mot de passe",
       "submit": "Créer un compte",
       "hasAccount": "Vous avez déjà un compte ?",
       "signIn": "Se connecter",
@@ -402,7 +403,8 @@
       "checkEmail": "Consultez votre e-mail",
       "emailSent": "Nous avons envoyé un lien de réinitialisation à {email}",
       "noEmail": "Vous n'avez pas reçu l'e-mail ? Vérifiez votre dossier spam ou réessayez.",
-      "tryDifferent": "Essayer un autre e-mail"
+      "tryDifferent": "Essayer un autre e-mail",
+      "backToInvite": "Retour à l'invitation"
     },
     "resetPassword": {
       "title": "Réinitialiser votre mot de passe",
@@ -419,7 +421,9 @@
       "success": "Mot de passe réinitialisé avec succès ! Vous pouvez maintenant vous connecter.",
       "invalidTitle": "Lien de réinitialisation invalide",
       "invalidDescription": "Ce lien de réinitialisation est invalide ou a expiré.",
-      "requestNewLink": "Demander un nouveau lien"
+      "requestNewLink": "Demander un nouveau lien",
+      "backToInvite": "Retour à l'invitation",
+      "successInvite": "Mot de passe réinitialisé ! Connectez-vous ci-dessous pour accepter l'invitation."
     },
     "invite": {
       "joinOrg": "Rejoindre {organizationName}",
@@ -437,7 +441,9 @@
       "goToSignIn": "Aller à la connexion",
       "welcome": "Bienvenue chez {organizationName} !",
       "createFailed": "Échec de la création du compte",
-      "invalidCredentials": "Identifiants invalides"
+      "invalidCredentials": "Identifiants invalides",
+      "accountExists": "Un compte avec cet email existe déjà. Connectez-vous pour accepter l'invitation.",
+      "forgotPassword": "Mot de passe oublié ?"
     },
     "error": {
       "title": "Erreur d'authentification",

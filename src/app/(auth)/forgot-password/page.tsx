@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
@@ -18,7 +19,20 @@ import {
 import { toast } from "sonner"
 
 export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ForgotPasswordForm />
+    </Suspense>
+  )
+}
+
+function ForgotPasswordForm() {
   const t = useTranslations("auth.forgotPassword")
+  const searchParams = useSearchParams()
+  // When the worker came from /invite/[token] and forgot their password, we
+  // round-trip the invite token through reset so they land back on the invite
+  // page after setting a new password.
+  const inviteToken = searchParams.get("invite")
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSent, setIsSent] = useState(false)
@@ -27,12 +41,18 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setIsLoading(true)
 
+    // Better Auth appends `?token=…` to redirectTo via URL.searchParams.set,
+    // so an existing `?invite=…` query is preserved cleanly.
+    const redirectTo = inviteToken
+      ? `/reset-password?invite=${encodeURIComponent(inviteToken)}`
+      : "/reset-password"
+
     const { error } = await (authClient as unknown as {
       requestPasswordReset: (opts: { email: string; redirectTo: string }) =>
         Promise<{ error: { message: string } | null }>
     }).requestPasswordReset({
       email,
-      redirectTo: "/reset-password",
+      redirectTo,
     })
 
     if (error) {
@@ -70,9 +90,15 @@ export default function ForgotPasswordPage() {
           </Button>
         </CardContent>
         <CardFooter className="justify-center">
-          <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
-            {t("backToLogin")}
-          </Link>
+          {inviteToken ? (
+            <Link href={`/invite/${inviteToken}`} className="text-sm text-muted-foreground hover:text-foreground">
+              {t("backToInvite")}
+            </Link>
+          ) : (
+            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
+              {t("backToLogin")}
+            </Link>
+          )}
         </CardFooter>
       </Card>
     )

@@ -68,8 +68,10 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     return { error: "This user is already a member of your organization" }
   }
 
-  // Generate invitation token
-  const token = crypto.randomBytes(32).toString("hex")
+  // Generate invitation token. The plaintext only ever leaves in the
+  // email/deep-link; the DB stores the sha256 hash so a backup leak
+  // can't be replayed against /invite/[token].
+  const plaintextToken = crypto.randomBytes(32).toString("hex")
   const expiresAt = addDays(new Date(), 7)
 
   const invitation = await db.staffInvitation.create({
@@ -77,15 +79,15 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
       organizationId: parsed.organizationId,
       email: parsed.email,
       role: parsed.role === "owner" ? "OWNER" : "STAFF",
-      token,
+      token: hashToken(plaintextToken),
       expiresAt,
     },
   })
 
   // Dispatch invitation email
   const siteUrl = process.env.BETTER_AUTH_URL || "http://localhost:3000"
-  const inviteUrl = `${siteUrl}/invite/${token}`
-  const mobileDeepLink = `loyalshystaff://invite/${token}?url=${encodeURIComponent(siteUrl)}`
+  const inviteUrl = `${siteUrl}/invite/${plaintextToken}`
+  const mobileDeepLink = `loyalshystaff://invite/${plaintextToken}?url=${encodeURIComponent(siteUrl)}`
   const organizationName = org?.name ?? "An organization"
 
   await sendInvitationEmail({
@@ -214,18 +216,40 @@ export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitati
     return { error: "This invitation was sent to a different email address" }
   }
 
-  // Mark invitation as accepted and add user as org member
+  // If the user already belongs to this org (e.g. invitation was re-sent
+  // after they already accepted, or they were added via another path), don't
+  // explode on the unique constraint inside the transaction — just mark the
+  // invitation accepted, point the session at this org, and let them in.
+  const existingMember = await db.member.findFirst({
+    where: {
+      userId: session.user.id,
+      organizationId: invitation.organizationId,
+    },
+    select: { id: true },
+  })
+
+  // Mark invitation accepted, add the membership if missing, and set the
+  // session's active org so the dashboard lands in the org they just joined
+  // rather than whatever org was previously active.
   await db.$transaction([
     db.staffInvitation.update({
       where: { id: invitation.id },
       data: { accepted: true },
     }),
-    db.member.create({
-      data: {
-        userId: session.user.id,
-        organizationId: invitation.organizationId,
-        role: invitation.role === "OWNER" ? "owner" : "member",
-      },
+    ...(existingMember
+      ? []
+      : [
+          db.member.create({
+            data: {
+              userId: session.user.id,
+              organizationId: invitation.organizationId,
+              role: invitation.role === "OWNER" ? "owner" : "member",
+            },
+          }),
+        ]),
+    db.session.updateMany({
+      where: { userId: session.user.id },
+      data: { activeOrganizationId: invitation.organizationId },
     }),
   ])
 

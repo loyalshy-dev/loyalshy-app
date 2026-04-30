@@ -365,6 +365,7 @@
       "emailPlaceholder": "tu@ejemplo.com",
       "password": "Contraseña",
       "passwordHint": "Mínimo 8 caracteres",
+      "passwordPlaceholder": "Introduce tu contraseña",
       "submit": "Crear cuenta",
       "hasAccount": "¿Ya tienes cuenta?",
       "signIn": "Inicia sesión",
@@ -402,7 +403,8 @@
       "checkEmail": "Revisa tu correo",
       "emailSent": "Hemos enviado un enlace para restablecer la contraseña a {email}",
       "noEmail": "¿No recibiste el email? Revisa tu carpeta de spam o inténtalo de nuevo.",
-      "tryDifferent": "Probar con otro email"
+      "tryDifferent": "Probar con otro email",
+      "backToInvite": "Volver a la invitación"
     },
     "resetPassword": {
       "title": "Restablece tu contraseña",
@@ -419,7 +421,9 @@
       "success": "¡Contraseña restablecida! Ya puedes iniciar sesión.",
       "invalidTitle": "Enlace no válido",
       "invalidDescription": "Este enlace para restablecer la contraseña no es válido o ha caducado.",
-      "requestNewLink": "Solicitar nuevo enlace"
+      "requestNewLink": "Solicitar nuevo enlace",
+      "backToInvite": "Volver a la invitación",
+      "successInvite": "¡Contraseña restablecida! Inicia sesión a continuación para aceptar la invitación."
     },
     "invite": {
       "joinOrg": "Unirse a {organizationName}",
@@ -437,7 +441,9 @@
       "goToSignIn": "Ir a iniciar sesión",
       "welcome": "¡Bienvenido a {organizationName}!",
       "createFailed": "Error al crear la cuenta",
-      "invalidCredentials": "Credenciales incorrectas"
+      "invalidCredentials": "Credenciales incorrectas",
+      "accountExists": "Ya existe una cuenta con este email. Inicia sesión para aceptar la invitación.",
+      "forgotPassword": "¿Olvidaste tu contraseña?"
     },
     "error": {
       "title": "Error de autenticación",

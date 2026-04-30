@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -20,10 +20,21 @@ import {
 import { toast } from "sonner"
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordForm />
+    </Suspense>
+  )
+}
+
+function ResetPasswordForm() {
   const t = useTranslations("auth.resetPassword")
   const searchParams = useSearchParams()
   const router = useRouter()
   const token = searchParams.get("token")
+  // Preserved through requestPasswordReset's redirectTo. If present, send the
+  // worker back to /invite/[token] after reset so they can finish accepting.
+  const inviteToken = searchParams.get("invite")
 
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -37,7 +48,10 @@ export default function ResetPasswordPage() {
           <CardDescription>{t("invalidDescription")}</CardDescription>
         </CardHeader>
         <CardFooter className="justify-center">
-          <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            href={inviteToken ? `/forgot-password?invite=${inviteToken}` : "/forgot-password"}
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
             {t("requestNewLink")}
           </Link>
         </CardFooter>
@@ -74,6 +88,12 @@ export default function ResetPasswordPage() {
       return
     }
 
+    if (inviteToken) {
+      toast.success(t("successInvite"))
+      // ?reset=1 makes the invite form open in signin mode by default.
+      router.push(`/invite/${inviteToken}?reset=1`)
+      return
+    }
     toast.success(t("success"))
     router.push("/login")
   }
@@ -119,9 +139,15 @@ export default function ResetPasswordPage() {
         </form>
       </CardContent>
       <CardFooter className="justify-center">
-        <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
-          {t("backToLogin")}
-        </Link>
+        {inviteToken ? (
+          <Link href={`/invite/${inviteToken}`} className="text-sm text-muted-foreground hover:text-foreground">
+            {t("backToInvite")}
+          </Link>
+        ) : (
+          <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
+            {t("backToLogin")}
+          </Link>
+        )}
       </CardFooter>
     </Card>
   )
