@@ -4,6 +4,7 @@ import { z } from "zod"
 import crypto from "crypto"
 import { addDays } from "date-fns"
 import { headers } from "next/headers"
+import { Prisma } from "@prisma/client"
 import { db } from "@/lib/db"
 import { assertOrganizationRole, assertAuthenticated } from "@/lib/dal"
 import { publicFormLimiter } from "@/lib/rate-limit"
@@ -243,41 +244,60 @@ export async function signUpAndAcceptInvite(
   const { hashPassword } = await import("better-auth/crypto")
   const hashedPassword = await hashPassword(parsed.password)
 
-  const userId = await db.$transaction(async (tx) => {
-    const user = await tx.user.create({
-      data: {
-        email: invitation.email,
-        name: parsed.name,
-        emailVerified: true,
-        role: "USER",
-      },
-      select: { id: true },
-    })
+  let userId: string
+  try {
+    userId = await db.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email: invitation.email,
+          name: parsed.name,
+          emailVerified: true,
+          role: "USER",
+        },
+        select: { id: true },
+      })
 
-    await tx.account.create({
-      data: {
-        userId: user.id,
-        accountId: user.id,
-        providerId: "credential",
-        password: hashedPassword,
-      },
-    })
+      await tx.account.create({
+        data: {
+          userId: user.id,
+          accountId: user.id,
+          providerId: "credential",
+          password: hashedPassword,
+        },
+      })
 
-    await tx.staffInvitation.update({
-      where: { id: invitation.id },
-      data: { accepted: true },
-    })
+      await tx.staffInvitation.update({
+        where: { id: invitation.id },
+        data: { accepted: true },
+      })
 
-    await tx.member.create({
-      data: {
-        userId: user.id,
-        organizationId: invitation.organizationId,
-        role: invitation.role === "OWNER" ? "owner" : "member",
-      },
-    })
+      await tx.member.create({
+        data: {
+          userId: user.id,
+          organizationId: invitation.organizationId,
+          role: invitation.role === "OWNER" ? "owner" : "member",
+        },
+      })
 
-    return user.id
-  })
+      return user.id
+    })
+  } catch (err) {
+    // TOCTOU race: the existence check above ran before this transaction,
+    // and another request (a parallel /register, a parallel invite tab, …)
+    // may have inserted the User row in between. Catch the unique-constraint
+    // violation on `user.email` and route to the same signin fallback as
+    // the explicit pre-check.
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
+      return {
+        error: "An account with this email already exists. Sign in to accept the invitation.",
+        alreadyExists: true,
+      }
+    }
+    throw err
+  }
 
   // Mint the session via Better Auth so cookie handling matches every other
   // signin path. nextCookies() forwards the Set-Cookie via next/headers.
@@ -316,13 +336,38 @@ export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitati
     where: { token: hashToken(parsed.token) },
   })
 
-  if (!invitation || invitation.accepted || invitation.expiresAt < new Date()) {
+  if (!invitation || invitation.expiresAt < new Date()) {
     return { error: "Invalid or expired invitation" }
   }
 
   // Verify the authenticated user's email matches the invitation email
   if (session.user.email.toLowerCase() !== invitation.email.toLowerCase()) {
     return { error: "This invitation was sent to a different email address" }
+  }
+
+  // Idempotency guard: the action can re-run after a partial failure
+  // (e.g. signUpAndAcceptInvite created the user + member but its post-tx
+  // signInEmail call rejected; the user then signs in via /invite signin
+  // mode and re-runs this action). If the invitation is already accepted
+  // AND the current user is already a member of that org, treat it as a
+  // successful no-op so we still set activeOrganizationId and the dashboard
+  // navigation can proceed.
+  if (invitation.accepted) {
+    const existing = await db.member.findFirst({
+      where: {
+        userId: session.user.id,
+        organizationId: invitation.organizationId,
+      },
+      select: { id: true },
+    })
+    if (!existing) {
+      return { error: "This invitation has already been used" }
+    }
+    await db.session.updateMany({
+      where: { userId: session.user.id },
+      data: { activeOrganizationId: invitation.organizationId },
+    })
+    return { success: true, organizationId: invitation.organizationId }
   }
 
   // If the user already belongs to this org (e.g. invitation was re-sent
