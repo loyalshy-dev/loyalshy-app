@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
@@ -8,12 +8,14 @@ import {
   LayoutGrid,
   LogOut,
   Settings,
+  Smartphone,
   Users,
   Layers,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { authClient } from "@/lib/auth-client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ConnectDeviceDialog } from "@/components/dashboard/settings/connect-device"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,6 +65,9 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const isOwner = orgRole === "owner"
+  // Lifted out of the dropdown so the dialog isn't unmounted when the
+  // dropdown closes after the menu item is selected.
+  const [connectDeviceOpen, setConnectDeviceOpen] = useState(false)
 
   const navItems = [
     { label: t("overview"), href: "/dashboard", icon: LayoutGrid },
@@ -213,6 +218,20 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
                   <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
+                {organization ? (
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      // Keep dropdown closing behavior, then open the dialog
+                      // on the next tick — Radix unmounts the menu before
+                      // calling onSelect, which is fine for setState.
+                      e.preventDefault()
+                      setConnectDeviceOpen(true)
+                    }}
+                  >
+                    <Smartphone className="size-4" />
+                    {t("connectDevice")}
+                  </DropdownMenuItem>
+                ) : null}
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
                   <LogOut className="size-4" />
                   {t("signOut")}
@@ -222,6 +241,14 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
+      {organization ? (
+        <ConnectDeviceDialog
+          open={connectDeviceOpen}
+          onOpenChange={setConnectDeviceOpen}
+          organizationName={organization.name}
+        />
+      ) : null}
 
       <SidebarRail />
     </Sidebar>

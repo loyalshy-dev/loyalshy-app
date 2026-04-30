@@ -20,6 +20,54 @@ type ConnectDeviceProps = {
 
 export function ConnectDevice({ organizationName }: ConnectDeviceProps) {
   const [open, setOpen] = useState(false)
+  return (
+    <>
+      <Card className="p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-brand/10">
+              <Smartphone className="size-4 text-brand" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium">Staff App</h3>
+              <p className="text-xs text-muted-foreground">
+                Connect a device to the Loyalshy Staff Scanner app
+              </p>
+            </div>
+          </div>
+          <Button onClick={() => setOpen(true)} size="sm" className="gap-1.5">
+            <Smartphone className="size-3.5" />
+            Connect Device
+          </Button>
+        </div>
+      </Card>
+      <ConnectDeviceDialog
+        open={open}
+        onOpenChange={setOpen}
+        organizationName={organizationName}
+      />
+    </>
+  )
+}
+
+type ConnectDeviceDialogProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  organizationName: string
+}
+
+/**
+ * Standalone, controllable dialog for the QR + PIN pairing flow. Used both
+ * by the Settings → Team card (owner-facing) and the user-menu "Connect
+ * mobile device" entry in the sidebar (any member). The pairing endpoint
+ * itself only needs an active org membership, not owner role — the QR
+ * mints a session for whoever generated it.
+ */
+export function ConnectDeviceDialog({
+  open,
+  onOpenChange,
+  organizationName,
+}: ConnectDeviceDialogProps) {
   const [loading, setLoading] = useState(false)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [pin, setPin] = useState<string | null>(null)
@@ -86,37 +134,18 @@ export function ConnectDevice({ organizationName }: ConnectDeviceProps) {
     return () => clearInterval(interval)
   }, [expiresAt])
 
-  const handleClose = () => {
-    setOpen(false)
-    setQrDataUrl(null)
-    setPin(null)
-    setExpiresAt(null)
-    setTimeLeft("")
+  const handleClose = (next: boolean) => {
+    onOpenChange(next)
+    if (!next) {
+      setQrDataUrl(null)
+      setPin(null)
+      setExpiresAt(null)
+      setTimeLeft("")
+    }
   }
 
   return (
-    <>
-      <Card className="p-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-brand/10">
-              <Smartphone className="size-4 text-brand" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium">Staff App</h3>
-              <p className="text-xs text-muted-foreground">
-                Connect a device to the Loyalshy Staff Scanner app
-              </p>
-            </div>
-          </div>
-          <Button onClick={() => setOpen(true)} size="sm" className="gap-1.5">
-            <Smartphone className="size-3.5" />
-            Connect Device
-          </Button>
-        </div>
-      </Card>
-
-      <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Connect Staff Device</DialogTitle>
@@ -183,6 +212,5 @@ export function ConnectDevice({ organizationName }: ConnectDeviceProps) {
           </p>
         </DialogContent>
       </Dialog>
-    </>
   )
 }
