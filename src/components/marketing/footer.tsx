@@ -63,7 +63,7 @@ export async function MarketingFooter() {
               />
             </Link>
             <p
-              className="mt-3 text-[14px] leading-relaxed max-w-[220px]"
+              className="mt-3 text-[14px] leading-relaxed max-w-55"
               style={{ color: "oklch(0.45 0.008 285)" }}
             >
               {t("tagline")}
