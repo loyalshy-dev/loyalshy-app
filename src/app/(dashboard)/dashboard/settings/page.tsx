@@ -55,6 +55,7 @@ export default async function SettingsPage(props: {
           activeTab={activeTab}
           billingData={billingData}
           currentUserId={session.user.id}
+          currentUserEmail={session.user.email}
         />
       </Suspense>
     </div>

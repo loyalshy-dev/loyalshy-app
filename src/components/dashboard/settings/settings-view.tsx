@@ -9,6 +9,7 @@ import { GeneralSettingsForm } from "./general-settings-form"
 import { TeamManagement } from "./team-management"
 import { ConnectDevice } from "./connect-device"
 import { BillingSettings } from "./billing-settings"
+import { DeleteAccountSection } from "./delete-account-section"
 import type { BillingData } from "@/server/billing-actions"
 import { Card } from "@/components/ui/card"
 
@@ -59,6 +60,7 @@ type SettingsViewProps = {
   activeTab: string
   billingData: BillingData | null
   currentUserId: string
+  currentUserEmail: string
 }
 
 export function SettingsView({
@@ -68,6 +70,7 @@ export function SettingsView({
   activeTab,
   billingData,
   currentUserId,
+  currentUserEmail,
 }: SettingsViewProps) {
   const t = useTranslations("dashboard.settings")
   const router = useRouter()
@@ -130,7 +133,10 @@ export function SettingsView({
 
       {/* Tab Content */}
       {currentTab === "general" && (
-        <GeneralSettingsForm organization={organization} />
+        <div className="space-y-6">
+          <GeneralSettingsForm organization={organization} />
+          <DeleteAccountSection userEmail={currentUserEmail} />
+        </div>
       )}
       {currentTab === "team" && (
         <div className="space-y-6">
