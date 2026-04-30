@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
 import { useTranslations } from "next-intl"
+import Link from "next/link"
 import {
   UserPlus,
   MoreHorizontal,
@@ -16,6 +17,7 @@ import {
   RefreshCw,
   X,
   Check,
+  History,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -203,10 +205,18 @@ export function TeamManagement({
               {members.length} member{members.length !== 1 ? "s" : ""}
             </p>
           </div>
-          <Button size="sm" onClick={() => setInviteOpen(true)}>
-            <UserPlus className="mr-1.5 h-3.5 w-3.5" />
-            Invite
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard/settings/audit-log">
+              <Button size="sm" variant="outline">
+                <History className="mr-1.5 h-3.5 w-3.5" />
+                {t("viewAuditLog")}
+              </Button>
+            </Link>
+            <Button size="sm" onClick={() => setInviteOpen(true)}>
+              <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+              Invite
+            </Button>
+          </div>
         </div>
         <div className="divide-y divide-border">
           {members.map((member) => (

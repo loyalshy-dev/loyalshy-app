@@ -13,6 +13,7 @@ import { validateTemplateConfig } from "@/lib/pass-config"
 import { checkTemplateLimit, checkPassTypeAllowed } from "@/server/billing-actions"
 import { computeDesignHash, computeTextColor } from "@/lib/wallet/card-design"
 import { hashToken } from "@/lib/token-hash"
+import { logOrgAction } from "@/lib/org-audit"
 import type { PatternStyle, ProgressStyle, LabelFormat, SocialLinks } from "@/lib/wallet/card-design"
 import type { DesignCardType } from "@/types/pass-types"
 
@@ -1757,18 +1758,15 @@ export async function removeTeamMember(organizationId: string, memberId: string)
     }),
   ])
 
-  // Owner-action audit trail. Org-level events don't fit AdminAuditLog (which
-  // is scoped to platform admins) so we emit a structured log line that's
-  // greppable from Vercel/Sentry until we ship a dedicated org audit table.
-  console.info("[org-action] member.removed", {
+  await logOrgAction({
     organizationId,
-    removedUserId: member.userId,
-    removedEmail: member.user.email,
-    removedRole: member.role,
     actorUserId: session.user.id,
     actorEmail: session.user.email,
-    revokedSessions: revoked.count,
-    timestamp: new Date().toISOString(),
+    action: "MEMBER_REMOVED",
+    targetType: "member",
+    targetId: member.userId,
+    targetLabel: member.user.email,
+    metadata: { role: member.role, revokedSessions: revoked.count },
   })
 
   revalidatePath("/dashboard/settings")
@@ -1785,7 +1783,12 @@ export async function changeTeamMemberRole(
 
   const member = await db.member.findUnique({
     where: { id: memberId },
-    select: { organizationId: true, userId: true, role: true },
+    select: {
+      organizationId: true,
+      userId: true,
+      role: true,
+      user: { select: { email: true } },
+    },
   })
 
   if (!member || member.organizationId !== organizationId) {
@@ -1811,9 +1814,21 @@ export async function changeTeamMemberRole(
     }
   }
 
+  const previousRole = member.role
   await db.member.update({
     where: { id: memberId },
     data: { role: newRole },
+  })
+
+  await logOrgAction({
+    organizationId,
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    action: "MEMBER_ROLE_CHANGED",
+    targetType: "member",
+    targetId: member.userId,
+    targetLabel: member.user.email,
+    metadata: { previousRole, newRole },
   })
 
   revalidatePath("/dashboard/settings")
@@ -1835,14 +1850,15 @@ export async function cancelInvitation(organizationId: string, invitationId: str
 
   await db.staffInvitation.delete({ where: { id: invitationId } })
 
-  console.info("[org-action] invitation.cancelled", {
+  await logOrgAction({
     organizationId,
-    invitationId,
-    inviteeEmail: invitation.email,
-    role: invitation.role,
     actorUserId: session.user.id,
     actorEmail: session.user.email,
-    timestamp: new Date().toISOString(),
+    action: "INVITATION_CANCELLED",
+    targetType: "invitation",
+    targetId: invitationId,
+    targetLabel: invitation.email,
+    metadata: { role: invitation.role },
   })
 
   revalidatePath("/dashboard/settings")
@@ -1893,14 +1909,15 @@ export async function resendInvitation(organizationId: string, invitationId: str
     mobileDeepLink,
   })
 
-  console.info("[org-action] invitation.resent", {
+  await logOrgAction({
     organizationId,
-    invitationId,
-    inviteeEmail: invitation.email,
-    role: invitation.role,
     actorUserId: session.user.id,
     actorEmail: session.user.email,
-    timestamp: new Date().toISOString(),
+    action: "INVITATION_RESENT",
+    targetType: "invitation",
+    targetId: invitationId,
+    targetLabel: invitation.email,
+    metadata: { role: invitation.role },
   })
 
   revalidatePath("/dashboard/settings")
@@ -1954,4 +1971,83 @@ export async function getOrgMediaLibrary(organizationId: string) {
   }
 
   return { items }
+}
+
+// ─── Audit Log Query ──────────────────────────────────────────
+
+export type OrgAuditLogEntry = {
+  id: string
+  action: string
+  targetType: string | null
+  targetLabel: string | null
+  metadata: Prisma.JsonValue | null
+  ipAddress: string | null
+  createdAt: Date
+  actorEmail: string | null
+  actor: {
+    id: string
+    name: string
+    email: string
+    image: string | null
+  } | null
+}
+
+type GetOrgAuditLogsOpts = {
+  organizationId: string
+  page: number
+  perPage: number
+  action: string
+  search: string
+}
+
+export async function getOrgAuditLogs(opts: GetOrgAuditLogsOpts): Promise<{
+  logs: OrgAuditLogEntry[]
+  total: number
+  pageCount: number
+}> {
+  await assertOrganizationRole(opts.organizationId, "owner")
+
+  const where: Prisma.OrgAuditLogWhereInput = {
+    organizationId: opts.organizationId,
+  }
+
+  if (opts.action && opts.action !== "all") {
+    where.action = opts.action as Prisma.OrgAuditLogWhereInput["action"]
+  }
+
+  if (opts.search) {
+    where.OR = [
+      { targetLabel: { contains: opts.search, mode: "insensitive" } },
+      { actorEmail: { contains: opts.search, mode: "insensitive" } },
+    ]
+  }
+
+  const [logs, total] = await Promise.all([
+    db.orgAuditLog.findMany({
+      where,
+      include: {
+        actor: { select: { id: true, name: true, email: true, image: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (opts.page - 1) * opts.perPage,
+      take: opts.perPage,
+    }),
+    db.orgAuditLog.count({ where }),
+  ])
+
+  return {
+    logs: logs.map((l) => ({
+      id: l.id,
+      action: l.action,
+      targetType: l.targetType,
+      targetLabel: l.targetLabel,
+      metadata: l.metadata,
+      ipAddress: l.ipAddress,
+      createdAt: l.createdAt,
+      actorEmail: l.actorEmail,
+      actor: l.actor,
+    })),
+    total,
+    pageCount: Math.ceil(total / opts.perPage),
+  }
 }

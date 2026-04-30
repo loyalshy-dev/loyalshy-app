@@ -23,6 +23,17 @@ enum UserRole {
   @@map("user_role")
 }
 
+enum OrgAuditAction {
+  INVITATION_SENT      @map("invitation_sent")
+  INVITATION_RESENT    @map("invitation_resent")
+  INVITATION_CANCELLED @map("invitation_cancelled")
+  INVITATION_ACCEPTED  @map("invitation_accepted")
+  MEMBER_REMOVED       @map("member_removed")
+  MEMBER_ROLE_CHANGED  @map("member_role_changed")
+
+  @@map("org_audit_action")
+}
+
 enum AdminAction {
   USER_BANNED              @map("user_banned")
   USER_UNBANNED            @map("user_unbanned")
@@ -208,6 +219,7 @@ model User {
   performedInteractions Interaction[]        @relation("PerformedBy")
   redeemedRewards       Reward[]             @relation("RedeemedBy")
   adminAuditLogs        AdminAuditLog[]      @relation("AdminAuditLogs")
+  orgAuditLogs          OrgAuditLog[]        @relation("OrgAuditActor")
   devicePairingTokens   DevicePairingToken[] @relation("DevicePairingTokens")
 
   @@map("user")
@@ -299,6 +311,7 @@ model Organization {
   staffInvitations    StaffInvitation[]
   analyticsSnapshots  AnalyticsSnapshot[]
   devicePairingTokens DevicePairingToken[]
+  orgAuditLogs        OrgAuditLog[]
 
   @@map("organization")
 }
@@ -612,6 +625,36 @@ model AdminAuditLog {
   @@index([action, createdAt])
   @@index([createdAt])
   @@map("admin_audit_log")
+}
+
+// ─── Org Audit Log ────────────────────────────────────────────
+// Visible to org owners. Mirrors AdminAuditLog but scoped to a single
+// organization — owner-actioned events (invite, remove member, role
+// change). actorUserId is nullable + ON DELETE SET NULL because the
+// actor's User row may eventually be deleted; actorEmail is denormalized
+// so the trail survives. metadata is open-ended for action-specific
+// detail (e.g. invitation role, previous/new role on a change).
+
+model OrgAuditLog {
+  id             String         @id @default(dbgenerated("uuidv7()::text"))
+  organizationId String
+  actorUserId    String?
+  actorEmail     String?
+  action         OrgAuditAction
+  targetType     String?
+  targetId       String?
+  targetLabel    String?
+  metadata       Json?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime       @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation("OrgAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt(sort: Desc)])
+  @@index([action])
+  @@map("org_audit_log")
 }
 
 // ─── Device Pairing Token (mobile app QR login) ───────────────

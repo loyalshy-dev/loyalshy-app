@@ -824,6 +824,7 @@
       "cancelInvite": "Annuler",
       "inviteCancelled": "Invitation annulée",
       "members": "Membres",
+      "viewAuditLog": "Journal d'audit",
       "removeMember": "Retirer",
       "removeConfirm": "Retirer {name} de cette organisation ?",
       "currentPlan": "Plan actuel",
@@ -889,6 +890,26 @@
       "devices": "Appareils",
       "sent": "Envoyé",
       "failed": "Échoué"
+    },
+    "auditLog": {
+      "title": "Journal d'audit",
+      "subtitle": "Chaque changement d'équipe dans cette organisation, avec auteur et date.",
+      "backToTeam": "Retour à l'équipe",
+      "searchPlaceholder": "Rechercher par e-mail...",
+      "filterAll": "Toutes les actions",
+      "empty": "Aucune activité pour l'instant.",
+      "by": "par",
+      "target": "cible",
+      "unknownActor": "(utilisateur supprimé)",
+      "pageOf": "Page {page} sur {total} · {count, plural, one {# entrée} other {# entrées}}",
+      "action": {
+        "INVITATION_SENT": "Invitation envoyée",
+        "INVITATION_RESENT": "Invitation renvoyée",
+        "INVITATION_CANCELLED": "Invitation annulée",
+        "INVITATION_ACCEPTED": "Invitation acceptée",
+        "MEMBER_REMOVED": "Membre retiré",
+        "MEMBER_ROLE_CHANGED": "Rôle modifié"
+      }
     },
     "visitsChart": {
       "activityOverTime": "Activité dans le temps",

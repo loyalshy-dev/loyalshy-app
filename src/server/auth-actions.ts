@@ -9,6 +9,7 @@ import { db } from "@/lib/db"
 import { assertOrganizationRole, assertAuthenticated } from "@/lib/dal"
 import { publicFormLimiter } from "@/lib/rate-limit"
 import { hashToken } from "@/lib/token-hash"
+import { logOrgAction } from "@/lib/org-audit"
 
 // ─── Schemas ────────────────────────────────────────────────
 
@@ -24,7 +25,7 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
   const parsed = sendInvitationSchema.parse(input)
 
   // Only owners can invite staff
-  await assertOrganizationRole(parsed.organizationId, "owner")
+  const { session } = await assertOrganizationRole(parsed.organizationId, "owner")
 
   // Check for existing pending invitation
   const existing = await db.staffInvitation.findFirst({
@@ -103,13 +104,15 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     idempotencyKey: `invite:${invitation.id}`,
   })
 
-  console.info("[org-action] invitation.sent", {
+  await logOrgAction({
     organizationId: parsed.organizationId,
-    invitationId: invitation.id,
-    inviteeEmail: parsed.email,
-    role: parsed.role,
-    expiresAt: expiresAt.toISOString(),
-    timestamp: new Date().toISOString(),
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    action: "INVITATION_SENT",
+    targetType: "invitation",
+    targetId: invitation.id,
+    targetLabel: parsed.email,
+    metadata: { role: parsed.role, expiresAt: expiresAt.toISOString() },
   })
 
   return { success: true, invitationId: invitation.id }
@@ -358,14 +361,15 @@ export async function signUpAndAcceptInvite(
     data: { activeOrganizationId: invitation.organizationId },
   })
 
-  console.info("[org-action] invitation.accepted", {
+  await logOrgAction({
     organizationId: invitation.organizationId,
-    invitationId: invitation.id,
-    userId,
-    inviteeEmail: invitation.email,
-    role: invitation.role,
-    path: "signup",
-    timestamp: new Date().toISOString(),
+    actorUserId: userId,
+    actorEmail: invitation.email,
+    action: "INVITATION_ACCEPTED",
+    targetType: "invitation",
+    targetId: invitation.id,
+    targetLabel: invitation.email,
+    metadata: { role: invitation.role, path: "signup" },
   })
 
   return { success: true, organizationId: invitation.organizationId }
@@ -473,14 +477,15 @@ export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitati
     }),
   ])
 
-  console.info("[org-action] invitation.accepted", {
+  await logOrgAction({
     organizationId: invitation.organizationId,
-    invitationId: invitation.id,
-    userId: session.user.id,
-    inviteeEmail: invitation.email,
-    role: invitation.role,
-    path: "signin",
-    timestamp: new Date().toISOString(),
+    actorUserId: session.user.id,
+    actorEmail: session.user.email,
+    action: "INVITATION_ACCEPTED",
+    targetType: "invitation",
+    targetId: invitation.id,
+    targetLabel: invitation.email,
+    metadata: { role: invitation.role, path: "signin" },
   })
 
   return { success: true, organizationId: invitation.organizationId }
