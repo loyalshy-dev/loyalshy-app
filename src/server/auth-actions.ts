@@ -193,7 +193,116 @@ export async function validateInvitationToken(token: string) {
   }
 }
 
-// ─── Accept Invitation ──────────────────────────────────────
+// ─── Sign-up + Accept (fresh account) ───────────────────────
+//
+// The /invite signup path used to call `authClient.signUp.email(...)`,
+// which goes through Better Auth's `/sign-up/email` endpoint and triggers
+// the emailOTP plugin's after-hook: a 6-digit OTP "verify your email" email
+// gets sent. That makes no sense for invite acceptance — the recipient
+// already proved control of the address by clicking the link from the
+// invitation email.
+//
+// This action bypasses Better Auth's signup endpoint entirely, creates the
+// User + credential Account + Member rows directly with `emailVerified:
+// true`, then runs `auth.api.signInEmail` to mint a session. The
+// `nextCookies()` Better Auth plugin (already wired in `src/lib/auth.ts`)
+// forwards the Set-Cookie headers to the browser via Next.js `cookies()`,
+// so the user lands in the dashboard authenticated, with no junk OTP.
+
+const signUpInviteSchema = z.object({
+  token: z.string().min(1),
+  name: z.string().min(1).max(100),
+  password: z.string().min(8).max(128),
+})
+
+export async function signUpAndAcceptInvite(
+  input: z.infer<typeof signUpInviteSchema>,
+): Promise<{ success: true; organizationId: string } | { error: string; alreadyExists?: boolean }> {
+  const parsed = signUpInviteSchema.parse(input)
+
+  const invitation = await db.staffInvitation.findUnique({
+    where: { token: hashToken(parsed.token) },
+  })
+  if (!invitation || invitation.accepted || invitation.expiresAt < new Date()) {
+    return { error: "Invalid or expired invitation" }
+  }
+
+  // If the email already has an account, kick the form back to signin mode
+  // rather than failing the unique constraint inside the transaction.
+  const existing = await db.user.findUnique({
+    where: { email: invitation.email },
+    select: { id: true },
+  })
+  if (existing) {
+    return {
+      error: "An account with this email already exists. Sign in to accept the invitation.",
+      alreadyExists: true,
+    }
+  }
+
+  const { hashPassword } = await import("better-auth/crypto")
+  const hashedPassword = await hashPassword(parsed.password)
+
+  const userId = await db.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        email: invitation.email,
+        name: parsed.name,
+        emailVerified: true,
+        role: "USER",
+      },
+      select: { id: true },
+    })
+
+    await tx.account.create({
+      data: {
+        userId: user.id,
+        accountId: user.id,
+        providerId: "credential",
+        password: hashedPassword,
+      },
+    })
+
+    await tx.staffInvitation.update({
+      where: { id: invitation.id },
+      data: { accepted: true },
+    })
+
+    await tx.member.create({
+      data: {
+        userId: user.id,
+        organizationId: invitation.organizationId,
+        role: invitation.role === "OWNER" ? "owner" : "member",
+      },
+    })
+
+    return user.id
+  })
+
+  // Mint the session via Better Auth so cookie handling matches every other
+  // signin path. nextCookies() forwards the Set-Cookie via next/headers.
+  const { auth } = await import("@/lib/auth")
+  try {
+    await auth.api.signInEmail({
+      body: { email: invitation.email, password: parsed.password },
+      headers: await headers(),
+    })
+  } catch (err) {
+    // The user + invitation are persisted at this point; log so we can
+    // diagnose, then surface a generic error so the form can fall back.
+    console.error("[signUpAndAcceptInvite] signInEmail failed:", err)
+    return { error: "Account created but sign-in failed. Please sign in manually." }
+  }
+
+  await db.session.updateMany({
+    where: { userId },
+    data: { activeOrganizationId: invitation.organizationId },
+  })
+
+  return { success: true, organizationId: invitation.organizationId }
+}
+
+// ─── Accept Invitation (existing user) ──────────────────────
 
 const acceptInvitationSchema = z.object({
   token: z.string().min(1),

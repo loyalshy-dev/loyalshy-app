@@ -4,7 +4,11 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
-import { validateInvitationToken, acceptStaffInvitation } from "@/server/auth-actions"
+import {
+  validateInvitationToken,
+  acceptStaffInvitation,
+  signUpAndAcceptInvite,
+} from "@/server/auth-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -62,36 +66,28 @@ export function InviteForm({ token }: { token: string }) {
     setIsSubmitting(true)
 
     try {
-      // Create account via Better Auth
-      const { data, error: signUpError } = await authClient.signUp.email({
-        name,
-        email: invitation.email,
-        password,
-      })
+      // Single server action that creates user + account + member + session
+      // with emailVerified: true. Bypasses Better Auth's /sign-up/email so
+      // the emailOTP plugin doesn't fire a junk verification email — the
+      // invitation email itself is proof of address ownership.
+      const result = await signUpAndAcceptInvite({ token, name, password })
 
-      if (signUpError || !data) {
-        // Better Auth returns 422 USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL when
-        // an account with this email already exists. Auto-flip to sign-in
-        // mode so the worker can finish accepting the invitation.
-        if (signUpError?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
+      if ("error" in result) {
+        if (result.alreadyExists) {
           toast.info(t("accountExists"))
           setPassword("")
           setMode("signin")
           return
         }
-        toast.error(signUpError?.message || t("createFailed"))
-        return
-      }
-
-      const acceptResult = await acceptStaffInvitation({ token })
-      if (acceptResult.error) {
-        toast.error(acceptResult.error)
+        toast.error(result.error)
         return
       }
 
       toast.success(t("welcome", { organizationName: invitation.organizationName }))
-      router.push("/dashboard")
-      router.refresh()
+      // replace + no refresh: we're navigating away from a one-shot accept
+      // flow, and refresh() would re-render /invite (now showing "already
+      // accepted") before the dashboard loads.
+      router.replace("/dashboard")
     } catch (err) {
       console.error("Invite signup failed:", err)
       toast.error(err instanceof Error ? err.message : t("createFailed"))
@@ -123,8 +119,7 @@ export function InviteForm({ token }: { token: string }) {
       }
 
       toast.success(t("welcome", { organizationName: invitation.organizationName }))
-      router.push("/dashboard")
-      router.refresh()
+      router.replace("/dashboard")
     } catch (err) {
       console.error("Invite signin failed:", err)
       toast.error(err instanceof Error ? err.message : t("invalidCredentials"))
