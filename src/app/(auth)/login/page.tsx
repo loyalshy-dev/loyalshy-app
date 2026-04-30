@@ -24,6 +24,9 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  // SessionWatcher routes here with `?reason=expired` when the dashboard tab
+  // detects the session is gone (most often: removed from team).
+  const reason = searchParams.get("reason")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -64,6 +67,14 @@ export default function LoginPage() {
         <CardDescription>{t("subtitle")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {reason === "expired" ? (
+          <div
+            role="alert"
+            className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200"
+          >
+            {t("sessionEnded")}
+          </div>
+        ) : null}
         <Button
           variant="outline"
           className="w-full"

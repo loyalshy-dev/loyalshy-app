@@ -7,6 +7,7 @@ import { getMessages } from "next-intl/server"
 import { getCurrentUser, getOrgMember } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
+import { SessionWatcher } from "@/components/dashboard/session-watcher"
 
 const DASHBOARD_NAMESPACES = ["common", "dashboard", "studio", "serverErrors"] as const
 
@@ -82,6 +83,7 @@ async function DashboardLayoutInner({
         }
         orgRole={orgRole}
       >
+        <SessionWatcher />
         {children}
       </DashboardShell>
     </NextIntlClientProvider>

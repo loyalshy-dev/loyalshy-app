@@ -347,7 +347,8 @@
       "submit": "Se connecter",
       "noAccount": "Vous n'avez pas de compte ?",
       "signUp": "S'inscrire",
-      "invalidCredentials": "E-mail ou mot de passe invalide"
+      "invalidCredentials": "E-mail ou mot de passe invalide",
+      "sessionEnded": "Votre session a expiré. Veuillez vous reconnecter."
     },
     "legalConsent": "En continuant, vous acceptez nos <terms>Conditions d'utilisation</terms> et notre <privacy>Politique de confidentialité</privacy>.",
     "brandTagline": "Conçu avec précision pour le curateur digital.",

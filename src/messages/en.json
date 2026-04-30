@@ -347,7 +347,8 @@
       "submit": "Sign in",
       "noAccount": "Don't have an account?",
       "signUp": "Sign up",
-      "invalidCredentials": "Invalid email or password"
+      "invalidCredentials": "Invalid email or password",
+      "sessionEnded": "Your session has ended. Please sign in again."
     },
     "legalConsent": "By continuing, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
     "brandTagline": "Built with precision for the digital curator.",

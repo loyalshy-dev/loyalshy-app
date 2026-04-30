@@ -347,7 +347,8 @@
       "submit": "Iniciar sesión",
       "noAccount": "¿No tienes cuenta?",
       "signUp": "Regístrate",
-      "invalidCredentials": "Email o contraseña incorrectos"
+      "invalidCredentials": "Email o contraseña incorrectos",
+      "sessionEnded": "Tu sesión ha terminado. Inicia sesión de nuevo."
     },
     "legalConsent": "Al continuar, aceptas nuestros <terms>Términos de Servicio</terms> y nuestra <privacy>Política de Privacidad</privacy>.",
     "brandTagline": "Diseñado con precisión para el curador digital.",
