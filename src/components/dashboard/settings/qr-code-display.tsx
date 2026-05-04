@@ -13,42 +13,6 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { parseCouponConfig, formatCouponValue } from "@/lib/pass-config"
 
-type SizePreset = {
-  id: string
-  label: string
-  description: string
-  qrSize: number
-  canvasWidth: number
-  canvasHeight: number
-}
-
-const SIZE_PRESETS: SizePreset[] = [
-  {
-    id: "receipt",
-    label: "Receipt",
-    description: "3\" x 3\"",
-    qrSize: 600,
-    canvasWidth: 600,
-    canvasHeight: 750,
-  },
-  {
-    id: "table-tent",
-    label: "Table Tent",
-    description: "4\" x 6\"",
-    qrSize: 800,
-    canvasWidth: 800,
-    canvasHeight: 1200,
-  },
-  {
-    id: "poster",
-    label: "Poster",
-    description: "8.5\" x 11\"",
-    qrSize: 1200,
-    canvasWidth: 1700,
-    canvasHeight: 2200,
-  },
-]
-
 type PartialCardDesign = {
   cardType?: string | null
   primaryColor?: string | null
@@ -89,16 +53,12 @@ type QrCodeDisplayProps = {
   joinUrl: string
 }
 
-type DownloadMode = "qr-only" | "poster"
-
 export function QrCodeDisplay({
   organization,
   templates,
   joinUrl,
 }: QrCodeDisplayProps) {
   const activeTemplate = templates[0] ?? null
-  const rewardDescription = activeTemplate?.rewardDescription ?? "Free reward"
-  const visitsRequired = activeTemplate?.visitsRequired ?? 10
   const activeTemplateDesign = activeTemplate?.cardDesign ?? null
   const activeTemplateType = activeTemplate?.passType
   const activeTemplateConfig = activeTemplate?.templateConfig
@@ -125,8 +85,6 @@ export function QrCodeDisplay({
     organization.brandColor ??
     "#1a1a2e"
 
-  const [selectedSize, setSelectedSize] = useState<string>("table-tent")
-  const [downloadMode, setDownloadMode] = useState<DownloadMode>("qr-only")
   const [downloading, setDownloading] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -226,131 +184,6 @@ export function QrCodeDisplay({
     }
   }
 
-  async function downloadPoster() {
-    setDownloading(true)
-
-    try {
-      const preset = SIZE_PRESETS.find((p) => p.id === selectedSize) ?? SIZE_PRESETS[1]
-      const canvas = canvasRef.current
-      if (!canvas) return
-
-      canvas.width = preset.canvasWidth
-      canvas.height = preset.canvasHeight
-
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      const posterAccentColor =
-        activeTemplateDesign?.primaryColor ?? organization.brandColor ?? "#1a1a2e"
-
-      ctx.fillStyle = "#ffffff"
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      const barHeight = Math.round(canvas.height * 0.06)
-      ctx.fillStyle = posterAccentColor
-      ctx.fillRect(0, 0, canvas.width, barHeight)
-
-      const nameFontSize = Math.round(canvas.width * 0.05)
-      ctx.fillStyle = "#111111"
-      ctx.font = `600 ${nameFontSize}px -apple-system, 'Segoe UI', sans-serif`
-      ctx.textAlign = "center"
-      ctx.fillText(
-        organization.name,
-        canvas.width / 2,
-        barHeight + nameFontSize + Math.round(canvas.height * 0.03)
-      )
-
-      const qr = QRCode.create(joinUrl, { errorCorrectionLevel: "H" })
-      // Render QR without image logo for SVG (external images taint canvas via SVG)
-      const styledSvg = renderStyledQr(qr.modules, preset.qrSize, organization.name.charAt(0).toUpperCase(), { bg: posterAccentColor, fg: "#ffffff" })
-      const svgBlob = new Blob([styledSvg], { type: "image/svg+xml" })
-      const svgUrl = URL.createObjectURL(svgBlob)
-
-      const qrImage = new window.Image()
-      await new Promise<void>((resolve) => {
-        qrImage.onload = () => resolve()
-        qrImage.src = svgUrl
-      })
-      URL.revokeObjectURL(svgUrl)
-
-      const qrDrawSize = Math.min(preset.qrSize, canvas.width * 0.75)
-      const qrX = (canvas.width - qrDrawSize) / 2
-      const qrY = barHeight + nameFontSize + Math.round(canvas.height * 0.06)
-      ctx.drawImage(qrImage, qrX, qrY, qrDrawSize, qrDrawSize)
-
-      // Draw logo image on top of QR center via same-origin proxy
-      if (qrLogoUrl) {
-        const logoImg = await loadLogoImage(qrLogoUrl)
-        if (logoImg) {
-          const moduleCount = qr.modules.size
-          const cellSize = preset.qrSize / (moduleCount + 5)
-          const centerModules = Math.ceil(moduleCount * 0.18)
-          const logoBgRadius = centerModules * cellSize * 0.42
-          const logoSize = logoBgRadius * 2 * (qrDrawSize / preset.qrSize)
-          const logoCenterX = qrX + qrDrawSize / 2
-          const logoCenterY = qrY + qrDrawSize / 2
-          const logoRadius = logoSize / 2
-
-          ctx.save()
-          ctx.beginPath()
-          ctx.arc(logoCenterX, logoCenterY, logoRadius + 2, 0, Math.PI * 2)
-          ctx.fillStyle = posterAccentColor
-          ctx.fill()
-          ctx.beginPath()
-          ctx.arc(logoCenterX, logoCenterY, logoRadius, 0, Math.PI * 2)
-          ctx.clip()
-          ctx.drawImage(logoImg, logoCenterX - logoRadius, logoCenterY - logoRadius, logoSize, logoSize)
-          ctx.restore()
-        }
-      }
-
-      const subFontSize = Math.round(canvas.width * 0.035)
-      ctx.fillStyle = "#666666"
-      ctx.font = `500 ${subFontSize}px -apple-system, 'Segoe UI', sans-serif`
-      const scanText = activeTemplate
-        ? `Scan to join ${activeTemplate.name}`
-        : "Scan to join our loyalty program"
-      ctx.fillText(scanText, canvas.width / 2, qrY + qrDrawSize + Math.round(canvas.height * 0.04))
-
-      const rewardFontSize = Math.round(canvas.width * 0.028)
-      ctx.fillStyle = "#999999"
-      ctx.font = `400 ${rewardFontSize}px -apple-system, 'Segoe UI', sans-serif`
-      const rewardText = activeTemplateType === "COUPON" && couponConfig
-        ? formatCouponValue(couponConfig)
-        : `Earn a free ${rewardDescription} after ${visitsRequired} visits`
-      ctx.fillText(
-        rewardText,
-        canvas.width / 2,
-        qrY + qrDrawSize + Math.round(canvas.height * 0.04) + rewardFontSize + Math.round(canvas.height * 0.015)
-      )
-
-      const brandFontSize = Math.round(canvas.width * 0.022)
-      ctx.fillStyle = "#bbbbbb"
-      ctx.font = `400 ${brandFontSize}px -apple-system, 'Segoe UI', sans-serif`
-      ctx.fillText("Powered by Loyalshy", canvas.width / 2, canvas.height - Math.round(canvas.height * 0.03))
-
-      const suffix = activeTemplate
-        ? `${activeTemplate.name.toLowerCase().replace(/\s+/g, "-")}-${selectedSize}`
-        : `qr-${selectedSize}`
-      const link = document.createElement("a")
-      link.download = `${organization.slug}-${suffix}.png`
-      link.href = canvas.toDataURL("image/png", 1.0)
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    } finally {
-      setDownloading(false)
-    }
-  }
-
-  function handleDownload() {
-    if (downloadMode === "qr-only") {
-      downloadQrOnly()
-    } else {
-      downloadPoster()
-    }
-  }
-
   return (
     <Card className="p-5 space-y-5">
       <div className="flex items-center gap-2">
@@ -415,68 +248,13 @@ export function QrCodeDisplay({
 
         {/* Download controls */}
         <div className="space-y-4">
-          {/* Download mode toggle */}
-          <div className="space-y-2">
-            <label className="text-[13px] font-medium text-muted-foreground">
-              Download format
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {([
-                { id: "qr-only" as const, label: "QR Code Only", description: "Transparent PNG" },
-                { id: "poster" as const, label: "Print Poster", description: "With text & branding" },
-              ]).map((mode) => (
-                <button
-                  key={mode.id}
-                  onClick={() => setDownloadMode(mode.id)}
-                  className={`flex flex-col items-center gap-0.5 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
-                    downloadMode === mode.id
-                      ? "border-foreground bg-foreground/5"
-                      : "border-border hover:border-foreground/30"
-                  }`}
-                >
-                  <span className="font-medium">{mode.label}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {mode.description}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Print size selector — only shown for poster mode */}
-          {downloadMode === "poster" && (
-            <div className="space-y-2">
-              <label className="text-[13px] font-medium text-muted-foreground">
-                Print size
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {SIZE_PRESETS.map((preset) => (
-                  <button
-                    key={preset.id}
-                    onClick={() => setSelectedSize(preset.id)}
-                    className={`flex flex-col items-center gap-0.5 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
-                      selectedSize === preset.id
-                        ? "border-foreground bg-foreground/5"
-                        : "border-border hover:border-foreground/30"
-                    }`}
-                  >
-                    <span className="font-medium">{preset.label}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {preset.description}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           <Button
-            onClick={handleDownload}
+            onClick={downloadQrOnly}
             disabled={downloading}
             className="w-full gap-2"
           >
             <Download className="size-4" />
-            {downloading ? "Generating..." : downloadMode === "qr-only" ? "Download QR Code" : "Download Poster"}
+            {downloading ? "Generating..." : "Download QR Code"}
           </Button>
 
           {/* NFC note */}
