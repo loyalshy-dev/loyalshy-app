@@ -80,7 +80,7 @@ export const processStripeWebhookTask = task({
           await db.organization.update({
             where: { id: organization.id },
             data: {
-              subscriptionStatus: "CANCELED" as never,
+              subscriptionStatus: "ACTIVE" as never,
               plan: "FREE" as never,
               stripeSubscriptionId: null,
               trialEndsAt: null,

@@ -180,10 +180,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
   if (!organization) return
 
+  // Drop to the FREE tier on cancellation. FREE is a real, usable plan
+  // (50 contacts / 1 program / 1 staff), so we keep subscriptionStatus ACTIVE
+  // — `isActiveSubscription()` then returns true and limit checks continue
+  // to evaluate against the FREE limits. CANCELED is reserved as a terminal
+  // "do not let this org use the app" flag, e.g. for admin-disabled orgs.
   await db.organization.update({
     where: { id: organization.id },
     data: {
-      subscriptionStatus: "CANCELED" as never,
+      subscriptionStatus: "ACTIVE" as never,
       plan: "FREE" as never,
       stripeSubscriptionId: null,
       trialEndsAt: null,

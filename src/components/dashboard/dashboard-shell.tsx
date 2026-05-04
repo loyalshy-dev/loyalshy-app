@@ -4,9 +4,8 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import dynamic from "next/dynamic"
-import { AlertTriangle, Clock, Lock, X } from "lucide-react"
+import { AlertTriangle, Clock, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/button"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "./sidebar"
 import { Topbar } from "./topbar"
@@ -71,7 +70,6 @@ export function DashboardShell({
     try { sessionStorage.setItem("loyalshy_trial_banner_dismissed", "1") } catch {}
   }
 
-  const showSubscriptionGate = organization?.subscriptionStatus === "CANCELED"
   const pathname = usePathname()
   const isStudioPage = pathname.endsWith("/design")
 
@@ -124,29 +122,9 @@ export function DashboardShell({
         )}
 
         <main className={`flex-1 overflow-y-auto md:pb-0 ${isStudioPage ? "pb-0" : "pb-18"}`}>
-          {showSubscriptionGate ? (
-            <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted mb-4">
-                <Lock className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <h2 className="text-lg font-semibold tracking-tight">
-                Your subscription has ended
-              </h2>
-              <p className="text-sm text-muted-foreground mt-2 max-w-md">
-                Your subscription was canceled. Upgrade to a plan to continue
-                using Loyalshy and access your dashboard.
-              </p>
-              <Button asChild className="mt-6">
-                <Link href="/dashboard/settings?tab=billing" prefetch={true}>
-                  Choose a plan
-                </Link>
-              </Button>
-            </div>
-          ) : (
-            <div className={isStudioPage ? "w-full px-0 py-0 md:px-4 lg:px-6 md:py-6" : "w-full px-4 lg:px-6 py-6"}>
-              {children}
-            </div>
-          )}
+          <div className={isStudioPage ? "w-full px-0 py-0 md:px-4 lg:px-6 md:py-6" : "w-full px-4 lg:px-6 py-6"}>
+            {children}
+          </div>
         </main>
 
         {/* Mobile bottom nav — hidden on studio/design page (has its own toolbar) */}
