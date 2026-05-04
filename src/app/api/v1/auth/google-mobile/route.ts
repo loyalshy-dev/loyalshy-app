@@ -38,11 +38,22 @@ export async function POST(req: NextRequest) {
       return withCorsHeaders(problemJson(400, "Bad Request", "idToken is required"))
     }
 
-    // Mobile-only audiences. The web GOOGLE_CLIENT_ID is intentionally
-    // excluded — the web Better Auth flow has its own non-bearer path
-    // and accepting web-issued tokens here would let any leaked web ID
-    // token mint a 30-day staff session.
+    // The mobile staff app uses @react-native-google-signin, which issues
+    // ID tokens whose `aud` claim is the *web* client ID — the iOS / Android
+    // client IDs only drive the native sign-in handshake. So we must accept
+    // GOOGLE_CLIENT_ID here. We still accept the iOS / Android audiences
+    // for backwards compatibility with any in-flight builds and for future
+    // tooling that signs tokens with the native client ID directly.
+    //
+    // Security note: this used to exclude the web client ID to avoid
+    // letting a leaked web token mint a staff session. The web flow uses
+    // Better Auth's authorization-code OAuth path, so the web id_token
+    // never touches client-side JS — there's no XSS exfiltration vector.
+    // An attacker who can re-trigger Google sign-in for the victim could
+    // already authenticate via this endpoint regardless of which audience
+    // we accept.
     const allowedClientIds = [
+      process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_ID_IOS,
       process.env.GOOGLE_CLIENT_ID_ANDROID,
     ].filter(Boolean) as string[]
