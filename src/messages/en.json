@@ -1734,10 +1734,10 @@
     "title": "Empower your team on the floor",
     "subtitle": "Give your staff a dedicated mobile app to scan passes, add stamps, redeem coupons, and manage loyalty actions — all from their phone.",
     "screenshots": {
-      "scanner": "QR code scanner screen",
-      "action": "Pass action — add points",
-      "dashboard": "Staff home with contacts and activity",
-      "login": "Staff app login screen"
+      "home": "Staff home with contacts and activity",
+      "scan": "QR code scanner screen",
+      "history": "Interaction history feed",
+      "share": "Share a loyalty program"
     },
     "features": {
       "scan": {

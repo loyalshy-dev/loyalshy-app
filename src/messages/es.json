@@ -1734,10 +1734,10 @@
     "title": "Potencia a tu equipo en el punto de venta",
     "subtitle": "Ofrece a tu personal una app móvil dedicada para escanear pases, añadir sellos, canjear cupones y gestionar acciones de fidelización — todo desde su teléfono.",
     "screenshots": {
-      "scanner": "Pantalla de escáner QR",
-      "action": "Acción de pase — añadir puntos",
-      "dashboard": "Inicio con contactos y actividad reciente",
-      "login": "Pantalla de inicio de sesión"
+      "home": "Inicio con contactos y actividad reciente",
+      "scan": "Pantalla de escáner QR",
+      "history": "Historial de interacciones",
+      "share": "Compartir un programa de fidelización"
     },
     "features": {
       "scan": {

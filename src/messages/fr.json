@@ -1734,10 +1734,10 @@
     "title": "Donnez les moyens à votre équipe sur le terrain",
     "subtitle": "Offrez à votre personnel une application mobile dédiée pour scanner les pass, ajouter des tampons, utiliser des coupons et gérer les actions de fidélité — tout depuis leur téléphone.",
     "screenshots": {
-      "scanner": "Écran de scan QR",
-      "action": "Action de pass — ajouter des points",
-      "dashboard": "Accueil avec contacts et activité récente",
-      "login": "Écran de connexion"
+      "home": "Accueil avec contacts et activité récente",
+      "scan": "Écran de scan QR",
+      "history": "Historique des interactions",
+      "share": "Partager un programme de fidélité"
     },
     "features": {
       "scan": {

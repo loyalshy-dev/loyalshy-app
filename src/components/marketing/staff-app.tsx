@@ -10,10 +10,10 @@ import { FadeIn, Stagger, StaggerItem } from "./motion"
 /* ─── Screenshot carousel data ────────────────────────────────────── */
 
 const SCREENSHOTS = [
-  { src: "/staff-app/1-eng.webp", id: "login" },
-  { src: "/staff-app/2-eng.webp", id: "scanner" },
-  { src: "/staff-app/3-eng.webp", id: "action" },
-  { src: "/staff-app/4-eng.webp", id: "dashboard" },
+  { src: "/staff-app/home.webp", id: "home" },
+  { src: "/staff-app/scan.webp", id: "scan" },
+  { src: "/staff-app/history.webp", id: "history" },
+  { src: "/staff-app/share.webp", id: "share" },
 ] as const
 
 /* ─── Main component ─────────────────────────────────────────────── */
@@ -148,8 +148,8 @@ export function StaffApp() {
                       key={shot.id}
                       src={shot.src}
                       alt={t(`screenshots.${shot.id}`)}
-                      width={1242}
-                      height={2688}
+                      width={1170}
+                      height={2532}
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-out"
                       style={{ opacity: activeIdx === i ? 1 : 0 }}
                       sizes="252px"
