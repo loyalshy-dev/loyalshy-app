@@ -3,6 +3,7 @@ import Link from "next/link"
 import { ExternalLink } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { FadeIn } from "./motion"
+import { TryDemoCard } from "./try-demo-card"
 
 const DEMO_JOIN_URL = process.env.NEXT_PUBLIC_DEMO_JOIN_URL
 
@@ -57,15 +58,8 @@ export async function TryDemo() {
           <div
             className="mx-auto max-w-md flex flex-col items-center gap-8 rounded-2xl p-8 sm:p-10"
           >
-            {/* Card preview */}
-            <Image
-              src="/pass-types/business-apple.webp"
-              alt={t("cardPreviewAlt")}
-              width={283}
-              height={308}
-              className="rounded-2xl"
-
-            />
+            {/* Card preview — Apple on iOS/macOS, Google on Android */}
+            <TryDemoCard alt={t("cardPreviewAlt")} />
 
             {/* Wallet buttons */}
             <div className="flex flex-row flex-wrap items-center justify-center gap-3 sm:gap-4">
