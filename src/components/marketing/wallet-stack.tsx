@@ -177,6 +177,7 @@ export function WalletStack() {
       style={{
         width: compact ? 320 : 400,
         height: compact ? cardH + 30 : cardH + 40,
+        marginLeft: compact ? 24 : 0,
       }}
     >
       <div
