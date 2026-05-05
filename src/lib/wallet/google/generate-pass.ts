@@ -2,7 +2,7 @@ import "server-only"
 
 import { buildClassId, buildObjectId, buildProgramClassId, buildEnrollmentObjectId } from "./constants"
 import { buildSaveUrl } from "./jwt-utils"
-import type { CardDesignData, CardType } from "../card-design"
+import type { CardDesignData } from "../card-design"
 import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
@@ -77,7 +77,6 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
     : buildClassId(input.organizationId)
   const design = input.passDesign
   const hexBg = ensureHexColor(design?.primaryColor ?? input.brandColor, "#1a1a2e")
-  const cardType: CardType | undefined = design?.cardType as CardType | undefined
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
   const stripFilters = parseStripFilters(design?.editorConfig)
 
@@ -301,7 +300,6 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     ? buildProgramClassId(input.templateId)
     : buildClassId(input.organizationId)
   const design = input.passDesign
-  const cardType: CardType | undefined = design?.cardType as CardType | undefined
 
   const progressStyle = design?.progressStyle ?? "NUMBERS"
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
@@ -431,10 +429,13 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     }
   }
 
-  // Hero image (on object — shows as banner strip on the pass)
+  // Hero image (on object — shows as banner strip on the pass).
+  // Derive stamp-vs-coupon from input.passType (template-level,
+  // authoritative). design.cardType is unset on programs created
+  // outside the studio and would silently break the hero rendering.
   const googleLogo = input.organizationLogoGoogle ?? input.organizationLogo
   const showStrip = design?.showStrip ?? false
-  const isStampType = cardType === "STAMP"
+  const isStampType = !input.passType || input.passType === "STAMP_CARD"
   let heroImageUrl: string | null = null
   if (showStrip) {
     const stripFiltersG = parseStripFilters(design?.editorConfig)

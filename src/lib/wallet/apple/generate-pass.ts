@@ -65,6 +65,10 @@ export async function generateApplePass(
   const design = input.cardDesign
   const showStrip = design?.showStrip ?? false
   const textColor = design?.textColor ?? null
+  // Visual `cardType` is design-level metadata. We keep it for the typed
+  // CardDesignData contract, but type-driven behavior below derives from
+  // `input.programType` (template-level, authoritative) — design.cardType
+  // can be unset on programs created outside the studio.
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
 
   // Determine strip image: dynamic stamp grid or static URL
@@ -79,7 +83,10 @@ export async function generateApplePass(
   const stripPrimary = stripFilters.stripColor1 ?? design?.primaryColor ?? input.brandColor ?? "#1a1a2e"
   const stripSecondary = stripFilters.stripColor2 ?? design?.secondaryColor ?? input.secondaryColor ?? "#ffffff"
 
-  const isStampType = cardType === "STAMP"
+  // Authoritative stamp-vs-coupon flag — drives strip image, layout, and
+  // the changeMessage banner gate. Defaults to STAMP when programType is
+  // unset (legacy / programmatic issuance paths).
+  const isStampType = !input.programType || input.programType === "STAMP_CARD"
   if (showStrip && isStampGrid && design && isStampType) {
     // Generate stamp grid strip image dynamically for this enrollment
     const { generateStampGridImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
@@ -284,13 +291,7 @@ export async function generateApplePass(
       key: "progress",
       label: lbl("progress", progressLabel),
       value: progressValue,
-      // Gate on programType (template-level, authoritative) rather than
-      // isStampType (design-level — only true if the studio set cardType).
-      // Programs without a configured design.cardType were silently missing
-      // the banner trigger.
-      ...(!input.programType || input.programType === "STAMP_CARD"
-        ? { changeMessage: "Stamp added! %@" }
-        : {}),
+      ...(isStampType ? { changeMessage: "Stamp added! %@" } : {}),
     },
     nextReward: { key: "nextReward", label: lbl("nextReward", "NEXT REWARD"), value: input.rewardDescription },
     totalVisits: { key: "totalVisits", label: lbl("totalVisits", "TOTAL VISITS"), value: `${input.totalVisits}` },
@@ -305,7 +306,7 @@ export async function generateApplePass(
           key: "discount",
           label: lbl("discount", "OFFER"),
           value: isSingleUseRedeemed ? "USED" : (couponConfig.couponDescription || "Free item"),
-          ...(isCouponRedeemed || input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
+          ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
         }
       : {
           key: "discount",

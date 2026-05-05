@@ -1,14 +1,33 @@
 import { after } from "next/server"
 
 /**
- * Wallet pass update dispatch shared by every staff action that mutates
- * pass state. Scheduled via `after()` so the HTTP response returns
- * immediately while the push fires in the background — Vercel keeps the
- * Lambda alive until the registered work completes.
+ * Update types accepted by the dispatch helper. Mirrors the Trigger.dev
+ * task's payload union (see `src/trigger/update-wallet-pass.ts`) plus
+ * `COUPON_REDEEM` which is dashboard-specific. Used as fire-and-forget
+ * metadata — no provider-specific behavior depends on it.
+ */
+export type WalletUpdateType =
+  | "STAMP"
+  | "VISIT"
+  | "COUPON_REDEEM"
+  | "REWARD_EARNED"
+  | "REWARD_REDEEMED"
+  | "REWARD_EXPIRED"
+  | "DESIGN_CHANGE"
+  | "TEMPLATE_CHANGE"
+  | "PASS_INSTANCE_SUSPENDED"
+
+/**
+ * Wallet pass update dispatch shared by every staff/admin action that
+ * mutates pass state. Scheduled via `after()` so the HTTP response
+ * returns immediately while the push fires in the background — Vercel
+ * keeps the Lambda alive until the registered work completes (works
+ * the same in Server Actions and Route Handlers).
  *
  * Primary path is a direct call into `notifyApplePassUpdate` /
- * `notifyGooglePassUpdate` — no Trigger.dev queue / worker boot in front
- * of APNs, which shaves ~1-2s off perceived latency on the device.
+ * `notifyGooglePassUpdate` — no Trigger.dev queue / worker boot in
+ * front of APNs, which shaves ~1-2s off perceived latency on the
+ * device.
  *
  * If the direct call throws, falls back to Trigger.dev for retry +
  * observability. Without Trigger.dev (e.g. local dev) the failure is
@@ -17,7 +36,7 @@ import { after } from "next/server"
 export function dispatchWalletUpdate(
   passInstanceId: string,
   walletProvider: string,
-  updateType: "STAMP" | "COUPON_REDEEM" | "REWARD_REDEEMED",
+  updateType: WalletUpdateType,
 ) {
   if (walletProvider === "NONE") return
 
