@@ -284,7 +284,13 @@ export async function generateApplePass(
       key: "progress",
       label: lbl("progress", progressLabel),
       value: progressValue,
-      ...(isStampType ? { changeMessage: "Stamp added! %@" } : {}),
+      // Gate on programType (template-level, authoritative) rather than
+      // isStampType (design-level — only true if the studio set cardType).
+      // Programs without a configured design.cardType were silently missing
+      // the banner trigger.
+      ...(!input.programType || input.programType === "STAMP_CARD"
+        ? { changeMessage: "Stamp added! %@" }
+        : {}),
     },
     nextReward: { key: "nextReward", label: lbl("nextReward", "NEXT REWARD"), value: input.rewardDescription },
     totalVisits: { key: "totalVisits", label: lbl("totalVisits", "TOTAL VISITS"), value: `${input.totalVisits}` },
