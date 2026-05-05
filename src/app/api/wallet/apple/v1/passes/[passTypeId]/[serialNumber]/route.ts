@@ -89,6 +89,9 @@ export async function GET(request: Request, { params }: { params: Params }) {
   const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalVisits = (instanceData.totalVisits as number) ?? 0
+  const isRedeemed = (instanceData.redeemed as boolean) ?? false
+  const redeemedAtRaw = instanceData.redeemedAt
+  const redeemedAt = typeof redeemedAtRaw === "string" ? new Date(redeemedAtRaw) : null
 
   // Extract config values from PassTemplate.config JSON
   const templateConfig = (template.config ?? {}) as Record<string, unknown>
@@ -133,6 +136,8 @@ export async function GET(request: Request, { params }: { params: Params }) {
       hasUnrevealedPrize: passInstance.rewards.some(
         (r: { revealedAt: Date | null; description: string | null }) => r.revealedAt === null && r.description != null
       ),
+      isRedeemed,
+      redeemedAt,
     })
 
     // Log update

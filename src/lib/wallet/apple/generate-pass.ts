@@ -50,6 +50,9 @@ export type PassGenerationInput = {
   organizationSlug?: string
   // Whether there is an unrevealed prize to reveal
   hasUnrevealedPrize?: boolean
+  // COUPON: redemption state (drives voided pass + lock-screen notification)
+  isRedeemed?: boolean
+  redeemedAt?: Date | null
 }
 
 // ─── Generate Pass ──────────────────────────────────────────
@@ -198,6 +201,12 @@ export async function generateApplePass(
     return input.programType === "COUPON" ? `${name} Coupon` : `${name} Loyalty Card`
   })()
 
+  // Parse coupon config early so we can decide voided state at constructor time.
+  const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
+  const isCouponRedeemed = input.programType === "COUPON" && input.isRedeemed === true
+  const isSingleUseRedeemed = isCouponRedeemed && couponConfig?.redemptionLimit !== "unlimited"
+  const isUnlimitedRedeemed = isCouponRedeemed && couponConfig?.redemptionLimit === "unlimited"
+
   const pass = new PKPass(icons, certs, {
     formatVersion: 1,
     passTypeIdentifier: PASS_TYPE_IDENTIFIER,
@@ -212,6 +221,10 @@ export async function generateApplePass(
     labelColor: colors.labelColor,
     // logoText omitted — logo icon is sufficient, keeps header clean
     sharingProhibited: true,
+    // Apple Wallet greys out and stamps the pass when voided=true. Only do
+    // this for single-use coupons that have been redeemed — unlimited
+    // coupons keep being usable.
+    ...(isSingleUseRedeemed ? { voided: true } : {}),
   })
 
   // Apple Wallet pass type — STAMP_CARD and COUPON both use storeCard
@@ -254,9 +267,6 @@ export async function generateApplePass(
   const registeredAtShort = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
   const registeredAtFull = `${registeredAtShort} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 
-  // Parse type-specific config for field data
-  const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
-
   // Custom field labels from editorConfig
   const customLabels = stripFilters.fieldLabels ?? {}
   const lbl = (fieldId: string, defaultLabel: string) => {
@@ -281,10 +291,22 @@ export async function generateApplePass(
     memberSince: { key: "memberSince", label: lbl("memberSince", "SINCE"), value: memberSinceFormatted },
     registeredAt: { key: "registeredAt", label: lbl("registeredAt", "REGISTERED"), value: registeredAtShort },
     customerName: { key: "customerName", label: lbl("customerName", "NAME"), value: input.customerName },
-    // COUPON fields
+    // COUPON fields. When a single-use coupon has been redeemed, the discount
+    // value flips to "USED" — that value change is what triggers the lock-screen
+    // notification via changeMessage on the next pass fetch.
     discount: couponConfig?.discountType === "freebie"
-      ? { key: "discount", label: lbl("discount", "OFFER"), value: couponConfig.couponDescription || "Free item" }
-      : { key: "discount", label: lbl("discount", "DISCOUNT"), value: couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription },
+      ? {
+          key: "discount",
+          label: lbl("discount", "OFFER"),
+          value: isSingleUseRedeemed ? "USED" : (couponConfig.couponDescription || "Free item"),
+          ...(isCouponRedeemed || input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
+        }
+      : {
+          key: "discount",
+          label: lbl("discount", "DISCOUNT"),
+          value: isSingleUseRedeemed ? "USED" : (couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription),
+          ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
+        },
     validUntil: { key: "validUntil", label: lbl("validUntil", "VALID UNTIL"), value: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
     couponCode: { key: "couponCode", label: lbl("couponCode", "CODE"), value: couponConfig?.couponCode ?? "" },
     // Generic fields
@@ -353,7 +375,7 @@ export async function generateApplePass(
     ...appleLayout.secondary,
     ...appleLayout.auxiliary,
   ])
-  const pushBack = (field: { key: string; label: string; value: string }) => {
+  const pushBack = (field: { key: string; label: string; value: string; changeMessage?: string }) => {
     if (!frontFieldKeys.has(field.key)) pass.backFields.push(field)
   }
 
@@ -385,6 +407,24 @@ export async function generateApplePass(
       label: "How to Redeem",
       value: "Show this pass to staff when placing your order. The coupon will be applied at checkout.",
     })
+
+    // Unlimited coupons: surface the most recent redemption timestamp so
+    // every successive redeem changes the field value and fires a banner via
+    // changeMessage. Single-use is already covered by the discount→USED flip.
+    if (isUnlimitedRedeemed && input.redeemedAt) {
+      const ts = input.redeemedAt.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+      pushBack({
+        key: "couponLastUsed",
+        label: "Last Used",
+        value: ts,
+        changeMessage: "Coupon redeemed — %@",
+      })
+    }
   } else {
     // STAMP_CARD (default)
     pushBack({
