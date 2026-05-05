@@ -40,8 +40,11 @@ type GooglePassUpdateData = {
   customProgressLabel: string | null
   heroImageUrl?: string | null
   revealLink?: string | null
-  // Pass instance status (for coupon redeemed display)
+  // Pass instance status (kept for backward compatibility with non-coupon flows)
   passInstanceStatus?: string
+  // Coupon redemption state — drives state="COMPLETED" + push notification
+  isRedeemed?: boolean
+  redeemedAt?: Date | null
   // Editor config for custom field labels
   editorConfig?: unknown
 }
@@ -79,12 +82,17 @@ async function patchGoogleWalletObject(
     return formatLabel(custom ?? defaultLabel, labelFmt)
   }
 
-  // Coupon status-aware values
-  const isRedeemed = data.passInstanceStatus === "COMPLETED"
+  // Coupon redemption state. Single-use redeemed flips visuals to "USED" and
+  // marks the pass COMPLETED in Google Wallet (greys it out + adds a badge).
+  // Unlimited stays visually active — we add a "Last Used" text module instead.
+  const isCouponRedeemed = data.passType === "COUPON" && data.isRedeemed === true
+  const isSingleUseRedeemed = isCouponRedeemed && couponConfig?.redemptionLimit !== "unlimited"
+  const isUnlimitedRedeemed = isCouponRedeemed && couponConfig?.redemptionLimit === "unlimited"
+
   const couponPrizeText = couponConfig ? getWalletRewardText(data.templateConfig, formatCouponValue(couponConfig)) : ""
   const couponHasPrizes = couponConfig ? couponPrizeText !== formatCouponValue(couponConfig) : false
-  const couponDiscountLabel = isRedeemed ? "REDEEMED" : (data.revealedPrize ? "YOUR PRIZE" : (couponHasPrizes ? "PRIZES" : "DISCOUNT"))
-  const couponDiscountValue = isRedeemed ? `${data.revealedPrize ?? couponPrizeText} (Used)` : (data.revealedPrize ?? couponPrizeText)
+  const couponDiscountLabel = isSingleUseRedeemed ? "REDEEMED" : (data.revealedPrize ? "YOUR PRIZE" : (couponHasPrizes ? "PRIZES" : "DISCOUNT"))
+  const couponDiscountValue = isSingleUseRedeemed ? `${data.revealedPrize ?? couponPrizeText} (Used)` : (data.revealedPrize ?? couponPrizeText)
   const couponValidUntilText = couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"
 
   // All field data — IDs match field IDs from getFieldConfig
@@ -98,7 +106,7 @@ async function patchGoogleWalletObject(
     customerName: { id: "customerName", header: lbl("customerName", "NAME"), body: data.contactName },
     // COUPON
     discount: { id: "discount", header: lbl("discount", couponDiscountLabel), body: couponDiscountValue },
-    validUntil: { id: "validUntil", header: lbl("validUntil", isRedeemed ? "STATUS" : "VALID UNTIL"), body: isRedeemed ? "Redeemed" : couponValidUntilText },
+    validUntil: { id: "validUntil", header: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"), body: isSingleUseRedeemed ? "Redeemed" : couponValidUntilText },
     couponCode: { id: "couponCode", header: lbl("couponCode", "CODE"), body: couponConfig?.couponCode ?? "" },
   }
 
@@ -120,13 +128,26 @@ async function patchGoogleWalletObject(
     .map((id) => allFieldData[id])
     .filter((f): f is { id: string; header: string; body: string } => f != null && f.body !== "")
 
+  // Unlimited coupons: surface the most recent redemption timestamp so the
+  // user can see when they last used it. Each redeem updates the value, which
+  // pairs with the messages-with-id dedupe below to fire one banner per use.
+  if (isUnlimitedRedeemed && data.redeemedAt) {
+    const ts = data.redeemedAt.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+    textModulesData.push({ id: "couponLastUsed", header: lbl("couponLastUsed", "LAST USED"), body: ts })
+  }
+
   // Type-specific loyalty points (native Google Wallet widget — not affected by field config)
   let loyaltyPoints: Record<string, unknown>
   let secondaryLoyaltyPoints: Record<string, unknown>
 
   if (data.passType === "COUPON" && couponConfig) {
     loyaltyPoints = { label: lbl("discount", couponDiscountLabel), balance: { string: couponDiscountValue } }
-    secondaryLoyaltyPoints = { label: lbl("validUntil", isRedeemed ? "STATUS" : "VALID UNTIL"), balance: { string: isRedeemed ? "Redeemed" : couponValidUntilText } }
+    secondaryLoyaltyPoints = { label: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"), balance: { string: isSingleUseRedeemed ? "Redeemed" : couponValidUntilText } }
   } else {
     // STAMP_CARD (default)
     const progressValue = formatProgressValue(data.currentCycleVisits, data.visitsRequired, data.progressStyle, data.hasAvailableReward)
@@ -149,6 +170,31 @@ async function patchGoogleWalletObject(
         defaultValue: { language: "en", value: data.organizationName },
       },
     }
+  }
+
+  // Coupon redemption: greys-out the pass for single-use, and pushes a
+  // banner notification on every redeem (deduped by id derived from
+  // redeemedAt — same id fires once, new id per redeem fires a new banner).
+  if (isSingleUseRedeemed) {
+    patchBody.state = "COMPLETED"
+  }
+
+  if (isCouponRedeemed && data.redeemedAt) {
+    const ts = data.redeemedAt.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+    const body = isSingleUseRedeemed ? "Your coupon has been redeemed." : `Used at ${ts}.`
+    patchBody.messages = [
+      {
+        id: `redeem-${data.redeemedAt.getTime()}`,
+        header: "Coupon redeemed",
+        body,
+        messageType: "TEXT_AND_NOTIFY",
+      },
+    ]
   }
 
   if (data.revealLink) {
@@ -254,6 +300,9 @@ export async function notifyGooglePassUpdate(
   const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalVisits = (instanceData.totalVisits as number) ?? 0
+  const isRedeemed = (instanceData.redeemed as boolean) ?? false
+  const redeemedAtRaw = instanceData.redeemedAt
+  const redeemedAt = typeof redeemedAtRaw === "string" ? new Date(redeemedAtRaw) : null
 
   // Extract config values from PassTemplate.config JSON
   const templateConfig = (passInstance.passTemplate.config ?? {}) as Record<string, unknown>
@@ -334,6 +383,8 @@ export async function notifyGooglePassUpdate(
       heroImageUrl,
       revealLink,
       passInstanceStatus: passInstance.status,
+      isRedeemed,
+      redeemedAt,
       editorConfig: passDesign?.editorConfig,
     })
   } catch (error) {
