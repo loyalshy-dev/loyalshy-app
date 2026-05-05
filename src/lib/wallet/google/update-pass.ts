@@ -145,14 +145,20 @@ async function patchGoogleWalletObject(
   let loyaltyPoints: Record<string, unknown>
   let secondaryLoyaltyPoints: Record<string, unknown>
 
+  // Hoisted so the stamp banner below can reuse the same formatted value
+  // and only fires for STAMP_CARD (passType undefined defaults to stamp).
+  const isStampPass = !data.passType || data.passType === "STAMP_CARD"
+  const stampProgressValue = isStampPass
+    ? formatProgressValue(data.currentCycleVisits, data.visitsRequired, data.progressStyle, data.hasAvailableReward)
+    : null
+
   if (data.passType === "COUPON" && couponConfig) {
     loyaltyPoints = { label: lbl("discount", couponDiscountLabel), balance: { string: couponDiscountValue } }
     secondaryLoyaltyPoints = { label: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"), balance: { string: isSingleUseRedeemed ? "Redeemed" : couponValidUntilText } }
   } else {
     // STAMP_CARD (default)
-    const progressValue = formatProgressValue(data.currentCycleVisits, data.visitsRequired, data.progressStyle, data.hasAvailableReward)
     const progressLabel = data.customProgressLabel ? data.customProgressLabel : data.hasAvailableReward ? "STATUS" : "PROGRESS"
-    loyaltyPoints = { label: formatLabel(progressLabel, labelFmt), balance: { string: progressValue } }
+    loyaltyPoints = { label: formatLabel(progressLabel, labelFmt), balance: { string: stampProgressValue ?? "" } }
     secondaryLoyaltyPoints = { label: lbl("totalVisits", "TOTAL VISITS"), balance: { int: data.totalVisits } }
   }
 
@@ -192,6 +198,22 @@ async function patchGoogleWalletObject(
         id: `redeem-${data.redeemedAt.getTime()}`,
         header: "Coupon redeemed",
         body,
+        messageType: "TEXT_AND_NOTIFY",
+      },
+    ]
+  }
+
+  // Stamp banner — Google equivalent of Apple's progress field changeMessage.
+  // id keyed on totalVisits (monotonic per stamp, never resets) so Google's
+  // TEXT_AND_NOTIFY id-dedupe fires the banner exactly once per new stamp.
+  // Mutually exclusive with the coupon redeem branch above (different
+  // passType), so writing patchBody.messages here can't clobber it.
+  if (isStampPass && stampProgressValue && data.totalVisits > 0) {
+    patchBody.messages = [
+      {
+        id: `stamp-${data.totalVisits}`,
+        header: "Stamp added!",
+        body: stampProgressValue,
         messageType: "TEXT_AND_NOTIFY",
       },
     ]
