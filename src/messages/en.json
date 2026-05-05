@@ -49,12 +49,12 @@
     "freeForever": "Free forever",
     "noCreditCard": "No credit card required",
     "screenshotAlt": "Loyalshy dashboard showing loyalty programs with beautiful card designs",
-    "browserUrl": "www.loyalshy.com/dashboard"
+    "browserUrl": "loyalshy.com/dashboard"
   },
   "featureShowcase": {
     "sectionLabel": "Platform",
     "title": "Everything in one place",
-    "browserUrl": "www.loyalshy.com",
+    "browserUrl": "loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Dashboard",

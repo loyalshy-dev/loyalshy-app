@@ -49,12 +49,12 @@
     "freeForever": "Gratuit pour toujours",
     "noCreditCard": "Aucune carte bancaire requise",
     "screenshotAlt": "Tableau de bord Loyalshy montrant les programmes de fidélité avec de superbes designs de cartes",
-    "browserUrl": "www.loyalshy.com/dashboard"
+    "browserUrl": "loyalshy.com/dashboard"
   },
   "featureShowcase": {
     "sectionLabel": "Plateforme",
     "title": "Tout au même endroit",
-    "browserUrl": "www.loyalshy.com",
+    "browserUrl": "loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Tableau de bord",

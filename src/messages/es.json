@@ -49,12 +49,12 @@
     "freeForever": "Gratis para siempre",
     "noCreditCard": "Sin tarjeta de crédito",
     "screenshotAlt": "Panel de Loyalshy mostrando programas de fidelización con diseños de tarjetas",
-    "browserUrl": "www.loyalshy.com/dashboard"
+    "browserUrl": "loyalshy.com/dashboard"
   },
   "featureShowcase": {
     "sectionLabel": "Plataforma",
     "title": "Todo en un solo lugar",
-    "browserUrl": "www.loyalshy.com",
+    "browserUrl": "loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Panel",

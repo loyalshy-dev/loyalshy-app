@@ -39,7 +39,7 @@ type NominatimResult = {
  * falls back to Nominatim (OpenStreetMap) otherwise.
  */
 // Referer header so Google accepts server-side requests with HTTP referrer restrictions
-const REFERER = process.env.BETTER_AUTH_URL || "https://www.loyalshy.com"
+const REFERER = process.env.BETTER_AUTH_URL || "https://loyalshy.com"
 
 export async function GET(request: NextRequest) {
   // Require authenticated session
