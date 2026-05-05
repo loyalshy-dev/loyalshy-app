@@ -27,11 +27,14 @@ function getCardTransform(
 
   const spreadX = compact ? 8 : 12
   const spreadY = compact ? 4 : 6
+  // Compensate for the active card's left rotation overhang (-8°) so the
+  // top-left corner doesn't extend past the container's left edge on mobile.
+  const baseTx = compact ? 24 : 0
   const rotateStep = 4
   const baseRotate = -8 + depth * rotateStep
   const scaleStep = 0.04
 
-  const tx = depth * spreadX
+  const tx = baseTx + depth * spreadX
   const ty = -depth * spreadY
   const rotate = baseRotate
   const scale = 1 - depth * scaleStep
@@ -165,7 +168,7 @@ export function WalletStack() {
     return () => clearTimeout(resumeTimer)
   }, [])
 
-  const cardW = compact ? 260 : 320
+  const cardW = compact ? 240 : 320
   const cardH = Math.round(cardW * (1455 / 960)) // match tallest image ratio (Google 960×1455)
 
   return (
