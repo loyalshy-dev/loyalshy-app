@@ -294,7 +294,17 @@ export async function generateApplePass(
       ...(isStampType ? { changeMessage: "Stamp added! %@" } : {}),
     },
     nextReward: { key: "nextReward", label: lbl("nextReward", "NEXT REWARD"), value: input.rewardDescription },
-    totalVisits: { key: "totalVisits", label: lbl("totalVisits", "TOTAL VISITS"), value: `${input.totalVisits}` },
+    // totalVisits is the *primary* changeMessage carrier for stamp cards —
+    // it's in the default secondary layout (so it actually ends up in the
+    // pass) and increments monotonically per stamp. The progress field above
+    // also carries a changeMessage as a fallback for custom layouts that
+    // include it.
+    totalVisits: {
+      key: "totalVisits",
+      label: lbl("totalVisits", "TOTAL VISITS"),
+      value: `${input.totalVisits}`,
+      ...(isStampType ? { changeMessage: "Visit recorded — %@ total" } : {}),
+    },
     memberSince: { key: "memberSince", label: lbl("memberSince", "SINCE"), value: memberSinceFormatted },
     registeredAt: { key: "registeredAt", label: lbl("registeredAt", "REGISTERED"), value: registeredAtShort },
     customerName: { key: "customerName", label: lbl("customerName", "NAME"), value: input.customerName },
@@ -314,7 +324,19 @@ export async function generateApplePass(
           value: isSingleUseRedeemed ? "USED" : (couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription),
           ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
         },
-    validUntil: { key: "validUntil", label: lbl("validUntil", "VALID UNTIL"), value: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+    // validUntil is the *primary* changeMessage carrier for coupon single-use
+    // redemption — it's in the default secondary layout (so it ends up in the
+    // pass) and flips from a date to "Redeemed" when single-use is consumed.
+    // The discount field above also carries a changeMessage as a fallback for
+    // custom layouts that include it.
+    validUntil: {
+      key: "validUntil",
+      label: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"),
+      value: isSingleUseRedeemed
+        ? "Redeemed"
+        : (couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"),
+      ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
+    },
     couponCode: { key: "couponCode", label: lbl("couponCode", "CODE"), value: couponConfig?.couponCode ?? "" },
     // Generic fields
     title: { key: "title", label: lbl("title", "TITLE"), value: input.programName ?? "" },
