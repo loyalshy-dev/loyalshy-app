@@ -3,8 +3,13 @@
 import { useTheme } from "next-themes"
 import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  className?: string
+}
+
+export function ThemeToggle({ className }: ThemeToggleProps = {}) {
   const { resolvedTheme, setTheme } = useTheme()
 
   const toggle = () => {
@@ -15,7 +20,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      className="size-8"
+      className={cn("size-8", className)}
       onClick={toggle}
       aria-label="Toggle theme"
     >

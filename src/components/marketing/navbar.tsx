@@ -136,14 +136,14 @@ export function MarketingNavbar() {
           style={{ background: "var(--mk-bg)" }}
         >
           {/* Top row: language + theme switchers + close button, respects notch */}
-          <div className="flex items-center justify-end gap-2 px-6 safe-area-top" style={{ paddingTop: "max(env(safe-area-inset-top, 1.25rem), 1.25rem)" }}>
-            <LanguageSwitcher />
-            <ThemeToggle />
+          <div className="flex items-center justify-end gap-1 px-4 safe-area-top" style={{ paddingTop: "max(env(safe-area-inset-top, 1.25rem), 1.25rem)" }}>
+            <LanguageSwitcher size="icon" className="size-11" />
+            <ThemeToggle className="size-11" />
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
               aria-label={t("closeMenu")}
-              className="p-3 -mr-3 transition-opacity hover:opacity-60"
+              className="flex size-11 items-center justify-center transition-opacity hover:opacity-60"
               style={{ color: "var(--mk-text-muted)" }}
             >
               <X className="size-6" />

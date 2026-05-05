@@ -11,8 +11,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { locales, localeNames, type Locale } from "@/i18n/config"
+import { cn } from "@/lib/utils"
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  className?: string
+  size?: "icon-sm" | "icon"
+}
+
+export function LanguageSwitcher({ className, size = "icon-sm" }: LanguageSwitcherProps = {}) {
   const locale = useLocale()
   const [isPending, startTransition] = useTransition()
 
@@ -29,19 +35,21 @@ export function LanguageSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size="icon-sm"
+          size={size}
           disabled={isPending}
           aria-label="Switch language"
+          className={className}
         >
           <Languages className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      {/* z-[110] keeps the dropdown above the marketing mobile menu overlay (z-100). */}
+      <DropdownMenuContent align="end" className="z-[110]">
         {locales.map((l) => (
           <DropdownMenuItem
             key={l}
             onClick={() => switchLocale(l)}
-            className={locale === l ? "font-semibold" : ""}
+            className={cn("py-2.5 text-base", locale === l ? "font-semibold" : "")}
           >
             {localeNames[l]}
           </DropdownMenuItem>
