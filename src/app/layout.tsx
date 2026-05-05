@@ -87,6 +87,11 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Loyalshy",
   },
+  verification: {
+    other: {
+      "facebook-domain-verification": "61hyot3oi2z5ilk1ir2pa9w7epwk77",
+    },
+  },
 };
 
 // Only send shared namespaces at root level (~1KB instead of ~67KB).
