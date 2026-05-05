@@ -9,6 +9,7 @@ import {
   assertOrganizationAccess,
 } from "@/lib/dal"
 import { parseCouponConfig } from "@/lib/pass-config"
+import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
 import { Prisma } from "@prisma/client"
 import { startOfMonth, subMonths } from "date-fns"
 
@@ -268,6 +269,7 @@ export async function redeemReward(
       revealedAt: true,
       passInstance: {
         select: {
+          walletProvider: true,
           passTemplate: {
             select: { passType: true, config: true },
           },
@@ -334,22 +336,8 @@ export async function redeemReward(
     }
   })
 
-  // Dispatch wallet pass update
-  if (reward.passInstanceId) {
-    if (process.env.TRIGGER_SECRET_KEY) {
-      import("@trigger.dev/sdk")
-        .then(({ tasks }) =>
-          tasks.trigger("update-wallet-pass", {
-            passInstanceId: reward.passInstanceId,
-            updateType: "REWARD_REDEEMED",
-          })
-        )
-        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
-    } else {
-      import("@/lib/wallet/google/update-pass")
-        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(reward.passInstanceId!))
-        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
-    }
+  if (reward.passInstanceId && reward.passInstance) {
+    dispatchWalletUpdate(reward.passInstanceId, reward.passInstance.walletProvider, "REWARD_REDEEMED")
   }
 
   revalidatePath("/dashboard")

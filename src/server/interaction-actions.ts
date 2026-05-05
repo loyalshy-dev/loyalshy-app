@@ -19,6 +19,7 @@ import {
   assertOrganizationAccess,
 } from "@/lib/dal"
 import { parseCouponConfig, formatCouponValue, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
+import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
 
 // NOTE: stamp-actions exports (searchContactsForStamp, registerStamp, lookupPassInstanceByWalletPassId)
 // must be imported directly from "@/server/stamp-actions" — Turbopack does not support
@@ -67,23 +68,6 @@ async function fetchPassInstanceForInteraction(passInstanceId: string) {
   }
 
   return { error: null, organization, passInstance }
-}
-
-function dispatchWalletUpdate(passInstanceId: string, walletProvider: string, updateType: string) {
-  if (walletProvider === "NONE") return
-  if (process.env.TRIGGER_SECRET_KEY) {
-    import("@trigger.dev/sdk")
-      .then(({ tasks }) => tasks.trigger("update-wallet-pass", { passInstanceId, updateType }))
-      .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
-  } else if (walletProvider === "GOOGLE") {
-    import("@/lib/wallet/google/update-pass")
-      .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(passInstanceId))
-      .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
-  } else if (walletProvider === "APPLE") {
-    import("@/lib/wallet/apple/update-pass")
-      .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(passInstanceId))
-      .catch((err: unknown) => console.error("Direct Apple pass update failed:", err instanceof Error ? err.message : "Unknown error"))
-  }
 }
 
 // ─── Coupon Redemption ───────────────────────────────────────

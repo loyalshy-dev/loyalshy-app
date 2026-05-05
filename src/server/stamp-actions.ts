@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { assertAuthenticated, getOrganizationForUser, assertOrganizationAccess } from "@/lib/dal"
 import { parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
+import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
 import type { PassInstanceSummary } from "@/types/pass-instance"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -666,27 +667,11 @@ export async function registerStamp(
     throw err
   }
 
-  // Dispatch wallet pass update via Trigger.dev
-  if (passInstance.walletProvider !== "NONE") {
-    if (process.env.TRIGGER_SECRET_KEY) {
-      import("@trigger.dev/sdk")
-        .then(({ tasks }) =>
-          tasks.trigger("update-wallet-pass", {
-            passInstanceId: passInstance.id,
-            updateType: wasRewardEarned ? "REWARD_EARNED" : "STAMP",
-          })
-        )
-        .catch((err: unknown) => console.error("Wallet pass update dispatch failed:", err instanceof Error ? err.message : "Unknown error"))
-    } else if (passInstance.walletProvider === "GOOGLE") {
-      import("@/lib/wallet/google/update-pass")
-        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(passInstance.id))
-        .catch((err: unknown) => console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error"))
-    } else if (passInstance.walletProvider === "APPLE") {
-      import("@/lib/wallet/apple/update-pass")
-        .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(passInstance.id))
-        .catch((err: unknown) => console.error("Direct Apple pass update failed:", err instanceof Error ? err.message : "Unknown error"))
-    }
-  }
+  dispatchWalletUpdate(
+    passInstance.id,
+    passInstance.walletProvider,
+    wasRewardEarned ? "REWARD_EARNED" : "STAMP",
+  )
 
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/contacts")

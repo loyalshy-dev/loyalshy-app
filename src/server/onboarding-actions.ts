@@ -8,6 +8,7 @@ import { sanitizeText } from "@/lib/sanitize"
 import { publicFormLimiter, joinPassLimiter } from "@/lib/rate-limit"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
+import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { buildCardUrl } from "@/lib/card-access"
 import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
@@ -921,31 +922,8 @@ export async function revealPrize(
     select: { walletProvider: true },
   })
 
-  if (passInstance && passInstance.walletProvider !== "NONE") {
-    if (process.env.TRIGGER_SECRET_KEY) {
-      import("@trigger.dev/sdk")
-        .then(({ tasks }) =>
-          tasks.trigger("update-wallet-pass", {
-            passInstanceId,
-            updateType: "REWARD_EARNED" as const,
-          })
-        )
-        .catch((err: unknown) =>
-          console.error("Wallet pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
-        )
-    } else if (passInstance.walletProvider === "GOOGLE") {
-      import("@/lib/wallet/google/update-pass")
-        .then(({ notifyGooglePassUpdate }) => notifyGooglePassUpdate(passInstanceId))
-        .catch((err: unknown) =>
-          console.error("Direct Google pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
-        )
-    } else if (passInstance.walletProvider === "APPLE") {
-      import("@/lib/wallet/apple/update-pass")
-        .then(({ notifyApplePassUpdate }) => notifyApplePassUpdate(passInstanceId))
-        .catch((err: unknown) =>
-          console.error("Direct Apple pass update after reveal failed:", err instanceof Error ? err.message : "Unknown error")
-        )
-    }
+  if (passInstance) {
+    dispatchWalletUpdate(passInstanceId, passInstance.walletProvider, "REWARD_EARNED")
   }
 
   return { success: true }
