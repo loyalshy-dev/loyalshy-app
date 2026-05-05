@@ -337,9 +337,22 @@ export async function generateApplePass(
 
   // ── Back fields: Program info, T&C, contact, card design extras ──
 
+  // Apple Wallet requires field keys to be unique across the entire pass —
+  // a back field with the same key as a front field gets silently dropped
+  // by passkit-generator with a "Cannot add field with key 'X'" warning.
+  const frontFieldKeys = new Set<string>([
+    ...appleLayout.header,
+    ...appleLayout.primary,
+    ...appleLayout.secondary,
+    ...appleLayout.auxiliary,
+  ])
+  const pushBack = (field: { key: string; label: string; value: string }) => {
+    if (!frontFieldKeys.has(field.key)) pass.backFields.push(field)
+  }
+
   // If programName is provided, add a "Program" back field
   if (input.programName) {
-    pass.backFields.push({
+    pushBack({
       key: "program",
       label: "Program",
       value: input.programName,
@@ -348,58 +361,56 @@ export async function generateApplePass(
 
   // Type-specific back fields
   if (input.programType === "COUPON" && couponConfig) {
-    pass.backFields.push({
+    pushBack({
       key: "couponDetails",
       label: "Coupon Details",
       value: `${formatCouponValue(couponConfig)}${couponConfig.couponDescription ? ` — ${couponConfig.couponDescription}` : ""}`,
     })
     if (couponConfig.couponCode) {
-      pass.backFields.push({
+      pushBack({
         key: "redemptionCode",
         label: "Redemption Code",
         value: couponConfig.couponCode,
       })
     }
-    pass.backFields.push({
+    pushBack({
       key: "redemptionInstructions",
       label: "How to Redeem",
       value: "Show this pass to staff when placing your order. The coupon will be applied at checkout.",
     })
   } else {
     // STAMP_CARD (default)
-    pass.backFields.push(
-      {
-        key: "programInfo",
-        label: "Loyalty Program",
-        value: `Earn a reward after every ${input.visitsRequired} visits! Your reward: ${input.rewardDescription}. Rewards expire ${input.rewardExpiryDays} days after being earned.`,
-      },
-      {
-        key: "currentProgress",
-        label: "Current Progress",
-        value: `${input.currentCycleVisits} of ${input.visitsRequired} visits completed this cycle. ${input.totalVisits} total visits.`,
-      },
-      {
-        key: "memberNumber",
-        label: "Member #",
-        value: `${input.memberNumber ?? "—"}`,
-      },
-      {
-        key: "memberSince",
-        label: "Member Since",
-        value: memberSinceFormatted,
-      },
-      {
-        key: "registeredAt",
-        label: "Registered",
-        value: registeredAtFull,
-      }
-    )
+    pushBack({
+      key: "programInfo",
+      label: "Loyalty Program",
+      value: `Earn a reward after every ${input.visitsRequired} visits! Your reward: ${input.rewardDescription}. Rewards expire ${input.rewardExpiryDays} days after being earned.`,
+    })
+    pushBack({
+      key: "currentProgress",
+      label: "Current Progress",
+      value: `${input.currentCycleVisits} of ${input.visitsRequired} visits completed this cycle. ${input.totalVisits} total visits.`,
+    })
+    pushBack({
+      key: "memberNumber",
+      label: "Member #",
+      value: `${input.memberNumber ?? "—"}`,
+    })
+    pushBack({
+      key: "memberSince",
+      label: "Member Since",
+      value: memberSinceFormatted,
+    })
+    pushBack({
+      key: "registeredAt",
+      label: "Registered",
+      value: registeredAtFull,
+    })
   }
 
   // T&C from program or type-specific config
   const termsText = (input.programType === "COUPON" ? couponConfig?.terms : null) ?? input.termsAndConditions
   if (termsText) {
-    pass.backFields.push({
+    pushBack({
       key: "terms",
       label: "Terms & Conditions",
       value: termsText,
@@ -415,7 +426,7 @@ export async function generateApplePass(
       contactParts.push(input.organizationName)
       contactParts.push("https://loyalshy.com")
     }
-    pass.backFields.push({
+    pushBack({
       key: "contact",
       label: "Contact",
       value: contactParts.join("\n"),
@@ -424,7 +435,7 @@ export async function generateApplePass(
 
   // Card design back-of-pass content
   if (design?.businessHours) {
-    pass.backFields.push({
+    pushBack({
       key: "businessHours",
       label: "Business Hours",
       value: design.businessHours,
@@ -432,7 +443,7 @@ export async function generateApplePass(
   }
 
   if (design?.mapAddress) {
-    pass.backFields.push({
+    pushBack({
       key: "mapAddress",
       label: "Address",
       value: design.mapAddress,
@@ -440,7 +451,7 @@ export async function generateApplePass(
   }
 
   if (design?.customMessage) {
-    pass.backFields.push({
+    pushBack({
       key: "customMessage",
       label: "Message",
       value: design.customMessage,
@@ -454,7 +465,7 @@ export async function generateApplePass(
     if (design?.socialLinks.tiktok) socialParts.push(`TikTok: ${design.socialLinks.tiktok}`)
     if (design?.socialLinks.x) socialParts.push(`X: ${design.socialLinks.x}`)
     if (socialParts.length > 0) {
-      pass.backFields.push({
+      pushBack({
         key: "socials",
         label: "Social Media",
         value: socialParts.join("\n"),
@@ -468,14 +479,14 @@ export async function generateApplePass(
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
     const sig = signCardAccess(input.passInstanceId)
     const cardPageUrl = `${baseUrl}/join/${input.organizationSlug}/card/${input.passInstanceId}?sig=${sig}`
-    pass.backFields.push({
+    pushBack({
       key: "revealLink",
       label: "Prize Ready!",
       value: `You have a prize waiting to be revealed! Tap here to play:\n${cardPageUrl}`,
     })
   }
 
-  pass.backFields.push({
+  pushBack({
     key: "poweredBy",
     label: "Powered By",
     value: "Loyalshy — Digital Loyalty Cards\nhttps://loyalshy.com",
