@@ -264,11 +264,18 @@ export async function generateApplePass(
     return formatLabel(custom ?? defaultLabel, labelFmt)
   }
 
-  // Field data map — all labels go through formatLabel with custom label overrides
-  const fieldData: Record<string, { key: string; label: string; value: string }> = {
+  // Field data map — all labels go through formatLabel with custom label overrides.
+  // changeMessage triggers an iOS lock-screen notification when the field's value
+  // changes between fetches (Starbucks-style "tap to view"). %@ is the new value.
+  const fieldData: Record<string, { key: string; label: string; value: string; changeMessage?: string }> = {
     organization: { key: "organization", label: lbl("organization", "ORG"), value: input.organizationName },
     memberNumber: { key: "memberNumber", label: lbl("memberNumber", "MEMBER #"), value: `${input.memberNumber ?? "—"}` },
-    progress: { key: "progress", label: lbl("progress", progressLabel), value: progressValue },
+    progress: {
+      key: "progress",
+      label: lbl("progress", progressLabel),
+      value: progressValue,
+      ...(isStampType ? { changeMessage: "Stamp added! %@" } : {}),
+    },
     nextReward: { key: "nextReward", label: lbl("nextReward", "NEXT REWARD"), value: input.rewardDescription },
     totalVisits: { key: "totalVisits", label: lbl("totalVisits", "TOTAL VISITS"), value: `${input.totalVisits}` },
     memberSince: { key: "memberSince", label: lbl("memberSince", "SINCE"), value: memberSinceFormatted },
