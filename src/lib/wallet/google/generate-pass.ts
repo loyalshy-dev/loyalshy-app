@@ -46,6 +46,12 @@ export type GooglePassGenerationInput = {
   // Prize reveal
   hasUnrevealedPrize?: boolean
   organizationSlug?: string
+  // COUPON: redemption state (drives state="COMPLETED" + Last Used field +
+  // TEXT_AND_NOTIFY banner). Mirrors the Apple input and the update-pass.ts
+  // patch path so a re-saved pass after redemption looks the same as one
+  // that was updated in-place.
+  isRedeemed?: boolean
+  redeemedAt?: Date | null
 }
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -322,6 +328,14 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   // Parse type-specific config
   const couponConfig = input.passType === "COUPON" ? parseCouponConfig(input.templateConfig) : null
 
+  // Coupon redemption state — drives state="COMPLETED" + USED visuals on
+  // single-use, "Last Used" text + per-redeem banner on unlimited. Mirrors
+  // the patchGoogleWalletObject path so a re-saved pass after redemption
+  // doesn't appear active.
+  const isCouponRedeemed = input.passType === "COUPON" && input.isRedeemed === true
+  const isSingleUseRedeemed = isCouponRedeemed && couponConfig?.redemptionLimit !== "unlimited"
+  const isUnlimitedRedeemed = isCouponRedeemed && couponConfig?.redemptionLimit === "unlimited"
+
   // Custom field labels from editorConfig
   const objStripFilters = parseStripFilters(design?.editorConfig)
   const customLabels = objStripFilters.fieldLabels ?? {}
@@ -339,9 +353,20 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     memberSince: { id: "memberSince", header: lbl("memberSince", "SINCE"), body: memberSinceFormatted },
     registeredAt: { id: "registeredAt", header: lbl("registeredAt", "REGISTERED"), body: memberSinceFormatted },
     customerName: { id: "customerName", header: lbl("customerName", "NAME"), body: input.contactName },
-    // COUPON
-    discount: { id: "discount", header: lbl("discount", couponConfig ? (getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) !== formatCouponValue(couponConfig) ? "PRIZES" : "DISCOUNT") : "DISCOUNT"), body: couponConfig ? getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) : "" },
-    validUntil: { id: "validUntil", header: lbl("validUntil", "VALID UNTIL"), body: couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+    // COUPON. Single-use redeemed flips visuals to USED + "Redeemed" status —
+    // same shape patchGoogleWalletObject produces on the update path.
+    discount: {
+      id: "discount",
+      header: lbl("discount", isSingleUseRedeemed ? "REDEEMED" : (couponConfig ? (getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) !== formatCouponValue(couponConfig) ? "PRIZES" : "DISCOUNT") : "DISCOUNT")),
+      body: isSingleUseRedeemed
+        ? `${couponConfig ? getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) : ""} (Used)`.trim()
+        : (couponConfig ? getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) : ""),
+    },
+    validUntil: {
+      id: "validUntil",
+      header: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"),
+      body: isSingleUseRedeemed ? "Redeemed" : (couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"),
+    },
     couponCode: { id: "couponCode", header: lbl("couponCode", "CODE"), body: couponConfig?.couponCode ?? "" },
     address: { id: "address", header: lbl("address", "ADDRESS"), body: design?.mapAddress ?? "" },
   }
@@ -372,12 +397,12 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     const prizeText = getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig))
     const hasPrizes = prizeText !== formatCouponValue(couponConfig)
     loyaltyPoints = {
-      label: lbl("discount", hasPrizes ? "PRIZES" : "DISCOUNT"),
-      balance: { string: prizeText },
+      label: lbl("discount", isSingleUseRedeemed ? "REDEEMED" : (hasPrizes ? "PRIZES" : "DISCOUNT")),
+      balance: { string: isSingleUseRedeemed ? `${prizeText} (Used)`.trim() : prizeText },
     }
     secondaryLoyaltyPoints = {
-      label: lbl("validUntil", "VALID UNTIL"),
-      balance: { string: couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry" },
+      label: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"),
+      balance: { string: isSingleUseRedeemed ? "Redeemed" : (couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry") },
     }
   } else {
     // STAMP_CARD (default)
@@ -391,10 +416,25 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     }
   }
 
+  // Unlimited coupons: surface the most recent redemption timestamp so each
+  // re-save reflects the latest use. Same shape patchGoogleWalletObject
+  // produces, so a re-saved pass after redemption matches the in-place update.
+  if (isUnlimitedRedeemed && input.redeemedAt) {
+    const ts = input.redeemedAt.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+    textModulesData.push({ id: "couponLastUsed", header: lbl("couponLastUsed", "LAST USED"), body: ts })
+  }
+
   const loyaltyObject: Record<string, unknown> = {
     id: objectId,
     classId,
-    state: "ACTIVE",
+    // Single-use redeemed → COMPLETED (Google's voided equivalent — adds
+    // a "Completed" badge and greys out the pass).
+    state: isSingleUseRedeemed ? "COMPLETED" : "ACTIVE",
     accountId: input.walletPassId,
     accountName: input.contactName,
     loyaltyPoints,
@@ -406,6 +446,27 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     textModulesData,
     // Group passes from the same organization together
     groupingInfo: { groupingId: input.organizationId },
+  }
+
+  // Per-redemption banner — TEXT_AND_NOTIFY deduped by id derived from the
+  // redeemedAt timestamp. Same pattern as patchGoogleWalletObject, so a pass
+  // that gets re-saved before its first PATCH still surfaces the banner.
+  if (isCouponRedeemed && input.redeemedAt) {
+    const ts = input.redeemedAt.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+    const body = isSingleUseRedeemed ? "Your coupon has been redeemed." : `Used at ${ts}.`
+    loyaltyObject.messages = [
+      {
+        id: `redeem-${input.redeemedAt.getTime()}`,
+        header: "Coupon redeemed",
+        body,
+        messageType: "TEXT_AND_NOTIFY",
+      },
+    ]
   }
 
   // Add reveal link if there's an unrevealed prize

@@ -122,6 +122,9 @@ export async function POST(request: Request) {
     const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
     const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
     const totalVisits = (instanceData.totalVisits as number) ?? 0
+    const isRedeemed = (instanceData.redeemed as boolean) ?? false
+    const redeemedAtRaw = instanceData.redeemedAt
+    const redeemedAt = typeof redeemedAtRaw === "string" ? new Date(redeemedAtRaw) : null
 
     // Extract config values from PassTemplate.config JSON
     const templateConfig = (template.config ?? {}) as Record<string, unknown>
@@ -168,6 +171,8 @@ export async function POST(request: Request) {
       templateConfig: template.config,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
+      isRedeemed,
+      redeemedAt,
     })
 
     return NextResponse.json({ saveUrl })

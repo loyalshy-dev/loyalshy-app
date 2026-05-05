@@ -277,6 +277,8 @@ export async function issueGoogleWalletPass(
       templateConfig: passInstance.passTemplate.config,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
+      isRedeemed: (instanceData.redeemed as boolean) ?? false,
+      redeemedAt: typeof instanceData.redeemedAt === "string" ? new Date(instanceData.redeemedAt) : null,
     })
 
     // Update pass instance with wallet pass fields

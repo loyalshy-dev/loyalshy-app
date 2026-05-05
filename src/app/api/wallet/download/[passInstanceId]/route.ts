@@ -88,6 +88,9 @@ export async function GET(
   const instanceData = (passInstance.data ?? {}) as Record<string, unknown>
   const currentCycleVisits = (instanceData.currentCycleVisits as number) ?? 0
   const totalInteractions = (instanceData.totalInteractions as number) ?? 0
+  const isRedeemed = (instanceData.redeemed as boolean) ?? false
+  const redeemedAtRaw = instanceData.redeemedAt
+  const redeemedAt = typeof redeemedAtRaw === "string" ? new Date(redeemedAtRaw) : null
 
   const templateConfig = (template.config ?? {}) as Record<string, unknown>
   const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
@@ -199,6 +202,8 @@ export async function GET(
       templateConfig: template.config,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
+      isRedeemed,
+      redeemedAt,
     })
 
     // Update pass instance
