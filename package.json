@@ -24,7 +24,7 @@
     "@sentry/nextjs": "^10.40.0",
     "@stripe/stripe-js": "^8.8.0",
     "@tanstack/react-table": "^8.21.3",
-    "@trigger.dev/sdk": "4.4.4",
+    "@trigger.dev/sdk": "4.4.5",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.4",
     "@vercel/analytics": "^2.0.1",
