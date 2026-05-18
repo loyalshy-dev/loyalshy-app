@@ -1092,6 +1092,8 @@
       "save": "Save",
       "saving": "Saving...",
       "saved": "Saved",
+      "publishSuccess": "Program published! Customers can now join.",
+      "publishSaveFirst": "Save your changes before publishing",
       "undo": "Undo",
       "redo": "Redo",
       "backToDesign": "Back to design",

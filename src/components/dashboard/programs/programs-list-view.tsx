@@ -117,9 +117,9 @@ export function TemplatesListView({
               </DialogHeader>
               <CreateProgramForm
                 organizationId={organizationId}
-                onCreated={() => {
+                onCreated={(templateId) => {
                   setShowCreate(false)
-                  router.refresh()
+                  router.push(`/dashboard/programs/${templateId}/design?welcome=1`)
                 }}
               />
             </DialogContent>

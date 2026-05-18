@@ -1092,6 +1092,8 @@
       "save": "Enregistrer",
       "saving": "Enregistrement...",
       "saved": "Enregistré",
+      "publishSuccess": "Programme publié ! Vos clients peuvent maintenant rejoindre.",
+      "publishSaveFirst": "Enregistre tes modifications avant de publier",
       "undo": "Annuler",
       "redo": "Refaire",
       "backToDesign": "Retour au design",

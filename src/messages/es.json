@@ -1092,6 +1092,8 @@
       "save": "Guardar",
       "saving": "Guardando...",
       "saved": "Guardado",
+      "publishSuccess": "¡Programa publicado! Tus clientes ya pueden unirse.",
+      "publishSaveFirst": "Guarda los cambios antes de publicar",
       "undo": "Deshacer",
       "redo": "Rehacer",
       "backToDesign": "Volver al diseño",

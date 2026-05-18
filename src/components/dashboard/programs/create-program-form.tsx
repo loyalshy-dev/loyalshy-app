@@ -88,7 +88,7 @@ function StampCardForm({
   onBack,
 }: {
   organizationId: string
-  onCreated: () => void
+  onCreated: (templateId: string) => void
   onBack: () => void
 }) {
   const t = useTranslations("dashboard.createProgram")
@@ -123,8 +123,9 @@ function StampCardForm({
         toast.error(String(result.error))
       } else {
         toast.success(t("stampCardCreated"))
+        window.plausible?.("program_create_success", { props: { type: "STAMP_CARD" } })
         reset()
-        onCreated()
+        onCreated(result.templateId)
       }
     })
   }
@@ -249,7 +250,7 @@ function CouponForm({
   onBack,
 }: {
   organizationId: string
-  onCreated: () => void
+  onCreated: (templateId: string) => void
   onBack: () => void
 }) {
   const t = useTranslations("dashboard.createProgram")
@@ -314,8 +315,9 @@ function CouponForm({
         toast.error(String(result.error))
       } else {
         toast.success(t("couponCreated"))
+        window.plausible?.("program_create_success", { props: { type: "COUPON" } })
         reset()
-        onCreated()
+        onCreated(result.templateId)
       }
     })
   }
@@ -493,7 +495,7 @@ export function CreateProgramForm({
   onCreated,
 }: {
   organizationId: string
-  onCreated: () => void
+  onCreated: (templateId: string) => void
 }) {
   const [selectedType, setSelectedType] = useState<PassType | null>(null)
 

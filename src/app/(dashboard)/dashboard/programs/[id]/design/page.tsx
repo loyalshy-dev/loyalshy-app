@@ -105,6 +105,7 @@ export default async function ProgramDesignPage(props: {
       templateId={programId}
       templateName={program.name}
       passType={program.passType}
+      templateStatus={program.status}
       templateConfig={program.config}
       templateStartsAt={program.startsAt.toISOString()}
       templateEndsAt={program.endsAt?.toISOString() ?? ""}

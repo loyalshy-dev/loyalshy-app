@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import QRCode from "qrcode"
 import {
   Download,
+  FileText,
   QrCode,
   Smartphone,
 } from "lucide-react"
@@ -184,6 +185,130 @@ export function QrCodeDisplay({
     }
   }
 
+  /**
+   * Render the styled QR (with logo + brand color) onto the offscreen canvas
+   * and return a data URL. Shared between PNG and PDF exports.
+   * Returns null if the canvas can't be acquired.
+   */
+  async function renderQrToCanvasDataUrl(size: number): Promise<string | null> {
+    const canvas = canvasRef.current
+    if (!canvas) return null
+
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return null
+
+    const posterAccentColor =
+      activeTemplateDesign?.primaryColor ?? organization.brandColor ?? "#1a1a2e"
+
+    const qr = QRCode.create(joinUrl, { errorCorrectionLevel: "H" })
+    const styledSvg = renderStyledQr(
+      qr.modules,
+      size,
+      organization.name.charAt(0).toUpperCase(),
+      { bg: posterAccentColor, fg: "#ffffff" }
+    )
+    const svgBlob = new Blob([styledSvg], { type: "image/svg+xml" })
+    const svgUrl = URL.createObjectURL(svgBlob)
+
+    const qrImage = new window.Image()
+    await new Promise<void>((resolve) => {
+      qrImage.onload = () => resolve()
+      qrImage.src = svgUrl
+    })
+    URL.revokeObjectURL(svgUrl)
+
+    // White background under the QR (so the PDF renders cleanly on paper)
+    ctx.clearRect(0, 0, size, size)
+    ctx.fillStyle = "#ffffff"
+    ctx.fillRect(0, 0, size, size)
+    ctx.drawImage(qrImage, 0, 0, size, size)
+
+    if (qrLogoUrl) {
+      const logoImg = await loadLogoImage(qrLogoUrl)
+      if (logoImg) {
+        const moduleCount = qr.modules.size
+        const cellSize = size / (moduleCount + 5)
+        const centerModules = Math.ceil(moduleCount * 0.18)
+        const logoBgRadius = centerModules * cellSize * 0.42
+        const centerXY = size / 2
+        const logoSize = logoBgRadius * 2
+
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(centerXY, centerXY, logoBgRadius + 1, 0, Math.PI * 2)
+        ctx.fillStyle = posterAccentColor
+        ctx.fill()
+        ctx.beginPath()
+        ctx.arc(centerXY, centerXY, logoBgRadius, 0, Math.PI * 2)
+        ctx.clip()
+        ctx.drawImage(logoImg, centerXY - logoBgRadius, centerXY - logoBgRadius, logoSize, logoSize)
+        ctx.restore()
+      }
+    }
+
+    return canvas.toDataURL("image/png", 1.0)
+  }
+
+  async function downloadQrPdf() {
+    setDownloading(true)
+    try {
+      const qrDataUrl = await renderQrToCanvasDataUrl(1024)
+      if (!qrDataUrl) return
+
+      const { jsPDF } = await import("jspdf")
+      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" })
+
+      const pageWidth = pdf.internal.pageSize.getWidth() // 210mm
+      const pageHeight = pdf.internal.pageSize.getHeight() // 297mm
+
+      // Org name above QR
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(28)
+      pdf.setTextColor(31, 20, 16) // INK
+      pdf.text(organization.name, pageWidth / 2, 55, {
+        align: "center",
+        maxWidth: pageWidth - 40,
+      })
+
+      // QR centered
+      const qrSizeMm = 130
+      const qrX = (pageWidth - qrSizeMm) / 2
+      const qrY = 75
+      pdf.addImage(qrDataUrl, "PNG", qrX, qrY, qrSizeMm, qrSizeMm)
+
+      // Tagline below QR
+      pdf.setFont("helvetica", "normal")
+      pdf.setFontSize(18)
+      pdf.setTextColor(31, 20, 16)
+      pdf.text(
+        "Escanea para unirte a nuestro programa de fidelización",
+        pageWidth / 2,
+        qrY + qrSizeMm + 22,
+        { align: "center", maxWidth: pageWidth - 40 }
+      )
+
+      // Footer
+      pdf.setFont("helvetica", "normal")
+      pdf.setFontSize(11)
+      pdf.setTextColor(127, 127, 127)
+      pdf.text(
+        "Powered by Loyalshy · loyalshy.com",
+        pageWidth / 2,
+        pageHeight - 18,
+        { align: "center" }
+      )
+
+      const suffix = activeTemplate
+        ? `${activeTemplate.name.toLowerCase().replace(/\s+/g, "-")}-poster`
+        : "poster"
+      pdf.save(`${organization.slug}-${suffix}.pdf`)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
   return (
     <Card className="p-5 space-y-5">
       <div className="flex items-center gap-2">
@@ -248,14 +373,25 @@ export function QrCodeDisplay({
 
         {/* Download controls */}
         <div className="space-y-4">
-          <Button
-            onClick={downloadQrOnly}
-            disabled={downloading}
-            className="w-full gap-2"
-          >
-            <Download className="size-4" />
-            {downloading ? "Generating..." : "Download QR Code"}
-          </Button>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button
+              onClick={downloadQrOnly}
+              disabled={downloading}
+              variant="outline"
+              className="w-full gap-2"
+            >
+              <Download className="size-4" />
+              {downloading ? "Generating..." : "Download PNG"}
+            </Button>
+            <Button
+              onClick={downloadQrPdf}
+              disabled={downloading}
+              className="w-full gap-2"
+            >
+              <FileText className="size-4" />
+              {downloading ? "Generating..." : "Download A4 poster (PDF)"}
+            </Button>
+          </div>
 
           {/* NFC note */}
           <div className="flex items-start gap-2 rounded-lg bg-muted/50 p-3">

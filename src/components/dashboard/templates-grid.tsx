@@ -114,7 +114,13 @@ export function TemplatesGridView({
           </p>
         </div>
         {isOwner && (
-          <Dialog open={showCreate} onOpenChange={setShowCreate}>
+          <Dialog
+            open={showCreate}
+            onOpenChange={(open) => {
+              if (open && !showCreate) window.plausible?.("program_create_opened")
+              setShowCreate(open)
+            }}
+          >
             <DialogTrigger asChild>
               <Button size="sm" className="gap-1.5">
                 <Plus className="h-3.5 w-3.5" />
@@ -130,9 +136,9 @@ export function TemplatesGridView({
               </DialogHeader>
               <CreateProgramForm
                 organizationId={organizationId}
-                onCreated={() => {
+                onCreated={(templateId) => {
                   setShowCreate(false)
-                  router.refresh()
+                  router.push(`/dashboard/programs/${templateId}/design?welcome=1`)
                 }}
               />
             </DialogContent>

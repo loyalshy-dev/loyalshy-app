@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useCallback, useState } from "react"
+import { useEffect, useRef, useCallback, useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { createCardDesignStore } from "@/lib/stores/card-design-store"
 import type { CardDesignStoreApi, WalletState } from "@/lib/stores/card-design-store"
@@ -19,12 +20,17 @@ import { NotificationsPanel } from "./panels/notifications-panel"
 import { LogoPanel } from "./panels/logo-panel"
 import { PrizeRevealPanel } from "./panels/prize-reveal-panel"
 import { ScratchCard, SlotMachine, WheelOfFortune } from "@/components/minigames"
-import { savePassDesign as saveCardDesign, updatePassTemplate, updateMinigameConfig } from "@/server/org-settings-actions"
+import {
+  savePassDesign as saveCardDesign,
+  updatePassTemplate,
+  updateMinigameConfig,
+  activateTemplate,
+} from "@/server/org-settings-actions"
 import type { StudioTool, PreviewFormat } from "@/types/editor"
 import type { CardType } from "@/lib/wallet/card-design"
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
 import type { ProgramConfigState } from "@/lib/stores/card-design-store"
-import { Save, Download, Smartphone, Tablet, Palette, BarChart3, ImagePlus, SlidersHorizontal, Undo2, Redo2, TextCursorInput, CircleUserRound, FileText, Bell, Gift } from "lucide-react"
+import { Save, Download, Smartphone, Tablet, Palette, BarChart3, ImagePlus, SlidersHorizontal, Undo2, Redo2, TextCursorInput, CircleUserRound, FileText, Bell, Gift, Rocket, Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 /** Map PassType → CardType for visual rendering */
@@ -57,6 +63,7 @@ type StudioLayoutProps = {
   templateId: string
   templateName: string
   passType: string
+  templateStatus: string
   templateConfig: unknown
   templateStartsAt?: string
   templateEndsAt?: string
@@ -77,6 +84,7 @@ export function StudioLayout({
   templateId,
   templateName,
   passType,
+  templateStatus,
   templateConfig,
   templateStartsAt = "",
   templateEndsAt = "",
@@ -383,6 +391,24 @@ export function StudioLayout({
     }
   }, [templateId, organizationId, passType, walletPassCount, store])
 
+  // ─── Publish (activate) handler ───────────────────────
+
+  const router = useRouter()
+  const [isActivating, startActivateTransition] = useTransition()
+
+  const handleActivate = useCallback(() => {
+    startActivateTransition(async () => {
+      const result = await activateTemplate(organizationId, templateId)
+      if ("error" in result) {
+        toast.error(String(result.error))
+        return
+      }
+      toast.success(tStudioRef.current?.("publishSuccess") ?? "Program published!")
+      window.plausible?.("template_activated", { props: { passType, source: "studio" } })
+      router.refresh()
+    })
+  }, [organizationId, templateId, passType, router])
+
   // ─── Keyboard shortcuts ───────────────────────────────
 
   useEffect(() => {
@@ -650,6 +676,9 @@ export function StudioLayout({
                 onRedo={() => temporalStore.getState().redo()}
                 onSave={handleSave}
                 onDownload={handleDownload}
+                templateStatus={templateStatus}
+                isActivating={isActivating}
+                onActivate={handleActivate}
               />
             )}
           </div>
@@ -684,6 +713,9 @@ export function StudioLayout({
             onSave={handleSave}
             onDownload={handleDownload}
             onPreviewFormatChange={(fmt) => store.getState().setPreviewFormat(fmt)}
+            templateStatus={templateStatus}
+            isActivating={isActivating}
+            onActivate={handleActivate}
           />
         )}
       </>
@@ -748,6 +780,9 @@ function CanvasControls({
   onRedo,
   onSave,
   onDownload,
+  templateStatus,
+  isActivating,
+  onActivate,
 }: {
   previewFormat: PreviewFormat
   onPreviewFormatChange: (fmt: PreviewFormat) => void
@@ -760,8 +795,12 @@ function CanvasControls({
   onRedo: () => void
   onSave: () => void
   onDownload: () => void
+  templateStatus: string
+  isActivating: boolean
+  onActivate: () => void
 }) {
   const t = useTranslations("dashboard.studio")
+  const tPrograms = useTranslations("dashboard.programs")
   return (
     <div
       style={{
@@ -908,6 +947,34 @@ function CanvasControls({
         <Save size={13} />
         {isSaving ? t("saving") : isDirty ? t("save") : t("saved")}
       </button>
+
+      {/* Publish button — DRAFT only */}
+      {templateStatus === "DRAFT" && (
+        <button
+          onClick={onActivate}
+          disabled={isActivating || isSaving || isDirty}
+          title={isDirty ? t("publishSaveFirst") : undefined}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 14px",
+            borderRadius: 9999,
+            border: "none",
+            backgroundColor: "var(--primary)",
+            color: "var(--primary-foreground)",
+            cursor: isActivating || isSaving || isDirty ? "default" : "pointer",
+            fontSize: 12,
+            fontWeight: 500,
+            opacity: isActivating || isSaving || isDirty ? 0.6 : 1,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          }}
+          aria-label={tPrograms("activate")}
+        >
+          {isActivating ? <Loader2 size={13} className="animate-spin" /> : <Rocket size={13} />}
+          {tPrograms("activate")}
+        </button>
+      )}
     </div>
   )
 }
@@ -1099,6 +1166,9 @@ function MobileToolBar({
   onSave,
   onDownload,
   onPreviewFormatChange,
+  templateStatus,
+  isActivating,
+  onActivate,
 }: {
   activeTool: StudioTool | null
   onToolSelect: (tool: StudioTool | null) => void
@@ -1115,8 +1185,12 @@ function MobileToolBar({
   onSave: () => void
   onDownload: () => void
   onPreviewFormatChange: (fmt: PreviewFormat) => void
+  templateStatus: string
+  isActivating: boolean
+  onActivate: () => void
 }) {
   const t = useTranslations("dashboard.studio")
+  const tPrograms = useTranslations("dashboard.programs")
 
   const ALL_TOOLS: { id: StudioTool; label: string; icon: React.ReactNode; condition?: boolean }[] = [
     { id: "program", label: t("program"), icon: <SlidersHorizontal size={20} /> },
@@ -1278,6 +1352,33 @@ function MobileToolBar({
           <Save size={13} />
           {isSaving ? t("saving") : isDirty ? t("save") : t("saved")}
         </button>
+
+        {/* Publish button — DRAFT only */}
+        {templateStatus === "DRAFT" && (
+          <button
+            onClick={onActivate}
+            disabled={isActivating || isSaving || isDirty}
+            title={isDirty ? t("publishSaveFirst") : undefined}
+            aria-label={tPrograms("activate")}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              padding: "5px 14px",
+              borderRadius: 9999,
+              border: "none",
+              backgroundColor: "var(--primary)",
+              color: "var(--primary-foreground)",
+              cursor: isActivating || isSaving || isDirty ? "default" : "pointer",
+              fontSize: 12,
+              fontWeight: 500,
+              opacity: isActivating || isSaving || isDirty ? 0.6 : 1,
+            }}
+          >
+            {isActivating ? <Loader2 size={13} className="animate-spin" /> : <Rocket size={13} />}
+            {tPrograms("activate")}
+          </button>
+        )}
       </div>
 
       {/* Tool row: horizontally scrollable Canva-style */}
