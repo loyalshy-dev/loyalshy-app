@@ -1514,7 +1514,25 @@
       "overview": "Resumen",
       "users": "Usuarios",
       "organizations": "Organizaciones",
+      "funnel": "Embudo",
       "auditLog": "Registro de auditoría"
+    },
+    "funnel": {
+      "title": "Embudo de activación",
+      "subtitle": "Cómo los registros se convierten en programas activos y pases emitidos. Las etapas se anclan en User.createdAt para la ventana de cohorte; el abandono es retención de cohorte, no recuento de eventos.",
+      "stageSignedUp": "Registrados",
+      "stageOrgCreated": "Organización creada",
+      "stageProgramCreated": "Primer programa creado",
+      "stageProgramActive": "Primer programa activado",
+      "stagePassIssued": "Primer pase emitido",
+      "range7d": "7 días",
+      "range30d": "30 días",
+      "range90d": "90 días",
+      "rangeAll": "Todo",
+      "rangeAriaLabel": "Rango de cohorte",
+      "ofCohort": "cohorte",
+      "ofPrev": "{value} de la anterior",
+      "cohortNote": "Cada etapa cuenta usuarios únicos cuyo registro cae dentro de la ventana de cohorte seleccionada. Un usuario que se registra y activa un programa el mismo día es la misma persona, no dos eventos."
     },
     "overview": {
       "title": "Resumen de la plataforma",

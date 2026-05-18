@@ -1514,7 +1514,25 @@
       "overview": "Aperçu",
       "users": "Utilisateurs",
       "organizations": "Organisations",
+      "funnel": "Entonnoir",
       "auditLog": "Journal d'audit"
+    },
+    "funnel": {
+      "title": "Entonnoir d'activation",
+      "subtitle": "Comment les inscriptions deviennent des programmes actifs et des pass émis. Les étapes sont ancrées sur User.createdAt pour la fenêtre de cohorte ; l'abandon est de la rétention de cohorte, pas un comptage d'événements.",
+      "stageSignedUp": "Inscrits",
+      "stageOrgCreated": "Organisation créée",
+      "stageProgramCreated": "Premier programme créé",
+      "stageProgramActive": "Premier programme activé",
+      "stagePassIssued": "Premier pass émis",
+      "range7d": "7 jours",
+      "range30d": "30 jours",
+      "range90d": "90 jours",
+      "rangeAll": "Tout",
+      "rangeAriaLabel": "Période de cohorte",
+      "ofCohort": "cohorte",
+      "ofPrev": "{value} du précédent",
+      "cohortNote": "Chaque étape compte les utilisateurs uniques dont l'inscription tombe dans la fenêtre de cohorte sélectionnée. Un utilisateur qui s'inscrit et active un programme le même jour est la même personne, pas deux événements."
     },
     "overview": {
       "title": "Aperçu de la plateforme",

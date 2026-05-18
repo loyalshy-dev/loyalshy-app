@@ -404,10 +404,9 @@ export function StudioLayout({
         return
       }
       toast.success(tStudioRef.current?.("publishSuccess") ?? "Program published!")
-      window.plausible?.("template_activated", { props: { passType, source: "studio" } })
       router.refresh()
     })
-  }, [organizationId, templateId, passType, router])
+  }, [organizationId, templateId, router])
 
   // ─── Keyboard shortcuts ───────────────────────────────
 

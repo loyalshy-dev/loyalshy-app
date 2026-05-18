@@ -5,7 +5,6 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { AnalyticsProvider } from "@/components/analytics-provider";
 import { CookieBanner } from "@/components/cookie-banner";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -136,7 +135,6 @@ async function IntlProvider({ children }: { children: React.ReactNode }) {
             <CookieBanner />
           </ThemeProvider>
         </NextIntlClientProvider>
-        <AnalyticsProvider />
       </body>
     </html>
   );

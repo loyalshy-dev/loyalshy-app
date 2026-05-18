@@ -63,7 +63,6 @@ export function ProgramTabNav({
         toast.error(String(result.error))
       } else {
         toast.success(t("activated"))
-        window.plausible?.("template_activated", { props: { passType, source: "draft-banner" } })
         router.refresh()
       }
     })

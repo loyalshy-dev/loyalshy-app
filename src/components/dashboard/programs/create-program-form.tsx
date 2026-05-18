@@ -123,7 +123,6 @@ function StampCardForm({
         toast.error(String(result.error))
       } else {
         toast.success(t("stampCardCreated"))
-        window.plausible?.("program_create_success", { props: { type: "STAMP_CARD" } })
         reset()
         onCreated(result.templateId)
       }
@@ -315,7 +314,6 @@ function CouponForm({
         toast.error(String(result.error))
       } else {
         toast.success(t("couponCreated"))
-        window.plausible?.("program_create_success", { props: { type: "COUPON" } })
         reset()
         onCreated(result.templateId)
       }

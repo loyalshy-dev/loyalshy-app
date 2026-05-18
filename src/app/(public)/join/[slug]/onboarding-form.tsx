@@ -193,8 +193,6 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
 
-        window.plausible?.("join_pass_issued", { props: { platform: "apple", isReturning: !!joinRes.isReturning } })
-
         // Redirect to card page after a brief moment (pass opens in Wallet)
         if (joinRes.cardUrl) {
           setTimeout(() => {
@@ -202,7 +200,6 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
           }, 1500)
         }
       } else if (walletRes.platform === "google" && walletRes.saveUrl) {
-        window.plausible?.("join_pass_issued", { props: { platform: "google", isReturning: !!joinRes.isReturning } })
         window.location.href = walletRes.saveUrl
         return
       }

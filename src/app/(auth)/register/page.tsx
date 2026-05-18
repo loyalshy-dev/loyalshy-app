@@ -143,10 +143,6 @@ function AccountStep({ onNext }: { onNext: (email: string) => void }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
-  useEffect(() => {
-    window.plausible?.("signup_started")
-  }, [])
-
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
     setIsLoading(true)
@@ -296,7 +292,6 @@ function VerifyEmailStep({
     }
 
     toast.success(t("verifySuccess"))
-    window.plausible?.("signup_email_verified")
     onVerified()
   }
 
@@ -400,7 +395,6 @@ function OrganizationStep() {
 
       if ("organizationId" in result && result.organizationId) {
         toast.success(t("allSet"))
-        window.plausible?.("signup_org_created")
         router.push("/dashboard")
         return
       }

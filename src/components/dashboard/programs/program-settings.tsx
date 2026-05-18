@@ -90,7 +90,6 @@ export function ProgramSettings({ program, organizationId }: ProgramSettingsProp
         toast.error(String(result.error))
       } else {
         toast.success(t("statusUpdated"))
-        window.plausible?.("template_activated", { props: { passType: program.passType, source: "settings" } })
         router.refresh()
       }
     })

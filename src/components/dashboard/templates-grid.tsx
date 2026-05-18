@@ -114,13 +114,7 @@ export function TemplatesGridView({
           </p>
         </div>
         {isOwner && (
-          <Dialog
-            open={showCreate}
-            onOpenChange={(open) => {
-              if (open && !showCreate) window.plausible?.("program_create_opened")
-              setShowCreate(open)
-            }}
-          >
+          <Dialog open={showCreate} onOpenChange={setShowCreate}>
             <DialogTrigger asChild>
               <Button size="sm" className="gap-1.5">
                 <Plus className="h-3.5 w-3.5" />

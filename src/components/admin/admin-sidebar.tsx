@@ -7,6 +7,7 @@ import {
   BarChart3,
   Building2,
   ChevronLeft,
+  Filter,
   LogOut,
   LayoutDashboard,
   ScrollText,
@@ -59,6 +60,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
     { label: t("nav.overview"), href: "/admin", icon: BarChart3 },
     { label: t("nav.users"), href: "/admin/users", icon: Users },
     { label: t("nav.organizations"), href: "/admin/organizations", icon: Building2 },
+    { label: t("nav.funnel"), href: "/admin/funnel", icon: Filter },
     { label: t("nav.auditLog"), href: "/admin/audit-log", icon: ScrollText },
   ]
 

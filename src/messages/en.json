@@ -1514,7 +1514,25 @@
       "overview": "Overview",
       "users": "Users",
       "organizations": "Organizations",
+      "funnel": "Funnel",
       "auditLog": "Audit Log"
+    },
+    "funnel": {
+      "title": "Activation funnel",
+      "subtitle": "How signups become active programs and issued passes. Stages are anchored on User.createdAt for the cohort window; drop-off is cohort retention, not event counts.",
+      "stageSignedUp": "Signed up",
+      "stageOrgCreated": "Org created",
+      "stageProgramCreated": "First program created",
+      "stageProgramActive": "First program activated",
+      "stagePassIssued": "First pass issued",
+      "range7d": "7 days",
+      "range30d": "30 days",
+      "range90d": "90 days",
+      "rangeAll": "All time",
+      "rangeAriaLabel": "Cohort range",
+      "ofCohort": "cohort",
+      "ofPrev": "{value} of prev",
+      "cohortNote": "Each stage counts distinct users whose signup falls inside the selected cohort window. A user signing up today and activating a program today is one of the same person — not two events."
     },
     "overview": {
       "title": "Platform Overview",
