@@ -9,6 +9,12 @@ type WelcomeEmailPayload = {
   ownerName: string
   organizationName: string
   organizationSlug: string
+  /**
+   * Path the primary CTA should target. Resolved by the caller based on
+   * whether the org already has an ACTIVE PassTemplate. Defaults to the
+   * create-program deep link if absent.
+   */
+  getStartedPath?: string
   /** Forwarded to Resend so a Trigger.dev retry doesn't resend the welcome. */
   idempotencyKey?: string
 }
@@ -30,7 +36,7 @@ export const sendWelcomeEmailTask = task({
 
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
     const dashboardUrl = `${baseUrl}/dashboard`
-    const qrUrl = `${baseUrl}/dashboard/settings/qr-code`
+    const getStartedUrl = `${baseUrl}${payload.getStartedPath ?? "/dashboard/programs?action=create"}`
     const joinUrl = `${baseUrl}/join/${payload.organizationSlug}`
 
     const result = await resend.emails.send(
@@ -48,15 +54,17 @@ export const sendWelcomeEmailTask = task({
           <div style="background:#fafafa;border-radius:8px;padding:20px;margin:24px 0;">
             <h3 style="color:#171717;font-size:16px;margin:0 0 12px 0;">Getting Started</h3>
             <ol style="color:#525252;font-size:14px;line-height:1.8;padding-left:20px;margin:0;">
-              <li><strong>Set up your loyalty program</strong> — Configure visits required and rewards in Settings</li>
-              <li><strong>Print your QR code</strong> — Download from <a href="${qrUrl}" style="color:#2563eb;">QR Code Settings</a></li>
+              <li><strong>Create your first program</strong> — <a href="${getStartedUrl}" style="color:#2563eb;">Pick a stamp card or coupon</a> and customize it</li>
               <li><strong>Share with customers</strong> — They scan to join at <a href="${joinUrl}" style="color:#2563eb;">${joinUrl}</a></li>
               <li><strong>Register visits</strong> — Use the dashboard to stamp customer visits</li>
             </ol>
           </div>
 
-          <a href="${dashboardUrl}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;">
-            Go to Dashboard
+          <a href="${getStartedUrl}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;">
+            Get started
+          </a>
+          <a href="${dashboardUrl}" style="display:inline-block;padding:12px 24px;color:#525252;text-decoration:none;font-size:14px;margin-left:8px;">
+            Go to dashboard
           </a>
 
           <p style="color:#a3a3a3;font-size:13px;margin-top:32px;">

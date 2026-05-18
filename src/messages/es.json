@@ -634,7 +634,10 @@
       "firstContactDescription": "Añade un contacto o haz que escaneen tu código QR",
       "inviteStaff": "Invita a tu equipo",
       "inviteStaffDescription": "Añade miembros del equipo para ayudar a gestionar visitas",
-      "dismiss": "Cerrar lista de tareas"
+      "dismiss": "Cerrar lista de tareas",
+      "heroTitle": "Crea tu primer programa de fidelización",
+      "heroBody": "Elige una tarjeta de sellos o un cupón, personaliza el diseño y empieza a recompensar a tus clientes en minutos.",
+      "heroCta": "Crear programa"
     },
     "status": {
       "active": "Activo",
@@ -789,7 +792,19 @@
       "nfcCopyUrl": "Copiar URL",
       "nfcStep1": "Consigue una etiqueta NFC (pegatina, tarjeta o soporte de mesa)",
       "nfcStep2": "Usa una app de escritura NFC para programar esta URL en la etiqueta",
-      "nfcStep3": "La gente toca la etiqueta con su móvil para añadir el pase"
+      "nfcStep3": "La gente toca la etiqueta con su móvil para añadir el pase",
+      "firstCustomer": {
+        "title": "Consigue tu primer cliente",
+        "subtitle": "Cuatro pasos rápidos para poner tu programa frente a personas reales.",
+        "qrLabel": "Descarga el cartel QR",
+        "qrDescription": "Imprímelo para el mostrador — PDF A4, con tu color de marca, listo para escanear.",
+        "shareLabel": "Comparte el enlace de inscripción",
+        "shareDescription": "Por WhatsApp, email, o cópialo directo en una story.",
+        "scannerLabel": "Configura el móvil del personal",
+        "scannerDescription": "Vincula la app Loyalshy Staff para que cualquiera en turno pueda sellar y canjear.",
+        "directLabel": "Emite el primer pase manualmente",
+        "directDescription": "Envía un pase directo a un cliente habitual — sin escaneo."
+      }
     },
     "programSettings": {
       "title": "Ajustes",

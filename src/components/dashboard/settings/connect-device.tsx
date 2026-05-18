@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import QRCode from "qrcode"
 import { Smartphone, RefreshCw, Timer } from "lucide-react"
@@ -20,6 +21,15 @@ type ConnectDeviceProps = {
 
 export function ConnectDevice({ organizationName }: ConnectDeviceProps) {
   const [open, setOpen] = useState(false)
+  // Auto-open when arriving via ?connect=1 deep link (e.g. from the
+  // distribution-page first-customer checklist). Runs once on mount.
+  const searchParams = useSearchParams()
+  useEffect(() => {
+    if (searchParams.get("connect") === "1") {
+      setOpen(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return (
     <>
       <Card className="p-5">

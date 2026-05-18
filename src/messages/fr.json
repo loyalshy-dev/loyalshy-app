@@ -634,7 +634,10 @@
       "firstContactDescription": "Ajoutez un contact ou laissez-le scanner votre QR code",
       "inviteStaff": "Invitez votre équipe",
       "inviteStaffDescription": "Ajoutez des membres d'équipe pour vous aider à gérer les visites",
-      "dismiss": "Masquer la liste"
+      "dismiss": "Masquer la liste",
+      "heroTitle": "Créez votre premier programme de fidélité",
+      "heroBody": "Choisis une carte à tampons ou un coupon, personnalise le design, et commence à récompenser tes clients en quelques minutes.",
+      "heroCta": "Créer le programme"
     },
     "status": {
       "active": "Actif",
@@ -789,7 +792,19 @@
       "nfcCopyUrl": "Copier l'URL",
       "nfcStep1": "Procurez-vous un tag NFC (autocollant, carte ou support de bureau)",
       "nfcStep2": "Utilisez une app d'écriture NFC pour programmer cette URL dans le tag",
-      "nfcStep3": "Les gens touchent le tag avec leur téléphone pour ajouter le pass"
+      "nfcStep3": "Les gens touchent le tag avec leur téléphone pour ajouter le pass",
+      "firstCustomer": {
+        "title": "Obtiens ton premier client",
+        "subtitle": "Quatre étapes rapides pour mettre ce programme entre les mains de vraies personnes.",
+        "qrLabel": "Télécharge l'affiche QR",
+        "qrDescription": "Imprime-la pour le comptoir — PDF A4, aux couleurs de ta marque, prêt à scanner.",
+        "shareLabel": "Partage le lien d'inscription",
+        "shareDescription": "Sur WhatsApp, par email, ou copie-le dans une story.",
+        "scannerLabel": "Configure le téléphone du staff",
+        "scannerDescription": "Connecte l'app Loyalshy Staff pour que n'importe qui en service puisse tamponner et valider.",
+        "directLabel": "Émets le premier pass manuellement",
+        "directDescription": "Envoie un pass directement à un client régulier — pas besoin de scan."
+      }
     },
     "programSettings": {
       "title": "Paramètres",

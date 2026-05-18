@@ -634,7 +634,10 @@
       "firstContactDescription": "Add a contact or have them scan your QR code",
       "inviteStaff": "Invite your staff",
       "inviteStaffDescription": "Add team members to help manage visits",
-      "dismiss": "Dismiss checklist"
+      "dismiss": "Dismiss checklist",
+      "heroTitle": "Create your first loyalty program",
+      "heroBody": "Pick a stamp card or coupon, customize the design, and start rewarding customers in minutes.",
+      "heroCta": "Create program"
     },
     "status": {
       "active": "Active",
@@ -789,7 +792,19 @@
       "nfcCopyUrl": "Copy URL",
       "nfcStep1": "Get an NFC tag (sticker, card, or desk stand)",
       "nfcStep2": "Use an NFC writer app to program this URL into the tag",
-      "nfcStep3": "People tap the tag with their phone to add the pass"
+      "nfcStep3": "People tap the tag with their phone to add the pass",
+      "firstCustomer": {
+        "title": "Get your first customer",
+        "subtitle": "Four quick steps to get this program in front of real people.",
+        "qrLabel": "Download QR poster",
+        "qrDescription": "Print it for the counter — A4 PDF, brand-coloured, scan-ready.",
+        "shareLabel": "Share the join link",
+        "shareDescription": "WhatsApp, email, or copy the link straight into a story.",
+        "scannerLabel": "Set up your scanner phone",
+        "scannerDescription": "Pair the Loyalshy Staff app so anyone on shift can stamp and redeem.",
+        "directLabel": "Issue your first pass manually",
+        "directDescription": "Send a pass straight to a regular — no scan needed."
+      }
     },
     "programSettings": {
       "title": "Settings",

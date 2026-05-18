@@ -108,6 +108,19 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
       data: { activeOrganizationId: result.id },
     })
 
+    // Build the "Get started" CTA target. At signup time the org has no
+    // templates, so this resolves to the create-program deep link. The
+    // conditional is here (rather than always sending to ?action=create)
+    // so any future caller of this flow with an existing org Just Works.
+    const firstActive = await db.passTemplate.findFirst({
+      where: { organizationId: result.id, status: "ACTIVE" },
+      orderBy: { createdAt: "asc" },
+      select: { id: true },
+    })
+    const getStartedPath = firstActive
+      ? `/dashboard/programs/${firstActive.id}/distribution`
+      : "/dashboard/programs?action=create"
+
     // Dispatch welcome email via Trigger.dev (non-blocking). Idempotency key
     // dedupes both the trigger and the Resend send so a Trigger.dev retry can't
     // mail the new owner twice.
@@ -121,6 +134,7 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
             ownerName: session.user.name,
             organizationName: name,
             organizationSlug: slug,
+            getStartedPath,
             idempotencyKey: welcomeIdempotencyKey,
           },
           { idempotencyKey: welcomeIdempotencyKey },

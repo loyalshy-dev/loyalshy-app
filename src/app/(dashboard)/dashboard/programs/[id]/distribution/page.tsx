@@ -7,6 +7,7 @@ import { DirectIssueSection } from "@/components/dashboard/programs/direct-issue
 import { ShareLinkSection } from "@/components/dashboard/programs/distribution-share-section"
 import { DistributionStats } from "@/components/dashboard/programs/distribution-stats"
 import { NfcSection } from "@/components/dashboard/programs/nfc-section"
+import { FirstCustomerChecklist } from "@/components/dashboard/programs/first-customer-checklist"
 
 export default async function ProgramDistributionPage(props: {
   params: Promise<{ id: string }>
@@ -77,47 +78,57 @@ export default async function ProgramDistributionPage(props: {
 
   return (
     <div className="space-y-6">
-      <DistributionStats
-        totalIssued={totalIssued}
-        issuedThisWeek={issuedThisWeek}
-        eligibleContacts={eligibleContacts}
-      />
+      {totalIssued === 0 ? (
+        <FirstCustomerChecklist />
+      ) : (
+        <DistributionStats
+          totalIssued={totalIssued}
+          issuedThisWeek={issuedThisWeek}
+          eligibleContacts={eligibleContacts}
+        />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <QrCodeDisplay
-          organization={{
-            name: organization.name,
-            slug: organization.slug,
-            logo: organization.logo,
-            logoApple: organization.logoApple ?? null,
-            logoGoogle: organization.logoGoogle ?? null,
-            brandColor: organization.brandColor,
-          }}
-          templates={[
-            {
-              id: program.id,
-              name: program.name,
-              passType: program.passType,
-              templateConfig: program.config,
-              rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
-              visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
-              cardDesign: program.passDesign ?? null,
-            },
-          ]}
-          joinUrl={joinUrl}
-        />
-        <div className="space-y-6">
-          <ShareLinkSection
+        <section id="qr-section" className="scroll-mt-6">
+          <QrCodeDisplay
+            organization={{
+              name: organization.name,
+              slug: organization.slug,
+              logo: organization.logo,
+              logoApple: organization.logoApple ?? null,
+              logoGoogle: organization.logoGoogle ?? null,
+              brandColor: organization.brandColor,
+            }}
+            templates={[
+              {
+                id: program.id,
+                name: program.name,
+                passType: program.passType,
+                templateConfig: program.config,
+                rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
+                visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
+                cardDesign: program.passDesign ?? null,
+              },
+            ]}
             joinUrl={joinUrl}
-            templateName={program.name}
-            organizationName={organization.name}
           />
-          <DirectIssueSection
-            templateId={program.id}
-            templateName={program.name}
-            passType={program.passType}
-            eligibleCount={eligibleContacts}
-          />
+        </section>
+        <div className="space-y-6">
+          <section id="share-section" className="scroll-mt-6">
+            <ShareLinkSection
+              joinUrl={joinUrl}
+              templateName={program.name}
+              organizationName={organization.name}
+            />
+          </section>
+          <section id="direct-issue-section" className="scroll-mt-6">
+            <DirectIssueSection
+              templateId={program.id}
+              templateName={program.name}
+              passType={program.passType}
+              eligibleCount={eligibleContacts}
+            />
+          </section>
           <NfcSection joinUrl={joinUrl} />
         </div>
       </div>

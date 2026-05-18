@@ -11,6 +11,7 @@ import {
   Image,
   Gift,
   QrCode,
+  Sparkles,
   UserPlus,
   Users,
   X,
@@ -39,6 +40,52 @@ export function OnboardingChecklist({
 
   if (dismissed || data.isDismissed) return null
 
+  function handleDismiss() {
+    startTransition(async () => {
+      await dismissOnboardingChecklist(organizationId)
+      setDismissed(true)
+    })
+  }
+
+  // ─── Hero state ────────────────────────────────────────
+  // When the org has no program yet, the other 4 checklist items are
+  // either impossible (QR + first contact need an active program) or
+  // off-path (logo, invite staff). Collapse to a single oversized CTA.
+  if (!data.hasProgram) {
+    return (
+      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-card to-card p-6 sm:p-8">
+        <button
+          onClick={handleDismiss}
+          disabled={isPending}
+          className="absolute top-3 right-3 flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+          aria-label={t("dismiss")}
+        >
+          <X className="size-4" />
+        </button>
+
+        <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-7">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/15">
+            <Sparkles className="size-7 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0 space-y-1.5">
+            <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">
+              {t("heroTitle")}
+            </h2>
+            <p className="text-sm text-muted-foreground max-w-xl">
+              {t("heroBody")}
+            </p>
+          </div>
+          <Button asChild size="lg" className="shrink-0 gap-2">
+            <Link href="/dashboard/programs?action=create" prefetch={true}>
+              <Gift className="size-4" />
+              {t("heroCta")}
+            </Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   const items: ChecklistItem[] = [
     {
       id: "logo",
@@ -53,7 +100,7 @@ export function OnboardingChecklist({
       label: t("createFirstProgram"),
       description: t("createFirstProgramDescription"),
       completed: data.hasProgram,
-      href: "/dashboard/programs",
+      href: data.hasProgram ? "/dashboard/programs" : "/dashboard/programs?action=create",
       icon: Gift,
     },
     {
@@ -84,13 +131,6 @@ export function OnboardingChecklist({
 
   const completedCount = items.filter((i) => i.completed).length
   const progress = Math.round((completedCount / items.length) * 100)
-
-  function handleDismiss() {
-    startTransition(async () => {
-      await dismissOnboardingChecklist(organizationId)
-      setDismissed(true)
-    })
-  }
 
   return (
     <div className="rounded-xl border bg-card">
