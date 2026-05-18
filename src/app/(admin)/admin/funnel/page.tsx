@@ -62,7 +62,7 @@ async function fetchFunnel(range: Range): Promise<FunnelRow> {
       (SELECT COUNT(DISTINCT user_id) FROM owned_orgs o
         WHERE EXISTS (
           SELECT 1 FROM pass_template pt
-          WHERE pt."organizationId" = o.org_id AND pt.status = 'ACTIVE'
+          WHERE pt."organizationId" = o.org_id AND pt.status = 'active'::template_status
         ))::bigint AS stage_program_active,
       (SELECT COUNT(DISTINCT user_id) FROM owned_orgs o
         WHERE EXISTS (
