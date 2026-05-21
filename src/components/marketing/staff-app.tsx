@@ -93,7 +93,7 @@ export function StaffApp() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Phone mockup with screenshots */}
           <FadeIn direction="left" className="flex justify-center">
-            <div className="relative origin-top scale-[0.7] sm:scale-[0.85] lg:scale-100 mb-[calc(-544px*0.3)] sm:mb-[calc(-544px*0.15)] lg:mb-0">
+            <div className="relative">
               {/* Phone frame — matches the wallet/platform frame: thin uniform
                   bezel, small dynamic island, light shadow + 1px ring */}
               <div
