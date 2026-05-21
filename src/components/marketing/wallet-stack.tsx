@@ -122,10 +122,12 @@ export function WalletStack() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [hoveredIndex, setHoveredIndex] = useState(-1)
   const [reducedMotion, setReducedMotion] = useState(false)
-  const [compact, setCompact] = useState(() => {
-    if (typeof window === "undefined") return false
-    return window.matchMedia("(max-width: 767px)").matches
-  })
+  // Must match SSR (false) so hydration doesn't mismatch. Reading matchMedia
+  // here would make the client render compact=true while the server emitted
+  // compact=false; React 19 keeps the server DOM on mismatch and never patches
+  // it, leaving the stack stuck at the desktop width on mobile. The mount
+  // effect below syncs the real value, forcing a post-hydration re-render.
+  const [compact, setCompact] = useState(false)
   const interactedRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -139,6 +141,10 @@ export function WalletStack() {
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)")
+    // Sync on mount: SSR renders compact=false, and the listener below only
+    // fires on a viewport *change* — without this, a page loaded directly at a
+    // mobile width stays stuck on the desktop layout (overflows + left clip).
+    setCompact(mq.matches)
     const handler = (e: MediaQueryListEvent) => setCompact(e.matches)
     mq.addEventListener("change", handler)
     return () => mq.removeEventListener("change", handler)
