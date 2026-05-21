@@ -58,8 +58,8 @@ export async function TryDemo() {
           <div
             className="mx-auto max-w-md flex flex-col items-center gap-8 rounded-2xl p-8 sm:p-10"
           >
-            {/* Card preview — Apple on iOS/macOS, Google on Android */}
-            <TryDemoCard alt={t("cardPreviewAlt")} />
+            {/* Card preview — tap to flip between Apple and Google Wallet */}
+            <TryDemoCard alt={t("cardPreviewAlt")} flipHint={t("tapToFlip")} />
 
             {/* Wallet buttons */}
             <div className="flex flex-row flex-wrap items-center justify-center gap-3 sm:gap-4">
