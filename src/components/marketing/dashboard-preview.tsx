@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { BarChart3, CreditCard, Palette, QrCode, Smartphone, Users } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -11,6 +11,18 @@ import { FadeIn, ScaleIn } from "./motion"
 export function FeatureShowcase() {
   const t = useTranslations("featureShowcase")
   const [activeTab, setActiveTab] = useState("dashboard")
+  // Must match SSR (false) so hydration doesn't mismatch; the mount effect
+  // below syncs the real value, forcing a post-hydration re-render. Mobile
+  // swaps the desktop browser mockup for a phone mockup with mobile shots.
+  const [compact, setCompact] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)")
+    setCompact(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setCompact(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
 
   const FEATURES = [
     {
@@ -19,6 +31,7 @@ export function FeatureShowcase() {
       icon: BarChart3,
       description: t("tabs.dashboard.description"),
       image: "/platform/dashboard.webp",
+      mobileImage: "/platform/mobile/dashboard.webp",
       alt: t("tabs.dashboard.alt"),
     },
     {
@@ -27,6 +40,7 @@ export function FeatureShowcase() {
       icon: Palette,
       description: t("tabs.cardDesigner.description"),
       image: "/platform/studio.webp",
+      mobileImage: "/platform/mobile/studio.webp",
       alt: t("tabs.cardDesigner.alt"),
     },
     {
@@ -35,6 +49,7 @@ export function FeatureShowcase() {
       icon: CreditCard,
       description: t("tabs.programs.description"),
       image: "/platform/cards.webp",
+      mobileImage: "/platform/mobile/cards.webp",
       alt: t("tabs.programs.alt"),
     },
     {
@@ -43,6 +58,7 @@ export function FeatureShowcase() {
       icon: Smartphone,
       description: t("tabs.passes.description"),
       image: "/platform/passes.webp",
+      mobileImage: "/platform/mobile/passes.webp",
       alt: t("tabs.passes.alt"),
     },
     {
@@ -51,6 +67,7 @@ export function FeatureShowcase() {
       icon: QrCode,
       description: t("tabs.distribution.description"),
       image: "/platform/distribution.webp",
+      mobileImage: "/platform/mobile/distribution.webp",
       alt: t("tabs.distribution.alt"),
     },
     {
@@ -59,6 +76,7 @@ export function FeatureShowcase() {
       icon: Users,
       description: t("tabs.team.description"),
       image: "/platform/team.webp",
+      mobileImage: "/platform/mobile/team.webp",
       alt: t("tabs.team.alt"),
     },
   ]
@@ -86,58 +104,102 @@ export function FeatureShowcase() {
           </div>
         </FadeIn>
 
-        {/* Browser mockup with active screenshot */}
+        {/* Product mockup with active screenshot — phone on mobile, browser on desktop */}
         <ScaleIn>
-          <div
-            className="relative mx-auto max-w-5xl rounded-2xl overflow-hidden"
-            style={{
-              background: "var(--mk-card)",
-              border: "1px solid var(--mk-border)",
-              boxShadow:
-                "0 24px 80px oklch(0 0 0 / 0.10), 0 8px 24px oklch(0 0 0 / 0.06)",
-            }}
-          >
-            {/* Browser bar */}
-            <div
-              className="flex items-center gap-2 px-4 py-2.5"
-              style={{ borderBottom: "1px solid var(--mk-border)" }}
-            >
-              <div className="flex gap-1.5">
-                <div className="size-2.5 rounded-full" style={{ background: "oklch(0.65 0.2 25)" }} />
-                <div className="size-2.5 rounded-full" style={{ background: "oklch(0.80 0.15 95)" }} />
-                <div className="size-2.5 rounded-full" style={{ background: "oklch(0.65 0.18 145)" }} />
-              </div>
+          {compact ? (
+            /* Phone mockup — mobile screenshots */
+            <div className="relative mx-auto" style={{ width: 260 }}>
               <div
-                className="mx-auto rounded-md px-4 py-1 text-[11px]"
-                style={{ background: "var(--mk-surface)", color: "var(--mk-text-dimmed)", border: "1px solid var(--mk-border)" }}
+                className="relative overflow-hidden"
+                style={{
+                  borderRadius: 42,
+                  background: "oklch(0.18 0.005 285)",
+                  padding: 8,
+                  boxShadow:
+                    "0 24px 70px oklch(0 0 0 / 0.18), 0 0 0 1px var(--mk-border)",
+                }}
               >
-                {t("browserUrl")}
+                {/* Dynamic island */}
+                <div
+                  className="absolute left-1/2 top-3.5 z-20 -translate-x-1/2 rounded-full bg-black"
+                  style={{ width: 78, height: 22 }}
+                  aria-hidden="true"
+                />
+                {/* Screen — all images stacked, only active one visible */}
+                <div
+                  className="relative overflow-hidden"
+                  style={{ borderRadius: 34, aspectRatio: "390 / 844", background: "var(--mk-surface)" }}
+                >
+                  {FEATURES.map((feature) => (
+                    <Image
+                      key={feature.id}
+                      src={feature.mobileImage}
+                      alt={feature.alt}
+                      width={780}
+                      height={1688}
+                      className="absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-300 ease-out"
+                      style={{ opacity: activeTab === feature.id ? 1 : 0 }}
+                      sizes="260px"
+                      priority={feature.id === "dashboard"}
+                      loading={feature.id === "dashboard" ? "eager" : "lazy"}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
+          ) : (
+            /* Browser mockup — desktop screenshots */
+            <div
+              className="relative mx-auto max-w-5xl rounded-2xl overflow-hidden"
+              style={{
+                background: "var(--mk-card)",
+                border: "1px solid var(--mk-border)",
+                boxShadow:
+                  "0 24px 80px oklch(0 0 0 / 0.10), 0 8px 24px oklch(0 0 0 / 0.06)",
+              }}
+            >
+              {/* Browser bar */}
+              <div
+                className="flex items-center gap-2 px-4 py-2.5"
+                style={{ borderBottom: "1px solid var(--mk-border)" }}
+              >
+                <div className="flex gap-1.5">
+                  <div className="size-2.5 rounded-full" style={{ background: "oklch(0.65 0.2 25)" }} />
+                  <div className="size-2.5 rounded-full" style={{ background: "oklch(0.80 0.15 95)" }} />
+                  <div className="size-2.5 rounded-full" style={{ background: "oklch(0.65 0.18 145)" }} />
+                </div>
+                <div
+                  className="mx-auto rounded-md px-4 py-1 text-[11px]"
+                  style={{ background: "var(--mk-surface)", color: "var(--mk-text-dimmed)", border: "1px solid var(--mk-border)" }}
+                >
+                  {t("browserUrl")}
+                </div>
+              </div>
 
-            {/* Screenshot area — all images stacked, only active one visible */}
-            <div className="relative overflow-hidden aspect-video">
-              {FEATURES.map((feature) => (
-                <Image
-                  key={feature.id}
-                  src={feature.image}
-                  alt={feature.alt}
-                  width={1920}
-                  height={1080}
-                  className="w-full h-auto transition-opacity duration-300 ease-out"
-                  style={{
-                    opacity: activeTab === feature.id ? 1 : 0,
-                    position: activeTab === feature.id ? "relative" : "absolute",
-                    top: 0,
-                    left: 0,
-                  }}
-                  sizes="(max-width: 1280px) 100vw, 1280px"
-                  priority={feature.id === "dashboard"}
-                  loading={feature.id === "dashboard" ? "eager" : "lazy"}
-                />
-              ))}
+              {/* Screenshot area — all images stacked, only active one visible */}
+              <div className="relative overflow-hidden aspect-video">
+                {FEATURES.map((feature) => (
+                  <Image
+                    key={feature.id}
+                    src={feature.image}
+                    alt={feature.alt}
+                    width={1920}
+                    height={1080}
+                    className="w-full h-auto transition-opacity duration-300 ease-out"
+                    style={{
+                      opacity: activeTab === feature.id ? 1 : 0,
+                      position: activeTab === feature.id ? "relative" : "absolute",
+                      top: 0,
+                      left: 0,
+                    }}
+                    sizes="(max-width: 1280px) 100vw, 1280px"
+                    priority={feature.id === "dashboard"}
+                    loading={feature.id === "dashboard" ? "eager" : "lazy"}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </ScaleIn>
 
         {/* Tab bar */}

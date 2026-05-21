@@ -93,55 +93,35 @@ export function StaffApp() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Phone mockup with screenshots */}
           <FadeIn direction="left" className="flex justify-center">
-            <div className="relative origin-top scale-[0.7] sm:scale-[0.85] lg:scale-100 mb-[calc(-572px*0.3)] sm:mb-[calc(-572px*0.15)] lg:mb-0">
-              {/* Phone frame */}
+            <div className="relative origin-top scale-[0.7] sm:scale-[0.85] lg:scale-100 mb-[calc(-544px*0.3)] sm:mb-[calc(-544px*0.15)] lg:mb-0">
+              {/* Phone frame — matches the wallet/platform frame: thin uniform
+                  bezel, small dynamic island, light shadow + 1px ring */}
               <div
-                className="relative mx-auto"
+                className="relative mx-auto overflow-hidden"
                 style={{
-                  width: 280,
-                  height: 572,
-                  borderRadius: 44,
+                  width: 260,
+                  padding: 8,
+                  borderRadius: 42,
                   background: "oklch(0.18 0.005 285)",
-                  boxShadow:
-                    "0 40px 80px oklch(0 0 0 / 0.25), 0 0 0 1px oklch(0.25 0.005 285), inset 0 1px 0 oklch(0.28 0.005 285)",
+                  boxShadow: "0 24px 70px oklch(0 0 0 / 0.18), 0 0 0 1px var(--mk-border)",
                 }}
               >
-                {/* Side buttons */}
+                {/* Dynamic island */}
                 <div
-                  className="absolute rounded-sm"
-                  style={{ left: -3, top: 120, width: 3, height: 28, background: "oklch(0.22 0.005 285)" }}
-                  aria-hidden="true"
-                />
-                <div
-                  className="absolute rounded-sm"
-                  style={{ left: -3, top: 158, width: 3, height: 28, background: "oklch(0.22 0.005 285)" }}
-                  aria-hidden="true"
-                />
-                <div
-                  className="absolute rounded-sm"
-                  style={{ right: -3, top: 140, width: 3, height: 36, background: "oklch(0.22 0.005 285)" }}
+                  className="absolute left-1/2 top-3.5 z-30 -translate-x-1/2 rounded-full bg-black"
+                  style={{ width: 78, height: 22 }}
                   aria-hidden="true"
                 />
 
                 {/* Screen */}
                 <div
-                  className="absolute overflow-hidden"
+                  className="relative overflow-hidden"
                   style={{
-                    top: 14,
-                    left: 14,
-                    width: 252,
-                    height: 544,
-                    borderRadius: 36,
-                    background: "oklch(0.08 0.01 270)",
+                    height: 528,
+                    borderRadius: 34,
+                    background: "var(--mk-surface)",
                   }}
                 >
-                  {/* Dynamic island */}
-                  <div
-                    className="absolute left-1/2 top-2.5 z-30 -translate-x-1/2 rounded-full bg-black"
-                    style={{ width: 90, height: 28 }}
-                    aria-hidden="true"
-                  />
-
                   {/* Screenshots — stacked with crossfade */}
                   {SCREENSHOTS.map((shot, i) => (
                     <Image
@@ -152,7 +132,7 @@ export function StaffApp() {
                       height={2532}
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-out"
                       style={{ opacity: activeIdx === i ? 1 : 0 }}
-                      sizes="252px"
+                      sizes="260px"
                       priority={i === 0}
                       loading={i === 0 ? "eager" : "lazy"}
                     />
