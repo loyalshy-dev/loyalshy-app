@@ -6,11 +6,16 @@ import { useCallback, useEffect, useRef, useState } from "react"
 /* ─── Card image data ─────────────────────────────────────────────── */
 
 const CARD_IMAGES = [
-  { src: "/pass-types/stamp-apple.webp", alt: "Stamp card — Apple Wallet", shadow: "oklch(0.45 0.15 265)" },
-  { src: "/pass-types/coupon-google.webp", alt: "Coupon — Google Wallet", shadow: "oklch(0.50 0.12 155)" },
-  { src: "/pass-types/ticket-apple.webp", alt: "Ticket — Apple Wallet", shadow: "oklch(0.45 0.10 75)" },
-  { src: "/pass-types/memebership-google.webp", alt: "Membership — Google Wallet", shadow: "oklch(0.48 0.14 200)" },
-  { src: "/pass-types/business-apple.webp", alt: "Business Card — Apple Wallet", shadow: "oklch(0.50 0.10 300)" },
+  { src: "/pass-types/stamp-2-apple.webp", alt: "Stamp card — Apple Wallet", shadow: "oklch(0.45 0.15 265)" },
+  { src: "/pass-types/coupon-3-google.webp", alt: "Coupon — Google Wallet", shadow: "oklch(0.48 0.12 75)" },
+  { src: "/pass-types/stamp-1-google.png", alt: "Stamp card — Google Wallet", shadow: "oklch(0.50 0.12 155)" },
+  { src: "/pass-types/coupon-1-apple.png", alt: "Coupon — Apple Wallet", shadow: "oklch(0.50 0.13 30)" },
+  { src: "/pass-types/stamp-2-google.webp", alt: "Stamp card — Google Wallet", shadow: "oklch(0.50 0.12 200)" },
+  { src: "/pass-types/coupon-2-apple.png", alt: "Coupon — Apple Wallet", shadow: "oklch(0.50 0.13 350)" },
+  { src: "/pass-types/stamp-1-apple.png", alt: "Stamp card — Apple Wallet", shadow: "oklch(0.48 0.14 290)" },
+  { src: "/pass-types/coupon-3-apple.webp", alt: "Coupon — Apple Wallet", shadow: "oklch(0.48 0.12 60)" },
+  { src: "/pass-types/coupon-1-google.png", alt: "Coupon — Google Wallet", shadow: "oklch(0.50 0.12 130)" },
+  { src: "/pass-types/coupon-2-google.png", alt: "Coupon — Google Wallet", shadow: "oklch(0.50 0.13 15)" },
 ] as const
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
@@ -24,20 +29,24 @@ function getCardTransform(
 ) {
   const offset = (index - activeIndex + total) % total
   const depth = offset === 0 ? 0 : offset
+  // Fan the whole deck across a fixed envelope (not a fixed per-card step), so
+  // adding more cards tightens the spacing instead of overflowing the box. The
+  // deepest card lands exactly at the envelope edge regardless of card count.
+  const steps = Math.max(total - 1, 1)
+  const t = depth / steps
 
-  const spreadX = compact ? 8 : 12
-  const spreadY = compact ? 4 : 6
+  const maxTx = compact ? 66 : 88
+  const maxTy = compact ? 30 : 38
+  const rotateRange = 20 // deepest card rotates to (-8 + rotateRange)°
+  const maxScaleDrop = 0.26
   // Compensate for the active card's left rotation overhang (-8°) so the
   // top-left corner doesn't extend past the container's left edge on mobile.
   const baseTx = compact ? 24 : 0
-  const rotateStep = 4
-  const baseRotate = -8 + depth * rotateStep
-  const scaleStep = 0.04
 
-  const tx = baseTx + depth * spreadX
-  const ty = -depth * spreadY
-  const rotate = baseRotate
-  const scale = 1 - depth * scaleStep
+  const tx = baseTx + t * maxTx
+  const ty = -t * maxTy
+  const rotate = -8 + t * rotateRange
+  const scale = 1 - t * maxScaleDrop
   const z = total - depth
 
   const isHovered = hoveredIndex === index && depth !== 0
@@ -181,8 +190,8 @@ export function WalletStack() {
     <div
       className="relative"
       style={{
-        width: compact ? 320 : 400,
-        height: compact ? cardH + 30 : cardH + 40,
+        width: compact ? 330 : 430,
+        height: compact ? cardH + 40 : cardH + 50,
         marginLeft: compact ? 24 : 0,
       }}
     >

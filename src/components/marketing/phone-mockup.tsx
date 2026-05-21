@@ -14,16 +14,16 @@ const CARD_PEEK = 64
 const EXPAND_TOP = STATUS_BAR_H + 4
 
 const CARD_PADDING = 4 // 4px each side
-const PHONE_CARD_W = SCREEN_W - CARD_PADDING * 2 // fill nearly full screen width
-const PHONE_CARD_H = Math.round(PHONE_CARD_W * (477 / 426)) // match actual image ratio
 
 /* ─── Card images ─────────────────────────────────────────────────── */
 
+// w/h are each image's intrinsic size (Apple 960×1350, Google 960×1455) so the
+// tall full-pass screenshots keep their aspect ratio inside the phone screen.
 const CARD_IMAGES = [
-  { src: "/pass-types/stamp-apple.webp", alt: "Stamp card — Apple Wallet" },
-  { src: "/pass-types/coupon-apple.webp", alt: "Coupon — Apple Wallet" },
-  { src: "/pass-types/ticket-apple.webp", alt: "Ticket — Apple Wallet" },
-  { src: "/pass-types/business-apple.webp", alt: "Business Card — Apple Wallet" },
+  { src: "/pass-types/stamp-2-apple.webp", alt: "Stamp card — Apple Wallet", w: 960, h: 1350 },
+  { src: "/pass-types/coupon-3-apple.webp", alt: "Coupon — Apple Wallet", w: 960, h: 1350 },
+  { src: "/pass-types/stamp-2-google.webp", alt: "Stamp card — Google Wallet", w: 960, h: 1455 },
+  { src: "/pass-types/coupon-3-google.webp", alt: "Coupon — Google Wallet", w: 960, h: 1455 },
 ] as const
 
 /* ─── Status bar icons ─────────────────────────────────────────────── */
@@ -226,8 +226,8 @@ export function PhoneMockupInteractive() {
                       <Image
                         src={card.src}
                         alt={card.alt}
-                        width={426}
-                        height={477}
+                        width={card.w}
+                        height={card.h}
                         className="w-full h-auto rounded-xl"
                       />
                     </div>

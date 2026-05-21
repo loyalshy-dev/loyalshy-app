@@ -59,7 +59,7 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     icon: Stamp,
     description: "Reward contacts after a set number of visits",
     defaultCardType: "STAMP",
-    image: "/pass-types/stamp-apple.webp",
+    image: "/pass-types/stamp-2-apple.webp",
   },
   COUPON: {
     label: "Coupon / Voucher",
@@ -67,6 +67,6 @@ export const PASS_TYPE_META: Record<PassType, PassTypeMeta> = {
     icon: Ticket,
     description: "Offer discounts or free items contacts can redeem",
     defaultCardType: "COUPON",
-    image: "/pass-types/coupon-google.webp",
+    image: "/pass-types/coupon-3-google.webp",
   },
 }
