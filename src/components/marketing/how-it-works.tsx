@@ -1,7 +1,24 @@
 import Image from "next/image"
 import { Palette, Send, ScanLine } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { Stagger, StaggerItem } from "./motion"
+import { StepVideo } from "./step-video"
+
+/* ─── Step type ──────────────────────────────────────────────────── */
+
+type StepBase = {
+  number: string
+  icon: LucideIcon
+  title: string
+  description: string
+  alt: string
+}
+type Step = StepBase &
+  (
+    | { video: string; poster: string }
+    | { image: string; width: number; height: number }
+  )
 
 /* ─── Icon colors per step ───────────────────────────────────────── */
 
@@ -16,13 +33,14 @@ const STEP_ICON_STYLES = [
 export async function HowItWorks() {
   const t = await getTranslations("howItWorks")
 
-  const steps = [
+  const steps: Step[] = [
     {
       number: "01",
       icon: Palette,
       title: t("steps.design.title"),
       description: t("steps.design.description"),
-      image: "/platform/studio.webp",
+      video: "/steps/design.mp4",
+      poster: "/steps/design-poster.webp",
       alt: t("steps.design.alt"),
     },
     {
@@ -30,7 +48,9 @@ export async function HowItWorks() {
       icon: Send,
       title: t("steps.issue.title"),
       description: t("steps.issue.description"),
-      image: "/platform/distribution.webp",
+      image: "/steps/issue.webp",
+      width: 1024,
+      height: 1024,
       alt: t("steps.issue.alt"),
     },
     {
@@ -38,7 +58,9 @@ export async function HowItWorks() {
       icon: ScanLine,
       title: t("steps.scan.title"),
       description: t("steps.scan.description"),
-      image: "/platform/passes.webp",
+      image: "/steps/scan.webp",
+      width: 1026,
+      height: 1218,
       alt: t("steps.scan.alt"),
     },
   ]
@@ -55,8 +77,8 @@ export async function HowItWorks() {
             const Icon = step.icon
             const iconStyle = STEP_ICON_STYLES[i]
             return (
-              <StaggerItem key={step.number}>
-                <div className="group relative">
+              <StaggerItem key={step.number} className="h-full">
+                <div className="relative h-full">
                   {/* Oversized faded step number */}
                   <span
                     aria-hidden="true"
@@ -66,23 +88,26 @@ export async function HowItWorks() {
                     {step.number}
                   </span>
 
-                  <div className="relative z-10 flex flex-col gap-4">
-                    {/* Screenshot first on mobile for visual hook */}
+                  <div className="relative z-10 flex h-full flex-col gap-4">
+                    {/* Media first on mobile for visual hook */}
                     <div
-                      className="rounded-xl overflow-hidden transition-transform duration-500 group-hover:-translate-y-2 md:order-last"
+                      className="aspect-square rounded-xl overflow-hidden md:order-last md:mt-auto"
                       style={{
-                        border: "1px solid var(--mk-border)",
                         boxShadow: "0 8px 32px oklch(0 0 0 / 0.08)",
                       }}
                     >
-                      <Image
-                        src={step.image}
-                        alt={step.alt}
-                        width={800}
-                        height={600}
-                        className="w-full h-auto"
-                        loading="lazy"
-                      />
+                      {"video" in step ? (
+                        <StepVideo src={step.video} poster={step.poster} label={step.alt} />
+                      ) : (
+                        <Image
+                          src={step.image}
+                          alt={step.alt}
+                          width={step.width}
+                          height={step.height}
+                          className="h-full w-full object-cover object-top"
+                          loading="lazy"
+                        />
+                      )}
                     </div>
 
                     {/* Icon + title + description */}

@@ -95,17 +95,17 @@
     "steps": {
       "design": {
         "title": "Diseña tu pase",
-        "description": "Elige entre 7 tipos de pase y personaliza cada detalle — colores, logos, campos y recompensas — en nuestro estudio visual.",
+        "description": "Elige tarjeta de sellos o cupón y personaliza cada detalle — colores, logos, campos y recompensas — en nuestro estudio visual.",
         "alt": "Estudio de diseño de tarjetas — personaliza tu pase digital"
       },
       "issue": {
         "title": "Emite pases a contactos",
-        "description": "Distribuye pases mediante código QR, enlace compartible, emisión directa, importación CSV masiva o API REST.",
-        "alt": "Página de distribución con código QR, emisión manual y opciones de API"
+        "description": "Distribuye pases mediante escaneo de código QR, enlace compartible, emisión directa o toque NFC.",
+        "alt": "Página de distribución con código QR y emisión manual"
       },
       "scan": {
         "title": "Escanea para actualizar pases",
-        "description": "Escanea un pase para sellar, registrar visita, canjear o sumar puntos — se sincroniza al instante con Apple y Google Wallet.",
+        "description": "Escanea un pase para sumar un sello o canjear un cupón — se sincroniza al instante con Apple y Google Wallet.",
         "alt": "Escaneando un pase digital para registrar una interacción"
       }
     }

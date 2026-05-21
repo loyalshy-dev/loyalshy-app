@@ -95,17 +95,17 @@
     "steps": {
       "design": {
         "title": "Conçois ton pass",
-        "description": "Choisis parmi 7 types de pass et personnalise chaque détail — couleurs, logos, champs et récompenses — dans notre studio visuel.",
+        "description": "Choisis une carte à tampons ou un coupon, puis personnalise chaque détail — couleurs, logos, champs et récompenses — dans notre studio visuel.",
         "alt": "Studio de design de cartes — personnalise ton pass digital"
       },
       "issue": {
         "title": "Émets des passes aux contacts",
-        "description": "Distribue des passes par QR code, lien partageable, émission directe, import CSV en masse ou API REST.",
-        "alt": "Page de distribution avec QR code, émission manuelle et options API"
+        "description": "Distribue des passes par scan de QR code, lien partageable, émission directe ou tap NFC.",
+        "alt": "Page de distribution avec QR code et émission manuelle"
       },
       "scan": {
         "title": "Scanne pour mettre à jour les passes",
-        "description": "Scanne un pass pour tamponner, enregistrer une visite, échanger ou ajouter des points — synchronisation instantanée avec Apple et Google Wallet.",
+        "description": "Scanne un pass pour ajouter un tampon ou échanger un coupon — synchronisation instantanée avec Apple et Google Wallet.",
         "alt": "Scan d'un pass digital pour enregistrer une interaction"
       }
     }

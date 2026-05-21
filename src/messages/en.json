@@ -100,7 +100,7 @@
       },
       "issue": {
         "title": "Issue passes to contacts",
-        "description": "Distribute passes via QR code scan, shareable link, direct issue, or bulk CSV import.",
+        "description": "Distribute passes via QR code scan, shareable link, direct issue, or an NFC tap.",
         "alt": "Distribution page with QR code and manual issue"
       },
       "scan": {
