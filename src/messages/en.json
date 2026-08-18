@@ -553,7 +553,7 @@
       "copyFailed": "Could not copy the link",
       "handoffExpiry": "This link expires in 7 days. Generating a new one invalidates it.",
       "referralTitle": "Your referral link",
-      "referralDesc": "Share this link with prospects. Anyone who signs up through it is attributed to you, including for revenue share.",
+      "referralDesc": "Share this link with prospects. Any business that signs up through it is automatically added to your client list.",
       "referralError": "Could not load your referral link. Please try again."
     },
     "nav": {

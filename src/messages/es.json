@@ -553,7 +553,7 @@
       "copyFailed": "No se pudo copiar el enlace",
       "handoffExpiry": "Este enlace caduca en 7 días. Generar uno nuevo invalida el anterior.",
       "referralTitle": "Tu enlace de referido",
-      "referralDesc": "Comparte este enlace con clientes potenciales. Quien se registre a través de él quedará atribuido a ti, incluso para el reparto de ingresos.",
+      "referralDesc": "Comparte este enlace con clientes potenciales. Cualquier negocio que se registre a través de él se añadirá automáticamente a tu lista de clientes.",
       "referralError": "No se pudo cargar tu enlace de referido. Inténtalo de nuevo."
     },
     "nav": {

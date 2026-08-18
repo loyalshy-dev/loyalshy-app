@@ -553,7 +553,7 @@
       "copyFailed": "Impossible de copier le lien",
       "handoffExpiry": "Ce lien expire dans 7 jours. En générer un nouveau invalide l'ancien.",
       "referralTitle": "Votre lien de parrainage",
-      "referralDesc": "Partagez ce lien avec vos prospects. Toute personne qui s'inscrit via ce lien vous est attribuée, y compris pour le partage des revenus.",
+      "referralDesc": "Partagez ce lien avec vos prospects. Toute entreprise qui s'inscrit via ce lien est automatiquement ajoutée à votre liste de clients.",
       "referralError": "Impossible de charger votre lien de parrainage. Veuillez réessayer."
     },
     "nav": {
