@@ -1,29 +1,30 @@
-# Loyalshy — Digital Wallet Pass Platform
+# Loyalshy — Digital Loyalty Platform for Small Businesses
 
-Multi-tenant SaaS platform for businesses to create and manage digital wallet passes with Apple and Google Wallet integration. Supports 6 pass types: stamp cards, coupons, memberships, points programs, gift cards, and event tickets.
+Multi-tenant SaaS for cafés, salons, and small retail to run digital loyalty programs in Apple Wallet and Google Wallet. Two pass types: **stamp cards** (reward after N visits) and **coupons** (single-use or unlimited redeemable offers). Customers join via QR code, shareable link, direct issue, or email — no app install required.
+
+A companion staff app ([loyalshy-staff](../loyalshy-staff)) lets employees scan passes and register stamps/redemptions from their phone.
 
 ## Tech Stack
 
-Next.js 16 | React 19 | Prisma 7 | PostgreSQL 18 | Better Auth | Stripe | Trigger.dev | Tailwind CSS 4 | shadcn/ui
+Next.js 16 | React 19 | Prisma 7 | PostgreSQL 18 (Neon) | Better Auth | Stripe | Trigger.dev | Tailwind CSS 4 | shadcn/ui | next-intl (en/es/fr)
 
 ## Prerequisites
 
 - Node.js 20+
-- pnpm 9+
-- PostgreSQL 18 (or Docker)
+- PostgreSQL 18 (Neon or local Docker)
 
 ## Getting Started
 
 ### 1. Install dependencies
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### 2. Set up the database
 
 ```bash
-# Start PostgreSQL (Docker example)
+# Local PostgreSQL via Docker (or use a Neon branch)
 docker run -d --name loyalshy-db \
   -e POSTGRES_USER=loyalshy \
   -e POSTGRES_PASSWORD=loyalshy \
@@ -31,11 +32,11 @@ docker run -d --name loyalshy-db \
   -p 5433:5432 \
   postgres:18
 
-# Push the schema
-pnpm prisma db push
+# Apply migrations
+npx prisma migrate deploy
 
-# Seed the database (optional)
-pnpm prisma db seed
+# Seed (optional)
+npx prisma db seed
 ```
 
 ### 3. Configure environment variables
@@ -45,7 +46,7 @@ Copy `.env.example` to `.env.local` and fill in the values. See sections below f
 ### 4. Run the dev server
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -56,22 +57,18 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Concept | Description |
 |---------|-------------|
-| **Organization** | Tenant — a business using the platform |
-| **PassTemplate** | Blueprint for a type of pass (e.g., "Coffee Stamp Card", "VIP Membership") |
+| **Organization** | Tenant — a business using the platform (Better Auth Organization) |
+| **PassTemplate** | Program blueprint (e.g., "Coffee Stamp Card") |
 | **PassInstance** | An issued pass — links a Contact to a PassTemplate |
 | **Contact** | End user who receives passes |
-| **Interaction** | Any event on a pass (stamp, check-in, points earn, ticket scan, etc.) |
+| **Interaction** | Any event on a pass (stamp, redeem, reward, note) |
 
 ## Pass Types
 
-| Type | Description |
-|------|-------------|
-| STAMP_CARD | Collect stamps, earn rewards |
-| COUPON | Single or multi-use discount codes |
-| MEMBERSHIP | Digital ID with tier, benefits, lifecycle |
-| POINTS | Earn and redeem points from a catalog |
-| GIFT_CARD | Monetary balance with partial redemption |
-| TICKET | Event entry with scan tracking |
+| Type | Description | Staff action |
+|------|-------------|--------------|
+| STAMP_CARD | Collect stamps, earn rewards | `{ action: "stamp" }` |
+| COUPON | Single-use or unlimited redeemable offer | `{ action: "redeem" }` |
 
 ---
 
@@ -114,6 +111,8 @@ APPLE_PASS_KEY_PASSPHRASE="your-passphrase"
 APPLE_WWDR_CERTIFICATE="base64-encoded-wwdr"
 ```
 
+> **Gotcha:** `BETTER_AUTH_URL` must be the apex domain (`https://loyalshy.com`, no `www.`) — it is signed into every `.pkpass` as `webServiceURL`, and iOS strips the Authorization header on cross-host redirects, silently breaking pass updates.
+
 ---
 
 ## Other Services
@@ -126,44 +125,30 @@ APPLE_WWDR_CERTIFICATE="base64-encoded-wwdr"
 | **Cloudflare R2** | For file uploads | S3-compatible object storage |
 | **Sentry** | For error tracking | [sentry.io](https://sentry.io) — free tier available |
 | **Plausible** | For analytics | [plausible.io](https://plausible.io) — optional, privacy-first |
-| **Upstash Redis** | For API rate limiting | [upstash.com](https://upstash.com) — optional, has in-memory fallback |
+| **Upstash Redis** | For rate limiting | [upstash.com](https://upstash.com) — auth endpoints fail open to an in-memory fallback if unreachable. Free-tier DBs are auto-deleted after inactivity; prefer pay-as-you-go |
 
-## Public REST API
+## Staff-App API (`/api/v1`)
 
-Full REST API for programmatic access to contacts, passes, interactions, and webhooks.
-
-- **Base URL**: `/api/v1`
-- **Auth**: Bearer token (`Authorization: Bearer lsk_live_...`)
-- **Docs**: Interactive API reference at `/api/v1/docs` (powered by Scalar)
-- **OpenAPI spec**: `/api/v1/openapi.json`
-
-API keys are managed in **Settings > API** in the dashboard. All plans include API access.
+There is **no public REST API** (removed in the 2026-04-27 pivot — no API keys, no webhooks). The `/api/v1/**` endpoints exist solely for the loyalshy-staff mobile app and use **session-token bearer auth** (Better Auth session).
 
 | Endpoint | Methods | Description |
 |----------|---------|-------------|
-| `/contacts` | GET, POST | List and create contacts |
-| `/contacts/:id` | GET, PATCH, DELETE | Contact detail, update, soft-delete |
-| `/contacts/bulk` | POST | Bulk import (up to 200) |
-| `/templates` | GET | List pass templates |
-| `/templates/:id` | GET | Template detail |
-| `/templates/:id/stats` | GET | Template statistics |
-| `/passes` | GET, POST | List and issue passes |
-| `/passes/:id` | GET | Pass instance detail |
-| `/passes/:id/actions` | POST | Type-specific actions (stamp, redeem, check_in, etc.) |
-| `/passes/:id/interactions` | GET, POST | Pass interactions |
-| `/passes/bulk` | POST | Bulk issue (up to 100) |
-| `/interactions` | GET | Cross-pass interaction list |
-| `/interactions/:id` | GET | Interaction detail |
-| `/stats` | GET | Organization aggregate stats |
-| `/stats/daily` | GET | Daily time series (max 90 days) |
-| `/webhooks` | GET, POST | Webhook endpoint management |
-| `/webhooks/:id` | GET, PATCH, DELETE | Endpoint detail, update, delete |
-| `/webhooks/:id/test` | POST | Send test ping |
-| `/webhooks/:id/rotate-secret` | POST | Rotate signing secret |
+| `/auth/*` | POST/GET | Sign-in flows (email, Google, QR device pairing, invite), `me`, `select-org` |
+| `/contacts`, `/contacts/:id` | GET | Contact search + detail |
+| `/passes`, `/passes/:id` | GET | Pass instances (lookup by id or walletPassId) |
+| `/passes/:id/actions` | POST | `{action:"stamp"}` or `{action:"redeem"}` only |
+| `/rewards/:id/redeem` | POST | Redeem an earned reward |
+| `/interactions` | GET | Interaction feed |
+| `/templates` | GET | Program list |
+
+## Monitoring
+
+- **`GET /api/health`** — dependency health check: pings the database (Neon) and Upstash Redis with 5s timeouts. Returns 200 when healthy, 503 when degraded. Point an external uptime monitor (UptimeRobot / Better Stack) at `https://loyalshy.com/api/health` on a 5-minute interval.
+- **Sentry** — errors are aggregated into issues; configure alert rules (new issue → email, frequency spike) in the Sentry dashboard. Rate-limiter fallback events are tagged `auth-rate-limit` / `contact-form-rate-limit`.
 
 ## Admin Panel
 
-Super admins can access the admin panel at `/admin`. Set `SUPER_ADMIN_EMAIL` before the user registers — they will be auto-promoted on signup:
+Admins access the panel at `/admin` (tiered roles: ADMIN_SUPPORT < ADMIN_BILLING < ADMIN_OPS < SUPER_ADMIN). Set `SUPER_ADMIN_EMAIL` before that user registers — they are auto-promoted on signup:
 
 ```env
 SUPER_ADMIN_EMAIL="you@example.com"
@@ -174,33 +159,32 @@ SUPER_ADMIN_EMAIL="you@example.com"
 ```
 /src
   /app              — App Router pages
-    /(auth)         — Login / Register / Forgot password
-    /(dashboard)    — Protected dashboard routes
-    /(admin)        — Super admin panel
-    /(admin-studio) — Showcase card studio (own layout)
-    /(studio)       — Card design studio (own layout)
-    /(public)       — Landing, pricing, QR scan pages
-    /api            — API routes (auth, wallet callbacks, webhooks)
-      /api/v1       — Public REST API (19 endpoints)
-      /api/v1/docs  — Interactive API reference (Scalar)
-  /components       — Reusable UI components
-  /lib              — Utilities, DB client, auth, DAL, wallet generation
-  /server           — Server actions (per pass type + shared)
+    /(auth)         — Login / Register / Forgot password / Invite
+    /(dashboard)    — Protected dashboard (programs, contacts, settings, admin)
+    /(public)       — Landing, pricing, contact, legal, /join/[slug] self-join pages
+    /api            — API routes
+      /api/v1       — Staff-app API (session-token auth only)
+      /api/wallet   — Apple/Google Wallet callbacks + downloads
+      /api/health   — Dependency health check (uptime monitoring)
+  /components       — Reusable UI (studio, dashboard, marketing, card-renderer)
+  /i18n, /messages  — next-intl config + en/es/fr translations
+  /lib              — DB client, auth, DAL, wallet generation, rate limiting
+  /server           — Server actions
   /trigger          — Trigger.dev job definitions
-  /types            — TypeScript types (pass-types, pass-instance, interaction)
+  /types            — TypeScript types
 /e2e                — Playwright E2E tests
-/prisma             — Schema & seed
+/prisma             — Schema & migrations
 ```
 
 ## Scripts
 
 ```bash
-pnpm dev              # Start dev server (Turbopack)
-pnpm build            # Production build
-pnpm test             # Run Vitest unit tests
-pnpm test:e2e         # Run Playwright E2E tests
-pnpm prisma studio    # Open Prisma Studio
-pnpm prisma db push   # Push schema changes
+npm run dev                # Start dev server (Turbopack)
+npm run build              # Production build
+npm test                   # Run Vitest unit tests
+npm run test:e2e           # Run Playwright E2E tests
+npx prisma studio          # Open Prisma Studio
+npx prisma migrate dev     # Create + apply a migration locally
 ```
 
 ## Documentation
@@ -210,5 +194,4 @@ pnpm prisma db push   # Push schema changes
 - `docs/file-references.md` — Detailed file-by-file reference
 - `docs/apple-wallet-setup.md` — Apple Wallet certificate setup
 - `docs/google-oauth-setup.md` — Google OAuth + Wallet API setup
-- `/api/v1/docs` — Interactive API reference (live)
-- `/api/v1/openapi.json` — OpenAPI 3.1 specification
+- `docs/email-setup.md` — Email routing setup
