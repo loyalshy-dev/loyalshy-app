@@ -53,6 +53,11 @@ export type PassGenerationInput = {
   // COUPON: redemption state (drives voided pass + lock-screen notification)
   isRedeemed?: boolean
   redeemedAt?: Date | null
+  // Broadcast announcement (PassTemplate.announcement). The back field is
+  // ALWAYS present (placeholder when unset) because iOS only fires the
+  // changeMessage banner for a field whose VALUE changed — a newly added
+  // field updates silently.
+  announcement?: { message: string } | null
 }
 
 // ─── Generate Pass ──────────────────────────────────────────
@@ -416,6 +421,16 @@ export async function generateApplePass(
       value: input.programName,
     })
   }
+
+  // Broadcast announcement — value change fires an iOS lock-screen banner
+  // showing the raw message ("%@"). Placeholder keeps the field present on
+  // every pass so the FIRST real announcement already counts as a change.
+  pushBack({
+    key: "announcement",
+    label: "Announcement",
+    value: input.announcement?.message ?? "No announcements yet",
+    changeMessage: "%@",
+  })
 
   // Type-specific back fields
   if (input.programType === "COUPON" && couponConfig) {

@@ -4,6 +4,7 @@ import { randomUUID } from "crypto"
 import { db } from "@/lib/db"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
+import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import { uploadFile } from "@/lib/storage"
 
 /**
@@ -37,6 +38,7 @@ export async function generateApplePassForEmail(
           name: true,
           passType: true,
           config: true,
+          announcement: true,
           termsAndConditions: true,
           passDesign: true,
           organization: {
@@ -114,6 +116,7 @@ export async function generateApplePassForEmail(
       programConfig: template.config,
       passInstanceId: passInstance.id,
       organizationSlug: organization.slug,
+      announcement: parseTemplateAnnouncement(template.announcement),
     })
 
     // Upload .pkpass to R2 — iOS Safari opens these URLs with native wallet dialog

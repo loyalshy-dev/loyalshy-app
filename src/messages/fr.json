@@ -899,7 +899,19 @@
         "scannerDescription": "Connecte l'app Loyalshy Staff pour que n'importe qui en service puisse tamponner et valider.",
         "directLabel": "Émets le premier pass manuellement",
         "directDescription": "Envoie un pass directement à un client régulier — pas besoin de scan."
-      }
+      },
+      "announcementTitle": "Envoyer une annonce",
+      "announcementDescription": "Envoyez un court message à toutes les personnes ayant la carte de ce programme dans Apple ou Google Wallet — il s'affiche en notification sur l'écran verrouillé.",
+      "announcementPlaceholder": "ex. Aujourd'hui, 2 boissons pour le prix d'1 !",
+      "announcementSend": "Envoyer",
+      "announcementQuota": "{count, plural, =0 {Aucun envoi restant aujourd'hui} one {# envoi restant aujourd'hui} other {# envois restants aujourd'hui}}",
+      "announcementSent": "{count, plural, =0 {Annonce enregistrée — aucune carte dans un wallet à notifier pour l'instant} one {Annonce envoyée à # carte} other {Annonce envoyée à # cartes}}",
+      "announcementNotActive": "Activez le programme pour envoyer des annonces.",
+      "announcementLastSent": "Envoyée {date}",
+      "announcementConfirmTitle": "Envoyer cette annonce ?",
+      "announcementConfirmBody": "{count, plural, =0 {Personne n'a encore cette carte dans son wallet — le message n'apparaîtra que sur les nouvelles cartes.} one {# titulaire sera notifié. Cette action est irréversible.} other {# titulaires seront notifiés. Cette action est irréversible.}}",
+      "announcementConfirmCancel": "Annuler",
+      "announcementConfirmSend": "Envoyer maintenant"
     },
     "programSettings": {
       "title": "Paramètres",
@@ -1623,7 +1635,9 @@
     "csvTotalInteractions": "Total des interactions",
     "csvActivePasses": "Passes actifs",
     "csvLastInteraction": "Dernière interaction",
-    "csvJoined": "Inscrit le"
+    "csvJoined": "Inscrit le",
+    "announcementProgramNotActive": "Les annonces ne peuvent être envoyées que pour des programmes actifs.",
+    "announcementQuotaReached": "Vous avez atteint la limite de 3 annonces par 24 heures pour ce programme."
   },
   "admin": {
     "cohorts": {

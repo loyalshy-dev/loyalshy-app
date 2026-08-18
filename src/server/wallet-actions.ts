@@ -6,6 +6,7 @@ import { assertAuthenticated, getOrganizationForUser, assertOrganizationAccess }
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
+import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import { revalidatePath } from "next/cache"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -61,6 +62,7 @@ export async function issueAppleWalletPass(
           name: true,
           passType: true,
           config: true,
+          announcement: true,
           termsAndConditions: true,
           organizationId: true,
           passDesign: true,
@@ -130,6 +132,7 @@ export async function issueAppleWalletPass(
       hasUnrevealedPrize,
       passInstanceId: passInstance.id,
       organizationSlug: organization.slug,
+      announcement: parseTemplateAnnouncement(passInstance.passTemplate.announcement),
     })
 
     // Update pass instance with wallet pass fields
@@ -207,6 +210,7 @@ export async function issueGoogleWalletPass(
           name: true,
           passType: true,
           config: true,
+          announcement: true,
           termsAndConditions: true,
           organizationId: true,
           endsAt: true,
@@ -279,6 +283,7 @@ export async function issueGoogleWalletPass(
       organizationSlug: organization.slug,
       isRedeemed: (instanceData.redeemed as boolean) ?? false,
       redeemedAt: typeof instanceData.redeemedAt === "string" ? new Date(instanceData.redeemedAt) : null,
+      announcement: parseTemplateAnnouncement(passInstance.passTemplate.announcement),
     })
 
     // Update pass instance with wallet pass fields

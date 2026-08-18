@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { validateApplePassAuth } from "@/lib/wallet/apple/auth"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
+import { parseTemplateAnnouncement } from "@/lib/pass-config"
 
 type Params = Promise<{
   passTypeId: string
@@ -45,6 +46,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
           name: true,
           passType: true,
           config: true,
+          announcement: true,
           termsAndConditions: true,
           organization: {
             select: {
@@ -138,6 +140,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       ),
       isRedeemed,
       redeemedAt,
+      announcement: parseTemplateAnnouncement(template.announcement),
     })
 
     // Log update

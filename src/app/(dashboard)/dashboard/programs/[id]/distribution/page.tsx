@@ -8,6 +8,12 @@ import { ShareLinkSection } from "@/components/dashboard/programs/distribution-s
 import { DistributionStats } from "@/components/dashboard/programs/distribution-stats"
 import { NfcSection } from "@/components/dashboard/programs/nfc-section"
 import { FirstCustomerChecklist } from "@/components/dashboard/programs/first-customer-checklist"
+import { AnnouncementSection } from "@/components/dashboard/programs/announcement-section"
+import {
+  parseTemplateAnnouncement,
+  recentAnnouncementSends,
+  ANNOUNCEMENT_MAX_PER_24H,
+} from "@/lib/pass-config"
 
 export default async function ProgramDistributionPage(props: {
   params: Promise<{ id: string }>
@@ -28,14 +34,16 @@ export default async function ProgramDistributionPage(props: {
   weekAgo.setDate(weekAgo.getDate() - 7)
 
   // Run program validation and stats in parallel
-  const [program, totalIssued, issuedThisWeek, eligibleContacts] = await Promise.all([
+  const [program, totalIssued, issuedThisWeek, eligibleContacts, walletHolders] = await Promise.all([
     db.passTemplate.findFirst({
       where: { id: programId, organizationId: organization.id },
       select: {
         id: true,
         name: true,
         passType: true,
+        status: true,
         config: true,
+        announcement: true,
         passDesign: {
           select: {
             cardType: true,
@@ -65,11 +73,23 @@ export default async function ProgramDistributionPage(props: {
         NOT: { passInstances: { some: { passTemplateId: programId } } },
       },
     }),
+    db.passInstance.count({
+      where: {
+        passTemplateId: programId,
+        status: "ACTIVE",
+        walletProvider: { not: "NONE" },
+      },
+    }),
   ])
 
   if (!program) {
     notFound()
   }
+
+  // Announcement quota: 3 sends per rolling 24h (mirrors the server action)
+  const announcement = parseTemplateAnnouncement(program.announcement)
+  const sentLast24h = recentAnnouncementSends(announcement).length
+  const remainingToday = Math.max(0, ANNOUNCEMENT_MAX_PER_24H - sentLast24h)
 
   // Build join URL
   const origin = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? ""
@@ -127,6 +147,19 @@ export default async function ProgramDistributionPage(props: {
               templateName={program.name}
               passType={program.passType}
               eligibleCount={eligibleContacts}
+            />
+          </section>
+          <section id="announcement-section" className="scroll-mt-6">
+            <AnnouncementSection
+              templateId={program.id}
+              programActive={program.status === "ACTIVE"}
+              lastAnnouncement={
+                announcement
+                  ? { message: announcement.message, sentAt: announcement.sentAt }
+                  : null
+              }
+              remainingToday={remainingToday}
+              walletHolders={walletHolders}
             />
           </section>
           <NfcSection joinUrl={joinUrl} />

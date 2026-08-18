@@ -899,7 +899,19 @@
         "scannerDescription": "Vincula la app Loyalshy Staff para que cualquiera en turno pueda sellar y canjear.",
         "directLabel": "Emite el primer pase manualmente",
         "directDescription": "Envía un pase directo a un cliente habitual — sin escaneo."
-      }
+      },
+      "announcementTitle": "Enviar anuncio",
+      "announcementDescription": "Envía un mensaje corto a todos los que tienen la tarjeta de este programa en Apple o Google Wallet — aparece como notificación en la pantalla de bloqueo.",
+      "announcementPlaceholder": "p. ej. ¡Hoy 2x1 en todas las bebidas!",
+      "announcementSend": "Enviar",
+      "announcementQuota": "{count, plural, =0 {Sin envíos disponibles hoy} one {# envío disponible hoy} other {# envíos disponibles hoy}}",
+      "announcementSent": "{count, plural, =0 {Anuncio guardado — aún no hay tarjetas en wallets para notificar} one {Anuncio enviado a # tarjeta} other {Anuncio enviado a # tarjetas}}",
+      "announcementNotActive": "Activa el programa para enviar anuncios.",
+      "announcementLastSent": "Enviado {date}",
+      "announcementConfirmTitle": "¿Enviar este anuncio?",
+      "announcementConfirmBody": "{count, plural, =0 {Nadie tiene aún esta tarjeta en su wallet — el mensaje solo aparecerá en las tarjetas nuevas.} one {Se notificará a # titular. No se puede deshacer.} other {Se notificará a # titulares. No se puede deshacer.}}",
+      "announcementConfirmCancel": "Cancelar",
+      "announcementConfirmSend": "Enviar ahora"
     },
     "programSettings": {
       "title": "Ajustes",
@@ -1623,7 +1635,9 @@
     "csvTotalInteractions": "Total Interacciones",
     "csvActivePasses": "Pases Activos",
     "csvLastInteraction": "Última Interacción",
-    "csvJoined": "Registrado"
+    "csvJoined": "Registrado",
+    "announcementProgramNotActive": "Solo se pueden enviar anuncios en programas activos.",
+    "announcementQuotaReached": "Has alcanzado el límite de 3 anuncios por 24 horas para este programa."
   },
   "admin": {
     "cohorts": {

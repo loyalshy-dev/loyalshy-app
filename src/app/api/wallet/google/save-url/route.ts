@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { getCurrentUser } from "@/lib/dal"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
+import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import { apiRouteLimiter } from "@/lib/rate-limit"
 
 /**
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
             name: true,
             passType: true,
             config: true,
+            announcement: true,
             termsAndConditions: true,
             endsAt: true,
             organization: {
@@ -173,6 +175,7 @@ export async function POST(request: Request) {
       organizationSlug: organization.slug,
       isRedeemed,
       redeemedAt,
+      announcement: parseTemplateAnnouncement(template.announcement),
     })
 
     return NextResponse.json({ saveUrl })

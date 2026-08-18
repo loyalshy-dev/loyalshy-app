@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { verifyCardSignature } from "@/lib/card-access"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
+import { parseTemplateAnnouncement } from "@/lib/pass-config"
 
 export async function GET(
   request: Request,
@@ -40,6 +41,7 @@ export async function GET(
           name: true,
           passType: true,
           config: true,
+          announcement: true,
           termsAndConditions: true,
           organization: {
             select: {
@@ -114,6 +116,7 @@ export async function GET(
       cardDesign: passDesign,
       programType: template.passType,
       programConfig: template.config,
+      announcement: parseTemplateAnnouncement(template.announcement),
     })
 
     return new NextResponse(new Uint8Array(passBuffer), {

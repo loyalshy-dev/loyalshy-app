@@ -407,6 +407,10 @@ model PassTemplate {
   endsAt             DateTime?
   termsAndConditions String?        @db.Text
   config             Json           @default("{}")
+  // Broadcast announcement pushed to all wallet passes of this template:
+  // { message, sentAt, history: [ISO timestamps] } — lives outside `config`
+  // because validateTemplateConfig strips unknown keys on program edits.
+  announcement       Json?
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 

@@ -11,7 +11,7 @@ import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { buildCardUrl } from "@/lib/card-access"
-import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
+import { parseCouponConfig, parseMinigameConfig, parseTemplateAnnouncement, weightedRandomPrize } from "@/lib/pass-config"
 import { verifyCardSignature } from "@/lib/card-access"
 import type { PublicTemplateInfo } from "@/types/pass-instance"
 import type { MinigameConfig } from "@/types/pass-types"
@@ -593,6 +593,7 @@ export async function requestWalletPass(
           name: true,
           passType: true,
           config: true,
+          announcement: true,
           termsAndConditions: true,
           endsAt: true,
           passDesign: true,
@@ -663,6 +664,7 @@ export async function requestWalletPass(
       rewardExpiryDays: (templateConfig.rewardExpiryDays as number) ?? 90,
       termsAndConditions: template.termsAndConditions,
       endsAt: template.endsAt,
+      announcement: template.announcement,
     },
     parsed.data.platform,
     true, // requesting a pass after instance creation is always a "returning" action
@@ -713,6 +715,7 @@ async function issuePassForInstance(
     rewardExpiryDays: number
     termsAndConditions: string | null
     endsAt: Date | null
+    announcement: unknown
   },
   platform: "apple" | "google",
   isReturning: boolean,
@@ -751,6 +754,7 @@ async function issuePassForInstance(
         hasUnrevealedPrize: instance.hasUnrevealedPrize ?? false,
         passInstanceId: instance.passInstanceId,
         organizationSlug: organization.slug,
+        announcement: parseTemplateAnnouncement(template.announcement),
       })
 
       // Store wallet fields on PassInstance
@@ -831,6 +835,7 @@ async function issuePassForInstance(
       templateConfig: template.config,
       hasUnrevealedPrize,
       organizationSlug: organization.slug,
+      announcement: parseTemplateAnnouncement(template.announcement),
     })
 
     // Store wallet fields on PassInstance

@@ -5,7 +5,7 @@ import { verifyCardSignature } from "@/lib/card-access"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
-import { parseMinigameConfig } from "@/lib/pass-config"
+import { parseMinigameConfig, parseTemplateAnnouncement } from "@/lib/pass-config"
 
 export async function GET(
   request: Request,
@@ -50,6 +50,7 @@ export async function GET(
           name: true,
           passType: true,
           config: true,
+          announcement: true,
           termsAndConditions: true,
           endsAt: true,
           passDesign: true,
@@ -133,6 +134,7 @@ export async function GET(
         programConfig: template.config,
         passInstanceId: passInstance.id,
         organizationSlug: organization.slug,
+        announcement: parseTemplateAnnouncement(template.announcement),
       })
 
       // Update pass instance with wallet details
@@ -204,6 +206,7 @@ export async function GET(
       organizationSlug: organization.slug,
       isRedeemed,
       redeemedAt,
+      announcement: parseTemplateAnnouncement(template.announcement),
     })
 
     // Update pass instance

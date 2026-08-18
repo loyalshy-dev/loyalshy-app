@@ -899,7 +899,19 @@
         "scannerDescription": "Pair the Loyalshy Staff app so anyone on shift can stamp and redeem.",
         "directLabel": "Issue your first pass manually",
         "directDescription": "Send a pass straight to a regular — no scan needed."
-      }
+      },
+      "announcementTitle": "Send announcement",
+      "announcementDescription": "Push a short message to everyone who has this program's pass in Apple or Google Wallet — it shows up as a lock-screen notification.",
+      "announcementPlaceholder": "e.g. 2-for-1 on all drinks today!",
+      "announcementSend": "Send",
+      "announcementQuota": "{count, plural, =0 {No sends left today} one {# send left today} other {# sends left today}}",
+      "announcementSent": "{count, plural, =0 {Announcement saved — no wallet passes to notify yet} one {Announcement sent to # pass} other {Announcement sent to # passes}}",
+      "announcementNotActive": "Activate the program to send announcements.",
+      "announcementLastSent": "Sent {date}",
+      "announcementConfirmTitle": "Send this announcement?",
+      "announcementConfirmBody": "{count, plural, =0 {No one holds this pass in a wallet yet — the message will only appear on newly issued passes.} one {This will notify # pass holder. It can't be unsent.} other {This will notify # pass holders. It can't be unsent.}}",
+      "announcementConfirmCancel": "Cancel",
+      "announcementConfirmSend": "Send now"
     },
     "programSettings": {
       "title": "Settings",
@@ -1623,7 +1635,9 @@
     "csvTotalInteractions": "Total Interactions",
     "csvActivePasses": "Active Passes",
     "csvLastInteraction": "Last Interaction",
-    "csvJoined": "Joined"
+    "csvJoined": "Joined",
+    "announcementProgramNotActive": "Announcements can only be sent for active programs.",
+    "announcementQuotaReached": "You've reached the limit of 3 announcements per 24 hours for this program."
   },
   "admin": {
     "cohorts": {

@@ -52,6 +52,11 @@ export type GooglePassGenerationInput = {
   // that was updated in-place.
   isRedeemed?: boolean
   redeemedAt?: Date | null
+  // Broadcast announcement (PassTemplate.announcement). Carried on the class
+  // so the issuance-path class PATCH doesn't wipe the broadcast message; the
+  // deterministic id (announce-{sentAt ms}) means Google's TEXT_AND_NOTIFY
+  // id-dedupe never re-notifies holders who already got the banner.
+  announcement?: { message: string; sentAt: string } | null
 }
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -270,6 +275,21 @@ function buildLoyaltyClass(input: GooglePassGenerationInput) {
   }
   if (classTextModules.length > 0) {
     loyaltyClass.textModulesData = classTextModules
+  }
+
+  // Current broadcast announcement — must be re-included here because the
+  // issuance path PATCHes the class (replacing `messages`); the stable id
+  // keeps Google from re-firing the notification.
+  if (input.announcement) {
+    const sentAtMs = Date.parse(input.announcement.sentAt)
+    loyaltyClass.messages = [
+      {
+        id: `announce-${Number.isNaN(sentAtMs) ? "0" : sentAtMs}`,
+        header: input.organizationName,
+        body: input.announcement.message,
+        messageType: "TEXT_AND_NOTIFY",
+      },
+    ]
   }
 
   // Merchant locations from coordinates + nearby notification
