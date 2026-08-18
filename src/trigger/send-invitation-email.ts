@@ -7,7 +7,7 @@ import { emailsQueue } from "./queues"
 type InvitationEmailPayload = {
   email: string
   organizationName: string
-  role: "owner" | "staff"
+  role: "owner" | "admin" | "staff"
   inviteUrl: string
   mobileDeepLink?: string
   /** Forwarded to Resend so a Trigger.dev retry doesn't resend the invitation. */
@@ -29,7 +29,12 @@ export const sendInvitationEmailTask = task({
     const { Resend } = await import("resend")
     const resend = new Resend(process.env.RESEND_API_KEY)
 
-    const roleLabel = payload.role === "owner" ? "an owner" : "a staff member"
+    const roleLabel =
+      payload.role === "owner"
+        ? "an owner"
+        : payload.role === "admin"
+          ? "a program manager"
+          : "a staff member"
 
     const result = await resend.emails.send(
       {

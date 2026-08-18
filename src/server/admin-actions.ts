@@ -36,6 +36,7 @@ export type AdminUserRow = {
   banReason: string | null
   createdAt: Date
   emailVerified: boolean
+  isPartner: boolean
   organizationName?: string | null
 }
 
@@ -145,6 +146,11 @@ const setRoleSchema = z.object({
 
 const revokeSessionsSchema = z.object({
   userId: z.string().min(1),
+})
+
+const setPartnerSchema = z.object({
+  userId: z.string().min(1),
+  isPartner: z.enum(["true", "false"]),
 })
 
 const impersonateSchema = z.object({
@@ -307,6 +313,7 @@ export async function getAdminUsers(opts: GetAdminUsersOpts): Promise<AdminUsers
       banReason: u.banReason,
       createdAt: u.createdAt,
       emailVerified: u.emailVerified,
+      isPartner: u.isPartner,
     })),
     total,
     pageCount: Math.ceil(total / perPage),
@@ -581,6 +588,50 @@ export async function adminSetRole(formData: FormData) {
     return { success: true }
   } catch {
     return { error: "Failed to update role." }
+  }
+}
+
+export async function adminSetPartner(formData: FormData) {
+  const session = await assertAdminRole("ADMIN_OPS")
+
+  const parsed = setPartnerSchema.safeParse({
+    userId: formData.get("userId"),
+    isPartner: formData.get("isPartner"),
+  })
+
+  if (!parsed.success) {
+    return { error: "Invalid input." }
+  }
+
+  const { userId } = parsed.data
+  const isPartner = parsed.data.isPartner === "true"
+
+  const target = await db.user.findUnique({
+    where: { id: userId },
+    select: { email: true, isPartner: true },
+  })
+  if (!target) {
+    return { error: "User not found." }
+  }
+
+  try {
+    await db.user.update({
+      where: { id: userId },
+      data: { isPartner },
+    })
+
+    await logAdminAction({
+      adminId: session.user.id,
+      action: "USER_PARTNER_CHANGED",
+      targetType: "user",
+      targetId: userId,
+      targetLabel: target.email,
+      metadata: { oldValue: target.isPartner, newValue: isPartner },
+    })
+
+    return { success: true }
+  } catch {
+    return { error: "Failed to update partner status." }
   }
 }
 

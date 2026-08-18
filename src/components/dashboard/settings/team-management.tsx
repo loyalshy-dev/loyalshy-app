@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
+import { useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
@@ -59,7 +60,7 @@ import { Card } from "@/components/ui/card"
 
 type InviteForm = {
   email: string
-  role: "owner" | "staff"
+  role: "owner" | "admin" | "staff"
 }
 
 type Organization = {
@@ -129,6 +130,22 @@ export function TeamManagement({
 
   const selectedRole = watch("role")
 
+  // Deep link from a partner access-request email:
+  // /dashboard/settings?tab=team&invite={email}&inviteRole=admin
+  // opens the invite dialog pre-filled — the owner just reviews and sends.
+  const searchParams = useSearchParams()
+  const prefillApplied = useRef(false)
+  useEffect(() => {
+    if (prefillApplied.current) return
+    const invite = searchParams.get("invite")
+    if (!invite) return
+    prefillApplied.current = true
+    const role = searchParams.get("inviteRole")
+    setValue("email", invite)
+    setValue("role", role === "admin" ? "admin" : role === "owner" ? "owner" : "staff")
+    setInviteOpen(true)
+  }, [searchParams, setValue])
+
   function onInviteSubmit(data: InviteForm) {
     startTransition(async () => {
       const result = await inviteTeamMember({
@@ -182,13 +199,14 @@ export function TeamManagement({
     })
   }
 
-  function handleChangeRole(member: Member, newRole: "owner" | "member") {
+  function handleChangeRole(member: Member, newRole: "owner" | "admin" | "member") {
     startTransition(async () => {
       const result = await changeTeamMemberRole(organization.id, member.id, newRole)
       if ("error" in result) {
         toast.error(String(result.error))
       } else {
-        const label = newRole === "owner" ? "Owner" : "Staff"
+        const label =
+          newRole === "owner" ? t("owner") : newRole === "admin" ? t("programManager") : t("staff")
         toast.success(`${member.user.name} is now ${label}`)
       }
     })
@@ -253,7 +271,11 @@ export function TeamManagement({
                   ) : (
                     <Shield className="mr-1 h-3 w-3" />
                   )}
-                  {member.role === "owner" ? t("owner") : t("staff")}
+                  {member.role === "owner"
+                    ? t("owner")
+                    : member.role === "admin"
+                      ? t("programManager")
+                      : t("staff")}
                 </Badge>
                 <p className="text-xs text-muted-foreground hidden sm:block w-28 text-right">
                   Joined {formatDistanceToNow(new Date(member.createdAt), { addSuffix: true })}
@@ -266,19 +288,28 @@ export function TeamManagement({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {member.role === "owner" ? (
-                        <DropdownMenuItem
-                          onClick={() => handleChangeRole(member, "member")}
-                        >
-                          <Shield className="mr-2 h-3.5 w-3.5" />
-                          Demote to Staff
-                        </DropdownMenuItem>
-                      ) : (
+                      {member.role !== "owner" && (
                         <DropdownMenuItem
                           onClick={() => handleChangeRole(member, "owner")}
                         >
                           <ShieldCheck className="mr-2 h-3.5 w-3.5" />
                           Promote to Owner
+                        </DropdownMenuItem>
+                      )}
+                      {member.role !== "admin" && (
+                        <DropdownMenuItem
+                          onClick={() => handleChangeRole(member, "admin")}
+                        >
+                          <ShieldCheck className="mr-2 h-3.5 w-3.5" />
+                          Make Program Manager
+                        </DropdownMenuItem>
+                      )}
+                      {member.role !== "member" && (
+                        <DropdownMenuItem
+                          onClick={() => handleChangeRole(member, "member")}
+                        >
+                          <Shield className="mr-2 h-3.5 w-3.5" />
+                          Demote to Staff
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem
@@ -328,7 +359,11 @@ export function TeamManagement({
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-[10px]">
-                    {inv.role === "OWNER" ? t("owner") : t("staff")}
+                    {inv.role === "OWNER"
+                      ? t("owner")
+                      : inv.role === "ADMIN"
+                        ? t("programManager")
+                        : t("staff")}
                   </Badge>
                   <Button
                     variant="ghost"
@@ -407,6 +442,33 @@ export function TeamManagement({
                       </ul>
                     </div>
                     {selectedRole === "staff" && (
+                      <Check className="mt-0.5 h-4 w-4 shrink-0" />
+                    )}
+                  </button>
+                </Card>
+                <Card
+                  asChild
+                  className={`
+                    cursor-pointer transition-colors
+                    ${selectedRole === "admin" ? "bg-accent" : "hover:bg-accent/50"}
+                  `}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setValue("role", "admin")}
+                    className="flex items-start gap-3 px-4 py-3.5 text-left"
+                  >
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="flex-1 space-y-1">
+                      <span className="text-sm font-medium">{t("programManager")}</span>
+                      <ul className="space-y-0.5 text-[11px] text-muted-foreground">
+                        <li>Everything Staff can do</li>
+                        <li>Design cards & manage programs</li>
+                        <li>Distribution & pass issuing</li>
+                        <li>No billing, team or settings access</li>
+                      </ul>
+                    </div>
+                    {selectedRole === "admin" && (
                       <Check className="mt-0.5 h-4 w-4 shrink-0" />
                     )}
                   </button>

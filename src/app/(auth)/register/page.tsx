@@ -32,12 +32,52 @@ import {
   Store,
 } from "lucide-react"
 
+// ─── Referral capture ───────────────────────────────────────
+//
+// /register?ref={code} attributes the signup to a partner. The code is
+// parked in localStorage (30-day window) so it survives the OTP step and
+// the Google OAuth roundtrip, then consumed at org creation.
+
+const REF_STORAGE_KEY = "loyalshy_ref"
+const REF_TTL_MS = 30 * 24 * 60 * 60 * 1000
+
+function storeReferralCode(code: string) {
+  try {
+    localStorage.setItem(REF_STORAGE_KEY, JSON.stringify({ code, ts: Date.now() }))
+  } catch {}
+}
+
+function readReferralCode(): string | undefined {
+  try {
+    const raw = localStorage.getItem(REF_STORAGE_KEY)
+    if (!raw) return undefined
+    const parsed = JSON.parse(raw) as { code?: unknown; ts?: unknown }
+    if (typeof parsed.code !== "string" || typeof parsed.ts !== "number") return undefined
+    if (Date.now() - parsed.ts > REF_TTL_MS) return undefined
+    return parsed.code
+  } catch {
+    return undefined
+  }
+}
+
+function clearReferralCode() {
+  try {
+    localStorage.removeItem(REF_STORAGE_KEY)
+  } catch {}
+}
+
 // ─── Main Page Component ────────────────────────────────────
 
 export default function RegisterPage() {
   const t = useTranslations("auth.register")
   const searchParams = useSearchParams()
   const stepParam = searchParams.get("step")
+  const refParam = searchParams.get("ref")
+
+  // Park the referral code as soon as the link lands
+  useEffect(() => {
+    if (refParam) storeReferralCode(refParam)
+  }, [refParam])
 
   // Google OAuth callback lands on ?step=org → jump to org step (email already verified)
   // ?step=2 for backwards compat also jumps to org
@@ -385,7 +425,7 @@ function OrganizationStep() {
     setIsLoading(true)
 
     try {
-      const result = await createOrganization({ name })
+      const result = await createOrganization({ name, ref: readReferralCode() })
 
       if ("error" in result && result.error) {
         toast.error(result.error)
@@ -394,6 +434,7 @@ function OrganizationStep() {
       }
 
       if ("organizationId" in result && result.organizationId) {
+        clearReferralCode()
         toast.success(t("allSet"))
         router.push("/dashboard")
         return

@@ -50,6 +50,7 @@ const ACTION_LABELS: Record<string, string> = {
   USER_BANNED: "actionUserBanned",
   USER_UNBANNED: "actionUserUnbanned",
   USER_ROLE_CHANGED: "actionUserRoleChanged",
+  USER_PARTNER_CHANGED: "actionUserPartnerChanged",
   USER_SESSIONS_REVOKED: "actionUserSessionsRevoked",
   USER_IMPERSONATED: "actionUserImpersonated",
   USER_IMPERSONATION_ENDED: "actionUserImpersonationEnded",

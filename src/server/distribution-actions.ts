@@ -115,7 +115,7 @@ export async function issuePassToContacts(
     return { success: false, results: [], issuedCount: 0, skippedCount: 0, error: t("noOrganization") }
   }
 
-  await assertOrganizationRole(organization.id, "owner")
+  await assertOrganizationRole(organization.id, "admin")
 
   const parsed = issuePassSchema.safeParse({ templateId, contactIds })
   if (!parsed.success) {
@@ -375,7 +375,7 @@ export async function createContactAndIssuePass(
     return { success: false, error: t("noOrganization") }
   }
 
-  await assertOrganizationRole(organization.id, "owner")
+  await assertOrganizationRole(organization.id, "admin")
 
   const parsed = createAndIssueSchema.safeParse({ templateId, fullName, email, phone })
   if (!parsed.success) {
@@ -510,7 +510,7 @@ export async function issuePassToAllEligible(
     return { success: false, results: [], issuedCount: 0, skippedCount: 0, totalEligible: 0, error: t("noOrganization") }
   }
 
-  await assertOrganizationRole(organization.id, "owner")
+  await assertOrganizationRole(organization.id, "admin")
 
   const eligibleContacts = await db.contact.findMany({
     where: {

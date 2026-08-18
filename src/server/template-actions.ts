@@ -312,7 +312,7 @@ export async function updatePassInstanceStatus(
   const organization = await getOrganizationForUser()
   if (!organization) return { error: "Organization not found" }
 
-  await assertOrganizationRole(organization.id, "owner")
+  await assertOrganizationRole(organization.id, "admin")
 
   const passInstance = await db.passInstance.findFirst({
     where: {
@@ -349,7 +349,7 @@ export async function getTemplateForSettings(templateId: string): Promise<Templa
   const organization = await getOrganizationForUser()
   if (!organization) return null
 
-  await assertOrganizationRole(organization.id, "owner")
+  await assertOrganizationRole(organization.id, "admin")
 
   const template = await db.passTemplate.findFirst({
     where: { id: templateId, organizationId: organization.id },

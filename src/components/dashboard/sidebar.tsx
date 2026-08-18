@@ -4,16 +4,27 @@ import { useCallback, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
+  Check,
   ChevronsUpDown,
+  Handshake,
   LayoutGrid,
+  Link2,
   LogOut,
+  Plus,
   Settings,
+  Share2,
   Smartphone,
   Users,
   Layers,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { authClient } from "@/lib/auth-client"
+import { switchActiveOrganization } from "@/server/org-switch-actions"
+import {
+  NewClientDialog,
+  HandoffDialog,
+  ReferralLinkDialog,
+} from "@/components/dashboard/partner-tools"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ConnectDeviceDialog } from "@/components/dashboard/settings/connect-device"
 import {
@@ -49,6 +60,14 @@ type AppSidebarProps = {
     logoGoogle: string | null
   } | null
   orgRole: string | null
+  organizations: {
+    id: string
+    name: string
+    logo: string | null
+    logoGoogle: string | null
+  }[]
+  activeOrganizationId: string
+  isPartnerUser: boolean
 }
 
 function getInitials(name: string) {
@@ -60,7 +79,42 @@ function getInitials(name: string) {
     .slice(0, 2)
 }
 
-export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
+function OrgAvatar({
+  name,
+  logo,
+  logoGoogle,
+}: {
+  name: string
+  logo: string | null
+  logoGoogle: string | null
+}) {
+  const src = logoGoogle ?? logo
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={name}
+        className="size-7 rounded-md shrink-0 object-cover"
+      />
+    )
+  }
+  return (
+    <div className="size-7 rounded-md bg-sidebar-accent flex items-center justify-center shrink-0">
+      <span className="text-[11px] font-semibold text-sidebar-accent-foreground">
+        {getInitials(name)}
+      </span>
+    </div>
+  )
+}
+
+export function AppSidebar({
+  user,
+  organization,
+  orgRole,
+  organizations,
+  activeOrganizationId,
+  isPartnerUser,
+}: AppSidebarProps) {
   const t = useTranslations("dashboard.nav")
   const pathname = usePathname()
   const router = useRouter()
@@ -68,11 +122,36 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
   // Lifted out of the dropdown so the dialog isn't unmounted when the
   // dropdown closes after the menu item is selected.
   const [connectDeviceOpen, setConnectDeviceOpen] = useState(false)
+  const [newClientOpen, setNewClientOpen] = useState(false)
+  const [handoffOpen, setHandoffOpen] = useState(false)
+  const [referralOpen, setReferralOpen] = useState(false)
+  const [isSwitchingOrg, setIsSwitchingOrg] = useState(false)
+  // The switcher dropdown exists for multi-org users (agency/partner reps,
+  // multi-location owners) and for every partner — partners need its menu
+  // to start a new client setup even with a single org.
+  const canSwitchOrg = organizations.length > 1 || isPartnerUser
+
+  async function handleSwitchOrg(organizationId: string) {
+    if (organizationId === activeOrganizationId || isSwitchingOrg) return
+    setIsSwitchingOrg(true)
+    const result = await switchActiveOrganization({ organizationId })
+    if ("error" in result) {
+      setIsSwitchingOrg(false)
+      return
+    }
+    // Full navigation: the current page may belong to the previous org
+    // (e.g. a program detail), and a hard load bypasses the client router
+    // cache so every surface re-renders against the new active org.
+    window.location.assign("/dashboard")
+  }
 
   const navItems = [
     { label: t("overview"), href: "/dashboard", icon: LayoutGrid },
     { label: t("contacts"), href: "/dashboard/contacts", icon: Users },
     { label: t("programs"), href: "/dashboard/programs", icon: Layers },
+    ...(isPartnerUser
+      ? [{ label: t("partnerConsole"), href: "/dashboard/partner", icon: Handshake }]
+      : []),
   ]
 
   const ownerItems = [
@@ -98,28 +177,111 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon">
-      {/* Organization branding */}
+      {/* Organization branding + switcher (dropdown only for multi-org users) */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="cursor-default hover:bg-transparent active:bg-transparent">
-              {(organization?.logoGoogle ?? organization?.logo) ? (
-                <img
-                  src={(organization.logoGoogle ?? organization.logo)!}
-                  alt={organization.name}
-                  className="size-7 rounded-md shrink-0 object-cover"
-                />
-              ) : (
-                <div className="size-7 rounded-md bg-sidebar-accent flex items-center justify-center shrink-0">
-                  <span className="text-[11px] font-semibold text-sidebar-accent-foreground">
-                    {organization ? getInitials(organization.name) : "L"}
-                  </span>
-                </div>
-              )}
-              <span className="text-sm font-semibold text-sidebar-primary truncate">
-                {organization?.name ?? "Loyalshy"}
-              </span>
-            </SidebarMenuButton>
+            {canSwitchOrg ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                    size="lg"
+                    disabled={isSwitchingOrg}
+                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                    aria-label={t("switchOrganization")}
+                  >
+                    {organization ? (
+                      <OrgAvatar
+                        name={organization.name}
+                        logo={organization.logo}
+                        logoGoogle={organization.logoGoogle}
+                      />
+                    ) : (
+                      <OrgAvatar name="Loyalshy" logo={null} logoGoogle={null} />
+                    )}
+                    <span className="text-sm font-semibold text-sidebar-primary truncate">
+                      {organization?.name ?? "Loyalshy"}
+                    </span>
+                    <ChevronsUpDown className="ml-auto size-4 shrink-0" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  side="bottom"
+                  align="start"
+                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56"
+                >
+                  <p className="px-2 py-1.5 text-xs text-muted-foreground">
+                    {t("switchOrganization")}
+                  </p>
+                  {organizations.map((org) => (
+                    <DropdownMenuItem
+                      key={org.id}
+                      disabled={isSwitchingOrg}
+                      onSelect={() => handleSwitchOrg(org.id)}
+                    >
+                      <OrgAvatar
+                        name={org.name}
+                        logo={org.logo}
+                        logoGoogle={org.logoGoogle}
+                      />
+                      <span className="truncate flex-1">{org.name}</span>
+                      {org.id === activeOrganizationId && (
+                        <Check className="size-4 shrink-0" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                  {isPartnerUser && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault()
+                          setNewClientOpen(true)
+                        }}
+                      >
+                        <Plus className="size-4" />
+                        {t("newClientSetup")}
+                      </DropdownMenuItem>
+                      {isOwner && organization && (
+                        <DropdownMenuItem
+                          onSelect={(e) => {
+                            e.preventDefault()
+                            setHandoffOpen(true)
+                          }}
+                        >
+                          <Link2 className="size-4" />
+                          {t("handoffToOwner")}
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault()
+                          setReferralOpen(true)
+                        }}
+                      >
+                        <Share2 className="size-4" />
+                        {t("referralLink")}
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <SidebarMenuButton size="lg" className="cursor-default hover:bg-transparent active:bg-transparent">
+                {organization ? (
+                  <OrgAvatar
+                    name={organization.name}
+                    logo={organization.logo}
+                    logoGoogle={organization.logoGoogle}
+                  />
+                ) : (
+                  <OrgAvatar name="Loyalshy" logo={null} logoGoogle={null} />
+                )}
+                <span className="text-sm font-semibold text-sidebar-primary truncate">
+                  {organization?.name ?? "Loyalshy"}
+                </span>
+              </SidebarMenuButton>
+            )}
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -246,6 +408,21 @@ export function AppSidebar({ user, organization, orgRole }: AppSidebarProps) {
         <ConnectDeviceDialog
           open={connectDeviceOpen}
           onOpenChange={setConnectDeviceOpen}
+          organizationName={organization.name}
+        />
+      ) : null}
+
+      {isPartnerUser ? (
+        <>
+          <NewClientDialog open={newClientOpen} onOpenChange={setNewClientOpen} />
+          <ReferralLinkDialog open={referralOpen} onOpenChange={setReferralOpen} />
+        </>
+      ) : null}
+      {isPartnerUser && organization ? (
+        <HandoffDialog
+          open={handoffOpen}
+          onOpenChange={setHandoffOpen}
+          organizationId={activeOrganizationId}
           organizationName={organization.name}
         />
       ) : null}

@@ -42,13 +42,14 @@ export async function getBillingData(): Promise<BillingData | { error: string }>
     const plan = organization.plan as PlanId
     const limits = getPlanLimits(plan)
 
-    // Count usage metrics in parallel
+    // Count usage metrics in parallel. Partner memberships (agency reps
+    // flagged by admins) are exempt from the staff seat count.
     const [contactCount, memberCount, programCount] = await Promise.all([
       db.contact.count({
         where: { organizationId: organization.id, deletedAt: null },
       }),
       db.member.count({
-        where: { organizationId: organization.id },
+        where: { organizationId: organization.id, user: { isPartner: false } },
       }),
       db.passTemplate.count({
         where: { organizationId: organization.id, status: "ACTIVE" },
@@ -270,7 +271,10 @@ export async function checkPassTypeAllowed(_organizationId: string, passType: st
   return passType === "STAMP_CARD" || passType === "COUPON"
 }
 
-export async function checkStaffLimit(organizationId: string): Promise<{
+export async function checkStaffLimit(
+  organizationId: string,
+  opts?: { inviteeEmail?: string }
+): Promise<{
   allowed: boolean
   current: number
   limit: number
@@ -281,6 +285,21 @@ export async function checkStaffLimit(organizationId: string): Promise<{
   if (isAdminRole(currentUser?.user.role ?? "")) {
     const current = await db.member.count({ where: { organizationId } })
     return { allowed: true, current, limit: Infinity, approaching: false }
+  }
+
+  // Partner users (agency reps flagged by admins) never consume a seat:
+  // inviting one is always allowed regardless of the plan limit.
+  if (opts?.inviteeEmail) {
+    const invitee = await db.user.findUnique({
+      where: { email: opts.inviteeEmail },
+      select: { isPartner: true },
+    })
+    if (invitee?.isPartner) {
+      const current = await db.member.count({
+        where: { organizationId, user: { isPartner: false } },
+      })
+      return { allowed: true, current, limit: Infinity, approaching: false }
+    }
   }
 
   const organization = await db.organization.findUnique({
@@ -296,19 +315,32 @@ export async function checkStaffLimit(organizationId: string): Promise<{
   const plan = organization.plan as PlanId
   const { staffLimit } = getPlanLimits(plan)
 
+  // Partner memberships are exempt from the seat count
   const memberCount = await db.member.count({
-    where: { organizationId },
+    where: { organizationId, user: { isPartner: false } },
   })
   const current = memberCount ?? 1
 
-  // Also count pending invitations
-  const pendingCount = await db.staffInvitation.count({
+  // Also count pending invitations — minus those addressed to partner
+  // users, since accepting them won't consume a seat either.
+  const pendingInvites = await db.staffInvitation.findMany({
     where: {
       organizationId,
       accepted: false,
       expiresAt: { gt: new Date() },
     },
+    select: { email: true },
   })
+  let pendingCount = pendingInvites.length
+  if (pendingCount > 0) {
+    const partnerPending = await db.user.count({
+      where: {
+        isPartner: true,
+        email: { in: pendingInvites.map((i) => i.email) },
+      },
+    })
+    pendingCount -= partnerPending
+  }
 
   const totalCommitted = current + pendingCount
 

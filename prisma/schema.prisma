@@ -30,6 +30,9 @@ enum OrgAuditAction {
   INVITATION_ACCEPTED  @map("invitation_accepted")
   MEMBER_REMOVED       @map("member_removed")
   MEMBER_ROLE_CHANGED  @map("member_role_changed")
+  HANDOFF_LINK_CREATED @map("handoff_link_created")
+  OWNERSHIP_CLAIMED    @map("ownership_claimed")
+  ACCESS_REQUESTED     @map("access_requested")
 
   @@map("org_audit_action")
 }
@@ -38,6 +41,7 @@ enum AdminAction {
   USER_BANNED              @map("user_banned")
   USER_UNBANNED            @map("user_unbanned")
   USER_ROLE_CHANGED        @map("user_role_changed")
+  USER_PARTNER_CHANGED     @map("user_partner_changed")
   USER_SESSIONS_REVOKED    @map("user_sessions_revoked")
   USER_IMPERSONATED        @map("user_impersonated")
   USER_IMPERSONATION_ENDED @map("user_impersonation_ended")
@@ -136,6 +140,10 @@ enum WalletPassAction {
 
 enum StaffRole {
   OWNER @map("owner")
+  // Program manager: design studio, distribution, program lifecycle —
+  // no billing, team, or org settings. Maps to member.role "admin"
+  // (the middle tier of the DAL's owner > admin > member hierarchy).
+  ADMIN @map("admin")
   STAFF @map("staff")
 
   @@map("staff_role")
@@ -206,6 +214,13 @@ model User {
   emailVerified Boolean   @default(false)
   image         String?
   role          UserRole  @default(USER)
+  // Platform-controlled flag for agency/partner reps: their org memberships
+  // are exempt from plan staffLimit counting. Set only via the admin panel —
+  // never by org owners (it would be a free-seats loophole).
+  isPartner     Boolean   @default(false)
+  // Unique code behind /register?ref={code} links; lazily generated the
+  // first time a partner requests their referral link.
+  referralCode  String?   @unique
   banned        Boolean   @default(false)
   banReason     String?
   banExpires    DateTime?
@@ -221,6 +236,8 @@ model User {
   adminAuditLogs        AdminAuditLog[]      @relation("AdminAuditLogs")
   orgAuditLogs          OrgAuditLog[]        @relation("OrgAuditActor")
   devicePairingTokens   DevicePairingToken[] @relation("DevicePairingTokens")
+  handoffTokensCreated  OrgHandoffToken[]    @relation("HandoffCreatedBy")
+  referredOrganizations Organization[]       @relation("ReferredOrgs")
 
   @@map("user")
 }
@@ -302,6 +319,13 @@ model Organization {
   timezone       String  @default("UTC")
   settings       Json    @default("{}")
 
+  // Partner attribution: the partner responsible for this org — set when a
+  // partner creates the org directly (handoff flow) or when the owner
+  // signed up through the partner's /register?ref= link. Drives the
+  // rev-share statement; SET NULL keeps the org if the partner is deleted.
+  referredById String?
+  referredBy   User?   @relation("ReferredOrgs", fields: [referredById], references: [id], onDelete: SetNull)
+
   members             Member[]
   invitations         Invitation[]
   passTemplates       PassTemplate[]
@@ -312,8 +336,30 @@ model Organization {
   analyticsSnapshots  AnalyticsSnapshot[]
   devicePairingTokens DevicePairingToken[]
   orgAuditLogs        OrgAuditLog[]
+  handoffTokens       OrgHandoffToken[]
 
+  @@index([referredById])
   @@map("organization")
+}
+
+// Partner-led onboarding: a partner rep creates a client org, does the
+// setup, then hands ownership to the real owner via a one-shot claim link.
+// The DB stores sha256(token); plaintext only ever leaves in the link.
+model OrgHandoffToken {
+  id             String    @id @default(dbgenerated("uuidv7()::text"))
+  organizationId String
+  createdById    String
+  token          String    @unique
+  expiresAt      DateTime
+  claimedAt      DateTime?
+  claimedById    String?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("HandoffCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("org_handoff_token")
 }
 
 model Member {

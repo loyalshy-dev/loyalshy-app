@@ -8,6 +8,8 @@ import {
   Building2,
   ChevronLeft,
   Filter,
+  Grid3x3,
+  Handshake,
   LogOut,
   LayoutDashboard,
   ScrollText,
@@ -60,6 +62,8 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
     { label: t("nav.overview"), href: "/admin", icon: BarChart3 },
     { label: t("nav.users"), href: "/admin/users", icon: Users },
     { label: t("nav.organizations"), href: "/admin/organizations", icon: Building2 },
+    { label: t("nav.partners"), href: "/admin/partners", icon: Handshake },
+    { label: t("nav.cohorts"), href: "/admin/cohorts", icon: Grid3x3 },
     { label: t("nav.funnel"), href: "/admin/funnel", icon: Filter },
     { label: t("nav.auditLog"), href: "/admin/audit-log", icon: ScrollText },
   ]

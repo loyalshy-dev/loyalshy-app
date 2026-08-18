@@ -1,13 +1,12 @@
 import { Suspense } from "react"
-import { redirect } from "next/navigation"
 import { connection } from "next/server"
-import { headers } from "next/headers"
 import type { Metadata } from "next"
 import { NextIntlClientProvider } from "next-intl"
 import Link from "next/link"
 import { getMessages, getTranslations } from "next-intl/server"
 import { getCurrentUser } from "@/lib/dal"
 import { db } from "@/lib/db"
+import { AuthRedirectGate } from "@/components/auth-redirect-gate"
 
 const AUTH_NAMESPACES = ["common", "auth", "nav"] as const
 
@@ -23,44 +22,37 @@ async function AuthLayoutInner({
   await connection()
   const session = await getCurrentUser()
 
-  if (session) {
-    // Check if user has an org — either via session or by membership lookup
-    let hasOrg = !!session.session.activeOrganizationId
+  // Check if user has an org — either via session or by membership lookup
+  let hasOrg = !!session?.session.activeOrganizationId
 
-    if (!hasOrg) {
-      // Session lost activeOrganizationId (e.g., new session after password reset).
-      // Check if user actually has an org membership and restore it.
-      const membership = await db.member.findFirst({
+  if (session && !hasOrg) {
+    // Session lost activeOrganizationId (e.g., new session after password reset).
+    // Check if user actually has an org membership and restore it.
+    const membership = await db.member.findFirst({
+      where: { userId: session.user.id },
+      select: { organizationId: true },
+      orderBy: { createdAt: "asc" },
+    })
+
+    if (membership) {
+      // Restore activeOrganizationId on all active sessions
+      await db.session.updateMany({
         where: { userId: session.user.id },
-        select: { organizationId: true },
-        orderBy: { createdAt: "asc" },
+        data: { activeOrganizationId: membership.organizationId },
       })
-
-      if (membership) {
-        // Restore activeOrganizationId on all active sessions
-        await db.session.updateMany({
-          where: { userId: session.user.id },
-          data: { activeOrganizationId: membership.organizationId },
-        })
-        hasOrg = true
-      }
-    }
-
-    if (hasOrg) {
-      redirect("/dashboard")
-    }
-
-    // Authenticated but no organization — mid-onboarding.
-    // /register is valid (they need to finish); /login and /forgot-password are not.
-    const headerList = await headers()
-    const pathname = headerList.get("x-pathname") || ""
-
-    if (pathname && !pathname.startsWith("/register") && !pathname.startsWith("/reset-password")) {
-      redirect("/register?step=org")
+      hasOrg = true
     }
   }
 
-  return children
+  // Pathname-dependent redirects (away-from-auth, mid-onboarding, token-
+  // flow exemptions for /invite and /claim) are applied client-side by
+  // AuthRedirectGate — the request pathname isn't reliably available to a
+  // streamed layout render.
+  return (
+    <AuthRedirectGate hasSession={!!session} hasOrg={hasOrg}>
+      {children}
+    </AuthRedirectGate>
+  )
 }
 
 export default async function AuthLayout({

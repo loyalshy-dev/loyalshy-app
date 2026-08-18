@@ -223,3 +223,87 @@ describe("checkContactLimit", () => {
     expect(result.limit).toBe(Infinity)
   })
 })
+
+// ─── checkStaffLimit (partner seat exemption) ───────────────────
+
+describe("checkStaffLimit", () => {
+  it("excludes partner members from the seat count", async () => {
+    const session = createMockSession()
+    mockGetCurrentUser.mockResolvedValue(session)
+
+    mockDb.organization.findUnique.mockResolvedValue({
+      plan: "STARTER",
+      subscriptionStatus: "ACTIVE",
+    })
+    // 1 non-partner member (the partner rep is filtered out by the where)
+    mockDb.member.count.mockResolvedValue(1)
+    mockDb.staffInvitation.findMany.mockResolvedValue([])
+
+    const { checkStaffLimit } = await import("./billing-actions")
+    const result = await checkStaffLimit("org-1")
+
+    expect(mockDb.member.count).toHaveBeenCalledWith({
+      where: { organizationId: "org-1", user: { isPartner: false } },
+    })
+    expect(result.allowed).toBe(true)
+    expect(result.current).toBe(1)
+    expect(result.limit).toBe(2)
+  })
+
+  it("blocks a non-partner invite at the plan limit", async () => {
+    const session = createMockSession()
+    mockGetCurrentUser.mockResolvedValue(session)
+
+    mockDb.organization.findUnique.mockResolvedValue({
+      plan: "STARTER",
+      subscriptionStatus: "ACTIVE",
+    })
+    mockDb.user.findUnique.mockResolvedValue({ isPartner: false })
+    mockDb.member.count.mockResolvedValue(2)
+    mockDb.staffInvitation.findMany.mockResolvedValue([])
+
+    const { checkStaffLimit } = await import("./billing-actions")
+    const result = await checkStaffLimit("org-1", { inviteeEmail: "barista@example.com" })
+
+    expect(result.allowed).toBe(false)
+    expect(result.current).toBe(2)
+  })
+
+  it("allows inviting a partner user even when the org is at its limit", async () => {
+    const session = createMockSession()
+    mockGetCurrentUser.mockResolvedValue(session)
+
+    mockDb.user.findUnique.mockResolvedValue({ isPartner: true })
+    mockDb.member.count.mockResolvedValue(2) // Pro limit already reached
+
+    const { checkStaffLimit } = await import("./billing-actions")
+    const result = await checkStaffLimit("org-1", { inviteeEmail: "rep@agency.example" })
+
+    expect(result.allowed).toBe(true)
+    expect(result.limit).toBe(Infinity)
+  })
+
+  it("does not count pending invitations addressed to partner users", async () => {
+    const session = createMockSession()
+    mockGetCurrentUser.mockResolvedValue(session)
+
+    mockDb.organization.findUnique.mockResolvedValue({
+      plan: "STARTER",
+      subscriptionStatus: "ACTIVE",
+    })
+    mockDb.member.count.mockResolvedValue(1)
+    mockDb.staffInvitation.findMany.mockResolvedValue([
+      { email: "rep@agency.example" },
+      { email: "barista@example.com" },
+    ])
+    // One of the two pending invites belongs to a partner user
+    mockDb.user.count.mockResolvedValue(1)
+
+    const { checkStaffLimit } = await import("./billing-actions")
+    const result = await checkStaffLimit("org-1")
+
+    // 1 member + (2 pending - 1 partner) = 2, which is NOT < 2
+    expect(result.current).toBe(2)
+    expect(result.allowed).toBe(false)
+  })
+})

@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import dynamic from "next/dynamic"
-import { AlertTriangle, Clock, X } from "lucide-react"
+import { AlertTriangle, Clock, PartyPopper, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "./sidebar"
@@ -28,6 +28,14 @@ type DashboardShellProps = {
     trialEndsAt: string | null
   } | null
   orgRole: string | null
+  organizations: {
+    id: string
+    name: string
+    logo: string | null
+    logoGoogle: string | null
+  }[]
+  activeOrganizationId: string
+  isPartnerUser: boolean
   children: React.ReactNode
 }
 
@@ -35,6 +43,9 @@ export function DashboardShell({
   user,
   organization,
   orgRole,
+  organizations,
+  activeOrganizationId,
+  isPartnerUser,
   children,
 }: DashboardShellProps) {
   const t = useTranslations("dashboard.shell")
@@ -46,6 +57,12 @@ export function DashboardShell({
   })
   // Past due banner should never be persistently dismissed — it's urgent
   const [pastDueBannerDismissed, setPastDueBannerDismissed] = useState(false)
+  // Post-handoff welcome: /dashboard?welcome=handoff after the new owner
+  // claims their org. Session-scoped dismiss only.
+  const searchParams = useSearchParams()
+  const [handoffBannerDismissed, setHandoffBannerDismissed] = useState(false)
+  const showHandoffBanner =
+    !handoffBannerDismissed && searchParams.get("welcome") === "handoff"
 
   function handleRegisterVisit() {
     setCommandOpen(false)
@@ -75,7 +92,14 @@ export function DashboardShell({
 
   return (
     <SidebarProvider>
-      <AppSidebar user={user} organization={organization} orgRole={orgRole} />
+      <AppSidebar
+        user={user}
+        organization={organization}
+        orgRole={orgRole}
+        organizations={organizations}
+        activeOrganizationId={activeOrganizationId}
+        isPartnerUser={isPartnerUser}
+      />
 
       <SidebarInset className="min-w-0">
         {/* Hide topbar on mobile when in studio/design to maximize canvas space */}
@@ -85,6 +109,32 @@ export function DashboardShell({
             onOpenRegisterVisit={handleRegisterVisit}
           />
         </div>
+
+        {/* Post-handoff welcome banner */}
+        {showHandoffBanner && (
+          <div className="flex items-center justify-between gap-3 border-b border-primary/20 bg-primary/5 px-4 lg:px-6 py-2.5">
+            <div className="flex items-center gap-2 text-sm text-foreground">
+              <PartyPopper className="h-3.5 w-3.5 shrink-0 text-primary" />
+              <span>
+                {t("handoffWelcome")}{" "}
+                <Link
+                  href="/dashboard/settings?tab=billing"
+                  prefetch={true}
+                  className="underline underline-offset-2 font-medium"
+                >
+                  {t("handoffWelcomeCta")}
+                </Link>
+              </span>
+            </div>
+            <button
+              onClick={() => setHandoffBannerDismissed(true)}
+              className="text-muted-foreground hover:text-foreground"
+              aria-label={t("dismissBanner")}
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Subscription banners — hidden on mobile for studio */}
         {showTrialBanner && (
