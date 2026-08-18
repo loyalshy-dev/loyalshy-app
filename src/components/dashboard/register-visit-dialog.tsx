@@ -407,7 +407,7 @@ export function RegisterVisitDialog({
       if (autoDismissRef.current) clearTimeout(autoDismissRef.current)
       onOpenChange(v)
     }}>
-      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden max-md:h-[85dvh] max-md:mt-auto max-md:mb-0 max-md:rounded-b-none">
+      <DialogContent className="sm:max-w-md p-0 gap-0 flex flex-col overflow-hidden max-h-[85dvh] max-md:h-[85dvh] max-md:mt-auto max-md:mb-0 max-md:rounded-b-none">
         {step === "search" && isMobile && hasCamera && !scanMode && (
           <MobileSearchStep
             query={query}
@@ -426,8 +426,8 @@ export function RegisterVisitDialog({
           />
         )}
         {step === "search" && scanMode && (
-          <div className="flex flex-col">
-            <DialogHeader className="p-4 pb-0">
+          <div className="flex flex-1 flex-col min-h-0 overflow-y-auto">
+            <DialogHeader className="shrink-0 p-4 pb-0">
               <DialogTitle className="text-base">{t("scanQr")}</DialogTitle>
             </DialogHeader>
             <div className="pt-3">
@@ -557,7 +557,7 @@ function SearchStep({
         </div>
       </div>
 
-      <ScrollArea className="flex-1 max-h-[50vh] min-h-30">
+      <ScrollArea className="flex-1 min-h-30 max-h-[50dvh]">
         <div className="px-4 pb-4">
           {!query.trim() ? (
             <div className="flex flex-col items-center gap-2 py-10 text-center">
@@ -713,7 +713,7 @@ function MobileSearchStep({
 
       {/* Search results — only shown when actively searching */}
       {isActivelySearching && (
-        <ScrollArea className="flex-1 max-h-[40vh] min-h-20">
+        <ScrollArea className="flex-1 min-h-20 max-h-[40dvh]">
           <div className="px-4 pb-4">
             {results.length === 0 && !isSearching ? (
               <div className="flex flex-col items-center gap-2 py-8 text-center">
@@ -793,9 +793,9 @@ function ProgramPickerStep({
   )
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-1 flex-col min-h-0">
       {/* Header */}
-      <div className="flex items-center gap-2 p-4 pb-0">
+      <div className="flex shrink-0 items-center gap-2 p-4 pb-0">
         <Button
           variant="ghost"
           size="icon-sm"
@@ -824,7 +824,7 @@ function ProgramPickerStep({
       </div>
 
       {/* Program cards */}
-      <ScrollArea className="max-h-[50vh] min-h-30">
+      <ScrollArea className="flex-1 min-h-30 max-h-[50dvh]">
         <div className="px-4 py-3 space-y-2">
           {activePassInstances.length === 0 && (
             <div className="text-center py-8">
@@ -930,7 +930,7 @@ function ConfirmStep({
 
   if (!passInstance) {
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-1 flex-col min-h-0">
         <div className="flex items-center gap-2 p-4 pb-0">
           <Button
             variant="ghost"
@@ -965,9 +965,9 @@ function ConfirmStep({
   const design = cardDesign ? buildWalletPassDesign(cardDesign) : null
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-1 flex-col min-h-0">
       {/* Header */}
-      <div className="flex items-center gap-2 p-4 pb-0">
+      <div className="flex shrink-0 items-center gap-2 p-4 pb-0">
         <Button
           variant="ghost"
           size="icon-sm"
@@ -982,54 +982,58 @@ function ConfirmStep({
         </DialogTitle>
       </div>
 
-      {/* Customer info */}
-      <div className="flex flex-col items-center gap-3 pt-6 pb-4 px-4">
-        <div
-          className="flex size-16 items-center justify-center rounded-full text-lg font-semibold text-white"
-          style={{ backgroundColor: getAvatarColor(customer.fullName) }}
-        >
-          {getInitials(customer.fullName)}
-        </div>
-        <div className="text-center">
-          <p className="text-[15px] font-semibold">{customer.fullName}</p>
-          <p className="text-[12px] text-muted-foreground mt-0.5">
-            {isCoupon
-              ? `${passInstance.templateName} — Coupon Redemption`
-              : `${passInstance.templateName} — Visit #${totalVisitsFromData + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
-          </p>
-        </div>
-      </div>
-
-      {/* Card preview */}
-      {design ? (
-        <div className="flex justify-center px-6">
-          <WalletPassRenderer
-            design={design}
-            format="apple"
-            programName={passInstance.templateName}
-            customerName={customer.fullName}
-            logoUrl={passInstance.passDesign?.logoUrl}
-            logoAppleUrl={passInstance.passDesign?.logoAppleUrl}
-            logoGoogleUrl={passInstance.passDesign?.logoGoogleUrl}
-            currentVisits={isCoupon ? 1 : nextVisit}
-            totalVisits={isCoupon ? 1 : visitsRequired}
-            rewardDescription=""
-            compact
-            width={280}
-          />
-        </div>
-      ) : isCoupon ? (
-        <div className="px-6">
-          <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-6">
-            <Ticket className="size-10 text-brand" />
-            <p className="text-[13px] font-medium text-center">Ready to redeem</p>
+      {/* Scrollable body — keeps the confirm CTA reachable on short viewports */}
+      <div className="flex flex-1 flex-col min-h-0 overflow-y-auto">
+        {/* Customer info */}
+        <div className="flex flex-col items-center gap-3 pt-6 pb-4 px-4">
+          <div
+            className="flex size-16 items-center justify-center rounded-full text-lg font-semibold text-white"
+            style={{ backgroundColor: getAvatarColor(customer.fullName) }}
+          >
+            {getInitials(customer.fullName)}
+          </div>
+          <div className="text-center">
+            <p className="text-[15px] font-semibold">{customer.fullName}</p>
+            <p className="text-[12px] text-muted-foreground mt-0.5">
+              {isCoupon
+                ? `${passInstance.templateName} — Coupon Redemption`
+                : `${passInstance.templateName} — Visit #${totalVisitsFromData + 1} — ${nextVisit}/${visitsRequired} in current cycle`}
+            </p>
           </div>
         </div>
-      ) : (
-        <StampCard filled={filled} total={visitsRequired} highlightNext />
-      )}
 
-      <div className="p-4 pt-6">
+        {/* Card preview */}
+        {design ? (
+          <div className="flex justify-center px-6">
+            <WalletPassRenderer
+              design={design}
+              format="apple"
+              programName={passInstance.templateName}
+              customerName={customer.fullName}
+              logoUrl={passInstance.passDesign?.logoUrl}
+              logoAppleUrl={passInstance.passDesign?.logoAppleUrl}
+              logoGoogleUrl={passInstance.passDesign?.logoGoogleUrl}
+              currentVisits={isCoupon ? 1 : nextVisit}
+              totalVisits={isCoupon ? 1 : visitsRequired}
+              rewardDescription=""
+              compact
+              width={280}
+              height={394}
+            />
+          </div>
+        ) : isCoupon ? (
+          <div className="px-6">
+            <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/30 p-6">
+              <Ticket className="size-10 text-brand" />
+              <p className="text-[13px] font-medium text-center">Ready to redeem</p>
+            </div>
+          </div>
+        ) : (
+          <StampCard filled={filled} total={visitsRequired} highlightNext />
+        )}
+      </div>
+
+      <div className="shrink-0 border-t border-border bg-background p-4 pt-4 md:border-t-0 md:pt-6">
         <Button
           className="w-full h-11 text-[14px] font-medium gap-2"
           onClick={isCoupon ? onConfirmCoupon : onConfirm}
@@ -1126,7 +1130,7 @@ function SuccessStep({
 }) {
   return (
     <div
-      className="flex flex-col items-center py-10 px-6 cursor-pointer"
+      className="flex flex-1 flex-col items-center justify-center overflow-y-auto py-10 px-6 cursor-pointer"
       onClick={onClose}
     >
       {couponResult ? (
