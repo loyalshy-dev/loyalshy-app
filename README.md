@@ -154,12 +154,26 @@ Admins access the panel at `/admin` (tiered roles: ADMIN_SUPPORT < ADMIN_BILLING
 SUPER_ADMIN_EMAIL="you@example.com"
 ```
 
+## Partner Program (Agency Channel)
+
+Agency reps sell and set up Loyalshy for clients face-to-face. A user becomes a partner via **/admin/users → "Mark as partner"** (platform-controlled). Partners get:
+
+- **Partner console** (`/dashboard/partner`) — client portfolio with setup checklists, referral link, self-serve monthly earnings
+- **New client setup** — creates a client org instantly; the rep designs the card, publishes the program, and pairs the staff device as owner
+- **Handoff link** (`/claim/{token}`, one-shot, 7-day expiry, optionally emailed) — the business owner signs up and takes ownership; the rep is demoted to **Program manager** (design + distribution + programs, no billing/team/settings)
+- **Referral link** (`/register?ref={code}`) — self-signups are attributed automatically (30-day window)
+- Partner seats **don't count** against plan staff limits
+
+Attribution lands in `Organization.referredById` and drives two admin pages: **/admin/partners** (monthly rev-share statement: 30% of collected net revenue − 30€ per newly activated client, netted) and **/admin/cohorts** (interaction-based retention, partner vs organic).
+
+Org roles are now three-tier: `owner` > `admin` (Program manager) > `member` (Staff).
+
 ## Project Structure
 
 ```
 /src
   /app              — App Router pages
-    /(auth)         — Login / Register / Forgot password / Invite
+    /(auth)         — Login / Register / Forgot password / Invite / Claim (ownership handoff)
     /(dashboard)    — Protected dashboard (programs, contacts, settings, admin)
     /(public)       — Landing, pricing, contact, legal, /join/[slug] self-join pages
     /api            — API routes
@@ -185,6 +199,14 @@ npm test                   # Run Vitest unit tests
 npm run test:e2e           # Run Playwright E2E tests
 npx prisma studio          # Open Prisma Studio
 npx prisma migrate dev     # Create + apply a migration locally
+```
+
+Partner-flow E2E tooling (run against `npm run dev` on port 3000 — Better Auth rejects other origins):
+
+```bash
+npx tsx scripts/seed-handoff-e2e.ts          # Seed partner/owner test accounts
+npx tsx scripts/e2e-handoff.ts               # Drive the full handoff flow in a headless browser
+npx tsx scripts/teardown-e2e-fixtures.ts     # Remove all test fixtures (--dry-run to preview)
 ```
 
 ## Documentation
