@@ -106,6 +106,8 @@ export async function submitContactForm(
     } catch (err) {
       // Redis unreachable — degrade to the in-memory fallback below
       console.error("[contact-form] Upstash rate-limit check failed, using in-memory fallback:", err)
+      const Sentry = await import("@sentry/nextjs")
+      Sentry.captureException(err, { tags: { component: "contact-form-rate-limit" } })
     }
   }
   if (limitOk === null) {

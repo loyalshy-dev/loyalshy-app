@@ -41,7 +41,8 @@ async function ProgramsSection() {
     getOrgMember(organization.id),
   ])
 
-  const isOwner = member?.role === "owner"
+  // "admin" (program manager) gets the same program surfaces as owners
+  const isOwner = member?.role === "owner" || member?.role === "admin"
 
   return (
     <TemplatesGridView

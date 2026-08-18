@@ -10,14 +10,26 @@ import { assertOrganizationRole, assertAuthenticated } from "@/lib/dal"
 import { publicFormLimiter } from "@/lib/rate-limit"
 import { hashToken } from "@/lib/token-hash"
 import { logOrgAction } from "@/lib/org-audit"
+import { checkStaffLimit } from "./billing-actions"
 
 // ─── Schemas ────────────────────────────────────────────────
 
 const sendInvitationSchema = z.object({
   organizationId: z.string().min(1),
   email: z.string().email(),
-  role: z.enum(["owner", "staff"]),
+  // "admin" = program manager: design, distribution, program lifecycle —
+  // no billing/team/org settings
+  role: z.enum(["owner", "admin", "staff"]),
 })
+
+function toStaffRole(role: "owner" | "admin" | "staff"): "OWNER" | "ADMIN" | "STAFF" {
+  return role === "owner" ? "OWNER" : role === "admin" ? "ADMIN" : "STAFF"
+}
+
+/** Maps a StaffInvitation.role to the Member.role string. */
+function toMemberRole(staffRole: string): "owner" | "admin" | "member" {
+  return staffRole === "OWNER" ? "owner" : staffRole === "ADMIN" ? "admin" : "member"
+}
 
 // ─── Send Staff Invitation ──────────────────────────────────
 
@@ -70,6 +82,15 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     return { error: "This user is already a member of your organization" }
   }
 
+  // Enforce the plan's staff seat limit. Partner users (agency reps
+  // flagged by admins) are exempt and never blocked by it.
+  const staffLimit = await checkStaffLimit(parsed.organizationId, {
+    inviteeEmail: parsed.email,
+  })
+  if (!staffLimit.allowed) {
+    return { error: "Staff member limit reached for your plan. Upgrade to invite more team members." }
+  }
+
   // Generate invitation token. The plaintext only ever leaves in the
   // email/deep-link; the DB stores the sha256 hash so a backup leak
   // can't be replayed against /invite/[token].
@@ -80,7 +101,7 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
     data: {
       organizationId: parsed.organizationId,
       email: parsed.email,
-      role: parsed.role === "owner" ? "OWNER" : "STAFF",
+      role: toStaffRole(parsed.role),
       token: hashToken(plaintextToken),
       expiresAt,
     },
@@ -122,7 +143,7 @@ export async function sendStaffInvitation(input: z.infer<typeof sendInvitationSc
 export async function sendInvitationEmail(payload: {
   email: string
   organizationName: string
-  role: "owner" | "staff"
+  role: "owner" | "admin" | "staff"
   inviteUrl: string
   mobileDeepLink?: string
   idempotencyKey?: string
@@ -139,7 +160,12 @@ export async function sendInvitationEmail(payload: {
     const resend = new Resend(process.env.RESEND_API_KEY)
     const { getEmailFrom } = await import("@/lib/email-templates")
 
-    const roleLabel = payload.role === "owner" ? "an owner" : "a staff member"
+    const roleLabel =
+      payload.role === "owner"
+        ? "an owner"
+        : payload.role === "admin"
+          ? "a program manager"
+          : "a staff member"
 
     await resend.emails.send(
       {
@@ -317,7 +343,7 @@ export async function signUpAndAcceptInvite(
         data: {
           userId: user.id,
           organizationId: invitation.organizationId,
-          role: invitation.role === "OWNER" ? "owner" : "member",
+          role: toMemberRole(invitation.role),
         },
       })
 
@@ -467,7 +493,7 @@ export async function acceptStaffInvitation(input: z.infer<typeof acceptInvitati
             data: {
               userId: session.user.id,
               organizationId: invitation.organizationId,
-              role: invitation.role === "OWNER" ? "owner" : "member",
+              role: toMemberRole(invitation.role),
             },
           }),
         ]),

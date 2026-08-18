@@ -101,6 +101,8 @@ async function check(
       // Redis unreachable (deleted DB, network blip) must degrade to the
       // per-instance fallback, never take the auth endpoint down with it.
       console.error(`[auth-rate-limit] Upstash check failed for ${opts.prefix}, using in-memory fallback:`, err)
+      const Sentry = await import("@sentry/nextjs")
+      Sentry.captureException(err, { tags: { component: "auth-rate-limit", prefix: opts.prefix } })
     }
   }
   const ok = checkMemoryFallback(

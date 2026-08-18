@@ -156,7 +156,12 @@ export async function POST(req: NextRequest) {
         data: {
           userId: session.userId,
           organizationId: invitation.organizationId,
-          role: invitation.role === "OWNER" ? "owner" : "member",
+          role:
+            invitation.role === "OWNER"
+              ? "owner"
+              : invitation.role === "ADMIN"
+                ? "admin"
+                : "member",
         },
       }),
       db.session.update({

@@ -32,6 +32,7 @@ export function createMockDb() {
     passTemplate: createMockModel(),
     passInstance: createMockModel(),
     passDesign: createMockModel(),
+    orgHandoffToken: createMockModel(),
     $queryRaw: vi.fn(),
     $executeRaw: vi.fn(),
   }
@@ -55,9 +56,16 @@ export function createMockDb() {
     invitation: createMockModel(),
     session: createMockModel(),
     account: createMockModel(),
-    $transaction: vi.fn(async (fn: (tx: typeof mockTx) => Promise<unknown>) => {
-      return fn(mockTx)
-    }),
+    orgHandoffToken: createMockModel(),
+    orgAuditLog: createMockModel(),
+    $transaction: vi.fn(
+      async (
+        fnOrOps: ((tx: typeof mockTx) => Promise<unknown>) | Promise<unknown>[]
+      ) => {
+        if (Array.isArray(fnOrOps)) return Promise.all(fnOrOps)
+        return fnOrOps(mockTx)
+      }
+    ),
     $queryRaw: vi.fn(),
     _tx: mockTx,
   }

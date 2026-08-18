@@ -10,6 +10,9 @@ import { sanitizeText } from "@/lib/sanitize"
 
 const createOrganizationSchema = z.object({
   name: z.string().min(1, "Organization name is required").max(100),
+  // Partner referral code from a /register?ref= link. Optional and
+  // best-effort: an invalid code never blocks signup.
+  ref: z.string().max(64).optional(),
 })
 
 // ─── Auth Helpers ────────────────────────────────────────────
@@ -77,6 +80,19 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
     const name = sanitizeText(parsed.name, 100)
     const slug = await generateUniqueSlug(name)
 
+    // Resolve partner attribution from a /register?ref= link. Best-effort:
+    // unknown codes, non-partner users, and self-referrals are ignored.
+    let referredById: string | null = null
+    if (parsed.ref) {
+      const partner = await db.user.findUnique({
+        where: { referralCode: parsed.ref },
+        select: { id: true, isPartner: true },
+      })
+      if (partner?.isPartner && partner.id !== session.user.id) {
+        referredById = partner.id
+      }
+    }
+
     // Create Organization + Member in a transaction
     const result = await db.$transaction(async (tx) => {
       // 1. Create organization — free tier starts as FREE/ACTIVE with no Stripe customer
@@ -87,6 +103,7 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
           plan: "FREE",
           subscriptionStatus: "ACTIVE",
           settings: { onboardingComplete: true },
+          referredById,
         },
       })
 

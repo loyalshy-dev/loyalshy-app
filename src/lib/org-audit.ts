@@ -9,7 +9,7 @@ export type OrgAuditLogParams = {
   actorUserId: string | null
   actorEmail: string | null
   action: OrgAuditAction
-  targetType?: "member" | "invitation"
+  targetType?: "member" | "invitation" | "handoff"
   targetId?: string
   targetLabel?: string
   metadata?: Record<string, unknown>

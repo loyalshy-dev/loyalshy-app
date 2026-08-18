@@ -16,7 +16,7 @@ export default async function ProgramSettingsPage(props: {
     redirect("/dashboard")
   }
 
-  await assertOrganizationRole(organization.id, "owner")
+  await assertOrganizationRole(organization.id, "admin")
 
   const program = await db.passTemplate.findFirst({
     where: { id: programId, organizationId: organization.id },

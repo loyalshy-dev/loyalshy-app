@@ -21,7 +21,7 @@ export default async function ProgramDistributionPage(props: {
     redirect("/dashboard")
   }
 
-  await assertOrganizationRole(organization.id, "owner")
+  await assertOrganizationRole(organization.id, "admin")
 
   // Distribution stats
   const weekAgo = new Date()

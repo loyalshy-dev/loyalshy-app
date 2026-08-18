@@ -17,7 +17,7 @@ export default async function ProgramDesignPage(props: {
     redirect("/dashboard")
   }
 
-  await assertOrganizationRole(organization.id, "owner")
+  await assertOrganizationRole(organization.id, "admin")
 
   const [program, walletPassCount] = await Promise.all([
     db.passTemplate.findFirst({

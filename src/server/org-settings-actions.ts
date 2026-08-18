@@ -324,7 +324,7 @@ export async function updateOrganizationProfile(input: z.infer<typeof updateProf
 export async function createPassTemplate(input: z.infer<typeof createPassTemplateSchema>) {
   const t = await getTranslations("serverErrors")
   const parsed = createPassTemplateSchema.parse(input)
-  await assertOrganizationRole(parsed.organizationId, "owner")
+  await assertOrganizationRole(parsed.organizationId, "admin")
 
   // Plan template limit applies to ACTIVE programs only (enforced in activateTemplate /
   // reactivateTemplate). Drafts and archives are unrestricted.
@@ -416,7 +416,7 @@ async function pickRandomStripPreset(): Promise<
 
 export async function archivePassTemplate(organizationId: string, templateId: string) {
   const t = await getTranslations("serverErrors")
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const template = await db.passTemplate.findUnique({
     where: { id: templateId },
@@ -495,7 +495,7 @@ export async function archivePassTemplate(organizationId: string, templateId: st
 
 export async function activateTemplate(organizationId: string, templateId: string) {
   const t = await getTranslations("serverErrors")
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const template = await db.passTemplate.findUnique({
     where: { id: templateId },
@@ -533,7 +533,7 @@ export async function activateTemplate(organizationId: string, templateId: strin
 
 export async function reactivateTemplate(organizationId: string, templateId: string) {
   const t = await getTranslations("serverErrors")
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const template = await db.passTemplate.findUnique({
     where: { id: templateId },
@@ -693,7 +693,7 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     return { error: t("templateNotFound") }
   }
 
-  await assertOrganizationRole(template.organizationId, "owner")
+  await assertOrganizationRole(template.organizationId, "admin")
 
   const primaryColor = parsed.primaryColor || null
   const secondaryColor = parsed.secondaryColor || null
@@ -1026,7 +1026,7 @@ export async function uploadStripImage(formData: FormData) {
     return { error: t("templateNotFound") }
   }
 
-  await assertOrganizationRole(template.organizationId, "owner")
+  await assertOrganizationRole(template.organizationId, "admin")
 
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) return { error: t("fileTooLarge5MB") }
@@ -1100,7 +1100,7 @@ export async function deleteStripImage(templateId: string) {
 
   if (!template) return { error: t("templateNotFound") }
 
-  await assertOrganizationRole(template.organizationId, "owner")
+  await assertOrganizationRole(template.organizationId, "admin")
 
   const existing = await db.passDesign.findUnique({
     where: { passTemplateId: templateId },
@@ -1142,7 +1142,7 @@ async function uploadStampIconGeneric(formData: FormData, slot: StampIconSlot) {
 
   if (!template) return { error: t("templateNotFound") }
 
-  await assertOrganizationRole(template.organizationId, "owner")
+  await assertOrganizationRole(template.organizationId, "admin")
 
   const maxSize = 2 * 1024 * 1024
   if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
@@ -1203,7 +1203,7 @@ async function deleteStampIconGeneric(templateId: string, slot: StampIconSlot) {
 
   if (!template) return { error: t("templateNotFound") }
 
-  await assertOrganizationRole(template.organizationId, "owner")
+  await assertOrganizationRole(template.organizationId, "admin")
 
   const existing = await db.passDesign.findUnique({
     where: { passTemplateId: templateId },
@@ -1297,7 +1297,7 @@ export async function uploadOrganizationLogo(formData: FormData) {
 
   if (!organizationId || !file) return { error: t("missingFields") }
 
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const maxSize = 2 * 1024 * 1024
   if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
@@ -1344,7 +1344,7 @@ export async function uploadOrganizationLogo(formData: FormData) {
 // ─── Delete Organization Logo ─────────────────────────────────
 
 export async function deleteOrganizationLogo(organizationId: string) {
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const old = await db.organization.findUnique({
     where: { id: organizationId },
@@ -1374,7 +1374,7 @@ export async function uploadProgramLogo(formData: FormData) {
 
   if (!organizationId || !templateId || !file) return { error: t("missingFields") }
 
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const maxSize = 2 * 1024 * 1024
   if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
@@ -1421,7 +1421,7 @@ export async function uploadProgramLogo(formData: FormData) {
 // ─── Delete Program Logo ──────────────────────────────────────
 
 export async function deleteProgramLogo(organizationId: string, templateId: string) {
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const old = await db.passDesign.findUnique({
     where: { passTemplateId: templateId },
@@ -1449,7 +1449,7 @@ export async function uploadProgramPlatformLogo(formData: FormData) {
   const file = formData.get("file") as File
 
   if (!organizationId || !templateId || !file || !platform) return { error: t("missingFields") }
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const maxSize = 2 * 1024 * 1024
   if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
@@ -1471,7 +1471,7 @@ export async function uploadProgramPlatformLogo(formData: FormData) {
 // ─── Reset Program Platform Logo ──────────────────────────────
 
 export async function resetProgramPlatformLogo(organizationId: string, templateId: string, platform: "apple" | "google") {
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const design = await db.passDesign.findUnique({
     where: { passTemplateId: templateId },
@@ -1490,7 +1490,7 @@ export async function resetProgramPlatformLogo(organizationId: string, templateI
 // ─── Use Organization Logo for Program ────────────────────────
 
 export async function useOrgLogoForProgram(organizationId: string, templateId: string) {
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   // Clear program-level logos so it falls back to org
   const old = await db.passDesign.findUnique({
@@ -1523,7 +1523,7 @@ const updateMinigameConfigSchema = z.object({
 export async function updateMinigameConfig(input: z.infer<typeof updateMinigameConfigSchema>) {
   const t = await getTranslations("serverErrors")
   const parsed = updateMinigameConfigSchema.parse(input)
-  await assertOrganizationRole(parsed.organizationId, "owner")
+  await assertOrganizationRole(parsed.organizationId, "admin")
 
   const template = await db.passTemplate.findUnique({
     where: { id: parsed.templateId },
@@ -1558,7 +1558,7 @@ export async function updateMinigameConfig(input: z.infer<typeof updateMinigameC
 export async function updatePassTemplate(input: z.infer<typeof updatePassTemplateSchema>) {
   const t = await getTranslations("serverErrors")
   const parsed = updatePassTemplateSchema.parse(input)
-  await assertOrganizationRole(parsed.organizationId, "owner")
+  await assertOrganizationRole(parsed.organizationId, "admin")
 
   const template = await db.passTemplate.findUnique({
     where: { id: parsed.templateId },
@@ -1601,7 +1601,7 @@ export async function updatePassTemplate(input: z.infer<typeof updatePassTemplat
 
 export async function extractPaletteFromLogoUrl(organizationId: string, logoUrl?: string) {
   const t = await getTranslations("serverErrors")
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   // Use provided logoUrl (program logo) or fall back to organization logo
   let sourceUrl = logoUrl
@@ -1643,7 +1643,7 @@ export async function uploadPlatformLogo(formData: FormData) {
   const file = formData.get("file") as File
 
   if (!organizationId || !file || !platform) return { error: t("missingFields") }
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const maxSize = 2 * 1024 * 1024
   if (file.size > maxSize) return { error: t("fileTooLarge2MB") }
@@ -1663,7 +1663,7 @@ export async function uploadPlatformLogo(formData: FormData) {
 }
 
 export async function resetPlatformLogo(organizationId: string, platform: "apple" | "google") {
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const org = await db.organization.findUnique({
     where: { id: organizationId },
@@ -1680,7 +1680,7 @@ export async function resetPlatformLogo(organizationId: string, platform: "apple
 }
 
 export async function deletePlatformLogo(organizationId: string, platform: "apple" | "google") {
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const org = await db.organization.findUnique({
     where: { id: organizationId },
@@ -1704,7 +1704,7 @@ export async function deletePlatformLogo(organizationId: string, platform: "appl
 export async function inviteTeamMember(input: {
   organizationId: string
   email: string
-  role: "owner" | "staff"
+  role: "owner" | "admin" | "staff"
 }) {
   const { sendStaffInvitation } = await import("@/server/auth-actions")
   return sendStaffInvitation(input)
@@ -1776,7 +1776,7 @@ export async function removeTeamMember(organizationId: string, memberId: string)
 export async function changeTeamMemberRole(
   organizationId: string,
   memberId: string,
-  newRole: "owner" | "member"
+  newRole: "owner" | "admin" | "member"
 ) {
   const t = await getTranslations("serverErrors")
   const { session } = await assertOrganizationRole(organizationId, "owner")
@@ -1805,7 +1805,7 @@ export async function changeTeamMemberRole(
   }
 
   // Prevent demoting the last owner
-  if (member.role === "owner" && newRole === "member") {
+  if (member.role === "owner" && newRole !== "owner") {
     const ownerCount = await db.member.count({
       where: { organizationId, role: "owner" },
     })
@@ -1933,7 +1933,7 @@ export type MediaLibraryItem = {
 }
 
 export async function getOrgMediaLibrary(organizationId: string) {
-  await assertOrganizationRole(organizationId, "owner")
+  await assertOrganizationRole(organizationId, "admin")
 
   const [org, designs] = await Promise.all([
     db.organization.findUnique({

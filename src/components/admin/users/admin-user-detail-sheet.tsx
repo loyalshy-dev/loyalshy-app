@@ -6,6 +6,7 @@ import { formatDistanceToNow, format } from "date-fns"
 import {
   Ban,
   CheckCircle2,
+  Handshake,
   KeyRound,
   Loader2,
   Monitor,
@@ -21,6 +22,7 @@ import {
   adminBanUser,
   adminUnbanUser,
   adminSetRole,
+  adminSetPartner,
   adminRevokeAllSessions,
   adminGetUserSessions,
   adminImpersonateUser,
@@ -152,6 +154,27 @@ export function AdminUserDetailSheet({
     })
   }
 
+  async function handleTogglePartner() {
+    const newValue = !user!.isPartner
+    const formData = new FormData()
+    formData.set("userId", user!.id)
+    formData.set("isPartner", String(newValue))
+
+    startTransition(async () => {
+      const result = await adminSetPartner(formData)
+      if (result.error) {
+        toast.error(result.error)
+      } else {
+        toast.success(
+          newValue
+            ? t("partnerMarked", { name: user!.name })
+            : t("partnerUnmarked", { name: user!.name })
+        )
+        router.refresh()
+      }
+    })
+  }
+
   async function handleRevokeAll() {
     const formData = new FormData()
     formData.set("userId", user!.id)
@@ -225,6 +248,14 @@ export function AdminUserDetailSheet({
                 >
                   {user.banned ? "Banned" : "Active"}
                 </Badge>
+                {user.isPartner && (
+                  <Badge
+                    variant="outline"
+                    className="text-[11px] bg-teal-500/10 text-teal-600 border-teal-500/20"
+                  >
+                    {t("partner")}
+                  </Badge>
+                )}
               </div>
             </SheetHeader>
 
@@ -346,6 +377,15 @@ export function AdminUserDetailSheet({
             >
               <Shield className="size-3.5" />
               {user.role === "SUPER_ADMIN" ? t("demoteToUser") : t("promoteToAdmin")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleTogglePartner}
+              disabled={isPending}
+            >
+              <Handshake className="size-3.5" />
+              {user.isPartner ? t("unmarkPartner") : t("markPartner")}
             </Button>
             <Button
               variant="outline"

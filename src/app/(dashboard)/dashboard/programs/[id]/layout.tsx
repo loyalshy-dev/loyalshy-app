@@ -34,7 +34,8 @@ async function ProgramLayoutInner({
     notFound()
   }
 
-  const isOwner = member?.role === "owner"
+  // "admin" (program manager) gets the same program surfaces as owners
+  const isOwner = member?.role === "owner" || member?.role === "admin"
 
   return (
     <div className="flex flex-col gap-6">

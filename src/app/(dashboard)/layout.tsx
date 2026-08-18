@@ -8,6 +8,7 @@ import { getCurrentUser, getOrgMember } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { SessionWatcher } from "@/components/dashboard/session-watcher"
+import { PartnerOrglessGate } from "@/components/dashboard/partner-orgless-gate"
 
 const DASHBOARD_NAMESPACES = ["common", "dashboard", "studio", "serverErrors"] as const
 
@@ -29,28 +30,55 @@ async function DashboardLayoutInner({
 
   const { user } = session
 
-  // If user has no active organization, redirect to onboarding
+  // No active organization: normal users go to onboarding, but partner
+  // reps fall through org-less — a rep's first act is often "New client
+  // setup", and forcing them to create a personal org first was a
+  // pointless hurdle. PartnerOrglessGate (client-side, where the pathname
+  // is reliable) confines them to the Partner console until they have an
+  // org.
   const activeOrgId = session.session.activeOrganizationId
   if (!activeOrgId) {
-    redirect("/register?step=2")
+    const partnerCheck = await db.user.findUnique({
+      where: { id: user.id },
+      select: { isPartner: true },
+    })
+    if (!partnerCheck?.isPartner) {
+      redirect("/register?step=2")
+    }
   }
 
-  // Fetch organization and member role in parallel (getOrgMember is cached per-request)
-  const [organization, member] = await Promise.all([
-    db.organization.findUnique({
-      where: { id: activeOrgId },
+  // Fetch organization, member role, memberships, and the partner flag in
+  // parallel (getOrgMember is cached per-request)
+  const [organization, member, memberships, dbUser] = await Promise.all([
+    activeOrgId
+      ? db.organization.findUnique({
+          where: { id: activeOrgId },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logo: true,
+            logoGoogle: true,
+            plan: true,
+            subscriptionStatus: true,
+            trialEndsAt: true,
+          },
+        })
+      : Promise.resolve(null),
+    activeOrgId ? getOrgMember(activeOrgId) : Promise.resolve(null),
+    db.member.findMany({
+      where: { userId: user.id },
       select: {
-        id: true,
-        name: true,
-        slug: true,
-        logo: true,
-        logoGoogle: true,
-        plan: true,
-        subscriptionStatus: true,
-        trialEndsAt: true,
+        organization: {
+          select: { id: true, name: true, logo: true, logoGoogle: true },
+        },
       },
+      orderBy: { createdAt: "asc" },
     }),
-    getOrgMember(activeOrgId),
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { isPartner: true },
+    }),
   ])
 
   const orgRole: string | null = member?.role ?? null
@@ -82,9 +110,16 @@ async function DashboardLayoutInner({
             : null
         }
         orgRole={orgRole}
+        organizations={memberships.map((m) => m.organization)}
+        activeOrganizationId={activeOrgId ?? ""}
+        isPartnerUser={dbUser?.isPartner ?? false}
       >
         <SessionWatcher />
-        {children}
+        {activeOrgId ? (
+          children
+        ) : (
+          <PartnerOrglessGate>{children}</PartnerOrglessGate>
+        )}
       </DashboardShell>
     </NextIntlClientProvider>
   )
