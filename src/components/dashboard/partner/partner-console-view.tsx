@@ -1,13 +1,12 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { format } from "date-fns"
 import {
   ArrowUpRight,
   Check,
   CheckCircle2,
   Copy,
-  FileText,
   KeyRound,
   Link2,
   Loader2,
@@ -19,16 +18,11 @@ import { useTranslations } from "next-intl"
 import type { PartnerClient } from "@/server/partner-console-actions"
 import { requestClientAccess } from "@/server/partner-console-actions"
 import { NewClientDialog } from "@/components/dashboard/partner-tools"
-import {
-  getMyPartnerStatement,
-  type PartnerStatement,
-} from "@/server/partner-statement-actions"
 import { switchActiveOrganization } from "@/server/org-switch-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Table,
   TableBody,
@@ -43,18 +37,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const eur = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" })
-
-function money(cents: number) {
-  return eur.format(cents / 100)
-}
-
-function previousMonthValue(): string {
-  const now = new Date()
-  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  return `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, "0")}`
-}
-
 type PartnerConsoleViewProps = {
   clients: PartnerClient[]
   referralUrl: string | null
@@ -64,9 +46,6 @@ export function PartnerConsoleView({ clients, referralUrl }: PartnerConsoleViewP
   const t = useTranslations("dashboard.partnerConsole")
   const [copied, setCopied] = useState(false)
   const [openingOrgId, setOpeningOrgId] = useState<string | null>(null)
-  const [monthValue, setMonthValue] = useState<string>(previousMonthValue)
-  const [statement, setStatement] = useState<PartnerStatement | null>(null)
-  const [isPending, startTransition] = useTransition()
   const [newClientOpen, setNewClientOpen] = useState(false)
   const [requestingOrgId, setRequestingOrgId] = useState<string | null>(null)
   const [requestedOrgIds, setRequestedOrgIds] = useState<Set<string>>(new Set())
@@ -113,19 +92,6 @@ export function PartnerConsoleView({ clients, referralUrl }: PartnerConsoleViewP
       return
     }
     window.location.assign("/dashboard")
-  }
-
-  function handleGenerate() {
-    const [y, m] = monthValue.split("-").map(Number)
-    if (!y || !m) return
-    startTransition(async () => {
-      const result = await getMyPartnerStatement(y, m)
-      if ("error" in result) {
-        toast.error(t("generateError"))
-        return
-      }
-      setStatement(result)
-    })
   }
 
   return (
@@ -278,69 +244,6 @@ export function PartnerConsoleView({ clients, referralUrl }: PartnerConsoleViewP
         </CardContent>
       </Card>
 
-      {/* Earnings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">{t("earningsTitle")}</CardTitle>
-          <p className="text-xs text-muted-foreground">{t("earningsSubtitle")}</p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="earnings-month">{t("monthLabel")}</Label>
-              <Input
-                id="earnings-month"
-                type="month"
-                value={monthValue}
-                onChange={(e) => setMonthValue(e.target.value)}
-                className="w-44"
-              />
-            </div>
-            <Button onClick={handleGenerate} disabled={isPending}>
-              {isPending ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <FileText className="size-3.5" />
-              )}
-              {t("generate")}
-            </Button>
-          </div>
-
-          {statement && (
-            <>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <StatCard
-                  label={t("netCollected")}
-                  value={money(statement.totals.netCollectedCents)}
-                  hint={t("grossMinusRefunds", {
-                    gross: money(statement.totals.grossCollectedCents),
-                    refunds: money(statement.totals.refundedCents),
-                  })}
-                />
-                <StatCard
-                  label={t("revShare", { rate: Math.round(statement.revShareRate * 100) })}
-                  value={money(statement.totals.revShareCents)}
-                />
-                <StatCard
-                  label={t("setupFeeShare")}
-                  value={`−${money(statement.totals.setupFeeShareCents)}`}
-                  hint={t("newActivated", { count: statement.totals.newActivatedCount })}
-                />
-                <StatCard
-                  label={
-                    statement.totals.payoutCents >= 0
-                      ? t("payoutToPartner")
-                      : t("payoutFromPartner")
-                  }
-                  value={money(Math.abs(statement.totals.payoutCents))}
-                  highlight
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">{t("methodology")}</p>
-            </>
-          )}
-        </CardContent>
-      </Card>
     </div>
   )
 }

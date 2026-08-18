@@ -501,7 +501,7 @@
   "dashboard": {
     "partnerConsole": {
       "title": "Partner console",
-      "subtitle": "Your client portfolio, setup progress, and monthly earnings.",
+      "subtitle": "Your client portfolio and setup progress.",
       "statClients": "Clients",
       "statSubscribed": "Active subscriptions",
       "statPendingHandoffs": "Pending handoffs",
@@ -527,20 +527,7 @@
       "setupOwner": "Owner claimed",
       "open": "Open",
       "handoffPendingBadge": "Handoff pending",
-      "noClients": "No clients yet. Use \"New client setup\" in the sidebar menu to create your first one.",
-      "earningsTitle": "Monthly earnings",
-      "earningsSubtitle": "Your rev-share statement for a given month — the same numbers Loyalshy uses for payouts.",
-      "monthLabel": "Month",
-      "generate": "Show statement",
-      "generateError": "Could not load the statement. Please try again.",
-      "netCollected": "Net collected",
-      "grossMinusRefunds": "{gross} collected − {refunds} refunded",
-      "revShare": "Your revenue share ({rate}%)",
-      "setupFeeShare": "Setup fee share owed to Loyalshy",
-      "newActivated": "{count, plural, =1 {1 new activated client} other {# new activated clients}} × €30",
-      "payoutToPartner": "Net payout to you",
-      "payoutFromPartner": "Net owed to Loyalshy",
-      "methodology": "Collected = paid invoices dated in the month across your attributed clients. Refunds issued in the month are deducted from this statement. New activated client = client organization created in the month with at least one active program."
+      "noClients": "No clients yet. Use \"New client setup\" in the sidebar menu to create your first one."
     },
     "partner": {
       "newClientTitle": "New client setup",

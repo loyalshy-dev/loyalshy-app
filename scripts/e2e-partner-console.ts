@@ -20,12 +20,6 @@ async function main() {
     const rows = await page.locator("table tbody tr").count()
     console.log("✓ client rows:", rows)
 
-    await page.fill("#earnings-month", "2026-08")
-    await page.click('button:has-text("Show statement")')
-    await page.waitForSelector("text=Net payout to you, text=Net owed to Loyalshy", { state: "attached" }).catch(() => {})
-    await page.waitForSelector("text=Your revenue share")
-    console.log("✓ earnings statement rendered")
-
     await page.screenshot({ path: `${SHOT_DIR}/e2e-partner-console.png`, fullPage: true })
     console.log("\n✅ partner console smoke PASSED")
   } catch (err) {

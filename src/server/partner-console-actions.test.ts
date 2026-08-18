@@ -90,24 +90,6 @@ describe("getMyPartnerClients", () => {
   })
 })
 
-describe("getMyPartnerStatement", () => {
-  it("builds the caller's own statement (never someone else's)", async () => {
-    const mockBuild = vi.fn().mockResolvedValue({ totals: { payoutCents: 0 } })
-    vi.doMock("@/lib/partner-statement", () => ({
-      buildPartnerStatement: mockBuild,
-    }))
-    vi.doMock("@/lib/dal", () => ({
-      assertAuthenticated: mockAssertAuthenticated,
-      assertAdminRole: vi.fn(),
-    }))
-
-    const { getMyPartnerStatement } = await import("./partner-statement-actions")
-    await getMyPartnerStatement(2026, 7)
-
-    expect(mockBuild).toHaveBeenCalledWith("user-rep", 2026, 7)
-  })
-})
-
 describe("requestClientAccess", () => {
   const mockSend = vi.fn().mockResolvedValue({})
 

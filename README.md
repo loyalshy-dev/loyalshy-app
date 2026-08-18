@@ -158,7 +158,7 @@ SUPER_ADMIN_EMAIL="you@example.com"
 
 Agency reps sell and set up Loyalshy for clients face-to-face. A user becomes a partner via **/admin/users → "Mark as partner"** (platform-controlled). Partners get:
 
-- **Partner console** (`/dashboard/partner`) — client portfolio with setup checklists, referral link, self-serve monthly earnings
+- **Partner console** (`/dashboard/partner`) — client portfolio with setup checklists and referral link (no earnings view — rev-share terms are negotiated per partner and settled via the admin statement)
 - **New client setup** — creates a client org instantly; the rep designs the card, publishes the program, and pairs the staff device as owner
 - **Handoff link** (`/claim/{token}`, one-shot, 7-day expiry, optionally emailed) — the business owner signs up and takes ownership; the rep is demoted to **Program manager** (design + distribution + programs, no billing/team/settings)
 - **Referral link** (`/register?ref={code}`) — self-signups are attributed automatically (30-day window)

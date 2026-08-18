@@ -501,7 +501,7 @@
   "dashboard": {
     "partnerConsole": {
       "title": "Consola de partner",
-      "subtitle": "Tu cartera de clientes, el progreso de configuración y tus ingresos mensuales.",
+      "subtitle": "Tu cartera de clientes y el progreso de configuración.",
       "statClients": "Clientes",
       "statSubscribed": "Suscripciones activas",
       "statPendingHandoffs": "Transferencias pendientes",
@@ -527,20 +527,7 @@
       "setupOwner": "Propietario reclamado",
       "open": "Abrir",
       "handoffPendingBadge": "Transferencia pendiente",
-      "noClients": "Aún no hay clientes. Usa \"Nueva configuración de cliente\" en el menú lateral para crear el primero.",
-      "earningsTitle": "Ingresos mensuales",
-      "earningsSubtitle": "Tu liquidación de reparto de ingresos de un mes — las mismas cifras que Loyalshy usa para los pagos.",
-      "monthLabel": "Mes",
-      "generate": "Ver liquidación",
-      "generateError": "No se pudo cargar la liquidación. Inténtalo de nuevo.",
-      "netCollected": "Neto cobrado",
-      "grossMinusRefunds": "{gross} cobrado − {refunds} reembolsado",
-      "revShare": "Tu reparto de ingresos ({rate}%)",
-      "setupFeeShare": "Parte de la cuota de alta adeudada a Loyalshy",
-      "newActivated": "{count, plural, =1 {1 cliente nuevo activado} other {# clientes nuevos activados}} × 30 €",
-      "payoutToPartner": "Pago neto para ti",
-      "payoutFromPartner": "Neto adeudado a Loyalshy",
-      "methodology": "Cobrado = facturas pagadas con fecha del mes entre tus clientes atribuidos. Los reembolsos emitidos en el mes se descuentan de esta liquidación. Cliente nuevo activado = organización cliente creada en el mes con al menos un programa activo."
+      "noClients": "Aún no hay clientes. Usa \"Nueva configuración de cliente\" en el menú lateral para crear el primero."
     },
     "partner": {
       "newClientTitle": "Nueva configuración de cliente",

@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { assertAdminRole, assertAuthenticated } from "@/lib/dal"
+import { assertAdminRole } from "@/lib/dal"
 import {
   buildPartnerStatement,
   type PartnerStatement,
@@ -11,9 +11,10 @@ export type { PartnerStatement, StatementLine } from "@/lib/partner-statement"
 
 // ─── Monthly partner rev-share statement (actions) ──────────
 //
-// Math and contract terms live in src/lib/partner-statement.ts. Two entry
-// points: admins can pull any partner's statement; a partner can pull
-// their own for the console's earnings view.
+// Math and contract terms live in src/lib/partner-statement.ts. Admin-only:
+// the partner console deliberately has NO self-serve earnings view — the
+// rev-share percentage is negotiated per partner, so the fixed-rate
+// statement is an internal payout tool, not something partners see.
 
 export type PartnerRow = {
   id: string
@@ -54,13 +55,4 @@ export async function getPartnerStatement(
 ): Promise<PartnerStatement | { error: string }> {
   await assertAdminRole("ADMIN_BILLING")
   return buildPartnerStatement(partnerId, year, month)
-}
-
-/** Self-serve variant for the partner console: always the caller's own statement. */
-export async function getMyPartnerStatement(
-  year: number,
-  month: number
-): Promise<PartnerStatement | { error: string }> {
-  const session = await assertAuthenticated()
-  return buildPartnerStatement(session.user.id, year, month)
 }

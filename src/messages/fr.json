@@ -501,7 +501,7 @@
   "dashboard": {
     "partnerConsole": {
       "title": "Console partenaire",
-      "subtitle": "Votre portefeuille de clients, l'avancement des configurations et vos revenus mensuels.",
+      "subtitle": "Votre portefeuille de clients et l'avancement des configurations.",
       "statClients": "Clients",
       "statSubscribed": "Abonnements actifs",
       "statPendingHandoffs": "Transferts en attente",
@@ -527,20 +527,7 @@
       "setupOwner": "Propriétaire confirmé",
       "open": "Ouvrir",
       "handoffPendingBadge": "Transfert en attente",
-      "noClients": "Pas encore de clients. Utilisez « Nouvelle configuration client » dans le menu latéral pour créer le premier.",
-      "earningsTitle": "Revenus mensuels",
-      "earningsSubtitle": "Votre relevé de partage des revenus pour un mois donné — les mêmes chiffres que Loyalshy utilise pour les versements.",
-      "monthLabel": "Mois",
-      "generate": "Afficher le relevé",
-      "generateError": "Impossible de charger le relevé. Veuillez réessayer.",
-      "netCollected": "Net encaissé",
-      "grossMinusRefunds": "{gross} encaissé − {refunds} remboursé",
-      "revShare": "Votre part de revenus ({rate}%)",
-      "setupFeeShare": "Part des frais d'installation due à Loyalshy",
-      "newActivated": "{count, plural, =1 {1 nouveau client activé} other {# nouveaux clients activés}} × 30 €",
-      "payoutToPartner": "Versement net pour vous",
-      "payoutFromPartner": "Net dû à Loyalshy",
-      "methodology": "Encaissé = factures payées datées du mois sur vos clients attribués. Les remboursements émis dans le mois sont déduits de ce relevé. Nouveau client activé = organisation cliente créée dans le mois avec au moins un programme actif."
+      "noClients": "Pas encore de clients. Utilisez « Nouvelle configuration client » dans le menu latéral pour créer le premier."
     },
     "partner": {
       "newClientTitle": "Nouvelle configuration client",
