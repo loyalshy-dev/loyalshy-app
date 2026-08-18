@@ -94,7 +94,15 @@ async function check(
   key: string,
 ): Promise<RateLimitResult> {
   const limiter = await getLimiter(opts)
-  if (limiter) return limiter.limit(key)
+  if (limiter) {
+    try {
+      return await limiter.limit(key)
+    } catch (err) {
+      // Redis unreachable (deleted DB, network blip) must degrade to the
+      // per-instance fallback, never take the auth endpoint down with it.
+      console.error(`[auth-rate-limit] Upstash check failed for ${opts.prefix}, using in-memory fallback:`, err)
+    }
+  }
   const ok = checkMemoryFallback(
     opts.prefix,
     key,

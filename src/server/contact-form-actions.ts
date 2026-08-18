@@ -98,15 +98,21 @@ export async function submitContactForm(
     "unknown"
 
   const limiter = await getRateLimiter()
+  let limitOk: boolean | null = null
   if (limiter) {
-    const result = await limiter.limit(`contact:${ip}`)
-    if (!result.success) {
-      return { error: t("rateLimitExceeded") }
+    try {
+      const result = await limiter.limit(`contact:${ip}`)
+      limitOk = result.success
+    } catch (err) {
+      // Redis unreachable — degrade to the in-memory fallback below
+      console.error("[contact-form] Upstash rate-limit check failed, using in-memory fallback:", err)
     }
-  } else {
-    if (!checkMemoryLimit(`contact:${ip}`)) {
-      return { error: t("rateLimitExceeded") }
-    }
+  }
+  if (limitOk === null) {
+    limitOk = checkMemoryLimit(`contact:${ip}`)
+  }
+  if (!limitOk) {
+    return { error: t("rateLimitExceeded") }
   }
 
   // 4. Send email via Resend
