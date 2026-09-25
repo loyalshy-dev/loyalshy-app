@@ -14,6 +14,7 @@ import {
   Clock,
   Loader2,
   Layers,
+  Megaphone,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -246,7 +247,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
           </p>
         </div>
         <div className="p-6">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* Contacts */}
             <div className="rounded-lg border border-border p-4">
               <div className="flex items-center gap-3">
@@ -351,6 +352,41 @@ export function BillingSettings({ data }: { data: BillingData }) {
                   )}
                 </div>
               )}
+            </div>
+
+            {/* Announcements (per org, shared across programs) */}
+            <div className="rounded-lg border border-border p-4">
+              <div className="flex items-center gap-3">
+                <Megaphone className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">{t("announcementsLabel")}</p>
+                  <p className="text-sm font-semibold">
+                    {usage.announcements.used} / {usage.announcements.limit === null ? t("unlimited") : usage.announcements.limit}
+                  </p>
+                </div>
+              </div>
+              {usage.announcements.limit !== null && (
+                <div className="mt-3">
+                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        usage.announcements.remaining === 0 ? "bg-red-500" : "bg-brand"
+                      }`}
+                      style={{
+                        width: `${Math.min((usage.announcements.used / usage.announcements.limit) * 100, 100)}%`,
+                      }}
+                    />
+                  </div>
+                  {usage.announcements.remaining === 0 && (
+                    <p className="text-[10px] text-red-600 mt-1">{t("announcementsLimitReached")}</p>
+                  )}
+                </div>
+              )}
+              <p className="text-[10px] text-muted-foreground mt-1">
+                {usage.announcements.period === "lifetime"
+                  ? t("announcementsHintLifetime")
+                  : t("announcementsHintWeek")}
+              </p>
             </div>
           </div>
         </div>

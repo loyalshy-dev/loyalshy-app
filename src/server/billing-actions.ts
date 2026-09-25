@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db"
 import { assertOrganizationRole, getOrganizationForUser, getCurrentUser, isAdminRole } from "@/lib/dal"
+import { getAnnouncementQuota, type AnnouncementQuota } from "@/lib/announcement-quota"
 import { stripe, PLANS, getPlanLimits, isActiveSubscription, type PlanId } from "@/lib/stripe"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -26,6 +27,7 @@ export type BillingData = {
     programs: number
     programLimit: number
     programPercent: number
+    announcements: AnnouncementQuota
   }
   plans: typeof PLANS
 }
@@ -44,7 +46,7 @@ export async function getBillingData(): Promise<BillingData | { error: string }>
 
     // Count usage metrics in parallel. Partner memberships (agency reps
     // flagged by admins) are exempt from the staff seat count.
-    const [contactCount, memberCount, programCount] = await Promise.all([
+    const [contactCount, memberCount, programCount, announcements] = await Promise.all([
       db.contact.count({
         where: { organizationId: organization.id, deletedAt: null },
       }),
@@ -54,6 +56,7 @@ export async function getBillingData(): Promise<BillingData | { error: string }>
       db.passTemplate.count({
         where: { organizationId: organization.id, status: "ACTIVE" },
       }),
+      getAnnouncementQuota(db, organization),
     ])
     const staffCount = memberCount ?? 1
 
@@ -89,6 +92,7 @@ export async function getBillingData(): Promise<BillingData | { error: string }>
         programs: programCount,
         programLimit: limits.programLimit,
         programPercent,
+        announcements,
       },
       plans: PLANS,
     }

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Megaphone, Send, Loader2 } from "lucide-react"
+import { Megaphone, Send, Loader2, Sparkles, Clock, AlertTriangle } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -19,6 +20,8 @@ import {
 import { toast } from "sonner"
 import { useTranslations, useLocale } from "next-intl"
 import { sendProgramAnnouncement } from "@/server/announcement-actions"
+import type { AnnouncementQuota } from "@/lib/announcement-quota"
+import { cn } from "@/lib/utils"
 
 const MAX_LENGTH = 160
 
@@ -26,7 +29,13 @@ type AnnouncementSectionProps = {
   templateId: string
   programActive: boolean
   lastAnnouncement: { message: string; sentAt: string } | null
-  remainingToday: number
+  quota: AnnouncementQuota
+  planName: string
+  /** Sends on THIS program in the last 24h reached the Google delivery cap */
+  programCapReached: boolean
+  /** Next plan that raises the quota, if any */
+  upgrade: { name: string; limit: number } | null
+  canManageBilling: boolean
   walletHolders: number
 }
 
@@ -34,7 +43,11 @@ export function AnnouncementSection({
   templateId,
   programActive,
   lastAnnouncement,
-  remainingToday,
+  quota,
+  planName,
+  programCapReached,
+  upgrade,
+  canManageBilling,
   walletHolders,
 }: AnnouncementSectionProps) {
   const t = useTranslations("dashboard.distribution")
@@ -44,8 +57,20 @@ export function AnnouncementSection({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
 
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString(locale, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+
+  const unlimited = quota.limit === null
+  const exhausted = quota.remaining === 0
+  const blocked = quota.inactive || exhausted || programCapReached
   const trimmed = message.trim()
-  const canSend = programActive && trimmed.length > 0 && remainingToday > 0 && !isPending
+  const canSend = programActive && !blocked && trimmed.length > 0 && !isPending
 
   function handleSend() {
     setConfirmOpen(false)
@@ -53,6 +78,8 @@ export function AnnouncementSection({
       const result = await sendProgramAnnouncement({ templateId, message: trimmed })
       if ("error" in result) {
         toast.error(result.error)
+        // Quota changed under us (another program / teammate) — resync the card
+        if (result.code) router.refresh()
         return
       }
       toast.success(t("announcementSent", { count: result.recipients }))
@@ -61,32 +88,104 @@ export function AnnouncementSection({
     })
   }
 
-  const lastSentDate = lastAnnouncement
-    ? new Date(lastAnnouncement.sentAt).toLocaleString(locale, {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      })
-    : null
+  const quotaLabel = unlimited
+    ? t("announcementQuotaUnlimited")
+    : quota.period === "lifetime"
+      ? t("announcementQuotaLifetime", { remaining: quota.remaining ?? 0, limit: quota.limit ?? 0 })
+      : t("announcementQuotaWeek", { remaining: quota.remaining ?? 0, limit: quota.limit ?? 0 })
+
+  const planLabel = unlimited
+    ? t("announcementPlanUnlimited", { plan: planName })
+    : quota.period === "lifetime"
+      ? t("announcementPlanLifetime", { plan: planName, limit: quota.limit ?? 0 })
+      : t("announcementPlanWeek", { plan: planName, limit: quota.limit ?? 0 })
 
   return (
     <Card className="p-5 space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <div className="flex size-7 items-center justify-center rounded-md bg-brand/10">
-            <Megaphone className="size-3.5 text-brand" />
-          </div>
-          <h3 className="text-sm font-medium">{t("announcementTitle")}</h3>
+      <div className="flex items-center gap-2">
+        <div className="flex size-7 items-center justify-center rounded-md bg-brand/10">
+          <Megaphone className="size-3.5 text-brand" />
         </div>
-        <span className="text-[11px] text-muted-foreground tabular-nums">
-          {t("announcementQuota", { count: remainingToday })}
-        </span>
+        <h3 className="text-sm font-medium">{t("announcementTitle")}</h3>
       </div>
 
       <p className="text-[13px] text-muted-foreground">
         {t("announcementDescription")}
       </p>
+
+      {/* Quota meter */}
+      <div className="rounded-lg border border-border px-3 py-2.5 space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[13px] font-medium tabular-nums">{quotaLabel}</span>
+          {!unlimited && quota.limit !== null && quota.limit <= 10 && (
+            <div
+              className="flex items-center gap-1"
+              role="img"
+              aria-label={quotaLabel}
+            >
+              {Array.from({ length: quota.limit }, (_, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "h-1.5 w-4 rounded-full",
+                    i < (quota.remaining ?? 0) ? "bg-brand" : "bg-muted"
+                  )}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          {planLabel} · {t("announcementSharedHint")}
+        </p>
+      </div>
+
+      {quota.inactive ? (
+        <Notice
+          icon={<AlertTriangle className="size-3.5" />}
+          tone="warning"
+          text={t("announcementSubscriptionInactive")}
+          action={
+            canManageBilling ? (
+              <Link href="/dashboard/settings?tab=billing" className="font-medium underline underline-offset-2">
+                {t("announcementFixBilling")}
+              </Link>
+            ) : null
+          }
+        />
+      ) : exhausted ? (
+        <Notice
+          icon={<Clock className="size-3.5" />}
+          tone="muted"
+          text={
+            quota.period === "lifetime"
+              ? t("announcementUsedFree", { limit: quota.limit ?? 0 })
+              : quota.nextAvailableAt
+                ? t("announcementUsedWeek", { date: formatDate(quota.nextAvailableAt) })
+                : t("announcementUsedWeekNoDate")
+          }
+          action={
+            upgrade ? (
+              canManageBilling ? (
+                <Button asChild size="sm" variant="outline" className="h-7 gap-1.5 text-[12px]">
+                  <Link href="/dashboard/settings?tab=billing">
+                    <Sparkles className="size-3.5" />
+                    {t("announcementUpgradeCta", { plan: upgrade.name, limit: upgrade.limit })}
+                  </Link>
+                </Button>
+              ) : (
+                <span>{t("announcementAskOwner", { plan: upgrade.name })}</span>
+              )
+            ) : null
+          }
+        />
+      ) : programCapReached ? (
+        <Notice
+          icon={<Clock className="size-3.5" />}
+          tone="muted"
+          text={t("announcementProgramCap")}
+        />
+      ) : null}
 
       <div className="space-y-2">
         <Textarea
@@ -95,7 +194,7 @@ export function AnnouncementSection({
           placeholder={t("announcementPlaceholder")}
           rows={2}
           maxLength={MAX_LENGTH}
-          disabled={!programActive || isPending}
+          disabled={!programActive || blocked || isPending}
           aria-label={t("announcementTitle")}
           className="resize-none text-[13px]"
         />
@@ -129,7 +228,7 @@ export function AnnouncementSection({
         <div className="rounded-lg border border-border bg-muted/50 px-3 py-2.5">
           <p className="text-[13px] truncate">{lastAnnouncement.message}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            {t("announcementLastSent", { date: lastSentDate ?? "" })}
+            {t("announcementLastSent", { date: formatDate(lastAnnouncement.sentAt) })}
           </p>
         </div>
       )}
@@ -145,6 +244,13 @@ export function AnnouncementSection({
           <div className="rounded-lg border border-border bg-muted/50 px-3 py-2.5 text-[13px]">
             {trimmed}
           </div>
+          {!unlimited && quota.remaining !== null && (
+            <p className="text-[12px] text-muted-foreground">
+              {quota.period === "lifetime"
+                ? t("announcementConfirmQuotaLifetime", { left: quota.remaining - 1 })
+                : t("announcementConfirmQuotaWeek", { left: quota.remaining - 1 })}
+            </p>
+          )}
           <AlertDialogFooter>
             <AlertDialogCancel>{t("announcementConfirmCancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleSend}>
@@ -154,5 +260,34 @@ export function AnnouncementSection({
         </AlertDialogContent>
       </AlertDialog>
     </Card>
+  )
+}
+
+function Notice({
+  icon,
+  text,
+  action,
+  tone,
+}: {
+  icon: React.ReactNode
+  text: string
+  action?: React.ReactNode
+  tone: "muted" | "warning"
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-2 rounded-lg border px-3 py-2.5 text-[12px] sm:flex-row sm:items-center sm:justify-between",
+        tone === "warning"
+          ? "border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-400"
+          : "border-border bg-muted/40 text-muted-foreground"
+      )}
+    >
+      <div className="flex items-start gap-2">
+        <span className="mt-0.5 shrink-0">{icon}</span>
+        <span>{text}</span>
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
+    </div>
   )
 }

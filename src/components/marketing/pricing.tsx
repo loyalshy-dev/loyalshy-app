@@ -84,6 +84,7 @@ function FreePlanCard() {
     t("free.features.contacts"),
     t("free.features.programs"),
     t("free.features.staff"),
+    t("free.features.announcements"),
   ] as const
 
   return (

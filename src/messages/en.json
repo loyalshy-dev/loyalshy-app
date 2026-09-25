@@ -221,7 +221,8 @@
       "features": {
         "contacts": "Up to 50 contacts",
         "programs": "1 program",
-        "staff": "1 staff member"
+        "staff": "1 staff member",
+        "announcements": "2 wallet announcements"
       }
     },
     "starter": {
@@ -230,7 +231,8 @@
       "features": {
         "contacts": "Up to 500 contacts",
         "programs": "Up to 2 programs",
-        "staff": "2 staff members"
+        "staff": "2 staff members",
+        "announcements": "1 wallet announcement / week"
       }
     },
     "growth": {
@@ -239,7 +241,8 @@
       "features": {
         "contacts": "Up to 2,500 contacts",
         "programs": "Up to 5 programs",
-        "staff": "5 staff members"
+        "staff": "5 staff members",
+        "announcements": "2 wallet announcements / week"
       }
     },
     "scale": {
@@ -248,7 +251,8 @@
       "features": {
         "contacts": "Unlimited contacts",
         "programs": "Unlimited programs",
-        "staff": "25 staff members"
+        "staff": "25 staff members",
+        "announcements": "5 wallet announcements / week"
       }
     },
     "enterprise": {
@@ -904,14 +908,30 @@
       "announcementDescription": "Push a short message to everyone who has this program's pass in Apple or Google Wallet — it shows up as a lock-screen notification.",
       "announcementPlaceholder": "e.g. 2-for-1 on all drinks today!",
       "announcementSend": "Send",
-      "announcementQuota": "{count, plural, =0 {No sends left today} one {# send left today} other {# sends left today}}",
       "announcementSent": "{count, plural, =0 {Announcement saved — no wallet passes to notify yet} one {Announcement sent to # pass} other {Announcement sent to # passes}}",
       "announcementNotActive": "Activate the program to send announcements.",
       "announcementLastSent": "Sent {date}",
       "announcementConfirmTitle": "Send this announcement?",
       "announcementConfirmBody": "{count, plural, =0 {No one holds this pass in a wallet yet — the message will only appear on newly issued passes.} one {This will notify # pass holder. It can't be unsent.} other {This will notify # pass holders. It can't be unsent.}}",
       "announcementConfirmCancel": "Cancel",
-      "announcementConfirmSend": "Send now"
+      "announcementConfirmSend": "Send now",
+      "announcementQuotaWeek": "{remaining} of {limit} left this week",
+      "announcementQuotaLifetime": "{remaining} of {limit} free announcements left",
+      "announcementQuotaUnlimited": "Unlimited announcements",
+      "announcementPlanWeek": "{plan} plan: {limit, plural, one {# announcement} other {# announcements}} every 7 days",
+      "announcementPlanLifetime": "{plan} plan: {limit} announcements in total",
+      "announcementPlanUnlimited": "{plan} plan: no weekly limit",
+      "announcementSharedHint": "shared across all your programs",
+      "announcementUsedWeek": "You've used this week's announcements. Your next one is available {date}.",
+      "announcementUsedWeekNoDate": "You've used this week's announcements. More will be available soon.",
+      "announcementUsedFree": "You've used your {limit} free announcements. Upgrade to keep reaching your customers every week.",
+      "announcementUpgradeCta": "Upgrade to {plan} · {limit}/week",
+      "announcementAskOwner": "Ask the account owner to upgrade to {plan} for more.",
+      "announcementProgramCap": "This program already sent 3 announcements in the last 24 hours. Wait a bit so Google Wallet still delivers the notification.",
+      "announcementSubscriptionInactive": "Your subscription is inactive, so announcements are paused.",
+      "announcementFixBilling": "Update billing",
+      "announcementConfirmQuotaWeek": "{left, plural, =0 {This uses your last announcement for this week.} one {You'll have # announcement left this week.} other {You'll have # announcements left this week.}}",
+      "announcementConfirmQuotaLifetime": "{left, plural, =0 {This uses your last free announcement.} one {You'll have # free announcement left.} other {You'll have # free announcements left.}}"
     },
     "programSettings": {
       "title": "Settings",
@@ -993,7 +1013,11 @@
       "staffLimitReached": "Limit reached — upgrade to add more",
       "programLimitReached": "Limit reached — upgrade to add more",
       "teamMembersLabel": "Team Members",
-      "programsLabel": "Programs"
+      "programsLabel": "Programs",
+      "announcementsLabel": "Announcements",
+      "announcementsHintWeek": "Rolling 7 days, shared across all programs.",
+      "announcementsHintLifetime": "Total on the Free plan — upgrade for weekly announcements.",
+      "announcementsLimitReached": "Limit reached — upgrade to send more"
     },
     "registerVisit": {
       "title": "Register Interaction",
@@ -1637,7 +1661,10 @@
     "csvLastInteraction": "Last Interaction",
     "csvJoined": "Joined",
     "announcementProgramNotActive": "Announcements can only be sent for active programs.",
-    "announcementQuotaReached": "You've reached the limit of 3 announcements per 24 hours for this program."
+    "announcementQuotaReachedWeek": "You've used all your announcements for this week. Upgrade your plan to send more.",
+    "announcementQuotaReachedFree": "You've used your free announcements. Upgrade your plan to send more.",
+    "announcementProgramDailyCap": "This program already sent 3 announcements in the last 24 hours. Try again later.",
+    "announcementSubscriptionInactive": "Your subscription is inactive. Update your billing to send announcements."
   },
   "admin": {
     "cohorts": {

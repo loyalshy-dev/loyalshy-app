@@ -221,7 +221,8 @@
       "features": {
         "contacts": "Hasta 50 contactos",
         "programs": "1 programa",
-        "staff": "1 miembro del equipo"
+        "staff": "1 miembro del equipo",
+        "announcements": "2 anuncios en wallet"
       }
     },
     "starter": {
@@ -230,7 +231,8 @@
       "features": {
         "contacts": "Hasta 500 contactos",
         "programs": "Hasta 2 programas",
-        "staff": "2 miembros del equipo"
+        "staff": "2 miembros del equipo",
+        "announcements": "1 anuncio en wallet / semana"
       }
     },
     "growth": {
@@ -239,7 +241,8 @@
       "features": {
         "contacts": "Hasta 2.500 contactos",
         "programs": "Hasta 5 programas",
-        "staff": "5 miembros del equipo"
+        "staff": "5 miembros del equipo",
+        "announcements": "2 anuncios en wallet / semana"
       }
     },
     "scale": {
@@ -248,7 +251,8 @@
       "features": {
         "contacts": "Contactos ilimitados",
         "programs": "Programas ilimitados",
-        "staff": "25 miembros del equipo"
+        "staff": "25 miembros del equipo",
+        "announcements": "5 anuncios en wallet / semana"
       }
     },
     "enterprise": {
@@ -904,14 +908,30 @@
       "announcementDescription": "Envía un mensaje corto a todos los que tienen la tarjeta de este programa en Apple o Google Wallet — aparece como notificación en la pantalla de bloqueo.",
       "announcementPlaceholder": "p. ej. ¡Hoy 2x1 en todas las bebidas!",
       "announcementSend": "Enviar",
-      "announcementQuota": "{count, plural, =0 {Sin envíos disponibles hoy} one {# envío disponible hoy} other {# envíos disponibles hoy}}",
       "announcementSent": "{count, plural, =0 {Anuncio guardado — aún no hay tarjetas en wallets para notificar} one {Anuncio enviado a # tarjeta} other {Anuncio enviado a # tarjetas}}",
       "announcementNotActive": "Activa el programa para enviar anuncios.",
       "announcementLastSent": "Enviado {date}",
       "announcementConfirmTitle": "¿Enviar este anuncio?",
       "announcementConfirmBody": "{count, plural, =0 {Nadie tiene aún esta tarjeta en su wallet — el mensaje solo aparecerá en las tarjetas nuevas.} one {Se notificará a # titular. No se puede deshacer.} other {Se notificará a # titulares. No se puede deshacer.}}",
       "announcementConfirmCancel": "Cancelar",
-      "announcementConfirmSend": "Enviar ahora"
+      "announcementConfirmSend": "Enviar ahora",
+      "announcementQuotaWeek": "Te quedan {remaining} de {limit} esta semana",
+      "announcementQuotaLifetime": "Te quedan {remaining} de {limit} anuncios gratis",
+      "announcementQuotaUnlimited": "Anuncios ilimitados",
+      "announcementPlanWeek": "Plan {plan}: {limit, plural, one {# anuncio} other {# anuncios}} cada 7 días",
+      "announcementPlanLifetime": "Plan {plan}: {limit} anuncios en total",
+      "announcementPlanUnlimited": "Plan {plan}: sin límite semanal",
+      "announcementSharedHint": "compartidos entre todos tus programas",
+      "announcementUsedWeek": "Ya usaste los anuncios de esta semana. El próximo estará disponible el {date}.",
+      "announcementUsedWeekNoDate": "Ya usaste los anuncios de esta semana. Pronto tendrás más disponibles.",
+      "announcementUsedFree": "Ya usaste tus {limit} anuncios gratis. Mejora tu plan para seguir llegando a tus clientes cada semana.",
+      "announcementUpgradeCta": "Mejorar a {plan} · {limit}/semana",
+      "announcementAskOwner": "Pide al propietario de la cuenta que mejore a {plan} para enviar más.",
+      "announcementProgramCap": "Este programa ya envió 3 anuncios en las últimas 24 horas. Espera un poco para que Google Wallet siga entregando la notificación.",
+      "announcementSubscriptionInactive": "Tu suscripción está inactiva, así que los anuncios están en pausa.",
+      "announcementFixBilling": "Actualizar facturación",
+      "announcementConfirmQuotaWeek": "{left, plural, =0 {Este es tu último anuncio de esta semana.} one {Te quedará # anuncio esta semana.} other {Te quedarán # anuncios esta semana.}}",
+      "announcementConfirmQuotaLifetime": "{left, plural, =0 {Este es tu último anuncio gratis.} one {Te quedará # anuncio gratis.} other {Te quedarán # anuncios gratis.}}"
     },
     "programSettings": {
       "title": "Ajustes",
@@ -993,7 +1013,11 @@
       "statusTrial": "Prueba",
       "statusActive": "Activo",
       "statusPastDue": "Pago Atrasado",
-      "statusCanceled": "Cancelado"
+      "statusCanceled": "Cancelado",
+      "announcementsLabel": "Anuncios",
+      "announcementsHintWeek": "Últimos 7 días, compartidos entre todos los programas.",
+      "announcementsHintLifetime": "Total en el plan Free — mejora para tener anuncios semanales.",
+      "announcementsLimitReached": "Límite alcanzado — mejora para enviar más"
     },
     "registerVisit": {
       "title": "Registrar Interacción",
@@ -1637,7 +1661,10 @@
     "csvLastInteraction": "Última Interacción",
     "csvJoined": "Registrado",
     "announcementProgramNotActive": "Solo se pueden enviar anuncios en programas activos.",
-    "announcementQuotaReached": "Has alcanzado el límite de 3 anuncios por 24 horas para este programa."
+    "announcementQuotaReachedWeek": "Ya usaste todos tus anuncios de esta semana. Mejora tu plan para enviar más.",
+    "announcementQuotaReachedFree": "Ya usaste tus anuncios gratis. Mejora tu plan para enviar más.",
+    "announcementProgramDailyCap": "Este programa ya envió 3 anuncios en las últimas 24 horas. Inténtalo más tarde.",
+    "announcementSubscriptionInactive": "Tu suscripción está inactiva. Actualiza tu facturación para enviar anuncios."
   },
   "admin": {
     "cohorts": {

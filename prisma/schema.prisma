@@ -238,6 +238,7 @@ model User {
   devicePairingTokens   DevicePairingToken[] @relation("DevicePairingTokens")
   handoffTokensCreated  OrgHandoffToken[]    @relation("HandoffCreatedBy")
   referredOrganizations Organization[]       @relation("ReferredOrgs")
+  sentAnnouncements     ProgramAnnouncement[] @relation("AnnouncementSentBy")
 
   @@map("user")
 }
@@ -337,6 +338,7 @@ model Organization {
   devicePairingTokens DevicePairingToken[]
   orgAuditLogs        OrgAuditLog[]
   handoffTokens       OrgHandoffToken[]
+  announcements       ProgramAnnouncement[]
 
   @@index([referredById])
   @@map("organization")
@@ -419,11 +421,34 @@ model PassTemplate {
   passDesign    PassDesign?
   rewards       Reward[]
   interactions  Interaction[]
+  announcements ProgramAnnouncement[]
 
   @@index([organizationId])
   @@index([organizationId, status])
   @@index([organizationId, passType])
   @@map("pass_template")
+}
+
+// One row per broadcast announcement send. Source of truth for the per-plan
+// quota (counted per ORGANIZATION, see src/lib/announcement-quota.ts).
+// passTemplateId is SET NULL on delete so deleting a program can't reset the
+// org's quota.
+model ProgramAnnouncement {
+  id             String   @id @default(dbgenerated("uuidv7()::text"))
+  organizationId String
+  passTemplateId String?
+  sentById       String?
+  message        String
+  recipients     Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  passTemplate PassTemplate? @relation(fields: [passTemplateId], references: [id], onDelete: SetNull)
+  sentBy       User?         @relation("AnnouncementSentBy", fields: [sentById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt(sort: Desc)])
+  @@index([passTemplateId, createdAt(sort: Desc)])
+  @@map("program_announcement")
 }
 
 model PassInstance {

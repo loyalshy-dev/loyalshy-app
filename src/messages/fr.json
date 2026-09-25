@@ -221,7 +221,8 @@
       "features": {
         "contacts": "Jusqu'à 50 contacts",
         "programs": "1 programme",
-        "staff": "1 membre d'équipe"
+        "staff": "1 membre d'équipe",
+        "announcements": "2 annonces wallet"
       }
     },
     "starter": {
@@ -230,7 +231,8 @@
       "features": {
         "contacts": "Jusqu'à 500 contacts",
         "programs": "Jusqu'à 2 programmes",
-        "staff": "2 membres d'équipe"
+        "staff": "2 membres d'équipe",
+        "announcements": "1 annonce wallet / semaine"
       }
     },
     "growth": {
@@ -239,7 +241,8 @@
       "features": {
         "contacts": "Jusqu'à 2 500 contacts",
         "programs": "Jusqu'à 5 programmes",
-        "staff": "5 membres d'équipe"
+        "staff": "5 membres d'équipe",
+        "announcements": "2 annonces wallet / semaine"
       }
     },
     "scale": {
@@ -248,7 +251,8 @@
       "features": {
         "contacts": "Contacts illimités",
         "programs": "Programmes illimités",
-        "staff": "25 membres d'équipe"
+        "staff": "25 membres d'équipe",
+        "announcements": "5 annonces wallet / semaine"
       }
     },
     "enterprise": {
@@ -904,14 +908,30 @@
       "announcementDescription": "Envoyez un court message à toutes les personnes ayant la carte de ce programme dans Apple ou Google Wallet — il s'affiche en notification sur l'écran verrouillé.",
       "announcementPlaceholder": "ex. Aujourd'hui, 2 boissons pour le prix d'1 !",
       "announcementSend": "Envoyer",
-      "announcementQuota": "{count, plural, =0 {Aucun envoi restant aujourd'hui} one {# envoi restant aujourd'hui} other {# envois restants aujourd'hui}}",
       "announcementSent": "{count, plural, =0 {Annonce enregistrée — aucune carte dans un wallet à notifier pour l'instant} one {Annonce envoyée à # carte} other {Annonce envoyée à # cartes}}",
       "announcementNotActive": "Activez le programme pour envoyer des annonces.",
       "announcementLastSent": "Envoyée {date}",
       "announcementConfirmTitle": "Envoyer cette annonce ?",
       "announcementConfirmBody": "{count, plural, =0 {Personne n'a encore cette carte dans son wallet — le message n'apparaîtra que sur les nouvelles cartes.} one {# titulaire sera notifié. Cette action est irréversible.} other {# titulaires seront notifiés. Cette action est irréversible.}}",
       "announcementConfirmCancel": "Annuler",
-      "announcementConfirmSend": "Envoyer maintenant"
+      "announcementConfirmSend": "Envoyer maintenant",
+      "announcementQuotaWeek": "{remaining} sur {limit} restantes cette semaine",
+      "announcementQuotaLifetime": "{remaining} sur {limit} annonces gratuites restantes",
+      "announcementQuotaUnlimited": "Annonces illimitées",
+      "announcementPlanWeek": "Offre {plan} : {limit, plural, one {# annonce} other {# annonces}} tous les 7 jours",
+      "announcementPlanLifetime": "Offre {plan} : {limit} annonces au total",
+      "announcementPlanUnlimited": "Offre {plan} : sans limite hebdomadaire",
+      "announcementSharedHint": "partagées entre tous vos programmes",
+      "announcementUsedWeek": "Vous avez utilisé les annonces de cette semaine. La prochaine sera disponible le {date}.",
+      "announcementUsedWeekNoDate": "Vous avez utilisé les annonces de cette semaine. D'autres seront bientôt disponibles.",
+      "announcementUsedFree": "Vous avez utilisé vos {limit} annonces gratuites. Passez à une offre supérieure pour continuer à toucher vos clients chaque semaine.",
+      "announcementUpgradeCta": "Passer à {plan} · {limit}/semaine",
+      "announcementAskOwner": "Demandez au propriétaire du compte de passer à {plan} pour en envoyer plus.",
+      "announcementProgramCap": "Ce programme a déjà envoyé 3 annonces ces dernières 24 heures. Patientez un peu pour que Google Wallet continue de livrer la notification.",
+      "announcementSubscriptionInactive": "Votre abonnement est inactif, les annonces sont donc en pause.",
+      "announcementFixBilling": "Mettre à jour la facturation",
+      "announcementConfirmQuotaWeek": "{left, plural, =0 {C'est votre dernière annonce de la semaine.} one {Il vous restera # annonce cette semaine.} other {Il vous restera # annonces cette semaine.}}",
+      "announcementConfirmQuotaLifetime": "{left, plural, =0 {C'est votre dernière annonce gratuite.} one {Il vous restera # annonce gratuite.} other {Il vous restera # annonces gratuites.}}"
     },
     "programSettings": {
       "title": "Paramètres",
@@ -993,7 +1013,11 @@
       "staffLimitReached": "Limite atteinte — passez à un plan supérieur pour en ajouter",
       "programLimitReached": "Limite atteinte — passez à un plan supérieur pour en ajouter",
       "teamMembersLabel": "Membres d'équipe",
-      "programsLabel": "Programmes"
+      "programsLabel": "Programmes",
+      "announcementsLabel": "Annonces",
+      "announcementsHintWeek": "7 jours glissants, partagées entre tous les programmes.",
+      "announcementsHintLifetime": "Total sur l'offre Free — passez à une offre supérieure pour des annonces hebdomadaires.",
+      "announcementsLimitReached": "Limite atteinte — passez à une offre supérieure pour en envoyer plus"
     },
     "registerVisit": {
       "title": "Enregistrer une interaction",
@@ -1637,7 +1661,10 @@
     "csvLastInteraction": "Dernière interaction",
     "csvJoined": "Inscrit le",
     "announcementProgramNotActive": "Les annonces ne peuvent être envoyées que pour des programmes actifs.",
-    "announcementQuotaReached": "Vous avez atteint la limite de 3 annonces par 24 heures pour ce programme."
+    "announcementQuotaReachedWeek": "Vous avez utilisé toutes vos annonces de la semaine. Passez à une offre supérieure pour en envoyer plus.",
+    "announcementQuotaReachedFree": "Vous avez utilisé vos annonces gratuites. Passez à une offre supérieure pour en envoyer plus.",
+    "announcementProgramDailyCap": "Ce programme a déjà envoyé 3 annonces ces dernières 24 heures. Réessayez plus tard.",
+    "announcementSubscriptionInactive": "Votre abonnement est inactif. Mettez à jour votre facturation pour envoyer des annonces."
   },
   "admin": {
     "cohorts": {

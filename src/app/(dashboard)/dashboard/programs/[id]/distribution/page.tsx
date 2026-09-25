@@ -1,6 +1,6 @@
 import { connection } from "next/server"
 import { notFound, redirect } from "next/navigation"
-import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole } from "@/lib/dal"
+import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole, getOrgMember } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { QrCodeDisplay } from "@/components/dashboard/settings/qr-code-display"
 import { DirectIssueSection } from "@/components/dashboard/programs/direct-issue-section"
@@ -9,11 +9,13 @@ import { DistributionStats } from "@/components/dashboard/programs/distribution-
 import { NfcSection } from "@/components/dashboard/programs/nfc-section"
 import { FirstCustomerChecklist } from "@/components/dashboard/programs/first-customer-checklist"
 import { AnnouncementSection } from "@/components/dashboard/programs/announcement-section"
+import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import {
-  parseTemplateAnnouncement,
-  recentAnnouncementSends,
-  ANNOUNCEMENT_MAX_PER_24H,
-} from "@/lib/pass-config"
+  getAnnouncementQuota,
+  countProgramSendsLast24h,
+  ANNOUNCEMENT_PROGRAM_MAX_PER_24H,
+} from "@/lib/announcement-quota"
+import { PLANS, getAnnouncementUpgrade, type PlanId } from "@/lib/plans"
 
 export default async function ProgramDistributionPage(props: {
   params: Promise<{ id: string }>
@@ -34,7 +36,16 @@ export default async function ProgramDistributionPage(props: {
   weekAgo.setDate(weekAgo.getDate() - 7)
 
   // Run program validation and stats in parallel
-  const [program, totalIssued, issuedThisWeek, eligibleContacts, walletHolders] = await Promise.all([
+  const [
+    program,
+    totalIssued,
+    issuedThisWeek,
+    eligibleContacts,
+    walletHolders,
+    announcementQuota,
+    programSendsLast24h,
+    member,
+  ] = await Promise.all([
     db.passTemplate.findFirst({
       where: { id: programId, organizationId: organization.id },
       select: {
@@ -80,16 +91,20 @@ export default async function ProgramDistributionPage(props: {
         walletProvider: { not: "NONE" },
       },
     }),
+    getAnnouncementQuota(db, organization),
+    countProgramSendsLast24h(db, programId),
+    getOrgMember(organization.id),
   ])
 
   if (!program) {
     notFound()
   }
 
-  // Announcement quota: 3 sends per rolling 24h (mirrors the server action)
+  // Announcement quota: per-org plan quota + per-program Google delivery cap
+  // (mirrors the server action)
   const announcement = parseTemplateAnnouncement(program.announcement)
-  const sentLast24h = recentAnnouncementSends(announcement).length
-  const remainingToday = Math.max(0, ANNOUNCEMENT_MAX_PER_24H - sentLast24h)
+  const plan = organization.plan as PlanId
+  const announcementUpgrade = getAnnouncementUpgrade(plan)
 
   // Build join URL
   const origin = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? ""
@@ -158,7 +173,15 @@ export default async function ProgramDistributionPage(props: {
                   ? { message: announcement.message, sentAt: announcement.sentAt }
                   : null
               }
-              remainingToday={remainingToday}
+              quota={announcementQuota}
+              planName={PLANS[plan].name}
+              programCapReached={programSendsLast24h >= ANNOUNCEMENT_PROGRAM_MAX_PER_24H}
+              upgrade={
+                announcementUpgrade
+                  ? { name: announcementUpgrade.name, limit: announcementUpgrade.announcementLimit }
+                  : null
+              }
+              canManageBilling={member?.role === "owner"}
               walletHolders={walletHolders}
             />
           </section>

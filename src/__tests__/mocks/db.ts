@@ -33,6 +33,7 @@ export function createMockDb() {
     passInstance: createMockModel(),
     passDesign: createMockModel(),
     orgHandoffToken: createMockModel(),
+    programAnnouncement: createMockModel(),
     $queryRaw: vi.fn(),
     $executeRaw: vi.fn(),
   }
@@ -58,6 +59,7 @@ export function createMockDb() {
     account: createMockModel(),
     orgHandoffToken: createMockModel(),
     orgAuditLog: createMockModel(),
+    programAnnouncement: createMockModel(),
     $transaction: vi.fn(
       async (
         fnOrOps: ((tx: typeof mockTx) => Promise<unknown>) | Promise<unknown>[]

@@ -54,7 +54,8 @@ export const couponConfigSchema = z.object({
 
 // Broadcast announcement stored on PassTemplate.announcement (own column, NOT
 // inside config — validateTemplateConfig strips unknown keys on program edits).
-// `history` holds ISO timestamps of recent sends for the 3-per-24h quota.
+// `history` is legacy (pre-2026-09-25 quota) — quotas now count rows in
+// ProgramAnnouncement, see src/lib/announcement-quota.ts.
 export const templateAnnouncementSchema = z.object({
   message: z.string().min(1).max(160),
   sentAt: z.string(),
@@ -65,22 +66,6 @@ export type TemplateAnnouncement = z.infer<typeof templateAnnouncementSchema>
 
 export function parseTemplateAnnouncement(value: unknown): TemplateAnnouncement | null {
   return safeParse(templateAnnouncementSchema, value)
-}
-
-// Google caps TEXT_AND_NOTIFY pushes at ~3 per object per 24h — the same
-// quota is enforced per template so broadcasts stay deliverable everywhere.
-export const ANNOUNCEMENT_MAX_PER_24H = 3
-const ANNOUNCEMENT_WINDOW_MS = 24 * 60 * 60 * 1000
-
-/** ISO timestamps from `history` that fall inside the rolling 24h window. */
-export function recentAnnouncementSends(
-  announcement: TemplateAnnouncement | null,
-  now: Date = new Date()
-): string[] {
-  return (announcement?.history ?? []).filter((iso) => {
-    const ts = Date.parse(iso)
-    return !Number.isNaN(ts) && now.getTime() - ts < ANNOUNCEMENT_WINDOW_MS
-  })
 }
 
 export const prizeItemSchema = z.object({

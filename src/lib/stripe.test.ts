@@ -16,6 +16,8 @@ describe("PLANS", () => {
     expect(PLANS.FREE.customerLimit).toBe(50)
     expect(PLANS.FREE.staffLimit).toBe(1)
     expect(PLANS.FREE.programLimit).toBe(1)
+    expect(PLANS.FREE.announcementLimit).toBe(2)
+    expect(PLANS.FREE.announcementPeriod).toBe("lifetime")
     expect(PLANS.FREE.price).toBe(0)
   })
 
@@ -51,22 +53,22 @@ describe("PLANS", () => {
 describe("getPlanLimits", () => {
   it("returns correct limits for STARTER plan", () => {
     const limits = getPlanLimits("STARTER")
-    expect(limits).toEqual({ customerLimit: 500, staffLimit: 2, programLimit: 2 })
+    expect(limits).toEqual({ customerLimit: 500, staffLimit: 2, programLimit: 2, announcementLimit: 1, announcementPeriod: "week" })
   })
 
   it("returns correct limits for GROWTH plan", () => {
     const limits = getPlanLimits("GROWTH")
-    expect(limits).toEqual({ customerLimit: 2_500, staffLimit: 5, programLimit: 5 })
+    expect(limits).toEqual({ customerLimit: 2_500, staffLimit: 5, programLimit: 5, announcementLimit: 2, announcementPeriod: "week" })
   })
 
   it("returns correct limits for SCALE plan", () => {
     const limits = getPlanLimits("SCALE")
-    expect(limits).toEqual({ customerLimit: Infinity, staffLimit: 25, programLimit: Infinity })
+    expect(limits).toEqual({ customerLimit: Infinity, staffLimit: 25, programLimit: Infinity, announcementLimit: 5, announcementPeriod: "week" })
   })
 
   it("returns correct limits for ENTERPRISE plan", () => {
     const limits = getPlanLimits("ENTERPRISE")
-    expect(limits).toEqual({ customerLimit: Infinity, staffLimit: Infinity, programLimit: Infinity })
+    expect(limits).toEqual({ customerLimit: Infinity, staffLimit: Infinity, programLimit: Infinity, announcementLimit: Infinity, announcementPeriod: "week" })
   })
 })
 
