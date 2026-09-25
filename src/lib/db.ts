@@ -1,17 +1,32 @@
 import { PrismaPg } from "@prisma/adapter-pg"
-import { PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 
+function createPrismaClient(): PrismaClient {
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+  return new PrismaClient({ adapter })
+}
+
+/**
+ * Dev-only: a client cached on globalThis across HMR can predate a
+ * `prisma generate` and miss newly added models. Checks every generated
+ * model instead of a hard-coded name — the old `"apiKey" in client` check
+ * failed permanently once ApiKey was deleted in the pivot, rebuilding the
+ * client (and its pg pool) on EVERY db access.
+ */
+function isStaleClient(client: PrismaClient): boolean {
+  return Object.values(Prisma.ModelName).some(
+    (name) => !(name.charAt(0).toLowerCase() + name.slice(1) in client)
+  )
+}
+
 function getPrismaClient(): PrismaClient {
-  if (!globalForPrisma.prisma) {
-    const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
-    globalForPrisma.prisma = new PrismaClient({ adapter })
-  }
-  // Verify the client has expected models (invalidate stale HMR cache)
-  if (!("apiKey" in globalForPrisma.prisma)) {
-    const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
-    globalForPrisma.prisma = new PrismaClient({ adapter })
+  if (
+    !globalForPrisma.prisma ||
+    (process.env.NODE_ENV !== "production" && isStaleClient(globalForPrisma.prisma))
+  ) {
+    globalForPrisma.prisma = createPrismaClient()
   }
   return globalForPrisma.prisma
 }
