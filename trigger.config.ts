@@ -2,6 +2,7 @@ import { defineConfig } from "@trigger.dev/sdk"
 
 export default defineConfig({
   project: process.env.TRIGGER_PROJECT_REF ?? "loyalshy-app",
+  runtime: "node-24",
   dirs: ["./src/trigger"],
   maxDuration: 300,
   retries: {
