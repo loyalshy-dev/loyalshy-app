@@ -931,7 +931,8 @@
       "announcementSubscriptionInactive": "Votre abonnement est inactif, les annonces sont donc en pause.",
       "announcementFixBilling": "Mettre à jour la facturation",
       "announcementConfirmQuotaWeek": "{left, plural, =0 {C'est votre dernière annonce de la semaine.} one {Il vous restera # annonce cette semaine.} other {Il vous restera # annonces cette semaine.}}",
-      "announcementConfirmQuotaLifetime": "{left, plural, =0 {C'est votre dernière annonce gratuite.} one {Il vous restera # annonce gratuite.} other {Il vous restera # annonces gratuites.}}"
+      "announcementConfirmQuotaLifetime": "{left, plural, =0 {C'est votre dernière annonce gratuite.} one {Il vous restera # annonce gratuite.} other {Il vous restera # annonces gratuites.}}",
+      "announcementNoHolders": "Personne n'a encore ce pass dans Apple ou Google Wallet. Partagez d'abord le programme : les annonces n'atteignent que les détenteurs du pass et n'utiliseront pas votre quota d'ici là."
     },
     "programSettings": {
       "title": "Paramètres",
@@ -1664,7 +1665,9 @@
     "announcementQuotaReachedWeek": "Vous avez utilisé toutes vos annonces de la semaine. Passez à une offre supérieure pour en envoyer plus.",
     "announcementQuotaReachedFree": "Vous avez utilisé vos annonces gratuites. Passez à une offre supérieure pour en envoyer plus.",
     "announcementProgramDailyCap": "Ce programme a déjà envoyé 3 annonces ces dernières 24 heures. Réessayez plus tard.",
-    "announcementSubscriptionInactive": "Votre abonnement est inactif. Mettez à jour votre facturation pour envoyer des annonces."
+    "announcementSubscriptionInactive": "Votre abonnement est inactif. Mettez à jour votre facturation pour envoyer des annonces.",
+    "announcementNoRecipients": "Personne n'a encore le pass de ce programme dans son wallet, il n'y a donc personne à notifier. Votre quota n'a pas été utilisé.",
+    "announcementQuotaReachedWeekTopPlan": "Vous avez utilisé toutes vos annonces de la semaine. D'autres seront disponibles quand les précédentes auront plus de 7 jours."
   },
   "admin": {
     "cohorts": {

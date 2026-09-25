@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useSyncExternalStore, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Megaphone, Send, Loader2, Sparkles, Clock, AlertTriangle } from "lucide-react"
@@ -24,6 +24,13 @@ import type { AnnouncementQuota } from "@/lib/announcement-quota"
 import { cn } from "@/lib/utils"
 
 const MAX_LENGTH = 160
+
+// Dates are formatted in the viewer's timezone, which the server (UTC) can't
+// know — render them only after hydration to avoid a mismatch.
+const noopSubscribe = () => () => {}
+function useHydrated(): boolean {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false)
+}
 
 type AnnouncementSectionProps = {
   templateId: string
@@ -56,6 +63,7 @@ export function AnnouncementSection({
   const [message, setMessage] = useState("")
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const hydrated = useHydrated()
 
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleString(locale, {
@@ -68,7 +76,9 @@ export function AnnouncementSection({
 
   const unlimited = quota.limit === null
   const exhausted = quota.remaining === 0
-  const blocked = quota.inactive || exhausted || programCapReached
+  // Sends to zero wallet holders are refused server-side (they'd burn quota)
+  const noHolders = walletHolders === 0
+  const blocked = quota.inactive || exhausted || noHolders || programCapReached
   const trimmed = message.trim()
   const canSend = programActive && !blocked && trimmed.length > 0 && !isPending
 
@@ -160,7 +170,7 @@ export function AnnouncementSection({
           text={
             quota.period === "lifetime"
               ? t("announcementUsedFree", { limit: quota.limit ?? 0 })
-              : quota.nextAvailableAt
+              : quota.nextAvailableAt && hydrated
                 ? t("announcementUsedWeek", { date: formatDate(quota.nextAvailableAt) })
                 : t("announcementUsedWeekNoDate")
           }
@@ -178,6 +188,12 @@ export function AnnouncementSection({
               )
             ) : null
           }
+        />
+      ) : noHolders && programActive ? (
+        <Notice
+          icon={<Megaphone className="size-3.5" />}
+          tone="muted"
+          text={t("announcementNoHolders")}
         />
       ) : programCapReached ? (
         <Notice
@@ -228,7 +244,9 @@ export function AnnouncementSection({
         <div className="rounded-lg border border-border bg-muted/50 px-3 py-2.5">
           <p className="text-[13px] truncate">{lastAnnouncement.message}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            {t("announcementLastSent", { date: formatDate(lastAnnouncement.sentAt) })}
+            {hydrated
+              ? t("announcementLastSent", { date: formatDate(lastAnnouncement.sentAt) })
+              : "\u00a0"}
           </p>
         </div>
       )}

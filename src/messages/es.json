@@ -931,7 +931,8 @@
       "announcementSubscriptionInactive": "Tu suscripción está inactiva, así que los anuncios están en pausa.",
       "announcementFixBilling": "Actualizar facturación",
       "announcementConfirmQuotaWeek": "{left, plural, =0 {Este es tu último anuncio de esta semana.} one {Te quedará # anuncio esta semana.} other {Te quedarán # anuncios esta semana.}}",
-      "announcementConfirmQuotaLifetime": "{left, plural, =0 {Este es tu último anuncio gratis.} one {Te quedará # anuncio gratis.} other {Te quedarán # anuncios gratis.}}"
+      "announcementConfirmQuotaLifetime": "{left, plural, =0 {Este es tu último anuncio gratis.} one {Te quedará # anuncio gratis.} other {Te quedarán # anuncios gratis.}}",
+      "announcementNoHolders": "Nadie tiene todavía este pase en Apple o Google Wallet. Comparte primero el programa: los anuncios solo llegan a quienes tienen el pase y no gastarán tu cupo hasta entonces."
     },
     "programSettings": {
       "title": "Ajustes",
@@ -1664,7 +1665,9 @@
     "announcementQuotaReachedWeek": "Ya usaste todos tus anuncios de esta semana. Mejora tu plan para enviar más.",
     "announcementQuotaReachedFree": "Ya usaste tus anuncios gratis. Mejora tu plan para enviar más.",
     "announcementProgramDailyCap": "Este programa ya envió 3 anuncios en las últimas 24 horas. Inténtalo más tarde.",
-    "announcementSubscriptionInactive": "Tu suscripción está inactiva. Actualiza tu facturación para enviar anuncios."
+    "announcementSubscriptionInactive": "Tu suscripción está inactiva. Actualiza tu facturación para enviar anuncios.",
+    "announcementNoRecipients": "Nadie tiene todavía el pase de este programa en su wallet, así que no hay a quién notificar. No se ha gastado tu cupo.",
+    "announcementQuotaReachedWeekTopPlan": "Ya usaste todos tus anuncios de esta semana. Tendrás más disponibles cuando los anteriores cumplan 7 días."
   },
   "admin": {
     "cohorts": {

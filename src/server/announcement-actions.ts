@@ -10,7 +10,7 @@ import {
   countProgramSendsLast24h,
   ANNOUNCEMENT_PROGRAM_MAX_PER_24H,
 } from "@/lib/announcement-quota"
-import { getPlanLimits, type PlanId } from "@/lib/plans"
+import { getAnnouncementUpgrade, getPlanLimits, type PlanId } from "@/lib/plans"
 import type { Prisma } from "@prisma/client"
 
 const sendAnnouncementSchema = z.object({
@@ -21,6 +21,7 @@ const sendAnnouncementSchema = z.object({
 export type AnnouncementErrorCode =
   | "quotaReached"
   | "programDailyCap"
+  | "noRecipients"
   | "subscriptionInactive"
 
 export type SendAnnouncementResult =
@@ -94,6 +95,10 @@ export async function sendProgramAnnouncement(input: {
         walletProvider: { not: "NONE" },
       },
     })
+    // Nobody to notify — don't burn quota (Free has only 2, ever)
+    if (recipients === 0) {
+      return { ok: false, code: "noRecipients", nextAvailableAt: null }
+    }
 
     await tx.programAnnouncement.create({
       data: {
@@ -120,12 +125,16 @@ export async function sendProgramAnnouncement(input: {
   })
 
   if (!check.ok) {
+    const plan = organization.plan as PlanId
     const errorKey = {
       quotaReached:
-        getPlanLimits(organization.plan as PlanId).announcementPeriod === "lifetime"
+        getPlanLimits(plan).announcementPeriod === "lifetime"
           ? "announcementQuotaReachedFree"
-          : "announcementQuotaReachedWeek",
+          : getAnnouncementUpgrade(plan)
+            ? "announcementQuotaReachedWeek"
+            : "announcementQuotaReachedWeekTopPlan",
       programDailyCap: "announcementProgramDailyCap",
+      noRecipients: "announcementNoRecipients",
       subscriptionInactive: "announcementSubscriptionInactive",
     }[check.code]
     return { error: t(errorKey), code: check.code, nextAvailableAt: check.nextAvailableAt }

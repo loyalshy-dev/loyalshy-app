@@ -931,7 +931,8 @@
       "announcementSubscriptionInactive": "Your subscription is inactive, so announcements are paused.",
       "announcementFixBilling": "Update billing",
       "announcementConfirmQuotaWeek": "{left, plural, =0 {This uses your last announcement for this week.} one {You'll have # announcement left this week.} other {You'll have # announcements left this week.}}",
-      "announcementConfirmQuotaLifetime": "{left, plural, =0 {This uses your last free announcement.} one {You'll have # free announcement left.} other {You'll have # free announcements left.}}"
+      "announcementConfirmQuotaLifetime": "{left, plural, =0 {This uses your last free announcement.} one {You'll have # free announcement left.} other {You'll have # free announcements left.}}",
+      "announcementNoHolders": "No one has this pass in Apple or Google Wallet yet. Share the program first — announcements only reach wallet holders and won't use your quota until then."
     },
     "programSettings": {
       "title": "Settings",
@@ -1664,7 +1665,9 @@
     "announcementQuotaReachedWeek": "You've used all your announcements for this week. Upgrade your plan to send more.",
     "announcementQuotaReachedFree": "You've used your free announcements. Upgrade your plan to send more.",
     "announcementProgramDailyCap": "This program already sent 3 announcements in the last 24 hours. Try again later.",
-    "announcementSubscriptionInactive": "Your subscription is inactive. Update your billing to send announcements."
+    "announcementSubscriptionInactive": "Your subscription is inactive. Update your billing to send announcements.",
+    "announcementNoRecipients": "No one has this program's pass in a wallet yet, so there's no one to notify. Your quota wasn't used.",
+    "announcementQuotaReachedWeekTopPlan": "You've used all your announcements for this week. More will be available as older ones pass the 7-day mark."
   },
   "admin": {
     "cohorts": {

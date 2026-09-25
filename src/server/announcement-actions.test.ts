@@ -233,6 +233,33 @@ describe("sendProgramAnnouncement", () => {
     expect(result).toEqual({ success: true, recipients: 7, remaining: 1 })
   })
 
+  it("refuses to send (and doesn't consume quota) when no one holds the pass", async () => {
+    mockGetOrganizationForUser.mockResolvedValue({ ...ORG, plan: "FREE" })
+    mockActiveTemplate({ lifetimeSends: 0 })
+    mockDb._tx.passInstance.count.mockResolvedValue(0)
+
+    const { sendProgramAnnouncement } = await import("./announcement-actions")
+    const result = await sendProgramAnnouncement({ templateId: "tpl-1", message: "2x1 today" })
+
+    expect(result).toMatchObject({ error: "announcementNoRecipients", code: "noRecipients" })
+    expect(mockDb._tx.programAnnouncement.create).not.toHaveBeenCalled()
+    expect(mockSendGoogleClassAnnouncement).not.toHaveBeenCalled()
+  })
+
+  it("doesn't suggest a self-serve upgrade when Scale runs out", async () => {
+    mockGetOrganizationForUser.mockResolvedValue({ ...ORG, plan: "SCALE" })
+    const sends = Array.from({ length: 5 }, (_, i) => new Date(Date.now() - (5 - i) * 60_000))
+    mockActiveTemplate({ weeklySends: sends })
+
+    const { sendProgramAnnouncement } = await import("./announcement-actions")
+    const result = await sendProgramAnnouncement({ templateId: "tpl-1", message: "2x1 today" })
+
+    expect(result).toMatchObject({
+      error: "announcementQuotaReachedWeekTopPlan",
+      code: "quotaReached",
+    })
+  })
+
   it("ignores sends that fell out of the rolling 7-day window", async () => {
     // Only in-window rows are returned by the query; one send left on Business
     mockActiveTemplate({ weeklySends: [new Date(Date.now() - DAY)] })
