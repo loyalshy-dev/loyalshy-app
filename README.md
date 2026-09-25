@@ -70,6 +70,12 @@ Open [http://localhost:3000](http://localhost:3000).
 | STAMP_CARD | Collect stamps, earn rewards | `{ action: "stamp" }` |
 | COUPON | Single-use or unlimited redeemable offer | `{ action: "redeem" }` |
 
+## Announcements (Wallet Broadcast)
+
+From a program's **Distribution** page, merchants can push a short message (max 160 chars, e.g. "2x1 today") to everyone holding that program's pass — it appears as a lock-screen notification on both Apple and Google Wallet. Sends are limited per organization by plan and shared across all programs: **Free 2 in total, Pro 1, Business 2, Scale 5 per rolling 7 days, Enterprise unlimited**. On top of that, each program is capped at 3 sends per 24h (Google's notification cap). Google holders are notified via a single class-level `TEXT_AND_NOTIFY` PATCH; Apple holders via APNs push + a `changeMessage` field on the pass. Delivery is best-effort — users can mute a pass's notifications.
+
+> **Gotcha:** Apple only banners *changed* field values, never newly added fields. Passes issued before the announcement feature receive their first broadcast silently (the field appears without a banner); every broadcast after that notifies normally.
+
 ---
 
 ## Google Wallet Setup (Free)
