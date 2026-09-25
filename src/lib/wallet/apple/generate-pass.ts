@@ -68,7 +68,6 @@ export async function generateApplePass(
   const certs = getAppleCertificates()
 
   const design = input.cardDesign
-  const showStrip = design?.showStrip ?? false
   const textColor = design?.textColor ?? null
   // Visual `cardType` is design-level metadata. We keep it for the typed
   // CardDesignData contract, but type-driven behavior below derives from
@@ -76,114 +75,10 @@ export async function generateApplePass(
   // can be unset on programs created outside the studio.
   const cardType: CardType | undefined = design?.cardType as CardType | undefined
 
-  // Determine strip image: dynamic stamp grid or static URL
-  let stripImageUrl: string | null = null
-  let stampGridStripBuffer: Buffer | null = null
-
   const stripFilters = design ? parseStripFilters(design.editorConfig) : parseStripFilters(null)
-  // Stamp grid: check editorConfig flag or legacy patternStyle column
-  const isStampGrid = stripFilters.useStampGrid || design?.patternStyle === "STAMP_GRID"
 
-  // Effective strip colors (independent from card background)
-  const stripPrimary = stripFilters.stripColor1 ?? design?.primaryColor ?? input.brandColor ?? "#1a1a2e"
-  const stripSecondary = stripFilters.stripColor2 ?? design?.secondaryColor ?? input.secondaryColor ?? "#ffffff"
-
-  // Authoritative stamp-vs-coupon flag — drives strip image, layout, and
-  // the changeMessage banner gate. Defaults to STAMP when programType is
-  // unset (legacy / programmatic issuance paths).
-  const isStampType = !input.programType || input.programType === "STAMP_CARD"
-  if (showStrip && isStampGrid && design && isStampType) {
-    // Generate stamp grid strip image dynamically for this enrollment
-    const { generateStampGridImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
-    const stampGridConfig = parseStampGridConfig(design.editorConfig)
-    stampGridStripBuffer = await generateStampGridImage({
-      currentVisits: input.currentCycleVisits,
-      totalVisits: input.visitsRequired,
-      hasReward: input.hasAvailableReward,
-      config: stampGridConfig,
-      primaryColor: stripPrimary,
-      secondaryColor: stripFilters.stampFilledColor ?? stripSecondary,
-      textColor: design.textColor,
-      width: APPLE_STRIP_WIDTH,
-      height: APPLE_STRIP_HEIGHT,
-      stripImageUrl: design.stripImageApple,
-      stripOpacity: stripFilters.stripOpacity,
-      stripGrayscale: stripFilters.stripGrayscale,
-      stripImagePosition: stripFilters.stripImagePosition,
-      stripImageZoom: stripFilters.stripImageZoom,
-    })
-  } else if (showStrip && !isStampGrid && design && isStampType) {
-    // Non-stamp-grid progress: bake progress text into strip image for consistent rendering
-    const progressStyle = (design.progressStyle ?? "NUMBERS") as import("../card-design").ProgressStyle
-    const { generateProgressStripImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
-    const progressLabel = design.customProgressLabel
-      ? design.customProgressLabel
-      : input.hasAvailableReward ? "STATUS" : "PROGRESS"
-    const labelFmt = (design.labelFormat ?? "UPPERCASE") as import("../card-design").LabelFormat
-    const { formatLabel: fmtLabel } = await import("../card-design")
-    const colors = getPassColors(
-      design.primaryColor ?? input.brandColor,
-      design.secondaryColor ?? input.secondaryColor,
-      design.textColor,
-      stripFilters.labelColor
-    )
-    stampGridStripBuffer = await generateProgressStripImage({
-      currentVisits: input.currentCycleVisits,
-      totalVisits: input.visitsRequired,
-      hasReward: input.hasAvailableReward,
-      progressStyle,
-      progressLabel: fmtLabel(progressLabel, labelFmt),
-      primaryColor: stripPrimary,
-      secondaryColor: stripSecondary,
-      textColor: colors.foregroundColor,
-      labelColor: colors.labelColor,
-      width: APPLE_STRIP_WIDTH,
-      height: APPLE_STRIP_HEIGHT,
-      stripImageUrl: design.stripImageApple,
-      stripOpacity: stripFilters.stripOpacity,
-      stripGrayscale: stripFilters.stripGrayscale,
-      stripImagePosition: stripFilters.stripImagePosition,
-      stripImageZoom: stripFilters.stripImageZoom,
-    })
-  } else if (showStrip) {
-    const rawUrl = design?.stripImageApple ?? design?.generatedStripApple ?? null
-    const hasPositionZoom = stripFilters.stripImageZoom !== 1 || stripFilters.stripImagePosition.x !== 0.5 || stripFilters.stripImagePosition.y !== 0.5
-    // Apply filters/position/zoom to static strip images if needed
-    if (rawUrl && (stripFilters.stripOpacity < 1 || stripFilters.stripGrayscale || hasPositionZoom)) {
-      const { default: sharp } = await import("sharp")
-      const { APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, resizeStripImage } = await import("../strip-image")
-      const res = await fetch(rawUrl)
-      if (res.ok) {
-        const rawBuffer = Buffer.from(await res.arrayBuffer())
-        let resized = await resizeStripImage(rawBuffer, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, stripFilters.stripImagePosition, stripFilters.stripImageZoom)
-        if (stripFilters.stripGrayscale) {
-          resized = await sharp(resized).greyscale().png().toBuffer()
-        }
-        if (stripFilters.stripOpacity < 1) {
-          // Reduce alpha then flatten onto primary color background
-          const { data, info } = await sharp(resized).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
-          for (let i = 3; i < data.length; i += 4) {
-            data[i] = Math.round(data[i] * stripFilters.stripOpacity)
-          }
-          const transparentStrip = await sharp(data, {
-            raw: { width: info.width, height: info.height, channels: 4 },
-          }).png().toBuffer()
-          const bgColor = stripPrimary
-          const bg = await sharp({ create: { width: APPLE_STRIP_WIDTH, height: APPLE_STRIP_HEIGHT, channels: 4, background: bgColor } }).png().toBuffer()
-          stampGridStripBuffer = await sharp(bg)
-            .composite([{ input: transparentStrip }])
-            .png()
-            .toBuffer()
-        } else {
-          stampGridStripBuffer = resized
-        }
-      } else {
-        stripImageUrl = rawUrl
-      }
-    } else {
-      stripImageUrl = rawUrl
-    }
-  }
+  // Determine strip image: dynamic stamp grid or static URL
+  const { buffer: stampGridStripBuffer, url: stripImageUrl } = await resolveAppleStrip(input)
 
   const icons = await getIconBuffers(
     input.organizationLogoApple ?? input.organizationLogo,
@@ -255,124 +150,16 @@ export async function generateApplePass(
   })
 
   // ── Build fields based on shape layout ──
-  const progressStyle = design?.progressStyle ?? "NUMBERS"
-  const labelFmt = design?.labelFormat ?? "UPPERCASE"
-  const progressValue = formatProgressValue(
-    input.currentCycleVisits,
-    input.visitsRequired,
-    progressStyle,
-    input.hasAvailableReward
-  )
+  const { fieldData, appleLayout } = buildAppleFrontFields(input)
 
-  const progressLabel = design?.customProgressLabel
-    ? design.customProgressLabel
-    : input.hasAvailableReward ? "STATUS" : "PROGRESS"
-
+  // Back-of-pass date formats (front fields compute their own copies)
   const memberSinceFormatted = input.memberSince.toLocaleDateString("en-US", {
     month: "short",
     year: "numeric",
   })
-
-  // Registration timestamps — short for header, full for back
   const pad = (n: number) => String(n).padStart(2, "0")
   const d = input.memberSince
-  const registeredAtShort = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-  const registeredAtFull = `${registeredAtShort} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-
-  // Custom field labels from editorConfig
-  const customLabels = stripFilters.fieldLabels ?? {}
-  const lbl = (fieldId: string, defaultLabel: string) => {
-    const custom = customLabels[fieldId]
-    return formatLabel(custom ?? defaultLabel, labelFmt)
-  }
-
-  // Field data map — all labels go through formatLabel with custom label overrides.
-  // changeMessage triggers an iOS lock-screen notification when the field's value
-  // changes between fetches (Starbucks-style "tap to view"). %@ is the new value.
-  const fieldData: Record<string, { key: string; label: string; value: string; changeMessage?: string }> = {
-    organization: { key: "organization", label: lbl("organization", "ORG"), value: input.organizationName },
-    memberNumber: { key: "memberNumber", label: lbl("memberNumber", "MEMBER #"), value: `${input.memberNumber ?? "—"}` },
-    progress: {
-      key: "progress",
-      label: lbl("progress", progressLabel),
-      value: progressValue,
-      ...(isStampType ? { changeMessage: "Stamp added! %@" } : {}),
-    },
-    nextReward: { key: "nextReward", label: lbl("nextReward", "NEXT REWARD"), value: input.rewardDescription },
-    // totalVisits is the *primary* changeMessage carrier for stamp cards —
-    // it's in the default secondary layout (so it actually ends up in the
-    // pass) and increments monotonically per stamp. The progress field above
-    // also carries a changeMessage as a fallback for custom layouts that
-    // include it.
-    totalVisits: {
-      key: "totalVisits",
-      label: lbl("totalVisits", "TOTAL VISITS"),
-      value: `${input.totalVisits}`,
-      ...(isStampType ? { changeMessage: "Visit recorded — %@ total" } : {}),
-    },
-    memberSince: { key: "memberSince", label: lbl("memberSince", "SINCE"), value: memberSinceFormatted },
-    registeredAt: { key: "registeredAt", label: lbl("registeredAt", "REGISTERED"), value: registeredAtShort },
-    customerName: { key: "customerName", label: lbl("customerName", "NAME"), value: input.customerName },
-    // COUPON fields. When a single-use coupon has been redeemed, the discount
-    // value flips to "USED" — that value change is what triggers the lock-screen
-    // notification via changeMessage on the next pass fetch.
-    discount: couponConfig?.discountType === "freebie"
-      ? {
-          key: "discount",
-          label: lbl("discount", "OFFER"),
-          value: isSingleUseRedeemed ? "USED" : (couponConfig.couponDescription || "Free item"),
-          ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
-        }
-      : {
-          key: "discount",
-          label: lbl("discount", "DISCOUNT"),
-          value: isSingleUseRedeemed ? "USED" : (couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription),
-          ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
-        },
-    // validUntil is the *primary* changeMessage carrier for coupon single-use
-    // redemption — it's in the default secondary layout (so it ends up in the
-    // pass) and flips from a date to "Redeemed" when single-use is consumed.
-    // The discount field above also carries a changeMessage as a fallback for
-    // custom layouts that include it.
-    validUntil: {
-      key: "validUntil",
-      label: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"),
-      value: isSingleUseRedeemed
-        ? "Redeemed"
-        : (couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"),
-      ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
-    },
-    couponCode: { key: "couponCode", label: lbl("couponCode", "CODE"), value: couponConfig?.couponCode ?? "" },
-    // Generic fields
-    title: { key: "title", label: lbl("title", "TITLE"), value: input.programName ?? "" },
-    description: { key: "description", label: lbl("description", "DESCRIPTION"), value: input.rewardDescription },
-    address: { key: "address", label: lbl("address", "ADDRESS"), value: design?.mapAddress ?? "" },
-  }
-
-  // User-configurable field layout for all pass types
-  // Unified fields list auto-distributes: first 2 → header, rest → secondary
-  // Falls back to legacy headerFields/secondaryFields, then per-type defaults
-  const fieldConfig = getFieldConfig(input.programType ?? "STAMP_CARD")
-  const unifiedFields = stripFilters.fields
-    ?? (stripFilters.headerFields || stripFilters.secondaryFields
-      ? [...(stripFilters.headerFields ?? fieldConfig.defaultHeader), ...(stripFilters.secondaryFields ?? fieldConfig.defaultSecondary)]
-      : null)
-    ?? fieldConfig.defaultFields
-  const appleSplit = splitFieldsForApple(unifiedFields)
-  // When showPrimaryField is on (and not stamp type), second field from the list becomes the primary overlay
-  const useDynamicPrimary = showStrip && !isStampType && stripFilters.showPrimaryField && appleSplit.secondary.length > 0
-  const appleLayout = {
-    header: appleSplit.header,
-    primary: isStampType
-      ? []
-      : useDynamicPrimary
-        ? [appleSplit.secondary[0]]
-        : [],
-    secondary: useDynamicPrimary
-      ? appleSplit.secondary.slice(1)
-      : appleSplit.secondary,
-    auxiliary: appleSplit.auxiliary,
-  }
+  const registeredAtFull = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 
   // Populate header fields
   for (const fieldId of appleLayout.header) {
@@ -594,4 +381,266 @@ export async function generateApplePass(
   }
 
   return pass.getAsBuffer()
+}
+
+// ─── Shared building blocks ─────────────────────────────────
+// Used by generateApplePass and by the staff app's card preview
+// (src/lib/wallet/apple/card-view.ts) so the in-app card can't drift
+// from what Apple Wallet actually shows.
+
+export type AppleFrontField = { key: string; label: string; value: string; changeMessage?: string }
+
+/**
+ * Strip image for the pass: a generated PNG (stamp grid, baked progress, or
+ * filtered/repositioned upload) or, when no processing is needed, the raw
+ * strip URL. Both null when the design has no strip.
+ */
+export async function resolveAppleStrip(
+  input: PassGenerationInput
+): Promise<{ buffer: Buffer | null; url: string | null }> {
+  const design = input.cardDesign
+  const showStrip = design?.showStrip ?? false
+  let stripImageUrl: string | null = null
+  let stampGridStripBuffer: Buffer | null = null
+
+  const stripFilters = design ? parseStripFilters(design.editorConfig) : parseStripFilters(null)
+  // Stamp grid: check editorConfig flag or legacy patternStyle column
+  const isStampGrid = stripFilters.useStampGrid || design?.patternStyle === "STAMP_GRID"
+
+  // Effective strip colors (independent from card background)
+  const stripPrimary = stripFilters.stripColor1 ?? design?.primaryColor ?? input.brandColor ?? "#1a1a2e"
+  const stripSecondary = stripFilters.stripColor2 ?? design?.secondaryColor ?? input.secondaryColor ?? "#ffffff"
+
+  const isStampType = !input.programType || input.programType === "STAMP_CARD"
+  if (showStrip && isStampGrid && design && isStampType) {
+    // Generate stamp grid strip image dynamically for this enrollment
+    const { generateStampGridImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
+    const stampGridConfig = parseStampGridConfig(design.editorConfig)
+    stampGridStripBuffer = await generateStampGridImage({
+      currentVisits: input.currentCycleVisits,
+      totalVisits: input.visitsRequired,
+      hasReward: input.hasAvailableReward,
+      config: stampGridConfig,
+      primaryColor: stripPrimary,
+      secondaryColor: stripFilters.stampFilledColor ?? stripSecondary,
+      textColor: design.textColor,
+      width: APPLE_STRIP_WIDTH,
+      height: APPLE_STRIP_HEIGHT,
+      stripImageUrl: design.stripImageApple,
+      stripOpacity: stripFilters.stripOpacity,
+      stripGrayscale: stripFilters.stripGrayscale,
+      stripImagePosition: stripFilters.stripImagePosition,
+      stripImageZoom: stripFilters.stripImageZoom,
+    })
+  } else if (showStrip && !isStampGrid && design && isStampType) {
+    // Non-stamp-grid progress: bake progress text into strip image for consistent rendering
+    const progressStyle = (design.progressStyle ?? "NUMBERS") as import("../card-design").ProgressStyle
+    const { generateProgressStripImage, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT } = await import("../strip-image")
+    const progressLabel = design.customProgressLabel
+      ? design.customProgressLabel
+      : input.hasAvailableReward ? "STATUS" : "PROGRESS"
+    const labelFmt = (design.labelFormat ?? "UPPERCASE") as import("../card-design").LabelFormat
+    const { formatLabel: fmtLabel } = await import("../card-design")
+    const colors = getPassColors(
+      design.primaryColor ?? input.brandColor,
+      design.secondaryColor ?? input.secondaryColor,
+      design.textColor,
+      stripFilters.labelColor
+    )
+    stampGridStripBuffer = await generateProgressStripImage({
+      currentVisits: input.currentCycleVisits,
+      totalVisits: input.visitsRequired,
+      hasReward: input.hasAvailableReward,
+      progressStyle,
+      progressLabel: fmtLabel(progressLabel, labelFmt),
+      primaryColor: stripPrimary,
+      secondaryColor: stripSecondary,
+      textColor: colors.foregroundColor,
+      labelColor: colors.labelColor,
+      width: APPLE_STRIP_WIDTH,
+      height: APPLE_STRIP_HEIGHT,
+      stripImageUrl: design.stripImageApple,
+      stripOpacity: stripFilters.stripOpacity,
+      stripGrayscale: stripFilters.stripGrayscale,
+      stripImagePosition: stripFilters.stripImagePosition,
+      stripImageZoom: stripFilters.stripImageZoom,
+    })
+  } else if (showStrip) {
+    const rawUrl = design?.stripImageApple ?? design?.generatedStripApple ?? null
+    const hasPositionZoom = stripFilters.stripImageZoom !== 1 || stripFilters.stripImagePosition.x !== 0.5 || stripFilters.stripImagePosition.y !== 0.5
+    // Apply filters/position/zoom to static strip images if needed
+    if (rawUrl && (stripFilters.stripOpacity < 1 || stripFilters.stripGrayscale || hasPositionZoom)) {
+      const { default: sharp } = await import("sharp")
+      const { APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, resizeStripImage } = await import("../strip-image")
+      const res = await fetch(rawUrl)
+      if (res.ok) {
+        const rawBuffer = Buffer.from(await res.arrayBuffer())
+        let resized = await resizeStripImage(rawBuffer, APPLE_STRIP_WIDTH, APPLE_STRIP_HEIGHT, stripFilters.stripImagePosition, stripFilters.stripImageZoom)
+        if (stripFilters.stripGrayscale) {
+          resized = await sharp(resized).greyscale().png().toBuffer()
+        }
+        if (stripFilters.stripOpacity < 1) {
+          // Reduce alpha then flatten onto primary color background
+          const { data, info } = await sharp(resized).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+          for (let i = 3; i < data.length; i += 4) {
+            data[i] = Math.round(data[i] * stripFilters.stripOpacity)
+          }
+          const transparentStrip = await sharp(data, {
+            raw: { width: info.width, height: info.height, channels: 4 },
+          }).png().toBuffer()
+          const bgColor = stripPrimary
+          const bg = await sharp({ create: { width: APPLE_STRIP_WIDTH, height: APPLE_STRIP_HEIGHT, channels: 4, background: bgColor } }).png().toBuffer()
+          stampGridStripBuffer = await sharp(bg)
+            .composite([{ input: transparentStrip }])
+            .png()
+            .toBuffer()
+        } else {
+          stampGridStripBuffer = resized
+        }
+      } else {
+        stripImageUrl = rawUrl
+      }
+    } else {
+      stripImageUrl = rawUrl
+    }
+  }
+
+  return { buffer: stampGridStripBuffer, url: stripImageUrl }
+}
+
+/**
+ * Front-of-pass fields (header / primary / secondary / auxiliary) exactly as
+ * they are written into pass.json.
+ */
+export function buildAppleFrontFields(input: PassGenerationInput): {
+  fieldData: Record<string, AppleFrontField>
+  appleLayout: { header: string[]; primary: string[]; secondary: string[]; auxiliary: string[] }
+} {
+  const design = input.cardDesign
+  const showStrip = design?.showStrip ?? false
+  const stripFilters = design ? parseStripFilters(design.editorConfig) : parseStripFilters(null)
+  const isStampType = !input.programType || input.programType === "STAMP_CARD"
+  const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null
+  const isCouponRedeemed = input.programType === "COUPON" && input.isRedeemed === true
+  const isSingleUseRedeemed = isCouponRedeemed && couponConfig?.redemptionLimit !== "unlimited"
+
+  const progressStyle = design?.progressStyle ?? "NUMBERS"
+  const labelFmt = design?.labelFormat ?? "UPPERCASE"
+  const progressValue = formatProgressValue(
+    input.currentCycleVisits,
+    input.visitsRequired,
+    progressStyle,
+    input.hasAvailableReward
+  )
+
+  const progressLabel = design?.customProgressLabel
+    ? design.customProgressLabel
+    : input.hasAvailableReward ? "STATUS" : "PROGRESS"
+
+  const memberSinceFormatted = input.memberSince.toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  })
+
+  // Registration timestamps — short for header, full for back
+  const pad = (n: number) => String(n).padStart(2, "0")
+  const d = input.memberSince
+  const registeredAtShort = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+
+  // Custom field labels from editorConfig
+  const customLabels = stripFilters.fieldLabels ?? {}
+  const lbl = (fieldId: string, defaultLabel: string) => {
+    const custom = customLabels[fieldId]
+    return formatLabel(custom ?? defaultLabel, labelFmt)
+  }
+
+  // Field data map — all labels go through formatLabel with custom label overrides.
+  // changeMessage triggers an iOS lock-screen notification when the field's value
+  // changes between fetches (Starbucks-style "tap to view"). %@ is the new value.
+  const fieldData: Record<string, { key: string; label: string; value: string; changeMessage?: string }> = {
+    organization: { key: "organization", label: lbl("organization", "ORG"), value: input.organizationName },
+    memberNumber: { key: "memberNumber", label: lbl("memberNumber", "MEMBER #"), value: `${input.memberNumber ?? "—"}` },
+    progress: {
+      key: "progress",
+      label: lbl("progress", progressLabel),
+      value: progressValue,
+      ...(isStampType ? { changeMessage: "Stamp added! %@" } : {}),
+    },
+    nextReward: { key: "nextReward", label: lbl("nextReward", "NEXT REWARD"), value: input.rewardDescription },
+    // totalVisits is the *primary* changeMessage carrier for stamp cards —
+    // it's in the default secondary layout (so it actually ends up in the
+    // pass) and increments monotonically per stamp. The progress field above
+    // also carries a changeMessage as a fallback for custom layouts that
+    // include it.
+    totalVisits: {
+      key: "totalVisits",
+      label: lbl("totalVisits", "TOTAL VISITS"),
+      value: `${input.totalVisits}`,
+      ...(isStampType ? { changeMessage: "Visit recorded — %@ total" } : {}),
+    },
+    memberSince: { key: "memberSince", label: lbl("memberSince", "SINCE"), value: memberSinceFormatted },
+    registeredAt: { key: "registeredAt", label: lbl("registeredAt", "REGISTERED"), value: registeredAtShort },
+    customerName: { key: "customerName", label: lbl("customerName", "NAME"), value: input.customerName },
+    // COUPON fields. When a single-use coupon has been redeemed, the discount
+    // value flips to "USED" — that value change is what triggers the lock-screen
+    // notification via changeMessage on the next pass fetch.
+    discount: couponConfig?.discountType === "freebie"
+      ? {
+          key: "discount",
+          label: lbl("discount", "OFFER"),
+          value: isSingleUseRedeemed ? "USED" : (couponConfig.couponDescription || "Free item"),
+          ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
+        }
+      : {
+          key: "discount",
+          label: lbl("discount", "DISCOUNT"),
+          value: isSingleUseRedeemed ? "USED" : (couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription),
+          ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
+        },
+    // validUntil is the *primary* changeMessage carrier for coupon single-use
+    // redemption — it's in the default secondary layout (so it ends up in the
+    // pass) and flips from a date to "Redeemed" when single-use is consumed.
+    // The discount field above also carries a changeMessage as a fallback for
+    // custom layouts that include it.
+    validUntil: {
+      key: "validUntil",
+      label: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"),
+      value: isSingleUseRedeemed
+        ? "Redeemed"
+        : (couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"),
+      ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
+    },
+    couponCode: { key: "couponCode", label: lbl("couponCode", "CODE"), value: couponConfig?.couponCode ?? "" },
+    // Generic fields
+    title: { key: "title", label: lbl("title", "TITLE"), value: input.programName ?? "" },
+    description: { key: "description", label: lbl("description", "DESCRIPTION"), value: input.rewardDescription },
+    address: { key: "address", label: lbl("address", "ADDRESS"), value: design?.mapAddress ?? "" },
+  }
+
+  // User-configurable field layout for all pass types
+  // Unified fields list auto-distributes: first 2 → header, rest → secondary
+  // Falls back to legacy headerFields/secondaryFields, then per-type defaults
+  const fieldConfig = getFieldConfig(input.programType ?? "STAMP_CARD")
+  const unifiedFields = stripFilters.fields
+    ?? (stripFilters.headerFields || stripFilters.secondaryFields
+      ? [...(stripFilters.headerFields ?? fieldConfig.defaultHeader), ...(stripFilters.secondaryFields ?? fieldConfig.defaultSecondary)]
+      : null)
+    ?? fieldConfig.defaultFields
+  const appleSplit = splitFieldsForApple(unifiedFields)
+  // When showPrimaryField is on (and not stamp type), second field from the list becomes the primary overlay
+  const useDynamicPrimary = showStrip && !isStampType && stripFilters.showPrimaryField && appleSplit.secondary.length > 0
+  const appleLayout = {
+    header: appleSplit.header,
+    primary: isStampType
+      ? []
+      : useDynamicPrimary
+        ? [appleSplit.secondary[0]]
+        : [],
+    secondary: useDynamicPrimary
+      ? appleSplit.secondary.slice(1)
+      : appleSplit.secondary,
+    auxiliary: appleSplit.auxiliary,
+  }
+
+  return { fieldData, appleLayout }
 }

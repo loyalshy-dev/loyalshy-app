@@ -1077,7 +1077,8 @@
         "MEMBER_ROLE_CHANGED": "Role changed",
         "HANDOFF_LINK_CREATED": "Handoff link created",
         "OWNERSHIP_CLAIMED": "Ownership claimed",
-        "ACCESS_REQUESTED": "Access requested"
+        "ACCESS_REQUESTED": "Access requested",
+        "STAMP_UNDONE": "Stamp undone"
       }
     },
     "visitsChart": {

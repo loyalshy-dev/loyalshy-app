@@ -27,6 +27,7 @@ const ACTIONS = [
   "HANDOFF_LINK_CREATED",
   "OWNERSHIP_CLAIMED",
   "ACCESS_REQUESTED",
+  "STAMP_UNDONE",
 ] as const
 
 type Props = {

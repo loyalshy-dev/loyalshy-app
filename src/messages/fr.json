@@ -1077,7 +1077,8 @@
         "MEMBER_ROLE_CHANGED": "Rôle modifié",
         "HANDOFF_LINK_CREATED": "Lien de transfert créé",
         "OWNERSHIP_CLAIMED": "Propriété réclamée",
-        "ACCESS_REQUESTED": "Accès demandé"
+        "ACCESS_REQUESTED": "Accès demandé",
+        "STAMP_UNDONE": "Tampon annulé"
       }
     },
     "visitsChart": {

@@ -1,6 +1,5 @@
 "use server"
 
-import { randomUUID } from "crypto"
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { getTranslations } from "next-intl/server"
@@ -14,12 +13,8 @@ import {
 import { buildCardUrl } from "@/lib/card-access"
 import { buildPassIssuedEmailHtml, getEmailFrom, buildWalletDownloadUrl } from "@/lib/email-templates"
 import { generateApplePassForEmail } from "@/lib/wallet/generate-pass-for-email"
+import { createPassInstanceForContact, sendPassIssuedEmail, PASS_TYPE_LABELS } from "@/lib/issue-pass"
 import { sanitizeText } from "@/lib/sanitize"
-import {
-  parseCouponConfig,
-  parseMinigameConfig,
-  weightedRandomPrize,
-} from "@/lib/pass-config"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -55,10 +50,7 @@ const issuePassSchema = z.object({
 
 // ─── Pass Type Labels ───────────────────────────────────────
 
-const PASS_TYPE_LABELS: Record<string, string> = {
-  STAMP_CARD: "Stamp Card",
-  COUPON: "Coupon",
-}
+// PASS_TYPE_LABELS lives in @/lib/issue-pass (shared with the staff API)
 
 // ─── Search Contacts for Direct Issue ───────────────────────
 
@@ -194,138 +186,30 @@ export async function issuePassToContacts(
       continue
     }
 
-    // Create pass instance with type-specific initialization
-    const walletPassId = randomUUID()
-    const templateConfig = (template.config as Record<string, unknown>) ?? {}
-    const rewardExpiryDays = (templateConfig.rewardExpiryDays as number) ?? 90
-
-    const instanceDataObj: Record<string, unknown> = {
-      currentCycleVisits: 0,
-      totalInteractions: 0,
-    }
-
-    const expiresAt: Date | null = null
-
-    // Atomic creation of pass instance + coupon reward. The unique constraint
-    // on (contactId, passTemplateId) is the real race guard — the upfront
-    // findUnique above is just a fast path. If a concurrent caller wins the
-    // race, the create throws P2002 and we report "already_exists".
-    let passInstance: { id: string }
-    try {
-      passInstance = await db.$transaction(async (tx) => {
-        const pi = await tx.passInstance.create({
-          data: {
-            contactId: contact.id,
-            passTemplateId: template.id,
-            walletPassId,
-            data: instanceDataObj as import("@prisma/client").Prisma.InputJsonValue,
-            ...(expiresAt ? { expiresAt } : {}),
-          },
-          select: { id: true },
-        })
-
-        if (template.passType === "COUPON") {
-          const couponConfig = parseCouponConfig(template.config)
-          const couponExpiresAt = couponConfig?.validUntil
-            ? new Date(couponConfig.validUntil)
-            : rewardExpiryDays > 0
-              ? new Date(Date.now() + rewardExpiryDays * 86_400_000)
-              : new Date(Date.now() + 365 * 86_400_000)
-
-          const mgConfig = parseMinigameConfig(template.config)
-          const hasPrizes = mgConfig?.enabled && mgConfig.prizes?.length
-          const selectedPrize = hasPrizes ? weightedRandomPrize(mgConfig.prizes!) : null
-
-          await tx.reward.create({
-            data: {
-              contactId: contact.id,
-              organizationId: organization.id,
-              passTemplateId: template.id,
-              passInstanceId: pi.id,
-              status: "AVAILABLE",
-              expiresAt: couponExpiresAt,
-              ...(selectedPrize ? { description: selectedPrize, revealedAt: null } : {}),
-            },
-          })
-        }
-
-        return pi
+    const created = await createPassInstanceForContact({
+      organizationId: organization.id,
+      template,
+      contactId: contact.id,
+    })
+    if (created.status === "already_exists") {
+      skippedCount++
+      results.push({
+        contactId: contact.id,
+        contactName: contact.fullName,
+        status: "already_exists",
       })
-    } catch (err) {
-      if (err && typeof err === "object" && "code" in err && (err as { code: string }).code === "P2002") {
-        skippedCount++
-        results.push({
-          contactId: contact.id,
-          contactName: contact.fullName,
-          status: "already_exists",
-        })
-        continue
-      }
-      throw err
+      continue
     }
+    const passInstance = { id: created.id }
 
     // Send email notification if contact has email
     if (contact.email) {
-      const cardUrl = buildCardUrl(organization.slug, passInstance.id)
-
-      const googleWalletUrl = buildWalletDownloadUrl(passInstance.id, "google")
-      const passTypeLabel = PASS_TYPE_LABELS[template.passType] ?? "Pass"
-
-      try {
-        // Generate Apple pass and upload to R2 for direct wallet add from email
-        const applePass = await generateApplePassForEmail(passInstance.id)
-
-        const idempotencyKey = `pass-issued:${passInstance.id}`
-        if (process.env.TRIGGER_SECRET_KEY) {
-          const { tasks } = await import("@trigger.dev/sdk")
-          await tasks.trigger(
-            "send-pass-issued-email",
-            {
-              email: contact.email,
-              contactName: contact.fullName,
-              organizationName: organization.name,
-              templateName: template.name,
-              passTypeLabel,
-              cardUrl,
-              appleWalletUrl: applePass?.url,
-              googleWalletUrl,
-              idempotencyKey,
-            },
-            { idempotencyKey },
-          )
-        } else {
-          const { Resend } = await import("resend")
-          const resend = new Resend(process.env.RESEND_API_KEY)
-          const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
-
-          const { error: resendError } = await resend.emails.send(
-            {
-              from: getEmailFrom(),
-              to: contact.email,
-              subject: `Your ${passTypeLabel} from ${organization.name}`,
-              html: buildPassIssuedEmailHtml({
-                contactName: contact.fullName,
-                organizationName: organization.name,
-                templateName: template.name,
-                passTypeLabel,
-                cardUrl: `${baseUrl}${cardUrl}`,
-                appleWalletUrl: applePass?.url,
-                googleWalletUrl: `${baseUrl}${googleWalletUrl}`,
-              }),
-            },
-            { idempotencyKey },
-          )
-          if (resendError) {
-            console.error("Resend error (direct issue):", resendError.message)
-          }
-        }
-      } catch (err) {
-        console.error(
-          "Failed to send pass issued email:",
-          err instanceof Error ? err.message : "Unknown error"
-        )
-        // Don't fail the whole operation — pass was still created
-      }
+      await sendPassIssuedEmail({
+        passInstanceId: passInstance.id,
+        contact: { fullName: contact.fullName, email: contact.email },
+        organization,
+        template,
+      })
     }
 
     issuedCount++

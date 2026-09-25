@@ -42,70 +42,72 @@ function isPaginated<T>(r: HandlerResult<T>): r is { data: T; pagination: Pagina
  *     })
  *   }
  */
+/**
+ * Bearer token → session → active org membership. Returns the context, or
+ * the 401/403 response to send. Shared by sessionHandler (JSON envelope)
+ * and sessionRawHandler (binary responses such as card strip PNGs).
+ */
+async function authenticate(
+  req: NextRequest,
+  requestId: string,
+): Promise<{ ctx: SessionContext } | { response: NextResponse }> {
+  const deny = (status: 401 | 403, title: string, detail: string) => ({
+    response: withCorsHeaders(
+      NextResponse.json({ type: "about:blank", status, title, detail }, { status }),
+    ),
+  })
+
+  const auth = req.headers.get("authorization")
+  if (!auth || !auth.startsWith("Bearer ")) {
+    return deny(401, "Unauthorized", "Missing Authorization header")
+  }
+  const token = auth.slice(7)
+
+  const session = await db.session.findUnique({
+    where: { token },
+    select: {
+      expiresAt: true,
+      activeOrganizationId: true,
+      user: { select: { id: true } },
+    },
+  })
+
+  if (!session || session.expiresAt < new Date()) {
+    return deny(401, "Unauthorized", "Invalid or expired session")
+  }
+
+  if (!session.activeOrganizationId) {
+    return deny(403, "Forbidden", "No active organization selected")
+  }
+
+  const member = await db.member.findFirst({
+    where: { userId: session.user.id, organizationId: session.activeOrganizationId },
+    select: { role: true },
+  })
+
+  if (!member) {
+    return deny(403, "Forbidden", "Not a member of this organization")
+  }
+
+  return {
+    ctx: {
+      userId: session.user.id,
+      organizationId: session.activeOrganizationId,
+      role: member.role,
+      requestId,
+    },
+  }
+}
+
 export async function sessionHandler<T>(
   req: NextRequest,
   handler: Handler<T>,
 ): Promise<NextResponse> {
   const requestId = randomUUID()
   try {
-    const auth = req.headers.get("authorization")
-    if (!auth || !auth.startsWith("Bearer ")) {
-      return withCorsHeaders(
-        NextResponse.json(
-          { type: "about:blank", status: 401, title: "Unauthorized", detail: "Missing Authorization header" },
-          { status: 401 },
-        ),
-      )
-    }
-    const token = auth.slice(7)
-
-    const session = await db.session.findUnique({
-      where: { token },
-      select: {
-        expiresAt: true,
-        activeOrganizationId: true,
-        user: { select: { id: true } },
-      },
-    })
-
-    if (!session || session.expiresAt < new Date()) {
-      return withCorsHeaders(
-        NextResponse.json(
-          { type: "about:blank", status: 401, title: "Unauthorized", detail: "Invalid or expired session" },
-          { status: 401 },
-        ),
-      )
-    }
-
-    if (!session.activeOrganizationId) {
-      return withCorsHeaders(
-        NextResponse.json(
-          { type: "about:blank", status: 403, title: "Forbidden", detail: "No active organization selected" },
-          { status: 403 },
-        ),
-      )
-    }
-
-    const member = await db.member.findFirst({
-      where: { userId: session.user.id, organizationId: session.activeOrganizationId },
-      select: { role: true },
-    })
-
-    if (!member) {
-      return withCorsHeaders(
-        NextResponse.json(
-          { type: "about:blank", status: 403, title: "Forbidden", detail: "Not a member of this organization" },
-          { status: 403 },
-        ),
-      )
-    }
-
-    const ctx: SessionContext = {
-      userId: session.user.id,
-      organizationId: session.activeOrganizationId,
-      role: member.role,
-      requestId,
-    }
+    const authResult = await authenticate(req, requestId)
+    if ("response" in authResult) return authResult.response
+    const ctx = authResult.ctx
 
     const result = await handler(ctx, req)
 
@@ -118,7 +120,39 @@ export async function sessionHandler<T>(
     if (err instanceof ApiError) {
       return withCorsHeaders(
         NextResponse.json(
-          { type: "about:blank", status: err.status, title: err.title, detail: err.detail, requestId },
+          { type: "about:blank", status: err.status, title: err.title, detail: err.detail, ...err.extra, requestId },
+          { status: err.status },
+        ),
+      )
+    }
+    console.error(`[api/v1] [${requestId}]`, err instanceof Error ? err.message : err)
+    return withCorsHeaders(
+      NextResponse.json(
+        { type: "about:blank", status: 500, title: "Internal Server Error", detail: "Unexpected error", requestId },
+        { status: 500 },
+      ),
+    )
+  }
+}
+
+/**
+ * Like sessionHandler, but the handler returns its own Response (images and
+ * other non-JSON bodies). Errors still come back as RFC 7807 JSON.
+ */
+export async function sessionRawHandler(
+  req: NextRequest,
+  handler: (ctx: SessionContext, req: NextRequest) => Promise<Response>,
+): Promise<Response> {
+  const requestId = randomUUID()
+  try {
+    const authResult = await authenticate(req, requestId)
+    if ("response" in authResult) return authResult.response
+    return await handler(authResult.ctx, req)
+  } catch (err) {
+    if (err instanceof ApiError) {
+      return withCorsHeaders(
+        NextResponse.json(
+          { type: "about:blank", status: err.status, title: err.title, detail: err.detail, ...err.extra, requestId },
           { status: err.status },
         ),
       )
@@ -202,7 +236,7 @@ export async function sessionHandlerNoOrg<T>(
     if (err instanceof ApiError) {
       return withCorsHeaders(
         NextResponse.json(
-          { type: "about:blank", status: err.status, title: err.title, detail: err.detail, requestId },
+          { type: "about:blank", status: err.status, title: err.title, detail: err.detail, ...err.extra, requestId },
           { status: err.status },
         ),
       )
@@ -223,8 +257,23 @@ export class ApiError extends Error {
     public status: number,
     public title: string,
     public detail: string,
+    /** Extra machine-readable members merged into the problem body (e.g. `code`). */
+    public extra?: Record<string, unknown>,
   ) {
     super(detail)
+  }
+}
+
+const ROLE_RANK: Record<string, number> = { member: 1, admin: 2, owner: 3 }
+
+/**
+ * Org-role gate for staff-app routes, same hierarchy as the DAL's
+ * assertOrganizationRole (owner > admin > member) but throwing a 403
+ * ApiError instead of redirecting.
+ */
+export function requireRole(ctx: SessionContext, minRole: "admin" | "owner"): void {
+  if ((ROLE_RANK[ctx.role] ?? 0) < ROLE_RANK[minRole]) {
+    throw forbidden(`Requires the ${minRole} role`)
   }
 }
 

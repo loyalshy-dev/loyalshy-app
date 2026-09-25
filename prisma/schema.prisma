@@ -33,6 +33,7 @@ enum OrgAuditAction {
   HANDOFF_LINK_CREATED @map("handoff_link_created")
   OWNERSHIP_CLAIMED    @map("ownership_claimed")
   ACCESS_REQUESTED     @map("access_requested")
+  STAMP_UNDONE         @map("stamp_undone")
 
   @@map("org_audit_action")
 }
