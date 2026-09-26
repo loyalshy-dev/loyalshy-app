@@ -84,7 +84,7 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
   - `GET /api/v1/passes` (filter by contactId/templateId/status, paginated), `GET /api/v1/passes/[id]` (looks up by `id` OR `walletPassId` since wallet QRs encode `walletPassId`)
   - `POST /api/v1/passes/[id]/actions` — only `{action:"stamp"}` (STAMP_CARD pass) and `{action:"redeem"}` (COUPON pass). All other action types from the old API are gone.
   - `POST /api/v1/rewards/[id]/redeem`
-  - `GET /api/v1/interactions` (paginated)
+  - `GET /api/v1/interactions` (newest first; keyset paging: every response has `meta.pagination.nextCursor`, continue with `?cursor=`; `?page=` offset paging still honoured for older staff builds — `src/lib/interaction-cursor.ts`)
   - `GET /api/v1/templates` (filter by status)
   - **Added 2026-09-25 (STAFF-APP-FEATURES):**
     - `GET /api/v1/passes/[id]/card` + `/card/strip`, `GET /api/v1/templates/[id]/card` + `/card/strip`: the front of the Apple Wallet pass as data (`AppleCardView`) plus the strip PNG, built by the SAME helpers as `generateApplePass` (`resolveAppleStrip`, `buildAppleFrontFields` in `src/lib/wallet/apple/generate-pass.ts`; loaders in `card-view.ts`, which mirror the Apple update route). Strip routes use `sessionRawHandler` (binary body) and are immutable per `?v=stripVersion`

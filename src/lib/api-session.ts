@@ -10,7 +10,13 @@ export type SessionContext = {
   requestId: string
 }
 
-export type Pagination = { page: number; pageSize: number; total: number }
+export type Pagination = {
+  page: number
+  pageSize: number
+  total: number
+  /** Keyset continuation for feeds that support it; null = no more rows. */
+  nextCursor?: string | null
+}
 
 export type HandlerResult<T> = T | { data: T; pagination: Pagination }
 

@@ -3,7 +3,7 @@ import "server-only"
 import { db } from "@/lib/db"
 import { resolveCardDesign, parseStripFilters } from "../card-design"
 import { parseCouponConfig, parseTemplateAnnouncement } from "@/lib/pass-config"
-import { getPassColors } from "./colors"
+import { getPassColors, hexToPasskitRgb } from "./colors"
 import {
   buildAppleFrontFields,
   resolveAppleStrip,
@@ -23,6 +23,13 @@ export type AppleCardView = {
   backgroundColor: string
   foregroundColor: string
   labelColor: string
+  /**
+   * The color the program's stamps are printed in (the strip's filled
+   * stamp color, falling back through the strip's secondary color to the
+   * organization's). The staff app inks its own stamp grid and success
+   * moment with it, so the counter matches the customer's card.
+   */
+  accentColor: string
   logoUrl: string | null
   logoZoom: number
   hasStrip: boolean
@@ -195,6 +202,12 @@ export function toAppleCardView(input: PassGenerationInput): AppleCardView {
     design?.textColor ?? null,
     stripFilters.labelColor,
   )
+  const accentSource =
+    stripFilters.stampFilledColor ??
+    stripFilters.stripColor2 ??
+    design?.secondaryColor ??
+    input.secondaryColor ??
+    "#ffffff"
   const { fieldData, appleLayout } = buildAppleFrontFields(input)
   const pick = (ids: string[]) =>
     ids.flatMap((id) => {
@@ -211,6 +224,7 @@ export function toAppleCardView(input: PassGenerationInput): AppleCardView {
     backgroundColor: colors.backgroundColor,
     foregroundColor: colors.foregroundColor,
     labelColor: colors.labelColor,
+    accentColor: /^#?[0-9a-f]{6}$/i.test(accentSource) ? hexToPasskitRgb(accentSource) : accentSource,
     logoUrl: input.organizationLogoApple ?? input.organizationLogo,
     logoZoom: stripFilters.logoAppleZoom,
     hasStrip: design?.showStrip ?? false,
