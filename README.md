@@ -72,7 +72,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Announcements (Wallet Broadcast)
 
-From a program's **Distribution** page, merchants can push a short message (max 160 chars, e.g. "2x1 today") to everyone holding that program's pass — it appears as a lock-screen notification on both Apple and Google Wallet. Sends are limited per organization by plan and shared across all programs: **Free 2 in total, Pro 1, Business 2, Scale 5 per rolling 7 days, Enterprise unlimited**. On top of that, each program is capped at 3 sends per 24h (Google's notification cap). Google holders are notified via a single class-level `TEXT_AND_NOTIFY` PATCH; Apple holders via APNs push + a `changeMessage` field on the pass. Delivery is best-effort — users can mute a pass's notifications.
+From a program's **Distribution** page (or the staff app's **Announcement** screen, for owners and Program managers), merchants can push a short message (max 160 chars, e.g. "2x1 today") to everyone holding that program's pass — it appears as a lock-screen notification on both Apple and Google Wallet. Sends are limited per organization by plan and shared across all programs: **Free 2 in total, Pro 1, Business 2, Scale 5 per rolling 7 days, Enterprise unlimited**. On top of that, each program is capped at 3 sends per 24h (Google's notification cap). Google holders are notified via a single class-level `TEXT_AND_NOTIFY` PATCH; Apple holders via APNs push + a `changeMessage` field on the pass. Delivery is best-effort — users can mute a pass's notifications.
 
 > **Gotcha:** Apple only banners *changed* field values, never newly added fields. Passes issued before the announcement feature receive their first broadcast silently (the field appears without a banner); every broadcast after that notifies normally.
 
@@ -141,11 +141,20 @@ There is **no public REST API** (removed in the 2026-04-27 pivot — no API keys
 |----------|---------|-------------|
 | `/auth/*` | POST/GET | Sign-in flows (email, Google, QR device pairing, invite), `me`, `select-org` |
 | `/contacts`, `/contacts/:id` | GET | Contact search + detail |
+| `/contacts` | POST | Counter signup: find-or-create the contact, issue the program's pass, email it with Add to Wallet links (plan contact limit enforced) |
 | `/passes`, `/passes/:id` | GET | Pass instances (lookup by id or walletPassId) |
 | `/passes/:id/actions` | POST | `{action:"stamp"}` or `{action:"redeem"}` only |
+| `/passes/:id/undo-stamp` | POST | Undo the latest stamp (within 10 min; own stamps unless admin/owner; audit-logged) |
+| `/passes/:id/card`, `/passes/:id/card/strip` | GET | The pass's Apple Wallet front as data + its strip PNG (same code as the real pass) |
+| `/templates/:id/card`, `/templates/:id/card/strip` | GET | A fresh program card, for previews |
+| `/rewards` | GET | Pending stamp-card rewards, soonest-expiring first |
 | `/rewards/:id/redeem` | POST | Redeem an earned reward |
+| `/stats` | GET | Today in the org's time zone: stamps, rewards given, new customers (7 days), pending rewards |
+| `/announcements` | GET / POST | Wallet broadcast quota + reach / send (owner and Program manager only) |
 | `/interactions` | GET | Interaction feed |
 | `/templates` | GET | Program list |
+
+Errors are RFC 7807 problem bodies; conflicts carry a machine-readable `code` (e.g. `alreadyHasPass`, `quotaReached`, `rewardAlreadyUsed`).
 
 ## Monitoring
 
