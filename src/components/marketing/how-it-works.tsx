@@ -2,7 +2,7 @@ import Image from "next/image"
 import { Palette, Send, ScanLine } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { getTranslations } from "next-intl/server"
-import { Stagger, StaggerItem } from "./motion"
+import { FadeIn, Stagger, StaggerItem } from "./motion"
 import { StepVideo } from "./step-video"
 
 /* ─── Step type ──────────────────────────────────────────────────── */
@@ -72,6 +72,23 @@ export async function HowItWorks() {
       style={{ background: "var(--mk-surface)" }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <FadeIn>
+          <div className="mx-auto max-w-2xl text-center mb-12 sm:mb-16">
+            <h2
+              className="font-display mk-clamp-h2 font-black tracking-tight leading-tight text-balance mb-4"
+              style={{ color: "var(--mk-text)" }}
+            >
+              {t("title")}
+            </h2>
+            <p
+              className="text-[16px] max-w-md mx-auto"
+              style={{ color: "var(--mk-text-muted)" }}
+            >
+              {t("subtitle")}
+            </p>
+          </div>
+        </FadeIn>
+
         <Stagger className="grid grid-cols-1 gap-12 md:grid-cols-3" stagger={0.15}>
           {steps.map((step, i) => {
             const Icon = step.icon
