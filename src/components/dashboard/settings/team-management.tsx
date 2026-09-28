@@ -263,7 +263,7 @@ export function TeamManagement({
               </div>
               <div className="flex items-center gap-3">
                 <Badge
-                  variant={member.role === "owner" ? "default" : "secondary"}
+                  variant={member.role === "owner" ? "ink" : "secondary"}
                   className="text-[10px] font-medium"
                 >
                   {member.role === "owner" ? (

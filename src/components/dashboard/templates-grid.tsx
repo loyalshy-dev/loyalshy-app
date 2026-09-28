@@ -106,7 +106,7 @@ export function TemplatesGridView({
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-2xl font-semibold tracking-tight">
             {t("title")}
           </h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">
@@ -179,6 +179,7 @@ export function TemplatesGridView({
           </p>
           {isOwner && typeFilter === "ALL" && (
             <Button
+              variant="outline"
               size="sm"
               className="mt-4 gap-1.5"
               onClick={() => setShowCreate(true)}

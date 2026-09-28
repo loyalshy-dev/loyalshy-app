@@ -44,7 +44,7 @@ function ResetPasswordForm() {
     return (
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{t("invalidTitle")}</CardTitle>
+          <CardTitle className="font-display text-2xl font-bold">{t("invalidTitle")}</CardTitle>
           <CardDescription>{t("invalidDescription")}</CardDescription>
         </CardHeader>
         <CardFooter className="justify-center">
@@ -101,7 +101,7 @@ function ResetPasswordForm() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">{t("title")}</CardTitle>
+        <CardTitle className="font-display text-2xl font-bold">{t("title")}</CardTitle>
         <CardDescription>{t("subtitle")}</CardDescription>
       </CardHeader>
       <CardContent>

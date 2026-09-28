@@ -27,7 +27,7 @@ export default async function TermsPage() {
             &larr; Back to Loyalshy
           </Link>
           <h1
-            className="text-3xl sm:text-4xl font-bold"
+            className="font-display text-3xl sm:text-4xl font-bold"
             style={{ color: "var(--mk-text, #111)", letterSpacing: "-0.03em" }}
           >
             {t("pageTitle")}

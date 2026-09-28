@@ -183,7 +183,7 @@ export function ContactTable({
               return (
                 <Button
                   key={page}
-                  variant={page === currentPage ? "default" : "outline"}
+                  variant={page === currentPage ? "ink" : "outline"}
                   size="icon-sm"
                   onClick={() => handlePage(page)}
                   className="tabular-nums text-[12px]"

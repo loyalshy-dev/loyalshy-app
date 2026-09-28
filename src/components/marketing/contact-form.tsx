@@ -82,7 +82,7 @@ export function ContactForm() {
           />
         </div>
         <h2
-          className="text-2xl font-bold"
+          className="font-display text-2xl font-bold"
           style={{ color: "var(--mk-text)", letterSpacing: "-0.03em" }}
         >
           {t("successTitle")}

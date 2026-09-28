@@ -122,7 +122,7 @@ async function FunnelContent({
     <div className="space-y-8">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">{t("title")}</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">{t("title")}</h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
             {t("subtitle")}
           </p>
@@ -145,7 +145,7 @@ async function FunnelContent({
                 className={cn(
                   "px-3 py-1 rounded-full text-[12px] font-medium transition-colors",
                   active
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-foreground text-background"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >

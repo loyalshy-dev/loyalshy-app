@@ -351,7 +351,7 @@ export function Pricing() {
               {t("sectionLabel")}
             </p>
             <h2
-              className="mk-clamp-h2 font-black tracking-tight mb-4"
+              className="font-display mk-clamp-h2 font-black tracking-tight mb-4"
               style={{ color: "var(--mk-text)" }}
             >
               {t("title")}

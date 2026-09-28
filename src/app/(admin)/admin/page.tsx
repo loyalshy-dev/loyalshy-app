@@ -16,7 +16,7 @@ export default async function AdminOverviewPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">Platform Overview</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Platform Overview</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Global metrics across all organizations and users.
         </p>

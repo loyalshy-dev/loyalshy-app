@@ -30,7 +30,7 @@ export async function WalletPreview() {
               {t("sectionLabel")}
             </p>
             <h2
-              className="mk-clamp-h2 font-black tracking-tight leading-tight"
+              className="font-display mk-clamp-h2 font-black tracking-tight leading-tight"
               style={{ color: "var(--mk-text)" }}
             >
               {t("title")}

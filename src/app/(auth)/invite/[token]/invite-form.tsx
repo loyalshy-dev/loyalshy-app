@@ -194,7 +194,7 @@ export function InviteForm({ token }: { token: string }) {
     return (
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{t(titleKey)}</CardTitle>
+          <CardTitle className="font-display text-2xl font-bold">{t(titleKey)}</CardTitle>
           <CardDescription>{t(descKey)}</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
@@ -211,7 +211,7 @@ export function InviteForm({ token }: { token: string }) {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">{t("joinOrg", { organizationName: invitation.organizationName })}</CardTitle>
+        <CardTitle className="font-display text-2xl font-bold">{t("joinOrg", { organizationName: invitation.organizationName })}</CardTitle>
         <CardDescription>
           {t("invitedAs", { role: invitation.role === "OWNER" ? "an owner" : "a staff member" })}{" "}
           {mode === "signup"

@@ -35,8 +35,8 @@ function weightedRetention(rows: CohortRow[], monthIndex: number): number | null
 
 function heatStyle(pct: number | null): React.CSSProperties {
   if (pct === null) return {}
-  // Teal heat scaled by retention; text stays readable via low max alpha
-  return { backgroundColor: `oklch(0.7 0.12 180 / ${(pct / 100) * 0.55})` }
+  // Sequential coral scaled by retention; text stays readable via low max mix
+  return { backgroundColor: `color-mix(in oklch, var(--chart-1) ${Math.round(pct * 0.55)}%, transparent)` }
 }
 
 function formatCohortLabel(cohortMonth: string): string {
@@ -74,7 +74,7 @@ export function CohortRetentionView({ segments }: CohortRetentionViewProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">{t("title")}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t("subtitle")}</p>
       </div>
 
@@ -98,7 +98,7 @@ export function CohortRetentionView({ segments }: CohortRetentionViewProps) {
           <Button
             key={opt.key}
             size="sm"
-            variant={segment === opt.key ? "default" : "outline"}
+            variant={segment === opt.key ? "ink" : "outline"}
             onClick={() => setSegment(opt.key)}
           >
             {opt.label}

@@ -2,12 +2,12 @@
 
 import { useEffect } from "react"
 import * as Sentry from "@sentry/nextjs"
-import { Geist } from "next/font/google"
+import { Inter } from "next/font/google"
 import { NextIntlClientProvider, useTranslations } from "next-intl"
 import messages from "@/messages/en.json"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 })
 
@@ -81,7 +81,7 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} antialiased`}>
+      <body className={`${inter.variable} antialiased`}>
         <NextIntlClientProvider locale="en" messages={messages}>
           <GlobalErrorContent error={error} reset={reset} />
         </NextIntlClientProvider>

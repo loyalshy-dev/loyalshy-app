@@ -56,13 +56,13 @@ export function BusiestDaysChart({ data }: BusiestDaysChartProps) {
           >
             <XAxis
               dataKey="day"
-              tick={{ fontSize: 11, fill: "oklch(0.52 0.01 285)" }}
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               allowDecimals={false}
-              tick={{ fontSize: 11, fill: "oklch(0.52 0.01 285)" }}
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
               axisLine={false}
               tickLine={false}
             />
@@ -71,10 +71,11 @@ export function BusiestDaysChart({ data }: BusiestDaysChartProps) {
               {data.map((entry, i) => (
                 <Cell
                   key={i}
+                  // The busiest day in coral, the rest as gray context.
                   fill={
                     entry.interactions === maxInteractions
-                      ? "oklch(0.55 0.2 265)"
-                      : "oklch(0.55 0.2 265 / 0.3)"
+                      ? "var(--chart-1)"
+                      : "var(--chart-4)"
                   }
                 />
               ))}

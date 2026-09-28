@@ -109,7 +109,7 @@ export default async function ContactPage() {
                     {t("sectionLabel")}
                   </p>
                   <h1
-                    className="text-[clamp(2.2rem,5vw,3.5rem)] font-extrabold leading-[1.08]"
+                    className="font-display text-[clamp(2.2rem,5vw,3.5rem)] font-extrabold leading-[1.08]"
                     style={{ color: "var(--mk-text)", letterSpacing: "-0.04em" }}
                   >
                     {t("pageTitle")}

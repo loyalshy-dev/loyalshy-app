@@ -1,8 +1,8 @@
 const planConfig: Record<string, { label: string; color: string }> = {
-  STARTER: { label: "Pro", color: "bg-blue-500" },
-  GROWTH: { label: "Business", color: "bg-violet-500" },
-  SCALE: { label: "Scale", color: "bg-indigo-500" },
-  ENTERPRISE: { label: "Enterprise", color: "bg-amber-500" },
+  STARTER: { label: "Pro", color: "bg-chart-1" },
+  GROWTH: { label: "Business", color: "bg-chart-1" },
+  SCALE: { label: "Scale", color: "bg-chart-1" },
+  ENTERPRISE: { label: "Enterprise", color: "bg-chart-1" },
 }
 
 import { Card } from "@/components/ui/card"

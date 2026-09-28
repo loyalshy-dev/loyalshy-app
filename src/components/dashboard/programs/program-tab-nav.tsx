@@ -126,7 +126,7 @@ export function ProgramTabNav({
         >
           <ArrowLeft className="size-4" />
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight truncate">
+        <h1 className="font-display text-2xl font-semibold tracking-tight truncate">
           {templateName}
         </h1>
         <Badge

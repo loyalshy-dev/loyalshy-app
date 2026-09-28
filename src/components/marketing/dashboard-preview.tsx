@@ -96,7 +96,7 @@ export function FeatureShowcase() {
               {t("sectionLabel")}
             </p>
             <h2
-              className="mk-clamp-h2 font-black tracking-tight"
+              className="font-display mk-clamp-h2 font-black tracking-tight"
               style={{ color: "var(--mk-text)" }}
             >
               {t("title")}

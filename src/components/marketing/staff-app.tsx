@@ -74,7 +74,7 @@ export function StaffApp() {
             <div className="flex items-center justify-center gap-4 mb-1">
 
               <h2
-                className="mk-clamp-h2 font-black tracking-tight text-center"
+                className="font-display mk-clamp-h2 font-black tracking-tight text-center"
                 style={{ color: "var(--mk-text)" }}
               >
                 {t("title")}

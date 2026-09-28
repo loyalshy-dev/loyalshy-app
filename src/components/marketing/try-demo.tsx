@@ -40,7 +40,7 @@ export async function TryDemo() {
               {t("sectionLabel")}
             </p>
             <h2
-              className="text-3xl sm:text-[2.75rem] font-bold"
+              className="font-display text-3xl sm:text-[2.75rem] font-bold"
               style={{ color: "var(--mk-text)", letterSpacing: "-0.035em" }}
             >
               {t("title")}

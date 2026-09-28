@@ -127,7 +127,7 @@ export function Topbar({
         <ThemeToggle />
 
         {/* Register Visit CTA */}
-        <Button className="gap-1.5" onClick={onOpenRegisterVisit}>
+        <Button variant="outline" className="gap-1.5" onClick={onOpenRegisterVisit}>
           <Plus className="size-3.5" />
           <span className="hidden sm:inline">{t("newInteraction")}</span>
         </Button>

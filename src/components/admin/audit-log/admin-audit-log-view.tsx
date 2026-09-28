@@ -243,7 +243,7 @@ export function AdminAuditLogView({
           <Shield className="size-4 text-amber-500" strokeWidth={1.75} />
         </div>
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">{t("title")}</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
             {total} {total === 1 ? "entry" : "entries"}
           </p>

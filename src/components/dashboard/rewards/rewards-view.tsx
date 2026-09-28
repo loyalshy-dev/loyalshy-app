@@ -83,7 +83,7 @@ export function RewardsView({
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Rewards</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Rewards</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">
             Track and manage earned rewards.
           </p>
