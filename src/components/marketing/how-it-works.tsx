@@ -79,15 +79,6 @@ export async function HowItWorks() {
             return (
               <StaggerItem key={step.number} className="h-full">
                 <div className="relative h-full">
-                  {/* Oversized faded step number */}
-                  <span
-                    aria-hidden="true"
-                    className="absolute -top-10 -left-6 text-[9rem] font-black leading-none select-none pointer-events-none hidden md:block"
-                    style={{ color: "oklch(0.704 0.193 32 / 0.04)" }}
-                  >
-                    {step.number}
-                  </span>
-
                   <div className="relative z-10 flex h-full flex-col gap-4">
                     {/* Media first on mobile for visual hook */}
                     <div
