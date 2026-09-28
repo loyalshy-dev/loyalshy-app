@@ -2,11 +2,11 @@
   "common": {
     "loyalshy": "Loyalshy",
     "getStarted": "Empezar",
-    "getStartedFree": "Empezar Gratis",
-    "logIn": "Iniciar Sesión",
+    "getStartedFree": "Empezar gratis",
+    "logIn": "Iniciar sesión",
     "learnMore": "Más información",
     "contact": "Contacto",
-    "contactSales": "Contactar Ventas",
+    "contactSales": "Hablar con ventas",
     "save": "Guardar",
     "cancel": "Cancelar",
     "delete": "Eliminar",
@@ -40,121 +40,120 @@
     "switchLanguage": "Cambiar idioma"
   },
   "hero": {
-    "badge": "Fidelización digital para pequeños negocios",
-    "title1": "Tarjetas de fidelidad",
-    "title2": "que tus clientes",
-    "titleHighlight": "realmente conservan",
-    "subtitle": "Reemplaza las tarjetas de sellos en papel por tarjetas digitales en Apple y Google Wallet. Premia a tus clientes recurrentes con tarjetas de sellos y cupones — sin necesidad de app.",
-    "seeHowItWorks": "Cómo Funciona",
+    "title1": "Tu tarjeta de sellos,",
+    "title2": "en el móvil de",
+    "titleHighlight": "tus clientes",
+    "subtitle": "Escanean un QR en el mostrador y la tarjeta se guarda en su Apple o Google Wallet. Tú sellas desde el móvil. Gratis hasta 50 clientes.",
+    "seeHowItWorks": "Ver cómo funciona",
     "freeForever": "Gratis para siempre",
     "noCreditCard": "Sin tarjeta de crédito",
     "screenshotAlt": "Panel de Loyalshy mostrando programas de fidelización con diseños de tarjetas",
     "browserUrl": "loyalshy.com/dashboard"
   },
   "featureShowcase": {
-    "sectionLabel": "Plataforma",
-    "title": "Todo en un solo lugar",
+    "sectionLabel": "Tu panel",
+    "title": "Quién vuelve y cuándo, de un vistazo",
     "browserUrl": "loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Panel",
-        "description": "Obtén una visión en tiempo real de visitas, recompensas y engagement — todo en un solo lugar.",
+        "description": "Las visitas, los sellos y los canjes de cada día, y qué clientes vuelven más.",
         "alt": "Panel de control del programa con tarjetas de estadísticas y detalles de plantilla"
       },
       "cardDesigner": {
         "label": "Diseñador",
-        "description": "Diseña tarjetas de fidelización impresionantes con nuestro estudio visual. Tu marca, tu estilo.",
+        "description": "Tu logo, tus colores y tu recompensa. Ves la tarjeta tal como quedará en el Wallet mientras la diseñas.",
         "alt": "Estudio de diseño de tarjetas con barra flotante y vista previa del pase"
       },
       "programs": {
         "label": "Programas",
-        "description": "Gestiona todos tus programas de fidelización en un solo lugar. Tarjetas de sellos y cupones, lado a lado.",
+        "description": "Tarjetas de sellos y cupones, cada uno con su diseño y sus reglas.",
         "alt": "Cuadrícula de programas mostrando diferentes tipos y diseños de tarjetas"
       },
       "passes": {
         "label": "Pases",
-        "description": "Rastrea cada pase emitido. Filtra por estado, busca contactos y gestiona el ciclo de vida.",
+        "description": "Cada tarjeta que has dado, con su estado. Busca a un cliente por nombre, email o teléfono.",
         "alt": "Lista de pases con filtros de estado y búsqueda"
       },
       "distribution": {
         "label": "Distribución",
-        "description": "Genera códigos QR, comparte enlaces y emite pases directamente. Varios tamaños para imprimir.",
+        "description": "El QR para imprimir en varios tamaños, el enlace para compartir y la opción de dar la tarjeta a mano.",
         "alt": "Página de distribución con código QR, enlace compartible y tamaños de impresión"
       },
       "team": {
         "label": "Equipo",
-        "description": "Invita al personal con acceso por roles. Propietarios y empleados ven vistas diferentes.",
+        "description": "Invita a tu equipo. Los empleados sellan y canjean; la facturación y los ajustes son solo tuyos.",
         "alt": "Configuración del equipo mostrando miembros con roles y botón de invitación"
       }
     }
   },
   "howItWorks": {
     "sectionLabel": "Cómo funciona",
-    "title": "Tres pasos para empezar",
-    "subtitle": "De cero a programa de fidelización activo en menos de 5 minutos",
+    "title": "Así funciona en tu mostrador",
+    "subtitle": "Lo dejas listo en unos minutos. Después, solo queda sellar.",
     "steps": {
       "design": {
-        "title": "Diseña tu pase",
-        "description": "Elige tarjeta de sellos o cupón y personaliza cada detalle — colores, logos, campos y recompensas — en nuestro estudio visual.",
-        "alt": "Estudio de diseño de tarjetas — personaliza tu pase digital"
+        "title": "Diseña la tarjeta",
+        "description": "Elige tarjeta de sellos o cupón, pon tu logo y tus colores y decide la recompensa.",
+        "alt": "Estudio de diseño de tarjetas con vista previa del Wallet"
       },
       "issue": {
-        "title": "Emite pases a contactos",
-        "description": "Distribuye pases mediante escaneo de código QR, enlace compartible, emisión directa o toque NFC.",
+        "title": "Pon el QR a la vista",
+        "description": "Imprime el QR para el mostrador, comparte el enlace o grábalo en una pegatina NFC. El cliente escanea y la tarjeta se guarda en su Wallet.",
         "alt": "Página de distribución con código QR y emisión manual"
       },
       "scan": {
-        "title": "Escanea para actualizar pases",
-        "description": "Escanea un pase para sumar un sello o canjear un cupón — se sincroniza al instante con Apple y Google Wallet.",
+        "title": "Sella con el móvil",
+        "description": "Escanea la tarjeta del cliente con la app y suma el sello o canjea el cupón. Su Wallet se actualiza en el momento.",
         "alt": "Escaneando un pase digital para registrar una interacción"
       }
     }
   },
   "features": {
     "sectionLabel": "Funciones",
-    "title": "Todo lo que necesitas para fidelizar",
-    "subtitle": "Una plataforma completa para negocios que se toman en serio la retención de clientes",
+    "title": "Lo que incluye",
+    "subtitle": "Todos los planes tienen las mismas funciones. Lo que cambia es cuántos clientes y programas puedes tener.",
     "appleWallet": {
       "title": "Apple Wallet",
-      "description": "Pases nativos junto a tarjetas de embarque y entradas. Se actualizan automáticamente en cada visita."
+      "description": "Tarjetas nativas en el iPhone y el Apple Watch, junto a las tarjetas de embarque. Se actualizan solas."
     },
     "googleWallet": {
       "title": "Google Wallet",
-      "description": "Soporte completo para Android. Los pases se actualizan automáticamente — sin app necesaria."
+      "description": "Lo mismo en Android, sin app y con actualización automática."
     },
     "analytics": {
-      "title": "Analíticas en Tiempo Real",
-      "description": "Rastrea visitas, recompensas y engagement con paneles intuitivos e informes exportables."
+      "title": "Estadísticas",
+      "description": "Visitas, sellos y canjes por día, y tu lista de clientes exportable a CSV."
     },
     "designer": {
-      "title": "Diseñador de Tarjetas",
-      "description": "Diseña tarjetas de fidelización con nuestro estudio visual. Sube logos, elige colores, selecciona patrones — hazla tuya."
+      "title": "Diseñador de tarjetas",
+      "description": "Sube tu logo, elige colores y fondo, y ve el resultado en el Wallet mientras lo cambias."
     },
     "qr": {
-      "title": "Alta por QR",
-      "description": "Imprime un código QR, ponlo en tu mostrador. Los clientes se unen en segundos — sin descargas."
+      "title": "Alta con un QR",
+      "description": "Lo imprimes y lo dejas en el mostrador. El cliente lo escanea y en unos segundos tiene su tarjeta."
     },
     "team": {
-      "title": "Gestión de Equipo",
-      "description": "Invita al personal con acceso por roles. Propietarios y empleados ven vistas diferentes."
+      "title": "Equipo",
+      "description": "Cada empleado entra con su cuenta. Solo tú ves la facturación y los ajustes."
     },
     "passTypes": {
-      "title": "Tarjetas de sellos y cupones",
-      "description": "Dos tipos pensados para la fidelización diaria — tarjetas de sellos que premian las visitas recurrentes y cupones que generan un canje único."
+      "title": "Sellos y cupones",
+      "description": "Tarjetas de sellos para premiar a quien vuelve y cupones para una oferta puntual."
     },
     "pushNotifications": {
-      "title": "Notificaciones Push",
-      "description": "Envía actualizaciones en tiempo real a las pantallas de bloqueo de tus clientes. Anuncia ofertas, recuerda pases por vencer e impulsa la interacción."
+      "title": "Avisos al móvil",
+      "description": "Manda un aviso a la pantalla de bloqueo de todos los que tienen tu tarjeta: una oferta, un horario nuevo, un cierre por vacaciones."
     }
   },
   "walletPreview": {
-    "badge1": "Compatible con Apple y Google Wallet",
-    "badge2": "Se actualiza automáticamente en cada visita",
-    "badge3": "Un escaneo para unirse, sin app necesaria",
-    "sectionLabel": "La experiencia del cliente",
-    "title": "Pases bonitos que viven en su wallet",
-    "description": "Sin app que descargar. Sin cuenta que crear. Tus clientes escanean una vez y obtienen una tarjeta de fidelización junto a sus tarjetas de embarque — y se actualiza automáticamente en cada visita.",
-    "seePricing": "Ver precios →"
+    "badge1": "Funciona con Apple Wallet y Google Wallet",
+    "badge2": "Se actualiza sola con cada visita",
+    "badge3": "Se añade con un escaneo, sin descargar nada",
+    "sectionLabel": "Lo que ve tu cliente",
+    "title": "Está en su Wallet, no en su cartera",
+    "description": "No tienen que descargar ninguna app ni crear una cuenta. La tarjeta se guarda junto a sus tarjetas de embarque y cuenta los sellos sola en cada visita.",
+    "seePricing": "Ver precios"
   },
   "testimonials": {
     "sectionLabel": "Testimonios",
@@ -208,130 +207,130 @@
   },
   "pricing": {
     "sectionLabel": "Precios",
-    "title": "Empieza gratis, escala cuando crezcas",
-    "subtitle": "Sin tarjeta de crédito. Mejora cuando necesites más.",
+    "title": "Gratis hasta 50 clientes",
+    "subtitle": "Después pagas según cuántos clientes tengas. Sin permanencia y sin tarjeta para empezar.",
     "monthly": "Mensual",
     "annual": "Anual",
-    "save20": "Ahorra 20%",
-    "savedPerYear": "ahorrado al año",
-    "mostPopular": "Más Popular",
+    "save20": "Ahorra un 20 %",
+    "savedPerYear": "de ahorro al año",
+    "mostPopular": "Recomendado",
     "free": {
       "name": "Gratis",
-      "description": "Prueba Loyalshy con tus primeros clientes",
+      "description": "Para probar con tus primeros clientes",
       "features": {
-        "contacts": "Hasta 50 contactos",
+        "contacts": "Hasta 50 clientes",
         "programs": "1 programa",
-        "staff": "1 miembro del equipo",
-        "announcements": "2 anuncios en wallet"
+        "staff": "1 persona en el equipo",
+        "announcements": "2 avisos en total"
       }
     },
     "starter": {
       "name": "Pro",
-      "description": "Para pequeños negocios listos para crecer",
+      "description": "Para un negocio con clientela fija",
       "features": {
-        "contacts": "Hasta 500 contactos",
+        "contacts": "Hasta 500 clientes",
         "programs": "Hasta 2 programas",
-        "staff": "2 miembros del equipo",
-        "announcements": "1 anuncio en wallet / semana"
+        "staff": "2 personas en el equipo",
+        "announcements": "1 aviso por semana"
       }
     },
     "growth": {
       "name": "Business",
-      "description": "Para negocios en crecimiento con múltiples programas",
+      "description": "Para negocios con varios programas a la vez",
       "features": {
-        "contacts": "Hasta 2.500 contactos",
+        "contacts": "Hasta 2.500 clientes",
         "programs": "Hasta 5 programas",
-        "staff": "5 miembros del equipo",
-        "announcements": "2 anuncios en wallet / semana"
+        "staff": "5 personas en el equipo",
+        "announcements": "2 avisos por semana"
       }
     },
     "scale": {
       "name": "Scale",
-      "description": "Para programas de fidelización a gran escala",
+      "description": "Para cadenas y negocios con mucho volumen",
       "features": {
-        "contacts": "Contactos ilimitados",
+        "contacts": "Clientes ilimitados",
         "programs": "Programas ilimitados",
-        "staff": "25 miembros del equipo",
-        "announcements": "5 anuncios en wallet / semana"
+        "staff": "25 personas en el equipo",
+        "announcements": "5 avisos por semana"
       }
     },
     "enterprise": {
       "name": "Enterprise",
-      "description": "Plan personalizado para grandes equipos",
-      "features": "Todo ilimitado, marca blanca, soporte dedicado y SLA."
+      "description": "Para cadenas con necesidades propias",
+      "features": "Límites a medida, soporte dedicado y condiciones por contrato."
     }
   },
   "faq": {
     "sectionLabel": "Preguntas",
     "title": "Preguntas frecuentes",
-    "subtitle": "Todo lo que necesitas saber sobre Loyalshy",
-    "stillHaveQuestions": "¿Aún tienes preguntas?",
+    "subtitle": "Lo que suelen preguntarnos antes de empezar",
+    "stillHaveQuestions": "¿Te queda alguna duda?",
     "emailUs": "Escríbenos",
-    "replyTime": "— normalmente respondemos en pocas horas.",
+    "replyTime": "y te contestamos por email.",
     "items": {
       "howWorks": {
         "question": "¿Cómo funciona Loyalshy?",
-        "answer": "Loyalshy sustituye las tarjetas de sellos de papel por tarjetas de fidelización digitales que viven en el Apple o Google Wallet de tus clientes. Configuras tu negocio, imprimes un código QR y los clientes lo escanean para obtener su pase digital. El personal registra visitas desde el panel y los clientes ganan recompensas automáticamente."
+        "answer": "Diseñas tu tarjeta de sellos o tu cupón en el panel e imprimes el QR. Tus clientes lo escanean y la tarjeta se guarda en su Apple o Google Wallet. Cuando vuelven, tu equipo escanea la tarjeta con la app de Loyalshy y suma el sello. Al completar la tarjeta, la recompensa aparece sola."
       },
       "devices": {
-        "question": "¿Qué dispositivos son compatibles?",
-        "answer": "Loyalshy funciona con Apple Wallet (iPhone, Apple Watch) y Google Wallet (Android). Los pases se actualizan automáticamente cada vez que se registra una visita — sin necesidad de descargar una app."
+        "question": "¿Qué necesitan mis clientes?",
+        "answer": "Un iPhone con Apple Wallet o un Android con Google Wallet. No tienen que descargar nada ni crear una cuenta. En el iPhone, la tarjeta también aparece en el Apple Watch."
       },
       "setup": {
-        "question": "¿Cuánto tarda la configuración?",
-        "answer": "La mayoría de negocios están funcionando en menos de 5 minutos. Crea tu cuenta, personaliza tu programa de fidelización, imprime tu código QR y listo."
+        "question": "¿Cuánto se tarda en empezar?",
+        "answer": "Crear la cuenta, diseñar la tarjeta e imprimir el QR lleva unos minutos. Para sellar, tu equipo instala la app en su móvil y la conecta escaneando un QR del panel."
       },
       "passTypes": {
-        "question": "¿Qué tipos de pases puedo crear?",
-        "answer": "Loyalshy se centra en dos tipos de pases: tarjetas de sellos digitales (premian a los clientes tras un número determinado de visitas) y cupones digitales (ofertas canjeables únicas o ilimitadas). Ambos viven en Apple y Google Wallet."
+        "question": "¿Qué tipos de tarjeta puedo crear?",
+        "answer": "Dos: tarjetas de sellos, que dan una recompensa al llegar a un número de visitas, y cupones, que se canjean una vez o las veces que quieras. Las dos funcionan en Apple y Google Wallet."
       },
       "freePlan": {
         "question": "¿Hay un plan gratuito?",
-        "answer": "¡Sí! Nuestro plan Gratis te permite empezar con hasta 50 contactos y 1 programa — elige entre tarjeta de sellos o cupón. Sin tarjeta de crédito, gratis para siempre. Mejora cuando necesites más."
+        "answer": "Sí. Con el plan Gratis tienes 1 programa y hasta 50 clientes, sin tarjeta de crédito y sin fecha de fin. Cuando se te quede pequeño, cambias de plan."
       },
       "cancel": {
         "question": "¿Cómo cancelo?",
-        "answer": "Puedes cancelar tu suscripción en cualquier momento desde los ajustes de facturación. No hay contratos a largo plazo ni cargos por cancelación."
+        "answer": "Desde los ajustes de facturación, cuando quieras. No hay permanencia ni penalización."
       },
       "security": {
-        "question": "¿Están seguros mis datos?",
-        "answer": "Sí. Utilizamos cifrado estándar de la industria, autenticación segura y tus datos se almacenan en infraestructura de nivel empresarial. Nunca compartimos los datos de tus clientes con terceros."
+        "question": "¿Qué pasa con los datos de mis clientes?",
+        "answer": "Son tuyos. No los vendemos ni los usamos para publicidad, y puedes exportar tu lista de clientes a CSV cuando quieras."
       },
       "customize": {
-        "question": "¿Puedo personalizar el diseño de la tarjeta?",
-        "answer": "¡Sí! Nuestro estudio visual te permite subir tu logo, elegir colores de marca, seleccionar patrones y personalizar completamente cómo se ven tus pases. Cada pase refleja la identidad de tu negocio."
+        "question": "¿Puedo poner la tarjeta con mi marca?",
+        "answer": "Sí. Subes tu logo, eliges los colores y la imagen de fondo y decides qué campos se ven. Mientras lo cambias, ves cómo queda en Apple y Google Wallet."
       }
     }
   },
   "tryDemo": {
     "sectionLabel": "Pruébalo tú mismo",
-    "title": "Añade un pase a tu wallet",
-    "subtitle": "Descubre cómo lo ven tus clientes. Escanea el código QR o pulsa un botón para añadir una tarjeta de fidelización de prueba a tu Apple o Google Wallet.",
+    "title": "Pruébala tú primero",
+    "subtitle": "Escanea el código o pulsa un botón para añadir una tarjeta de prueba a tu Wallet. Es exactamente lo que verán tus clientes.",
     "addToAppleWallet": "Añadir a Apple Wallet",
     "addToGoogleWallet": "Añadir a Google Wallet",
     "cardPreviewAlt": "Vista previa de la tarjeta de prueba",
     "or": "o visita el enlace",
-    "openJoinPage": "Abrir página del pase de prueba",
+    "openJoinPage": "Abrir la tarjeta de prueba",
     "tapToFlip": "Toca para girar"
   },
   "closingCta": {
-    "title1": "¿Listo para aumentar tus",
-    "titleHighlight": "clientes recurrentes",
-    "subtitle": "Únete a negocios que usan Loyalshy para convertir visitantes en clientes fieles. Configúralo en 5 minutos, sin tarjeta de crédito.",
-    "viewPricing": "Ver Precios",
-    "talkToUs": "Habla con nosotros →",
+    "title1": "Imprime el QR hoy.",
+    "titleHighlight": "Mañana tienes los primeros sellos.",
+    "subtitle": "Gratis hasta 50 clientes, sin tarjeta de crédito.",
+    "viewPricing": "Ver precios",
+    "talkToUs": "Hablar con nosotros",
     "floatingCardAlt": "Tarjeta de fidelización de ejemplo"
   },
   "footer": {
     "product": "Producto",
     "company": "Empresa",
     "legal": "Legal",
-    "privacyPolicy": "Política de Privacidad",
-    "termsOfService": "Términos de Servicio",
-    "cookiePolicy": "Política de Cookies",
-    "tagline": "Tarjetas de fidelización digitales para negocios modernos.",
+    "privacyPolicy": "Política de privacidad",
+    "termsOfService": "Términos del servicio",
+    "cookiePolicy": "Política de cookies",
+    "tagline": "Tarjetas de sellos y cupones en Apple y Google Wallet.",
     "copyright": "© 2026 Loyalshy, un producto de HEX CONCEPTS STUDIO, S.L. Todos los derechos reservados.",
-    "builtWith": "Hecho con cariño para dueños de negocios.",
+    "builtWith": "Hecho en España.",
     "instagram": "Loyalshy en Instagram",
     "tiktok": "Loyalshy en TikTok"
   },
@@ -1962,9 +1961,9 @@
     }
   },
   "staffApp": {
-    "sectionLabel": "App para staff",
-    "title": "Potencia a tu equipo en el punto de venta",
-    "subtitle": "Ofrece a tu personal una app móvil dedicada para escanear pases, añadir sellos, canjear cupones y gestionar acciones de fidelización — todo desde su teléfono.",
+    "sectionLabel": "App para el equipo",
+    "title": "Tu equipo sella con su propio móvil",
+    "subtitle": "Una app para escanear tarjetas, sumar sellos y canjear cupones en el mostrador. Se conecta escaneando un QR del panel.",
     "screenshots": {
       "home": "Inicio con contactos y actividad reciente",
       "scan": "Pantalla de escáner QR",
@@ -1973,20 +1972,20 @@
     },
     "features": {
       "scan": {
-        "title": "Escaneo QR instantáneo",
-        "description": "Apunta y escanea el pase de cualquier cliente en menos de un segundo."
+        "title": "Escanea y sella",
+        "description": "Apunta a la tarjeta del cliente y el sello se suma en un segundo. Si te equivocas, lo deshaces."
       },
       "activity": {
-        "title": "Actividad en tiempo real",
-        "description": "Consulta las interacciones recientes de todos tus programas al instante."
+        "title": "La actividad del día",
+        "description": "Los últimos sellos y canjes de todos tus programas, en orden."
       },
       "pairing": {
-        "title": "Configuración por QR",
-        "description": "Escanea un código QR desde el panel para conectarte en segundos — sin contraseñas."
+        "title": "Se conecta con un QR",
+        "description": "Escaneas un código desde el panel y el móvil queda conectado, sin contraseñas."
       },
       "secure": {
-        "title": "Acceso por roles",
-        "description": "El personal solo ve lo necesario. Los propietarios mantienen el control total desde el panel."
+        "title": "Cada uno ve lo suyo",
+        "description": "Los empleados sellan y canjean. Los ajustes y la facturación se quedan en el panel."
       }
     },
     "downloadAppStore": "Descargar en la App Store",

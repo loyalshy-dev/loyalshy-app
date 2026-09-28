@@ -6,7 +6,7 @@
     "logIn": "Se connecter",
     "learnMore": "En savoir plus",
     "contact": "Contact",
-    "contactSales": "Contacter les ventes",
+    "contactSales": "Parler à l'équipe commerciale",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",
@@ -40,11 +40,10 @@
     "switchLanguage": "Changer de langue"
   },
   "hero": {
-    "badge": "La fidélité numérique pour les petits commerces",
-    "title1": "Cartes de fidélité",
-    "title2": "que vos clients",
-    "titleHighlight": "gardent vraiment",
-    "subtitle": "Remplacez les cartes de fidélité en papier par des cartes numériques dans Apple & Google Wallet. Récompensez vos clients fidèles avec des cartes à tampons et des coupons — aucune app requise.",
+    "title1": "Votre carte à tampons,",
+    "title2": "dans le téléphone de",
+    "titleHighlight": "vos clients",
+    "subtitle": "Vos clients scannent un QR code au comptoir et la carte s'enregistre dans leur Apple ou Google Wallet. Vous tamponnez depuis votre téléphone. Gratuit jusqu'à 50 clients.",
     "seeHowItWorks": "Voir comment ça marche",
     "freeForever": "Gratuit pour toujours",
     "noCreditCard": "Aucune carte bancaire requise",
@@ -52,109 +51,109 @@
     "browserUrl": "loyalshy.com/dashboard"
   },
   "featureShowcase": {
-    "sectionLabel": "Plateforme",
-    "title": "Tout au même endroit",
+    "sectionLabel": "Votre tableau de bord",
+    "title": "Qui revient, et quand, en un coup d'œil",
     "browserUrl": "loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Tableau de bord",
-        "description": "Visualise en temps réel les visites, récompenses et l'engagement client — le tout en un seul endroit.",
+        "description": "Les visites, les tampons et les récompenses de chaque jour, et les clients qui reviennent le plus.",
         "alt": "Tableau de bord de programme avec cartes statistiques et détails du modèle"
       },
       "cardDesigner": {
         "label": "Éditeur de cartes",
-        "description": "Crée de superbes cartes de fidélité avec notre studio visuel. Ta marque, ton style.",
+        "description": "Votre logo, vos couleurs, votre récompense. Vous voyez la carte telle qu'elle sera dans le Wallet pendant que vous la créez.",
         "alt": "Studio de design de cartes avec barre d'outils flottante et aperçu du pass en direct"
       },
       "programs": {
         "label": "Programmes",
-        "description": "Gérez tous vos programmes de fidélité au même endroit. Cartes à tampons et coupons, côte à côte.",
+        "description": "Cartes à tampons et coupons, chacun avec son design et ses règles.",
         "alt": "Grille de programmes montrant différents types et designs de cartes de fidélité"
       },
       "passes": {
         "label": "Passes",
-        "description": "Suis chaque pass émis. Filtre par statut, recherche des contacts et gère le cycle de vie des passes.",
+        "description": "Chaque carte distribuée, avec son statut. Retrouvez un client par nom, e-mail ou téléphone.",
         "alt": "Liste des instances de pass avec filtres de statut et recherche"
       },
       "distribution": {
         "label": "Distribution",
-        "description": "Génère des QR codes, partage des liens et émets des passes directement. Plusieurs tailles pour l'impression.",
+        "description": "Le QR code à imprimer en plusieurs formats, un lien à partager et la possibilité de remettre une carte vous-même.",
         "alt": "Page de distribution avec QR code, lien partageable et tailles d'impression"
       },
       "team": {
         "label": "Équipe",
-        "description": "Invite du personnel avec un accès basé sur les rôles. Propriétaires et personnel voient des vues différentes.",
+        "description": "Invitez votre équipe. Les employés tamponnent et valident les coupons ; la facturation et les réglages restent à vous.",
         "alt": "Paramètres d'équipe montrant les membres avec leurs rôles et le bouton d'invitation"
       }
     }
   },
   "howItWorks": {
     "sectionLabel": "Comment ça marche",
-    "title": "Trois étapes pour te lancer",
-    "subtitle": "Passe de zéro à un programme de fidélité opérationnel en moins de 5 minutes",
+    "title": "Comment ça marche au comptoir",
+    "subtitle": "Quelques minutes pour tout préparer. Ensuite, il n'y a plus qu'à tamponner.",
     "steps": {
       "design": {
-        "title": "Conçois ton pass",
-        "description": "Choisis une carte à tampons ou un coupon, puis personnalise chaque détail — couleurs, logos, champs et récompenses — dans notre studio visuel.",
-        "alt": "Studio de design de cartes — personnalise ton pass digital"
+        "title": "Créez la carte",
+        "description": "Choisissez une carte à tampons ou un coupon, ajoutez votre logo et vos couleurs, et fixez la récompense.",
+        "alt": "Éditeur de cartes avec aperçu du Wallet en direct"
       },
       "issue": {
-        "title": "Émets des passes aux contacts",
-        "description": "Distribue des passes par scan de QR code, lien partageable, émission directe ou tap NFC.",
+        "title": "Affichez le QR code",
+        "description": "Imprimez le QR code pour le comptoir, partagez le lien ou enregistrez-le sur un autocollant NFC. Le client scanne et la carte s'enregistre dans son Wallet.",
         "alt": "Page de distribution avec QR code et émission manuelle"
       },
       "scan": {
-        "title": "Scanne pour mettre à jour les passes",
-        "description": "Scanne un pass pour ajouter un tampon ou échanger un coupon — synchronisation instantanée avec Apple et Google Wallet.",
+        "title": "Tamponnez avec votre téléphone",
+        "description": "Scannez la carte du client avec l'app pour ajouter un tampon ou valider un coupon. Son Wallet se met à jour sur le moment.",
         "alt": "Scan d'un pass digital pour enregistrer une interaction"
       }
     }
   },
   "features": {
     "sectionLabel": "Fonctionnalités",
-    "title": "Tout ce qu'il te faut pour développer la fidélité",
-    "subtitle": "Une plateforme complète conçue pour les entreprises qui prennent la rétention client au sérieux",
+    "title": "Ce qui est inclus",
+    "subtitle": "Tous les forfaits ont les mêmes fonctionnalités. Ce qui change, c'est le nombre de clients et de programmes.",
     "appleWallet": {
       "title": "Apple Wallet",
-      "description": "Des passes natifs qui s'installent juste à côté des cartes d'embarquement et des billets. Mise à jour automatique à chaque visite."
+      "description": "Des cartes natives sur iPhone et Apple Watch, à côté des cartes d'embarquement. Elles se mettent à jour toutes seules."
     },
     "googleWallet": {
       "title": "Google Wallet",
-      "description": "Support Android complet. Les passes se mettent à jour automatiquement — aucune app nécessaire."
+      "description": "La même chose sur Android, sans app et avec mise à jour automatique."
     },
     "analytics": {
-      "title": "Analytiques en temps réel",
-      "description": "Suis les visites, récompenses et l'engagement avec de beaux tableaux de bord et des rapports exportables."
+      "title": "Statistiques",
+      "description": "Visites, tampons et récompenses par jour, et votre liste de clients exportable en CSV."
     },
     "designer": {
       "title": "Éditeur de cartes",
-      "description": "Crée de superbes cartes de fidélité avec notre studio visuel. Télécharge ton logo, choisis tes couleurs, sélectionne des motifs — fais-en la tienne."
+      "description": "Ajoutez votre logo, choisissez les couleurs et le fond, et voyez le résultat dans le Wallet au fur et à mesure."
     },
     "qr": {
-      "title": "Inscription par QR",
-      "description": "Imprime un QR code, place-le à ton comptoir. Les clients s'inscrivent en quelques secondes — sans rien télécharger."
+      "title": "Inscription par QR code",
+      "description": "Imprimez-le et posez-le sur le comptoir. Le client le scanne et a sa carte en quelques secondes."
     },
     "team": {
-      "title": "Gestion d'équipe",
-      "description": "Invite du personnel avec un accès basé sur les rôles. Propriétaires et personnel voient des vues différentes."
+      "title": "Équipe",
+      "description": "Chaque employé se connecte avec son propre compte. Vous seul voyez la facturation et les réglages."
     },
     "passTypes": {
-      "title": "Cartes tampons et coupons",
-      "description": "Deux types pensés pour la fidélisation au quotidien — cartes tampons qui récompensent les visites répétées et coupons qui déclenchent un seul échange."
+      "title": "Tampons et coupons",
+      "description": "Des cartes à tampons pour récompenser ceux qui reviennent, et des coupons pour une offre ponctuelle."
     },
     "pushNotifications": {
-      "title": "Notifications Push",
-      "description": "Envoyez des mises à jour en temps réel sur l'écran de verrouillage de vos clients. Annoncez des offres, rappelez les passes expirants et stimulez l'engagement."
+      "title": "Messages sur l'écran verrouillé",
+      "description": "Envoyez un message sur l'écran verrouillé de tous ceux qui ont votre carte : une offre, de nouveaux horaires, une fermeture pour congés."
     }
   },
   "walletPreview": {
-    "badge1": "Compatible Apple & Google Wallet",
-    "badge2": "Mise à jour automatique à chaque visite",
-    "badge3": "Un scan pour s'inscrire, aucune app requise",
-    "sectionLabel": "L'expérience client",
-    "title": "De beaux passes qui vivent dans leur portefeuille",
-    "description": "Aucune app à télécharger. Aucun compte à créer. Tes clients scannent une seule fois et obtiennent une carte de fidélité qui se glisse juste à côté de leurs cartes d'embarquement — et se met à jour automatiquement à chaque visite.",
-    "seePricing": "Voir les tarifs →"
+    "badge1": "Compatible Apple Wallet et Google Wallet",
+    "badge2": "Se met à jour toute seule à chaque visite",
+    "badge3": "S'ajoute en un scan, rien à télécharger",
+    "sectionLabel": "Ce que voit votre client",
+    "title": "Dans son Wallet, pas au fond de son portefeuille",
+    "description": "Aucune app à télécharger, aucun compte à créer. La carte se range à côté de ses cartes d'embarquement et compte les tampons toute seule à chaque visite.",
+    "seePricing": "Voir les tarifs"
   },
   "testimonials": {
     "sectionLabel": "Témoignages",
@@ -208,118 +207,118 @@
   },
   "pricing": {
     "sectionLabel": "Tarifs",
-    "title": "Commence gratuitement, évolue en grandissant",
-    "subtitle": "Aucune carte bancaire requise. Passe à la version supérieure quand tu en as besoin.",
+    "title": "Gratuit jusqu'à 50 clients",
+    "subtitle": "Ensuite, vous payez selon le nombre de clients. Sans engagement, et sans carte bancaire pour commencer.",
     "monthly": "Mensuel",
     "annual": "Annuel",
-    "save20": "Économise 20 %",
+    "save20": "−20 %",
     "savedPerYear": "économisé par an",
-    "mostPopular": "Le plus populaire",
+    "mostPopular": "Recommandé",
     "free": {
       "name": "Gratuit",
-      "description": "Essaie Loyalshy avec tes premiers clients",
+      "description": "Pour essayer avec vos premiers clients",
       "features": {
-        "contacts": "Jusqu'à 50 contacts",
+        "contacts": "Jusqu'à 50 clients",
         "programs": "1 programme",
-        "staff": "1 membre d'équipe",
-        "announcements": "2 annonces wallet"
+        "staff": "1 membre de l'équipe",
+        "announcements": "2 messages au total"
       }
     },
     "starter": {
       "name": "Pro",
-      "description": "Pour les petites entreprises prêtes à grandir",
+      "description": "Pour un commerce avec ses habitués",
       "features": {
-        "contacts": "Jusqu'à 500 contacts",
+        "contacts": "Jusqu'à 500 clients",
         "programs": "Jusqu'à 2 programmes",
-        "staff": "2 membres d'équipe",
-        "announcements": "1 annonce wallet / semaine"
+        "staff": "2 membres de l'équipe",
+        "announcements": "1 message par semaine"
       }
     },
     "growth": {
       "name": "Business",
-      "description": "Pour les entreprises en croissance avec plusieurs programmes",
+      "description": "Pour les commerces avec plusieurs programmes",
       "features": {
-        "contacts": "Jusqu'à 2 500 contacts",
+        "contacts": "Jusqu'à 2 500 clients",
         "programs": "Jusqu'à 5 programmes",
-        "staff": "5 membres d'équipe",
-        "announcements": "2 annonces wallet / semaine"
+        "staff": "5 membres de l'équipe",
+        "announcements": "2 messages par semaine"
       }
     },
     "scale": {
       "name": "Scale",
-      "description": "Pour les programmes de fidélité à grande échelle",
+      "description": "Pour les enseignes et les gros volumes",
       "features": {
-        "contacts": "Contacts illimités",
+        "contacts": "Clients illimités",
         "programs": "Programmes illimités",
-        "staff": "25 membres d'équipe",
-        "announcements": "5 annonces wallet / semaine"
+        "staff": "25 membres de l'équipe",
+        "announcements": "5 messages par semaine"
       }
     },
     "enterprise": {
       "name": "Entreprise",
-      "description": "Offre personnalisée pour les grandes équipes",
-      "features": "Tout illimité, marque blanche, support dédié et SLA."
+      "description": "Pour les enseignes aux besoins spécifiques",
+      "features": "Limites sur mesure, support dédié et conditions contractuelles."
     }
   },
   "faq": {
     "sectionLabel": "FAQ",
     "title": "Questions fréquemment posées",
-    "subtitle": "Tout ce que tu dois savoir sur Loyalshy",
-    "stillHaveQuestions": "Tu as encore des questions ?",
+    "subtitle": "Ce qu'on nous demande le plus souvent avant de commencer",
+    "stillHaveQuestions": "Une autre question ?",
     "emailUs": "Écris-nous",
-    "replyTime": "— on répond généralement en quelques heures.",
+    "replyTime": "et nous vous répondons par e-mail.",
     "items": {
       "howWorks": {
         "question": "Comment fonctionne Loyalshy ?",
-        "answer": "Loyalshy remplace les cartes tampons papier par des cartes de fidélité digitales qui vivent dans le Apple ou Google Wallet de tes clients. Tu configures ton entreprise, imprimes un QR code, et les clients le scannent pour obtenir leur pass digital. Le personnel enregistre les visites depuis le tableau de bord, et les clients gagnent automatiquement des récompenses."
+        "answer": "Vous créez votre carte à tampons ou votre coupon dans le tableau de bord et vous imprimez le QR code. Vos clients le scannent et la carte s'enregistre dans leur Apple ou Google Wallet. Quand ils reviennent, votre équipe scanne la carte avec l'app Loyalshy et ajoute le tampon. Quand la carte est pleine, la récompense apparaît toute seule."
       },
       "devices": {
-        "question": "Quels appareils sont compatibles ?",
-        "answer": "Loyalshy fonctionne avec Apple Wallet (iPhone, Apple Watch) et Google Wallet (Android). Les passes se mettent à jour automatiquement dès qu'une visite est enregistrée — aucun téléchargement d'app requis pour les clients."
+        "question": "De quoi mes clients ont-ils besoin ?",
+        "answer": "D'un iPhone avec Apple Wallet ou d'un téléphone Android avec Google Wallet. Ils ne téléchargent rien et ne créent pas de compte. Sur iPhone, la carte apparaît aussi sur l'Apple Watch."
       },
       "setup": {
-        "question": "Combien de temps prend la mise en place ?",
-        "answer": "La plupart des entreprises sont opérationnelles en moins de 5 minutes. Crée ton compte, personnalise ton programme de fidélité, imprime ton QR code, et c'est parti."
+        "question": "Combien de temps faut-il pour démarrer ?",
+        "answer": "Créer le compte, concevoir la carte et imprimer le QR code prend quelques minutes. Pour tamponner, votre équipe installe l'app sur son téléphone et la connecte en scannant un QR code du tableau de bord."
       },
       "passTypes": {
-        "question": "Quels types de passes puis-je créer ?",
-        "answer": "Loyalshy se concentre sur deux types de passes : cartes tampons numériques (récompensent les clients après un nombre défini de visites) et coupons numériques (offres échangeables uniques ou illimitées). Les deux vivent dans Apple et Google Wallet."
+        "question": "Quels types de cartes puis-je créer ?",
+        "answer": "Deux : des cartes à tampons, qui donnent une récompense après un nombre de visites, et des coupons, utilisables une fois ou autant de fois que vous voulez. Les deux fonctionnent dans Apple et Google Wallet."
       },
       "freePlan": {
         "question": "Y a-t-il un plan gratuit ?",
-        "answer": "Oui ! Notre plan Gratuit te permet de démarrer avec jusqu'à 50 contacts et 1 programme — choisis entre carte tampons ou coupon. Aucune carte bancaire requise, gratuit pour toujours. Passe à la version supérieure quand tu veux."
+        "answer": "Oui. Le forfait Gratuit vous donne 1 programme et jusqu'à 50 clients, sans carte bancaire et sans date de fin. Quand il devient trop petit, vous changez de forfait."
       },
       "cancel": {
         "question": "Comment résilier ?",
-        "answer": "Tu peux résilier ton abonnement à tout moment depuis tes paramètres de facturation. Aucun engagement à long terme ni frais de résiliation."
+        "answer": "Depuis les réglages de facturation, quand vous voulez. Sans engagement ni frais."
       },
       "security": {
-        "question": "Mes données sont-elles sécurisées ?",
-        "answer": "Oui. Nous utilisons un chiffrement conforme aux standards de l'industrie, une authentification sécurisée et tes données sont stockées sur une infrastructure de niveau entreprise. Nous ne partageons jamais les données de tes clients avec des tiers."
+        "question": "Que deviennent les données de mes clients ?",
+        "answer": "Elles vous appartiennent. Nous ne les vendons pas et ne les utilisons pas pour de la publicité, et vous pouvez exporter votre liste de clients en CSV quand vous voulez."
       },
       "customize": {
-        "question": "Puis-je personnaliser le design de la carte de fidélité ?",
-        "answer": "Oui ! Notre studio visuel te permet de télécharger ton logo, définir les couleurs de ta marque, choisir des motifs et personnaliser entièrement l'apparence de tes passes. Chaque pass correspond à l'identité de ton entreprise."
+        "question": "La carte peut-elle porter ma marque ?",
+        "answer": "Oui. Ajoutez votre logo, choisissez les couleurs et l'image de fond, et décidez quels champs s'affichent. Pendant que vous modifiez, vous voyez le rendu dans Apple et Google Wallet."
       }
     }
   },
   "tryDemo": {
     "sectionLabel": "Essaie par toi-même",
-    "title": "Ajoute un pass à ton wallet",
-    "subtitle": "Découvre l'expérience de tes clients. Scanne le QR code ou appuie sur un bouton pour ajouter une carte de fidélité de démo à ton Apple ou Google Wallet.",
+    "title": "Essayez-la d'abord",
+    "subtitle": "Scannez le code ou appuyez sur un bouton pour ajouter une carte de démonstration à votre Wallet. C'est exactement ce que verront vos clients.",
     "addToAppleWallet": "Ajouter à Apple Wallet",
     "addToGoogleWallet": "Ajouter à Google Wallet",
     "cardPreviewAlt": "Aperçu de la carte de démo",
     "or": "ou visite le lien ci-dessous",
-    "openJoinPage": "Ouvrir la page du pass de démo",
+    "openJoinPage": "Ouvrir la carte de démonstration",
     "tapToFlip": "Touchez pour retourner"
   },
   "closingCta": {
-    "title1": "Prêt à développer ta",
-    "titleHighlight": "clientèle fidèle",
-    "subtitle": "Rejoins les entreprises qui utilisent Loyalshy pour transformer les visiteurs occasionnels en habitués fidèles. Mise en place en 5 minutes, aucune carte bancaire requise.",
+    "title1": "Imprimez le QR code aujourd'hui.",
+    "titleHighlight": "Vos premiers tampons demain.",
+    "subtitle": "Gratuit jusqu'à 50 clients, sans carte bancaire.",
     "viewPricing": "Voir les tarifs",
-    "talkToUs": "Parlez-nous →",
+    "talkToUs": "Nous contacter",
     "floatingCardAlt": "Exemple de carte de fidélité"
   },
   "footer": {
@@ -328,10 +327,10 @@
     "legal": "Mentions légales",
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation",
-    "cookiePolicy": "Politique des cookies",
-    "tagline": "Cartes de fidélité digitales pour les entreprises modernes.",
+    "cookiePolicy": "Politique de cookies",
+    "tagline": "Cartes à tampons et coupons dans Apple et Google Wallet.",
     "copyright": "© 2026 Loyalshy, un produit de HEX CONCEPTS STUDIO, S.L. Tous droits réservés.",
-    "builtWith": "Conçu avec soin pour les chefs d'entreprise.",
+    "builtWith": "Fait en Espagne.",
     "instagram": "Loyalshy sur Instagram",
     "tiktok": "Loyalshy sur TikTok"
   },
@@ -1962,9 +1961,9 @@
     }
   },
   "staffApp": {
-    "sectionLabel": "App staff",
-    "title": "Donnez les moyens à votre équipe sur le terrain",
-    "subtitle": "Offrez à votre personnel une application mobile dédiée pour scanner les pass, ajouter des tampons, utiliser des coupons et gérer les actions de fidélité — tout depuis leur téléphone.",
+    "sectionLabel": "App pour l'équipe",
+    "title": "Votre équipe tamponne avec son propre téléphone",
+    "subtitle": "Une app pour scanner les cartes, ajouter des tampons et valider des coupons au comptoir. Elle se connecte en scannant un QR code du tableau de bord.",
     "screenshots": {
       "home": "Accueil avec contacts et activité récente",
       "scan": "Écran de scan QR",
@@ -1973,20 +1972,20 @@
     },
     "features": {
       "scan": {
-        "title": "Scan QR instantané",
-        "description": "Pointez et scannez le pass d'un client en moins d'une seconde."
+        "title": "Scanner et tamponner",
+        "description": "Visez la carte du client et le tampon est ajouté en une seconde. Une erreur ? Vous l'annulez."
       },
       "activity": {
-        "title": "Activité en temps réel",
-        "description": "Consultez les interactions récentes de tous vos programmes en temps réel."
+        "title": "L'activité du jour",
+        "description": "Les derniers tampons et récompenses de tous vos programmes, dans l'ordre."
       },
       "pairing": {
-        "title": "Configuration par QR",
-        "description": "Scannez un code QR depuis le tableau de bord pour vous connecter en quelques secondes — sans mot de passe."
+        "title": "Connexion par QR code",
+        "description": "Scannez un code depuis le tableau de bord et le téléphone est connecté, sans mot de passe."
       },
       "secure": {
-        "title": "Accès par rôle",
-        "description": "Le personnel ne voit que ce dont il a besoin. Les propriétaires gardent le contrôle total depuis le tableau de bord."
+        "title": "Chacun voit sa partie",
+        "description": "Les employés tamponnent et valident. Les réglages et la facturation restent dans le tableau de bord."
       }
     },
     "downloadAppStore": "Télécharger sur l'App Store",

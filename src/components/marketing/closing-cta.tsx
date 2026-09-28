@@ -27,12 +27,12 @@ export async function ClosingCTA() {
           <div className="relative z-10 flex flex-col items-center gap-8">
             {/* Biggest heading on the page */}
             <h2
-              className="font-display mk-clamp-h1 font-black leading-[0.9] max-w-4xl tracking-[-0.025em] sm:tracking-[-0.035em] lg:tracking-[-0.045em]"
+              className="font-display mk-clamp-h1 font-black leading-[0.9] max-w-4xl text-balance tracking-[-0.025em] sm:tracking-[-0.035em] lg:tracking-[-0.045em]"
               style={{ color: "oklch(0.99 0 0)" }}
             >
               {t("title1")}{" "}
               <br />
-              {t("titleHighlight")}?
+              {t("titleHighlight")}
             </h2>
             <p
               className="text-xl max-w-2xl font-medium"
