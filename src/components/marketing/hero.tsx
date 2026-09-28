@@ -45,7 +45,7 @@ export async function Hero() {
             {/* CTAs */}
             <div className="hero-fade-in w-full" style={{ animationDelay: "300ms" }}>
               <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
-                <Link href="/register" className="mk-btn-primary py-4! px-8! text-base! gap-2 shadow-xl! w-full sm:w-auto">
+                <Link href="/register" className="mk-btn-primary py-4! px-8! text-base! gap-2 w-full sm:w-auto">
                   {tCommon("getStartedFree")}
                   <ArrowRight className="size-4" />
                 </Link>
