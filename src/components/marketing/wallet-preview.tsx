@@ -24,7 +24,7 @@ export async function WalletPreview() {
           {/* Text column */}
           <FadeIn direction="left" className="order-2 lg:order-1 flex flex-col gap-8">
             <h2
-              className="font-display mk-clamp-h2 font-black tracking-tight leading-tight"
+              className="font-display mk-clamp-h2 font-bold leading-[1.1]"
               style={{ color: "var(--mk-text)" }}
             >
               {t("title")}

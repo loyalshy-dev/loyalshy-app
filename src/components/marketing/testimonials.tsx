@@ -274,8 +274,8 @@ export async function Testimonials() {
               {t("sectionLabel")}
             </p>
             <h2
-              className="font-display text-3xl sm:text-[2.75rem] font-bold"
-              style={{ color: "var(--mk-text)", letterSpacing: "-0.035em" }}
+              className="font-display text-3xl sm:text-[2.75rem] font-bold leading-[1.1]"
+              style={{ color: "var(--mk-text)" }}
             >
               {t("title")}
             </h2>

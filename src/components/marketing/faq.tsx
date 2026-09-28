@@ -33,7 +33,7 @@ export function FAQ() {
         <FadeIn>
           <div className="text-center mb-16">
             <h2
-              className="font-display mk-clamp-h2 font-black tracking-tight"
+              className="font-display mk-clamp-h2 font-bold leading-[1.1]"
               style={{ color: "var(--mk-text)" }}
             >
               {t("title")}

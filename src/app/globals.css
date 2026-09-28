@@ -417,7 +417,7 @@
   }
 
   /* — Fluid heading sizes — */
-  .mk-clamp-h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+  .mk-clamp-h1 { font-size: clamp(2.5rem, 6vw, 4rem); }
   .mk-clamp-h2 { font-size: clamp(2rem, 5vw, 3rem); }
 
   /* — Primary Button (coral, brand-driven; adapts to light/dark via tokens) — */

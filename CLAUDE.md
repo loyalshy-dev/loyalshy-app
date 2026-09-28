@@ -508,7 +508,7 @@ Scoped via `[data-brand="loyalshy"]` wrapper on `src/app/page.tsx`, `src/app/(au
 **Typography**
 - Inter for body/UI (loaded via `next/font/google` as `--font-inter`)
 - Cabinet Grotesk only via the `.font-display` class, on display headings (≥24px) — never h3/h4 or small h2s (loaded via Fontshare CDN — Indian Type Foundry, not on Google Fonts)
-- Display headings: oversized, fluid sizing — `clamp(2.5rem, 6vw, 5rem)`
+- Display headings: hero + closing CTA `mk-clamp-h1` (`clamp(2.5rem, 6vw, 4rem)`) `font-extrabold leading-none`; section titles `mk-clamp-h2 font-bold leading-[1.1]`. Never `font-black`, never a per-heading letter-spacing (`.font-display` sets -0.02em for all)
 - Tracking: tight on large display (-0.02em via `.font-display`)
 - Sentence case ALWAYS — never Title Case, never ALL CAPS
 
