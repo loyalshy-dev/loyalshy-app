@@ -84,17 +84,11 @@ export function FeatureShowcase() {
   const activeFeature = FEATURES.find((f) => f.id === activeTab) ?? FEATURES[0]
 
   return (
-    <section className="relative py-16 sm:py-24 md:py-28 overflow-hidden" style={{ background: "var(--mk-bg)" }}>
+    <section id="features" className="relative scroll-mt-20 py-16 sm:py-24 md:py-28 overflow-hidden" style={{ background: "var(--mk-bg)" }}>
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         {/* Section heading */}
         <FadeIn>
           <div className="mx-auto max-w-2xl text-center mb-10">
-            <p
-              className="text-[13px] font-bold tracking-wide mb-4"
-              style={{ color: "var(--mk-brand-purple)" }}
-            >
-              {t("sectionLabel")}
-            </p>
             <h2
               className="font-display mk-clamp-h2 font-black tracking-tight"
               style={{ color: "var(--mk-text)" }}

@@ -51,7 +51,6 @@
     "browserUrl": "loyalshy.com/dashboard"
   },
   "featureShowcase": {
-    "sectionLabel": "Votre tableau de bord",
     "title": "Qui revient, et quand, en un coup d'œil",
     "browserUrl": "loyalshy.com",
     "tabs": {
@@ -88,7 +87,6 @@
     }
   },
   "howItWorks": {
-    "sectionLabel": "Comment ça marche",
     "title": "Comment ça marche au comptoir",
     "subtitle": "Quelques minutes pour tout préparer. Ensuite, il n'y a plus qu'à tamponner.",
     "steps": {
@@ -109,48 +107,10 @@
       }
     }
   },
-  "features": {
-    "sectionLabel": "Fonctionnalités",
-    "title": "Ce qui est inclus",
-    "subtitle": "Tous les forfaits ont les mêmes fonctionnalités. Ce qui change, c'est le nombre de clients et de programmes.",
-    "appleWallet": {
-      "title": "Apple Wallet",
-      "description": "Des cartes natives sur iPhone et Apple Watch, à côté des cartes d'embarquement. Elles se mettent à jour toutes seules."
-    },
-    "googleWallet": {
-      "title": "Google Wallet",
-      "description": "La même chose sur Android, sans app et avec mise à jour automatique."
-    },
-    "analytics": {
-      "title": "Statistiques",
-      "description": "Visites, tampons et récompenses par jour, et votre liste de clients exportable en CSV."
-    },
-    "designer": {
-      "title": "Éditeur de cartes",
-      "description": "Ajoutez votre logo, choisissez les couleurs et le fond, et voyez le résultat dans le Wallet au fur et à mesure."
-    },
-    "qr": {
-      "title": "Inscription par QR code",
-      "description": "Imprimez-le et posez-le sur le comptoir. Le client le scanne et a sa carte en quelques secondes."
-    },
-    "team": {
-      "title": "Équipe",
-      "description": "Chaque employé se connecte avec son propre compte. Vous seul voyez la facturation et les réglages."
-    },
-    "passTypes": {
-      "title": "Tampons et coupons",
-      "description": "Des cartes à tampons pour récompenser ceux qui reviennent, et des coupons pour une offre ponctuelle."
-    },
-    "pushNotifications": {
-      "title": "Messages sur l'écran verrouillé",
-      "description": "Envoyez un message sur l'écran verrouillé de tous ceux qui ont votre carte : une offre, de nouveaux horaires, une fermeture pour congés."
-    }
-  },
   "walletPreview": {
     "badge1": "Compatible Apple Wallet et Google Wallet",
     "badge2": "Se met à jour toute seule à chaque visite",
     "badge3": "S'ajoute en un scan, rien à télécharger",
-    "sectionLabel": "Ce que voit votre client",
     "title": "Dans son Wallet, pas au fond de son portefeuille",
     "description": "Aucune app à télécharger, aucun compte à créer. La carte se range à côté de ses cartes d'embarquement et compte les tampons toute seule à chaque visite.",
     "seePricing": "Voir les tarifs"
@@ -206,7 +166,6 @@
     }
   },
   "pricing": {
-    "sectionLabel": "Tarifs",
     "title": "Gratuit jusqu'à 50 clients",
     "subtitle": "Ensuite, vous payez selon le nombre de clients. Sans engagement, et sans carte bancaire pour commencer.",
     "monthly": "Mensuel",
@@ -261,7 +220,6 @@
     }
   },
   "faq": {
-    "sectionLabel": "FAQ",
     "title": "Questions fréquemment posées",
     "subtitle": "Ce qu'on nous demande le plus souvent avant de commencer",
     "stillHaveQuestions": "Une autre question ?",
@@ -303,7 +261,6 @@
     }
   },
   "tryDemo": {
-    "sectionLabel": "Essaie par toi-même",
     "title": "Essayez-la d'abord",
     "subtitle": "Scannez le code ou appuyez sur un bouton pour ajouter une carte de démonstration à votre Wallet. C'est exactement ce que verront vos clients.",
     "addToAppleWallet": "Ajouter à Apple Wallet",
@@ -1961,7 +1918,6 @@
     }
   },
   "staffApp": {
-    "sectionLabel": "App pour l'équipe",
     "title": "Votre équipe tamponne avec son propre téléphone",
     "subtitle": "Une app pour scanner les cartes, ajouter des tampons et valider des coupons au comptoir. Elle se connecte en scannant un QR code du tableau de bord.",
     "screenshots": {

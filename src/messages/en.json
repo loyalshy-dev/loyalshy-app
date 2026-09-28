@@ -51,7 +51,6 @@
     "browserUrl": "loyalshy.com/dashboard"
   },
   "featureShowcase": {
-    "sectionLabel": "Your dashboard",
     "title": "Who comes back, and when, at a glance",
     "browserUrl": "loyalshy.com",
     "tabs": {
@@ -88,7 +87,6 @@
     }
   },
   "howItWorks": {
-    "sectionLabel": "How it works",
     "title": "How it works at your counter",
     "subtitle": "Set it up in a few minutes. After that, it's just stamping.",
     "steps": {
@@ -109,48 +107,10 @@
       }
     }
   },
-  "features": {
-    "sectionLabel": "Features",
-    "title": "What's included",
-    "subtitle": "Every plan has the same features. What changes is how many customers and programs you can have.",
-    "appleWallet": {
-      "title": "Apple Wallet",
-      "description": "Native cards on iPhone and Apple Watch, next to boarding passes. They update themselves."
-    },
-    "googleWallet": {
-      "title": "Google Wallet",
-      "description": "The same on Android, with no app and automatic updates."
-    },
-    "analytics": {
-      "title": "Stats",
-      "description": "Visits, stamps and redemptions by day, and your customer list exportable to CSV."
-    },
-    "designer": {
-      "title": "Card designer",
-      "description": "Upload your logo, pick colors and a background, and see the result in the wallet as you change it."
-    },
-    "qr": {
-      "title": "Sign-up by QR code",
-      "description": "Print it and leave it on the counter. The customer scans it and has their card in a few seconds."
-    },
-    "team": {
-      "title": "Team",
-      "description": "Each staff member signs in with their own account. Only you see billing and settings."
-    },
-    "passTypes": {
-      "title": "Stamps and coupons",
-      "description": "Stamp cards to reward the people who come back, and coupons for a one-off offer."
-    },
-    "pushNotifications": {
-      "title": "Lock-screen messages",
-      "description": "Send a message to the lock screen of everyone who has your card: an offer, new opening hours, a holiday closure."
-    }
-  },
   "walletPreview": {
     "badge1": "Works with Apple Wallet and Google Wallet",
     "badge2": "Updates itself on every visit",
     "badge3": "Added with one scan, nothing to download",
-    "sectionLabel": "What your customer sees",
     "title": "In their Wallet, not lost in their wallet",
     "description": "No app to download, no account to create. The card sits next to their boarding passes and counts the stamps by itself on every visit.",
     "seePricing": "See pricing"
@@ -206,7 +166,6 @@
     }
   },
   "pricing": {
-    "sectionLabel": "Pricing",
     "title": "Free for up to 50 customers",
     "subtitle": "After that, you pay by how many customers you have. No contract, and no card to start.",
     "monthly": "Monthly",
@@ -261,7 +220,6 @@
     }
   },
   "faq": {
-    "sectionLabel": "FAQ",
     "title": "Frequently asked questions",
     "subtitle": "What people usually ask us before they start",
     "stillHaveQuestions": "Anything else?",
@@ -303,7 +261,6 @@
     }
   },
   "tryDemo": {
-    "sectionLabel": "Demo",
     "title": "Try it yourself first",
     "subtitle": "Scan the code or tap a button to add a demo card to your wallet. It's exactly what your customers will see.",
     "addToAppleWallet": "Add to Apple Wallet",
@@ -1961,7 +1918,6 @@
     }
   },
   "staffApp": {
-    "sectionLabel": "Staff app",
     "title": "Your team stamps from their own phone",
     "subtitle": "An app to scan cards, add stamps and redeem coupons at the counter. It connects by scanning a QR code from the dashboard.",
     "screenshots": {

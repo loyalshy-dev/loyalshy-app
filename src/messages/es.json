@@ -51,7 +51,6 @@
     "browserUrl": "loyalshy.com/dashboard"
   },
   "featureShowcase": {
-    "sectionLabel": "Tu panel",
     "title": "Quién vuelve y cuándo, de un vistazo",
     "browserUrl": "loyalshy.com",
     "tabs": {
@@ -88,7 +87,6 @@
     }
   },
   "howItWorks": {
-    "sectionLabel": "Cómo funciona",
     "title": "Así funciona en tu mostrador",
     "subtitle": "Lo dejas listo en unos minutos. Después, solo queda sellar.",
     "steps": {
@@ -109,48 +107,10 @@
       }
     }
   },
-  "features": {
-    "sectionLabel": "Funciones",
-    "title": "Lo que incluye",
-    "subtitle": "Todos los planes tienen las mismas funciones. Lo que cambia es cuántos clientes y programas puedes tener.",
-    "appleWallet": {
-      "title": "Apple Wallet",
-      "description": "Tarjetas nativas en el iPhone y el Apple Watch, junto a las tarjetas de embarque. Se actualizan solas."
-    },
-    "googleWallet": {
-      "title": "Google Wallet",
-      "description": "Lo mismo en Android, sin app y con actualización automática."
-    },
-    "analytics": {
-      "title": "Estadísticas",
-      "description": "Visitas, sellos y canjes por día, y tu lista de clientes exportable a CSV."
-    },
-    "designer": {
-      "title": "Diseñador de tarjetas",
-      "description": "Sube tu logo, elige colores y fondo, y ve el resultado en el Wallet mientras lo cambias."
-    },
-    "qr": {
-      "title": "Alta con un QR",
-      "description": "Lo imprimes y lo dejas en el mostrador. El cliente lo escanea y en unos segundos tiene su tarjeta."
-    },
-    "team": {
-      "title": "Equipo",
-      "description": "Cada empleado entra con su cuenta. Solo tú ves la facturación y los ajustes."
-    },
-    "passTypes": {
-      "title": "Sellos y cupones",
-      "description": "Tarjetas de sellos para premiar a quien vuelve y cupones para una oferta puntual."
-    },
-    "pushNotifications": {
-      "title": "Avisos al móvil",
-      "description": "Manda un aviso a la pantalla de bloqueo de todos los que tienen tu tarjeta: una oferta, un horario nuevo, un cierre por vacaciones."
-    }
-  },
   "walletPreview": {
     "badge1": "Funciona con Apple Wallet y Google Wallet",
     "badge2": "Se actualiza sola con cada visita",
     "badge3": "Se añade con un escaneo, sin descargar nada",
-    "sectionLabel": "Lo que ve tu cliente",
     "title": "Está en su Wallet, no en su cartera",
     "description": "No tienen que descargar ninguna app ni crear una cuenta. La tarjeta se guarda junto a sus tarjetas de embarque y cuenta los sellos sola en cada visita.",
     "seePricing": "Ver precios"
@@ -206,7 +166,6 @@
     }
   },
   "pricing": {
-    "sectionLabel": "Precios",
     "title": "Gratis hasta 50 clientes",
     "subtitle": "Después pagas según cuántos clientes tengas. Sin permanencia y sin tarjeta para empezar.",
     "monthly": "Mensual",
@@ -261,7 +220,6 @@
     }
   },
   "faq": {
-    "sectionLabel": "Preguntas",
     "title": "Preguntas frecuentes",
     "subtitle": "Lo que suelen preguntarnos antes de empezar",
     "stillHaveQuestions": "¿Te queda alguna duda?",
@@ -303,7 +261,6 @@
     }
   },
   "tryDemo": {
-    "sectionLabel": "Pruébalo tú mismo",
     "title": "Pruébala tú primero",
     "subtitle": "Escanea el código o pulsa un botón para añadir una tarjeta de prueba a tu Wallet. Es exactamente lo que verán tus clientes.",
     "addToAppleWallet": "Añadir a Apple Wallet",
@@ -1961,7 +1918,6 @@
     }
   },
   "staffApp": {
-    "sectionLabel": "App para el equipo",
     "title": "Tu equipo sella con su propio móvil",
     "subtitle": "Una app para escanear tarjetas, sumar sellos y canjear cupones en el mostrador. Se conecta escaneando un QR del panel.",
     "screenshots": {
