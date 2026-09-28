@@ -65,16 +65,10 @@ export function StaffApp() {
 
             </div>
 
-            <p
-              className="text-[13px] font-bold tracking-wide mb-4"
-              style={{ color: "var(--mk-brand-purple)" }}
-            >
-              {t("sectionLabel")}
-            </p>
             <div className="flex items-center justify-center gap-4 mb-1">
 
               <h2
-                className="mk-clamp-h2 font-black tracking-tight text-center"
+                className="font-display mk-clamp-h2 font-black tracking-tight leading-tight text-center text-balance"
                 style={{ color: "var(--mk-text)" }}
               >
                 {t("title")}

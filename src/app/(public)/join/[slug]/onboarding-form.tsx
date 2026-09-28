@@ -258,7 +258,7 @@ export function OnboardingForm({ organization, preselectedTemplateId }: Onboardi
             )}
 
             <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight">
+              <h1 className="font-display text-2xl font-semibold tracking-tight">
                 {organization.name}
               </h1>
               <p className="text-muted-foreground text-[15px]">

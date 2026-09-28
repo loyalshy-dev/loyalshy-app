@@ -105,7 +105,7 @@ export function ShareLinkSection({
         </div>
         <Button
           onClick={copyLink}
-          variant={copied ? "default" : "outline"}
+          variant={copied ? "ink" : "outline"}
           size="sm"
           className="shrink-0 gap-1.5 h-[42px] px-4"
         >

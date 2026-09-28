@@ -28,16 +28,16 @@ import { isUpgrade, type PlanId } from "@/lib/plans"
 const planAccents: Record<string, string> = {
   FREE: "bg-muted text-muted-foreground",
   STARTER: "bg-brand/10 text-brand",
-  GROWTH: "bg-chart-1/10 text-chart-1",
-  SCALE: "bg-chart-2/10 text-chart-2",
-  ENTERPRISE: "bg-chart-4/10 text-chart-4",
+  GROWTH: "bg-brand/10 text-brand",
+  SCALE: "bg-brand/10 text-brand",
+  ENTERPRISE: "bg-brand/10 text-brand",
 }
 
 const planBorders: Record<string, string> = {
   STARTER: "border-brand/30 ring-1 ring-brand/20",
-  GROWTH: "border-chart-1/30",
-  SCALE: "border-chart-2/30",
-  ENTERPRISE: "border-chart-4/30",
+  GROWTH: "border-brand/30 ring-1 ring-brand/20",
+  SCALE: "border-brand/30 ring-1 ring-brand/20",
+  ENTERPRISE: "border-brand/30 ring-1 ring-brand/20",
 }
 
 // ─── Status Labels ─────────────────────────────────────────
@@ -552,6 +552,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                     </Button>
                   ) : lookupKey ? (
                     <Button
+                      variant="outline"
                       size="sm"
                       className="w-full"
                       onClick={() => handleUpgrade(lookupKey)}

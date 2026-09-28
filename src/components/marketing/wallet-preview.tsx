@@ -23,14 +23,8 @@ export async function WalletPreview() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
           {/* Text column */}
           <FadeIn direction="left" className="order-2 lg:order-1 flex flex-col gap-8">
-            <p
-              className="text-[13px] font-bold tracking-wide"
-              style={{ color: "var(--mk-brand-green)" }}
-            >
-              {t("sectionLabel")}
-            </p>
             <h2
-              className="mk-clamp-h2 font-black tracking-tight leading-tight"
+              className="font-display mk-clamp-h2 font-black tracking-tight leading-tight"
               style={{ color: "var(--mk-text)" }}
             >
               {t("title")}

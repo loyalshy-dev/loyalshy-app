@@ -33,14 +33,8 @@ export async function TryDemo() {
       <div className="mx-auto max-w-5xl px-6 lg:px-8">
         <FadeIn>
           <div className="mx-auto max-w-2xl text-center mb-12 sm:mb-16">
-            <p
-              className="text-[13px] font-medium tracking-wide mb-3"
-              style={{ color: "var(--mk-brand-purple)" }}
-            >
-              {t("sectionLabel")}
-            </p>
             <h2
-              className="text-3xl sm:text-[2.75rem] font-bold"
+              className="font-display text-3xl sm:text-[2.75rem] font-bold"
               style={{ color: "var(--mk-text)", letterSpacing: "-0.035em" }}
             >
               {t("title")}

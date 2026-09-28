@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
@@ -10,17 +10,13 @@ import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
-// Inter loads globally but only applies on surfaces marked `data-brand="loyalshy"`.
+// Inter is the one body face on the web (landing, dashboard, studio, admin) —
+// `--font-sans` in globals.css. Cabinet Grotesk is for display sizes only.
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -115,8 +111,8 @@ async function IntlProvider({ children }: { children: React.ReactNode }) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        {/* Cabinet Grotesk (Indian Type Foundry / Fontshare) — applied only on
-            surfaces marked data-brand="loyalshy" via globals.css. */}
+        {/* Cabinet Grotesk (Indian Type Foundry / Fontshare) — display
+            sizes only, via globals.css. */}
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
         <link
           rel="stylesheet"
@@ -124,7 +120,7 @@ async function IntlProvider({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
+        className={`${geistMono.variable} ${inter.variable} antialiased`}
       >
         <NextIntlClientProvider messages={pickMessages(messages, SHARED_NAMESPACES)}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>

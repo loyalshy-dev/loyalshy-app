@@ -2,7 +2,7 @@ import Image from "next/image"
 import { Palette, Send, ScanLine } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { getTranslations } from "next-intl/server"
-import { Stagger, StaggerItem } from "./motion"
+import { FadeIn, Stagger, StaggerItem } from "./motion"
 import { StepVideo } from "./step-video"
 
 /* ─── Step type ──────────────────────────────────────────────────── */
@@ -72,6 +72,23 @@ export async function HowItWorks() {
       style={{ background: "var(--mk-surface)" }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <FadeIn>
+          <div className="mx-auto max-w-2xl text-center mb-12 sm:mb-16">
+            <h2
+              className="font-display mk-clamp-h2 font-black tracking-tight leading-tight text-balance mb-4"
+              style={{ color: "var(--mk-text)" }}
+            >
+              {t("title")}
+            </h2>
+            <p
+              className="text-[16px] max-w-md mx-auto"
+              style={{ color: "var(--mk-text-muted)" }}
+            >
+              {t("subtitle")}
+            </p>
+          </div>
+        </FadeIn>
+
         <Stagger className="grid grid-cols-1 gap-12 md:grid-cols-3" stagger={0.15}>
           {steps.map((step, i) => {
             const Icon = step.icon
@@ -79,15 +96,6 @@ export async function HowItWorks() {
             return (
               <StaggerItem key={step.number} className="h-full">
                 <div className="relative h-full">
-                  {/* Oversized faded step number */}
-                  <span
-                    aria-hidden="true"
-                    className="absolute -top-10 -left-6 text-[9rem] font-black leading-none select-none pointer-events-none hidden md:block"
-                    style={{ color: "oklch(0.704 0.193 32 / 0.04)" }}
-                  >
-                    {step.number}
-                  </span>
-
                   <div className="relative z-10 flex h-full flex-col gap-4">
                     {/* Media first on mobile for visual hook */}
                     <div

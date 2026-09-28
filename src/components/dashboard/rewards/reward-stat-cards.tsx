@@ -27,8 +27,8 @@ const statConfig = [
     key: "redemptionRate" as const,
     label: "Redemption Rate",
     icon: Clock,
-    iconClassName: "text-chart-4",
-    bgClassName: "bg-chart-4/10",
+    iconClassName: "text-foreground",
+    bgClassName: "bg-muted",
     suffix: "%",
   },
   {

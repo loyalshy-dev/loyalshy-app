@@ -18,6 +18,8 @@ const badgeVariants = cva(
           "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         link: "text-primary underline-offset-4 [a&]:hover:underline",
+        // Selected filter / emphasis — coral stays for actions.
+        ink: "bg-foreground text-background [a&]:hover:bg-foreground/90",
       },
     },
     defaultVariants: {

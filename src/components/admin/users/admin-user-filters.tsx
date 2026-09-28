@@ -81,7 +81,7 @@ export function AdminUserFilters({ search, filter, total }: AdminUserFiltersProp
         ).map((f) => (
           <button key={f.value} onClick={() => handleFilter(f.value)}>
             <Badge
-              variant={filter === f.value || (f.value === "all" && filter === "all") ? "default" : "outline"}
+              variant={filter === f.value || (f.value === "all" && filter === "all") ? "ink" : "outline"}
               className={`cursor-pointer text-[11px] px-2 py-0.5 ${
                 filter === f.value || (f.value === "all" && filter === "all") ? "" : "hover:bg-accent"
               }`}

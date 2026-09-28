@@ -1,12 +1,12 @@
 {
   "common": {
     "loyalshy": "Loyalshy",
-    "getStarted": "Get Started",
-    "getStartedFree": "Get Started Free",
-    "logIn": "Log In",
+    "getStarted": "Get started",
+    "getStartedFree": "Get started free",
+    "logIn": "Log in",
     "learnMore": "Learn more",
     "contact": "Contact",
-    "contactSales": "Contact Sales",
+    "contactSales": "Talk to sales",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -40,121 +40,80 @@
     "switchLanguage": "Switch language"
   },
   "hero": {
-    "badge": "Digital loyalty for small businesses",
-    "title1": "Loyalty cards",
-    "title2": "your customers",
-    "titleHighlight": "actually keep",
-    "subtitle": "Replace paper stamp cards with digital ones in Apple & Google Wallet. Reward repeat customers with stamp cards and coupons — no app required.",
-    "seeHowItWorks": "See How It Works",
+    "title1": "Your stamp card,",
+    "title2": "on your",
+    "titleHighlight": "customers' phones",
+    "subtitle": "Customers scan a QR code at the counter and the card saves to their Apple or Google Wallet. You stamp it from your phone. Free for up to 50 customers.",
+    "seeHowItWorks": "See how it works",
     "freeForever": "Free forever",
     "noCreditCard": "No credit card required",
     "screenshotAlt": "Loyalshy dashboard showing loyalty programs with beautiful card designs",
     "browserUrl": "loyalshy.com/dashboard"
   },
   "featureShowcase": {
-    "sectionLabel": "Platform",
-    "title": "Everything in one place",
+    "title": "Who comes back, and when, at a glance",
     "browserUrl": "loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Dashboard",
-        "description": "Get a real-time overview of visits, rewards, and customer engagement — all in one place.",
+        "description": "Each day's visits, stamps and redemptions, and which customers come back most.",
         "alt": "Program overview dashboard with stat cards and template details"
       },
       "cardDesigner": {
-        "label": "Card Designer",
-        "description": "Design stunning loyalty cards with our visual studio. Your brand, your style.",
+        "label": "Card designer",
+        "description": "Your logo, your colors, your reward. You see the card exactly as it will look in the wallet while you design it.",
         "alt": "Card design studio with floating toolbar and live wallet pass preview"
       },
       "programs": {
         "label": "Programs",
-        "description": "Manage all your loyalty programs in one place. Stamp cards and coupons, side by side.",
+        "description": "Stamp cards and coupons, each with its own design and rules.",
         "alt": "Programs grid showing different loyalty card types and designs"
       },
       "passes": {
         "label": "Passes",
-        "description": "Track every issued pass. Filter by status, search contacts, and manage pass lifecycle.",
+        "description": "Every card you've given out, with its status. Find a customer by name, email or phone.",
         "alt": "Pass instances list with status filters and search"
       },
       "distribution": {
         "label": "Distribution",
-        "description": "Generate QR codes, share links, and issue passes directly. Multiple sizes for print.",
+        "description": "The QR code to print in several sizes, a link to share, and the option to hand a card out yourself.",
         "alt": "Distribution page with QR code, shareable link, and print sizes"
       },
       "team": {
         "label": "Team",
-        "description": "Invite staff with role-based access. Owners and staff see different views.",
+        "description": "Invite your team. Staff stamp and redeem; billing and settings stay yours.",
         "alt": "Team settings showing members with roles and invite button"
       }
     }
   },
   "howItWorks": {
-    "sectionLabel": "How it works",
-    "title": "Three steps to launch",
-    "subtitle": "Go from zero to live loyalty program in under 5 minutes",
+    "title": "How it works at your counter",
+    "subtitle": "Set it up in a few minutes. After that, it's just stamping.",
     "steps": {
       "design": {
-        "title": "Design your pass",
-        "description": "Pick stamp card or coupon, then customize every detail — colors, logos, fields, and rewards — in our visual studio.",
-        "alt": "Card design studio — customize your wallet pass"
+        "title": "Design the card",
+        "description": "Pick a stamp card or a coupon, add your logo and colors, and choose the reward.",
+        "alt": "Card design studio with a live wallet preview"
       },
       "issue": {
-        "title": "Issue passes to contacts",
-        "description": "Distribute passes via QR code scan, shareable link, direct issue, or an NFC tap.",
+        "title": "Put the QR code out",
+        "description": "Print the QR code for the counter, share the link, or write it to an NFC sticker. The customer scans and the card saves to their wallet.",
         "alt": "Distribution page with QR code and manual issue"
       },
       "scan": {
-        "title": "Scan to update passes",
-        "description": "Scan a pass to add a stamp or redeem a coupon — updates sync instantly to Apple and Google Wallet.",
+        "title": "Stamp from your phone",
+        "description": "Scan the customer's card with the app to add a stamp or redeem a coupon. Their wallet updates on the spot.",
         "alt": "Scanning a wallet pass to record an interaction"
       }
     }
   },
-  "features": {
-    "sectionLabel": "Features",
-    "title": "Everything you need to grow loyalty",
-    "subtitle": "A complete platform built for businesses that take customer retention seriously",
-    "appleWallet": {
-      "title": "Apple Wallet",
-      "description": "Native passes that live right next to boarding passes and tickets. Auto-update on every visit."
-    },
-    "googleWallet": {
-      "title": "Google Wallet",
-      "description": "Full Android support. Passes update automatically — no app needed."
-    },
-    "analytics": {
-      "title": "Real-time Analytics",
-      "description": "Track visits, rewards, and engagement with beautiful dashboards and exportable reports."
-    },
-    "designer": {
-      "title": "Card Designer",
-      "description": "Design stunning loyalty cards with our visual studio. Upload logos, choose colors, pick patterns — make it yours."
-    },
-    "qr": {
-      "title": "QR Onboarding",
-      "description": "Print a QR code, place it at your counter. Customers join in seconds — no app downloads."
-    },
-    "team": {
-      "title": "Team Management",
-      "description": "Invite staff with role-based access. Owners and staff see different views."
-    },
-    "passTypes": {
-      "title": "Stamp Cards & Coupons",
-      "description": "Two types built for everyday loyalty — punch cards that reward repeat visits, and coupons that drive a single redemption."
-    },
-    "pushNotifications": {
-      "title": "Push Notifications",
-      "description": "Send real-time updates to your customers' lock screens. Announce offers, remind about expiring passes, and drive engagement."
-    }
-  },
   "walletPreview": {
-    "badge1": "Works with Apple & Google Wallet",
-    "badge2": "Updates automatically on every visit",
-    "badge3": "One scan to join, no app required",
-    "sectionLabel": "The customer experience",
-    "title": "Beautiful passes that live in their wallet",
-    "description": "No app to download. No account to create. Your customers scan once and get a loyalty card that lives right next to their boarding passes — and updates automatically every visit.",
-    "seePricing": "See pricing →"
+    "badge1": "Works with Apple Wallet and Google Wallet",
+    "badge2": "Updates itself on every visit",
+    "badge3": "Added with one scan, nothing to download",
+    "title": "In their Wallet, not lost in their wallet",
+    "description": "No app to download, no account to create. The card sits next to their boarding passes and counts the stamps by itself on every visit.",
+    "seePricing": "See pricing"
   },
   "testimonials": {
     "sectionLabel": "Testimonials",
@@ -207,131 +166,128 @@
     }
   },
   "pricing": {
-    "sectionLabel": "Pricing",
-    "title": "Start free, scale as you grow",
-    "subtitle": "No credit card required. Upgrade when you need more.",
+    "title": "Free for up to 50 customers",
+    "subtitle": "After that, you pay by how many customers you have. No contract, and no card to start.",
     "monthly": "Monthly",
     "annual": "Annual",
     "save20": "Save 20%",
     "savedPerYear": "saved per year",
-    "mostPopular": "Most Popular",
+    "mostPopular": "Recommended",
     "free": {
       "name": "Free",
-      "description": "Try Loyalshy with your first customers",
+      "description": "To try it with your first customers",
       "features": {
-        "contacts": "Up to 50 contacts",
+        "contacts": "Up to 50 customers",
         "programs": "1 program",
-        "staff": "1 staff member",
-        "announcements": "2 wallet announcements"
+        "staff": "1 team member",
+        "announcements": "2 messages in total"
       }
     },
     "starter": {
       "name": "Pro",
-      "description": "For small businesses ready to grow",
+      "description": "For a business with regulars",
       "features": {
-        "contacts": "Up to 500 contacts",
+        "contacts": "Up to 500 customers",
         "programs": "Up to 2 programs",
-        "staff": "2 staff members",
-        "announcements": "1 wallet announcement / week"
+        "staff": "2 team members",
+        "announcements": "1 message a week"
       }
     },
     "growth": {
       "name": "Business",
-      "description": "For growing businesses with multiple programs",
+      "description": "For businesses running several programs at once",
       "features": {
-        "contacts": "Up to 2,500 contacts",
+        "contacts": "Up to 2,500 customers",
         "programs": "Up to 5 programs",
-        "staff": "5 staff members",
-        "announcements": "2 wallet announcements / week"
+        "staff": "5 team members",
+        "announcements": "2 messages a week"
       }
     },
     "scale": {
       "name": "Scale",
-      "description": "For serious loyalty programs at scale",
+      "description": "For chains and high-volume businesses",
       "features": {
-        "contacts": "Unlimited contacts",
+        "contacts": "Unlimited customers",
         "programs": "Unlimited programs",
-        "staff": "25 staff members",
-        "announcements": "5 wallet announcements / week"
+        "staff": "25 team members",
+        "announcements": "5 messages a week"
       }
     },
     "enterprise": {
       "name": "Enterprise",
-      "description": "Custom plan for large teams",
-      "features": "Unlimited everything, white-label branding, dedicated support & SLA."
+      "description": "For chains with their own needs",
+      "features": "Custom limits, dedicated support and contract terms."
     }
   },
   "faq": {
-    "sectionLabel": "FAQ",
     "title": "Frequently asked questions",
-    "subtitle": "Everything you need to know about Loyalshy",
-    "stillHaveQuestions": "Still have questions?",
+    "subtitle": "What people usually ask us before they start",
+    "stillHaveQuestions": "Anything else?",
     "emailUs": "Email us",
-    "replyTime": "— we typically reply within a few hours.",
+    "replyTime": "and we'll answer by email.",
     "items": {
       "howWorks": {
         "question": "How does Loyalshy work?",
-        "answer": "Loyalshy replaces paper punch cards with digital loyalty cards that live in your customers' Apple or Google Wallet. You set up your business, print a QR code, and customers scan it to get their digital pass. Staff register visits from the dashboard, and customers automatically earn rewards."
+        "answer": "You design your stamp card or coupon in the dashboard and print the QR code. Your customers scan it and the card saves to their Apple or Google Wallet. When they come back, your team scans the card with the Loyalshy app and adds the stamp. When the card is full, the reward shows up by itself."
       },
       "devices": {
-        "question": "What devices are supported?",
-        "answer": "Loyalshy works with Apple Wallet (iPhone, Apple Watch) and Google Wallet (Android). The passes automatically update whenever a visit is registered — no app download required for customers."
+        "question": "What do my customers need?",
+        "answer": "An iPhone with Apple Wallet or an Android phone with Google Wallet. They don't download anything or create an account. On iPhone, the card also shows up on Apple Watch."
       },
       "setup": {
-        "question": "How long does setup take?",
-        "answer": "Most businesses are up and running in under 5 minutes. Create your account, customize your loyalty program, print your QR code, and you're ready to go."
+        "question": "How long does it take to start?",
+        "answer": "Creating the account, designing the card and printing the QR code takes a few minutes. To stamp, your team installs the app on their phone and connects it by scanning a QR code from the dashboard."
       },
       "passTypes": {
-        "question": "What types of passes can I create?",
-        "answer": "Loyalshy focuses on two pass types: digital stamp cards (reward customers after a set number of visits) and digital coupons (one-time or unlimited redeemable offers). Both live in Apple and Google Wallet."
+        "question": "What kinds of card can I create?",
+        "answer": "Two: stamp cards, which give a reward after a number of visits, and coupons, which can be redeemed once or as many times as you like. Both work in Apple and Google Wallet."
       },
       "freePlan": {
         "question": "Is there a free plan?",
-        "answer": "Yes! Our Free plan lets you get started with up to 50 contacts and 1 program — choose a stamp card or coupon. No credit card required, free forever. Upgrade anytime when you need more."
+        "answer": "Yes. The Free plan gives you 1 program and up to 50 customers, with no credit card and no end date. When you outgrow it, you change plans."
       },
       "cancel": {
         "question": "How do I cancel?",
-        "answer": "You can cancel your subscription at any time from your billing settings. There are no long-term contracts or cancellation fees."
+        "answer": "From your billing settings, whenever you want. No contract, no fee."
       },
       "security": {
-        "question": "Is my data secure?",
-        "answer": "Yes. We use industry-standard encryption, secure authentication, and your data is stored on enterprise-grade infrastructure. We never share your customer data with third parties."
+        "question": "What happens to my customers' data?",
+        "answer": "It's yours. We don't sell it or use it for advertising, and you can export your customer list to CSV whenever you want."
       },
       "customize": {
-        "question": "Can I customize the loyalty card design?",
-        "answer": "Yes! Our visual studio lets you upload your logo, set brand colors, choose patterns, and fully customize how your wallet passes look. Every pass matches your business's identity."
+        "question": "Can the card carry my brand?",
+        "answer": "Yes. Upload your logo, choose the colors and background image, and decide which fields show. As you change it, you see how it looks in Apple and Google Wallet."
       }
     }
   },
   "tryDemo": {
-    "sectionLabel": "Try it yourself",
-    "title": "Add a pass to your wallet",
-    "subtitle": "See how it feels for your customers. Scan the QR code or tap a button to add a demo loyalty card to your Apple or Google Wallet.",
+    "title": "Try it yourself first",
+    "subtitle": "Scan the code or tap a button to add a demo card to your wallet. It's exactly what your customers will see.",
     "addToAppleWallet": "Add to Apple Wallet",
     "addToGoogleWallet": "Add to Google Wallet",
     "cardPreviewAlt": "Demo loyalty card preview",
-    "or": "or visit the link below",
-    "openJoinPage": "Open demo pass page",
+    "or": "or open the link",
+    "openJoinPage": "Open the demo card",
     "tapToFlip": "Tap to flip"
   },
   "closingCta": {
-    "title1": "Ready to grow your",
-    "titleHighlight": "repeat business",
-    "subtitle": "Join businesses using Loyalshy to turn first-time visitors into loyal regulars. Set up in 5 minutes, no credit card required.",
-    "viewPricing": "View Pricing",
-    "talkToUs": "Talk to us →",
+    "title1": "Print the QR code today.",
+    "titleHighlight": "Get your first stamps tomorrow.",
+    "subtitle": "Free for up to 50 customers, no credit card.",
+    "viewPricing": "See pricing",
+    "talkToUs": "Talk to us",
     "floatingCardAlt": "Example loyalty card"
   },
   "footer": {
     "product": "Product",
     "company": "Company",
     "legal": "Legal",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "cookiePolicy": "Cookie Policy",
-    "tagline": "Digital loyalty cards for modern businesses.",
+    "privacyPolicy": "Privacy policy",
+    "termsOfService": "Terms of service",
+    "cookiePolicy": "Cookie policy",
+    "tagline": "Stamp cards and coupons in Apple and Google Wallet.",
     "copyright": "© 2026 Loyalshy, a product by HEX CONCEPTS STUDIO, S.L. All rights reserved.",
-    "builtWith": "Built with care for business owners.",
+    "builtWith": "Made in Spain.",
     "instagram": "Loyalshy on Instagram",
     "tiktok": "Loyalshy on TikTok"
   },
@@ -1962,9 +1918,8 @@
     }
   },
   "staffApp": {
-    "sectionLabel": "Staff App",
-    "title": "Empower your team on the floor",
-    "subtitle": "Give your staff a dedicated mobile app to scan passes, add stamps, redeem coupons, and manage loyalty actions — all from their phone.",
+    "title": "Your team stamps from their own phone",
+    "subtitle": "An app to scan cards, add stamps and redeem coupons at the counter. It connects by scanning a QR code from the dashboard.",
     "screenshots": {
       "home": "Staff home with contacts and activity",
       "scan": "QR code scanner screen",
@@ -1973,20 +1928,20 @@
     },
     "features": {
       "scan": {
-        "title": "Instant QR scanning",
-        "description": "Point and scan any customer's wallet pass in under a second."
+        "title": "Scan and stamp",
+        "description": "Point at the customer's card and the stamp is added in a second. Made a mistake? Undo it."
       },
       "activity": {
-        "title": "Live activity feed",
-        "description": "See recent interactions across all your programs in real time."
+        "title": "Today's activity",
+        "description": "The latest stamps and redemptions across all your programs, in order."
       },
       "pairing": {
-        "title": "QR pairing setup",
-        "description": "Scan a QR code from the dashboard to connect in seconds — no passwords needed."
+        "title": "Connects with a QR code",
+        "description": "Scan a code from the dashboard and the phone is connected, no passwords."
       },
       "secure": {
-        "title": "Role-based access",
-        "description": "Staff see only what they need. Owners keep full control from the dashboard."
+        "title": "Everyone sees their part",
+        "description": "Staff stamp and redeem. Settings and billing stay in the dashboard."
       }
     },
     "downloadAppStore": "Download on the App Store",

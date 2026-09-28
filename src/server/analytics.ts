@@ -42,11 +42,6 @@ export type BusiestDayData = {
   interactions: number
 }
 
-export type RewardDistributionItem = {
-  position: number
-  count: number
-}
-
 export type ActivityItem = {
   id: string
   type: "stamp" | "reward_earned" | "reward_redeemed" | "check_in" | "coupon_redeemed" | "points_earned" | "gift_charge" | "ticket_scan"
@@ -365,49 +360,6 @@ export async function getBusiestDays(): Promise<BusiestDayData[]> {
   }))
 }
 
-// ─── 4. Reward Cycle Distribution ───────────────────────────
-
-export async function getRewardDistribution(
-  visitsRequired: number,
-  templateId?: string
-): Promise<RewardDistributionItem[]> {
-  const organizationId = await requireOrganizationId()
-
-  // This is specific to STAMP_CARD — reads currentCycleVisits from passInstance.data
-  // For now, we query pass instances and extract cycle visits from data JSON
-  const instanceWhere: Record<string, unknown> = {
-    passTemplate: { organizationId, passType: "STAMP_CARD" },
-    status: "ACTIVE",
-  }
-
-  if (templateId) {
-    instanceWhere.passTemplateId = templateId
-  }
-
-  const instances = await db.passInstance.findMany({
-    where: instanceWhere as Prisma.PassInstanceWhereInput,
-    select: { data: true },
-  })
-
-  // Build distribution map
-  const countMap = new Map<number, number>()
-  for (const inst of instances) {
-    const data = (inst.data as Record<string, unknown>) ?? {}
-    const cycleVisits = (data.currentCycleVisits as number) ?? 0
-    countMap.set(cycleVisits, (countMap.get(cycleVisits) ?? 0) + 1)
-  }
-
-  const distribution: RewardDistributionItem[] = []
-  for (let i = 0; i < visitsRequired; i++) {
-    distribution.push({
-      position: i,
-      count: countMap.get(i) ?? 0,
-    })
-  }
-
-  return distribution
-}
-
 // ─── 5. Recent Activity ─────────────────────────────────────
 
 export async function getRecentActivity(): Promise<ActivityItem[]> {
@@ -605,6 +557,3 @@ export async function getTopContacts(): Promise<TopContactItem[]> {
     }
   })
 }
-
-// Need Prisma import for type casting in getRewardDistribution
-import { Prisma } from "@prisma/client"

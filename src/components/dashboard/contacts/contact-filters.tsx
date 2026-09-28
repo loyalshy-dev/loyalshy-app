@@ -136,7 +136,7 @@ export function ContactFilters({
           className="focus:outline-none"
         >
           <Badge
-            variant={hasReward === "yes" ? "default" : "outline"}
+            variant={hasReward === "yes" ? "ink" : "outline"}
             className={`cursor-pointer text-[11px] px-2 py-0.5 ${
               hasReward === "yes"
                 ? ""
@@ -159,7 +159,7 @@ export function ContactFilters({
               className="focus:outline-none"
             >
               <Badge
-                variant={isActive ? "default" : "outline"}
+                variant={isActive ? "ink" : "outline"}
                 className={`cursor-pointer text-[11px] px-2 py-0.5 gap-1 ${
                   isActive ? "" : "hover:bg-accent"
                 }`}

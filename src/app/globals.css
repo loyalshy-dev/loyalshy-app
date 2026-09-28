@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -16,7 +16,6 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
@@ -62,8 +61,11 @@
   --card-foreground: oklch(0.13 0.005 285);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.13 0.005 285);
-  --primary: oklch(0.21 0.006 285);
-  --primary-foreground: oklch(0.985 0 0);
+  /* Coral is the one accent (same as the staff app and the landing): the
+     main action on each screen, focus rings, toggles, selection tint.
+     Selected segments/chips use ink (`variant="ink"`), not primary. */
+  --primary: oklch(0.704 0.193 32);           /* Coral #FF6B47 */
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.965 0.002 285);
   --secondary-foreground: oklch(0.21 0.006 285);
   --muted: oklch(0.965 0.002 285);
@@ -73,7 +75,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.915 0.005 285);
   --input: oklch(0.915 0.005 285);
-  --ring: oklch(0.21 0.006 285);
+  --ring: oklch(0.704 0.193 32);
 
   /* — Brand color (per-organization theming, default = Loyalshy coral) — */
   --brand: oklch(0.704 0.193 32);
@@ -85,12 +87,15 @@
   --warning: oklch(0.75 0.15 75);
   --warning-foreground: oklch(0.21 0.006 285);
 
-  /* — Charts — */
-  --chart-1: oklch(0.55 0.2 265);
-  --chart-2: oklch(0.6 0.15 185);
-  --chart-3: oklch(0.65 0.12 145);
-  --chart-4: oklch(0.7 0.14 75);
-  --chart-5: oklch(0.6 0.18 330);
+  /* — Charts: emphasis + context, not a rainbow —
+     1 = the measure you're reading (coral, one step deeper than --primary
+     so a 2px line clears 3:1 on white), 2 = a comparison (ink),
+     3/4 = context (gray; e.g. the bars that aren't the max). Identity
+     between equal series comes from labels, never from extra hues. */
+  --chart-1: oklch(0.68 0.195 32);
+  --chart-2: oklch(0.3 0.01 285);
+  --chart-3: oklch(0.58 0.01 285);
+  --chart-4: oklch(0.8 0.006 285);
 
   /* — Sidebar: light in light mode, dark in dark mode — */
   --sidebar: oklch(0.985 0 0);
@@ -100,13 +105,14 @@
   --sidebar-accent: oklch(0.945 0.004 285);
   --sidebar-accent-foreground: oklch(0.13 0.005 285);
   --sidebar-border: oklch(0.915 0.005 285);
-  --sidebar-ring: oklch(0.21 0.006 285);
+  --sidebar-ring: oklch(0.704 0.193 32);
 }
 
 /* ═══════════════════════════════════════════════════════════
    Loyalshy brand override — scoped via [data-brand="loyalshy"]
    Applied on landing, (public), and (auth) surfaces only.
-   Dashboard / studio / admin keep the neutral shadcn palette.
+   Dashboard / studio / admin keep the neutral shadcn palette (with
+   coral as --primary, see :root) — no cream there.
    Palette: Cream #FFF8F1, Ink #1F1410, Coral #FF6B47.
    ═══════════════════════════════════════════════════════════ */
 
@@ -146,12 +152,14 @@
   --mk-footer-bg: oklch(0.187 0.021 38);
   --mk-glass-bg: oklch(1 0 0 / 0.7);
   --mk-glass-border: oklch(0.92 0.012 81 / 0.6);
-
-  /* Body font: Inter. Headings inherit Cabinet Grotesk via the rule below. */
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
-[data-brand="loyalshy"] :is(h1, h2, h3, h4, .font-display) {
+/* Cabinet Grotesk is a display face: page titles and hero/section
+   headlines (24px and up), never body or small headings — two faces at
+   neighbouring sizes read as a mistake. Opt in per heading with
+   `font-display`; a tag rule would also catch the small h2s (legal pages,
+   footer) and miss display titles that aren't headings (CardTitle). */
+.font-display {
   font-family: "Cabinet Grotesk", var(--font-inter), system-ui, sans-serif;
   letter-spacing: -0.02em;
 }
@@ -203,8 +211,8 @@
   --card-foreground: oklch(0.95 0 0);
   --popover: oklch(0.17 0.005 285);
   --popover-foreground: oklch(0.95 0 0);
-  --primary: oklch(0.95 0 0);
-  --primary-foreground: oklch(0.16 0.005 285);
+  --primary: oklch(0.74 0.19 32);             /* Coral, lifted for dark */
+  --primary-foreground: oklch(0.13 0.005 285);
   --secondary: oklch(0.22 0.008 285);
   --secondary-foreground: oklch(0.95 0 0);
   --muted: oklch(0.22 0.008 285);
@@ -214,18 +222,17 @@
   --destructive: oklch(0.65 0.2 25);
   --border: oklch(0.25 0.008 285);
   --input: oklch(0.25 0.008 285);
-  --ring: oklch(0.55 0.01 285);
+  --ring: oklch(0.74 0.19 32);
   --brand: oklch(0.74 0.19 32);             /* Coral kept (per-org default) */
   --brand-foreground: oklch(0.985 0 0);
   --success: oklch(0.62 0.17 145);
   --success-foreground: oklch(0.985 0 0);
   --warning: oklch(0.75 0.15 75);
   --warning-foreground: oklch(0.13 0.005 285);
-  --chart-1: oklch(0.55 0.22 265);
-  --chart-2: oklch(0.65 0.15 165);
-  --chart-3: oklch(0.7 0.17 75);
-  --chart-4: oklch(0.6 0.24 310);
-  --chart-5: oklch(0.6 0.22 20);
+  --chart-1: oklch(0.74 0.19 32);
+  --chart-2: oklch(0.92 0.004 285);
+  --chart-3: oklch(0.62 0.01 285);
+  --chart-4: oklch(0.46 0.01 285);
   --sidebar: oklch(0.13 0.005 285);
   --sidebar-foreground: oklch(0.7 0.01 285);
   --sidebar-primary: oklch(0.95 0 0);
@@ -233,15 +240,17 @@
   --sidebar-accent: oklch(0.2 0.008 285);
   --sidebar-accent-foreground: oklch(0.92 0 0);
   --sidebar-border: oklch(0.22 0.008 285);
-  --sidebar-ring: oklch(0.4 0.01 285);
+  --sidebar-ring: oklch(0.74 0.19 32);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  /* font-sans here, not on <html>: next/font sets --font-inter on <body>,
+     so Tailwind's html-level default can't resolve it. */
   body {
-    @apply bg-background text-foreground overflow-x-hidden;
+    @apply bg-background text-foreground font-sans overflow-x-hidden;
   }
 }
 

@@ -197,7 +197,7 @@ export function ClaimForm({ token }: { token: string }) {
     return (
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{t(titleKey)}</CardTitle>
+          <CardTitle className="font-display text-2xl font-bold">{t(titleKey)}</CardTitle>
           <CardDescription>{t(descKey)}</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
@@ -215,7 +215,7 @@ export function ClaimForm({ token }: { token: string }) {
     return (
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="font-display text-2xl font-bold">
             {t("title", { organizationName: handoff.organizationName })}
           </CardTitle>
           <CardDescription>
@@ -311,7 +311,7 @@ export function ClaimForm({ token }: { token: string }) {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">
+        <CardTitle className="font-display text-2xl font-bold">
           {t("title", { organizationName: handoff.organizationName })}
         </CardTitle>
         <CardDescription>

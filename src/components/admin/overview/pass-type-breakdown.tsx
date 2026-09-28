@@ -1,8 +1,8 @@
 import { Card } from "@/components/ui/card"
 
 const passTypeConfig: Record<string, { label: string; color: string }> = {
-  STAMP_CARD: { label: "Stamp Card", color: "bg-blue-500" },
-  COUPON: { label: "Coupon", color: "bg-green-500" },
+  STAMP_CARD: { label: "Stamp Card", color: "bg-chart-1" },
+  COUPON: { label: "Coupon", color: "bg-chart-1" },
 }
 
 type PassTypeBreakdownProps = {

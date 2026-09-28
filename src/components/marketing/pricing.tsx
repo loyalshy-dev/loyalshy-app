@@ -340,18 +340,8 @@ export function Pricing() {
       <div className="relative mx-auto max-w-6xl">
         <FadeIn>
           <div className="text-center mb-10">
-            <p
-              className="mb-3 inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold tracking-wide"
-              style={{
-                border: "1px solid var(--mk-border)",
-                background: "var(--mk-card)",
-                color: "var(--mk-text-dimmed)",
-              }}
-            >
-              {t("sectionLabel")}
-            </p>
             <h2
-              className="mk-clamp-h2 font-black tracking-tight mb-4"
+              className="font-display mk-clamp-h2 font-black tracking-tight mb-4"
               style={{ color: "var(--mk-text)" }}
             >
               {t("title")}

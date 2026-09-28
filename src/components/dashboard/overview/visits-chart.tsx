@@ -116,12 +116,12 @@ export function InteractionsChart({ initialData, initialRange }: InteractionsCha
               <linearGradient id="interactionsFill" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="0%"
-                  stopColor="oklch(0.55 0.2 265)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={0.2}
                 />
                 <stop
                   offset="100%"
-                  stopColor="oklch(0.55 0.2 265)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={0}
                 />
               </linearGradient>
@@ -129,19 +129,19 @@ export function InteractionsChart({ initialData, initialRange }: InteractionsCha
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
-              stroke="oklch(0.915 0.005 285)"
+              stroke="var(--border)"
             />
             <XAxis
               dataKey="date"
               tickFormatter={formatXAxis}
               interval={tickInterval}
-              tick={{ fontSize: 11, fill: "oklch(0.52 0.01 285)" }}
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               allowDecimals={false}
-              tick={{ fontSize: 11, fill: "oklch(0.52 0.01 285)" }}
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
               axisLine={false}
               tickLine={false}
             />
@@ -149,7 +149,7 @@ export function InteractionsChart({ initialData, initialRange }: InteractionsCha
             <Area
               type="monotone"
               dataKey="interactions"
-              stroke="oklch(0.55 0.2 265)"
+              stroke="var(--chart-1)"
               strokeWidth={2}
               fill="url(#interactionsFill)"
             />

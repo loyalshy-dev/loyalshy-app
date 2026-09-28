@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
+import { Wordmark } from "@/components/brand-mark"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
@@ -66,13 +66,7 @@ export function MarketingNavbar() {
             className="flex items-center transition-opacity hover:opacity-80"
             aria-label={t("home")}
           >
-            <Image
-              src="/logo-nobg.png"
-              alt={tCommon("loyalshy")}
-              width={160}
-              height={44}
-              className="h-18 w-auto lg:h-22"
-            />
+            <Wordmark className="text-[22px] lg:text-[26px] text-(--mk-text)" />
           </Link>
 
           {/* Center nav links — desktop only */}

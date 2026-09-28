@@ -7,6 +7,7 @@ import { getMessages, getTranslations } from "next-intl/server"
 import { getCurrentUser } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { AuthRedirectGate } from "@/components/auth-redirect-gate"
+import { Wordmark } from "@/components/brand-mark"
 
 const AUTH_NAMESPACES = ["common", "auth", "nav"] as const
 
@@ -93,6 +94,12 @@ export default async function AuthLayout({
       <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-125 w-150 rounded-full bg-brand/6 blur-[120px] dark:bg-brand/10" />
 
       <div className="relative z-10 w-full max-w-xl">
+        <Link
+          href="/"
+          className="mx-auto mb-6 flex w-fit rounded-md text-[28px] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Wordmark layout="stacked" />
+        </Link>
         <Suspense>
           <AuthLayoutInner>{children}</AuthLayoutInner>
         </Suspense>

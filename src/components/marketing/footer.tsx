@@ -1,6 +1,6 @@
-import Image from "next/image"
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
+import { Wordmark } from "@/components/brand-mark"
 
 interface FooterColumn {
   heading: string
@@ -79,13 +79,7 @@ export async function MarketingFooter() {
               className="inline-flex items-center transition-opacity hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               aria-label="Loyalshy home"
             >
-              <Image
-                src="/logo-nobg.png"
-                alt="Loyalshy"
-                width={120}
-                height={32}
-                className="h-14 w-auto"
-              />
+              <Wordmark className="text-[22px] text-[oklch(0.97_0_0)]" />
             </Link>
             <p
               className="mt-3 text-[14px] leading-relaxed max-w-55"

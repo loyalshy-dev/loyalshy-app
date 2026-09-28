@@ -19,28 +19,10 @@ export async function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left: Text content */}
           <div className="lg:col-span-7 flex flex-col items-start gap-6 sm:gap-8">
-            {/* Badge */}
-            <div className="hero-fade-in max-w-full" style={{ animationDelay: "0ms" }}>
-              <div
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs sm:text-sm font-semibold tracking-wide"
-                style={{
-                  background: "oklch(0.704 0.193 32 / 0.06)",
-                  border: "1px solid oklch(0.704 0.193 32 / 0.15)",
-                  color: "var(--mk-brand-purple)",
-                }}
-              >
-                <span
-                  className="size-1.5 shrink-0 rounded-full"
-                  style={{ background: "var(--mk-brand-purple)" }}
-                />
-                {t("badge")}
-              </div>
-            </div>
-
             {/* Headline */}
             <div className="hero-fade-in" style={{ animationDelay: "100ms" }}>
               <h1
-                className="mk-clamp-h1 font-black leading-[0.95] tracking-[-0.025em] sm:tracking-[-0.035em] lg:tracking-[-0.045em]"
+                className="font-display mk-clamp-h1 font-black leading-[0.95] tracking-[-0.025em] sm:tracking-[-0.035em] lg:tracking-[-0.045em]"
                 style={{ color: "var(--mk-text)" }}
               >
                 {t("title1")}{" "}
@@ -67,7 +49,7 @@ export async function Hero() {
                   {tCommon("getStartedFree")}
                   <ArrowRight className="size-4" />
                 </Link>
-                <Link href="#features" className="mk-btn-ghost py-4! px-8! text-base! w-full sm:w-auto">
+                <Link href="#how-it-works" className="mk-btn-ghost py-4! px-8! text-base! w-full sm:w-auto">
                   {t("seeHowItWorks")}
                 </Link>
               </div>

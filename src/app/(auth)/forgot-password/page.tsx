@@ -69,7 +69,7 @@ function ForgotPasswordForm() {
     return (
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{t("checkEmail")}</CardTitle>
+          <CardTitle className="font-display text-2xl font-bold">{t("checkEmail")}</CardTitle>
           <CardDescription>
             {t("emailSent", { email })}
           </CardDescription>
@@ -107,7 +107,7 @@ function ForgotPasswordForm() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">{t("title")}</CardTitle>
+        <CardTitle className="font-display text-2xl font-bold">{t("title")}</CardTitle>
         <CardDescription>
           {t("subtitle")}
         </CardDescription>
