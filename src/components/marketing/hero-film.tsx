@@ -88,20 +88,25 @@ function WalletButtons({ demoUrl, t, tDemo, align }: { demoUrl: string; t: Retur
 }
 
 function StoreBadges({ appStoreUrl, playStoreUrl, t, align }: { appStoreUrl?: string; playStoreUrl?: string; t: ReturnType<typeof useTranslations>; align: "left" | "center" }) {
-  if (!appStoreUrl && !playStoreUrl) return null
   const j = align === "left" ? "justify-center lg:justify-start" : "justify-center"
+  const badges = [
+    { url: appStoreUrl, src: "/staff-app/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg", label: t("film.appStore"), w: 156 },
+    { url: playStoreUrl, src: "/staff-app/GetItOnGooglePlay_Badge_Web_color_English.svg", label: t("film.playStore"), w: 180 },
+  ]
   return (
     <div className={`flex flex-wrap items-center gap-3 ${j}`}>
-      {appStoreUrl && (
-        <Link href={appStoreUrl} target="_blank" rel="noopener noreferrer" aria-label={t("film.appStore")}>
-          <Image src="/staff-app/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg" alt={t("film.appStore")} width={156} height={48} className="h-11 w-auto" />
-        </Link>
-      )}
-      {playStoreUrl && (
-        <Link href={playStoreUrl} target="_blank" rel="noopener noreferrer" aria-label={t("film.playStore")}>
-          <Image src="/staff-app/GetItOnGooglePlay_Badge_Web_color_English.svg" alt={t("film.playStore")} width={180} height={48} className="h-11 w-auto" />
-        </Link>
-      )}
+      {badges.map((b) => {
+        const img = <Image src={b.src} alt={b.label} width={b.w} height={48} className="h-11 w-auto" />
+        return b.url ? (
+          <Link key={b.src} href={b.url} target="_blank" rel="noopener noreferrer" aria-label={b.label}>
+            {img}
+          </Link>
+        ) : (
+          <span key={b.src} aria-label={b.label} title={t("film.soon")}>
+            {img}
+          </span>
+        )
+      })}
     </div>
   )
 }
@@ -165,7 +170,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   // a card sits beside it.
   const shift = narrow ? 0 : 240
   const side = narrow ? 0 : 56
-  const x = useSpring(useTransform(p, [0, 0.1, 0.26, 0.42, 0.5, 0.72, 0.8, 0.93, 0.99], narrow ? [0, 0, 0, 0, 0, 0, 0, 0, 0] : [0, shift, shift + side, shift + side, shift - 30, shift - 30, shift + side, shift + side, 0]), HEAVY)
+  const x = useSpring(useTransform(p, [0, 0.1, 0.26, 0.42, 0.5, 0.72, 0.8, 0.93, 0.99], narrow ? [0, 0, 0, 0, 0, 0, 0, 0, 0] : [0, shift, shift + side, shift + side, shift - 30, shift - 30, shift + side, shift + side, shift]), HEAVY)
 
   // Screen layers
   const lockOpacity = useFade([0, 0.06, 0.12, 0.36, 0.42, 0.94, 0.96], [1, 1, 0, 0, 1, 1, 0])
@@ -247,12 +252,17 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
         <p ref={liveRef} className="sr-only" aria-live="polite" />
         <div className="mk-wrap relative h-full">
           {/* Captions: under the phone on phones, on the left axis on desktop */}
-          <div className="absolute inset-x-0 bottom-2 h-[16rem] lg:inset-x-auto lg:bottom-auto lg:left-10 lg:top-1/2 lg:h-auto lg:w-5/12 lg:-translate-y-1/2">
+          <div className="absolute inset-x-0 bottom-2 h-[18rem] lg:inset-x-auto lg:bottom-auto lg:left-10 lg:top-1/2 lg:h-auto lg:w-5/12 lg:-translate-y-1/2">
             <motion.p style={{ opacity: intro }} className="mk-lead absolute inset-x-0 top-0 text-center lg:hidden">
               {t("film.scroll")}
             </motion.p>
             {captions.map((c) => (
               <div key={c.key} className="absolute inset-x-0 top-0 text-center lg:text-left">
+                {c.key === "ch4" && (
+                  <motion.div style={{ opacity: c.t.o, y: c.t.y }} className="mb-3 flex justify-center lg:mb-5 lg:justify-start">
+                    <Image src="/staff-app/icon.webp" alt="" width={64} height={64} className="size-12 rounded-[11px] lg:size-16 lg:rounded-[15px]" style={{ boxShadow: "0 8px 24px oklch(0 0 0 / 0.18), 0 0 0 1px oklch(0 0 0 / 0.06)" }} />
+                  </motion.div>
+                )}
                 <motion.h2 style={{ opacity: c.t.o, y: c.t.y }} className="font-display mk-display-2 lg:max-w-[14ch]">
                   <span style={{ color: "var(--mk-text)" }}>{t(`film.${c.key}.title`)}</span>
                 </motion.h2>
@@ -276,7 +286,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
           {/* The stage: everything hangs off the phone's own position */}
           <motion.div
             style={{ x, perspective: 1400 }}
-            className="absolute left-1/2 top-[33%] -translate-x-1/2 -translate-y-1/2 lg:top-1/2"
+            className="absolute left-1/2 top-[31%] -translate-x-1/2 -translate-y-1/2 lg:top-1/2"
           >
             {/* Chapter 2: the map behind the phone */}
             <motion.div
@@ -446,7 +456,8 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
           <WalletButtons demoUrl={demoUrl} t={t} tDemo={tDemo} align="center" />
         </div>
       )}
-      <div className="flex flex-col items-center text-center md:col-span-2 lg:col-span-4">
+      <div className="flex flex-col items-center gap-4 text-center md:col-span-2 lg:col-span-4">
+        <Image src="/staff-app/icon.webp" alt="" width={64} height={64} className="size-16 rounded-[15px]" />
         <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} t={t} align="center" />
       </div>
     </div>

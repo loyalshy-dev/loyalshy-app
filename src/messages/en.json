@@ -93,7 +93,8 @@
       "appStore": "Download on the App Store",
       "playStore": "Get it on Google Play",
       "appAlt": "The team app: find a customer, new customer, rewards, share a program, notice, and latest activity",
-      "walletTitle": "Wallet"
+      "walletTitle": "Wallet",
+      "soon": "Coming soon"
     }
   },
   "featureShowcase": {

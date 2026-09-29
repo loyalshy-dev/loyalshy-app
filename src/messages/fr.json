@@ -93,7 +93,8 @@
       "appStore": "Télécharger dans l'App Store",
       "playStore": "Disponible sur Google Play",
       "appAlt": "L'app de l'équipe : recherche client, nouveau client, récompenses, partager un programme, message et dernière activité",
-      "walletTitle": "Wallet"
+      "walletTitle": "Wallet",
+      "soon": "Bientôt"
     }
   },
   "featureShowcase": {
