@@ -1,6 +1,5 @@
-import type { Metadata } from "next"
 import { NextIntlClientProvider } from "next-intl"
-import { getMessages } from "next-intl/server"
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server"
 import { MarketingNavbar } from "@/components/marketing/navbar"
 import { Hero } from "@/components/marketing/hero"
 import { FeatureShowcase } from "@/components/marketing/dashboard-preview"
@@ -13,14 +12,14 @@ import { ClosingCTA } from "@/components/marketing/closing-cta"
 import { TryDemo } from "@/components/marketing/try-demo"
 import { StaffApp } from "@/components/marketing/staff-app"
 import { MarketingFooter } from "@/components/marketing/footer"
+import type { Locale } from "@/i18n/config"
+import { marketingUrl, siteUrl } from "@/i18n/marketing"
 
-const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://loyalshy.com"
+type PageProps = { params: Promise<{ locale: string }> }
 
-export const metadata: Metadata = {
-  alternates: { canonical: siteUrl },
-}
-
-function JsonLd() {
+async function JsonLd({ locale }: { locale: Locale }) {
+  const t = await getTranslations({ locale, namespace: "metadata.home" })
+  const pageUrl = marketingUrl(locale, "/")
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -32,6 +31,7 @@ function JsonLd() {
         url: siteUrl,
         logo: `${siteUrl}/logo.svg`,
         email: "hello@loyalshy.com",
+        sameAs: ["https://instagram.com/loyalshy", "https://tiktok.com/@loyalshy_"],
         taxID: "B27646645",
         vatID: "ESB27646645",
         address: {
@@ -42,8 +42,7 @@ function JsonLd() {
           addressRegion: "Lleida",
           addressCountry: "ES",
         },
-        description:
-          "Digital loyalty platform for small businesses. Create and manage stamp cards and coupons in Apple and Google Wallet.",
+        description: t("jsonLdDescription"),
       },
       {
         "@type": "WebSite",
@@ -51,16 +50,17 @@ function JsonLd() {
         name: "Loyalshy",
         url: siteUrl,
         publisher: { "@id": `${siteUrl}/#organization` },
-        inLanguage: "en",
+        inLanguage: ["en", "es", "fr"],
       },
       {
         "@type": "WebPage",
-        "@id": `${siteUrl}/#webpage`,
-        url: siteUrl,
-        name: "Loyalshy — Digital Loyalty Cards for Small Businesses",
+        "@id": `${pageUrl}/#webpage`,
+        url: pageUrl,
+        name: t("title"),
+        description: t("description"),
         isPartOf: { "@id": `${siteUrl}/#website` },
         about: { "@id": `${siteUrl}/#software` },
-        inLanguage: "en",
+        inLanguage: locale,
       },
       {
         "@type": "SoftwareApplication",
@@ -69,8 +69,7 @@ function JsonLd() {
         url: siteUrl,
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
-        description:
-          "Replace paper stamp cards with digital ones in Apple and Google Wallet. Reward repeat customers with stamp cards and coupons — no app required.",
+        description: t("description"),
         offers: {
           "@type": "AggregateOffer",
           priceCurrency: "EUR",
@@ -106,7 +105,10 @@ const MARKETING_NAMESPACES = [
   "faq", "tryDemo", "staffApp", "closingCta", "footer",
 ] as const
 
-export default async function LandingPage() {
+export default async function LandingPage({ params }: PageProps) {
+  // Validated by the [locale] layout.
+  const locale = (await params).locale as Locale
+  setRequestLocale(locale)
   const messages = await getMessages()
   const marketingMessages: Record<string, unknown> = {}
   for (const ns of MARKETING_NAMESPACES) {
@@ -115,7 +117,7 @@ export default async function LandingPage() {
 
   return (
     <NextIntlClientProvider messages={marketingMessages}>
-      <JsonLd />
+      <JsonLd locale={locale} />
       <div data-brand="loyalshy" className="min-h-screen" style={{ background: "var(--mk-bg)", overscrollBehaviorY: "contain" }}>
         <MarketingNavbar />
         <main>

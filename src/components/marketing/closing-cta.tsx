@@ -1,11 +1,14 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
+import type { Locale } from "@/i18n/config"
+import { localePath } from "@/i18n/marketing"
 import { FadeIn } from "./motion"
 
 export async function ClosingCTA() {
   const t = await getTranslations("closingCta")
   const tCommon = await getTranslations("common")
+  const locale = (await getLocale()) as Locale
 
   return (
     <section className="py-16 sm:py-24 md:py-32 px-4 sm:px-6">
@@ -65,7 +68,7 @@ export async function ClosingCTA() {
                 {t("viewPricing")}
               </Link>
               <Link
-                href="/contact"
+                href={localePath(locale, "/contact")}
                 className="text-[15px] font-bold transition-opacity hover:opacity-70 flex items-center gap-2 ml-4"
                 style={{ color: "oklch(0.99 0 0)" }}
               >

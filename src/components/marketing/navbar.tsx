@@ -10,6 +10,7 @@ import { Wordmark } from "@/components/brand-mark"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
+import { useLocalePath } from "@/i18n/use-locale-path"
 
 interface NavLink {
   label: string
@@ -19,15 +20,16 @@ interface NavLink {
 export function MarketingNavbar() {
   const t = useTranslations("nav")
   const tCommon = useTranslations("common")
+  const lp = useLocalePath()
 
   const [scrolled, setScrolled] = React.useState(false)
   const [mobileOpen, setMobileOpen] = React.useState(false)
 
   const NAV_LINKS: NavLink[] = [
-    { label: t("features"), href: "/#features" },
-    { label: t("pricing"), href: "/#pricing" },
-    { label: t("faq"), href: "/#faq" },
-    { label: tCommon("contact"), href: "/contact" },
+    { label: t("features"), href: `${lp("/")}#features` },
+    { label: t("pricing"), href: `${lp("/")}#pricing` },
+    { label: t("faq"), href: `${lp("/")}#faq` },
+    { label: tCommon("contact"), href: lp("/contact") },
   ]
 
   React.useEffect(() => {
@@ -62,7 +64,7 @@ export function MarketingNavbar() {
         <div className="mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-8 lg:h-20 lg:px-12">
           {/* Logo */}
           <Link
-            href="/"
+            href={lp("/")}
             className="flex items-center transition-opacity hover:opacity-80"
             aria-label={t("home")}
           >

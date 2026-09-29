@@ -1946,5 +1946,28 @@
     },
     "downloadAppStore": "Télécharger sur l'App Store",
     "downloadPlayStore": "Disponible sur Google Play"
+  },
+  "metadata": {
+    "home": {
+      "title": "Loyalshy — Carte de fidélité digitale dans Apple et Google Wallet",
+      "description": "Remplacez la carte de fidélité papier par une carte digitale dans Apple Wallet et Google Wallet. Fidélisez vos clients avec tampons et coupons, sans application. Gratuit jusqu'à 50 clients.",
+      "jsonLdDescription": "Plateforme de fidélité digitale pour les petits commerces. Créez et gérez cartes à tampons et coupons dans Apple Wallet et Google Wallet."
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Contactez l'équipe Loyalshy. Questions sur la carte de fidélité digitale, les offres entreprise ou les partenariats : écrivez-nous."
+    },
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "description": "Comment Loyalshy collecte, utilise et protège vos données personnelles."
+    },
+    "terms": {
+      "title": "Conditions d'utilisation",
+      "description": "Conditions générales d'utilisation de la plateforme Loyalshy."
+    },
+    "cookies": {
+      "title": "Politique relative aux cookies",
+      "description": "Comment Loyalshy utilise les cookies et technologies similaires."
+    }
   }
 }
