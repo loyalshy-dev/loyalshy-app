@@ -4,6 +4,7 @@ import crypto from "node:crypto"
 import { z } from "zod"
 import type { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { after } from "next/server"
 import { addDays } from "date-fns"
 import { getTranslations } from "next-intl/server"
 import { db } from "@/lib/db"
@@ -958,6 +959,15 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
   // If design hash changed, trigger bulk pass update
   const hashChanged = existingDesign?.designHash !== newHash
   if (hashChanged) {
+    // Class-level design (logo, colors, locations…) is shared by all Google
+    // holders; the per-pass updates below only touch objects.
+    after(() =>
+      import("@/lib/wallet/google/generate-pass")
+        .then(({ syncGoogleLoyaltyClass }) => syncGoogleLoyaltyClass(parsed.templateId))
+        .catch((err: unknown) =>
+          console.error("Google class sync failed:", err instanceof Error ? err.message : "Unknown error")
+        )
+    )
     if (process.env.TRIGGER_SECRET_KEY) {
       import("@trigger.dev/sdk")
         .then(({ tasks }) =>

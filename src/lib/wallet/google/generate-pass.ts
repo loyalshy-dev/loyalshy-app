@@ -3,10 +3,11 @@ import "server-only"
 import { buildClassId, buildObjectId, buildProgramClassId, buildEnrollmentObjectId } from "./constants"
 import { buildSaveUrl } from "./jwt-utils"
 import type { CardDesignData } from "../card-design"
-import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig } from "../card-design"
+import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig, resolveCardDesign } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { parseCouponConfig, formatCouponValue, getWalletRewardText } from "../../pass-config"
+import { parseCouponConfig, formatCouponValue, getWalletRewardText, parseTemplateAnnouncement } from "../../pass-config"
+import { db } from "../../db"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -81,7 +82,25 @@ function normalizeSocialUrl(handle: string, platform: "instagram" | "facebook" |
 
 // ─── Build Loyalty Class (one per template or organization) ─────────────
 
-function buildLoyaltyClass(input: GooglePassGenerationInput) {
+/** The class is shared by every holder of a program, so it only reads program-level fields. */
+type LoyaltyClassInput = Pick<
+  GooglePassGenerationInput,
+  | "organizationId"
+  | "organizationName"
+  | "organizationLogo"
+  | "organizationLogoGoogle"
+  | "organizationPhone"
+  | "organizationWebsite"
+  | "brandColor"
+  | "termsAndConditions"
+  | "templateId"
+  | "templateName"
+  | "passDesign"
+  | "passType"
+  | "announcement"
+>
+
+function buildLoyaltyClass(input: LoyaltyClassInput) {
   // Use per-template class ID when templateId is available, otherwise fall back to organization
   const classId = input.templateId
     ? buildProgramClassId(input.templateId)
@@ -602,6 +621,60 @@ export async function generateGoogleWalletSaveUrl(
   patchLoyaltyClass(loyaltyClass).catch(() => {})
 
   return buildSaveUrl([loyaltyClass], [loyaltyObject])
+}
+
+/**
+ * Rebuilds a program's loyalty class from the current DB state and PATCHes it.
+ *
+ * Class-level fields (logo, colors, card row template, links, locations) are
+ * shared by every holder, and the per-holder update path only PATCHes
+ * objects — so without this, existing Google holders only saw a design
+ * change once someone new generated a save URL for the program.
+ */
+export async function syncGoogleLoyaltyClass(templateId: string): Promise<void> {
+  const template = await db.passTemplate.findUnique({
+    where: { id: templateId },
+    select: {
+      id: true,
+      name: true,
+      passType: true,
+      announcement: true,
+      termsAndConditions: true,
+      passDesign: true,
+      organization: {
+        select: {
+          id: true,
+          name: true,
+          logo: true,
+          logoGoogle: true,
+          brandColor: true,
+          secondaryColor: true,
+          phone: true,
+          website: true,
+        },
+      },
+    },
+  })
+  if (!template) return
+
+  const organization = template.organization
+  const passDesign = resolveCardDesign(template.passDesign, organization)
+
+  await patchLoyaltyClass(buildLoyaltyClass({
+    organizationId: organization.id,
+    organizationName: organization.name,
+    organizationLogo: passDesign.logoUrl ?? organization.logo,
+    organizationLogoGoogle: passDesign.logoGoogleUrl ?? organization.logoGoogle,
+    organizationPhone: organization.phone,
+    organizationWebsite: organization.website,
+    brandColor: organization.brandColor,
+    termsAndConditions: template.termsAndConditions,
+    templateId: template.id,
+    templateName: template.name,
+    passDesign,
+    passType: template.passType,
+    announcement: parseTemplateAnnouncement(template.announcement),
+  }))
 }
 
 /**
