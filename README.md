@@ -76,6 +76,19 @@ From a program's **Distribution** page (or the staff app's **Announcement** scre
 
 > **Gotcha:** Apple only banners *changed* field values, never newly added fields. Passes issued before the announcement feature receive their first broadcast silently (the field appears without a banner); every broadcast after that notifies normally.
 
+## Pass Updates After Edits
+
+Passes already in customers' wallets pick up edits automatically — no re-install:
+
+| Edit | Google Wallet | Apple Wallet |
+|------|---------------|--------------|
+| Stamp, redeem, reward | Object PATCH | APNs push → device re-fetches the `.pkpass` |
+| Design studio (incl. location), program/org logos, program name/terms/config, business name/phone/website | Class PATCH (shared by every holder of the program) + object PATCHes | APNs push to every holder |
+
+Business-level edits refresh every program in the organization. Saves that change nothing visible on the pass (address, timezone, status) push nothing. These updates are silent — lock-screen banners only fire for stamps, redemptions and announcements. The fan-out runs through the `update-all-passes` Trigger.dev task (direct calls when `TRIGGER_SECRET_KEY` is unset); see `scheduleWalletRefresh` in `src/server/org-settings-actions.ts`.
+
+> **Gotcha:** Google renders logo, colors, links, terms, program name and locations from the **class**, not the per-holder object. Anything that changes those must PATCH the class (`syncGoogleLoyaltyClass`), or existing holders never see it.
+
 ---
 
 ## Google Wallet Setup (Free)
