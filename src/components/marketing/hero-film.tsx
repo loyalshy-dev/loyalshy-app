@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, type ReactNode } from "react"
+import { useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react"
@@ -63,20 +63,45 @@ function RealPass({ alt }: { alt: string }) {
   )
 }
 
-// The one banner we have no photo of (the reward) is built from the real
-// pass's logo and thumbnail, laid out as iOS lays it out.
-function RewardBanner({ title, body }: { title: string; body: string }) {
+type FilmProps = { demoUrl?: string; appStoreUrl?: string; playStoreUrl?: string }
+
+// The wallet buttons (chapter 1) and the store badges (the exit), shared by
+// the film and the reduced-motion frames.
+function WalletButtons({ demoUrl, t, tDemo, align }: { demoUrl: string; t: ReturnType<typeof useTranslations>; tDemo: ReturnType<typeof useTranslations>; align: "left" | "center" }) {
+  const j = align === "left" ? "justify-center lg:justify-start" : "justify-center"
+  const m = align === "left" ? "mx-auto lg:mx-0" : "mx-auto"
   return (
-    <div
-      className="flex items-center gap-3 rounded-[20px] py-2.5 pl-3 pr-2.5"
-      style={{ background: "oklch(0.2 0.01 285 / 0.86)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", boxShadow: "0 8px 24px oklch(0 0 0 / 0.22)" }}
-    >
-      <Image src="/hero/real-logo.webp" alt="" width={38} height={38} className="size-[38px] shrink-0 rounded-[9px]" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-semibold leading-[1.2] text-white">{title}</p>
-        <p className="text-[13px] leading-[1.25]" style={{ color: "oklch(0.92 0 0)" }}>{body}</p>
+    <div>
+      <p className={`mk-body-sm ${m} max-w-[34ch]`} style={{ color: "var(--mk-text-muted)" }}>
+        <strong style={{ color: "var(--mk-text)", fontWeight: 600 }}>{tDemo("title")}</strong> {t("film.tryLine")}
+      </p>
+      <div className={`mt-3 flex flex-wrap items-center gap-3 ${j}`}>
+        <Link href={demoUrl} target="_blank" rel="noopener noreferrer" aria-label={tDemo("addToAppleWallet")}>
+          <Image src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" alt={tDemo("addToAppleWallet")} width={156} height={48} className="h-11 w-auto" />
+        </Link>
+        <Link href={demoUrl} target="_blank" rel="noopener noreferrer" aria-label={tDemo("addToGoogleWallet")}>
+          <Image src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg" alt={tDemo("addToGoogleWallet")} width={180} height={48} className="h-11 w-auto" />
+        </Link>
       </div>
-      <Image src="/hero/real-pass.webp" alt="" width={40} height={56} className="h-[56px] w-[40px] shrink-0 rounded-[3px] object-cover" aria-hidden="true" />
+    </div>
+  )
+}
+
+function StoreBadges({ appStoreUrl, playStoreUrl, t, align }: { appStoreUrl?: string; playStoreUrl?: string; t: ReturnType<typeof useTranslations>; align: "left" | "center" }) {
+  if (!appStoreUrl && !playStoreUrl) return null
+  const j = align === "left" ? "justify-center lg:justify-start" : "justify-center"
+  return (
+    <div className={`flex flex-wrap items-center gap-3 ${j}`}>
+      {appStoreUrl && (
+        <Link href={appStoreUrl} target="_blank" rel="noopener noreferrer" aria-label={t("film.appStore")}>
+          <Image src="/staff-app/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg" alt={t("film.appStore")} width={156} height={48} className="h-11 w-auto" />
+        </Link>
+      )}
+      {playStoreUrl && (
+        <Link href={playStoreUrl} target="_blank" rel="noopener noreferrer" aria-label={t("film.playStore")}>
+          <Image src="/staff-app/GetItOnGooglePlay_Badge_Web_color_English.svg" alt={t("film.playStore")} width={180} height={48} className="h-11 w-auto" />
+        </Link>
+      )}
     </div>
   )
 }
@@ -118,7 +143,7 @@ function LockFace({ date, narrow }: { date: string; narrow: boolean }) {
 
 /* ─── The pinned film ─────────────────────────────────────────────── */
 
-function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: ReactNode }) {
+function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const t = useTranslations("hero")
   const tDemo = useTranslations("tryDemo")
   const narrow = useMediaQuery("(max-width: 1023px)")
@@ -149,12 +174,13 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
   const walletOpacity = useFade([0.2, 0.26, 0.36, 0.42], [0, 1, 1, 0])
   const passY = useSpring(useTransform(p, [0.22, 0.34], [380, 0]), HEAVY)
 
-  // Chapter 1: the table tent on the counter (what the camera is scanning),
-  // then the envelope under it
-  const tentOpacity = useFade([0.08, 0.16, 0.36, 0.42], [0, 1, 1, 0])
-  const tentX = useSpring(useTransform(p, [0.08, 0.16], [-24, 0]), LIGHT)
-  const mailOpacity = useFade([0.28, 0.34, 0.36, 0.42], [0, 1, 1, 0])
-  const mailX = useSpring(useTransform(p, [0.28, 0.34], [-24, 0]), LIGHT)
+  // Chapter 1: the real counter QR beside the phone (what the camera scans),
+  // and the wallet buttons under the caption once the pass is in.
+  const qrOpacity = useFade([0.08, 0.16, 0.36, 0.42], [0, 1, 1, 0])
+  const qrX = useSpring(useTransform(p, [0.08, 0.16], [-24, 0]), LIGHT)
+  const walletBtnOpacity = useFade([0.26, 0.32, 0.36, 0.42], [0, 1, 1, 0])
+  const walletBtnY = useSpring(useTransform(p, [0.26, 0.32], [12, 0]), LIGHT)
+  const walletBtnEvents = useTransform(p, (v) => (v > 0.28 && v < 0.4 ? "auto" : "none"))
 
   // Chapter 2: the map behind the phone, the customer walking into the
   // fence, the pulse when they cross it, then the banner
@@ -182,11 +208,9 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
   // banner drops in, and the phone is back at the centre when the stage lets go.
   const wallet2Opacity = useFade([0.955, 0.97], [0, 1])
   const pass2Y = useSpring(useTransform(p, [0.955, 0.975], [320, 0]), HEAVY)
-  const rewardY = useSpring(useTransform(p, [0.978, 0.995], [-40, 0]), LIGHT)
-  const rewardOpacity = useFade([0.978, 0.992], [0, 1])
-  const tryOpacity = useFade([0.985, 1], [0, 1])
-  const tryY = useSpring(useTransform(p, [0.985, 1], [16, 0]), LIGHT)
-  const tryEvents = useTransform(p, (v) => (v > 0.99 ? "auto" : "none"))
+  const tryOpacity = useFade([0.97, 0.99], [0, 1])
+  const tryY = useSpring(useTransform(p, [0.97, 0.99], [16, 0]), LIGHT)
+  const tryEvents = useTransform(p, (v) => (v > 0.98 ? "auto" : "none"))
 
   // Captions: each one rises in, holds, and rises out; the paragraph
   // follows the title by a beat.
@@ -200,8 +224,8 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
   const c2p = useCaption(0.47, 0.54, 0.68, 0.75, 0.02)
   const c3t = useCaption(0.8, 0.87, 0.92, 0.96)
   const c3p = useCaption(0.8, 0.87, 0.92, 0.96, 0.02)
-  const c4t = useCaption(0.965, 0.99, 1.5, 1.6)
-  const c4p = useCaption(0.965, 0.99, 1.5, 1.6, 0.02)
+  const c4t = useCaption(0.955, 0.98, 1.5, 1.6)
+  const c4p = useCaption(0.955, 0.98, 1.5, 1.6, 0.01)
   const intro = useFade([0, 0.07], [1, 0])
 
   // Announce which chapter is on for assistive tech.
@@ -226,33 +250,26 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
         <p ref={liveRef} className="sr-only" aria-live="polite" />
         <div className="mk-wrap relative h-full">
           {/* Captions: under the phone on phones, on the left axis on desktop */}
-          <div className="absolute inset-x-0 bottom-3 h-[14rem] lg:inset-x-auto lg:bottom-auto lg:left-10 lg:top-1/2 lg:h-auto lg:w-5/12 lg:-translate-y-1/2">
+          <div className="absolute inset-x-0 bottom-2 h-[16rem] lg:inset-x-auto lg:bottom-auto lg:left-10 lg:top-1/2 lg:h-auto lg:w-5/12 lg:-translate-y-1/2">
             <motion.p style={{ opacity: intro }} className="mk-lead absolute inset-x-0 top-0 text-center lg:hidden">
               {t("film.scroll")}
             </motion.p>
             {captions.map((c) => (
               <div key={c.key} className="absolute inset-x-0 top-0 text-center lg:text-left">
-                <motion.h2 style={{ opacity: c.t.o, y: c.t.y }} className={c.key === "ch4" ? "font-display mk-display-2 lg:max-w-[13ch]" : "font-display mk-display-2 lg:max-w-[14ch]"}>
+                <motion.h2 style={{ opacity: c.t.o, y: c.t.y }} className="font-display mk-display-2 lg:max-w-[14ch]">
                   <span style={{ color: "var(--mk-text)" }}>{t(`film.${c.key}.title`)}</span>
                 </motion.h2>
-                {c.key !== "ch4" && (
-                  <motion.p style={{ opacity: c.p.o, y: c.p.y }} className="mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4">
-                    {t(`film.${c.key}.caption`)}
-                  </motion.p>
+                <motion.p style={{ opacity: c.p.o, y: c.p.y }} className="mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4">
+                  {t(`film.${c.key}.caption`)}
+                </motion.p>
+                {c.key === "ch1" && demoUrl && (
+                  <motion.div style={{ opacity: walletBtnOpacity, y: walletBtnY, pointerEvents: walletBtnEvents }} className="mt-4 lg:mt-6">
+                    <WalletButtons demoUrl={demoUrl} t={t} tDemo={tDemo} align="left" />
+                  </motion.div>
                 )}
-                {c.key === "ch4" && demoUrl && (
-                  <motion.div style={{ opacity: tryOpacity, y: tryY, pointerEvents: tryEvents }} className="mt-4 lg:mt-6">
-                    <p className="mk-body-sm mx-auto max-w-[34ch] lg:mx-0" style={{ color: "var(--mk-text-muted)" }}>
-                      <strong style={{ color: "var(--mk-text)", fontWeight: 600 }}>{tDemo("title")}</strong> {t("film.tryLine")}
-                    </p>
-                    <div className="mt-3 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-                      <Link href={demoUrl} target="_blank" rel="noopener noreferrer" aria-label={tDemo("addToAppleWallet")}>
-                        <Image src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" alt={tDemo("addToAppleWallet")} width={156} height={48} className="h-11 w-auto" />
-                      </Link>
-                      <Link href={demoUrl} target="_blank" rel="noopener noreferrer" aria-label={tDemo("addToGoogleWallet")}>
-                        <Image src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg" alt={tDemo("addToGoogleWallet")} width={180} height={48} className="h-11 w-auto" />
-                      </Link>
-                    </div>
+                {c.key === "ch4" && (
+                  <motion.div style={{ opacity: tryOpacity, y: tryY, pointerEvents: tryEvents }} className="mt-5 lg:mt-7">
+                    <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} t={t} align="left" />
                   </motion.div>
                 )}
               </div>
@@ -262,7 +279,7 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
           {/* The stage: everything hangs off the phone's own position */}
           <motion.div
             style={{ x, perspective: 1400 }}
-            className="absolute left-1/2 top-[36%] -translate-x-1/2 -translate-y-1/2 lg:top-1/2"
+            className="absolute left-1/2 top-[33%] -translate-x-1/2 -translate-y-1/2 lg:top-1/2"
           >
             {/* Chapter 2: the map behind the phone */}
             <motion.div
@@ -283,37 +300,13 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
               />
             ))}
 
-            {/* Chapter 1: the tent on the counter, beside the phone */}
-            {tent && (
-              <motion.div
-                aria-hidden="true"
-                style={{ opacity: tentOpacity, x: tentX, right: "calc(100% + 16px)", width: 230, height: 270 }}
-                className="pointer-events-none absolute top-[4%] hidden lg:block"
-              >
-                {tent}
-                <p className="mk-caption mt-2 text-center" style={{ color: "var(--mk-text-muted)" }}>{t("film.tentNote")}</p>
-              </motion.div>
-            )}
-
-            {/* Chapter 1: the envelope, under the tent */}
+            {/* Chapter 1: the real counter QR, beside the phone */}
             <motion.div
-              aria-hidden="true"
-              style={{ opacity: mailOpacity, x: mailX, right: "calc(100% + 28px)" }}
-              className="pointer-events-none absolute top-[48%] hidden w-[200px] rounded-2xl bg-white p-4 lg:block"
+              style={{ opacity: qrOpacity, x: qrX, right: "calc(100% + 24px)", width: 200 }}
+              className="pointer-events-none absolute top-[10%] hidden rounded-2xl bg-white p-3 lg:block"
             >
-              <div className="flex items-center gap-2.5">
-                <span className="grid size-8 place-items-center rounded-full" style={{ background: "oklch(0.965 0.003 60)" }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={INK} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5" /><path d="m3 7 9 6 9-6" /></svg>
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-[12px] font-semibold" style={{ color: INK }}>{t("card.business")}</p>
-                  <p className="truncate text-[11px]" style={{ color: "oklch(0.5 0.01 40)" }}>{t("film.mailSubject")}</p>
-                </div>
-              </div>
-              <div className="mt-3 rounded-lg px-3 py-2 text-center text-[11px] font-semibold text-white" style={{ background: "#000" }}>
-                {t("film.mailButton")}
-              </div>
-              <p className="mt-2 text-center text-[10px]" style={{ color: "oklch(0.5 0.01 40)" }}>{t("film.alsoGoogle")}</p>
+              <Image src="/hero/real-qr.webp" alt={t("film.qrAlt")} width={640} height={640} className="h-auto w-full rounded-lg" sizes="200px" />
+              <p className="mk-caption mt-2 text-center" style={{ color: "var(--mk-text-muted)" }}>{t("film.qrNote")}</p>
             </motion.div>
 
             {/* Chapter 3: the dashboard card, beside the phone */}
@@ -367,8 +360,7 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
                       <span key={pos} className={`absolute size-6 rounded-[3px] ${pos}`} style={{ borderColor: "#fff" }} />
                     ))}
                     <div className="absolute inset-[14%] rounded-md bg-white p-2">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={qr} alt="" className="size-full" />
+                      <Image src="/hero/real-qr.webp" alt="" width={640} height={640} className="size-full" sizes="160px" />
                     </div>
                   </motion.div>
                   <div className="relative mt-8 rounded-full px-4 py-1.5 text-[12px] font-medium" style={{ background: "oklch(1 0 0 / 0.14)", color: "#fff" }}>
@@ -387,20 +379,9 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
                   </motion.div>
                 </motion.div>
 
-                {/* Wallet (exit): the card filled, the reward ready */}
-                <motion.div style={{ opacity: wallet2Opacity }} className="absolute inset-0">
-                  <div className="absolute inset-0" style={{ background: "oklch(0.965 0.003 60)" }} />
-                  <p className="absolute inset-x-0 top-12 text-center text-[13px] font-semibold" style={{ color: INK }}>{t("film.walletTitle")}</p>
-                  <motion.div style={{ y: pass2Y }} className="mk-hero-card absolute left-3 right-3">
-                    <div style={{ marginTop: narrow ? 152 : 150 }}>
-                      <RealPass alt={t("scenes.passAlt")} />
-                    </div>
-                  </motion.div>
-                  <motion.div style={{ opacity: rewardOpacity, y: rewardY }} className="absolute left-3 right-3 z-10" >
-                    <div style={{ marginTop: 44 }}>
-                      <RewardBanner title="Loyalshy" body={t("scenes.reward.notification")} />
-                    </div>
-                  </motion.div>
+                {/* The exit: the team app, everything managed from the phone */}
+                <motion.div style={{ opacity: wallet2Opacity, y: pass2Y }} className="absolute inset-0">
+                  <Image src="/staff-app/today.webp" alt={t("film.appAlt")} width={1170} height={2416} className="absolute inset-0 h-full w-full object-cover object-top" sizes="300px" />
                 </motion.div>
               </PhoneFrame>
             </motion.div>
@@ -408,18 +389,18 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
         </div>
       </div>
       {/* "Try it" links land here: the film's last frame, with the wallet buttons */}
-      <div id="try-demo" aria-hidden="true" className="absolute bottom-0 h-px w-full" style={{ scrollMarginTop: "100vh" }} />
+      {/* "Try it" links land on chapter 1, with the pass in Wallet and the buttons up */}
+      <div id="try-demo" aria-hidden="true" className="absolute h-px w-full" style={{ top: `${(PIN_VH - 100) * 0.33}vh` }} />
     </div>
   )
 }
 
 /* ─── Reduced motion: the three chapters as frames ─────────────────── */
 
-function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
+function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const t = useTranslations("hero")
   const tDemo = useTranslations("tryDemo")
   const w = 230
-  void qr
   const frames = [
     {
       key: "ch1",
@@ -457,14 +438,7 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
     {
       key: "ch4",
       screen: (
-        <div className="absolute inset-0" style={{ background: "oklch(0.965 0.003 60)" }}>
-          <div className="absolute left-3 right-3" style={{ top: 96 }}>
-            <RealPass alt={t("scenes.passAlt")} />
-          </div>
-          <div className="absolute left-3 right-3 z-10" style={{ top: 40 }}>
-            <RewardBanner title="Loyalshy" body={t("scenes.reward.notification")} />
-          </div>
-        </div>
+        <Image src="/staff-app/today.webp" alt={t("film.appAlt")} width={1170} height={2416} className="absolute inset-0 h-full w-full object-cover object-top" sizes="230px" />
       ),
     },
   ] as const
@@ -480,25 +454,18 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
         </figure>
       ))}
       {demoUrl && (
-        <div id="try-demo" className="flex flex-col items-center gap-3 text-center md:col-span-2 lg:col-span-4">
-          <p className="mk-body" style={{ color: "var(--mk-text-muted)" }}>
-            <strong style={{ color: "var(--mk-text)", fontWeight: 600 }}>{tDemo("title")}</strong> {t("film.tryLine")}
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link href={demoUrl} target="_blank" rel="noopener noreferrer" aria-label={tDemo("addToAppleWallet")}>
-              <Image src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" alt={tDemo("addToAppleWallet")} width={156} height={48} className="h-11 w-auto" />
-            </Link>
-            <Link href={demoUrl} target="_blank" rel="noopener noreferrer" aria-label={tDemo("addToGoogleWallet")}>
-              <Image src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg" alt={tDemo("addToGoogleWallet")} width={180} height={48} className="h-11 w-auto" />
-            </Link>
-          </div>
+        <div id="try-demo" className="flex flex-col items-center text-center md:col-span-2 lg:col-span-4">
+          <WalletButtons demoUrl={demoUrl} t={t} tDemo={tDemo} align="center" />
         </div>
       )}
+      <div className="flex flex-col items-center text-center md:col-span-2 lg:col-span-4">
+        <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} t={t} align="center" />
+      </div>
     </div>
   )
 }
 
-export function HeroFilm({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: ReactNode }) {
+export function HeroFilm(props: FilmProps) {
   const reduced = useReducedMotion()
-  return reduced ? <Frames qr={qr} demoUrl={demoUrl} /> : <Film qr={qr} demoUrl={demoUrl} tent={tent} />
+  return reduced ? <Frames {...props} /> : <Film {...props} />
 }

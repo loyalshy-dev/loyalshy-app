@@ -7,7 +7,6 @@ import { CardAnatomy } from "@/components/marketing/card-anatomy"
 import { Pricing } from "@/components/marketing/pricing"
 import { FAQ } from "@/components/marketing/faq"
 import { ClosingCTA } from "@/components/marketing/closing-cta"
-import { StaffApp } from "@/components/marketing/staff-app"
 import { MarketingFooter } from "@/components/marketing/footer"
 import type { Locale } from "@/i18n/config"
 import { marketingUrl, siteUrl } from "@/i18n/marketing"
@@ -99,7 +98,7 @@ async function JsonLd({ locale }: { locale: Locale }) {
 const MARKETING_NAMESPACES = [
   "common", "nav", "hero", "featureShowcase",
   "gallery", "pricing",
-  "faq", "tryDemo", "staffApp", "closingCta", "footer",
+  "faq", "tryDemo", "closingCta", "footer",
 ] as const
 
 export default async function LandingPage({ params }: PageProps) {
@@ -121,7 +120,6 @@ export default async function LandingPage({ params }: PageProps) {
           <Hero />
           <CardAnatomy />
           <FeatureShowcase />
-          <StaffApp />
           <Pricing />
           <FAQ />
           <ClosingCTA />

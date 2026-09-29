@@ -37,8 +37,7 @@
     "closeMenu": "Cerrar menú",
     "switchLanguage": "Cambiar idioma",
     "cards": "Tarjetas",
-    "dashboard": "El panel",
-    "staffApp": "App del equipo"
+    "dashboard": "El panel"
   },
   "hero": {
     "subtitle": "Sin app, sin cuenta y sin papel. La tarjeta se guarda en Apple Wallet o Google Wallet.",
@@ -63,9 +62,6 @@
       "announce": {
         "alt": "Notificación real de un aviso enviado desde el panel: «Hoy 2x1»"
       },
-      "reward": {
-        "notification": "¡Corte gratis! Enséñalo en el mostrador."
-      },
       "passAlt": "Tarjeta de sellos real de un cliente en Apple Wallet: seis de siete sellos, próxima recompensa un corte gratis"
     },
     "tagline": "Tarjetas de sellos y cupones.",
@@ -73,9 +69,6 @@
       "scroll": "Sigue bajando.",
       "camera": "Cámara",
       "openLink": "Abrir loyalshy.com",
-      "walletTitle": "Wallet",
-      "mailSubject": "Tu tarjeta de sellos",
-      "mailButton": "Añadir a Apple Wallet",
       "sendTitle": "Enviar aviso",
       "sendButton": "Enviar a 128 clientes",
       "ch1": {
@@ -90,21 +83,18 @@
         "title": "El mensaje adecuado, en el momento adecuado.",
         "caption": "Escribes el aviso en el panel y les llega como notificación a todos los que tienen tu tarjeta."
       },
-      "alsoGoogle": "También en Google Wallet.",
       "ch4": {
-        "title": "Y la recompensa, sola.",
-        "caption": "Al completar la tarjeta, el premio aparece en el pase y tu equipo lo canjea en el mostrador."
+        "title": "Todo, desde la app.",
+        "caption": "Tu equipo sella, canjea y da de alta a clientes desde su móvil. Se conecta escaneando un QR del panel."
       },
       "tryLine": "Añade la tarjeta de prueba a tu Wallet. Es exactamente lo que verán tus clientes.",
-      "tent": {
-        "business": "Café Sol",
-        "program": "Tarjeta de sellos",
-        "headline": "Guarda tu tarjeta de sellos",
-        "sub": "Escanea con la cámara. Se añade a tu Wallet, sin descargar nada.",
-        "qrAlt": "Código QR para unirse al programa de Café Sol"
-      },
-      "tentNote": "Listo para imprimir en tres tamaños: ticket, caballete y póster.",
-      "sendText": "Hoy 2x1"
+      "sendText": "Hoy 2x1",
+      "qrAlt": "QR real de un programa de Loyalshy, listo para el mostrador",
+      "qrNote": "El QR del programa, listo para imprimir.",
+      "appStore": "Descargar en la App Store",
+      "playStore": "Disponible en Google Play",
+      "appAlt": "La app del equipo: buscar cliente, nuevo cliente, recompensas, compartir programa, aviso y la última actividad",
+      "walletTitle": "Wallet"
     }
   },
   "featureShowcase": {
@@ -1895,13 +1885,6 @@
         "description": "Ayuda con tu cuenta, integración de API, problemas con pases o preguntas de facturación."
       }
     }
-  },
-  "staffApp": {
-    "title": "La app del equipo.",
-    "subtitle": "Una app para escanear tarjetas, sumar sellos y canjear cupones en el mostrador. Se conecta escaneando un QR del panel.",
-    "downloadAppStore": "Descargar en la App Store",
-    "downloadPlayStore": "Disponible en Google Play",
-    "screenAlt": "Pestaña Hoy de la app del equipo: buscar cliente, nuevo cliente, recompensas, compartir programa, aviso y la última actividad"
   },
   "metadata": {
     "home": {

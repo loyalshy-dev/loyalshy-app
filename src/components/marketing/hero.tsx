@@ -1,17 +1,16 @@
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
-import { CounterTent } from "./counter-tent"
 import { HeroFilm } from "./hero-film"
-import { demoQrDataUrl } from "./demo-qr"
 
 const DEMO_JOIN_URL = process.env.NEXT_PUBLIC_DEMO_JOIN_URL
+const APP_STORE_URL = process.env.NEXT_PUBLIC_APP_STORE_URL
+const PLAY_STORE_URL = process.env.NEXT_PUBLIC_PLAY_STORE_URL
 
 // Apple's opener: the name of the thing in two lines, one tagline, the
 // action, and then the film — the product on a pinned stage, driven by scroll.
 export async function Hero() {
   const t = await getTranslations("hero")
   const tCommon = await getTranslations("common")
-  const qr = await demoQrDataUrl()
 
   return (
     <section className="relative" style={{ background: "var(--mk-bg)" }}>
@@ -39,19 +38,7 @@ export async function Hero() {
           {t("note")}
         </p>
       </div>
-      <HeroFilm
-        qr={qr}
-        demoUrl={DEMO_JOIN_URL}
-        tent={
-          <CounterTent
-            business={t("film.tent.business")}
-            program={t("film.tent.program")}
-            headline={t("film.tent.headline")}
-            sub={t("film.tent.sub")}
-            qrAlt={t("film.tent.qrAlt")}
-          />
-        }
-      />
+      <HeroFilm demoUrl={DEMO_JOIN_URL} appStoreUrl={APP_STORE_URL} playStoreUrl={PLAY_STORE_URL} />
     </section>
   )
 }

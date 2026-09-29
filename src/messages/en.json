@@ -37,8 +37,7 @@
     "closeMenu": "Close menu",
     "switchLanguage": "Switch language",
     "cards": "Cards",
-    "dashboard": "Dashboard",
-    "staffApp": "Team app"
+    "dashboard": "Dashboard"
   },
   "hero": {
     "subtitle": "No app, no account, no paper. The card saves to Apple Wallet or Google Wallet.",
@@ -63,9 +62,6 @@
       "announce": {
         "alt": "A real notification of a notice sent from the dashboard: “Hoy 2x1” (2-for-1 today)"
       },
-      "reward": {
-        "notification": "Free haircut! Show this at the counter."
-      },
       "passAlt": "A real customer's stamp card in Apple Wallet: six of seven stamps, next reward a free haircut"
     },
     "tagline": "Stamp cards and coupons.",
@@ -73,9 +69,6 @@
       "scroll": "Keep scrolling.",
       "camera": "Camera",
       "openLink": "Open loyalshy.com",
-      "walletTitle": "Wallet",
-      "mailSubject": "Your stamp card",
-      "mailButton": "Add to Apple Wallet",
       "sendTitle": "Send a notice",
       "sendButton": "Send to 128 customers",
       "ch1": {
@@ -90,21 +83,18 @@
         "title": "The right message, at the right time.",
         "caption": "Write the notice in the dashboard and it lands as a notification on every phone that holds your card."
       },
-      "alsoGoogle": "Google Wallet too.",
       "ch4": {
-        "title": "And the reward, by itself.",
-        "caption": "When the card is full, the prize appears on the pass and your team redeems it at the counter."
+        "title": "Everything, from the app.",
+        "caption": "Your team stamps, redeems and signs customers up from their phone. It connects by scanning a QR code from the dashboard."
       },
       "tryLine": "Add the demo card to your Wallet. It's exactly what your customers will see.",
-      "tent": {
-        "business": "Café Sol",
-        "program": "Stamp card",
-        "headline": "Save your stamp card",
-        "sub": "Scan with your camera. It goes into your Wallet, nothing to download.",
-        "qrAlt": "QR code to join Café Sol's program"
-      },
-      "tentNote": "Ready to print in three sizes: receipt, table tent and poster.",
-      "sendText": "Hoy 2x1"
+      "sendText": "Hoy 2x1",
+      "qrAlt": "A real Loyalshy program QR code, ready for the counter",
+      "qrNote": "The program's QR code, ready to print.",
+      "appStore": "Download on the App Store",
+      "playStore": "Get it on Google Play",
+      "appAlt": "The team app: find a customer, new customer, rewards, share a program, notice, and latest activity",
+      "walletTitle": "Wallet"
     }
   },
   "featureShowcase": {
@@ -1895,13 +1885,6 @@
         "description": "Help with your account, API integration, wallet pass issues, or billing questions."
       }
     }
-  },
-  "staffApp": {
-    "title": "The team app.",
-    "subtitle": "An app to scan cards, add stamps and redeem coupons at the counter. It connects by scanning a QR code from the dashboard.",
-    "downloadAppStore": "Download on the App Store",
-    "downloadPlayStore": "Get it on Google Play",
-    "screenAlt": "The team app's Today tab: find a customer, new customer, rewards, share a program, notice, and latest activity"
   },
   "metadata": {
     "home": {

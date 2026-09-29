@@ -37,8 +37,7 @@
     "closeMenu": "Fermer le menu",
     "switchLanguage": "Changer de langue",
     "cards": "Cartes",
-    "dashboard": "Tableau de bord",
-    "staffApp": "App de l'équipe"
+    "dashboard": "Tableau de bord"
   },
   "hero": {
     "subtitle": "Sans app, sans compte et sans papier. La carte s'enregistre dans Apple Wallet ou Google Wallet.",
@@ -63,9 +62,6 @@
       "announce": {
         "alt": "Vraie notification d'un message envoyé depuis le tableau de bord : « Hoy 2x1 » (2 pour 1 aujourd'hui)"
       },
-      "reward": {
-        "notification": "Coupe offerte ! Montrez-la au comptoir."
-      },
       "passAlt": "Vraie carte à tampons d'un client dans Apple Wallet : six tampons sur sept, prochaine récompense une coupe offerte"
     },
     "tagline": "Cartes à tampons et coupons.",
@@ -73,9 +69,6 @@
       "scroll": "Continuez à défiler.",
       "camera": "Appareil photo",
       "openLink": "Ouvrir loyalshy.com",
-      "walletTitle": "Wallet",
-      "mailSubject": "Votre carte à tampons",
-      "mailButton": "Ajouter à Apple Wallet",
       "sendTitle": "Envoyer un message",
       "sendButton": "Envoyer à 128 clients",
       "ch1": {
@@ -90,21 +83,18 @@
         "title": "Le bon message, au bon moment.",
         "caption": "Écrivez le message dans le tableau de bord et il arrive en notification sur chaque téléphone qui a votre carte."
       },
-      "alsoGoogle": "Google Wallet aussi.",
       "ch4": {
-        "title": "Et la récompense, toute seule.",
-        "caption": "Quand la carte est pleine, le cadeau apparaît sur le pass et votre équipe le valide au comptoir."
+        "title": "Tout, depuis l'app.",
+        "caption": "Votre équipe tamponne, valide et inscrit les clients depuis son téléphone. Elle se connecte en scannant un QR du tableau de bord."
       },
       "tryLine": "Ajoutez la carte de démonstration à votre Wallet. C'est exactement ce que verront vos clients.",
-      "tent": {
-        "business": "Café Sol",
-        "program": "Carte à tampons",
-        "headline": "Enregistrez votre carte à tampons",
-        "sub": "Scannez avec l'appareil photo. Elle va dans votre Wallet, rien à télécharger.",
-        "qrAlt": "QR code pour rejoindre le programme de Café Sol"
-      },
-      "tentNote": "Prêt à imprimer en trois formats : ticket, chevalet et affiche.",
-      "sendText": "Hoy 2x1"
+      "sendText": "Hoy 2x1",
+      "qrAlt": "Vrai QR d'un programme Loyalshy, prêt pour le comptoir",
+      "qrNote": "Le QR du programme, prêt à imprimer.",
+      "appStore": "Télécharger dans l'App Store",
+      "playStore": "Disponible sur Google Play",
+      "appAlt": "L'app de l'équipe : recherche client, nouveau client, récompenses, partager un programme, message et dernière activité",
+      "walletTitle": "Wallet"
     }
   },
   "featureShowcase": {
@@ -1895,13 +1885,6 @@
         "description": "Aide avec votre compte, intégration API, problèmes de pass ou questions de facturation."
       }
     }
-  },
-  "staffApp": {
-    "title": "L'app de l'équipe.",
-    "subtitle": "Une app pour scanner les cartes, ajouter des tampons et valider des coupons au comptoir. Elle se connecte en scannant un QR code du tableau de bord.",
-    "downloadAppStore": "Télécharger dans l'App Store",
-    "downloadPlayStore": "Disponible sur Google Play",
-    "screenAlt": "Onglet Aujourd'hui de l'app de l'équipe : recherche client, nouveau client, récompenses, partager un programme, message et dernière activité"
   },
   "metadata": {
     "home": {

@@ -30,7 +30,6 @@ export async function MarketingFooter() {
       links: [
         { label: tNav("cards"), href: `${home}#cards` },
         { label: tNav("dashboard"), href: `${home}#features` },
-        { label: tNav("staffApp"), href: `${home}#staff-app` },
         { label: tNav("pricing"), href: `${home}#pricing` },
         ...(DEMO_JOIN_URL ? [{ label: t("tryDemo"), href: `${home}#try-demo` }] : []),
       ],
