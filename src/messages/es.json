@@ -61,11 +61,12 @@
         "notification": "Sello añadido. 4 de 5."
       },
       "announce": {
-        "notification": "Hoy, 2x1 en cafés hasta las 12."
+        "alt": "Notificación real de un aviso enviado desde el panel: «Hoy 2x1»"
       },
       "reward": {
-        "notification": "Café gratis. Enséñalo en el mostrador."
-      }
+        "notification": "¡Corte gratis! Enséñalo en el mostrador."
+      },
+      "passAlt": "Tarjeta de sellos real de un cliente en Apple Wallet: seis de siete sellos, próxima recompensa un corte gratis"
     },
     "tagline": "Tarjetas de sellos y cupones.",
     "film": {
@@ -102,7 +103,8 @@
         "sub": "Escanea con la cámara. Se añade a tu Wallet, sin descargar nada.",
         "qrAlt": "Código QR para unirse al programa de Café Sol"
       },
-      "tentNote": "Listo para imprimir en tres tamaños: ticket, caballete y póster."
+      "tentNote": "Listo para imprimir en tres tamaños: ticket, caballete y póster.",
+      "sendText": "Hoy 2x1"
     }
   },
   "featureShowcase": {

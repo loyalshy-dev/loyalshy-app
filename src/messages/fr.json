@@ -61,11 +61,12 @@
         "notification": "Tampon ajouté. 4 sur 5."
       },
       "announce": {
-        "notification": "Aujourd'hui, 2 cafés pour 1 jusqu'à midi."
+        "alt": "Vraie notification d'un message envoyé depuis le tableau de bord : « Hoy 2x1 » (2 pour 1 aujourd'hui)"
       },
       "reward": {
-        "notification": "Café offert. Montrez-le au comptoir."
-      }
+        "notification": "Coupe offerte ! Montrez-la au comptoir."
+      },
+      "passAlt": "Vraie carte à tampons d'un client dans Apple Wallet : six tampons sur sept, prochaine récompense une coupe offerte"
     },
     "tagline": "Cartes à tampons et coupons.",
     "film": {
@@ -102,7 +103,8 @@
         "sub": "Scannez avec l'appareil photo. Elle va dans votre Wallet, rien à télécharger.",
         "qrAlt": "QR code pour rejoindre le programme de Café Sol"
       },
-      "tentNote": "Prêt à imprimer en trois formats : ticket, chevalet et affiche."
+      "tentNote": "Prêt à imprimer en trois formats : ticket, chevalet et affiche.",
+      "sendText": "Hoy 2x1"
     }
   },
   "featureShowcase": {

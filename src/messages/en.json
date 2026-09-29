@@ -61,11 +61,12 @@
         "notification": "Stamp added. 4 of 5."
       },
       "announce": {
-        "notification": "Today, 2-for-1 coffees until noon."
+        "alt": "A real notification of a notice sent from the dashboard: “Hoy 2x1” (2-for-1 today)"
       },
       "reward": {
-        "notification": "Free coffee. Show this at the counter."
-      }
+        "notification": "Free haircut! Show this at the counter."
+      },
+      "passAlt": "A real customer's stamp card in Apple Wallet: six of seven stamps, next reward a free haircut"
     },
     "tagline": "Stamp cards and coupons.",
     "film": {
@@ -102,7 +103,8 @@
         "sub": "Scan with your camera. It goes into your Wallet, nothing to download.",
         "qrAlt": "QR code to join Café Sol's program"
       },
-      "tentNote": "Ready to print in three sizes: receipt, table tent and poster."
+      "tentNote": "Ready to print in three sizes: receipt, table tent and poster.",
+      "sendText": "Hoy 2x1"
     }
   },
   "featureShowcase": {

@@ -1,12 +1,10 @@
 "use client"
 
-import { useRef, useState, type ReactNode } from "react"
+import { useRef, type ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react"
 import { useTranslations } from "next-intl"
-import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
-import { DEMO_PASS_DESIGN, DEMO_PASS_LOGO, DEMO_PASS_TOTAL } from "./demo-pass"
 import { MapScene } from "./map-scene"
 import { PhoneFrame } from "./phone-frame"
 import { useMediaQuery } from "./use-media-query"
@@ -34,54 +32,16 @@ const LIGHT = { stiffness: 110, damping: 24, mass: 0.6 }
 // a half per chapter, with a breath between chapters where only the phone is on. Raise it to slow the film down, lower to speed up.
 const PIN_VH = 760
 
-// The Wallet notification as iOS draws it (measured from a real one): the
-// pass's own logo in a rounded tile, the business name in bold over the
-// message, and a thumbnail of the pass on the right. No timestamp.
-function Banner({ title, body, visits = 4, hasReward = false, t }: { title: string; body: string; visits?: number; hasReward?: boolean; t: ReturnType<typeof useTranslations> }) {
-  const thumbW = 40
-  return (
-    <div
-      className="flex items-center gap-3 rounded-[20px] py-2.5 pl-3 pr-2.5"
-      style={{ background: "oklch(1 0 0 / 0.82)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", boxShadow: "0 8px 24px oklch(0 0 0 / 0.14), 0 0 0 0.5px oklch(0 0 0 / 0.06)" }}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={DEMO_PASS_LOGO} alt="" width={38} height={38} className="size-[38px] shrink-0 rounded-[9px]" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-semibold leading-[1.2]" style={{ color: INK }}>{title}</p>
-        <p className="text-[13px] leading-[1.25]" style={{ color: "oklch(0.28 0.01 40)" }}>{body}</p>
-      </div>
-      <div className="shrink-0 overflow-hidden rounded-[4px]" style={{ width: thumbW, height: Math.round(thumbW * (450 / 320)) }} aria-hidden="true">
-        <WalletPassRenderer
-          design={DEMO_PASS_DESIGN}
-          format="apple"
-          compact
-          width={thumbW}
-          height={Math.round(thumbW * (450 / 320))}
-          logoUrl={DEMO_PASS_LOGO}
-          organizationName={t("card.business")}
-          programName={t("card.program")}
-          currentVisits={visits}
-          totalVisits={DEMO_PASS_TOTAL}
-          hasReward={hasReward}
-          rewardDescription={t("card.reward")}
-          customerName={t("card.customer")}
-          memberNumber="42"
-        />
-      </div>
-    </div>
-  )
-}
-
-// The location notification is the real thing: a photo of an actual Wallet
-// banner from a client's phone, cropped to the bubble. It carries its own
-// logo, name and text, so it is not translated.
-function RealBanner({ alt }: { alt: string }) {
+// Real artefacts from a client's phone, cropped: two Wallet notifications
+// (proximity and announcement), the pass itself, and its logo. They carry
+// their own name and text, so they are not translated.
+function RealBanner({ src, height, alt }: { src: string; height: number; alt: string }) {
   return (
     <Image
-      src="/hero/ios-banner.webp"
+      src={src}
       alt={alt}
       width={1080}
-      height={193}
+      height={height}
       className="h-auto w-full rounded-[18px]"
       style={{ boxShadow: "0 8px 24px oklch(0 0 0 / 0.22)" }}
       sizes="300px"
@@ -89,25 +49,35 @@ function RealBanner({ alt }: { alt: string }) {
   )
 }
 
-function Pass({ width, t, visits, hasReward }: { width: number; t: ReturnType<typeof useTranslations>; visits: number; hasReward: boolean }) {
+function RealPass({ alt }: { alt: string }) {
   return (
-    <WalletPassRenderer
-      design={DEMO_PASS_DESIGN}
-      format="apple"
-      compact
-      width={width}
-      logoUrl={DEMO_PASS_LOGO}
-      organizationName={t("card.business")}
-      programName={t("card.program")}
-      currentVisits={visits}
-      totalVisits={DEMO_PASS_TOTAL}
-      hasReward={hasReward}
-      rewardDescription={t("card.reward")}
-      customerName={t("card.customer")}
-      memberNumber="42"
-      height={Math.round(width * (450 / 320))}
-      style={{ boxShadow: "0 14px 34px oklch(0 0 0 / 0.18)" }}
+    <Image
+      src="/hero/real-pass.webp"
+      alt={alt}
+      width={720}
+      height={1003}
+      className="h-auto w-full rounded-[10px]"
+      style={{ boxShadow: "0 14px 34px oklch(0 0 0 / 0.22)" }}
+      sizes="300px"
     />
+  )
+}
+
+// The one banner we have no photo of (the reward) is built from the real
+// pass's logo and thumbnail, laid out as iOS lays it out.
+function RewardBanner({ title, body }: { title: string; body: string }) {
+  return (
+    <div
+      className="flex items-center gap-3 rounded-[20px] py-2.5 pl-3 pr-2.5"
+      style={{ background: "oklch(0.2 0.01 285 / 0.86)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", boxShadow: "0 8px 24px oklch(0 0 0 / 0.22)" }}
+    >
+      <Image src="/hero/real-logo.webp" alt="" width={38} height={38} className="size-[38px] shrink-0 rounded-[9px]" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[13px] font-semibold leading-[1.2] text-white">{title}</p>
+        <p className="text-[13px] leading-[1.25]" style={{ color: "oklch(0.92 0 0)" }}>{body}</p>
+      </div>
+      <Image src="/hero/real-pass.webp" alt="" width={40} height={56} className="h-[56px] w-[40px] shrink-0 rounded-[3px] object-cover" aria-hidden="true" />
+    </div>
   )
 }
 
@@ -159,8 +129,6 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
   const useFade = (keys: number[], values: number[]) => useSpring(useTransform(p, keys, values), LIGHT)
 
   const phoneW = narrow ? 230 : 300
-  const screenW = phoneW - 16
-  const passW = screenW - 24
 
   // The phone as an object. Rotation is skipped on phones (touch GPUs).
   const rot = narrow ? 0 : 1
@@ -219,8 +187,6 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
   const tryOpacity = useFade([0.985, 1], [0, 1])
   const tryY = useSpring(useTransform(p, [0.985, 1], [16, 0]), LIGHT)
   const tryEvents = useTransform(p, (v) => (v > 0.99 ? "auto" : "none"))
-  const [earned, setEarned] = useState(false)
-  useMotionValueEvent(p, "change", (v) => setEarned(v >= 0.975))
 
   // Captions: each one rises in, holds, and rises out; the paragraph
   // follows the title by a beat.
@@ -358,7 +324,7 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
             >
               <p className="text-[11px] font-semibold" style={{ color: INK }}>{t("film.sendTitle")}</p>
               <p className="mt-2 rounded-lg px-3 py-2 text-[12px] leading-snug" style={{ background: "oklch(0.965 0.003 60)", color: INK }}>
-                {t("scenes.announce.notification")}
+                {t("film.sendText")}
               </p>
               <div className="mt-2 rounded-full py-1.5 text-center text-[11px] font-semibold" style={{ background: INK, color: "#fff" }}>
                 {t("film.sendButton")}
@@ -371,7 +337,7 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
               style={{ opacity: flyOpacity, x: flyX, y: flyY }}
               className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 rounded-full px-3 py-1.5 text-[12px] font-medium text-white"
             >
-              <span className="block rounded-full px-3 py-1.5" style={{ background: INK }}>{t("scenes.announce.notification")}</span>
+              <span className="block rounded-full px-3 py-1.5" style={{ background: INK }}>{t("film.sendText")}</span>
             </motion.div>
 
             {/* The phone */}
@@ -382,12 +348,12 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
                   <LockFace date={t("lockDate")} narrow={narrow} />
                   <motion.div style={{ opacity: nearOpacity, y: nearY, bottom: LOCK_BOTTOM }} className="absolute left-3 right-3">
                     <div>
-                      <RealBanner alt={t("scenes.near.alt")} />
+                      <RealBanner src="/hero/ios-banner.webp" height={193} alt={t("scenes.near.alt")} />
                     </div>
                   </motion.div>
                   <motion.div style={{ opacity: announceOpacity, y: announceY, bottom: LOCK_BOTTOM }} className="absolute left-3 right-3">
                     <div>
-                      <Banner title={t("card.business")} body={t("scenes.announce.notification")} t={t} />
+                      <RealBanner src="/hero/ios-announce.webp" height={185} alt={t("scenes.announce.alt")} />
                     </div>
                   </motion.div>
                 </motion.div>
@@ -416,7 +382,7 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
                   <p className="absolute inset-x-0 top-12 text-center text-[13px] font-semibold" style={{ color: INK }}>{t("film.walletTitle")}</p>
                   <motion.div style={{ y: passY }} className="mk-hero-card absolute left-3 right-3" >
                     <div style={{ marginTop: narrow ? 96 : 110 }}>
-                      <Pass width={passW} t={t} visits={1} hasReward={false} />
+                      <RealPass alt={t("scenes.passAlt")} />
                     </div>
                   </motion.div>
                 </motion.div>
@@ -427,12 +393,12 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
                   <p className="absolute inset-x-0 top-12 text-center text-[13px] font-semibold" style={{ color: INK }}>{t("film.walletTitle")}</p>
                   <motion.div style={{ y: pass2Y }} className="mk-hero-card absolute left-3 right-3">
                     <div style={{ marginTop: narrow ? 152 : 150 }}>
-                      <Pass width={passW} t={t} visits={earned ? 5 : 4} hasReward={earned} />
+                      <RealPass alt={t("scenes.passAlt")} />
                     </div>
                   </motion.div>
                   <motion.div style={{ opacity: rewardOpacity, y: rewardY }} className="absolute left-3 right-3 z-10" >
                     <div style={{ marginTop: 44 }}>
-                      <Banner title={t("card.business")} body={t("scenes.reward.notification")} visits={5} hasReward t={t} />
+                      <RewardBanner title="Loyalshy" body={t("scenes.reward.notification")} />
                     </div>
                   </motion.div>
                 </motion.div>
@@ -453,7 +419,6 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
   const t = useTranslations("hero")
   const tDemo = useTranslations("tryDemo")
   const w = 230
-  const passW = w - 16 - 24
   void qr
   const frames = [
     {
@@ -462,7 +427,7 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
         <div className="absolute inset-0" style={{ background: "oklch(0.965 0.003 60)" }}>
           <p className="absolute inset-x-0 top-12 text-center text-[13px] font-semibold" style={{ color: INK }}>{t("film.walletTitle")}</p>
           <div className="absolute left-3 right-3" style={{ top: 96 }}>
-            <Pass width={passW} t={t} visits={1} hasReward={false} />
+            <RealPass alt={t("scenes.passAlt")} />
           </div>
         </div>
       ),
@@ -473,7 +438,7 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
         <div className="absolute inset-0">
           <LockFace date={t("lockDate")} narrow />
           <div className="absolute left-3 right-3" style={{ bottom: LOCK_BOTTOM }}>
-            <RealBanner alt={t("scenes.near.alt")} />
+            <RealBanner src="/hero/ios-banner.webp" height={193} alt={t("scenes.near.alt")} />
           </div>
         </div>
       ),
@@ -484,7 +449,7 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
         <div className="absolute inset-0">
           <LockFace date={t("lockDate")} narrow />
           <div className="absolute left-3 right-3" style={{ bottom: LOCK_BOTTOM }}>
-            <Banner title={t("card.business")} body={t("scenes.announce.notification")} t={t} />
+            <RealBanner src="/hero/ios-announce.webp" height={185} alt={t("scenes.announce.alt")} />
           </div>
         </div>
       ),
@@ -494,10 +459,10 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
       screen: (
         <div className="absolute inset-0" style={{ background: "oklch(0.965 0.003 60)" }}>
           <div className="absolute left-3 right-3" style={{ top: 96 }}>
-            <Pass width={passW} t={t} visits={5} hasReward />
+            <RealPass alt={t("scenes.passAlt")} />
           </div>
           <div className="absolute left-3 right-3 z-10" style={{ top: 40 }}>
-            <Banner title={t("card.business")} body={t("scenes.reward.notification")} visits={5} hasReward t={t} />
+            <RewardBanner title="Loyalshy" body={t("scenes.reward.notification")} />
           </div>
         </div>
       ),
