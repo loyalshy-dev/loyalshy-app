@@ -72,6 +72,23 @@ function Banner({ title, body, visits = 4, hasReward = false, t }: { title: stri
   )
 }
 
+// The location notification is the real thing: a photo of an actual Wallet
+// banner from a client's phone, cropped to the bubble. It carries its own
+// logo, name and text, so it is not translated.
+function RealBanner({ alt }: { alt: string }) {
+  return (
+    <Image
+      src="/hero/ios-banner.webp"
+      alt={alt}
+      width={1080}
+      height={193}
+      className="h-auto w-full rounded-[18px]"
+      style={{ boxShadow: "0 8px 24px oklch(0 0 0 / 0.22)" }}
+      sizes="300px"
+    />
+  )
+}
+
 function Pass({ width, t, visits, hasReward }: { width: number; t: ReturnType<typeof useTranslations>; visits: number; hasReward: boolean }) {
   return (
     <WalletPassRenderer
@@ -341,7 +358,7 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
                   <LockFace date={t("lockDate")} narrow={narrow} />
                   <motion.div style={{ opacity: nearOpacity, y: nearY }} className="absolute left-3 right-3">
                     <div style={{ marginTop: narrow ? 128 : 150 }}>
-                      <Banner title={t("card.business")} body={t("scenes.near.notification")} t={t} />
+                      <RealBanner alt={t("scenes.near.alt")} />
                     </div>
                   </motion.div>
                   <motion.div style={{ opacity: announceOpacity, y: announceY }} className="absolute left-3 right-3">
@@ -432,7 +449,7 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
         <div className="absolute inset-0">
           <LockFace date={t("lockDate")} narrow />
           <div className="absolute left-3 right-3" style={{ top: 128 }}>
-            <Banner title={t("card.business")} body={t("scenes.near.notification")} t={t} />
+            <RealBanner alt={t("scenes.near.alt")} />
           </div>
         </div>
       ),

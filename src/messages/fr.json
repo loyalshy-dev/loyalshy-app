@@ -55,7 +55,7 @@
     "lockDate": "lundi 6 octobre",
     "scenes": {
       "near": {
-        "notification": "Un café avant de continuer ? Montrez votre carte."
+        "alt": "Une vraie notification Wallet sur un iPhone : le logo du commerce, son nom et le message qu'il a écrit, avec la carte en miniature"
       },
       "stamp": {
         "notification": "Tampon ajouté. 4 sur 5."

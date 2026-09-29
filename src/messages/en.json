@@ -55,7 +55,7 @@
     "lockDate": "Monday, October 6",
     "scenes": {
       "near": {
-        "notification": "Coffee before you go on? Show your card."
+        "alt": "A real Wallet notification on an iPhone: the business's logo, its name and the message it wrote, with the card in miniature"
       },
       "stamp": {
         "notification": "Stamp added. 4 of 5."
