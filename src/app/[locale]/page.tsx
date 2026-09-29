@@ -2,14 +2,11 @@ import { NextIntlClientProvider } from "next-intl"
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server"
 import { MarketingNavbar } from "@/components/marketing/navbar"
 import { Hero } from "@/components/marketing/hero"
-import { FeatureShowcase } from "@/components/marketing/dashboard-preview"
-import { HowItWorks } from "@/components/marketing/how-it-works"
-import { WalletPreview } from "@/components/marketing/wallet-preview"
-import { Testimonials } from "@/components/marketing/testimonials"
+import { FeatureShowcase } from "@/components/marketing/feature-showcase"
+import { CardAnatomy } from "@/components/marketing/card-anatomy"
 import { Pricing } from "@/components/marketing/pricing"
 import { FAQ } from "@/components/marketing/faq"
 import { ClosingCTA } from "@/components/marketing/closing-cta"
-import { TryDemo } from "@/components/marketing/try-demo"
 import { StaffApp } from "@/components/marketing/staff-app"
 import { MarketingFooter } from "@/components/marketing/footer"
 import type { Locale } from "@/i18n/config"
@@ -100,8 +97,8 @@ async function JsonLd({ locale }: { locale: Locale }) {
 }
 
 const MARKETING_NAMESPACES = [
-  "common", "nav", "hero", "featureShowcase", "howItWorks",
-  "walletPreview", "testimonials", "pricing",
+  "common", "nav", "hero", "featureShowcase",
+  "gallery", "pricing",
   "faq", "tryDemo", "staffApp", "closingCta", "footer",
 ] as const
 
@@ -122,12 +119,9 @@ export default async function LandingPage({ params }: PageProps) {
         <MarketingNavbar />
         <main>
           <Hero />
-          <TryDemo />
+          <CardAnatomy />
           <FeatureShowcase />
-          <HowItWorks />
-          <WalletPreview />
           <StaffApp />
-          {/* <Testimonials /> */}
           <Pricing />
           <FAQ />
           <ClosingCTA />

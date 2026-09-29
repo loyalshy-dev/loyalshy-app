@@ -1,89 +1,48 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import { FadeIn } from "./motion"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { SectionHeading } from "./section-heading"
 
-const FAQ_ITEM_KEYS = [
-  "howWorks",
-  "devices",
-  "setup",
-  "passTypes",
-  "freePlan",
-  "cancel",
-  "security",
-  "customize",
-] as const
+const FAQ_ITEM_KEYS = ["howWorks", "paper", "devices", "pos", "freePlan", "security", "enterprise"] as const
 
 export function FAQ() {
   const t = useTranslations("faq")
 
   return (
-    <section
-      id="faq"
-      className="py-16 sm:py-24 md:py-32 px-4 sm:px-6"
-      style={{ background: "var(--mk-bg)" }}
-    >
-      <div className="mx-auto max-w-3xl">
-        <FadeIn>
-          <div className="text-center mb-16">
-            <h2
-              className="font-display mk-clamp-h2 font-bold leading-[1.1]"
-              style={{ color: "var(--mk-text)" }}
-            >
-              {t("title")}
-            </h2>
-          </div>
-        </FadeIn>
-
-        <FadeIn delay={0.1}>
-          <div className="flex flex-col gap-4">
-            <Accordion type="single" collapsible className="w-full flex flex-col gap-4">
-              {FAQ_ITEM_KEYS.map((key) => (
-                <AccordionItem
-                  key={key}
-                  value={key}
-                  className="mk-card-glass px-6 rounded-2xl! border-b-0"
-                >
-                  <AccordionTrigger
-                    className="text-[15px] font-bold hover:no-underline py-5 gap-6"
-                    style={{ color: "var(--mk-text)" }}
-                  >
-                    {t(`items.${key}.question`)}
-                  </AccordionTrigger>
-                  <AccordionContent
-                    className="text-[14px] leading-relaxed pb-5 pt-0"
-                    style={{ color: "var(--mk-text-muted)" }}
-                  >
-                    {t(`items.${key}.answer`)}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </FadeIn>
-
-        <FadeIn delay={0.2}>
-          <p
-            className="mt-8 text-center text-[14px]"
-            style={{ color: "var(--mk-text-muted)" }}
-          >
+    <section id="faq" className="scroll-mt-24" style={{ background: "var(--mk-bg)" }}>
+      <div className="mk-wrap grid grid-cols-1 gap-10 py-20 lg:grid-cols-12 lg:gap-8 lg:py-28">
+        <div className="lg:col-span-4">
+          <SectionHeading title={t("title")} />
+          <p className="mt-6 mk-body" style={{ color: "var(--mk-text-muted)" }}>
             {t("stillHaveQuestions")}{" "}
             <a
               href="mailto:hello@loyalshy.com"
-              className="font-medium underline underline-offset-4 transition-opacity hover:opacity-70"
+              className="font-medium underline underline-offset-4"
               style={{ color: "var(--mk-text)" }}
             >
               {t("emailUs")}
             </a>{" "}
             {t("replyTime")}
           </p>
-        </FadeIn>
+        </div>
+        <div className="lg:col-span-8">
+          <Accordion type="single" collapsible className="w-full border-t" style={{ borderColor: "var(--mk-border)" }}>
+            {FAQ_ITEM_KEYS.map((key) => (
+              <AccordionItem key={key} value={key} className="border-b" style={{ borderColor: "var(--mk-border)" }}>
+                <AccordionTrigger
+                  className="mk-body py-5 text-left font-semibold hover:no-underline"
+                  style={{ color: "var(--mk-text)" }}
+                >
+                  {t(`items.${key}.question`)}
+                </AccordionTrigger>
+                <AccordionContent className="max-w-[65ch] pb-6 mk-body" style={{ color: "var(--mk-text-muted)" }}>
+                  {t(`items.${key}.answer`)}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
       </div>
     </section>
   )

@@ -2,185 +2,177 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Menu, X } from "lucide-react"
+import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 
-import { Button } from "@/components/ui/button"
 import { Wordmark } from "@/components/brand-mark"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 import { useLocalePath } from "@/i18n/use-locale-path"
 
+// The global bar. At the top of the page it runs edge to edge over a
+// hairline; once the page scrolls it lifts into a floating translucent
+// capsule, a little narrower than the page. Links show which section is on
+// screen. The one action is the coral pill. On phones the bar is 44px and
+// the menu drops down full-screen.
+
 interface NavLink {
   label: string
   href: string
+  /** Section id on the landing this link points at (for the active state). */
+  section?: string
 }
+
+const SECTIONS = ["cards", "features", "pricing", "faq"] as const
 
 export function MarketingNavbar() {
   const t = useTranslations("nav")
   const tCommon = useTranslations("common")
   const lp = useLocalePath()
-
+  const pathname = usePathname()
+  const [open, setOpen] = React.useState(false)
   const [scrolled, setScrolled] = React.useState(false)
-  const [mobileOpen, setMobileOpen] = React.useState(false)
+  const [active, setActive] = React.useState<string | null>(null)
+  const onLanding = pathname === lp("/")
 
-  const NAV_LINKS: NavLink[] = [
-    { label: t("features"), href: `${lp("/")}#features` },
-    { label: t("pricing"), href: `${lp("/")}#pricing` },
-    { label: t("faq"), href: `${lp("/")}#faq` },
-    { label: tCommon("contact"), href: lp("/contact") },
+  const links: NavLink[] = [
+    { label: t("cards"), href: `${lp("/")}#cards`, section: "cards" },
+    { label: t("dashboard"), href: `${lp("/")}#features`, section: "features" },
+    { label: t("pricing"), href: `${lp("/")}#pricing`, section: "pricing" },
+    { label: t("faq"), href: `${lp("/")}#faq`, section: "faq" },
+    { label: tCommon("contact"), href: lp("/contact"), section: "contact" },
   ]
+  const current = onLanding ? active : pathname === lp("/contact") ? "contact" : null
 
+  // Lift the bar into its capsule once the page has moved.
   React.useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 8)
-    }
-    handleScroll()
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  // Lock body scroll when mobile menu is open
+  // Which section is on screen: the one whose top has passed the upper
+  // third of the viewport and whose bottom has not.
   React.useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden"
-    } else {
+    if (!onLanding) return
+    const els = SECTIONS.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => Boolean(el))
+    if (els.length === 0) return
+    const visible = new Map<string, boolean>()
+    const update = () => {
+      const hit = SECTIONS.find((id) => visible.get(id))
+      setActive(hit ?? null)
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) visible.set(entry.target.id, entry.isIntersecting)
+        update()
+      },
+      { rootMargin: "-34% 0px -60% 0px", threshold: 0 },
+    )
+    els.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [onLanding])
+
+  // On the landing the wordmark just scrolls to the top; elsewhere it goes home.
+  const onBrand = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    setOpen(false)
+    if (window.location.pathname === lp("/")) {
+      e.preventDefault()
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }
+
+  React.useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : ""
+    return () => {
       document.body.style.overflow = ""
     }
-    return () => { document.body.style.overflow = "" }
-  }, [mobileOpen])
+  }, [open])
+
+  React.useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false)
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [open])
 
   return (
-    <>
-      <header
-        className={cn(
-          "sticky top-0 z-50 w-full transition-all duration-200",
-          scrolled
-            ? "border-b border-(--mk-border) bg-(--mk-bg)/80 backdrop-blur-lg"
-            : "border-b border-transparent bg-transparent"
-        )}
-      >
-        <div className="mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-8 lg:h-20 lg:px-12">
-          {/* Logo */}
-          <Link
-            href={lp("/")}
-            className="flex items-center transition-opacity hover:opacity-80"
-            aria-label={t("home")}
-          >
-            <Wordmark className="text-[22px] lg:text-[26px] text-(--mk-text)" />
+    <header className="sticky top-0 z-50 w-full">
+      <div className="mk-nav-bar" data-scrolled={scrolled} data-open={open}>
+        <div className="mk-nav-inner">
+          <Link href={lp("/")} className="mk-nav-brand" aria-label={t("home")} onClick={onBrand}>
+            <Wordmark className="text-[19px]" />
           </Link>
 
-          {/* Center nav links — desktop only */}
-          <nav
-            className="hidden md:flex md:items-center md:gap-3 lg:gap-4"
-            aria-label="Main navigation"
-          >
-            {NAV_LINKS.map((link) => (
+          <nav className="mk-nav-links" aria-label="Main navigation">
+            {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={cn(
-                  "rounded-md px-5 py-2.5 text-base font-medium transition-colors duration-150 lg:px-6 lg:py-3 lg:text-lg",
-                  "hover:text-(--mk-text)",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                )}
-                style={{ color: "var(--mk-text-muted)" }}
+                className="mk-nav-link"
+                data-active={current === link.section}
+                aria-current={current === link.section ? "true" : undefined}
               >
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          {/* Right side actions — desktop */}
-          <div className="hidden items-center gap-5 md:flex lg:gap-7">
-            <LanguageSwitcher />
-            <ThemeToggle />
-            <Link
-              href="/login"
-              className="text-base font-medium transition-colors lg:text-lg"
-              style={{ color: "var(--mk-text-muted)" }}
-            >
+          <div className="mk-nav-actions">
+            <LanguageSwitcher className="mk-nav-icon" />
+            <ThemeToggle className="mk-nav-icon" />
+            <span className="mk-nav-sep" aria-hidden="true" />
+            <Link href="/login" className="mk-nav-link mk-nav-link-strong">
               {tCommon("logIn")}
             </Link>
-            <Link
-              href="/register"
-              className="mk-btn-primary py-3! px-8! text-base! lg:py-3.5! lg:px-10! lg:text-lg!"
-            >
-              {tCommon("getStarted")}
+            <Link href="/register" className="mk-nav-pill">
+              {tCommon("getStartedFree")}
             </Link>
           </div>
 
-          {/* Mobile: hamburger trigger */}
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="md:hidden"
-            style={{ color: "var(--mk-text-muted)" }}
-            aria-label={t("openMenu")}
-            onClick={() => setMobileOpen(true)}
+          <button
+            type="button"
+            className="mk-nav-burger"
+            aria-label={open ? t("closeMenu") : t("openMenu")}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
           >
-            <Menu className="size-5" />
-          </Button>
+            <span className={cn("mk-nav-burger-line", open && "mk-nav-burger-line-a")} />
+            <span className={cn("mk-nav-burger-line", open && "mk-nav-burger-line-b")} />
+          </button>
         </div>
-      </header>
+      </div>
 
-      {/* Full-screen mobile menu overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex flex-col md:hidden"
-          style={{ background: "var(--mk-bg)" }}
-        >
-          {/* Top row: language + theme switchers + close button, respects notch */}
-          <div className="flex items-center justify-end gap-1 px-4 safe-area-top" style={{ paddingTop: "max(env(safe-area-inset-top, 1.25rem), 1.25rem)" }}>
-            <LanguageSwitcher size="icon" className="size-11" />
-            <ThemeToggle className="size-11" />
-            <button
-              type="button"
-              onClick={() => setMobileOpen(false)}
-              aria-label={t("closeMenu")}
-              className="flex size-11 items-center justify-center transition-opacity hover:opacity-60"
-              style={{ color: "var(--mk-text-muted)" }}
-            >
-              <X className="size-6" />
-            </button>
-          </div>
-
-          {/* Nav links — large, spacious */}
-          <nav
-            className="flex flex-1 flex-col gap-2 px-8 pt-6"
-            aria-label="Mobile navigation"
-          >
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="text-[1.75rem] font-bold tracking-tight py-3 transition-opacity hover:opacity-60"
-                style={{ color: "var(--mk-text)" }}
-              >
-                {link.label}
-              </Link>
+      {/* Phone menu: drops from the bar, links stacked over hairlines */}
+      <div className={cn("mk-nav-menu", open && "mk-nav-menu-open")} aria-hidden={!open}>
+        <nav aria-label="Mobile navigation" className="mk-wrap">
+          <ul className="mk-nav-menu-list">
+            {links.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} onClick={() => setOpen(false)} className="mk-nav-menu-link" tabIndex={open ? 0 : -1}>
+                  {link.label}
+                </Link>
+              </li>
             ))}
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              className="text-[1.75rem] font-bold tracking-tight py-3 transition-opacity hover:opacity-60"
-              style={{ color: "var(--mk-text)" }}
-            >
+          </ul>
+          <div className="mk-nav-menu-foot">
+            <Link href="/register" onClick={() => setOpen(false)} className="mk-btn-primary w-full" tabIndex={open ? 0 : -1}>
+              {tCommon("getStartedFree")}
+            </Link>
+            <Link href="/login" onClick={() => setOpen(false)} className="mk-body font-semibold" style={{ color: "var(--mk-text)" }} tabIndex={open ? 0 : -1}>
               {tCommon("logIn")}
             </Link>
-            <Link
-              href="/register"
-              onClick={() => setMobileOpen(false)}
-              className="text-[1.75rem] font-bold tracking-tight py-3 transition-opacity hover:opacity-60"
-              style={{ color: "var(--mk-text)" }}
-            >
-              {tCommon("getStarted")}
-            </Link>
-          </nav>
-        </div>
-      )}
-    </>
+            <div className="flex items-center gap-1">
+              <LanguageSwitcher size="icon" className="size-10" />
+              <ThemeToggle className="size-10" />
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
   )
 }

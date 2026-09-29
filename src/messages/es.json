@@ -30,28 +30,84 @@
     }
   },
   "nav": {
-    "features": "Funciones",
     "pricing": "Precios",
     "faq": "Preguntas",
-    "apiDocs": "API Docs",
     "home": "Inicio Loyalshy",
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú",
-    "switchLanguage": "Cambiar idioma"
+    "switchLanguage": "Cambiar idioma",
+    "cards": "Tarjetas",
+    "dashboard": "El panel",
+    "staffApp": "App del equipo"
   },
   "hero": {
-    "title1": "Tu tarjeta de sellos,",
-    "title2": "en el móvil de",
-    "titleHighlight": "tus clientes",
-    "subtitle": "Escanean un QR en el mostrador y la tarjeta se guarda en su Apple o Google Wallet. Tú sellas desde el móvil. Gratis hasta 50 clientes.",
+    "subtitle": "Sin app, sin cuenta y sin papel. La tarjeta se guarda en Apple Wallet o Google Wallet.",
     "seeHowItWorks": "Ver cómo funciona",
-    "freeForever": "Gratis para siempre",
-    "noCreditCard": "Sin tarjeta de crédito",
-    "screenshotAlt": "Panel de Loyalshy mostrando programas de fidelización con diseños de tarjetas",
-    "browserUrl": "loyalshy.com/dashboard"
+    "title": "Fideliza a tus clientes ocasionales.",
+    "tryInWallet": "Pruébala en tu Wallet",
+    "note": "Gratis hasta 50 clientes. Sin tarjeta de crédito.",
+    "card": {
+      "business": "Café Sol",
+      "program": "Tarjeta de sellos",
+      "reward": "Café gratis",
+      "customer": "Marta G."
+    },
+    "lockDate": "lunes, 6 de octubre",
+    "now": "ahora",
+    "scenes": {
+      "near": {
+        "notification": "Estás cerca de Café Sol. Enseña tu tarjeta."
+      },
+      "stamp": {
+        "notification": "Sello añadido. 4 de 5."
+      },
+      "announce": {
+        "notification": "Hoy, 2x1 en cafés hasta las 12."
+      },
+      "reward": {
+        "notification": "Café gratis. Enséñalo en el mostrador."
+      }
+    },
+    "tagline": "Tarjetas de sellos y cupones.",
+    "film": {
+      "scroll": "Sigue bajando.",
+      "camera": "Cámara",
+      "openLink": "Abrir loyalshy.com",
+      "walletTitle": "Wallet",
+      "mailSubject": "Tu tarjeta de sellos",
+      "mailButton": "Añadir a Apple Wallet",
+      "sendTitle": "Enviar aviso",
+      "sendButton": "Enviar a 128 clientes",
+      "ch1": {
+        "title": "Del QR al Wallet.",
+        "caption": "Escanean el QR del mostrador o abren el email, y la tarjeta de sellos o el cupón se guarda en su Apple o Google Wallet. Sin app."
+      },
+      "ch2": {
+        "title": "Aparece cuando pasan cerca.",
+        "caption": "Con la ubicación de tu local activada, la tarjeta sale en la pantalla de bloqueo cuando el cliente está cerca."
+      },
+      "ch3": {
+        "title": "El mensaje adecuado, en el momento adecuado.",
+        "caption": "Escribes el aviso en el panel y les llega como notificación a todos los que tienen tu tarjeta."
+      },
+      "alsoGoogle": "También en Google Wallet.",
+      "ch4": {
+        "title": "Y la recompensa, sola.",
+        "caption": "Al completar la tarjeta, el premio aparece en el pase y tu equipo lo canjea en el mostrador."
+      },
+      "tryLine": "Añade la tarjeta de prueba a tu Wallet. Es exactamente lo que verán tus clientes.",
+      "tent": {
+        "business": "Café Sol",
+        "program": "Tarjeta de sellos",
+        "headline": "Guarda tu tarjeta de sellos",
+        "sub": "Escanea con la cámara. Se añade a tu Wallet, sin descargar nada.",
+        "qrAlt": "Código QR para unirse al programa de Café Sol"
+      },
+      "tentNote": "Listo para imprimir en tres tamaños: ticket, caballete y póster."
+    }
   },
   "featureShowcase": {
-    "title": "Quién vuelve y cuándo, de un vistazo",
+    "title": "El panel.",
     "browserUrl": "loyalshy.com",
     "tabs": {
       "dashboard": {
@@ -64,16 +120,6 @@
         "description": "Tu logo, tus colores y tu recompensa. Ves la tarjeta tal como quedará en el Wallet mientras la diseñas.",
         "alt": "Estudio de diseño de tarjetas con barra flotante y vista previa del pase"
       },
-      "programs": {
-        "label": "Programas",
-        "description": "Tarjetas de sellos y cupones, cada uno con su diseño y sus reglas.",
-        "alt": "Cuadrícula de programas mostrando diferentes tipos y diseños de tarjetas"
-      },
-      "passes": {
-        "label": "Pases",
-        "description": "Cada tarjeta que has dado, con su estado. Busca a un cliente por nombre, email o teléfono.",
-        "alt": "Lista de pases con filtros de estado y búsqueda"
-      },
       "distribution": {
         "label": "Distribución",
         "description": "El QR para imprimir en varios tamaños, el enlace para compartir y la opción de dar la tarjeta a mano.",
@@ -84,84 +130,33 @@
         "description": "Invita a tu equipo. Los empleados sellan y canjean; la facturación y los ajustes son solo tuyos.",
         "alt": "Configuración del equipo mostrando miembros con roles y botón de invitación"
       }
-    }
+    },
+    "lead": "Quién vuelve y cuándo, de un vistazo. Y todo lo que necesitas para llevar el programa."
   },
-  "howItWorks": {
-    "title": "Así funciona en tu mostrador",
-    "subtitle": "Lo dejas listo en unos minutos. Después, solo queda sellar.",
-    "steps": {
-      "design": {
-        "title": "Diseña la tarjeta",
-        "description": "Elige tarjeta de sellos o cupón, pon tu logo y tus colores y decide la recompensa.",
-        "alt": "Estudio de diseño de tarjetas con vista previa del Wallet"
-      },
-      "issue": {
-        "title": "Pon el QR a la vista",
-        "description": "Imprime el QR para el mostrador, comparte el enlace o grábalo en una pegatina NFC. El cliente escanea y la tarjeta se guarda en su Wallet.",
-        "alt": "Página de distribución con código QR y emisión manual"
-      },
-      "scan": {
-        "title": "Sella con el móvil",
-        "description": "Escanea la tarjeta del cliente con la app y suma el sello o canjea el cupón. Su Wallet se actualiza en el momento.",
-        "alt": "Escaneando un pase digital para registrar una interacción"
+  "gallery": {
+    "title": "La tarjeta, por dentro.",
+    "stamp": {
+      "name": "Tarjeta de sellos.",
+      "lead": "Un sello por visita. Al llegar al número que fijes, la recompensa aparece sola.",
+      "parts": {
+        "logo": "Tu logo y tus colores",
+        "stamps": "Los sellos, sobre tu foto o tu color",
+        "reward": "La próxima recompensa",
+        "name": "El nombre del cliente",
+        "qr": "El QR que escanea tu equipo"
       }
-    }
-  },
-  "walletPreview": {
-    "badge1": "Funciona con Apple Wallet y Google Wallet",
-    "badge2": "Se actualiza sola con cada visita",
-    "badge3": "Se añade con un escaneo, sin descargar nada",
-    "title": "Está en su Wallet, no en su cartera",
-    "description": "No tienen que descargar ninguna app ni crear una cuenta. La tarjeta se guarda junto a sus tarjetas de embarque y cuenta los sellos sola en cada visita.",
-    "seePricing": "Ver precios"
-  },
-  "testimonials": {
-    "sectionLabel": "Testimonios",
-    "title": "Amado por dueños de negocios",
-    "subtitle": "Descubre cómo los negocios están aumentando clientes recurrentes con Loyalshy",
-    "avatarAlt": "Avatar de {name}",
-    "items": {
-      "maria": {
-        "name": "María Santos",
-        "role": "Propietaria, Trattoria Bella",
-        "stat": "3x",
-        "statLabel": "más visitas repetidas",
-        "quote": "Reemplazamos las viejas tarjetas de sellos de papel y vimos 3 veces más visitas repetidas en el primer mes. Los pases son preciosos y los clientes los conservan."
-      },
-      "james": {
-        "name": "James Chen",
-        "role": "Gerente, Sushi Express",
-        "stat": "5 min",
-        "statLabel": "tiempo de configuración",
-        "quote": "La configuración tardó literalmente 5 minutos. A nuestro personal le encanta lo fácil que es registrar visitas, y a los clientes les encantan las tarjetas digitales."
-      },
-      "sophie": {
-        "name": "Sophie Dubois",
-        "role": "Propietaria, Cafe Lumiere",
-        "stat": "40%",
-        "statLabel": "aumento de ingresos",
-        "quote": "Solo las analíticas ya lo valen. Por fin sé quiénes son mis clientes habituales y puedo recompensarlos como merecen. Los ingresos por clientes recurrentes subieron un 40%."
-      },
-      "luca": {
-        "name": "Luca Moretti",
-        "role": "Propietario, Pizzeria Napoli",
-        "stat": "850+",
-        "statLabel": "miembros de fidelización",
-        "quote": "Pasamos de cero a 850 miembros de fidelización en tres meses. El código QR en el mostrador hace todo el trabajo — los clientes se registran solos."
-      },
-      "aisha": {
-        "name": "Aisha Patel",
-        "role": "Gerente, Spice Garden",
-        "stat": "92%",
-        "statLabel": "tasa de canje",
-        "quote": "Nuestra tasa de canje pasó del 15% con tarjetas de papel al 92% con Loyalshy. Los pases digitales se usan porque siempre están en el móvil del cliente."
-      },
-      "thomas": {
-        "name": "Thomas Bergstrom",
-        "role": "Propietario, Nordic Kitchen",
-        "stat": "2 hrs",
-        "statLabel": "ahorradas por semana",
-        "quote": "Solíamos pasar horas gestionando tarjetas de sellos y rastreando recompensas manualmente. Loyalshy automatizó todo. Mi equipo puede centrarse en lo importante — buena comida."
+    },
+    "coupon": {
+      "name": "Cupón.",
+      "lead": "Un descuento o un regalo con fecha. De un solo uso o de los que quieras.",
+      "offer": "2×1 en cafés",
+      "validUntil": "31 oct",
+      "code": "SOL2X1",
+      "parts": {
+        "offer": "La oferta, bien grande",
+        "valid": "Hasta cuándo vale",
+        "code": "Un código, si lo usas",
+        "qr": "Se canjea con el mismo escaneo"
       }
     }
   },
@@ -212,16 +207,10 @@
         "staff": "25 personas en el equipo",
         "announcements": "5 avisos por semana"
       }
-    },
-    "enterprise": {
-      "name": "Enterprise",
-      "description": "Para cadenas con necesidades propias",
-      "features": "Límites a medida, soporte dedicado y condiciones por contrato."
     }
   },
   "faq": {
     "title": "Preguntas frecuentes",
-    "subtitle": "Lo que suelen preguntarnos antes de empezar",
     "stillHaveQuestions": "¿Te queda alguna duda?",
     "emailUs": "Escríbenos",
     "replyTime": "y te contestamos por email.",
@@ -230,53 +219,42 @@
         "question": "¿Cómo funciona Loyalshy?",
         "answer": "Diseñas tu tarjeta de sellos o tu cupón en el panel e imprimes el QR. Tus clientes lo escanean y la tarjeta se guarda en su Apple o Google Wallet. Cuando vuelven, tu equipo escanea la tarjeta con la app de Loyalshy y suma el sello. Al completar la tarjeta, la recompensa aparece sola."
       },
+      "paper": {
+        "question": "¿En qué cambia respecto a la tarjeta de papel?",
+        "answer": "El sello lo pone tu equipo igual que antes, escaneando en vez de estampando. La diferencia está en el cliente: la tarjeta no se pierde, no se olvida en casa y no se puede falsificar. Y el recuento se actualiza en su móvil al momento."
+      },
       "devices": {
         "question": "¿Qué necesitan mis clientes?",
         "answer": "Un iPhone con Apple Wallet o un Android con Google Wallet. No tienen que descargar nada ni crear una cuenta. En el iPhone, la tarjeta también aparece en el Apple Watch."
       },
-      "setup": {
-        "question": "¿Cuánto se tarda en empezar?",
-        "answer": "Crear la cuenta, diseñar la tarjeta e imprimir el QR lleva unos minutos. Para sellar, tu equipo instala la app en su móvil y la conecta escaneando un QR del panel."
-      },
-      "passTypes": {
-        "question": "¿Qué tipos de tarjeta puedo crear?",
-        "answer": "Dos: tarjetas de sellos, que dan una recompensa al llegar a un número de visitas, y cupones, que se canjean una vez o las veces que quieras. Las dos funcionan en Apple y Google Wallet."
+      "pos": {
+        "question": "¿Funciona con mi TPV?",
+        "answer": "No toca nada del mostrador. Loyalshy va aparte del TPV: tu equipo escanea la tarjeta con el móvil y listo. No hay que integrar ni cambiar nada."
       },
       "freePlan": {
         "question": "¿Hay un plan gratuito?",
         "answer": "Sí. Con el plan Gratis tienes 1 programa y hasta 50 clientes, sin tarjeta de crédito y sin fecha de fin. Cuando se te quede pequeño, cambias de plan."
       },
-      "cancel": {
-        "question": "¿Cómo cancelo?",
-        "answer": "Desde los ajustes de facturación, cuando quieras. No hay permanencia ni penalización."
-      },
       "security": {
         "question": "¿Qué pasa con los datos de mis clientes?",
         "answer": "Son tuyos. No los vendemos ni los usamos para publicidad, y puedes exportar tu lista de clientes a CSV cuando quieras."
       },
-      "customize": {
-        "question": "¿Puedo poner la tarjeta con mi marca?",
-        "answer": "Sí. Subes tu logo, eliges los colores y la imagen de fondo y decides qué campos se ven. Mientras lo cambias, ves cómo queda en Apple y Google Wallet."
+      "enterprise": {
+        "question": "¿Y si tengo varias tiendas?",
+        "answer": "Para cadenas y negocios con necesidades propias está el plan Enterprise: límites a medida, soporte dedicado y condiciones por contrato. Escríbenos a hello@loyalshy.com y lo vemos."
       }
     }
   },
   "tryDemo": {
-    "title": "Pruébala tú primero",
-    "subtitle": "Escanea el código o pulsa un botón para añadir una tarjeta de prueba a tu Wallet. Es exactamente lo que verán tus clientes.",
+    "title": "Pruébala.",
     "addToAppleWallet": "Añadir a Apple Wallet",
-    "addToGoogleWallet": "Añadir a Google Wallet",
-    "cardPreviewAlt": "Vista previa de la tarjeta de prueba",
-    "or": "o visita el enlace",
-    "openJoinPage": "Abrir la tarjeta de prueba",
-    "tapToFlip": "Toca para girar"
+    "addToGoogleWallet": "Añadir a Google Wallet"
   },
   "closingCta": {
     "title1": "Imprime el QR hoy.",
     "titleHighlight": "Mañana tienes los primeros sellos.",
     "subtitle": "Gratis hasta 50 clientes, sin tarjeta de crédito.",
-    "viewPricing": "Ver precios",
-    "talkToUs": "Hablar con nosotros",
-    "floatingCardAlt": "Tarjeta de fidelización de ejemplo"
+    "talkToUs": "Hablar con nosotros"
   },
   "footer": {
     "product": "Producto",
@@ -288,8 +266,8 @@
     "tagline": "Tarjetas de sellos y cupones en Apple y Google Wallet.",
     "copyright": "© 2026 Loyalshy, un producto de HEX CONCEPTS STUDIO, S.L. Todos los derechos reservados.",
     "builtWith": "Hecho en España.",
-    "instagram": "Loyalshy en Instagram",
-    "tiktok": "Loyalshy en TikTok"
+    "tryDemo": "Tarjeta de prueba",
+    "follow": "Síguenos"
   },
   "cookieBanner": {
     "message": "Usamos cookies esenciales para autenticación y preferencias. Sin cookies de rastreo.",
@@ -1918,34 +1896,11 @@
     }
   },
   "staffApp": {
-    "title": "Tu equipo sella con su propio móvil",
+    "title": "La app del equipo.",
     "subtitle": "Una app para escanear tarjetas, sumar sellos y canjear cupones en el mostrador. Se conecta escaneando un QR del panel.",
-    "screenshots": {
-      "home": "Inicio con contactos y actividad reciente",
-      "scan": "Pantalla de escáner QR",
-      "history": "Historial de interacciones",
-      "share": "Compartir un programa de fidelización"
-    },
-    "features": {
-      "scan": {
-        "title": "Escanea y sella",
-        "description": "Apunta a la tarjeta del cliente y el sello se suma en un segundo. Si te equivocas, lo deshaces."
-      },
-      "activity": {
-        "title": "La actividad del día",
-        "description": "Los últimos sellos y canjes de todos tus programas, en orden."
-      },
-      "pairing": {
-        "title": "Se conecta con un QR",
-        "description": "Escaneas un código desde el panel y el móvil queda conectado, sin contraseñas."
-      },
-      "secure": {
-        "title": "Cada uno ve lo suyo",
-        "description": "Los empleados sellan y canjean. Los ajustes y la facturación se quedan en el panel."
-      }
-    },
     "downloadAppStore": "Descargar en la App Store",
-    "downloadPlayStore": "Disponible en Google Play"
+    "downloadPlayStore": "Disponible en Google Play",
+    "screenAlt": "Pestaña Hoy de la app del equipo: buscar cliente, nuevo cliente, recompensas, compartir programa, aviso y la última actividad"
   },
   "metadata": {
     "home": {
