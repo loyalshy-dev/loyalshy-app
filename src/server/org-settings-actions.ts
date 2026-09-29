@@ -298,6 +298,27 @@ export async function getSettingsData() {
   }
 }
 
+// ─── Google Wallet Class Sync ─────────────────────────────────
+
+/**
+ * Pushes class-level changes (program name, logo, links, terms, design,
+ * locations) to existing Google holders. The class is shared by every holder
+ * of a program and the per-pass update path only PATCHes objects, so without
+ * this they'd only see the change once someone new saved a pass. Runs after
+ * the response; best-effort.
+ */
+function scheduleGoogleClassSync(target: { templateId: string } | { organizationId: string }) {
+  after(async () => {
+    try {
+      const google = await import("@/lib/wallet/google/generate-pass")
+      if ("templateId" in target) await google.syncGoogleLoyaltyClass(target.templateId)
+      else await google.syncGoogleLoyaltyClassesForOrganization(target.organizationId)
+    } catch (err: unknown) {
+      console.error("Google class sync failed:", err instanceof Error ? err.message : "Unknown error")
+    }
+  })
+}
+
 // ─── Update Organization Profile ──────────────────────────────
 
 export async function updateOrganizationProfile(input: z.infer<typeof updateProfileSchema>) {
@@ -317,6 +338,7 @@ export async function updateOrganizationProfile(input: z.infer<typeof updateProf
 
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
+  scheduleGoogleClassSync({ organizationId: parsed.organizationId })
   return { success: true }
 }
 
@@ -959,15 +981,7 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
   // If design hash changed, trigger bulk pass update
   const hashChanged = existingDesign?.designHash !== newHash
   if (hashChanged) {
-    // Class-level design (logo, colors, locations…) is shared by all Google
-    // holders; the per-pass updates below only touch objects.
-    after(() =>
-      import("@/lib/wallet/google/generate-pass")
-        .then(({ syncGoogleLoyaltyClass }) => syncGoogleLoyaltyClass(parsed.templateId))
-        .catch((err: unknown) =>
-          console.error("Google class sync failed:", err instanceof Error ? err.message : "Unknown error")
-        )
-    )
+    scheduleGoogleClassSync({ templateId: parsed.templateId })
     if (process.env.TRIGGER_SECRET_KEY) {
       import("@trigger.dev/sdk")
         .then(({ tasks }) =>
@@ -1348,6 +1362,7 @@ export async function uploadOrganizationLogo(formData: FormData) {
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/programs")
+  scheduleGoogleClassSync({ organizationId })
   return { success: true, url: logoUrl, appleUrl, googleUrl }
 }
 
@@ -1371,6 +1386,7 @@ export async function deleteOrganizationLogo(organizationId: string) {
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/programs")
+  scheduleGoogleClassSync({ organizationId })
   return { success: true }
 }
 
@@ -1425,6 +1441,7 @@ export async function uploadProgramLogo(formData: FormData) {
   })
 
   revalidatePath(`/dashboard/programs/${templateId}`)
+  scheduleGoogleClassSync({ templateId })
   return { success: true, url: logoUrl, appleUrl, googleUrl }
 }
 
@@ -1446,6 +1463,7 @@ export async function deleteProgramLogo(organizationId: string, templateId: stri
   })
 
   revalidatePath(`/dashboard/programs/${templateId}`)
+  scheduleGoogleClassSync({ templateId })
   return { success: true }
 }
 
@@ -1475,6 +1493,7 @@ export async function uploadProgramPlatformLogo(formData: FormData) {
 
   await db.passDesign.update({ where: { passTemplateId: templateId }, data: { [field]: url } })
   revalidatePath(`/dashboard/programs/${templateId}`)
+  if (platform === "google") scheduleGoogleClassSync({ templateId })
   return { success: true, url }
 }
 
@@ -1494,6 +1513,7 @@ export async function resetProgramPlatformLogo(organizationId: string, templateI
   await db.passDesign.update({ where: { passTemplateId: templateId }, data: { [field]: sourceUrl } })
 
   revalidatePath(`/dashboard/programs/${templateId}`)
+  if (platform === "google") scheduleGoogleClassSync({ templateId })
   return { success: true, url: sourceUrl }
 }
 
@@ -1515,6 +1535,7 @@ export async function useOrgLogoForProgram(organizationId: string, templateId: s
   })
 
   revalidatePath(`/dashboard/programs/${templateId}`)
+  scheduleGoogleClassSync({ templateId })
   return { success: true }
 }
 
@@ -1604,6 +1625,7 @@ export async function updatePassTemplate(input: z.infer<typeof updatePassTemplat
   revalidatePath("/dashboard/programs")
   revalidatePath(`/dashboard/programs/${parsed.templateId}`)
 
+  scheduleGoogleClassSync({ templateId: parsed.templateId })
   return { success: true }
 }
 
@@ -1669,6 +1691,7 @@ export async function uploadPlatformLogo(formData: FormData) {
 
   await db.organization.update({ where: { id: organizationId }, data: { [field]: url } })
   revalidatePath("/dashboard/settings")
+  if (platform === "google") scheduleGoogleClassSync({ organizationId })
   return { success: true, url }
 }
 
@@ -1686,6 +1709,7 @@ export async function resetPlatformLogo(organizationId: string, platform: "apple
   await db.organization.update({ where: { id: organizationId }, data: { [field]: sourceUrl } })
 
   revalidatePath("/dashboard/settings")
+  if (platform === "google") scheduleGoogleClassSync({ organizationId })
   return { success: true, url: sourceUrl }
 }
 
@@ -1706,6 +1730,7 @@ export async function deletePlatformLogo(organizationId: string, platform: "appl
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/programs")
+  if (platform === "google") scheduleGoogleClassSync({ organizationId })
   return { success: true }
 }
 

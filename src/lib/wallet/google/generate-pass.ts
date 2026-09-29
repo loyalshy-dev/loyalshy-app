@@ -678,6 +678,18 @@ export async function syncGoogleLoyaltyClass(templateId: string): Promise<void> 
 }
 
 /**
+ * Org-level fields (name, logo, phone, website) feed every program's class,
+ * so re-sync each program that has ever had a Google pass saved.
+ */
+export async function syncGoogleLoyaltyClassesForOrganization(organizationId: string): Promise<void> {
+  const templates = await db.passTemplate.findMany({
+    where: { organizationId, passInstances: { some: { walletProvider: "GOOGLE" } } },
+    select: { id: true },
+  })
+  await Promise.allSettled(templates.map((t) => syncGoogleLoyaltyClass(t.id)))
+}
+
+/**
  * Best-effort PATCH of the loyalty class via REST API.
  * Ensures class-level changes (logo, colors, template) propagate
  * even when Google has cached an older version from a previous JWT.
