@@ -1,17 +1,26 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { getTranslations } from "next-intl/server"
+import { getTranslations, setRequestLocale } from "next-intl/server"
+import type { Locale } from "@/i18n/config"
+import { localePath, marketingAlternates } from "@/i18n/marketing"
 
-const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://loyalshy.com"
+type PageProps = { params: Promise<{ locale: string }> }
 
-export const metadata: Metadata = {
-  title: "Cookie Policy — Loyalshy",
-  description: "How Loyalshy uses cookies and similar technologies.",
-  alternates: { canonical: `${siteUrl}/cookies` },
-  robots: { index: true, follow: true },
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  // Validated by the [locale] layout.
+  const locale = (await params).locale as Locale
+  const t = await getTranslations({ locale, namespace: "metadata.cookies" })
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: marketingAlternates(locale, "/cookies"),
+    robots: { index: true, follow: true },
+  }
 }
 
-export default async function CookiesPage() {
+export default async function CookiesPage({ params }: PageProps) {
+  const locale = (await params).locale as Locale
+  setRequestLocale(locale)
   const t = await getTranslations("cookies")
   const tCommon = await getTranslations("common")
 
@@ -20,11 +29,11 @@ export default async function CookiesPage() {
       <div className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
         <header className="mb-12">
           <Link
-            href="/"
+            href={localePath(locale, "/")}
             className="text-[14px] font-medium mb-6 inline-block transition-opacity hover:opacity-70"
             style={{ color: "var(--mk-text-muted, #666)" }}
           >
-            &larr; Back to Loyalshy
+            {tCommon("backToHome")}
           </Link>
           <h1
             className="font-display text-3xl sm:text-4xl font-bold"

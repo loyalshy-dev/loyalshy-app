@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { locales, localeNames, type Locale } from "@/i18n/config"
+import { localePath, parseMarketingPath } from "@/i18n/marketing"
 import { cn } from "@/lib/utils"
 
 interface LanguageSwitcherProps {
@@ -26,7 +27,14 @@ export function LanguageSwitcher({ className, size = "icon-sm" }: LanguageSwitch
     if (newLocale === locale) return
     startTransition(() => {
       document.cookie = `locale=${newLocale};path=/;max-age=31536000;samesite=lax`
-      window.location.reload()
+      // Marketing pages have one URL per language — go to it. App pages
+      // read the cookie, so a reload is enough.
+      const marketing = parseMarketingPath(window.location.pathname)
+      if (marketing) {
+        window.location.assign(localePath(newLocale, marketing.path) + window.location.search + window.location.hash)
+      } else {
+        window.location.reload()
+      }
     })
   }
 

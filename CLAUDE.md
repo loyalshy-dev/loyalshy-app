@@ -34,12 +34,12 @@ Multi-tenant SaaS for cafés, salons, and small retail to run digital loyalty pr
 | next-themes | 0.4.x | Light/dark mode with system preference detection |
 | motion | 12.x | Scroll-triggered animations for marketing landing page (FadeIn, Stagger, ScaleIn) |
 | html-to-image | 1.11.x | DOM-to-PNG export for card design download (transparent bg, 3x resolution) |
-| next-intl | 4.8.x | i18n — cookie-based locale detection, no URL prefix routing |
+| next-intl | 4.8.x | i18n — marketing pages locale-prefixed (`/`, `/es`, `/fr`); app pages cookie-based |
 
 ## Critical Architecture Rules
 
 ### Auth Pattern (NEVER violate)
-- **proxy.ts** = UX optimization ONLY (cookie check + redirect). NO DB calls, NO role checks.
+- **`src/proxy.ts`** = UX optimization ONLY (no session cookie on `/dashboard`/`/admin` → `/login?callbackUrl=`). NO DB calls, NO role checks. It MUST live in `src/` — at the project root Next ignores it (it was silently dead until 2026-09-29). It does NOT bounce signed-in users off auth pages: cookie presence ≠ valid session (removed members keep a stale cookie), which would loop with the DAL; `AuthRedirectGate` owns that.
 - **DAL (`/src/lib/dal.ts`)** = REAL security boundary. Every Server Component and Server Action MUST call DAL functions.
 - `getCurrentUser()` — validate session, return user (cached per-request via React `cache()`)
 - `assertAuthenticated()` — redirects to /login if no session
@@ -102,8 +102,8 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
 - **Key files**: `src/lib/api-session.ts` (`sessionHandler` + `sessionHandlerNoOrg` + `ApiError`), `src/lib/auth-rate-limit.ts`, `src/lib/token-hash.ts`, `src/lib/org-scope.ts`, `src/lib/api-serializers.ts` (toApiContact, toApiPassInstance, toApiPassInstanceDetail, toApiReward, toApiInteraction, toApiTemplate), `src/lib/api-cors.ts`, `src/lib/wallet/dispatch.ts`. Action transactions are inlined in the route files (not in shared `api-data.ts` — the old shared layer is gone).
 
 ### Next.js 16 Rules
-- Use `proxy.ts` NOT `middleware.ts`
-- **NEVER rely on the proxy's `x-pathname` header in layouts** — it arrives EMPTY in streamed layout renders (verified 2026-08-18; caused a redirect loop and silently broke the /invite//claim signed-in exemption). Pathname-dependent redirect logic in layouts must live in client-side gates using `usePathname`: see `src/components/auth-redirect-gate.tsx` ((auth) layout: away-from-auth + mid-onboarding + token-flow exemptions) and `src/components/dashboard/partner-orgless-gate.tsx` ((dashboard) layout: org-less partners confined to the Partner console). The server layout computes session facts; the gate applies the pathname rules.
+- Use `src/proxy.ts` NOT `middleware.ts` (must sit next to `app/` when using `src/`)
+- **NEVER rely on a proxy-set `x-pathname` header in layouts** — it arrived EMPTY (verified 2026-08-18; caused a redirect loop and silently broke the /invite//claim signed-in exemption). Root cause found 2026-09-29: the proxy file sat at the project root and never ran at all; the header was removed when it moved to `src/`. Pathname-dependent redirect logic in layouts must live in client-side gates using `usePathname`: see `src/components/auth-redirect-gate.tsx` ((auth) layout: away-from-auth + mid-onboarding + token-flow exemptions) and `src/components/dashboard/partner-orgless-gate.tsx` ((dashboard) layout: org-less partners confined to the Partner console). The server layout computes session facts; the gate applies the pathname rules.
 - All `params` and `searchParams` are async — must be awaited
 - Enable `cacheComponents: true` + `reactCompiler: true` in next.config.ts
 - **`cacheComponents: true` is INCOMPATIBLE with route segment configs** — do NOT use `export const runtime`, `export const dynamic`, or `export const revalidate` in any route/page file
@@ -121,15 +121,18 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
 - OKLCH color space
 
 ### i18n Rules (next-intl)
-- **No URL-based locale routing** — locale is determined by `locale` cookie, then `Accept-Language` header, then default `en`
+- **Two locale mechanisms (2026-09-29, Phase I18N-SEO):**
+  - **Marketing pages** (`/`, `/contact`, `/privacy`, `/terms`, `/cookies`) live in `src/app/[locale]` with their own root layout — one crawlable URL per language: English unprefixed (`/contact`), others prefixed (`/es/contact`, `/fr/contact`). Every page emits canonical + hreflang (`en`/`es`/`fr`/`x-default`) via `marketingAlternates()`; sitemap lists all variants with alternates. English is served by `next.config.ts` **rewrites** (`/contact` → `/en/contact`); `/en/*` 308s to the unprefixed URL. Unprefixed URLs 307 to `/es`/`/fr` when the `locale` cookie says so, or (no cookie) when the browser's **primary** Accept-Language is es/fr — crawlers send neither, so they index English + follow hreflang. `LocaleCookieSync` writes the `locale` cookie from the URL so register/login/dashboard continue in that language. Helpers: `src/i18n/marketing.ts` (`MARKETING_PATHS`, `localePath`, `marketingUrl`, `marketingAlternates`, `parseMarketingPath`) and `useLocalePath()` (`src/i18n/use-locale-path.ts`) — **internal links on marketing pages must go through these**, never hard-coded `/contact`. Every `[locale]` page/metadata must call `setRequestLocale(locale)` / pass `{ locale }` (params are validated in the layout). Per-page titles/descriptions live in the `metadata` namespace. Adding a marketing page = add it to `MARKETING_PATHS` + `[locale]/…` + `metadata.<page>` keys.
+  - **App pages** (`src/app/(app)` — dashboard, auth, studio, admin, join) keep cookie-based locale: `locale` cookie, then primary `Accept-Language`, then `en`.
+  - **Two root layouts:** `src/app/(app)/layout.tsx` and `src/app/[locale]/layout.tsx`, both render `RootDocument` (`src/components/root-document.tsx` — fonts, providers, globals.css, `baseMetadata`). Navigating between them is a full page load. `experimental.globalNotFound` + `src/app/global-not-found.tsx` handle URLs outside both (e.g. `/foo`, which `[locale]` rejects); `[locale]/[...rest]` + `[locale]/not-found.tsx` give localized 404s.
 - **Locales**: `en` (default), `es` (Spanish — first target market is Spain), `fr` (French)
 - **Config**: `src/i18n/config.ts` (locale definitions), `src/i18n/request.ts` (server-side detection via `getRequestConfig`)
 - **Messages**: `src/messages/en.json` + `src/messages/es.json` + `src/messages/fr.json` — organized by namespace (common, nav, hero, features, pricing, faq, auth, dashboard, errors, etc.)
 - **Server components**: use `getTranslations("namespace")` from `next-intl/server` (must be async)
 - **Client components**: use `useTranslations("namespace")` from `next-intl`
-- **Root layout**: wraps children in `NextIntlClientProvider` with only shared namespaces (`common`, `errors`, `cookieBanner` ~1KB), inside a Suspense boundary (required for `cacheComponents: true`)
+- **Root layouts** (`RootDocument`): wrap children in `NextIntlClientProvider` with only shared namespaces (`common`, `errors`, `cookieBanner` ~1KB), inside a Suspense boundary (required for `cacheComponents: true`)
 - **Route group providers**: Each route group adds a nested `NextIntlClientProvider` with its specific namespaces — nested providers **override** (not merge with) the parent, so each MUST include `common` alongside its route-specific namespaces. `(dashboard)` provides `common`, `dashboard`, `studio`, `serverErrors`; `(auth)` provides `common`, `auth`, `nav`; landing page provides `common` + marketing namespaces. This reduces RSC payload from ~67KB to only what's needed per route.
-- **Language switcher**: `src/components/language-switcher.tsx` — sets `locale` cookie and reloads, placed in marketing navbar and dashboard topbar
+- **Language switcher**: `src/components/language-switcher.tsx` — sets `locale` cookie; on marketing pages navigates to the same page's localized URL, elsewhere reloads. Placed in marketing navbar and dashboard topbar
 - **Adding a new locale**: Add to `locales` array in `config.ts`, create `src/messages/{locale}.json`, add `localeNames` entry
 - **Server actions**: use `getTranslations("serverErrors")` from `next-intl/server` for error/validation messages
 - **Studio panels**: all use `useTranslations("studio.*")` — panels, colors, strip, notifications, details, prize, template, canvas (no avatar — holder photos are gone)
@@ -153,6 +156,8 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
 ```
 /src
   /app              → App Router pages
+    /[locale]       → Marketing site root layout (landing + (info)/contact, privacy, terms, cookies) — URL locale, see i18n Rules
+    /(app)          → App root layout (cookie locale); contains the groups below
     /(auth)         → Login/Register/Forgot password
     /(dashboard)    → Protected dashboard routes
       /dashboard              → Overview (stat cards, charts, activity feed, top contacts, programs summary)
@@ -166,7 +171,7 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
         /rewards              → Cross-program rewards (not in sidebar)
         /settings             → General, Team, Billing, API (owner, all plans)
     /(studio)       → Redirects to /programs/[id]/design (studio now embedded)
-    /(public)       → Landing, pricing, QR scan, card view, contact pages
+    /(public)       → Public join + card pages (/join/[slug])
     /api            → API routes
       /api/v1       → Staff-app REST API (session token only, no public API key)
         /auth/{me,select-org,email-signin,google-mobile,invite,device-pair/{create,claim}}
@@ -195,7 +200,8 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
     /wallet         → Wallet pass components
   /i18n             → Internationalization config
     config.ts       → Locale definitions (en, es, fr)
-    request.ts      → Server-side locale detection (cookie → Accept-Language → default)
+    request.ts      → Locale resolution (URL locale via setRequestLocale → cookie → primary Accept-Language → default)
+    marketing.ts    → Marketing URL helpers (localePath, marketingAlternates, …)
   /messages         → Translation JSON files (en.json, es.json, fr.json)
   /lib              → Utilities, db client, auth config, DAL
     /stores         → Zustand stores (card-design-store.ts)
@@ -300,6 +306,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] **Phase STAFF-APP-FEATURES-2026-09-25** — Backend for the staff app's Wallet-exact card and five counter features (see the "Added 2026-09-25" endpoint list above). `generateApplePass` was refactored with no behavior change: strip + front fields were extracted into `resolveAppleStrip` / `buildAppleFrontFields`, which it now calls. `sendProgramAnnouncement` and `issuePassToContacts` now delegate to `src/lib/announcements.ts` / `src/lib/issue-pass.ts`. `sessionHandler`'s auth was extracted to `authenticate()` (shared with `sessionRawHandler`). New tests: card-view (5), org-time (3), undo-stamp (6), contacts POST (4), announcements route (4); 218/218 pass. Known pre-existing issue seen while testing: the strip generator's digit glyphs can render oddly (a "6" looked broken in a local render). Worth checking on a real pass.
 - [x] **Phase ANNOUNCEMENT-QUOTA-2026-09-25** — Announcement quota moved from 3/24h per template to a **per-organization plan quota** (shared across all programs): FREE 2 lifetime, STARTER (Pro) 1, GROWTH (Business) 2, SCALE 5 per **rolling 7 days**, ENTERPRISE unlimited. `PlanDefinition.announcementLimit` + `announcementPeriod` ("lifetime" | "week") in `src/lib/plans.ts` (also in `getPlanLimits`, `features` strings, and `getAnnouncementUpgrade()` for the next plan CTA). **Storage:** new `ProgramAnnouncement` model / `program_announcement` table (migration `20260925090000_program_announcement_log`, backfilled from `PassTemplate.announcement.history`/`sentAt`); `passTemplateId` is SET NULL on delete so deleting a program can't reset the quota. `PassTemplate.announcement` now only stores `{message, sentAt}` for pass rendering; `history` is legacy and unused. **Logic:** `src/lib/announcement-quota.ts` — `computeAnnouncementQuota` (pure), `getAnnouncementQuota(client, org)`, `countProgramSendsLast24h`, `ANNOUNCEMENT_PROGRAM_MAX_PER_24H=3` (Google's TEXT_AND_NOTIFY cap stays as a separate per-program ceiling, only reachable on Scale/Enterprise). `sendProgramAnnouncement` checks + inserts inside a `$transaction` holding `pg_advisory_xact_lock(hashtext('announcement:'+orgId))` so concurrent sends can't overshoot; inactive subscriptions (PAST_DUE/CANCELED) are blocked. Result carries `code` (`quotaReached` | `programDailyCap` | `subscriptionInactive` | `noRecipients`) + `nextAvailableAt`. Sends to a program with 0 wallet holders are refused and never consume quota. Quota-reached copy only suggests upgrading when a self-serve upgrade exists (`getAnnouncementUpgrade`). Card dates render only after hydration (`useSyncExternalStore`) since the server formats in UTC. **UI:** `AnnouncementSection` shows a quota meter (pips), plan line + "shared across all your programs", exhausted notice with next-available date and an upgrade CTA (owners) or "ask the owner" (admins), program-cap and inactive notices, and remaining-after-send in the confirm dialog. Billing settings Usage card has a 4th Announcements tile; marketing pricing cards list the quota (`pricing.*.features.announcements`).
 - [x] **Phase BRAND-ALIGN-2026-09-28** (branch `feat/web-brand-alignment`) — Bring the staff app's brand to the web so app, landing and dashboard read as one system. **Done:** (1) coral is `--primary`/`--ring`/`--sidebar-ring` in the neutral `:root`/`.dark` palette too; new `ink` variant on `Button` and `Badge` (`bg-foreground text-background`) for selected states (pagination, segments, filter chips) so coral means "the main action on this screen" — topbar "New interaction", empty-state "Create program" and billing plan subscribe buttons are `outline`, studio Publish is gray while there are unsaved changes; studio selected fills use `var(--foreground)`. (2) Inter is the only body face (Geist Sans removed; Geist Mono stays); `font-sans` is applied on `body` because next/font puts `--font-inter` on `<body>` and Tailwind's html-level default can't resolve it — the dashboard had been rendering the system font, not Geist. (3) Cabinet Grotesk is opt-in via `.font-display` (global, not scoped to `[data-brand]`) on display headings ≥24px only: landing/public hero + section headlines, legal page h1s, auth card titles, and every dashboard/admin page title (normalized to `text-2xl`). No more tag rule, so small h2s/h3s are Inter. (4) the mark: `src/components/brand-mark.tsx` (`BrandMark` = the five dots in `currentColor`, same geometry as the staff app; `Wordmark` inline in navbar/footer, stacked above the card on every auth screen). Icons are the staff app icon — cream mark on coral: `src/app/icon.svg` + `favicon.ico` (rounded tile, mark enlarged 1.2× for 16–32px), `src/app/apple-icon.png`, `public/icon-192/512.png` (flat, `any maskable`), `public/logo.svg`/`logo.png` (schema.org Organization logo); manifest `background_color` coral. `opengraph-image.png` kept (already ink + coral mark + product shot). `public/logo-nobg.png` is no longer referenced in code (kept for external links). (5) charts: `--chart-1..4` = coral (`oklch(0.68 0.195 32)`, one step deeper than `--primary` so a 2px line clears 3:1 on white) / ink / gray / light gray, `--chart-5` removed. It is an emphasis + context palette, not a categorical one: coral = the measure, grays = context (busiest-days non-max bars), identity between equal series comes from labels. Overview charts read tokens (`var(--chart-1)`, grid `var(--border)`, ticks `var(--muted-foreground)`) so dark mode works; admin plan/pass-type bars are one coral (each row is already labelled); cohort heatmap is sequential coral via `color-mix`. Billing plan tiles and reward stat cards no longer borrow `--chart-*`. The unused `reward-distribution-chart.tsx` and its server action `getRewardDistribution` were deleted. Dev gotcha: Turbopack's `.next` cache can keep serving an old `globals.css` — `rm -rf .next` if token changes don't show.
+- [x] **Phase I18N-SEO-2026-09-29** (branch `feat/i18n-seo-routing`) — Spanish/French marketing pages were invisible to Google: locale came from cookie/Accept-Language on one URL, so Googlebot only ever saw English (titles/descriptions were hard-coded English even for Spanish visitors). Marketing moved to `src/app/[locale]` (second root layout) with `/es`, `/fr` URLs, localized metadata (`metadata` namespace ×3 locales), canonical + hreflang, per-locale JSON-LD (`inLanguage`, localized descriptions, `sameAs` Instagram/TikTok), sitemap with alternates (dead `/api/v1/docs` entry removed; `/contact` added), robots `allow` cleaned, localized internal links (navbar/footer/pricing/CTA/cookie banner/legal back links, which were hard-coded English). App groups moved under `src/app/(app)` unchanged. Accept-Language detection now uses the primary language only (was `includes("es")`) and detects French. Details in i18n Rules.
 
 ## Conversation Strategy
 
@@ -370,7 +377,7 @@ Update the "Current Progress" section above to track what's done.
 - `src/lib/auth-client.ts` — Client-side auth (createAuthClient + org/admin/emailOTP plugins, baseURL uses window.location.origin in browser)
 - `src/app/api/auth/[...all]/route.ts` — API route handler (toNextJsHandler)
 - `src/lib/dal.ts` — Data Access Layer (REAL security boundary)
-- `proxy.ts` — Optimistic cookie redirect (UX only)
+- `src/proxy.ts` — Optimistic cookie redirect (UX only)
 - `src/server/auth-actions.ts` — Staff invitation server actions (email via Trigger.dev, email-verified acceptance, rate-limited token validation)
 - `src/lib/api-session.ts` — Session-token Bearer auth wrapper for `/api/v1/**` staff-app endpoints (`sessionHandler`, `ApiError`, `notFound`, `badRequest`, `forbidden`)
 - `src/lib/api-serializers.ts` — Prisma row → JSON shape converters mirroring `loyalshy-staff/lib/types.ts`

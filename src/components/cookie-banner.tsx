@@ -4,11 +4,13 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { X } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useLocalePath } from "@/i18n/use-locale-path"
 
 const COOKIE_CONSENT_KEY = "loyalshy-cookie-consent"
 
 export function CookieBanner() {
   const t = useTranslations("cookieBanner")
+  const lp = useLocalePath()
   const tCommon = useTranslations("common")
   const [visible, setVisible] = useState(false)
 
@@ -48,7 +50,7 @@ export function CookieBanner() {
           >
             {t("message")}{" "}
             <Link
-              href="/cookies"
+              href={lp("/cookies")}
               className="underline underline-offset-2 transition-opacity hover:opacity-70"
               style={{ color: "var(--mk-text, hsl(var(--foreground)))" }}
             >

@@ -1,5 +1,7 @@
 import Link from "next/link"
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
+import type { Locale } from "@/i18n/config"
+import { localePath } from "@/i18n/marketing"
 import { Wordmark } from "@/components/brand-mark"
 
 interface FooterColumn {
@@ -31,28 +33,30 @@ export async function MarketingFooter() {
   const t = await getTranslations("footer")
   const tNav = await getTranslations("nav")
   const tCommon = await getTranslations("common")
+  const locale = (await getLocale()) as Locale
+  const home = localePath(locale, "/")
 
   const FOOTER_COLUMNS: FooterColumn[] = [
     {
       heading: t("product"),
       links: [
-        { label: tNav("features"), href: "#features" },
-        { label: tNav("pricing"), href: "#pricing" },
-        { label: tNav("faq"), href: "#faq" },
+        { label: tNav("features"), href: `${home}#features` },
+        { label: tNav("pricing"), href: `${home}#pricing` },
+        { label: tNav("faq"), href: `${home}#faq` },
       ],
     },
     {
       heading: t("company"),
       links: [
-        { label: tCommon("contact"), href: "/contact" },
+        { label: tCommon("contact"), href: localePath(locale, "/contact") },
       ],
     },
     {
       heading: t("legal"),
       links: [
-        { label: t("privacyPolicy"), href: "/privacy" },
-        { label: t("termsOfService"), href: "/terms" },
-        { label: t("cookiePolicy"), href: "/cookies" },
+        { label: t("privacyPolicy"), href: localePath(locale, "/privacy") },
+        { label: t("termsOfService"), href: localePath(locale, "/terms") },
+        { label: t("cookiePolicy"), href: localePath(locale, "/cookies") },
       ],
     },
   ]
@@ -75,7 +79,7 @@ export async function MarketingFooter() {
           {/* Brand column */}
           <div className="col-span-2 sm:col-span-2 lg:col-span-1">
             <Link
-              href="/"
+              href={home}
               className="inline-flex items-center transition-opacity hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               aria-label="Loyalshy home"
             >

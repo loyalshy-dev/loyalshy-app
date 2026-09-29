@@ -1,21 +1,27 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 import { Mail, MessageSquare, Handshake, HelpCircle, ArrowRight } from "lucide-react"
-import { getTranslations, getMessages } from "next-intl/server"
+import { getTranslations, getMessages, setRequestLocale } from "next-intl/server"
+import type { Locale } from "@/i18n/config"
+import { marketingAlternates } from "@/i18n/marketing"
 import { NextIntlClientProvider } from "next-intl"
 import { MarketingNavbar } from "@/components/marketing/navbar"
 import { MarketingFooter } from "@/components/marketing/footer"
 import { FadeIn, Stagger, StaggerItem } from "@/components/marketing/motion"
 import { ContactForm } from "@/components/marketing/contact-form"
 
-const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://loyalshy.com"
+type PageProps = { params: Promise<{ locale: string }> }
 
-export const metadata: Metadata = {
-  title: "Contact Us — Loyalshy",
-  description:
-    "Get in touch with the Loyalshy team. Questions about our digital loyalty platform, enterprise plans, or partnerships — we'd love to hear from you.",
-  alternates: { canonical: `${siteUrl}/contact` },
-  robots: { index: true, follow: true },
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  // Validated by the [locale] layout.
+  const locale = (await params).locale as Locale
+  const t = await getTranslations({ locale, namespace: "metadata.contact" })
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: marketingAlternates(locale, "/contact"),
+    robots: { index: true, follow: true },
+  }
 }
 
 const CONTACT_NAMESPACES = ["common", "nav", "footer", "contact"] as const
@@ -23,7 +29,9 @@ const CONTACT_NAMESPACES = ["common", "nav", "footer", "contact"] as const
 const HIGHLIGHT_ICONS = [MessageSquare, Mail, Handshake, HelpCircle] as const
 const HIGHLIGHT_KEYS = ["general", "sales", "partnership", "support"] as const
 
-export default async function ContactPage() {
+export default async function ContactPage({ params }: PageProps) {
+  const locale = (await params).locale as Locale
+  setRequestLocale(locale)
   const t = await getTranslations("contact")
   const messages = await getMessages()
   const contactMessages: Record<string, unknown> = {}

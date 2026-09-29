@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { Check, ArrowRight } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useLocalePath } from "@/i18n/use-locale-path"
 
 import { Button } from "@/components/ui/button"
 import { PLANS, type PlanId } from "@/lib/plans"
@@ -330,6 +331,7 @@ export function Pricing() {
   const [period, setPeriod] = React.useState<BillingPeriod>("monthly")
   const t = useTranslations("pricing")
   const tc = useTranslations("common")
+  const lp = useLocalePath()
 
   return (
     <section
@@ -410,7 +412,7 @@ export function Pricing() {
               size="sm"
               className="shrink-0 text-[14px] font-medium rounded-full"
             >
-              <Link href="/contact?type=sales">{tc("contactSales")}</Link>
+              <Link href={`${lp("/contact")}?type=sales`}>{tc("contactSales")}</Link>
             </Button>
           </div>
         </FadeIn>

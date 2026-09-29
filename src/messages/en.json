@@ -1946,5 +1946,28 @@
     },
     "downloadAppStore": "Download on the App Store",
     "downloadPlayStore": "Get it on Google Play"
+  },
+  "metadata": {
+    "home": {
+      "title": "Loyalshy — Digital Loyalty Cards for Small Businesses",
+      "description": "Replace paper stamp cards with digital ones in Apple and Google Wallet. Reward repeat customers with stamp cards and coupons — no app required. Free for up to 50 customers.",
+      "jsonLdDescription": "Digital loyalty platform for small businesses. Create and manage stamp cards and coupons in Apple and Google Wallet."
+    },
+    "contact": {
+      "title": "Contact us",
+      "description": "Get in touch with the Loyalshy team. Questions about our digital loyalty platform, enterprise plans, or partnerships — we'd love to hear from you."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "description": "How Loyalshy collects, uses, and protects your personal data."
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "description": "Terms and conditions for using the Loyalshy platform."
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "description": "How Loyalshy uses cookies and similar technologies."
+    }
   }
 }
