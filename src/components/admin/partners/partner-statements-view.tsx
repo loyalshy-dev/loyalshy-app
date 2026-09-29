@@ -5,11 +5,8 @@ import { format } from "date-fns"
 import { FileText, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
-import {
-  getPartnerStatement,
-  type PartnerRow,
-  type PartnerStatement,
-} from "@/server/partner-statement-actions"
+import { getPartnerStatement, type PartnerRow } from "@/server/partner-statement-actions"
+import type { PartnerStatement } from "@/lib/partner-statement"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

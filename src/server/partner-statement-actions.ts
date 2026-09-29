@@ -7,8 +7,6 @@ import {
   type PartnerStatement,
 } from "@/lib/partner-statement"
 
-export type { PartnerStatement, StatementLine } from "@/lib/partner-statement"
-
 // ─── Monthly partner rev-share statement (actions) ──────────
 //
 // Math and contract terms live in src/lib/partner-statement.ts. Admin-only:

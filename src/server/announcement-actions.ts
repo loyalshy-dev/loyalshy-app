@@ -12,8 +12,6 @@ const sendAnnouncementSchema = z.object({
   message: z.string().trim().min(1).max(ANNOUNCEMENT_MAX_LENGTH),
 })
 
-export type { AnnouncementErrorCode }
-
 export type SendAnnouncementResult =
   | { success: true; recipients: number; remaining: number | null }
   | { error: string; code?: AnnouncementErrorCode; nextAvailableAt?: string | null }
