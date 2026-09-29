@@ -53,10 +53,9 @@
       "customer": "Marta G."
     },
     "lockDate": "lunes, 6 de octubre",
-    "now": "ahora",
     "scenes": {
       "near": {
-        "notification": "Estás cerca de Café Sol. Enseña tu tarjeta."
+        "notification": "¿Un café antes de seguir? Enseña tu tarjeta."
       },
       "stamp": {
         "notification": "Sello añadido. 4 de 5."
@@ -84,7 +83,7 @@
       },
       "ch2": {
         "title": "Aparece cuando pasan cerca.",
-        "caption": "Con la ubicación de tu local activada, la tarjeta sale en la pantalla de bloqueo cuando el cliente está cerca."
+        "caption": "Con la ubicación de tu local activada, la tarjeta sale en la pantalla de bloqueo cuando el cliente está cerca. El mensaje lo escribes tú."
       },
       "ch3": {
         "title": "El mensaje adecuado, en el momento adecuado.",

@@ -53,10 +53,9 @@
       "customer": "Léa M."
     },
     "lockDate": "lundi 6 octobre",
-    "now": "maintenant",
     "scenes": {
       "near": {
-        "notification": "Vous êtes près de Café Sol. Montrez votre carte."
+        "notification": "Un café avant de continuer ? Montrez votre carte."
       },
       "stamp": {
         "notification": "Tampon ajouté. 4 sur 5."
@@ -84,7 +83,7 @@
       },
       "ch2": {
         "title": "Elle apparaît quand ils passent à côté.",
-        "caption": "Avec la position de votre commerce activée, la carte s'affiche sur l'écran verrouillé quand le client est proche."
+        "caption": "Avec la position de votre commerce activée, la carte s'affiche sur l'écran verrouillé quand le client est proche. Le message, c'est vous qui l'écrivez."
       },
       "ch3": {
         "title": "Le bon message, au bon moment.",

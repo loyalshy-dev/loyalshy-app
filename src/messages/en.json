@@ -53,10 +53,9 @@
       "customer": "Jane D."
     },
     "lockDate": "Monday, October 6",
-    "now": "now",
     "scenes": {
       "near": {
-        "notification": "You're near Café Sol. Show your card."
+        "notification": "Coffee before you go on? Show your card."
       },
       "stamp": {
         "notification": "Stamp added. 4 of 5."
@@ -84,7 +83,7 @@
       },
       "ch2": {
         "title": "It shows up when they're nearby.",
-        "caption": "With your shop's location on, the card appears on the lock screen when the customer is close."
+        "caption": "With your shop's location on, the card appears on the lock screen when the customer is close. The message is yours to write."
       },
       "ch3": {
         "title": "The right message, at the right time.",

@@ -24,37 +24,49 @@ import { useMediaQuery } from "./use-media-query"
 // transform and opacity animate. Reduced motion gets three static frames.
 
 const INK = "#1F1410"
-const CORAL = "#FF6B47"
 // Two weights: the phone, the map and the pass are heavy and settle slowly;
 // text, banners and side cards are light and answer quickly. Opacities go
 // through a spring too, so a wheel notch never completes a fade in one frame.
 const HEAVY = { stiffness: 70, damping: 22, mass: 1 }
 const LIGHT = { stiffness: 110, damping: 24, mass: 0.6 }
-const SPRING = LIGHT
 // How long the stage stays pinned, in viewport heights. The story plays over
 // (PIN_VH − 100)vh of scroll, so 760 gives ~6.6 screens: about a screen and
 // a half per chapter, with a breath between chapters where only the phone is on. Raise it to slow the film down, lower to speed up.
 const PIN_VH = 760
 
-function Banner({ title, body, when }: { title: string; body: string; when: string }) {
+// The Wallet notification as iOS draws it (measured from a real one): the
+// pass's own logo in a rounded tile, the business name in bold over the
+// message, and a thumbnail of the pass on the right. No timestamp.
+function Banner({ title, body, visits = 4, hasReward = false, t }: { title: string; body: string; visits?: number; hasReward?: boolean; t: ReturnType<typeof useTranslations> }) {
+  const thumbW = 40
   return (
     <div
-      className="flex items-start gap-3 rounded-[18px] px-3.5 py-3"
-      style={{ background: "oklch(1 0 0 / 0.8)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", boxShadow: "0 8px 24px oklch(0 0 0 / 0.14)" }}
+      className="flex items-center gap-3 rounded-[20px] py-2.5 pl-3 pr-2.5"
+      style={{ background: "oklch(1 0 0 / 0.82)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", boxShadow: "0 8px 24px oklch(0 0 0 / 0.14), 0 0 0 0.5px oklch(0 0 0 / 0.06)" }}
     >
-      <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-[9px]" style={{ background: INK }} aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke={CORAL} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="6" width="18" height="13" rx="2.5" />
-          <path d="M3 10h18" />
-          <path d="M15 14h3" />
-        </svg>
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={DEMO_PASS_LOGO} alt="" width={38} height={38} className="size-[38px] shrink-0 rounded-[9px]" />
       <div className="min-w-0 flex-1">
-        <div className="flex items-baseline justify-between gap-2">
-          <p className="text-[13px] font-semibold leading-tight" style={{ color: INK }}>{title}</p>
-          <span className="text-[11px]" style={{ color: "oklch(0.5 0.01 40)" }}>{when}</span>
-        </div>
-        <p className="mt-0.5 text-[13px] leading-snug" style={{ color: "oklch(0.3 0.01 40)" }}>{body}</p>
+        <p className="truncate text-[13px] font-semibold leading-[1.2]" style={{ color: INK }}>{title}</p>
+        <p className="text-[13px] leading-[1.25]" style={{ color: "oklch(0.28 0.01 40)" }}>{body}</p>
+      </div>
+      <div className="shrink-0 overflow-hidden rounded-[4px]" style={{ width: thumbW, height: Math.round(thumbW * (450 / 320)) }} aria-hidden="true">
+        <WalletPassRenderer
+          design={DEMO_PASS_DESIGN}
+          format="apple"
+          compact
+          width={thumbW}
+          height={Math.round(thumbW * (450 / 320))}
+          logoUrl={DEMO_PASS_LOGO}
+          organizationName={t("card.business")}
+          programName={t("card.program")}
+          currentVisits={visits}
+          totalVisits={DEMO_PASS_TOTAL}
+          hasReward={hasReward}
+          rewardDescription={t("card.reward")}
+          customerName={t("card.customer")}
+          memberNumber="42"
+        />
       </div>
     </div>
   )
@@ -329,12 +341,12 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
                   <LockFace date={t("lockDate")} narrow={narrow} />
                   <motion.div style={{ opacity: nearOpacity, y: nearY }} className="absolute left-3 right-3">
                     <div style={{ marginTop: narrow ? 128 : 150 }}>
-                      <Banner title={t("card.business")} body={t("scenes.near.notification")} when={t("now")} />
+                      <Banner title={t("card.business")} body={t("scenes.near.notification")} t={t} />
                     </div>
                   </motion.div>
                   <motion.div style={{ opacity: announceOpacity, y: announceY }} className="absolute left-3 right-3">
                     <div style={{ marginTop: narrow ? 128 : 150 }}>
-                      <Banner title={t("card.business")} body={t("scenes.announce.notification")} when={t("now")} />
+                      <Banner title={t("card.business")} body={t("scenes.announce.notification")} t={t} />
                     </div>
                   </motion.div>
                 </motion.div>
@@ -379,7 +391,7 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
                   </motion.div>
                   <motion.div style={{ opacity: rewardOpacity, y: rewardY }} className="absolute left-3 right-3 z-10" >
                     <div style={{ marginTop: 44 }}>
-                      <Banner title={t("card.business")} body={t("scenes.reward.notification")} when={t("now")} />
+                      <Banner title={t("card.business")} body={t("scenes.reward.notification")} visits={5} hasReward t={t} />
                     </div>
                   </motion.div>
                 </motion.div>
@@ -420,7 +432,7 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
         <div className="absolute inset-0">
           <LockFace date={t("lockDate")} narrow />
           <div className="absolute left-3 right-3" style={{ top: 128 }}>
-            <Banner title={t("card.business")} body={t("scenes.near.notification")} when={t("now")} />
+            <Banner title={t("card.business")} body={t("scenes.near.notification")} t={t} />
           </div>
         </div>
       ),
@@ -431,7 +443,7 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
         <div className="absolute inset-0">
           <LockFace date={t("lockDate")} narrow />
           <div className="absolute left-3 right-3" style={{ top: 128 }}>
-            <Banner title={t("card.business")} body={t("scenes.announce.notification")} when={t("now")} />
+            <Banner title={t("card.business")} body={t("scenes.announce.notification")} t={t} />
           </div>
         </div>
       ),
@@ -444,7 +456,7 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
             <Pass width={passW} t={t} visits={5} hasReward />
           </div>
           <div className="absolute left-3 right-3 z-10" style={{ top: 40 }}>
-            <Banner title={t("card.business")} body={t("scenes.reward.notification")} when={t("now")} />
+            <Banner title={t("card.business")} body={t("scenes.reward.notification")} visits={5} hasReward t={t} />
           </div>
         </div>
       ),
