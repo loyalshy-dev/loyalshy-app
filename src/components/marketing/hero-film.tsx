@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react"
@@ -118,10 +118,12 @@ const LOCK_BOTTOM = 92 // where a notification's bottom edge sits
 
 function LockFace({ date, narrow }: { date: string; narrow: boolean }) {
   const btn = "absolute bottom-[34px] grid size-11 place-items-center rounded-full"
-  const btnStyle = { background: "oklch(0.2 0.01 40 / 0.55)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }
+  const btnStyle = { background: "rgba(255,255,255,0.18)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }
   return (
-    <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, oklch(0.94 0.01 60) 0%, oklch(0.86 0.02 50) 100%)" }}>
-      <div className={narrow ? "pt-12 text-center" : "pt-14 text-center"} style={{ color: INK }}>
+    <div className="absolute inset-0" style={{ background: "#14102a" }}>
+      <Image src="/hero/wallpaper.webp" alt="" fill sizes="300px" className="object-cover" priority />
+      <div aria-hidden="true" className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.28) 100%)" }} />
+      <div className={narrow ? "relative pt-12 text-center" : "relative pt-14 text-center"} style={{ color: "#fff", textShadow: "0 1px 12px rgba(0,0,0,0.35)" }}>
         <p className="text-[13px] font-medium">{date}</p>
         <p className={narrow ? "font-display text-[54px] font-bold leading-none tracking-tight" : "font-display text-[64px] font-bold leading-none tracking-tight"}>9:41</p>
       </div>
@@ -141,7 +143,7 @@ function LockFace({ date, narrow }: { date: string; narrow: boolean }) {
         </svg>
       </div>
       {/* Home indicator */}
-      <div aria-hidden="true" className="absolute bottom-2 left-1/2 h-[5px] w-[34%] -translate-x-1/2 rounded-full" style={{ background: INK, opacity: 0.85 }} />
+      <div aria-hidden="true" className="absolute bottom-2 left-1/2 h-[5px] w-[34%] -translate-x-1/2 rounded-full" style={{ background: "#fff", opacity: 0.9 }} />
     </div>
   )
 }
@@ -174,6 +176,9 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
 
   // Screen layers
   const lockOpacity = useFade([0, 0.06, 0.12, 0.36, 0.42, 0.94, 0.96], [1, 1, 0, 0, 1, 1, 0])
+  const onLock = useTransform(p, (v) => v < 0.09 || (v > 0.39 && v < 0.95))
+  const [statusColor, setStatusColor] = useState("#fff")
+  useMotionValueEvent(onLock, "change", (v) => setStatusColor(v ? "#fff" : INK))
   const cameraOpacity = useFade([0.06, 0.12, 0.2, 0.26], [0, 1, 1, 0])
   const scanFrame = useSpring(useTransform(p, [0.1, 0.2], [1.15, 1]), HEAVY)
   const walletOpacity = useFade([0.2, 0.26, 0.36, 0.42], [0, 1, 1, 0])
@@ -187,19 +192,23 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   // Chapter 2: the map behind the phone, the customer walking into the
   // fence, the pulse when they cross it, then the banner
   const mapOpacity = useFade([0.46, 0.54, 0.7, 0.76], [0, 1, 1, 0])
-  const mapY = useSpring(useTransform(p, [0.46, 0.56], [30, 0]), HEAVY)
+  // the map drifts up slowly and settles late
+  const mapY = useSpring(useTransform(p, [0.46, 0.58], [44, 0]), { stiffness: 46, damping: 20, mass: 1.3 })
   const walk = useSpring(useTransform(p, [0.5, 0.64], [0, 1]), { stiffness: 60, damping: 22, mass: 1 })
   const pulse = useTransform(p, [0.62, 0.7], [0, 1])
-  const nearY = useSpring(useTransform(p, [0.63, 0.69], [28, 0]), LIGHT)
-  const nearOpacity = useFade([0.63, 0.68, 0.72, 0.76], [0, 1, 1, 0])
+  // the proximity banner arrives a beat after the pulse and overshoots a touch
+  const nearY = useSpring(useTransform(p, [0.645, 0.7], [34, 0]), { stiffness: 150, damping: 15, mass: 0.7 })
+  const nearOpacity = useFade([0.645, 0.69, 0.72, 0.76], [0, 1, 1, 0])
 
   // Chapter 3: the dashboard card, the message in flight, the banner, the crowd
   const cardOpacity = useFade([0.79, 0.85, 0.92, 0.95], [0, 1, 1, 0])
-  const cardX = useSpring(useTransform(p, [0.79, 0.85], [-24, 0]), LIGHT)
+  // the dashboard card slides in from further away, quick and dry
+  const cardX = useSpring(useTransform(p, [0.79, 0.84], [-48, 0]), { stiffness: 170, damping: 26, mass: 0.5 })
   const flyX = useSpring(useTransform(p, [0.85, 0.9], [narrow ? 0 : -220, 0]), LIGHT)
   const flyY = useSpring(useTransform(p, [0.85, 0.9], [narrow ? 120 : 40, -140]), LIGHT)
   const flyOpacity = useFade([0.845, 0.86, 0.89, 0.905], [0, 1, 1, 0])
-  const announceY = useSpring(useTransform(p, [0.89, 0.93], [24, 0]), LIGHT)
+  // the announcement lands with a small bounce
+  const announceY = useSpring(useTransform(p, [0.89, 0.93], [30, 0]), { stiffness: 140, damping: 14, mass: 0.8 })
   const announceOpacity = useFade([0.89, 0.92, 0.935, 0.955], [0, 1, 1, 0])
   const crowdOpacity = useFade([0.89, 0.92, 0.935, 0.955], [0, 1, 1, 0])
   const crowdSpread = useSpring(useTransform(p, [0.89, 0.93], [0, 1]), HEAVY)
@@ -223,7 +232,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const c1t = useCaption(0.07, 0.14, 0.34, 0.41)
   const c1p = useCaption(0.07, 0.14, 0.34, 0.41, 0.02)
   const c2t = useCaption(0.47, 0.54, 0.68, 0.75)
-  const c2p = useCaption(0.47, 0.54, 0.68, 0.75, 0.02)
+  const c2p = useCaption(0.47, 0.54, 0.68, 0.75, 0.035)
   const c3t = useCaption(0.8, 0.87, 0.92, 0.96)
   const c3p = useCaption(0.8, 0.87, 0.92, 0.96, 0.02)
   const c4t = useCaption(0.955, 0.98, 1.5, 1.6)
@@ -266,9 +275,11 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                 <motion.h2 style={{ opacity: c.t.o, y: c.t.y }} className="font-display mk-display-2 lg:max-w-[14ch]">
                   <span style={{ color: "var(--mk-text)" }}>{t(`film.${c.key}.title`)}</span>
                 </motion.h2>
-                <motion.p style={{ opacity: c.p.o, y: c.p.y }} className="mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4">
-                  {t(`film.${c.key}.caption`)}
-                </motion.p>
+                {c.key !== "ch2" && (
+                  <motion.p style={{ opacity: c.p.o, y: c.p.y }} className="mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4">
+                    {t(`film.${c.key}.caption`)}
+                  </motion.p>
+                )}
                 {c.key === "ch1" && demoUrl && (
                   <motion.div style={{ opacity: walletBtnOpacity, y: walletBtnY, pointerEvents: walletBtnEvents }} className="mt-4 lg:mt-6">
                     <WalletButtons demoUrl={demoUrl} t={t} tDemo={tDemo} align="left" />
@@ -333,7 +344,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
 
             {/* The phone */}
             <motion.div style={{ rotateY, rotateX, scale, transformStyle: "preserve-3d", willChange: "transform" }}>
-              <PhoneFrame width={phoneW} screenBackground="oklch(0.965 0.003 60)">
+              <PhoneFrame width={phoneW} screenBackground="oklch(0.965 0.003 60)" statusColor={statusColor}>
                 {/* Lock screen (intro, chapter 2, chapter 3) */}
                 <motion.div style={{ opacity: lockOpacity }} className="absolute inset-0">
                   <LockFace date={t("lockDate")} narrow={narrow} />
@@ -444,7 +455,7 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
     <div className="mk-wrap grid grid-cols-1 gap-12 py-16 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
       {frames.map((f) => (
         <figure key={f.key} className="flex flex-col items-center gap-5 text-center">
-          <PhoneFrame width={w}>{f.screen}</PhoneFrame>
+          <PhoneFrame width={w} statusColor={f.key === "ch2" || f.key === "ch3" ? "#fff" : INK}>{f.screen}</PhoneFrame>
           <figcaption>
             <h2 className="mk-title-4" style={{ color: "var(--mk-text)" }}>{t(`film.${f.key}.title`)}</h2>
             <p className="mk-body-sm mt-1 max-w-[32ch]" style={{ color: "var(--mk-text-muted)" }}>{t(`film.${f.key}.caption`)}</p>
