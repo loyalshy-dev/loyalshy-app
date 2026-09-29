@@ -39,7 +39,7 @@ Multi-tenant SaaS for cafés, salons, and small retail to run digital loyalty pr
 ## Critical Architecture Rules
 
 ### Auth Pattern (NEVER violate)
-- **proxy.ts** = UX optimization ONLY (cookie check + redirect). NO DB calls, NO role checks.
+- **`src/proxy.ts`** = UX optimization ONLY (no session cookie on `/dashboard`/`/admin` → `/login?callbackUrl=`). NO DB calls, NO role checks. It MUST live in `src/` — at the project root Next ignores it (it was silently dead until 2026-09-29). It does NOT bounce signed-in users off auth pages: cookie presence ≠ valid session (removed members keep a stale cookie), which would loop with the DAL; `AuthRedirectGate` owns that.
 - **DAL (`/src/lib/dal.ts`)** = REAL security boundary. Every Server Component and Server Action MUST call DAL functions.
 - `getCurrentUser()` — validate session, return user (cached per-request via React `cache()`)
 - `assertAuthenticated()` — redirects to /login if no session
@@ -102,8 +102,8 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
 - **Key files**: `src/lib/api-session.ts` (`sessionHandler` + `sessionHandlerNoOrg` + `ApiError`), `src/lib/auth-rate-limit.ts`, `src/lib/token-hash.ts`, `src/lib/org-scope.ts`, `src/lib/api-serializers.ts` (toApiContact, toApiPassInstance, toApiPassInstanceDetail, toApiReward, toApiInteraction, toApiTemplate), `src/lib/api-cors.ts`, `src/lib/wallet/dispatch.ts`. Action transactions are inlined in the route files (not in shared `api-data.ts` — the old shared layer is gone).
 
 ### Next.js 16 Rules
-- Use `proxy.ts` NOT `middleware.ts`
-- **NEVER rely on the proxy's `x-pathname` header in layouts** — it arrives EMPTY in streamed layout renders (verified 2026-08-18; caused a redirect loop and silently broke the /invite//claim signed-in exemption). Pathname-dependent redirect logic in layouts must live in client-side gates using `usePathname`: see `src/components/auth-redirect-gate.tsx` ((auth) layout: away-from-auth + mid-onboarding + token-flow exemptions) and `src/components/dashboard/partner-orgless-gate.tsx` ((dashboard) layout: org-less partners confined to the Partner console). The server layout computes session facts; the gate applies the pathname rules.
+- Use `src/proxy.ts` NOT `middleware.ts` (must sit next to `app/` when using `src/`)
+- **NEVER rely on a proxy-set `x-pathname` header in layouts** — it arrived EMPTY (verified 2026-08-18; caused a redirect loop and silently broke the /invite//claim signed-in exemption). Root cause found 2026-09-29: the proxy file sat at the project root and never ran at all; the header was removed when it moved to `src/`. Pathname-dependent redirect logic in layouts must live in client-side gates using `usePathname`: see `src/components/auth-redirect-gate.tsx` ((auth) layout: away-from-auth + mid-onboarding + token-flow exemptions) and `src/components/dashboard/partner-orgless-gate.tsx` ((dashboard) layout: org-less partners confined to the Partner console). The server layout computes session facts; the gate applies the pathname rules.
 - All `params` and `searchParams` are async — must be awaited
 - Enable `cacheComponents: true` + `reactCompiler: true` in next.config.ts
 - **`cacheComponents: true` is INCOMPATIBLE with route segment configs** — do NOT use `export const runtime`, `export const dynamic`, or `export const revalidate` in any route/page file
@@ -377,7 +377,7 @@ Update the "Current Progress" section above to track what's done.
 - `src/lib/auth-client.ts` — Client-side auth (createAuthClient + org/admin/emailOTP plugins, baseURL uses window.location.origin in browser)
 - `src/app/api/auth/[...all]/route.ts` — API route handler (toNextJsHandler)
 - `src/lib/dal.ts` — Data Access Layer (REAL security boundary)
-- `proxy.ts` — Optimistic cookie redirect (UX only)
+- `src/proxy.ts` — Optimistic cookie redirect (UX only)
 - `src/server/auth-actions.ts` — Staff invitation server actions (email via Trigger.dev, email-verified acceptance, rate-limited token validation)
 - `src/lib/api-session.ts` — Session-token Bearer auth wrapper for `/api/v1/**` staff-app endpoints (`sessionHandler`, `ApiError`, `notFound`, `badRequest`, `forbidden`)
 - `src/lib/api-serializers.ts` — Prisma row → JSON shape converters mirroring `loyalshy-staff/lib/types.ts`
