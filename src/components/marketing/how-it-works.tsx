@@ -75,7 +75,7 @@ export async function HowItWorks() {
         <FadeIn>
           <div className="mx-auto max-w-2xl text-center mb-12 sm:mb-16">
             <h2
-              className="font-display mk-clamp-h2 font-black tracking-tight leading-tight text-balance mb-4"
+              className="font-display mk-clamp-h2 font-bold leading-[1.1] text-balance mb-4"
               style={{ color: "var(--mk-text)" }}
             >
               {t("title")}

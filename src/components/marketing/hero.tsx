@@ -22,7 +22,7 @@ export async function Hero() {
             {/* Headline */}
             <div className="hero-fade-in" style={{ animationDelay: "100ms" }}>
               <h1
-                className="font-display mk-clamp-h1 font-black leading-[0.95] tracking-[-0.025em] sm:tracking-[-0.035em] lg:tracking-[-0.045em]"
+                className="font-display mk-clamp-h1 font-extrabold leading-none"
                 style={{ color: "var(--mk-text)" }}
               >
                 {t("title1")}{" "}
@@ -45,7 +45,7 @@ export async function Hero() {
             {/* CTAs */}
             <div className="hero-fade-in w-full" style={{ animationDelay: "300ms" }}>
               <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
-                <Link href="/register" className="mk-btn-primary py-4! px-8! text-base! gap-2 shadow-xl! w-full sm:w-auto">
+                <Link href="/register" className="mk-btn-primary py-4! px-8! text-base! gap-2 w-full sm:w-auto">
                   {tCommon("getStartedFree")}
                   <ArrowRight className="size-4" />
                 </Link>

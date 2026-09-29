@@ -90,7 +90,7 @@ export function FeatureShowcase() {
         <FadeIn>
           <div className="mx-auto max-w-2xl text-center mb-10">
             <h2
-              className="font-display mk-clamp-h2 font-black tracking-tight"
+              className="font-display mk-clamp-h2 font-bold leading-[1.1]"
               style={{ color: "var(--mk-text)" }}
             >
               {t("title")}

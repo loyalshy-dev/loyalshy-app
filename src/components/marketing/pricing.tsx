@@ -341,7 +341,7 @@ export function Pricing() {
         <FadeIn>
           <div className="text-center mb-10">
             <h2
-              className="font-display mk-clamp-h2 font-black tracking-tight mb-4"
+              className="font-display mk-clamp-h2 font-bold leading-[1.1] mb-4"
               style={{ color: "var(--mk-text)" }}
             >
               {t("title")}

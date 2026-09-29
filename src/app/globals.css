@@ -417,7 +417,7 @@
   }
 
   /* — Fluid heading sizes — */
-  .mk-clamp-h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+  .mk-clamp-h1 { font-size: clamp(2.5rem, 6vw, 4rem); }
   .mk-clamp-h2 { font-size: clamp(2rem, 5vw, 3rem); }
 
   /* — Primary Button (coral, brand-driven; adapts to light/dark via tokens) — */
@@ -433,15 +433,24 @@
     border: none;
     border-radius: 9999px;
     cursor: pointer;
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 0.25s,
-                filter 0.2s;
-    box-shadow: 0 1px 4px color-mix(in oklch, var(--mk-brand-purple) 30%, transparent);
+    /* Hover is a color change only: no lift, no glow. */
+    transition: background-color 150ms ease-out;
   }
   .mk-btn-primary:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.05);
-    box-shadow: 0 6px 20px color-mix(in oklch, var(--mk-brand-purple) 40%, transparent);
+    background: color-mix(in oklch, var(--mk-brand-purple) 90%, black);
+  }
+  .mk-btn-primary:active {
+    background: color-mix(in oklch, var(--mk-brand-purple) 84%, black);
+  }
+  .mk-btn-primary:focus-visible {
+    outline: 2px solid var(--mk-brand-purple);
+    outline-offset: 2px;
+  }
+  .mk-btn-primary svg {
+    transition: transform 150ms ease-out;
+  }
+  .mk-btn-primary:hover svg {
+    transform: translateX(2px);
   }
 
   /* — Ghost / Outline Button — */
@@ -457,14 +466,14 @@
     border: 1px solid var(--mk-border);
     border-radius: 9999px;
     cursor: pointer;
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                border-color 0.25s,
-                background 0.25s;
+    transition: border-color 150ms ease-out;
   }
   .mk-btn-ghost:hover {
-    transform: translateY(-2px);
-    border-color: var(--mk-border-hover);
-    background: color-mix(in oklch, var(--mk-text) 5%, transparent);
+    border-color: color-mix(in oklch, var(--mk-text) 40%, transparent);
+  }
+  .mk-btn-ghost:focus-visible {
+    outline: 2px solid var(--mk-text);
+    outline-offset: 2px;
   }
 
   /* — Marketing Input — */
@@ -536,6 +545,9 @@
   .mk-btn-ghost,
   .mk-card-glass {
     transition: none !important;
+  }
+  .mk-btn-primary:hover svg {
+    transform: none;
   }
   .mk-carousel-track {
     animation: none !important;
