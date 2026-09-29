@@ -174,10 +174,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const walletOpacity = useFade([0.2, 0.26, 0.36, 0.42], [0, 1, 1, 0])
   const passY = useSpring(useTransform(p, [0.22, 0.34], [380, 0]), HEAVY)
 
-  // Chapter 1: the real counter QR beside the phone (what the camera scans),
-  // and the wallet buttons under the caption once the pass is in.
-  const qrOpacity = useFade([0.08, 0.16, 0.36, 0.42], [0, 1, 1, 0])
-  const qrX = useSpring(useTransform(p, [0.08, 0.16], [-24, 0]), LIGHT)
+  // Chapter 1: the wallet buttons under the caption once the pass is in.
   const walletBtnOpacity = useFade([0.26, 0.32, 0.36, 0.42], [0, 1, 1, 0])
   const walletBtnY = useSpring(useTransform(p, [0.26, 0.32], [12, 0]), LIGHT)
   const walletBtnEvents = useTransform(p, (v) => (v > 0.28 && v < 0.4 ? "auto" : "none"))
@@ -299,15 +296,6 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                 className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[40px]"
               />
             ))}
-
-            {/* Chapter 1: the real counter QR, beside the phone */}
-            <motion.div
-              style={{ opacity: qrOpacity, x: qrX, right: "calc(100% + 24px)", width: 200 }}
-              className="pointer-events-none absolute top-[10%] hidden rounded-2xl bg-white p-3 lg:block"
-            >
-              <Image src="/hero/real-qr.webp" alt={t("film.qrAlt")} width={640} height={640} className="h-auto w-full rounded-lg" sizes="200px" />
-              <p className="mk-caption mt-2 text-center" style={{ color: "var(--mk-text-muted)" }}>{t("film.qrNote")}</p>
-            </motion.div>
 
             {/* Chapter 3: the dashboard card, beside the phone */}
             <motion.div
