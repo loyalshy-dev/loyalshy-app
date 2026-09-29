@@ -111,13 +111,37 @@ function Pass({ width, t, visits, hasReward }: { width: number; t: ReturnType<ty
   )
 }
 
+// The lock screen as iOS lays it out: date and time up top, the flashlight
+// and camera buttons in the bottom corners, the home indicator under them.
+// Notifications land just above the buttons.
+const LOCK_BOTTOM = 92 // where a notification's bottom edge sits
+
 function LockFace({ date, narrow }: { date: string; narrow: boolean }) {
+  const btn = "absolute bottom-[34px] grid size-11 place-items-center rounded-full"
+  const btnStyle = { background: "oklch(0.2 0.01 40 / 0.55)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }
   return (
     <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, oklch(0.94 0.01 60) 0%, oklch(0.86 0.02 50) 100%)" }}>
       <div className={narrow ? "pt-12 text-center" : "pt-14 text-center"} style={{ color: INK }}>
         <p className="text-[13px] font-medium">{date}</p>
         <p className={narrow ? "font-display text-[54px] font-bold leading-none tracking-tight" : "font-display text-[64px] font-bold leading-none tracking-tight"}>9:41</p>
       </div>
+      {/* Flashlight */}
+      <div className={`${btn} left-[30px]`} style={btnStyle} aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8 3h8v3l-2 3v11a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V9L8 6Z" />
+          <path d="M8 6h8" />
+          <circle cx="12" cy="13" r="1" fill="#fff" stroke="none" />
+        </svg>
+      </div>
+      {/* Camera */}
+      <div className={`${btn} right-[30px]`} style={btnStyle} aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 8h3l2-3h6l2 3h3v11H4Z" />
+          <circle cx="12" cy="13" r="3.2" />
+        </svg>
+      </div>
+      {/* Home indicator */}
+      <div aria-hidden="true" className="absolute bottom-2 left-1/2 h-[5px] w-[34%] -translate-x-1/2 rounded-full" style={{ background: INK, opacity: 0.85 }} />
     </div>
   )
 }
@@ -170,7 +194,7 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
   const mapY = useSpring(useTransform(p, [0.46, 0.56], [30, 0]), HEAVY)
   const walk = useSpring(useTransform(p, [0.5, 0.64], [0, 1]), { stiffness: 60, damping: 22, mass: 1 })
   const pulse = useTransform(p, [0.62, 0.7], [0, 1])
-  const nearY = useSpring(useTransform(p, [0.63, 0.69], [-40, 0]), LIGHT)
+  const nearY = useSpring(useTransform(p, [0.63, 0.69], [28, 0]), LIGHT)
   const nearOpacity = useFade([0.63, 0.68, 0.72, 0.76], [0, 1, 1, 0])
 
   // Chapter 3: the dashboard card, the message in flight, the banner, the crowd
@@ -179,7 +203,7 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
   const flyX = useSpring(useTransform(p, [0.85, 0.9], [narrow ? 0 : -220, 0]), LIGHT)
   const flyY = useSpring(useTransform(p, [0.85, 0.9], [narrow ? 120 : 40, -140]), LIGHT)
   const flyOpacity = useFade([0.845, 0.86, 0.89, 0.905], [0, 1, 1, 0])
-  const announceY = useSpring(useTransform(p, [0.89, 0.93], [-30, 0]), LIGHT)
+  const announceY = useSpring(useTransform(p, [0.89, 0.93], [24, 0]), LIGHT)
   const announceOpacity = useFade([0.89, 0.92, 0.935, 0.955], [0, 1, 1, 0])
   const crowdOpacity = useFade([0.89, 0.92, 0.935, 0.955], [0, 1, 1, 0])
   const crowdSpread = useSpring(useTransform(p, [0.89, 0.93], [0, 1]), HEAVY)
@@ -356,13 +380,13 @@ function Film({ qr, demoUrl, tent }: { qr: string; demoUrl?: string; tent?: Reac
                 {/* Lock screen (intro, chapter 2, chapter 3) */}
                 <motion.div style={{ opacity: lockOpacity }} className="absolute inset-0">
                   <LockFace date={t("lockDate")} narrow={narrow} />
-                  <motion.div style={{ opacity: nearOpacity, y: nearY }} className="absolute left-3 right-3">
-                    <div style={{ marginTop: narrow ? 128 : 150 }}>
+                  <motion.div style={{ opacity: nearOpacity, y: nearY, bottom: LOCK_BOTTOM }} className="absolute left-3 right-3">
+                    <div>
                       <RealBanner alt={t("scenes.near.alt")} />
                     </div>
                   </motion.div>
-                  <motion.div style={{ opacity: announceOpacity, y: announceY }} className="absolute left-3 right-3">
-                    <div style={{ marginTop: narrow ? 128 : 150 }}>
+                  <motion.div style={{ opacity: announceOpacity, y: announceY, bottom: LOCK_BOTTOM }} className="absolute left-3 right-3">
+                    <div>
                       <Banner title={t("card.business")} body={t("scenes.announce.notification")} t={t} />
                     </div>
                   </motion.div>
@@ -448,7 +472,7 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
       screen: (
         <div className="absolute inset-0">
           <LockFace date={t("lockDate")} narrow />
-          <div className="absolute left-3 right-3" style={{ top: 128 }}>
+          <div className="absolute left-3 right-3" style={{ bottom: LOCK_BOTTOM }}>
             <RealBanner alt={t("scenes.near.alt")} />
           </div>
         </div>
@@ -459,7 +483,7 @@ function Frames({ qr, demoUrl }: { qr: string; demoUrl?: string }) {
       screen: (
         <div className="absolute inset-0">
           <LockFace date={t("lockDate")} narrow />
-          <div className="absolute left-3 right-3" style={{ top: 128 }}>
+          <div className="absolute left-3 right-3" style={{ bottom: LOCK_BOTTOM }}>
             <Banner title={t("card.business")} body={t("scenes.announce.notification")} t={t} />
           </div>
         </div>
