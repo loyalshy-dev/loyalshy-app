@@ -28,9 +28,9 @@ const INK = "#1F1410"
 const HEAVY = { stiffness: 70, damping: 22, mass: 1 }
 const LIGHT = { stiffness: 110, damping: 24, mass: 0.6 }
 // How long the stage stays pinned, in viewport heights. The story plays over
-// (PIN_VH − 100)vh of scroll, so 760 gives ~6.6 screens: about a screen and
-// a half per chapter, with a breath between chapters where only the phone is on. Raise it to slow the film down, lower to speed up.
-const PIN_VH = 760
+// (PIN_VH − 100)vh of scroll, so 880 gives ~7.8 screens. Each notification
+// holds for ~10% of the film (about a screen of scroll) once it has landed. Raise it to slow the film down, lower to speed up.
+const PIN_VH = 880
 
 // Real artefacts from a client's phone, cropped: two Wallet notifications
 // (proximity and announcement), the pass itself, and its logo. They carry
@@ -164,54 +164,54 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
 
   // The phone as an object. Rotation is skipped on phones (touch GPUs).
   const rot = narrow ? 0 : 1
-  const rotateY = useSpring(useTransform(p, [0, 0.08, 0.24, 0.42, 0.5, 0.72, 0.8, 0.96, 1], [0, -18 * rot, 0, 0, 12 * rot, 12 * rot, 0, 0, 0]), HEAVY)
-  const rotateX = useSpring(useTransform(p, [0, 0.24, 0.5, 0.8, 0.96], [0, 4 * rot, -3 * rot, 0, 0]), HEAVY)
-  const scale = useSpring(useTransform(p, [0, 0.08, 0.24, 0.42, 0.5, 0.72, 0.8, 0.93, 1], [1, 1, 1.1, 1.1, 1.04, 1.04, 0.92, 0.92, 0.98]), HEAVY)
+  const rotateY = useSpring(useTransform(p, [0, 0.08, 0.24, 0.38, 0.46, 0.7, 0.76, 0.96, 1], [0, -18 * rot, 0, 0, 12 * rot, 12 * rot, 0, 0, 0]), HEAVY)
+  const rotateX = useSpring(useTransform(p, [0, 0.24, 0.46, 0.76, 0.96], [0, 4 * rot, -3 * rot, 0, 0]), HEAVY)
+  const scale = useSpring(useTransform(p, [0, 0.08, 0.24, 0.38, 0.46, 0.7, 0.76, 0.94, 1], [1, 1, 1.1, 1.1, 1.04, 1.04, 0.92, 0.92, 0.98]), HEAVY)
   // On desktop the phone opens centered on the stage and slides over to the
   // right as the first caption arrives, then drifts a little further whenever
   // a card sits beside it.
   const shift = narrow ? 0 : 240
   const side = narrow ? 0 : 56
-  const x = useSpring(useTransform(p, [0, 0.1, 0.26, 0.42, 0.5, 0.72, 0.8, 0.93, 0.99], narrow ? [0, 0, 0, 0, 0, 0, 0, 0, 0] : [0, shift, shift + side, shift + side, shift - 30, shift - 30, shift + side, shift + side, shift]), HEAVY)
+  const x = useSpring(useTransform(p, [0, 0.1, 0.26, 0.38, 0.46, 0.7, 0.76, 0.94, 0.99], narrow ? [0, 0, 0, 0, 0, 0, 0, 0, 0] : [0, shift, shift + side, shift + side, shift - 30, shift - 30, shift + side, shift + side, shift]), HEAVY)
 
   // Screen layers
-  const lockOpacity = useFade([0, 0.06, 0.12, 0.36, 0.42, 0.94, 0.96], [1, 1, 0, 0, 1, 1, 0])
-  const onLock = useTransform(p, (v) => v < 0.09 || (v > 0.39 && v < 0.95))
+  const lockOpacity = useFade([0, 0.06, 0.12, 0.34, 0.38, 0.94, 0.96], [1, 1, 0, 0, 1, 1, 0])
+  const onLock = useTransform(p, (v) => v < 0.09 || (v > 0.36 && v < 0.95))
   const [statusColor, setStatusColor] = useState("#fff")
   useMotionValueEvent(onLock, "change", (v) => setStatusColor(v ? "#fff" : INK))
   const cameraOpacity = useFade([0.06, 0.12, 0.2, 0.26], [0, 1, 1, 0])
   const scanFrame = useSpring(useTransform(p, [0.1, 0.2], [1.15, 1]), HEAVY)
-  const walletOpacity = useFade([0.2, 0.26, 0.36, 0.42], [0, 1, 1, 0])
+  const walletOpacity = useFade([0.2, 0.26, 0.33, 0.38], [0, 1, 1, 0])
   const passY = useSpring(useTransform(p, [0.22, 0.34], [380, 0]), HEAVY)
 
   // Chapter 1: the wallet buttons under the caption once the pass is in.
-  const walletBtnOpacity = useFade([0.26, 0.32, 0.36, 0.42], [0, 1, 1, 0])
+  const walletBtnOpacity = useFade([0.26, 0.31, 0.33, 0.38], [0, 1, 1, 0])
   const walletBtnY = useSpring(useTransform(p, [0.26, 0.32], [12, 0]), LIGHT)
-  const walletBtnEvents = useTransform(p, (v) => (v > 0.28 && v < 0.4 ? "auto" : "none"))
+  const walletBtnEvents = useTransform(p, (v) => (v > 0.28 && v < 0.36 ? "auto" : "none"))
 
   // Chapter 2: the map behind the phone, the customer walking into the
   // fence, the pulse when they cross it, then the banner
-  const mapOpacity = useFade([0.46, 0.54, 0.7, 0.76], [0, 1, 1, 0])
+  const mapOpacity = useFade([0.42, 0.5, 0.66, 0.7], [0, 1, 1, 0])
   // the map drifts up slowly and settles late
-  const mapY = useSpring(useTransform(p, [0.46, 0.58], [44, 0]), { stiffness: 46, damping: 20, mass: 1.3 })
-  const walk = useSpring(useTransform(p, [0.5, 0.64], [0, 1]), { stiffness: 60, damping: 22, mass: 1 })
-  const pulse = useTransform(p, [0.62, 0.7], [0, 1])
+  const mapY = useSpring(useTransform(p, [0.42, 0.54], [44, 0]), { stiffness: 46, damping: 20, mass: 1.3 })
+  const walk = useSpring(useTransform(p, [0.44, 0.54], [0, 1]), { stiffness: 60, damping: 22, mass: 1 })
+  const pulse = useTransform(p, [0.53, 0.6], [0, 1])
   // the proximity banner arrives a beat after the pulse and overshoots a touch
-  const nearY = useSpring(useTransform(p, [0.645, 0.7], [34, 0]), { stiffness: 150, damping: 15, mass: 0.7 })
-  const nearOpacity = useFade([0.645, 0.69, 0.72, 0.76], [0, 1, 1, 0])
+  const nearY = useSpring(useTransform(p, [0.55, 0.6], [34, 0]), { stiffness: 150, damping: 15, mass: 0.7 })
+  const nearOpacity = useFade([0.55, 0.59, 0.66, 0.7], [0, 1, 1, 0])
 
   // Chapter 3: the dashboard card, the message in flight, the banner, the crowd
-  const cardOpacity = useFade([0.79, 0.85, 0.92, 0.95], [0, 1, 1, 0])
+  const cardOpacity = useFade([0.74, 0.79, 0.92, 0.95], [0, 1, 1, 0])
   // the dashboard card slides in from further away, quick and dry
-  const cardX = useSpring(useTransform(p, [0.79, 0.84], [-48, 0]), { stiffness: 170, damping: 26, mass: 0.5 })
-  const flyX = useSpring(useTransform(p, [0.85, 0.9], [narrow ? 0 : -220, 0]), LIGHT)
-  const flyY = useSpring(useTransform(p, [0.85, 0.9], [narrow ? 120 : 40, -140]), LIGHT)
-  const flyOpacity = useFade([0.845, 0.86, 0.89, 0.905], [0, 1, 1, 0])
+  const cardX = useSpring(useTransform(p, [0.74, 0.78], [-48, 0]), { stiffness: 170, damping: 26, mass: 0.5 })
+  const flyX = useSpring(useTransform(p, [0.78, 0.82], [narrow ? 0 : -220, 0]), LIGHT)
+  const flyY = useSpring(useTransform(p, [0.78, 0.82], [narrow ? 120 : 40, -140]), LIGHT)
+  const flyOpacity = useFade([0.775, 0.79, 0.81, 0.825], [0, 1, 1, 0])
   // the announcement lands with a small bounce
-  const announceY = useSpring(useTransform(p, [0.89, 0.93], [30, 0]), { stiffness: 140, damping: 14, mass: 0.8 })
-  const announceOpacity = useFade([0.89, 0.92, 0.935, 0.955], [0, 1, 1, 0])
-  const crowdOpacity = useFade([0.89, 0.92, 0.935, 0.955], [0, 1, 1, 0])
-  const crowdSpread = useSpring(useTransform(p, [0.89, 0.93], [0, 1]), HEAVY)
+  const announceY = useSpring(useTransform(p, [0.82, 0.86], [30, 0]), { stiffness: 140, damping: 14, mass: 0.8 })
+  const announceOpacity = useFade([0.82, 0.85, 0.92, 0.95], [0, 1, 1, 0])
+  const crowdOpacity = useFade([0.83, 0.87, 0.92, 0.95], [0, 1, 1, 0])
+  const crowdSpread = useSpring(useTransform(p, [0.83, 0.88], [0, 1]), HEAVY)
   const crowdLeft = useTransform(crowdSpread, (v) => -110 * v)
   const crowdRight = useTransform(crowdSpread, (v) => 110 * v)
 
@@ -229,12 +229,12 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
     o: useSpring(useTransform(p, [a + lag, b + lag, c, d], [0, 1, 1, 0]), LIGHT),
     y: useSpring(useTransform(p, [a + lag, b + lag, c, d], [28, 0, 0, -22]), LIGHT),
   })
-  const c1t = useCaption(0.07, 0.14, 0.34, 0.41)
-  const c1p = useCaption(0.07, 0.14, 0.34, 0.41, 0.02)
-  const c2t = useCaption(0.47, 0.54, 0.68, 0.75)
-  const c2p = useCaption(0.47, 0.54, 0.68, 0.75, 0.035)
-  const c3t = useCaption(0.8, 0.87, 0.92, 0.96)
-  const c3p = useCaption(0.8, 0.87, 0.92, 0.96, 0.02)
+  const c1t = useCaption(0.07, 0.14, 0.31, 0.37)
+  const c1p = useCaption(0.07, 0.14, 0.31, 0.37, 0.02)
+  const c2t = useCaption(0.43, 0.5, 0.66, 0.71)
+  const c2p = useCaption(0.43, 0.5, 0.66, 0.71, 0.035)
+  const c3t = useCaption(0.75, 0.81, 0.92, 0.96)
+  const c3p = useCaption(0.75, 0.81, 0.92, 0.96, 0.02)
   const c4t = useCaption(0.955, 0.98, 1.5, 1.6)
   const c4p = useCaption(0.955, 0.98, 1.5, 1.6, 0.01)
   const intro = useFade([0, 0.07], [1, 0])
@@ -244,7 +244,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   useMotionValueEvent(p, "change", (v) => {
     const el = liveRef.current
     if (!el) return
-    const next = v < 0.08 ? "" : v < 0.44 ? t("film.ch1.title") : v < 0.78 ? t("film.ch2.title") : v < 0.96 ? t("film.ch3.title") : t("film.ch4.title")
+    const next = v < 0.08 ? "" : v < 0.4 ? t("film.ch1.title") : v < 0.73 ? t("film.ch2.title") : v < 0.96 ? t("film.ch3.title") : t("film.ch4.title")
     if (el.textContent !== next) el.textContent = next
   })
 
@@ -399,7 +399,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
       </div>
       {/* "Try it" links land here: the film's last frame, with the wallet buttons */}
       {/* "Try it" links land on chapter 1, with the pass in Wallet and the buttons up */}
-      <div id="try-demo" aria-hidden="true" className="absolute h-px w-full" style={{ top: `${(PIN_VH - 100) * 0.33}vh` }} />
+      <div id="try-demo" aria-hidden="true" className="absolute h-px w-full" style={{ top: `${(PIN_VH - 100) * 0.3}vh` }} />
     </div>
   )
 }
