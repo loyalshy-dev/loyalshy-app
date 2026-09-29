@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { authClient } from "@/lib/auth-client"
+import { safeRedirectPath } from "@/lib/safe-redirect"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,7 +24,9 @@ export default function LoginPage() {
   const t = useTranslations("auth.login")
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  // Set by src/proxy.ts; anything that isn't a path on this site is ignored
+  // so a crafted link can't send users elsewhere after they sign in.
+  const callbackUrl = safeRedirectPath(searchParams.get("callbackUrl"), "/dashboard")
   // SessionWatcher routes here with `?reason=expired` when the dashboard tab
   // detects the session is gone (most often: removed from team).
   const reason = searchParams.get("reason")
