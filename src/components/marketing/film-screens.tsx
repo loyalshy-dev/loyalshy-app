@@ -1,8 +1,11 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { motion, type MotionValue } from "motion/react"
+import { motion, useMotionValue, useMotionValueEvent, type MotionValue } from "motion/react"
 import { useTranslations } from "next-intl"
+import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
+import { DEMO_COUPON_DESIGN, DEMO_PASS_DESIGN, DEMO_PASS_LOGO, DEMO_PASS_RATIO, DEMO_PASS_TOTAL } from "./demo-pass"
 import { INK } from "./tokens"
 
 // The screens the hero phone shows, and the real artefacts on them. Each
@@ -136,6 +139,137 @@ export function WalletScreen({ opacity, passY, passAlt = "" }: { opacity?: Motio
         </div>
       </motion.div>
     </motion.div>
+  )
+}
+
+/** The pass's inset inside the screen, as a fraction of the phone's width. */
+export const PASS_TOP = 0.38
+const PASS_INSET = 12
+
+/** The width of an element, kept up to date. 0 until measured. */
+function useMeasuredWidth<T extends HTMLElement>() {
+  const ref = useRef<T>(null)
+  const [width, setWidth] = useState(0)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const ro = new ResizeObserver(([entry]) => setWidth(Math.round(entry.contentRect.width)))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return { ref, width }
+}
+
+/** Chapters 5–6: Wallet with the demo card drawn by the product's own
+ *  renderer — the stamp card first, filling with the scroll, then turned
+ *  over into the coupon. The renderer needs pixel sizes, so the card slot
+ *  is measured; this screen is never visible at scroll 0. */
+export function PassScreen({
+  opacity, passY, visits, stampRotate, stampVis, couponRotate, couponVis, fixedVisits,
+}: {
+  opacity?: MotionValue<number>
+  passY?: MotionValue<number>
+  /** 0–5, from the scroll: four stamps, then the reward. */
+  visits?: MotionValue<number>
+  stampRotate?: MotionValue<number>
+  stampVis?: MotionValue<number>
+  couponRotate?: MotionValue<number>
+  couponVis?: MotionValue<number>
+  /** Reduced-motion frames: a fixed count and no coupon. */
+  fixedVisits?: number
+}) {
+  const t = useTranslations("hero")
+  const tc = useTranslations("gallery")
+  const { ref, width } = useMeasuredWidth<HTMLDivElement>()
+  const [count, setCount] = useState(fixedVisits ?? 0)
+  const still = useMotionValue(fixedVisits ?? 0)
+  useMotionValueEvent(visits ?? still, "change", (v) => {
+    const next = Math.min(DEMO_PASS_TOTAL, Math.max(0, Math.round(v)))
+    if (next !== count) setCount(next)
+  })
+  const h = Math.round(width * DEMO_PASS_RATIO)
+  const shadow = { boxShadow: "0 14px 34px oklch(0 0 0 / 0.22)" }
+  return (
+    <motion.div style={{ opacity }} className="mk-film-pass absolute inset-0">
+      <div className="absolute inset-0" style={{ background: SCREEN_BG }} />
+      <p className="absolute inset-x-0 top-12 text-center text-[13px] font-semibold" style={{ color: INK }}>{t("film.walletTitle")}</p>
+      <motion.div ref={ref} style={{ y: passY, left: PASS_INSET, right: PASS_INSET, top: `calc(var(--phone-w) * ${PASS_TOP})` }} className="absolute">
+        {width > 0 && (
+          <div className="relative" style={{ width, height: h, perspective: 1200 }}>
+            <motion.div style={{ rotateY: stampRotate, opacity: stampVis, transformStyle: "preserve-3d" }} className="absolute inset-0">
+              <WalletPassRenderer
+                design={DEMO_PASS_DESIGN}
+                format="apple"
+                compact
+                width={width}
+                height={h}
+                logoUrl={DEMO_PASS_LOGO}
+                organizationName={t("card.business")}
+                programName={t("card.program")}
+                currentVisits={count}
+                totalVisits={DEMO_PASS_TOTAL}
+                rewardDescription={t("card.reward")}
+                customerName={t("card.customer")}
+                memberNumber="42"
+                style={shadow}
+              />
+            </motion.div>
+            {fixedVisits === undefined && (
+              <motion.div style={{ rotateY: couponRotate, opacity: couponVis, transformStyle: "preserve-3d" }} className="absolute inset-0">
+                <WalletPassRenderer
+                  design={DEMO_COUPON_DESIGN}
+                  format="apple"
+                  compact
+                  width={width}
+                  height={h}
+                  logoUrl={DEMO_PASS_LOGO}
+                  organizationName={t("card.business")}
+                  programName={tc("coupon.name")}
+                  customerName={t("card.customer")}
+                  discountText={tc("coupon.offer")}
+                  validUntil={tc("coupon.validUntil")}
+                  couponCode={tc("coupon.code")}
+                  style={shadow}
+                />
+              </motion.div>
+            )}
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  )
+}
+
+/** A frame with a fixed coupon, for reduced motion. */
+export function CouponFrame() {
+  const t = useTranslations("hero")
+  const tc = useTranslations("gallery")
+  const { ref, width } = useMeasuredWidth<HTMLDivElement>()
+  const h = Math.round(width * DEMO_PASS_RATIO)
+  return (
+    <div className="absolute inset-0">
+      <div className="absolute inset-0" style={{ background: SCREEN_BG }} />
+      <p className="absolute inset-x-0 top-12 text-center text-[13px] font-semibold" style={{ color: INK }}>{t("film.walletTitle")}</p>
+      <div ref={ref} style={{ left: PASS_INSET, right: PASS_INSET, top: `calc(var(--phone-w) * ${PASS_TOP})` }} className="absolute">
+        {width > 0 && (
+          <WalletPassRenderer
+            design={DEMO_COUPON_DESIGN}
+            format="apple"
+            compact
+            width={width}
+            height={h}
+            logoUrl={DEMO_PASS_LOGO}
+            organizationName={t("card.business")}
+            programName={tc("coupon.name")}
+            customerName={t("card.customer")}
+            discountText={tc("coupon.offer")}
+            validUntil={tc("coupon.validUntil")}
+            couponCode={tc("coupon.code")}
+            style={{ boxShadow: "0 14px 34px oklch(0 0 0 / 0.22)" }}
+          />
+        )}
+      </div>
+    </div>
   )
 }
 

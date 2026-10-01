@@ -94,7 +94,15 @@
       "playStore": "Disponible sur Google Play",
       "appAlt": "L'app de l'équipe : recherche client, nouveau client, récompenses, partager un programme, message et dernière activité",
       "walletTitle": "Wallet",
-      "chapters": "Chapitres"
+      "chapters": "Chapitres",
+      "ch5": {
+        "title": "La carte, de près.",
+        "caption": "Un tampon par visite. Au nombre que vous fixez, la récompense apparaît d'elle-même."
+      },
+      "ch6": {
+        "title": "Le coupon.",
+        "caption": "Une remise ou un cadeau avec une date. À usage unique ou autant de fois que vous voulez."
+      }
     }
   },
   "featureShowcase": {

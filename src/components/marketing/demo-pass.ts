@@ -54,3 +54,14 @@ export const DEMO_PASS_LOGO =
 
 export const DEMO_PASS_TOTAL = 5
 export const DEMO_PASS_STAMPS = 4
+
+/** The other side of the card: the same business, a coupon. */
+export const DEMO_COUPON_DESIGN: WalletPassDesign = {
+  ...DEMO_PASS_DESIGN,
+  cardType: "COUPON",
+  useStampGrid: false,
+  fields: ["organization", "discount", "validUntil", "couponCode", "customerName"],
+}
+
+/** The Apple pass's proportions (320 × 450). */
+export const DEMO_PASS_RATIO = 450 / 320

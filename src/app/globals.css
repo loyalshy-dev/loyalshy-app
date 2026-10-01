@@ -532,6 +532,21 @@
   .mk-film-map { width: calc(var(--pw) * 1.55); }
 }
 
+/* The stamp card in the film: a stamp lands when its slot fills. */
+@keyframes mk-stamp-land {
+  0%   { transform: scale(1.6); opacity: 0; }
+  60%  { transform: scale(0.94); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.mk-film-pass [data-slot-state="filled"],
+.mk-film-pass [data-slot-state="reward-filled"] {
+  animation: mk-stamp-land 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-film-pass [data-slot-state="filled"],
+  .mk-film-pass [data-slot-state="reward-filled"] { animation: none; }
+}
+
 /* ─── Global bar and footer, in the Apple manner ───────────────────── */
 .mk-nav-bar {
   height: 44px;

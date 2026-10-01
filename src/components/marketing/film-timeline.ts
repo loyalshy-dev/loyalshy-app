@@ -5,7 +5,10 @@
 //   Fade  = [inStart, inEnd, outStart, outEnd]  → opacity 0, 1, 1, 0
 //   Move  = [start, end]                         → a value travelling once
 //
-// Chapters are separated by a ~4% breath where only the phone is on screen.
+// Six chapters: the four about the customer and the team take the first
+// ~64% of the film at the pace they always had; the card's anatomy (stamp
+// card, then coupon) takes the rest. Chapters are separated by a short
+// breath where only the phone is on screen.
 
 export type Fade = readonly [number, number, number, number]
 export type Move = readonly [number, number]
@@ -13,11 +16,10 @@ export type Move = readonly [number, number]
 export type Keyframes = { keys: readonly number[]; values: readonly number[] }
 
 /** How long the stage stays pinned, in viewport heights. The story plays
- *  over (PIN_VH − 100)vh of scroll, so 680 gives ~5.8 screens; the push-ins
- *  carry the drama, so the film needs less scroll than it used to. Each
- *  notification still holds ~7% of the film (~360px at 900px tall). Raise
- *  it to slow the film down, lower to speed up. */
-export const PIN_VH = 680
+ *  over (PIN_VH − 100)vh of scroll, so 1000 gives nine screens for six
+ *  chapters; each notification still holds ~4.5% of the film (~360px at
+ *  900px tall). Raise it to slow the film down, lower to speed up. */
+export const PIN_VH = 1000
 
 export const FILM = {
   /** The opening: the phone fills the fold at 1.5× and pulls back to its
@@ -26,103 +28,140 @@ export const FILM = {
    *  from the viewport height) and settles to the centre over the same
    *  window. */
   intro: {
-    fade: [0, 0, 0, 0.07] as Fade,
-    pullBack: [0, 0.12] as Move,
+    fade: [0, 0, 0, 0.045] as Fade,
+    pullBack: [0, 0.077] as Move,
   },
 
   /** 1. The counter QR is scanned, the pass slides into Wallet. */
   ch1: {
-    caption: [0.07, 0.14, 0.31, 0.37] as Fade,
-    captionLag: 0.02,
+    caption: [0.045, 0.09, 0.2, 0.238] as Fade,
+    captionLag: 0.013,
     /** Where the rail lands a jump to this chapter. */
-    landAt: 0.14,
-    camera: [0.06, 0.12, 0.2, 0.26] as Fade,
-    scanFrame: [0.1, 0.2] as Move,
-    wallet: [0.2, 0.26, 0.33, 0.38] as Fade,
-    passRise: [0.22, 0.34] as Move,
-    buttons: [0.26, 0.31, 0.33, 0.38] as Fade,
-    buttonsRise: [0.26, 0.32] as Move,
+    landAt: 0.09,
+    camera: [0.039, 0.058, 0.129, 0.167] as Fade,
+    scanFrame: [0.064, 0.129] as Move,
+    wallet: [0.129, 0.167, 0.213, 0.245] as Fade,
+    passRise: [0.142, 0.219] as Move,
+    buttons: [0.167, 0.2, 0.213, 0.245] as Fade,
+    buttonsRise: [0.167, 0.206] as Move,
   },
 
   /** 2. Lock screen; a customer walks into the geofence, the banner drops. */
   ch2: {
-    caption: [0.43, 0.5, 0.66, 0.71] as Fade,
-    captionLag: 0.035,
-    landAt: 0.5,
-    map: [0.42, 0.5, 0.66, 0.7] as Fade,
-    mapRise: [0.42, 0.54] as Move,
-    walk: [0.44, 0.54] as Move,
-    pulse: [0.53, 0.6] as Move,
-    banner: [0.55, 0.59, 0.66, 0.7] as Fade,
-    bannerDrop: [0.55, 0.6] as Move,
+    caption: [0.277, 0.322, 0.425, 0.457] as Fade,
+    captionLag: 0.023,
+    landAt: 0.322,
+    map: [0.27, 0.322, 0.425, 0.451] as Fade,
+    mapRise: [0.27, 0.348] as Move,
+    walk: [0.283, 0.348] as Move,
+    pulse: [0.341, 0.386] as Move,
+    banner: [0.354, 0.38, 0.425, 0.451] as Fade,
+    bannerDrop: [0.354, 0.386] as Move,
   },
 
   /** 3. The owner writes a notice; it flies to the phone and lands. */
   ch3: {
-    caption: [0.75, 0.81, 0.92, 0.96] as Fade,
-    captionLag: 0.02,
-    landAt: 0.81,
-    card: [0.74, 0.79, 0.92, 0.95] as Fade,
-    cardSlide: [0.74, 0.78] as Move,
-    message: [0.775, 0.79, 0.81, 0.825] as Fade,
-    flight: [0.78, 0.82] as Move,
-    banner: [0.82, 0.85, 0.92, 0.95] as Fade,
-    bannerDrop: [0.82, 0.86] as Move,
-    crowd: [0.83, 0.87, 0.92, 0.95] as Fade,
-    crowdSpread: [0.83, 0.88] as Move,
+    caption: [0.483, 0.522, 0.592, 0.618] as Fade,
+    captionLag: 0.013,
+    landAt: 0.522,
+    card: [0.477, 0.509, 0.592, 0.612] as Fade,
+    cardSlide: [0.477, 0.502] as Move,
+    message: [0.499, 0.509, 0.522, 0.531] as Fade,
+    flight: [0.502, 0.528] as Move,
+    banner: [0.528, 0.547, 0.592, 0.612] as Fade,
+    bannerDrop: [0.528, 0.554] as Move,
+    crowd: [0.535, 0.56, 0.592, 0.612] as Fade,
+    crowdSpread: [0.535, 0.567] as Move,
   },
 
-  /** 4. The exit: the team app, store badges, the phone back at the centre. */
+  /** 4. The team app, with the store badges. */
   ch4: {
-    caption: [0.955, 0.98, 1.5, 1.6] as Fade, // never leaves
+    caption: [0.615, 0.63, 0.7, 0.725] as Fade,
+    captionLag: 0.007,
+    landAt: 0.63,
+    app: [0.615, 0.625, 0.7, 0.725] as Fade,
+    appRise: [0.615, 0.628] as Move,
+    badges: [0.625, 0.638, 0.7, 0.725] as Fade,
+    badgesRise: [0.625, 0.638] as Move,
+  },
+
+  /** 5. The stamp card, up close: it rises into Wallet, the stamps land
+   *  one by one with the scroll, the reward lights up, and its parts are
+   *  called out. */
+  ch5: {
+    caption: [0.715, 0.745, 0.86, 0.885] as Fade,
+    captionLag: 0.013,
+    landAt: 0.745,
+    wallet: [0.70, 0.725, 1.5, 1.6] as Fade, // the screen stays through ch6
+    passRise: [0.705, 0.745] as Move,
+    /** `visits` 0 → 5 over this window: four stamps, then the reward. */
+    stamps: [0.755, 0.805] as Move,
+    calloutsFrom: 0.805,
+    calloutStep: 0.011,
+    /** The card turns over into the coupon. */
+    flipOut: [0.875, 0.895] as Move,
+  },
+
+  /** 6. The coupon: the other side of the card, and the film's last frame. */
+  ch6: {
+    caption: [0.885, 0.91, 1.5, 1.6] as Fade, // never leaves
     captionLag: 0.01,
-    landAt: 0.98,
-    app: [0.955, 0.97, 1.5, 1.6] as Fade,
-    appRise: [0.955, 0.975] as Move,
-    badges: [0.97, 0.99, 1.5, 1.6] as Fade,
-    badgesRise: [0.97, 0.99] as Move,
+    landAt: 0.91,
+    flipIn: [0.895, 0.915] as Move,
+    calloutsFrom: 0.915,
+    calloutStep: 0.011,
   },
 
   /** The lock screen is under everything in the intro, chapter 2 and 3. */
   lock: {
-    opacity: { keys: [0, 0.06, 0.12, 0.34, 0.38, 0.94, 0.96], values: [1, 1, 0, 0, 1, 1, 0] } as Keyframes,
+    opacity: { keys: [0, 0.039, 0.077, 0.219, 0.245, 0.605, 0.618], values: [1, 1, 0, 0, 1, 1, 0] } as Keyframes,
     /** When the status bar reads white-on-dark. */
-    isOn: (p: number) => p < 0.09 || (p > 0.36 && p < 0.95),
+    isOn: (p: number) => p < 0.058 || (p > 0.232 && p < 0.612),
   },
 
   /** The phone as an object: rotation under 20°, the camera's zoom, and on
    *  desktop a slide to the right of the stage whenever a caption or a card
-   *  needs the left. */
+   *  needs the left; it comes back to the centre for the card chapters. */
   phone: {
-    rotateY: { keys: [0, 0.08, 0.24, 0.38, 0.46, 0.7, 0.76, 0.96, 1], values: [0, -18, 0, 0, 12, 12, 0, 0, 0] } as Keyframes,
-    rotateX: { keys: [0, 0.24, 0.46, 0.76, 0.96], values: [0, 4, -3, 0, 0] } as Keyframes,
+    rotateY: { keys: [0, 0.052, 0.155, 0.245, 0.296, 0.451, 0.49, 0.618, 0.644], values: [0, -18, 0, 0, 12, 12, 0, 0, 0] } as Keyframes,
+    rotateX: { keys: [0, 0.155, 0.296, 0.49, 0.618], values: [0, 4, -3, 0, 0] } as Keyframes,
     /** The camera. Wide at the open (1.5×, pulling back over the intro),
      *  then a push-in on each chapter's climax — the pass in Wallet, the
      *  proximity banner, the announcement, the app — and wide again for the
-     *  transitions. Chapter 3 stays a touch smaller so the crowd shows. */
+     *  transitions. Chapter 3 stays a touch smaller so the crowd shows. The
+     *  card chapters hold a close-up so the pass reads. */
     zoom: {
-      keys: [0, 0.12, 0.2, 0.26, 0.33, 0.38, 0.55, 0.59, 0.66, 0.7, 0.76, 0.82, 0.86, 0.92, 0.95, 0.97, 1],
-      values: [1.5, 1, 1, 1.25, 1.25, 1, 1, 1.22, 1.22, 1, 0.94, 0.94, 1.12, 1.12, 0.96, 1.1, 1.1],
+      keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.354, 0.38, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 1],
+      values: [1.5, 1, 1, 1.25, 1.25, 1, 1, 1.22, 1.22, 1, 0.94, 0.94, 1.12, 1.12, 0.96, 1.1, 1.1, 1.3, 1.3],
     } as Keyframes,
     /** Phones: a smaller open and gentler push-ins (the captions sit right
      *  under the phone). */
     zoomNarrow: {
-      keys: [0, 0.12, 0.2, 0.26, 0.33, 0.38, 0.55, 0.59, 0.66, 0.7, 0.76, 0.82, 0.86, 0.92, 0.95, 0.97, 1],
-      values: [1.3, 1, 1, 1.1, 1.1, 1, 1, 1.1, 1.1, 1, 1, 1, 1.08, 1.08, 1, 1.05, 1.05],
+      keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.354, 0.38, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 1],
+      values: [1.3, 1, 1, 1.1, 1.1, 1, 1, 1.1, 1.1, 1, 1, 1, 1.08, 1.08, 1, 1.05, 1.05, 1.1, 1.1],
     } as Keyframes,
-    /** Background layers drift the other way for depth. */
-    parallax: 40,
     /** x as a function of (shift, side): shift puts the phone right of the
-     *  captions, side moves it a little further when a card sits beside it. */
-    x: { keys: [0, 0.1, 0.26, 0.38, 0.46, 0.7, 0.76, 0.94, 0.99], values: (shift: number, side: number) => [0, shift, shift + side, shift + side, shift - 30, shift - 30, shift + side, shift + side, shift] },
+     *  captions, side moves it a little further when a card sits beside it;
+     *  0 is the centre, where the card chapters play. */
+    x: {
+      keys: [0, 0.064, 0.167, 0.245, 0.296, 0.451, 0.49, 0.605, 0.638, 0.7, 0.745, 1],
+      values: (shift: number, side: number) => [0, shift, shift + side, shift + side, shift - 30, shift - 30, shift + side, shift + side, shift, shift, 0, 0],
+    },
     shift: 240,
     side: 56,
+    /** Background layers drift the other way for depth. */
+    parallax: 40,
   },
 
   /** Where "Try it" links land: chapter 1 with the pass in Wallet. */
-  tryDemoAt: 0.3,
+  tryDemoAt: 0.193,
+  /** Where "Cards" links land, and from where the nav marks them on. */
+  cardsAt: 0.745,
 
-  /** Which chapter is on, for the live region. */
-  chapterAt: (p: number): "ch1" | "ch2" | "ch3" | "ch4" | null =>
-    p < 0.08 ? null : p < 0.4 ? "ch1" : p < 0.73 ? "ch2" : p < 0.96 ? "ch3" : "ch4",
+  /** Which chapter is on, for the live region and the rail. */
+  chapterAt: (p: number): "ch1" | "ch2" | "ch3" | "ch4" | "ch5" | "ch6" | null =>
+    p < 0.052 ? null : p < 0.258 ? "ch1" : p < 0.47 ? "ch2" : p < 0.615 ? "ch3" : p < 0.715 ? "ch4" : p < 0.885 ? "ch5" : "ch6",
 } as const
+
+export const CHAPTERS = ["ch1", "ch2", "ch3", "ch4", "ch5", "ch6"] as const
+export type Chapter = (typeof CHAPTERS)[number]

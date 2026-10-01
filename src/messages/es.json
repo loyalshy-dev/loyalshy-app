@@ -94,7 +94,15 @@
       "playStore": "Disponible en Google Play",
       "appAlt": "La app del equipo: buscar cliente, nuevo cliente, recompensas, compartir programa, aviso y la última actividad",
       "walletTitle": "Wallet",
-      "chapters": "Capítulos"
+      "chapters": "Capítulos",
+      "ch5": {
+        "title": "La tarjeta, por dentro.",
+        "caption": "Un sello por visita. Al llegar al número que fijes, la recompensa aparece sola."
+      },
+      "ch6": {
+        "title": "El cupón.",
+        "caption": "Un descuento o un regalo con fecha. De un solo uso o de los que quieras."
+      }
     }
   },
   "featureShowcase": {

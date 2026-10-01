@@ -3,16 +3,18 @@
 import { useCallback, useRef, useState } from "react"
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react"
 import { useTranslations } from "next-intl"
-import { FILM, PIN_VH } from "./film-timeline"
+import { CHAPTERS, FILM, PIN_VH, type Chapter } from "./film-timeline"
 import { useCaption, useFade, useMove, useVisibility } from "./film-hooks"
-import { AppIcon, AppScreen, BANNERS, CameraScreen, LockNotification, LockScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
+import { CalloutLines, CalloutList, COUPON_PARTS, STAMP_PARTS } from "./film-callouts"
+import { AppIcon, AppScreen, BANNERS, CameraScreen, CouponFrame, LockNotification, LockScreen, PASS_TOP, PassScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
 import { FilmRail } from "./film-rail"
 import { MapScene } from "./map-scene"
+import { DEMO_PASS_RATIO } from "./demo-pass"
 import { PhoneFrame } from "./phone-frame"
 import { INK, SPRING_HEAVY, SPRING_LIGHT } from "./tokens"
 import { useMediaQuery } from "./use-media-query"
 
-// The hero film: one phone, four chapters, scroll as the only clock. The
+// The hero film: one phone, six chapters, scroll as the only clock. The
 // phone fills the fold at the open and pulls back as the first scroll
 // happens; the camera then pushes in on each chapter's climax (see
 // `FILM.phone.zoom`). A rail on the left axis names the chapters and jumps.
@@ -23,7 +25,11 @@ import { useMediaQuery } from "./use-media-query"
 //   3. Reach them all with one message — the owner writes the notice in the
 //      dashboard, it flies to the phone and lands as a notification, two
 //      faint phones behind say it reached everyone.
-//   4. The exit — the phone's screen becomes the team app, store badges.
+//   4. The team app — the phone's screen becomes the app, store badges.
+//   5. The stamp card, up close — the phone returns to the centre, the
+//      demo card rises into Wallet, the stamps land with the scroll, the
+//      reward lights up, and its parts are called out.
+//   6. The coupon — the card turns over; its parts; the film's last frame.
 // Every moment is a named window in `film-timeline.ts`; the screens are in
 // `film-screens.tsx`. Only transform and opacity animate. Rotation stays
 // under 20° so the screen stays legible. Reduced motion gets static frames.
@@ -33,9 +39,6 @@ import { useMediaQuery } from "./use-media-query"
 // first client paint agree and the captions always start under the phone.
 // `narrow` (a client-only media query) only drives motion values that are
 // invisible at scroll 0, so the hydration swap never shows.
-
-const CHAPTERS = ["ch1", "ch2", "ch3", "ch4"] as const
-type Chapter = (typeof CHAPTERS)[number]
 
 type FilmProps = { demoUrl?: string; appStoreUrl: string; playStoreUrl: string }
 
@@ -110,12 +113,30 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const crowdLeft = useTransform(crowdSpread, (v) => -110 * v)
   const crowdRight = useTransform(crowdSpread, (v) => 110 * v)
 
-  // The exit
+  // Chapter 4: the team app
   const appOpacity = useFade(p, FILM.ch4.app)
   const appY = useMove(p, FILM.ch4.appRise, 320, 0, SPRING_HEAVY)
   const badgesOpacity = useFade(p, FILM.ch4.badges)
   const badgesY = useMove(p, FILM.ch4.badgesRise, 16, 0)
   const badgesVisibility = useVisibility(badgesOpacity)
+
+  // Chapters 5–6: the card in Wallet, filling with the scroll, then turned
+  // over into the coupon. The callouts are drawn in the phone's own
+  // coordinate space (unscaled 300px wide on desktop).
+  const passOpacity = useFade(p, FILM.ch5.wallet)
+  const pass2Y = useMove(p, FILM.ch5.passRise, 380, 0, SPRING_HEAVY)
+  const visits = useTransform(p, [...FILM.ch5.stamps], [0, 5])
+  const stampRotate = useSpring(useTransform(p, [FILM.ch5.flipOut[0], FILM.ch5.flipOut[1]], [0, -90]), SPRING_HEAVY)
+  const stampVis = useTransform(p, [FILM.ch5.flipOut[1] - 0.004, FILM.ch5.flipOut[1]], [1, 0])
+  const couponRotate = useSpring(useTransform(p, [...FILM.ch6.flipIn], [90, 0]), SPRING_HEAVY)
+  const couponVis = useTransform(p, [FILM.ch5.flipOut[1] - 0.004, FILM.ch5.flipOut[1]], [0, 1])
+  const phoneW = 300
+  const band = Math.max(2, phoneW * 0.012)
+  const bezel = phoneW * 0.03
+  const screenX = band + bezel
+  const screenW = phoneW - 2 * screenX
+  const cardW = screenW - 24
+  const cardBox = { x: screenX + 12, y: screenX + phoneW * PASS_TOP, w: cardW, h: cardW * DEMO_PASS_RATIO }
 
   // Captions
   const captions: Record<Chapter, ReturnType<typeof useCaption>> = {
@@ -123,6 +144,8 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
     ch2: useCaption(p, FILM.ch2.caption, FILM.ch2.captionLag),
     ch3: useCaption(p, FILM.ch3.caption, FILM.ch3.captionLag),
     ch4: useCaption(p, FILM.ch4.caption, FILM.ch4.captionLag),
+    ch5: useCaption(p, FILM.ch5.caption, FILM.ch5.captionLag),
+    ch6: useCaption(p, FILM.ch6.caption, FILM.ch6.captionLag),
   }
   const intro = useFade(p, FILM.intro.fade)
   const introVisibility = useVisibility(intro)
@@ -169,6 +192,8 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
           <div className="mk-film-captions">
             {CHAPTERS.map((key) => {
               const c = captions[key]
+              // Chapters 5–6 play with the phone at the centre: narrower captions.
+              const centred = key === "ch5" || key === "ch6"
               return (
                 <motion.div key={key} style={{ visibility: c.visibility }} className="absolute inset-x-0 top-0 text-center lg:text-left">
                   {key === "ch4" && (
@@ -176,11 +201,11 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                       <AppIcon className="size-12 rounded-[11px] lg:size-16 lg:rounded-[15px]" />
                     </motion.div>
                   )}
-                  <motion.h2 style={{ opacity: c.title.o, y: c.title.y }} className="font-display mk-display-2 lg:max-w-[14ch]">
+                  <motion.h2 style={{ opacity: c.title.o, y: c.title.y }} className={centred ? "font-display mk-display-2 lg:max-w-[10ch]" : "font-display mk-display-2 lg:max-w-[14ch]"}>
                     <span style={{ color: "var(--mk-text)" }}>{t(`film.${key}.title`)}</span>
                   </motion.h2>
                   {key !== "ch2" && (
-                    <motion.p style={{ opacity: c.body.o, y: c.body.y }} className="mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4">
+                    <motion.p style={{ opacity: c.body.o, y: c.body.y }} className={centred ? "mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4 lg:max-w-[26ch]" : "mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4"}>
                       {t(`film.${key}.caption`)}
                     </motion.p>
                   )}
@@ -194,6 +219,8 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                       <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} align="left" />
                     </motion.div>
                   )}
+                  {key === "ch5" && <CalloutList p={p} parts={STAMP_PARTS} from={FILM.ch5.calloutsFrom} step={FILM.ch5.calloutStep} ns="stamp" />}
+                  {key === "ch6" && <CalloutList p={p} parts={COUPON_PARTS} from={FILM.ch6.calloutsFrom} step={FILM.ch6.calloutStep} ns="coupon" />}
                 </motion.div>
               )
             })}
@@ -261,13 +288,20 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                 <CameraScreen opacity={cameraOpacity} scanFrame={scanFrame} />
                 <WalletScreen opacity={walletOpacity} passY={passY} />
                 <AppScreen opacity={appOpacity} y={appY} />
+                <PassScreen opacity={passOpacity} passY={pass2Y} visits={visits} stampRotate={stampRotate} stampVis={stampVis} couponRotate={couponRotate} couponVis={couponVis} />
               </PhoneFrame>
+              {/* The card's parts, beside the phone (desktop) */}
+              <CalloutLines p={p} parts={STAMP_PARTS} from={FILM.ch5.calloutsFrom} step={FILM.ch5.calloutStep} card={cardBox} phoneW={phoneW} ns="stamp" opacity={stampVis} />
+              <CalloutLines p={p} parts={COUPON_PARTS} from={FILM.ch6.calloutsFrom} step={FILM.ch6.calloutStep} card={cardBox} phoneW={phoneW} ns="coupon" opacity={couponVis} />
             </motion.div>
           </motion.div>
         </div>
       </div>
-      {/* "Try it" links land on chapter 1, with the pass in Wallet and the buttons up */}
+      {/* "Try it" links land on chapter 1, with the pass in Wallet and the buttons up;
+          "Cards" links land on chapter 5, and that anchor spans the card chapters
+          so the nav marks it while they play. */}
       <div id="try-demo" aria-hidden="true" className="absolute h-px w-full" style={{ top: `${(PIN_VH - 100) * FILM.tryDemoAt}vh` }} />
+      <div id="cards" aria-hidden="true" className="pointer-events-none absolute w-full" style={{ top: `${(PIN_VH - 100) * FILM.cardsAt}vh`, height: `${(PIN_VH - 100) * (1 - FILM.cardsAt) + 100}vh` }} />
     </div>
   )
 }
@@ -302,9 +336,11 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
       ),
     },
     { key: "ch4", dark: false, screen: <AppScreen alt={t("film.appAlt")} sizes="230px" /> },
+    { key: "ch5", dark: false, screen: <PassScreen fixedVisits={4} /> },
+    { key: "ch6", dark: false, screen: <CouponFrame /> },
   ]
   return (
-    <div className="mk-wrap grid grid-cols-1 gap-12 py-16 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+    <div className="mk-wrap grid grid-cols-1 gap-12 py-16 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
       {frames.map((f) => (
         <figure key={f.key} className="flex flex-col items-center gap-5 text-center">
           <PhoneFrame width={w} screenBackground={SCREEN_BG} statusColor={f.dark ? "#fff" : INK}>{f.screen}</PhoneFrame>
@@ -315,11 +351,11 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
         </figure>
       ))}
       {demoUrl && (
-        <div id="try-demo" className="flex flex-col items-center text-center md:col-span-2 lg:col-span-4">
+        <div id="try-demo" className="flex flex-col items-center text-center md:col-span-2 lg:col-span-3">
           <WalletButtons demoUrl={demoUrl} align="center" />
         </div>
       )}
-      <div className="flex flex-col items-center gap-4 text-center md:col-span-2 lg:col-span-4">
+      <div className="flex flex-col items-center gap-4 text-center md:col-span-2 lg:col-span-3">
         <AppIcon className="size-16 rounded-[15px]" />
         <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} align="center" />
       </div>

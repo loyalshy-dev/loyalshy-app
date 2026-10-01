@@ -3,17 +3,15 @@
 import { useState } from "react"
 import { useMotionValueEvent, type MotionValue } from "motion/react"
 import { useTranslations } from "next-intl"
-import { FILM } from "./film-timeline"
+import { CHAPTERS, FILM, type Chapter } from "./film-timeline"
 
 // The film's progress rail: one dot per chapter on the left axis, the
 // current one in ink, each a button that scrolls the page to that chapter.
 // It is the one way to skip ahead without leaving the film.
 
-const CHAPTERS = ["ch1", "ch2", "ch3", "ch4"] as const
-
 export function FilmRail({ p, scrollTo }: { p: MotionValue<number>; scrollTo: (progress: number) => void }) {
   const t = useTranslations("hero")
-  const [current, setCurrent] = useState<(typeof CHAPTERS)[number] | null>(null)
+  const [current, setCurrent] = useState<Chapter | null>(null)
   useMotionValueEvent(p, "change", (v) => {
     const next = FILM.chapterAt(v)
     if (next !== current) setCurrent(next)

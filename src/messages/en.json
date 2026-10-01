@@ -94,7 +94,15 @@
       "playStore": "Get it on Google Play",
       "appAlt": "The team app: find a customer, new customer, rewards, share a program, notice, and latest activity",
       "walletTitle": "Wallet",
-      "chapters": "Chapters"
+      "chapters": "Chapters",
+      "ch5": {
+        "title": "The card, up close.",
+        "caption": "One stamp per visit. When they reach the number you set, the reward appears by itself."
+      },
+      "ch6": {
+        "title": "The coupon.",
+        "caption": "A discount or a gift with an end date. Single use or as many as you like."
+      }
     }
   },
   "featureShowcase": {
