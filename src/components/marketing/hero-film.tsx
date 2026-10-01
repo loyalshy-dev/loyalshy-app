@@ -60,7 +60,10 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   // origin flips once the pull-back has settled at 1 — at scale 1 the
   // origin has no effect, so the flip is invisible.
   const transformOrigin = useTransform([p, scale], ([v, sc]: number[]) => (v < 0.2 && sc > 1.001 ? "50% 0%" : "50% 50%"))
-  const lift = useMove(p, FILM.intro.pullBack, narrow ? 0 : FILM.intro.lift, 0, SPRING_HEAVY)
+  // The open's lift is a CSS length (`--lift`, from the viewport height);
+  // the spring only drives how much of it applies, 1 → 0 over the pull-back.
+  const liftK = useMove(p, FILM.intro.pullBack, 1, 0, SPRING_HEAVY)
+  const lift = useTransform(liftK, (k) => `calc(var(--lift, 0px) * ${k.toFixed(4)})`)
   // Background layers drift the other way for depth.
   const parallax = useTransform(p, [0, 1], [phone.parallax, -phone.parallax])
   const x = useSpring(useTransform(p, [...phone.x.keys], narrow ? phone.x.values(0, 0) : phone.x.values(phone.shift, phone.side)), SPRING_HEAVY)

@@ -21,13 +21,13 @@ export const PIN_VH = 680
 
 export const FILM = {
   /** The opening: the phone fills the fold at 1.5× and pulls back to its
-   *  stage size as the first scroll happens; "keep scrolling" on phones. */
+   *  stage size as the first scroll happens; "keep scrolling" on phones.
+   *  On desktop it also sits higher at the open (`--lift`, computed in CSS
+   *  from the viewport height) and settles to the centre over the same
+   *  window. */
   intro: {
     fade: [0, 0, 0, 0.07] as Fade,
     pullBack: [0, 0.12] as Move,
-    /** Desktop: the phone sits a little higher at the open so its top meets
-     *  the hero's last line. */
-    lift: -96,
   },
 
   /** 1. The counter QR is scanned, the pass slides into Wallet. */

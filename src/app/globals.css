@@ -500,6 +500,11 @@
    for the push-in. Desktop: 300px, captions on the left axis. */
 .mk-film {
   --pw: min(230px, calc((100svh - var(--mk-bar-h, 44px) - 14rem) / 2.07));
+  /* How far the phone sits above its centred stage position at the open,
+     so its top edge lands 12px inside the stage whatever the viewport
+     height (the phone is 2.07 × its width tall). Phones anchor the phone
+     at the top already. */
+  --lift: 0px;
 }
 .mk-film-captions {
   position: absolute;
@@ -513,7 +518,10 @@
   height: calc(var(--pw) * 0.84 * 1.86);
 }
 @media (min-width: 1024px) {
-  .mk-film { --pw: 300px; }
+  .mk-film {
+    --pw: 300px;
+    --lift: min(0px, calc(12px - ((100svh - var(--mk-bar-h, 48px)) - var(--pw) * 2.07) / 2));
+  }
   .mk-film-captions {
     left: 2.5rem;
     right: auto;
