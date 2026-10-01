@@ -40,7 +40,7 @@
     "dashboard": "El panel"
   },
   "hero": {
-    "subtitle": "Sin app, sin cuenta y sin papel. La tarjeta se guarda en Apple Wallet o Google Wallet.",
+    "subtitle": "Tarjetas de sellos y cupones que tus clientes guardan en Apple Wallet o Google Wallet. Sin app, sin cuenta y sin papel.",
     "seeHowItWorks": "Ver cómo funciona",
     "title": "Fideliza a tus clientes ocasionales.",
     "tryInWallet": "Pruébala en tu Wallet",
@@ -64,7 +64,7 @@
       },
       "passAlt": "Tarjeta de sellos real de un cliente en Apple Wallet: seis de siete sellos, próxima recompensa un corte gratis"
     },
-    "tagline": "Tarjetas de sellos y cupones.",
+    "tagline": "La tarjeta de fidelización digital, en Apple y Google Wallet.",
     "film": {
       "scroll": "Sigue bajando.",
       "camera": "Cámara",
@@ -125,7 +125,7 @@
     "lead": "Quién vuelve y cuándo, de un vistazo. Y todo lo que necesitas para llevar el programa."
   },
   "gallery": {
-    "title": "La tarjeta, por dentro.",
+    "title": "La tarjeta de fidelización, por dentro.",
     "stamp": {
       "name": "Tarjeta de sellos.",
       "lead": "Un sello por visita. Al llegar al número que fijes, la recompensa aparece sola.",
@@ -208,7 +208,7 @@
     "items": {
       "howWorks": {
         "question": "¿Cómo funciona Loyalshy?",
-        "answer": "Diseñas tu tarjeta de sellos o tu cupón en el panel e imprimes el QR. Tus clientes lo escanean y la tarjeta se guarda en su Apple o Google Wallet. Cuando vuelven, tu equipo escanea la tarjeta con la app de Loyalshy y suma el sello. Al completar la tarjeta, la recompensa aparece sola."
+        "answer": "Loyalshy es una tarjeta de fidelización digital para cafeterías, peluquerías y comercios. Diseñas tu tarjeta de sellos o tu cupón en el panel e imprimes el QR. Tus clientes lo escanean y la tarjeta se guarda en su Apple o Google Wallet. Cuando vuelven, tu equipo escanea la tarjeta con la app de Loyalshy y suma el sello. Al completar la tarjeta, la recompensa aparece sola."
       },
       "paper": {
         "question": "¿En qué cambia respecto a la tarjeta de papel?",

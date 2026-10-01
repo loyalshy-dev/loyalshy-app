@@ -36,7 +36,13 @@ export function FAQ() {
                 >
                   {t(`items.${key}.question`)}
                 </AccordionTrigger>
-                <AccordionContent className="max-w-[65ch] pb-6 mk-body" style={{ color: "var(--mk-text-muted)" }}>
+                {/* forceMount keeps every answer in the server HTML for crawlers;
+                    closed answers are hidden with CSS instead of unmounted. */}
+                <AccordionContent
+                  forceMount
+                  className="max-w-[65ch] pb-6 mk-body in-data-[state=closed]:hidden"
+                  style={{ color: "var(--mk-text-muted)" }}
+                >
                   {t(`items.${key}.answer`)}
                 </AccordionContent>
               </AccordionItem>

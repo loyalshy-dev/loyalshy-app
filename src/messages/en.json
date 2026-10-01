@@ -40,7 +40,7 @@
     "dashboard": "Dashboard"
   },
   "hero": {
-    "subtitle": "No app, no account, no paper. The card saves to Apple Wallet or Google Wallet.",
+    "subtitle": "Stamp cards and coupons your customers save to Apple Wallet or Google Wallet. No app, no account, no paper.",
     "seeHowItWorks": "See how it works",
     "title": "Turn occasional customers into regulars.",
     "tryInWallet": "Try it in your Wallet",
@@ -64,7 +64,7 @@
       },
       "passAlt": "A real customer's stamp card in Apple Wallet: six of seven stamps, next reward a free haircut"
     },
-    "tagline": "Stamp cards and coupons.",
+    "tagline": "The digital loyalty card, in Apple and Google Wallet.",
     "film": {
       "scroll": "Keep scrolling.",
       "camera": "Camera",
@@ -125,7 +125,7 @@
     "lead": "Who comes back, and when, at a glance. And everything you need to run the program."
   },
   "gallery": {
-    "title": "The card, up close.",
+    "title": "The loyalty card, up close.",
     "stamp": {
       "name": "Stamp card.",
       "lead": "One stamp per visit. When they reach the number you set, the reward appears by itself.",
@@ -208,7 +208,7 @@
     "items": {
       "howWorks": {
         "question": "How does Loyalshy work?",
-        "answer": "You design your stamp card or coupon in the dashboard and print the QR code. Your customers scan it and the card saves to their Apple or Google Wallet. When they come back, your team scans the card with the Loyalshy app and adds the stamp. When the card is full, the reward shows up by itself."
+        "answer": "Loyalshy is a digital loyalty card for cafés, salons and small shops. You design your stamp card or coupon in the dashboard and print the QR code. Your customers scan it and the card saves to their Apple or Google Wallet. When they come back, your team scans the card with the Loyalshy app and adds the stamp. When the card is full, the reward shows up by itself."
       },
       "paper": {
         "question": "How is it different from the paper card?",

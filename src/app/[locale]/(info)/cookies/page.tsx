@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { getTranslations, setRequestLocale } from "next-intl/server"
 import type { Locale } from "@/i18n/config"
-import { localePath, marketingAlternates } from "@/i18n/marketing"
+import { localePath, marketingAlternates, marketingSocial } from "@/i18n/marketing"
 
 type PageProps = { params: Promise<{ locale: string }> }
 
@@ -14,6 +14,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: t("title"),
     description: t("description"),
     alternates: marketingAlternates(locale, "/cookies"),
+    ...marketingSocial(locale, "/cookies", `${t("title")} — Loyalshy`, t("description")),
     robots: { index: true, follow: true },
   }
 }

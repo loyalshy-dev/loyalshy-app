@@ -40,7 +40,7 @@
     "dashboard": "Tableau de bord"
   },
   "hero": {
-    "subtitle": "Sans app, sans compte et sans papier. La carte s'enregistre dans Apple Wallet ou Google Wallet.",
+    "subtitle": "Cartes à tampons et coupons que vos clients enregistrent dans Apple Wallet ou Google Wallet. Sans app, sans compte et sans papier.",
     "seeHowItWorks": "Voir comment ça marche",
     "title": "Fidélisez vos clients occasionnels.",
     "tryInWallet": "Essayez-la dans votre Wallet",
@@ -64,7 +64,7 @@
       },
       "passAlt": "Vraie carte à tampons d'un client dans Apple Wallet : six tampons sur sept, prochaine récompense une coupe offerte"
     },
-    "tagline": "Cartes à tampons et coupons.",
+    "tagline": "La carte de fidélité digitale, dans Apple et Google Wallet.",
     "film": {
       "scroll": "Continuez à défiler.",
       "camera": "Appareil photo",
@@ -125,7 +125,7 @@
     "lead": "Qui revient, et quand, en un coup d'œil. Et tout ce qu'il faut pour gérer le programme."
   },
   "gallery": {
-    "title": "La carte, de près.",
+    "title": "La carte de fidélité, de près.",
     "stamp": {
       "name": "Carte à tampons.",
       "lead": "Un tampon par visite. Au nombre que vous fixez, la récompense apparaît d'elle-même.",
@@ -208,7 +208,7 @@
     "items": {
       "howWorks": {
         "question": "Comment fonctionne Loyalshy ?",
-        "answer": "Vous créez votre carte à tampons ou votre coupon dans le tableau de bord et vous imprimez le QR code. Vos clients le scannent et la carte s'enregistre dans leur Apple ou Google Wallet. Quand ils reviennent, votre équipe scanne la carte avec l'app Loyalshy et ajoute le tampon. Quand la carte est pleine, la récompense apparaît toute seule."
+        "answer": "Loyalshy est une carte de fidélité digitale pour les cafés, salons et petits commerces. Vous créez votre carte à tampons ou votre coupon dans le tableau de bord et vous imprimez le QR code. Vos clients le scannent et la carte s'enregistre dans leur Apple ou Google Wallet. Quand ils reviennent, votre équipe scanne la carte avec l'app Loyalshy et ajoute le tampon. Quand la carte est pleine, la récompense apparaît toute seule."
       },
       "paper": {
         "question": "Qu'est-ce qui change par rapport à la carte papier ?",
