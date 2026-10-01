@@ -5,7 +5,8 @@ import { localePath } from "@/i18n/marketing"
 import { BrandMark } from "@/components/brand-mark"
 
 // The one coral surface on the page: the app icon's colour, the mark in
-// cream, one sentence, one button.
+// cream, one sentence, one button — and the demo request for whoever wants
+// to be walked through it (the contact form, sales preselected).
 export async function ClosingCTA() {
   const t = await getTranslations("closingCta")
   const tCommon = await getTranslations("common")
@@ -30,10 +31,10 @@ export async function ClosingCTA() {
             {tCommon("getStartedFree")}
           </Link>
           <Link
-            href={localePath(locale, "/contact")}
+            href={`${localePath(locale, "/contact")}?type=sales`}
             className="text-base font-semibold text-white underline-offset-4 hover:underline"
           >
-            {t("talkToUs")}
+            {t("requestDemo")}
           </Link>
         </div>
       </div>
