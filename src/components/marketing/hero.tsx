@@ -8,22 +8,22 @@ const APP_STORE_URL = process.env.NEXT_PUBLIC_APP_STORE_URL || "https://apps.app
 const PLAY_STORE_URL = process.env.NEXT_PUBLIC_PLAY_STORE_URL || "https://play.google.com/store/apps/details?id=com.loyalshy.staff"
 
 // Apple's opener: the name of the thing in two lines, one tagline, the
-// action, and then the film — the product on a pinned stage, driven by scroll.
+// action, and then the film — the phone fills the fold and the story plays
+// on a pinned stage, driven by scroll. The lead lives in the film's captions.
 export async function Hero() {
   const t = await getTranslations("hero")
   const tCommon = await getTranslations("common")
 
   return (
     <section className="relative" style={{ background: "var(--mk-bg)" }}>
-      <div className="mk-wrap flex flex-col items-center pt-14 pb-6 text-center sm:pt-20 lg:pt-24 lg:pb-8">
+      <div className="mk-wrap flex flex-col items-center pt-10 pb-4 text-center sm:pt-14 lg:pt-16 lg:pb-6">
         <h1 className="font-display mk-display-1 max-w-[18ch]" style={{ color: "var(--mk-text)" }}>
           {t("title")}
         </h1>
         <p className="font-display mt-4 text-[1.375rem] font-medium leading-tight tracking-[-0.015em] sm:text-[1.75rem]" style={{ color: "var(--mk-text-muted)" }}>
           {t("tagline")}
         </p>
-        <p className="mk-lead mt-6 hidden max-w-[48ch] lg:block">{t("subtitle")}</p>
-        <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+        <div className="mt-7 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
           <Link href="/register" className="mk-btn-primary px-8! py-4! text-base!">
             {tCommon("getStartedFree")}
           </Link>

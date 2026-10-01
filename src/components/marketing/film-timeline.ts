@@ -13,18 +13,29 @@ export type Move = readonly [number, number]
 export type Keyframes = { keys: readonly number[]; values: readonly number[] }
 
 /** How long the stage stays pinned, in viewport heights. The story plays
- *  over (PIN_VH − 100)vh of scroll, so 880 gives ~7.8 screens. Raise it to
- *  slow the film down, lower to speed up. */
-export const PIN_VH = 880
+ *  over (PIN_VH − 100)vh of scroll, so 680 gives ~5.8 screens; the push-ins
+ *  carry the drama, so the film needs less scroll than it used to. Each
+ *  notification still holds ~7% of the film (~360px at 900px tall). Raise
+ *  it to slow the film down, lower to speed up. */
+export const PIN_VH = 680
 
 export const FILM = {
-  /** "Keep scrolling", under the phone on phones. */
-  intro: { fade: [0, 0, 0, 0.07] as Fade },
+  /** The opening: the phone fills the fold at 1.5× and pulls back to its
+   *  stage size as the first scroll happens; "keep scrolling" on phones. */
+  intro: {
+    fade: [0, 0, 0, 0.07] as Fade,
+    pullBack: [0, 0.12] as Move,
+    /** Desktop: the phone sits a little higher at the open so its top meets
+     *  the hero's last line. */
+    lift: -96,
+  },
 
   /** 1. The counter QR is scanned, the pass slides into Wallet. */
   ch1: {
     caption: [0.07, 0.14, 0.31, 0.37] as Fade,
     captionLag: 0.02,
+    /** Where the rail lands a jump to this chapter. */
+    landAt: 0.14,
     camera: [0.06, 0.12, 0.2, 0.26] as Fade,
     scanFrame: [0.1, 0.2] as Move,
     wallet: [0.2, 0.26, 0.33, 0.38] as Fade,
@@ -37,6 +48,7 @@ export const FILM = {
   ch2: {
     caption: [0.43, 0.5, 0.66, 0.71] as Fade,
     captionLag: 0.035,
+    landAt: 0.5,
     map: [0.42, 0.5, 0.66, 0.7] as Fade,
     mapRise: [0.42, 0.54] as Move,
     walk: [0.44, 0.54] as Move,
@@ -49,6 +61,7 @@ export const FILM = {
   ch3: {
     caption: [0.75, 0.81, 0.92, 0.96] as Fade,
     captionLag: 0.02,
+    landAt: 0.81,
     card: [0.74, 0.79, 0.92, 0.95] as Fade,
     cardSlide: [0.74, 0.78] as Move,
     message: [0.775, 0.79, 0.81, 0.825] as Fade,
@@ -63,6 +76,7 @@ export const FILM = {
   ch4: {
     caption: [0.955, 0.98, 1.5, 1.6] as Fade, // never leaves
     captionLag: 0.01,
+    landAt: 0.98,
     app: [0.955, 0.97, 1.5, 1.6] as Fade,
     appRise: [0.955, 0.975] as Move,
     badges: [0.97, 0.99, 1.5, 1.6] as Fade,
@@ -76,13 +90,28 @@ export const FILM = {
     isOn: (p: number) => p < 0.09 || (p > 0.36 && p < 0.95),
   },
 
-  /** The phone as an object: rotation under 20°, a small scale, and on
+  /** The phone as an object: rotation under 20°, the camera's zoom, and on
    *  desktop a slide to the right of the stage whenever a caption or a card
    *  needs the left. */
   phone: {
     rotateY: { keys: [0, 0.08, 0.24, 0.38, 0.46, 0.7, 0.76, 0.96, 1], values: [0, -18, 0, 0, 12, 12, 0, 0, 0] } as Keyframes,
     rotateX: { keys: [0, 0.24, 0.46, 0.76, 0.96], values: [0, 4, -3, 0, 0] } as Keyframes,
-    scale: { keys: [0, 0.08, 0.24, 0.38, 0.46, 0.7, 0.76, 0.94, 1], values: [1, 1, 1.1, 1.1, 1.04, 1.04, 0.92, 0.92, 0.98] } as Keyframes,
+    /** The camera. Wide at the open (1.5×, pulling back over the intro),
+     *  then a push-in on each chapter's climax — the pass in Wallet, the
+     *  proximity banner, the announcement, the app — and wide again for the
+     *  transitions. Chapter 3 stays a touch smaller so the crowd shows. */
+    zoom: {
+      keys: [0, 0.12, 0.2, 0.26, 0.33, 0.38, 0.55, 0.59, 0.66, 0.7, 0.76, 0.82, 0.86, 0.92, 0.95, 0.97, 1],
+      values: [1.5, 1, 1, 1.25, 1.25, 1, 1, 1.22, 1.22, 1, 0.94, 0.94, 1.12, 1.12, 0.96, 1.1, 1.1],
+    } as Keyframes,
+    /** Phones: a smaller open and gentler push-ins (the captions sit right
+     *  under the phone). */
+    zoomNarrow: {
+      keys: [0, 0.12, 0.2, 0.26, 0.33, 0.38, 0.55, 0.59, 0.66, 0.7, 0.76, 0.82, 0.86, 0.92, 0.95, 0.97, 1],
+      values: [1.3, 1, 1, 1.1, 1.1, 1, 1, 1.1, 1.1, 1, 1, 1, 1.08, 1.08, 1, 1.05, 1.05],
+    } as Keyframes,
+    /** Background layers drift the other way for depth. */
+    parallax: 40,
     /** x as a function of (shift, side): shift puts the phone right of the
      *  captions, side moves it a little further when a card sits beside it. */
     x: { keys: [0, 0.1, 0.26, 0.38, 0.46, 0.7, 0.76, 0.94, 0.99], values: (shift: number, side: number) => [0, shift, shift + side, shift + side, shift - 30, shift - 30, shift + side, shift + side, shift] },

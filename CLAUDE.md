@@ -195,6 +195,7 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
     /marketing      → Landing page components (hero, features, pricing, FAQ, social proof, motion animations)
       tokens.ts       → INK / CORAL literals + the two spring weights shared by every stage
       film-timeline.ts → every moment of the hero film as a named window on scroll progress (edit here to re-time a chapter)
+      film-rail.tsx   → the chapter rail on the left axis (desktop): one dot per chapter, click scrolls to `FILM[ch].landAt`
       film-hooks.ts   → useFade / useMove / useVisibility / useCaption (sprung transforms; visibility follows opacity)
       film-screens.tsx → the phone's screens (lock, camera, Wallet, team app), real banners, Wallet buttons, store badges
       hero-film.tsx   → the pinned film (orchestration only) + reduced-motion frames
@@ -550,6 +551,7 @@ Scoped via `[data-brand="loyalshy"]` on `src/app/[locale]/page.tsx`, `src/app/(a
 - Everything else answers the user: tabs, accordion, the demo card flip
 - No per-section fade-ins. `motion.tsx` (FadeIn/Stagger/ScaleIn) was deleted 2026-10-01; nothing imported it
 - Media queries go through `useMediaQuery` (`use-media-query.ts`, `useSyncExternalStore`) — no setState-in-effect. It reports `false` on the server and the first client render, so it must never size anything visible at scroll 0: the hero phone is sized in CSS (`.mk-film` sets `--pw`; `PhoneFrame` derives every dimension from `--phone-w`), FeatureShowcase keeps both layouts in the HTML and lets CSS pick, and CardAnatomy renders its stage only once mounted (its title is server HTML)
+- The film's camera (2026-10-01): the phone opens at 1.5× (1.3× on phones) growing from its top edge so it meets the hero copy and is cut by the fold, pulls back to 1× over the first 12% of scroll (`FILM.intro.pullBack`, `transformOrigin` flips to centre once the spring settles at 1), then pushes in on each chapter's climax (`FILM.phone.zoom` / `zoomNarrow`); map and crowd drift the other way (`parallax`); the lock screen dims behind a banner (`LockScreen dim`). `PIN_VH` is 680 — holds are ~7% of the film, keep them ≥ ~350px of scroll at 900px tall
 - Anything that fades out also toggles `visibility` (`useVisibility`): opacity alone leaves links focusable and text readable by screen readers. The film's stage is `aria-hidden`; an `sr-only` list carries the four chapters
 - The accent token is `--mk-accent` (coral); `--mk-brand-purple`/`--mk-brand-green` and the legacy `@layer marketing :root` tokens are gone
 

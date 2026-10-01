@@ -1,17 +1,21 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react"
 import { useTranslations } from "next-intl"
 import { FILM, PIN_VH } from "./film-timeline"
 import { useCaption, useFade, useMove, useVisibility } from "./film-hooks"
 import { AppIcon, AppScreen, BANNERS, CameraScreen, LockNotification, LockScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
+import { FilmRail } from "./film-rail"
 import { MapScene } from "./map-scene"
 import { PhoneFrame } from "./phone-frame"
 import { INK, SPRING_HEAVY, SPRING_LIGHT } from "./tokens"
 import { useMediaQuery } from "./use-media-query"
 
-// The hero film: one phone, four chapters, scroll as the only clock.
+// The hero film: one phone, four chapters, scroll as the only clock. The
+// phone fills the fold at the open and pulls back as the first scroll
+// happens; the camera then pushes in on each chapter's climax (see
+// `FILM.phone.zoom`). A rail on the left axis names the chapters and jumps.
 //   1. The card on their phone — the counter QR is scanned, the pass slides
 //      into Wallet, the Add to Wallet buttons come up under the caption.
 //   2. It shows up when they are nearby — lock screen, a customer walks
@@ -49,7 +53,16 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const { phone } = FILM
   const rotateY = useSpring(useTransform(p, [...phone.rotateY.keys], phone.rotateY.values.map((v) => v * rot)), SPRING_HEAVY)
   const rotateX = useSpring(useTransform(p, [...phone.rotateX.keys], phone.rotateX.values.map((v) => v * rot)), SPRING_HEAVY)
-  const scale = useSpring(useTransform(p, [...phone.scale.keys], [...phone.scale.values]), SPRING_HEAVY)
+  const zoom = narrow ? phone.zoomNarrow : phone.zoom
+  const scale = useSpring(useTransform(p, [...zoom.keys], [...zoom.values]), SPRING_HEAVY)
+  // The open grows the phone downward from its top edge (so it meets the
+  // hero copy and is cut by the fold); push-ins grow from the centre. The
+  // origin flips once the pull-back has settled at 1 — at scale 1 the
+  // origin has no effect, so the flip is invisible.
+  const transformOrigin = useTransform([p, scale], ([v, sc]: number[]) => (v < 0.2 && sc > 1.001 ? "50% 0%" : "50% 50%"))
+  const lift = useMove(p, FILM.intro.pullBack, narrow ? 0 : FILM.intro.lift, 0, SPRING_HEAVY)
+  // Background layers drift the other way for depth.
+  const parallax = useTransform(p, [0, 1], [phone.parallax, -phone.parallax])
   const x = useSpring(useTransform(p, [...phone.x.keys], narrow ? phone.x.values(0, 0) : phone.x.values(phone.shift, phone.side)), SPRING_HEAVY)
 
   // The lock screen under everything; the status bar flips with it.
@@ -76,6 +89,8 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const pulse = useTransform(p, [...FILM.ch2.pulse], [0, 1])
   const nearY = useMove(p, FILM.ch2.bannerDrop, 34, 0, { stiffness: 150, damping: 15, mass: 0.7 })
   const nearOpacity = useFade(p, FILM.ch2.banner)
+  const announceOpacityEarly = useFade(p, FILM.ch3.banner)
+  const lockDim = useTransform([nearOpacity, announceOpacityEarly], ([a, b]: number[]) => Math.max(a, b) * 0.22)
 
   // Chapter 3: the dashboard card slides in from further away, quick and
   // dry; the message flies; the announcement lands with a small bounce; the
@@ -86,7 +101,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const flyY = useMove(p, FILM.ch3.flight, narrow ? 120 : 40, -140)
   const flyOpacity = useFade(p, FILM.ch3.message)
   const announceY = useMove(p, FILM.ch3.bannerDrop, 30, 0, { stiffness: 140, damping: 14, mass: 0.8 })
-  const announceOpacity = useFade(p, FILM.ch3.banner)
+  const announceOpacity = announceOpacityEarly
   const crowdOpacity = useFade(p, FILM.ch3.crowd)
   const crowdSpread = useMove(p, FILM.ch3.crowdSpread, 0, 1, SPRING_HEAVY)
   const crowdLeft = useTransform(crowdSpread, (v) => -110 * v)
@@ -108,6 +123,15 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   }
   const intro = useFade(p, FILM.intro.fade)
   const introVisibility = useVisibility(intro)
+
+  // The rail jumps to a chapter: progress 0 is the stage's top at the
+  // viewport's top, 1 is its bottom at the viewport's bottom.
+  const scrollTo = useCallback((progress: number) => {
+    const el = ref.current
+    if (!el) return
+    const top = el.getBoundingClientRect().top + window.scrollY
+    window.scrollTo({ top: top + progress * (el.offsetHeight - window.innerHeight), behavior: "smooth" })
+  }, [])
 
   // Announce which chapter is on for assistive tech.
   const liveRef = useRef<HTMLParagraphElement>(null)
@@ -134,11 +158,12 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
         <p ref={liveRef} className="sr-only" aria-live="polite" />
 
         <div className="mk-wrap relative h-full">
+          <FilmRail p={p} scrollTo={scrollTo} />
+          <motion.p style={{ opacity: intro, visibility: introVisibility }} className="mk-body-sm absolute inset-x-0 bottom-4 z-10 text-center lg:hidden" aria-hidden="true">
+            <span style={{ color: "var(--mk-text-muted)" }}>{t("film.scroll")}</span>
+          </motion.p>
           {/* Captions: under the phone on phones, on the left axis on desktop */}
           <div className="mk-film-captions">
-            <motion.p style={{ opacity: intro, visibility: introVisibility }} className="mk-lead absolute inset-x-0 top-0 text-center lg:hidden">
-              {t("film.scroll")}
-            </motion.p>
             {CHAPTERS.map((key) => {
               const c = captions[key]
               return (
@@ -183,14 +208,16 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
               style={{ opacity: mapOpacity, y: mapY, rotate: narrow ? 0 : -3, left: narrow ? "50%" : "42%", x: narrow ? "-50%" : 0 }}
               className="mk-film-map pointer-events-none absolute top-1/2 -translate-y-1/2"
             >
-              <MapScene walk={walk} pulse={pulse} className="h-auto w-full" style={{ filter: "drop-shadow(0 24px 40px oklch(0 0 0 / 0.14))" }} />
+              <motion.div style={{ y: parallax }}>
+                <MapScene walk={walk} pulse={pulse} className="h-auto w-full" style={{ filter: "drop-shadow(0 24px 40px oklch(0 0 0 / 0.14))" }} />
+              </motion.div>
             </motion.div>
 
             {/* Chapter 3: the crowd behind */}
             {[crowdLeft, crowdRight].map((mv, i) => (
               <motion.div
                 key={i}
-                style={{ opacity: crowdOpacity, x: mv, border: "6px solid oklch(0.16 0.006 60 / 0.18)" }}
+                style={{ opacity: crowdOpacity, x: mv, y: parallax, border: "6px solid oklch(0.16 0.006 60 / 0.18)" }}
                 className="mk-film-crowd pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[40px]"
               />
             ))}
@@ -218,9 +245,9 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
             </motion.div>
 
             {/* The phone */}
-            <motion.div style={{ rotateY, rotateX, scale, transformStyle: "preserve-3d", willChange: "transform" }}>
+            <motion.div style={{ rotateY, rotateX, scale, y: lift, transformOrigin, transformStyle: "preserve-3d", willChange: "transform" }}>
               <PhoneFrame width="var(--pw)" screenBackground={SCREEN_BG} statusColor={statusColor}>
-                <LockScreen opacity={lockOpacity}>
+                <LockScreen opacity={lockOpacity} dim={lockDim}>
                   <LockNotification opacity={nearOpacity} y={nearY}>
                     <RealBanner {...BANNERS.near} alt="" />
                   </LockNotification>

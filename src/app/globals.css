@@ -494,10 +494,10 @@
 }
 
 /* ─── The hero film's stage ────────────────────────────────────────── */
-/* `--pw` is the phone's width. On phones it also bows to the viewport
-   height so the phone (2.07 × its width tall) plus ~14rem of caption fit in
-   the pinned stage; the captions start right under it. Desktop: 300px,
-   captions on the left axis. */
+/* `--pw` is the phone's width at zoom 1. On phones it also bows to the
+   viewport height so the phone (2.07 × its width tall) plus ~14rem of
+   caption fit in the pinned stage; the captions start under it with room
+   for the push-in. Desktop: 300px, captions on the left axis. */
 .mk-film {
   --pw: min(230px, calc((100svh - var(--mk-bar-h, 44px) - 14rem) / 2.07));
 }
@@ -505,7 +505,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(var(--pw) * 2.07 + 1.25rem);
+  top: calc(var(--pw) * 2.07 + 2.25rem);
 }
 .mk-film-map { width: calc(var(--pw) * 1.75); }
 .mk-film-crowd {
