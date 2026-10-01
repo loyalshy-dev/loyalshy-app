@@ -84,10 +84,13 @@ export function MarketingNavbar() {
     }
   }
 
+  // Lock the page behind the open menu. iOS Safari ignores overflow on
+  // <body> alone, so the root element gets it too.
   React.useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : ""
+    const targets = [document.documentElement, document.body]
+    for (const el of targets) el.style.overflow = open ? "hidden" : ""
     return () => {
-      document.body.style.overflow = ""
+      for (const el of targets) el.style.overflow = ""
     }
   }, [open])
 
@@ -115,7 +118,7 @@ export function MarketingNavbar() {
                 href={link.href}
                 className="mk-nav-link"
                 data-active={current === link.section}
-                aria-current={current === link.section ? "true" : undefined}
+                aria-current={current === link.section ? "location" : undefined}
               >
                 {link.label}
               </Link>
@@ -139,6 +142,7 @@ export function MarketingNavbar() {
             className="mk-nav-burger"
             aria-label={open ? t("closeMenu") : t("openMenu")}
             aria-expanded={open}
+            aria-controls="mk-nav-menu"
             onClick={() => setOpen((v) => !v)}
           >
             <span className={cn("mk-nav-burger-line", open && "mk-nav-burger-line-a")} />
@@ -148,7 +152,7 @@ export function MarketingNavbar() {
       </div>
 
       {/* Phone menu: drops from the bar, links stacked over hairlines */}
-      <div className={cn("mk-nav-menu", open && "mk-nav-menu-open")} aria-hidden={!open}>
+      <div id="mk-nav-menu" className={cn("mk-nav-menu", open && "mk-nav-menu-open")} aria-hidden={!open}>
         <nav aria-label="Mobile navigation" className="mk-wrap">
           <ul className="mk-nav-menu-list">
             {links.map((link) => (

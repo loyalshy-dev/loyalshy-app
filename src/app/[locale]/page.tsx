@@ -114,7 +114,7 @@ export default async function LandingPage({ params }: PageProps) {
   return (
     <NextIntlClientProvider messages={marketingMessages}>
       <JsonLd locale={locale} />
-      <div data-brand="loyalshy" className="min-h-screen" style={{ background: "var(--mk-bg)", overscrollBehaviorY: "contain" }}>
+      <div data-brand="loyalshy" className="min-h-screen" style={{ background: "var(--mk-bg)" }}>
         <MarketingNavbar />
         <main>
           <Hero />

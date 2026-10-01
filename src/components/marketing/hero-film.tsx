@@ -2,8 +2,7 @@
 
 import { useRef, useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
-import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react"
+import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform, type MotionValue } from "motion/react"
 import { useTranslations } from "next-intl"
 import { MapScene } from "./map-scene"
 import { PhoneFrame } from "./phone-frame"
@@ -20,6 +19,12 @@ import { useMediaQuery } from "./use-media-query"
 // The stage is pinned for about four screens; every scroll position is a readable
 // state. Rotation stays under 20° so the screen stays legible. Only
 // transform and opacity animate. Reduced motion gets three static frames.
+//
+// Sizing is CSS: `.mk-film` sets `--pw` (the phone's width) from the
+// breakpoint and, on phones, from the viewport height, so the server and the
+// first client paint agree and the captions always start under the phone.
+// `narrow` (a client-only media query) only drives motion values that are
+// invisible at scroll 0, so the hydration swap never shows.
 
 const INK = "#1F1410"
 // Two weights: the phone, the map and the pass are heavy and settle slowly;
@@ -31,6 +36,13 @@ const LIGHT = { stiffness: 110, damping: 24, mass: 0.6 }
 // (PIN_VH − 100)vh of scroll, so 880 gives ~7.8 screens. Each notification
 // holds for ~10% of the film (about a screen of scroll) once it has landed. Raise it to slow the film down, lower to speed up.
 const PIN_VH = 880
+
+// Anything that fades out must also leave the accessibility tree and the tab
+// order: opacity alone keeps invisible links focusable and invisible text
+// readable. `visibility` follows the opacity.
+function useVisibility(...opacities: MotionValue<number>[]) {
+  return useTransform(opacities, (values: number[]) => (values.some((v) => v > 0.02) ? "visible" : "hidden"))
+}
 
 // Real artefacts from a client's phone, cropped: two Wallet notifications
 // (proximity and announcement), the pass itself, and its logo. They carry
@@ -63,11 +75,13 @@ function RealPass({ alt }: { alt: string }) {
   )
 }
 
-type FilmProps = { demoUrl?: string; appStoreUrl?: string; playStoreUrl?: string }
+type FilmProps = { demoUrl?: string; appStoreUrl: string; playStoreUrl: string }
 
 // The wallet buttons (chapter 1) and the store badges (the exit), shared by
 // the film and the reduced-motion frames.
-function WalletButtons({ demoUrl, t, tDemo, align }: { demoUrl: string; t: ReturnType<typeof useTranslations>; tDemo: ReturnType<typeof useTranslations>; align: "left" | "center" }) {
+function WalletButtons({ demoUrl, align }: { demoUrl: string; align: "left" | "center" }) {
+  const t = useTranslations("hero")
+  const tDemo = useTranslations("tryDemo")
   const j = align === "left" ? "justify-center lg:justify-start" : "justify-center"
   const m = align === "left" ? "mx-auto lg:mx-0" : "mx-auto"
   return (
@@ -76,18 +90,19 @@ function WalletButtons({ demoUrl, t, tDemo, align }: { demoUrl: string; t: Retur
         <strong style={{ color: "var(--mk-text)", fontWeight: 600 }}>{tDemo("title")}</strong> {t("film.tryLine")}
       </p>
       <div className={`mt-3 flex flex-wrap items-center gap-3 ${j}`}>
-        <Link href={demoUrl} target="_blank" rel="noopener noreferrer" aria-label={tDemo("addToAppleWallet")}>
-          <Image src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" alt={tDemo("addToAppleWallet")} width={156} height={48} className="h-11 w-auto" />
-        </Link>
-        <Link href={demoUrl} target="_blank" rel="noopener noreferrer" aria-label={tDemo("addToGoogleWallet")}>
-          <Image src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg" alt={tDemo("addToGoogleWallet")} width={180} height={48} className="h-11 w-auto" />
-        </Link>
+        <a href={demoUrl} target="_blank" rel="noopener noreferrer" aria-label={tDemo("addToAppleWallet")}>
+          <Image src="/wallet-buttons/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" alt="" width={156} height={48} className="h-11 w-auto" />
+        </a>
+        <a href={demoUrl} target="_blank" rel="noopener noreferrer" aria-label={tDemo("addToGoogleWallet")}>
+          <Image src="/wallet-buttons/enGB_add_to_google_wallet_add-wallet-badge.svg" alt="" width={180} height={48} className="h-11 w-auto" />
+        </a>
       </div>
     </div>
   )
 }
 
-function StoreBadges({ appStoreUrl, playStoreUrl, t, align }: { appStoreUrl?: string; playStoreUrl?: string; t: ReturnType<typeof useTranslations>; align: "left" | "center" }) {
+function StoreBadges({ appStoreUrl, playStoreUrl, align }: { appStoreUrl: string; playStoreUrl: string; align: "left" | "center" }) {
+  const t = useTranslations("hero")
   const j = align === "left" ? "justify-center lg:justify-start" : "justify-center"
   const badges = [
     { url: appStoreUrl, src: "/staff-app/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg", label: t("film.appStore"), w: 156 },
@@ -95,37 +110,30 @@ function StoreBadges({ appStoreUrl, playStoreUrl, t, align }: { appStoreUrl?: st
   ]
   return (
     <div className={`flex flex-wrap items-center gap-3 ${j}`}>
-      {badges.map((b) => {
-        const img = <Image src={b.src} alt={b.label} width={b.w} height={48} className="h-11 w-auto" />
-        return b.url ? (
-          <Link key={b.src} href={b.url} target="_blank" rel="noopener noreferrer" aria-label={b.label}>
-            {img}
-          </Link>
-        ) : (
-          <span key={b.src} aria-label={b.label} title={t("film.soon")}>
-            {img}
-          </span>
-        )
-      })}
+      {badges.map((b) => (
+        <a key={b.src} href={b.url} target="_blank" rel="noopener noreferrer" aria-label={b.label}>
+          <Image src={b.src} alt="" width={b.w} height={48} className="h-11 w-auto" />
+        </a>
+      ))}
     </div>
   )
 }
 
 // The lock screen as iOS lays it out: date and time up top, the flashlight
 // and camera buttons in the bottom corners, the home indicator under them.
-// Notifications land just above the buttons.
+// Notifications land just above the buttons. Type scales with the phone.
 const LOCK_BOTTOM = 92 // where a notification's bottom edge sits
 
-function LockFace({ date, narrow }: { date: string; narrow: boolean }) {
+function LockFace({ date }: { date: string }) {
   const btn = "absolute bottom-[34px] grid size-11 place-items-center rounded-full"
   const btnStyle = { background: "rgba(255,255,255,0.18)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }
   return (
     <div className="absolute inset-0" style={{ background: "#14102a" }}>
       <Image src="/hero/wallpaper.webp" alt="" fill sizes="300px" className="object-cover" priority />
       <div aria-hidden="true" className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.28) 100%)" }} />
-      <div className={narrow ? "relative pt-12 text-center" : "relative pt-14 text-center"} style={{ color: "#fff", textShadow: "0 1px 12px rgba(0,0,0,0.35)" }}>
+      <div className="relative text-center" style={{ paddingTop: "calc(var(--phone-w) * 0.2)", color: "#fff", textShadow: "0 1px 12px rgba(0,0,0,0.35)" }}>
         <p className="text-[13px] font-medium">{date}</p>
-        <p className={narrow ? "font-display text-[54px] font-bold leading-none tracking-tight" : "font-display text-[64px] font-bold leading-none tracking-tight"}>9:41</p>
+        <p className="font-display font-bold leading-none tracking-tight" style={{ fontSize: "calc(var(--phone-w) * 0.22)" }}>9:41</p>
       </div>
       {/* Flashlight */}
       <div className={`${btn} left-[30px]`} style={btnStyle} aria-hidden="true">
@@ -148,19 +156,18 @@ function LockFace({ date, narrow }: { date: string; narrow: boolean }) {
   )
 }
 
+const CHAPTERS = ["ch1", "ch2", "ch3", "ch4"] as const
+
 /* ─── The pinned film ─────────────────────────────────────────────── */
 
 function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const t = useTranslations("hero")
-  const tDemo = useTranslations("tryDemo")
   const narrow = useMediaQuery("(max-width: 1023px)")
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress: p } = useScroll({ target: ref, offset: ["start start", "end end"] })
 
   // A fade that a scroll notch can't finish in one frame.
   const useFade = (keys: number[], values: number[]) => useSpring(useTransform(p, keys, values), LIGHT)
-
-  const phoneW = narrow ? 230 : 300
 
   // The phone as an object. Rotation is skipped on phones (touch GPUs).
   const rot = narrow ? 0 : 1
@@ -187,7 +194,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   // Chapter 1: the wallet buttons under the caption once the pass is in.
   const walletBtnOpacity = useFade([0.26, 0.31, 0.33, 0.38], [0, 1, 1, 0])
   const walletBtnY = useSpring(useTransform(p, [0.26, 0.32], [12, 0]), LIGHT)
-  const walletBtnEvents = useTransform(p, (v) => (v > 0.28 && v < 0.36 ? "auto" : "none"))
+  const walletBtnVisibility = useVisibility(walletBtnOpacity)
 
   // Chapter 2: the map behind the phone, the customer walking into the
   // fence, the pulse when they cross it, then the banner
@@ -221,23 +228,23 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const pass2Y = useSpring(useTransform(p, [0.955, 0.975], [320, 0]), HEAVY)
   const tryOpacity = useFade([0.97, 0.99], [0, 1])
   const tryY = useSpring(useTransform(p, [0.97, 0.99], [16, 0]), LIGHT)
-  const tryEvents = useTransform(p, (v) => (v > 0.98 ? "auto" : "none"))
+  const tryVisibility = useVisibility(tryOpacity)
 
   // Captions: each one rises in, holds, and rises out; the paragraph
-  // follows the title by a beat.
-  const useCaption = (a: number, b: number, c: number, d: number, lag = 0) => ({
-    o: useSpring(useTransform(p, [a + lag, b + lag, c, d], [0, 1, 1, 0]), LIGHT),
-    y: useSpring(useTransform(p, [a + lag, b + lag, c, d], [28, 0, 0, -22]), LIGHT),
-  })
-  const c1t = useCaption(0.07, 0.14, 0.31, 0.37)
-  const c1p = useCaption(0.07, 0.14, 0.31, 0.37, 0.02)
-  const c2t = useCaption(0.43, 0.5, 0.66, 0.71)
-  const c2p = useCaption(0.43, 0.5, 0.66, 0.71, 0.035)
-  const c3t = useCaption(0.75, 0.81, 0.92, 0.96)
-  const c3p = useCaption(0.75, 0.81, 0.92, 0.96, 0.02)
-  const c4t = useCaption(0.955, 0.98, 1.5, 1.6)
-  const c4p = useCaption(0.955, 0.98, 1.5, 1.6, 0.01)
+  // follows the title by a beat. The whole caption leaves the tab order and
+  // the accessibility tree while it is invisible.
+  const useCaption = (a: number, b: number, c: number, d: number, lag: number) => {
+    const t = { o: useSpring(useTransform(p, [a, b, c, d], [0, 1, 1, 0]), LIGHT), y: useSpring(useTransform(p, [a, b, c, d], [28, 0, 0, -22]), LIGHT) }
+    const q = { o: useSpring(useTransform(p, [a + lag, b + lag, c, d], [0, 1, 1, 0]), LIGHT), y: useSpring(useTransform(p, [a + lag, b + lag, c, d], [28, 0, 0, -22]), LIGHT) }
+    return { t, p: q, visibility: useVisibility(t.o, q.o) }
+  }
+  const c1 = useCaption(0.07, 0.14, 0.31, 0.37, 0.02)
+  const c2 = useCaption(0.43, 0.5, 0.66, 0.71, 0.035)
+  const c3 = useCaption(0.75, 0.81, 0.92, 0.96, 0.02)
+  const c4 = useCaption(0.955, 0.98, 1.5, 1.6, 0.01)
+  const captions = { ch1: c1, ch2: c2, ch3: c3, ch4: c4 }
   const intro = useFade([0, 0.07], [1, 0])
+  const introVisibility = useVisibility(intro)
 
   // Announce which chapter is on for assistive tech.
   const liveRef = useRef<HTMLParagraphElement>(null)
@@ -248,62 +255,69 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
     if (el.textContent !== next) el.textContent = next
   })
 
-  const captions = [
-    { key: "ch1", t: c1t, p: c1p },
-    { key: "ch2", t: c2t, p: c2p },
-    { key: "ch3", t: c3t, p: c3p },
-    { key: "ch4", t: c4t, p: c4p },
-  ] as const
-
   return (
     <div ref={ref} className="relative" style={{ height: `${PIN_VH}vh` }}>
-      <div className="sticky overflow-hidden" style={{ top: "var(--mk-bar-h, 48px)", height: "calc(100svh - var(--mk-bar-h, 48px))" }}>
+      <div className="mk-film sticky overflow-hidden" style={{ top: "var(--mk-bar-h, 48px)", height: "calc(100svh - var(--mk-bar-h, 48px))" }}>
+        {/* The whole story in one place for assistive tech; the visible
+            captions below come and go with the scroll. */}
+        <ol className="sr-only">
+          {CHAPTERS.map((key) => (
+            <li key={key}>
+              <strong>{t(`film.${key}.title`)}</strong> {t(`film.${key}.caption`)}
+            </li>
+          ))}
+        </ol>
         <p ref={liveRef} className="sr-only" aria-live="polite" />
+
         <div className="mk-wrap relative h-full">
           {/* Captions: under the phone on phones, on the left axis on desktop */}
-          <div className="absolute inset-x-0 bottom-2 h-[18rem] lg:inset-x-auto lg:bottom-auto lg:left-10 lg:top-1/2 lg:h-auto lg:w-5/12 lg:-translate-y-1/2">
-            <motion.p style={{ opacity: intro }} className="mk-lead absolute inset-x-0 top-0 text-center lg:hidden">
+          <div className="mk-film-captions">
+            <motion.p style={{ opacity: intro, visibility: introVisibility }} className="mk-lead absolute inset-x-0 top-0 text-center lg:hidden">
               {t("film.scroll")}
             </motion.p>
-            {captions.map((c) => (
-              <div key={c.key} className="absolute inset-x-0 top-0 text-center lg:text-left">
-                {c.key === "ch4" && (
-                  <motion.div style={{ opacity: c.t.o, y: c.t.y }} className="mb-3 flex justify-center lg:mb-5 lg:justify-start">
-                    <Image src="/staff-app/icon.webp" alt="" width={64} height={64} className="size-12 rounded-[11px] lg:size-16 lg:rounded-[15px]" style={{ boxShadow: "0 8px 24px oklch(0 0 0 / 0.18), 0 0 0 1px oklch(0 0 0 / 0.06)" }} />
-                  </motion.div>
-                )}
-                <motion.h2 style={{ opacity: c.t.o, y: c.t.y }} className="font-display mk-display-2 lg:max-w-[14ch]">
-                  <span style={{ color: "var(--mk-text)" }}>{t(`film.${c.key}.title`)}</span>
-                </motion.h2>
-                {c.key !== "ch2" && (
-                  <motion.p style={{ opacity: c.p.o, y: c.p.y }} className="mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4">
-                    {t(`film.${c.key}.caption`)}
-                  </motion.p>
-                )}
-                {c.key === "ch1" && demoUrl && (
-                  <motion.div style={{ opacity: walletBtnOpacity, y: walletBtnY, pointerEvents: walletBtnEvents }} className="mt-4 lg:mt-6">
-                    <WalletButtons demoUrl={demoUrl} t={t} tDemo={tDemo} align="left" />
-                  </motion.div>
-                )}
-                {c.key === "ch4" && (
-                  <motion.div style={{ opacity: tryOpacity, y: tryY, pointerEvents: tryEvents }} className="mt-5 lg:mt-7">
-                    <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} t={t} align="left" />
-                  </motion.div>
-                )}
-              </div>
-            ))}
+            {CHAPTERS.map((key) => {
+              const c = captions[key]
+              return (
+                <motion.div key={key} style={{ visibility: c.visibility }} className="absolute inset-x-0 top-0 text-center lg:text-left">
+                  {key === "ch4" && (
+                    <motion.div style={{ opacity: c.t.o, y: c.t.y }} className="mb-3 flex justify-center lg:mb-5 lg:justify-start">
+                      <Image src="/staff-app/icon.webp" alt="" width={64} height={64} className="size-12 rounded-[11px] lg:size-16 lg:rounded-[15px]" style={{ boxShadow: "0 8px 24px oklch(0 0 0 / 0.18), 0 0 0 1px oklch(0 0 0 / 0.06)" }} />
+                    </motion.div>
+                  )}
+                  <motion.h2 style={{ opacity: c.t.o, y: c.t.y }} className="font-display mk-display-2 lg:max-w-[14ch]">
+                    <span style={{ color: "var(--mk-text)" }}>{t(`film.${key}.title`)}</span>
+                  </motion.h2>
+                  {key !== "ch2" && (
+                    <motion.p style={{ opacity: c.p.o, y: c.p.y }} className="mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4">
+                      {t(`film.${key}.caption`)}
+                    </motion.p>
+                  )}
+                  {key === "ch1" && demoUrl && (
+                    <motion.div style={{ opacity: walletBtnOpacity, y: walletBtnY, visibility: walletBtnVisibility }} className="mt-4 lg:mt-6">
+                      <WalletButtons demoUrl={demoUrl} align="left" />
+                    </motion.div>
+                  )}
+                  {key === "ch4" && (
+                    <motion.div style={{ opacity: tryOpacity, y: tryY, visibility: tryVisibility }} className="mt-5 lg:mt-7">
+                      <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} align="left" />
+                    </motion.div>
+                  )}
+                </motion.div>
+              )
+            })}
           </div>
 
-          {/* The stage: everything hangs off the phone's own position */}
+          {/* The stage: everything hangs off the phone's own position. It is
+              pure picture — the words live in the captions and the list above. */}
           <motion.div
+            aria-hidden="true"
             style={{ x, perspective: 1400 }}
-            className="absolute left-1/2 top-[31%] -translate-x-1/2 -translate-y-1/2 lg:top-1/2"
+            className="absolute left-1/2 top-3 -translate-x-1/2 lg:top-1/2 lg:-translate-y-1/2"
           >
             {/* Chapter 2: the map behind the phone */}
             <motion.div
-              aria-hidden="true"
-              style={{ opacity: mapOpacity, y: mapY, width: narrow ? phoneW * 1.75 : phoneW * 1.55, rotate: narrow ? 0 : -3, left: narrow ? "50%" : "42%", x: narrow ? "-50%" : 0 }}
-              className="pointer-events-none absolute top-1/2 -translate-y-1/2"
+              style={{ opacity: mapOpacity, y: mapY, rotate: narrow ? 0 : -3, left: narrow ? "50%" : "42%", x: narrow ? "-50%" : 0 }}
+              className="mk-film-map pointer-events-none absolute top-1/2 -translate-y-1/2"
             >
               <MapScene walk={walk} pulse={pulse} className="h-auto w-full" style={{ filter: "drop-shadow(0 24px 40px oklch(0 0 0 / 0.14))" }} />
             </motion.div>
@@ -312,15 +326,13 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
             {[crowdLeft, crowdRight].map((mv, i) => (
               <motion.div
                 key={i}
-                aria-hidden="true"
-                style={{ opacity: crowdOpacity, x: mv, width: phoneW * 0.84, height: (phoneW * 0.84 - 16) * (844 / 390) * 0.86, border: "6px solid oklch(0.16 0.006 60 / 0.18)" }}
-                className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[40px]"
+                style={{ opacity: crowdOpacity, x: mv, border: "6px solid oklch(0.16 0.006 60 / 0.18)" }}
+                className="mk-film-crowd pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[40px]"
               />
             ))}
 
             {/* Chapter 3: the dashboard card, beside the phone */}
             <motion.div
-              aria-hidden="true"
               style={{ opacity: cardOpacity, x: cardX, right: "calc(100% + 28px)" }}
               className="pointer-events-none absolute top-[44%] hidden w-[200px] rounded-2xl bg-white p-4 lg:block"
             >
@@ -335,7 +347,6 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
 
             {/* The message in flight */}
             <motion.div
-              aria-hidden="true"
               style={{ opacity: flyOpacity, x: flyX, y: flyY }}
               className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 rounded-full px-3 py-1.5 text-[12px] font-medium text-white"
             >
@@ -344,24 +355,20 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
 
             {/* The phone */}
             <motion.div style={{ rotateY, rotateX, scale, transformStyle: "preserve-3d", willChange: "transform" }}>
-              <PhoneFrame width={phoneW} screenBackground="oklch(0.965 0.003 60)" statusColor={statusColor}>
+              <PhoneFrame width="var(--pw)" screenBackground="oklch(0.965 0.003 60)" statusColor={statusColor}>
                 {/* Lock screen (intro, chapter 2, chapter 3) */}
                 <motion.div style={{ opacity: lockOpacity }} className="absolute inset-0">
-                  <LockFace date={t("lockDate")} narrow={narrow} />
+                  <LockFace date={t("lockDate")} />
                   <motion.div style={{ opacity: nearOpacity, y: nearY, bottom: LOCK_BOTTOM }} className="absolute left-3 right-3">
-                    <div>
-                      <RealBanner src="/hero/ios-banner.webp" height={193} alt={t("scenes.near.alt")} />
-                    </div>
+                    <RealBanner src="/hero/ios-banner.webp" height={193} alt="" />
                   </motion.div>
                   <motion.div style={{ opacity: announceOpacity, y: announceY, bottom: LOCK_BOTTOM }} className="absolute left-3 right-3">
-                    <div>
-                      <RealBanner src="/hero/ios-announce.webp" height={185} alt={t("scenes.announce.alt")} />
-                    </div>
+                    <RealBanner src="/hero/ios-announce.webp" height={185} alt="" />
                   </motion.div>
                 </motion.div>
 
                 {/* Camera (chapter 1a): the counter QR in the viewfinder */}
-                <motion.div style={{ opacity: cameraOpacity }} className="absolute inset-0 flex flex-col items-center" >
+                <motion.div style={{ opacity: cameraOpacity }} className="absolute inset-0 flex flex-col items-center">
                   <div className="absolute inset-0" style={{ background: "#0B0A0A" }} />
                   <p className="relative mt-12 text-[13px] font-semibold text-white">{t("film.camera")}</p>
                   <motion.div style={{ scale: scanFrame }} className="relative mt-10 aspect-square w-[64%]">
@@ -378,26 +385,25 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                 </motion.div>
 
                 {/* Wallet (chapter 1b): the pass slides in */}
-                <motion.div style={{ opacity: walletOpacity }} className="absolute inset-0" >
+                <motion.div style={{ opacity: walletOpacity }} className="absolute inset-0">
                   <div className="absolute inset-0" style={{ background: "oklch(0.965 0.003 60)" }} />
                   <p className="absolute inset-x-0 top-12 text-center text-[13px] font-semibold" style={{ color: INK }}>{t("film.walletTitle")}</p>
-                  <motion.div style={{ y: passY }} className="mk-hero-card absolute left-3 right-3" >
-                    <div style={{ marginTop: narrow ? 96 : 110 }}>
-                      <RealPass alt={t("scenes.passAlt")} />
+                  <motion.div style={{ y: passY }} className="absolute left-3 right-3">
+                    <div style={{ marginTop: "calc(var(--phone-w) * 0.38)" }}>
+                      <RealPass alt="" />
                     </div>
                   </motion.div>
                 </motion.div>
 
                 {/* The exit: the team app, everything managed from the phone */}
                 <motion.div style={{ opacity: wallet2Opacity, y: pass2Y }} className="absolute inset-0">
-                  <Image src="/staff-app/today.webp" alt={t("film.appAlt")} width={1170} height={2416} className="absolute inset-0 h-full w-full object-cover object-top" sizes="300px" />
+                  <Image src="/staff-app/today.webp" alt="" width={1170} height={2416} className="absolute inset-0 h-full w-full object-cover object-top" sizes="300px" />
                 </motion.div>
               </PhoneFrame>
             </motion.div>
           </motion.div>
         </div>
       </div>
-      {/* "Try it" links land here: the film's last frame, with the wallet buttons */}
       {/* "Try it" links land on chapter 1, with the pass in Wallet and the buttons up */}
       <div id="try-demo" aria-hidden="true" className="absolute h-px w-full" style={{ top: `${(PIN_VH - 100) * 0.3}vh` }} />
     </div>
@@ -408,7 +414,6 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
 
 function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const t = useTranslations("hero")
-  const tDemo = useTranslations("tryDemo")
   const w = 230
   const frames = [
     {
@@ -426,7 +431,7 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
       key: "ch2",
       screen: (
         <div className="absolute inset-0">
-          <LockFace date={t("lockDate")} narrow />
+          <LockFace date={t("lockDate")} />
           <div className="absolute left-3 right-3" style={{ bottom: LOCK_BOTTOM }}>
             <RealBanner src="/hero/ios-banner.webp" height={193} alt={t("scenes.near.alt")} />
           </div>
@@ -437,7 +442,7 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
       key: "ch3",
       screen: (
         <div className="absolute inset-0">
-          <LockFace date={t("lockDate")} narrow />
+          <LockFace date={t("lockDate")} />
           <div className="absolute left-3 right-3" style={{ bottom: LOCK_BOTTOM }}>
             <RealBanner src="/hero/ios-announce.webp" height={185} alt={t("scenes.announce.alt")} />
           </div>
@@ -464,12 +469,12 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
       ))}
       {demoUrl && (
         <div id="try-demo" className="flex flex-col items-center text-center md:col-span-2 lg:col-span-4">
-          <WalletButtons demoUrl={demoUrl} t={t} tDemo={tDemo} align="center" />
+          <WalletButtons demoUrl={demoUrl} align="center" />
         </div>
       )}
       <div className="flex flex-col items-center gap-4 text-center md:col-span-2 lg:col-span-4">
         <Image src="/staff-app/icon.webp" alt="" width={64} height={64} className="size-16 rounded-[15px]" />
-        <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} t={t} align="center" />
+        <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} align="center" />
       </div>
     </div>
   )

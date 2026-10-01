@@ -92,7 +92,7 @@ export async function MarketingFooter() {
 
         <div className="mk-footer-legal">
           <p className="flex items-start gap-2">
-            <Link href={home} aria-label="Loyalshy" className="inline-flex shrink-0 pt-[1px]" style={{ color: "var(--mk-brand-purple)" }}>
+            <Link href={home} aria-label="Loyalshy" className="inline-flex shrink-0 pt-[1px]" style={{ color: "var(--mk-accent)" }}>
               <BrandMark className="h-2.5" />
             </Link>
             <span>{t("copyright")}</span>

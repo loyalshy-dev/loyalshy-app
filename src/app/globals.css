@@ -147,8 +147,7 @@
   --mk-text: oklch(0.187 0.021 38);
   --mk-text-muted: oklch(0.56 0.010 40);
   --mk-text-dimmed: oklch(0.62 0.008 50);
-  --mk-brand-purple: oklch(0.704 0.193 32);   /* Coral hero */
-  --mk-brand-green: oklch(0.62 0.215 28);     /* Deeper coral — gradient endpoint for hero highlight */
+  --mk-accent: oklch(0.704 0.193 32);         /* Coral — the one accent */
   --mk-footer-bg: oklch(0.187 0.021 38);
   --mk-glass-bg: oklch(1 0 0 / 0.7);
   --mk-glass-border: oklch(0.91 0.005 60 / 0.6);
@@ -197,8 +196,7 @@
   --mk-text: oklch(0.95 0 0);
   --mk-text-muted: oklch(0.65 0.01 285);
   --mk-text-dimmed: oklch(0.55 0.008 285);
-  --mk-brand-purple: oklch(0.74 0.19 32);     /* Coral accent stays in dark mode */
-  --mk-brand-green: oklch(0.66 0.22 28);      /* Deeper coral for gradient endpoint */
+  --mk-accent: oklch(0.74 0.19 32);           /* Coral accent stays in dark mode */
   --mk-footer-bg: oklch(0.1 0.004 285);
   --mk-glass-bg: oklch(1 0 0 / 0.06);
   --mk-glass-border: oklch(1 0 0 / 0.10);
@@ -353,73 +351,6 @@
    ═══════════════════════════════════════════════════════════ */
 
 @layer marketing {
-  /* — Custom Properties (Light) — */
-  :root {
-    --mk-bg: oklch(0.995 0 0);
-    --mk-surface: oklch(0.975 0.002 285);
-    --mk-card: oklch(1 0 0);
-    --mk-border: oklch(0.92 0.005 285);
-    --mk-border-hover: oklch(0.85 0.008 285);
-    --mk-text: oklch(0.13 0.005 285);
-    --mk-text-muted: oklch(0.45 0.01 285);
-    --mk-text-dimmed: oklch(0.50 0.008 285);
-    --mk-brand-purple: oklch(0.55 0.2 265);
-    --mk-brand-green: oklch(0.55 0.17 155);
-    --mk-footer-bg: oklch(0.13 0.005 285);
-    --mk-glass-bg: oklch(1 0 0 / 0.6);
-    --mk-glass-border: oklch(1 0 0 / 0.15);
-  }
-
-  /* — Custom Properties (Dark) — */
-  .dark {
-    --mk-bg: oklch(0.12 0.005 285);
-    --mk-surface: oklch(0.15 0.006 285);
-    --mk-card: oklch(0.18 0.007 285);
-    --mk-border: oklch(0.25 0.008 285);
-    --mk-border-hover: oklch(0.35 0.01 285);
-    --mk-text: oklch(0.95 0 0);
-    --mk-text-muted: oklch(0.65 0.01 285);
-    --mk-text-dimmed: oklch(0.55 0.008 285);
-    --mk-brand-purple: oklch(0.6 0.22 265);
-    --mk-brand-green: oklch(0.6 0.18 155);
-    --mk-footer-bg: oklch(0.1 0.004 285);
-    --mk-glass-bg: oklch(1 0 0 / 0.06);
-    --mk-glass-border: oklch(1 0 0 / 0.10);
-  }
-
-  /* — Gradient Text — */
-  .mk-gradient-text {
-    background: linear-gradient(135deg, var(--mk-brand-purple), var(--mk-brand-green));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* — Card — */
-  .mk-card-glass {
-    background: var(--mk-glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--mk-glass-border);
-    border-radius: 1rem;
-    box-shadow: 0 20px 40px -10px color-mix(in oklch, var(--mk-brand-purple) 6%, transparent);
-    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
-  }
-  .mk-card-glass:hover {
-    border-color: var(--mk-border-hover);
-    box-shadow: 0 20px 40px -10px color-mix(in oklch, var(--mk-brand-purple) 10%, transparent);
-  }
-
-  /* — Mesh background utility — */
-  .mk-mesh-bg {
-    background-image: radial-gradient(at 0% 0%, color-mix(in oklch, var(--mk-brand-purple) 5%, transparent) 0px, transparent 50%),
-                       radial-gradient(at 100% 100%, color-mix(in oklch, var(--mk-brand-green) 5%, transparent) 0px, transparent 50%);
-  }
-
-  /* — Fluid heading sizes — */
-  .mk-clamp-h1 { font-size: clamp(2.5rem, 6vw, 4rem); }
-  .mk-clamp-h2 { font-size: clamp(2rem, 5vw, 3rem); }
-
   /* — Primary Button (coral, brand-driven; adapts to light/dark via tokens) — */
   .mk-btn-primary {
     display: inline-flex;
@@ -429,7 +360,7 @@
     font-size: 0.875rem;
     font-weight: 600;
     color: oklch(0.99 0 0);
-    background: var(--mk-brand-purple);
+    background: var(--mk-accent);
     border: none;
     border-radius: 9999px;
     cursor: pointer;
@@ -437,13 +368,13 @@
     transition: background-color 150ms ease-out;
   }
   .mk-btn-primary:hover {
-    background: color-mix(in oklch, var(--mk-brand-purple) 90%, black);
+    background: color-mix(in oklch, var(--mk-accent) 90%, black);
   }
   .mk-btn-primary:active {
-    background: color-mix(in oklch, var(--mk-brand-purple) 84%, black);
+    background: color-mix(in oklch, var(--mk-accent) 84%, black);
   }
   .mk-btn-primary:focus-visible {
-    outline: 2px solid var(--mk-brand-purple);
+    outline: 2px solid var(--mk-accent);
     outline-offset: 2px;
   }
   .mk-btn-primary svg {
@@ -488,73 +419,23 @@
   }
   .mk-input:focus,
   .mk-input:focus-within {
-    border-color: color-mix(in oklch, var(--mk-brand-purple) 60%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--mk-brand-purple) 12%, transparent);
+    border-color: color-mix(in oklch, var(--mk-accent) 60%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--mk-accent) 12%, transparent);
     outline: none;
   }
   .mk-input::placeholder {
     color: var(--mk-text-dimmed);
   }
-
-  /* — Carousel — */
-  .mk-carousel-track {
-    display: flex;
-    gap: 1.5rem;
-    animation: mk-carousel-scroll 40s linear infinite;
-    will-change: transform;
-  }
-  .mk-carousel-track:hover {
-    animation-play-state: paused;
-  }
-  .mk-carousel-track[data-paused="true"] {
-    animation-play-state: paused;
-  }
-}
-
-/* — Hero CSS animations (no JS needed) — */
-.hero-fade-in {
-  animation: mk-fade-up 0.6s ease-out both;
-}
-
-/* — Marketing Keyframes — */
-
-@keyframes mk-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes mk-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes mk-carousel-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
 }
 
 /* — Reduced Motion — */
 @media (prefers-reduced-motion: reduce) {
   .mk-btn-primary,
-  .mk-btn-ghost,
-  .mk-card-glass {
+  .mk-btn-ghost {
     transition: none !important;
   }
   .mk-btn-primary:hover svg {
     transform: none;
-  }
-  .mk-carousel-track {
-    animation: none !important;
-  }
-  .hero-fade-in {
-    animation: none !important;
-    opacity: 1 !important;
   }
 }
 
@@ -579,12 +460,6 @@
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
-.mk-title-3 {
-  font-size: 1.5rem;
-  line-height: 1.17;
-  font-weight: 600;
-  letter-spacing: -0.012em;
-}
 .mk-lead {
   font-size: clamp(1.125rem, 0.6vw + 0.9rem, 1.3125rem);
   line-height: 1.38;
@@ -608,9 +483,6 @@
   line-height: 1.33;
   letter-spacing: -0.006em;
 }
-.mk-rule {
-  border-top: 1px solid var(--mk-border);
-}
 .mk-wrap {
   width: 100%;
   max-width: 76rem;
@@ -621,23 +493,39 @@
   .mk-wrap { padding-inline: 2.5rem; }
 }
 
-/* The hero card: the product's own renderer, stamped on load. */
-@keyframes mk-stamp-land {
-  0%   { transform: scale(1.6); opacity: 0; }
-  60%  { transform: scale(0.94); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+/* ─── The hero film's stage ────────────────────────────────────────── */
+/* `--pw` is the phone's width. On phones it also bows to the viewport
+   height so the phone (2.07 × its width tall) plus ~14rem of caption fit in
+   the pinned stage; the captions start right under it. Desktop: 300px,
+   captions on the left axis. */
+.mk-film {
+  --pw: min(230px, calc((100svh - var(--mk-bar-h, 44px) - 14rem) / 2.07));
 }
-.mk-hero-card [data-slot-state="filled"] {
-  animation: mk-stamp-land 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+.mk-film-captions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--pw) * 2.07 + 1.25rem);
 }
-@media (prefers-reduced-motion: reduce) {
-  .mk-hero-card [data-slot-state="filled"] { animation: none; }
+.mk-film-map { width: calc(var(--pw) * 1.75); }
+.mk-film-crowd {
+  width: calc(var(--pw) * 0.84);
+  height: calc(var(--pw) * 0.84 * 1.86);
 }
-
+@media (min-width: 1024px) {
+  .mk-film { --pw: 300px; }
+  .mk-film-captions {
+    left: 2.5rem;
+    right: auto;
+    top: 50%;
+    width: 41.666%;
+    transform: translateY(-50%);
+  }
+  .mk-film-map { width: calc(var(--pw) * 1.55); }
+}
 
 /* ─── Global bar and footer, in the Apple manner ───────────────────── */
 .mk-nav-bar {
-  --mk-bar-h: 44px;
   height: 44px;
   margin-inline: auto;
   background: color-mix(in oklch, var(--mk-bg) 82%, transparent);
@@ -682,7 +570,7 @@
   width: 4px;
   height: 4px;
   border-radius: 9999px;
-  background: var(--mk-brand-purple);
+  background: var(--mk-accent);
   transform: translateX(-50%) scale(0);
   transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -701,10 +589,10 @@
   font-weight: 500;
   letter-spacing: -0.01em;
   color: #fff;
-  background: var(--mk-brand-purple);
+  background: var(--mk-accent);
   transition: background-color 150ms ease-out, transform 150ms ease-out;
 }
-.mk-nav-pill:hover { background: color-mix(in oklch, var(--mk-brand-purple) 90%, black); }
+.mk-nav-pill:hover { background: color-mix(in oklch, var(--mk-accent) 90%, black); }
 .mk-nav-pill:active { transform: scale(0.97); }
 .mk-nav-burger {
   display: inline-flex;
@@ -834,8 +722,4 @@
   letter-spacing: -0.012em;
 }
 
-
-/* The lead-in: the idea in ink, the rest in gray, one paragraph. */
-.mk-leadin { color: var(--mk-text-muted); }
-.mk-leadin strong { color: var(--mk-text); font-weight: 600; }
 

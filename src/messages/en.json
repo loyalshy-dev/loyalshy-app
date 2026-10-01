@@ -93,8 +93,7 @@
       "appStore": "Download on the App Store",
       "playStore": "Get it on Google Play",
       "appAlt": "The team app: find a customer, new customer, rewards, share a program, notice, and latest activity",
-      "walletTitle": "Wallet",
-      "soon": "Coming soon"
+      "walletTitle": "Wallet"
     }
   },
   "featureShowcase": {
@@ -198,7 +197,8 @@
         "staff": "25 team members",
         "announcements": "5 messages a week"
       }
-    }
+    },
+    "billingPeriod": "Billing period"
   },
   "faq": {
     "title": "Frequently asked questions",

@@ -12,7 +12,7 @@ export async function ClosingCTA() {
   const locale = (await getLocale()) as Locale
 
   return (
-    <section style={{ background: "var(--mk-brand-purple)" }}>
+    <section style={{ background: "var(--mk-accent)" }}>
       <div className="mk-wrap py-20 lg:py-28">
         <BrandMark className="h-5 text-white sm:h-6" />
         <h2 className="font-display mk-display-1 mt-8 max-w-[16ch] text-white">
@@ -25,7 +25,7 @@ export async function ClosingCTA() {
           <Link
             href="/register"
             className="inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-base font-semibold transition-colors hover:bg-white/90"
-            style={{ color: "var(--mk-brand-purple)" }}
+            style={{ color: "var(--mk-accent)" }}
           >
             {tCommon("getStartedFree")}
           </Link>

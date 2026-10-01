@@ -37,7 +37,7 @@ export function CookieBanner() {
       aria-label="Cookie consent"
     >
       <div
-        className="flex items-start gap-4 rounded-xl border px-5 py-4 shadow-lg backdrop-blur-lg"
+        className="flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg backdrop-blur-lg sm:items-start sm:gap-4 sm:px-5 sm:py-4"
         style={{
           background: "var(--mk-card, hsl(var(--card)))",
           borderColor: "var(--mk-border, hsl(var(--border)))",
@@ -45,7 +45,7 @@ export function CookieBanner() {
       >
         <div className="flex-1 min-w-0">
           <p
-            className="text-[13px] leading-relaxed"
+            className="text-[12px] leading-snug sm:text-[13px] sm:leading-relaxed"
             style={{ color: "var(--mk-text-muted, hsl(var(--muted-foreground)))" }}
           >
             {t("message")}{" "}
@@ -71,7 +71,7 @@ export function CookieBanner() {
           </button>
           <button
             onClick={accept}
-            className="rounded-lg p-1.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+            className="hidden rounded-lg p-1.5 transition-colors hover:bg-black/5 sm:block dark:hover:bg-white/5"
             aria-label={t("dismiss")}
             style={{ color: "var(--mk-text-dimmed, hsl(var(--muted-foreground)))" }}
           >

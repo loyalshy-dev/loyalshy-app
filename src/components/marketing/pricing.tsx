@@ -21,19 +21,31 @@ const COLUMNS: Column[] = [
   { key: "scale", planId: "SCALE" },
 ]
 
+const PERIODS: BillingPeriod[] = ["monthly", "annual"]
+
 function BillingToggle({ period, onChange }: { period: BillingPeriod; onChange: (p: BillingPeriod) => void }) {
   const t = useTranslations("pricing")
-  const options: BillingPeriod[] = ["monthly", "annual"]
+  // A radio group: Tab lands on the checked option, arrows move the check.
+  const onKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return
+    e.preventDefault()
+    const next = PERIODS[(PERIODS.indexOf(period) + 1) % PERIODS.length]
+    onChange(next)
+    ;(e.currentTarget.parentElement?.querySelector(`[data-period="${next}"]`) as HTMLButtonElement | null)?.focus()
+  }
   return (
     <div className="flex flex-col items-center gap-2">
-      <div role="radiogroup" aria-label={t("monthly") + " / " + t("annual")} className="inline-flex rounded-full p-1" style={{ border: "1px solid var(--mk-border)" }}>
-        {options.map((p) => (
+      <div role="radiogroup" aria-label={t("billingPeriod")} className="inline-flex rounded-full p-1" style={{ border: "1px solid var(--mk-border)" }}>
+        {PERIODS.map((p) => (
           <button
             key={p}
             type="button"
             role="radio"
             aria-checked={period === p}
+            tabIndex={period === p ? 0 : -1}
+            data-period={p}
             onClick={() => onChange(p)}
+            onKeyDown={onKeyDown}
             className="rounded-full px-4 py-1.5 text-[14px] font-medium transition-colors"
             style={{ background: period === p ? "var(--mk-text)" : "transparent", color: period === p ? "var(--mk-bg)" : "var(--mk-text-muted)" }}
           >
@@ -79,7 +91,7 @@ export function Pricing() {
                 <p className="mk-body-sm mt-1 min-h-[2lh] max-w-[26ch]" style={{ color: "var(--mk-text-muted)" }}>
                   {t(`${col.key}.description`)}
                 </p>
-                <p className="mt-5 flex items-baseline gap-1" style={{ color: "var(--mk-text)" }}>
+                <p className="mt-5 flex items-baseline gap-1" aria-live="polite" style={{ color: "var(--mk-text)" }}>
                   <span className="font-display text-5xl font-bold leading-none tracking-tight tabular-nums">{price}</span>
                   <span className="text-[15px] font-medium" style={{ color: "var(--mk-text-dimmed)" }}>{tc("perMonth")}</span>
                 </p>
