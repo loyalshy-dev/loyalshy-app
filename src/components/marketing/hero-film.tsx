@@ -244,7 +244,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
               className="mk-film-map pointer-events-none absolute top-1/2 -translate-y-1/2"
             >
               <motion.div style={{ y: parallax }}>
-                <MapScene walk={walk} pulse={pulse} className="h-auto w-full" style={{ filter: "drop-shadow(0 24px 40px oklch(0 0 0 / 0.14))" }} />
+                <MapScene walk={walk} pulse={pulse} label={t("card.business")} className="h-auto w-full" style={{ filter: "drop-shadow(0 24px 40px oklch(0 0 0 / 0.14))" }} />
               </motion.div>
             </motion.div>
 

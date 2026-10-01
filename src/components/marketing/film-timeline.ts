@@ -64,12 +64,12 @@ export const FILM = {
     caption: [0.277, 0.322, 0.425, 0.457] as Fade,
     captionLag: 0.023,
     landAt: 0.322,
-    map: [0.27, 0.322, 0.425, 0.451] as Fade,
-    mapRise: [0.27, 0.348] as Move,
-    walk: [0.283, 0.348] as Move,
-    pulse: [0.341, 0.386] as Move,
-    banner: [0.354, 0.38, 0.425, 0.451] as Fade,
-    bannerDrop: [0.354, 0.386] as Move,
+    map: [0.27, 0.31, 0.425, 0.451] as Fade,
+    mapRise: [0.27, 0.33] as Move,
+    walk: [0.28, 0.318] as Move,
+    pulse: [0.312, 0.345] as Move,
+    banner: [0.322, 0.345, 0.425, 0.451] as Fade,
+    bannerDrop: [0.322, 0.35] as Move,
   },
 
   /** 4. The owner writes a notice; it flies to the phone and lands. */
@@ -144,13 +144,13 @@ export const FILM = {
      *  transitions. Chapter 3 stays a touch smaller so the crowd shows. The
      *  card chapters hold a close-up so the pass reads. */
     zoom: {
-      keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.354, 0.38, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 1],
+      keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.322, 0.35, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 1],
       values: [1.5, 1, 1, 1.25, 1.25, 1, 1, 1.22, 1.22, 1, 0.94, 0.94, 1.12, 1.12, 0.96, 1.1, 1.1, 1.3, 1.3],
     } as Keyframes,
     /** Phones: a smaller open and gentler push-ins (the captions sit right
      *  under the phone). */
     zoomNarrow: {
-      keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.354, 0.38, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 1],
+      keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.322, 0.35, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 1],
       values: [1.3, 1, 1, 1.1, 1.1, 1, 1, 1.1, 1.1, 1, 1, 1, 1.08, 1.08, 1, 1.05, 1.05, 1.1, 1.1],
     } as Keyframes,
     /** x as a function of (shift, side): shift puts the phone right of the
