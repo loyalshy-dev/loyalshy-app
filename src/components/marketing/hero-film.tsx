@@ -286,9 +286,10 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
             {/* The phone */}
             <motion.div style={{ rotateY, rotateX, scale, y: lift, transformOrigin, transformStyle: "preserve-3d", willChange: "transform" }}>
               <PhoneFrame width="var(--pw)" screenBackground={SCREEN_BG} statusColor={statusColor}>
-                <LockScreen opacity={lockOpacity} dim={lockDim} pushClock={atOpen}>
+                <LockScreen opacity={lockOpacity} dim={lockDim}>
                   {/* The open: a proximity notification drops in from under the
-                      island, stays a second and leaves, on a loop */}
+                      island over the lock screen, stays three seconds and
+                      leaves, on a loop */}
                   {atOpen && (
                     <motion.div
                       animate={{ y: [-90, 40, 40, -90], opacity: [0, 1, 1, 0] }}
