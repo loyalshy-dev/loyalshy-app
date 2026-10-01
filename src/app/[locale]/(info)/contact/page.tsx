@@ -3,7 +3,7 @@ import { Suspense } from "react"
 import { Mail, MessageSquare, Handshake, HelpCircle, ArrowRight } from "lucide-react"
 import { getTranslations, getMessages, setRequestLocale } from "next-intl/server"
 import type { Locale } from "@/i18n/config"
-import { marketingAlternates } from "@/i18n/marketing"
+import { marketingAlternates, marketingSocial } from "@/i18n/marketing"
 import { NextIntlClientProvider } from "next-intl"
 import { MarketingNavbar } from "@/components/marketing/navbar"
 import { MarketingFooter } from "@/components/marketing/footer"
@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: t("title"),
     description: t("description"),
     alternates: marketingAlternates(locale, "/contact"),
+    ...marketingSocial(locale, "/contact", `${t("title")} — Loyalshy`, t("description")),
     robots: { index: true, follow: true },
   }
 }

@@ -52,6 +52,35 @@ export function parseMarketingPath(pathname: string): { locale: Locale; path: Ma
     : null
 }
 
+/** Served by src/app/opengraph-image.png (1200×630). */
+const OG_IMAGE = { url: "/opengraph-image.png", width: 1200, height: 630, alt: "Loyalshy" }
+
+/**
+ * Open Graph + Twitter tags for a marketing page. Set explicitly per page:
+ * a child's `openGraph` replaces the parent's wholesale, so without
+ * `images` here the root opengraph-image never reaches these pages.
+ */
+export function marketingSocial(locale: Locale, path: MarketingPath, title: string, description: string) {
+  return {
+    openGraph: {
+      type: "website" as const,
+      siteName: "Loyalshy",
+      url: marketingUrl(locale, path),
+      title,
+      description,
+      locale: ogLocales[locale],
+      alternateLocale: locales.filter((l) => l !== locale).map((l) => ogLocales[l]),
+      images: [OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image" as const,
+      title,
+      description,
+      images: [OG_IMAGE.url],
+    },
+  }
+}
+
 /** canonical + hreflang alternates for a marketing page. */
 export function marketingAlternates(locale: Locale, path: MarketingPath) {
   const languages: Record<string, string> = {}

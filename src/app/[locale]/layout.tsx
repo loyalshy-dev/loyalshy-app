@@ -4,7 +4,7 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 import { RootDocument, baseMetadata, rootViewport } from "@/components/root-document"
 import { LocaleCookieSync } from "@/components/marketing/locale-cookie-sync"
 import { locales } from "@/i18n/config"
-import { isLocale, marketingAlternates, ogLocales } from "@/i18n/marketing"
+import { isLocale, marketingAlternates, marketingSocial } from "@/i18n/marketing"
 
 // Root layout for the marketing site. The locale comes from the URL
 // (/, /es, /fr — see src/i18n/marketing.ts), so every language is its
@@ -34,19 +34,7 @@ export async function generateMetadata({ params }: Omit<LayoutProps, "children">
     },
     description: t("description"),
     alternates: marketingAlternates(locale, "/"),
-    openGraph: {
-      type: "website",
-      siteName: "Loyalshy",
-      title: t("title"),
-      description: t("description"),
-      locale: ogLocales[locale],
-      alternateLocale: locales.filter((l) => l !== locale).map((l) => ogLocales[l]),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: t("title"),
-      description: t("description"),
-    },
+    ...marketingSocial(locale, "/", t("title"), t("description")),
   }
 }
 
