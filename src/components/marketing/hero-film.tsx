@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { CHAPTERS, FILM, PIN_VH, type Chapter } from "./film-timeline"
 import { useCaption, useFade, useMove, useVisibility } from "./film-hooks"
 import { CalloutLines, CalloutList, COUPON_PARTS, STAMP_PARTS } from "./film-callouts"
-import { AppIcon, AppScreen, BANNERS, CameraScreen, CouponFrame, LockNotification, LockScreen, PASS_TOP, PassScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
+import { AppIcon, AppScreen, BANNERS, CameraScreen, CouponFrame, LockNotification, LockScreen, OPEN_LOOP, PASS_TOP, PassScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
 import { FilmRail } from "./film-rail"
 import { MapScene } from "./map-scene"
 import { DEMO_PASS_RATIO } from "./demo-pass"
@@ -154,6 +154,10 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   }
   const intro = useFade(p, FILM.intro.fade)
   const introVisibility = useVisibility(intro)
+  // The opening loop runs only while the stage is at the open; it remounts
+  // (and restarts in step) whenever the visitor scrolls back up.
+  const [atOpen, setAtOpen] = useState(true)
+  useMotionValueEvent(p, "change", (v) => setAtOpen(v < FILM.intro.fade[3]))
 
   // The rail jumps to a chapter: progress 0 is the stage's top at the
   // viewport's top, 1 is its bottom at the viewport's bottom.
@@ -282,7 +286,18 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
             {/* The phone */}
             <motion.div style={{ rotateY, rotateX, scale, y: lift, transformOrigin, transformStyle: "preserve-3d", willChange: "transform" }}>
               <PhoneFrame width="var(--pw)" screenBackground={SCREEN_BG} statusColor={statusColor}>
-                <LockScreen opacity={lockOpacity} dim={lockDim}>
+                <LockScreen opacity={lockOpacity} dim={lockDim} pushClock={atOpen}>
+                  {/* The open: a proximity notification drops in from under the
+                      island, stays a second and leaves, on a loop */}
+                  {atOpen && (
+                    <motion.div
+                      animate={{ y: [-90, 40, 40, -90], opacity: [0, 1, 1, 0] }}
+                      transition={OPEN_LOOP}
+                      className="absolute left-3 right-3 top-0 z-20"
+                    >
+                      <RealBanner {...BANNERS.near} alt="" />
+                    </motion.div>
+                  )}
                   <LockNotification opacity={nearOpacity} y={nearY}>
                     <RealBanner {...BANNERS.near} alt="" />
                   </LockNotification>

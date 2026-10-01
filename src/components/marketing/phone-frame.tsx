@@ -14,6 +14,7 @@ import { INK } from "./tokens"
 // own proportions. `width` may itself be a `var()` from an ancestor — it is
 // copied into `--phone-w`, never into a variable of the same name.
 
+// Signal and battery only: the customer is out on the street, on cellular.
 function StatusIcons({ color }: { color: string }) {
   return (
     <span className="flex items-center gap-[5px]" aria-hidden="true">
@@ -22,11 +23,6 @@ function StatusIcons({ color }: { color: string }) {
         <rect x="4" y="4" width="3" height="6" rx="0.8" />
         <rect x="8" y="2" width="3" height="8" rx="0.8" />
         <rect x="12" y="0" width="3" height="10" rx="0.8" />
-      </svg>
-      <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round">
-        <path d="M1 3.5a9 9 0 0 1 12 0" />
-        <path d="M3.4 6a5.6 5.6 0 0 1 7.2 0" />
-        <path d="M5.8 8.4a2.2 2.2 0 0 1 2.4 0" />
       </svg>
       <svg width="24" height="11" viewBox="0 0 24 11" fill="none">
         <rect x="0.5" y="0.5" width="20" height="10" rx="3" stroke={color} strokeOpacity="0.4" />

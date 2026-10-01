@@ -66,7 +66,12 @@ export function LockNotification({ opacity, y, children }: { opacity?: MotionVal
 // The lock screen as iOS lays it out: date and time up top, the flashlight
 // and camera buttons in the bottom corners, the home indicator under them.
 // Type scales with the phone (`--phone-w`, set by PhoneFrame).
-export function LockScreen({ opacity, dim, children }: { opacity?: MotionValue<number>; /** 0–1: how much the wallpaper darkens behind a notification. */ dim?: MotionValue<number>; children?: React.ReactNode }) {
+/** The opening loop: a notification drops in from under the island, stays
+ *  a second, and leaves; the clock steps down to make room, as iOS does.
+ *  Shared by the banner and the clock so they stay in step. */
+export const OPEN_LOOP = { duration: 1.7, times: [0, 0.18, 0.82, 1], ease: "easeOut" as const, repeat: Infinity, repeatDelay: 1.6 }
+
+export function LockScreen({ opacity, dim, pushClock, children }: { opacity?: MotionValue<number>; /** 0–1: how much the wallpaper darkens behind a notification. */ dim?: MotionValue<number>; /** Run the opening loop's clock step. */ pushClock?: boolean; children?: React.ReactNode }) {
   const t = useTranslations("hero")
   const btn = "absolute bottom-[34px] grid size-11 place-items-center rounded-full"
   const btnStyle = { background: "rgba(255,255,255,0.18)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }
@@ -76,10 +81,16 @@ export function LockScreen({ opacity, dim, children }: { opacity?: MotionValue<n
         <Image src="/hero/wallpaper.webp" alt="" fill sizes="300px" className="object-cover" priority />
         <div aria-hidden="true" className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.28) 100%)" }} />
         <motion.div aria-hidden="true" className="absolute inset-0" style={{ background: "#000", opacity: dim }} />
-        <div className="relative text-center" style={{ paddingTop: "calc(var(--phone-w) * 0.2)", color: "#fff", textShadow: "0 1px 12px rgba(0,0,0,0.35)" }}>
+        <motion.div
+          key={pushClock ? "loop" : "still"}
+          animate={pushClock ? { y: [0, 46, 46, 0] } : { y: 0 }}
+          transition={pushClock ? OPEN_LOOP : { duration: 0.3 }}
+          className="relative text-center"
+          style={{ paddingTop: "calc(var(--phone-w) * 0.2)", color: "#fff", textShadow: "0 1px 12px rgba(0,0,0,0.35)" }}
+        >
           <p className="text-[13px] font-medium">{t("lockDate")}</p>
           <p className="font-display font-bold leading-none tracking-tight" style={{ fontSize: "calc(var(--phone-w) * 0.22)" }}>9:41</p>
-        </div>
+        </motion.div>
         {/* Flashlight */}
         <div className={`${btn} left-[30px]`} style={btnStyle} aria-hidden="true">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
