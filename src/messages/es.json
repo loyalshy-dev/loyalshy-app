@@ -243,7 +243,11 @@
         "announcements": "5 avisos por semana"
       }
     },
-    "billingPeriod": "Periodo de facturación"
+    "billingPeriod": "Periodo de facturación",
+    "billedYearly": "Facturado al año",
+    "perYear": "al año",
+    "multiLocation": "¿Varios locales o una cadena? Un plan a medida, con todos los locales en un solo panel.",
+    "multiLocationCta": "Pide una demo"
   },
   "faq": {
     "title": "Preguntas frecuentes",

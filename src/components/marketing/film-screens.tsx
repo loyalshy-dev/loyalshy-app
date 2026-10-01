@@ -105,7 +105,7 @@ export function LockScreen({ opacity, dim, children }: { opacity?: MotionValue<n
   return (
     <motion.div style={{ opacity }} className="absolute inset-0">
       <div className="absolute inset-0" style={{ background: "#14102a" }}>
-        <Image src="/hero/wallpaper.webp" alt="" fill sizes="300px" className="object-cover" priority />
+        <Image src="/hero/wallpaper.webp" alt="" fill sizes="300px" className="object-cover" priority fetchPriority="high" />
         <div aria-hidden="true" className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.28) 100%)" }} />
         <motion.div aria-hidden="true" className="absolute inset-0" style={{ background: "#000", opacity: dim }} />
         <div className="relative text-center" style={{ paddingTop: "calc(var(--phone-w) * 0.2)", color: "#fff", textShadow: "0 1px 12px rgba(0,0,0,0.35)" }}>
@@ -324,7 +324,7 @@ export function WalletButtons({ demoUrl, align }: { demoUrl: string; align: "lef
   const m = align === "left" ? "mx-auto lg:mx-0" : "mx-auto"
   return (
     <div>
-      <p className={`mk-body-sm ${m} max-w-[34ch]`} style={{ color: "var(--mk-text-muted)" }}>
+      <p className={`mk-body-sm mk-film-tryline ${m} max-w-[34ch]`} style={{ color: "var(--mk-text-muted)" }}>
         <strong style={{ color: "var(--mk-text)", fontWeight: 600 }}>{tDemo("title")}</strong> {t("film.tryLine")}
       </p>
       <div className={`mt-3 flex flex-wrap items-center gap-3 ${j}`}>

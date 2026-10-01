@@ -90,6 +90,7 @@ export function RootDocument({
         {/* Cabinet Grotesk (Indian Type Foundry / Fontshare) — display
             sizes only, via globals.css. */}
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
+        <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="" />
         <link
           rel="stylesheet"
           href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&display=swap"

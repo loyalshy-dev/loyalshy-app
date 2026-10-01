@@ -243,7 +243,11 @@
         "announcements": "5 messages par semaine"
       }
     },
-    "billingPeriod": "Période de facturation"
+    "billingPeriod": "Période de facturation",
+    "billedYearly": "Facturé à l'année",
+    "perYear": "par an",
+    "multiLocation": "Plusieurs établissements ou une chaîne ? Un plan sur mesure, tous vos établissements dans un seul tableau de bord.",
+    "multiLocationCta": "Demander une démo"
   },
   "faq": {
     "title": "Questions fréquemment posées",

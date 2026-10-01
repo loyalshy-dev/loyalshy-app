@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Check } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { PLANS, type PlanId } from "@/lib/plans"
+import { useLocalePath } from "@/i18n/use-locale-path"
 import { SectionHeading } from "./section-heading"
 
 // Apple's "compare" layout: centered columns, no box around them, a
@@ -53,8 +54,8 @@ function BillingToggle({ period, onChange }: { period: BillingPeriod; onChange: 
           </button>
         ))}
       </div>
-      <span className="mk-caption font-medium" style={{ color: "var(--mk-text-muted)" }}>
-        {t("save20")}
+      <span className="mk-caption font-medium" style={{ color: "var(--mk-text-muted)" }} aria-live="polite">
+        {period === "annual" ? t("billedYearly") : t("save20")}
       </span>
     </div>
   )
@@ -64,6 +65,7 @@ export function Pricing() {
   const [period, setPeriod] = React.useState<BillingPeriod>("monthly")
   const t = useTranslations("pricing")
   const tc = useTranslations("common")
+  const lp = useLocalePath()
 
   return (
     <section id="pricing" className="scroll-mt-24" style={{ background: "var(--mk-bg)" }}>
@@ -96,9 +98,9 @@ export function Pricing() {
                   <span className="text-[15px] font-medium" style={{ color: "var(--mk-text-dimmed)" }}>{tc("perMonth")}</span>
                 </p>
                 <p className="mk-caption mt-2 min-h-[1lh]" style={{ color: "var(--mk-text-dimmed)" }}>
-                  {saved > 0 ? `${saved} € ${t("savedPerYear")}` : ""}
+                  {saved > 0 ? `${price * 12} € ${t("perYear")} · ${saved} € ${t("savedPerYear")}` : ""}
                 </p>
-                <Link href="/register" className={col.recommended ? "mk-btn-primary mt-5 w-full" : "mk-btn-ghost mt-5 w-full"}>
+                <Link href="/register" className={col.recommended ? "mk-btn-primary mt-5 w-full" : "mk-btn-ghost mt-5 w-full"} aria-label={`${tc("getStarted")} · ${t(`${col.key}.name`)}`}>
                   {tc("getStarted")}
                 </Link>
                 <ul className="mt-6 w-full border-t pt-5 text-left" style={{ borderColor: "var(--mk-border)" }}>
@@ -114,6 +116,13 @@ export function Pricing() {
           })}
         </div>
 
+        {/* Several locations or a chain: a word, not a column */}
+        <p className="mk-body mt-14 text-center" style={{ color: "var(--mk-text-muted)" }}>
+          {t("multiLocation")}{" "}
+          <Link href={`${lp("/contact")}?type=sales`} className="font-medium underline underline-offset-4" style={{ color: "var(--mk-text)" }}>
+            {t("multiLocationCta")}
+          </Link>
+        </p>
       </div>
     </section>
   )

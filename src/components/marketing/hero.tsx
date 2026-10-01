@@ -10,12 +10,14 @@ const PLAY_STORE_URL = process.env.NEXT_PUBLIC_PLAY_STORE_URL || "https://play.g
 // Apple's opener: the name of the thing in two lines, one tagline, the
 // action, and then the film — the phone fills the fold and the story plays
 // on a pinned stage, driven by scroll. The lead lives in the film's captions.
+// The section keeps a breath under the film so its last frame does not
+// land on the next title.
 export async function Hero() {
   const t = await getTranslations("hero")
   const tCommon = await getTranslations("common")
 
   return (
-    <section className="relative" style={{ background: "var(--mk-bg)" }}>
+    <section className="relative pb-[10vh] lg:pb-[14vh]" style={{ background: "var(--mk-bg)" }}>
       <div className="mk-wrap flex flex-col items-center pt-10 pb-4 text-center sm:pt-14 lg:pt-16 lg:pb-6">
         <h1 className="font-display mk-display-1 max-w-[18ch]" style={{ color: "var(--mk-text)" }}>
           {t("title")}
@@ -29,7 +31,7 @@ export async function Hero() {
           </Link>
           <Link
             href={DEMO_JOIN_URL ? "#try-demo" : "#features"}
-            className="hidden text-base font-semibold underline-offset-4 hover:underline sm:inline"
+            className="text-base font-semibold underline-offset-4 hover:underline"
             style={{ color: "var(--mk-text)" }}
           >
             {DEMO_JOIN_URL ? t("tryInWallet") : t("seeHowItWorks")}
