@@ -106,7 +106,8 @@
       "ch7": {
         "title": "El cupón.",
         "caption": "Un descuento o un regalo con fecha. De un solo uso o de los que quieras."
-      }
+      },
+      "mapLabel": "Establecimiento"
     }
   },
   "featureShowcase": {

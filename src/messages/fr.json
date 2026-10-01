@@ -106,7 +106,8 @@
       "ch7": {
         "title": "Le coupon.",
         "caption": "Une remise ou un cadeau avec une date. À usage unique ou autant de fois que vous voulez."
-      }
+      },
+      "mapLabel": "Établissement"
     }
   },
   "featureShowcase": {
