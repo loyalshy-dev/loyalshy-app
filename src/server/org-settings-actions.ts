@@ -4,6 +4,7 @@ import crypto from "node:crypto"
 import { z } from "zod"
 import type { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { after } from "next/server"
 import { addDays } from "date-fns"
 import { getTranslations } from "next-intl/server"
 import { db } from "@/lib/db"
@@ -297,13 +298,76 @@ export async function getSettingsData() {
   }
 }
 
+// ─── Wallet Refresh ───────────────────────────────────────────
+
+/**
+ * Pushes a program- or org-level edit (name, logo, links, terms, design,
+ * locations) to passes already in wallets. Without it, holders only saw the
+ * edit on their pass's next stamp/redeem.
+ *
+ * - Google: those fields live on the loyalty class, shared by every holder
+ *   of a program and never touched by the per-pass object PATCHes — so the
+ *   class is rebuilt and PATCHed once per program.
+ * - Apple: each pass gets an APNs push (via `update-all-passes`, or directly
+ *   when Trigger.dev isn't configured) so the device re-fetches the .pkpass.
+ *   No lock-screen banner: changeMessage fields only fire when their value
+ *   changes, and these edits don't touch them.
+ *
+ * Omitting templateId refreshes every program of the organization. Runs
+ * after the response; best-effort.
+ */
+function scheduleWalletRefresh(
+  target: { organizationId: string; templateId?: string },
+  reason: "DESIGN_CHANGE" | "TEMPLATE_CHANGE",
+) {
+  const { organizationId, templateId } = target
+  after(async () => {
+    try {
+      const google = await import("@/lib/wallet/google/generate-pass")
+      if (templateId) await google.syncGoogleLoyaltyClass(templateId)
+      else await google.syncGoogleLoyaltyClassesForOrganization(organizationId)
+    } catch (err: unknown) {
+      console.error("Google class sync failed:", err instanceof Error ? err.message : "Unknown error")
+    }
+
+    if (process.env.TRIGGER_SECRET_KEY) {
+      try {
+        const { tasks } = await import("@trigger.dev/sdk")
+        await tasks.trigger("update-all-passes", { organizationId, templateId, reason })
+      } catch (err: unknown) {
+        console.error("Failed to trigger bulk pass update:", err instanceof Error ? err.message : "Unknown error")
+      }
+      return
+    }
+
+    const instanceScope = {
+      status: "ACTIVE" as const,
+      passTemplate: { organizationId, ...(templateId ? { id: templateId } : {}) },
+    }
+    const [{ notifyGooglePassUpdate }, { notifyApplePassUpdate }, googleInstances, appleInstances] = await Promise.all([
+      import("@/lib/wallet/google/update-pass"),
+      import("@/lib/wallet/apple/update-pass"),
+      db.passInstance.findMany({ where: { ...instanceScope, walletProvider: "GOOGLE" }, select: { id: true } }),
+      db.passInstance.findMany({ where: { ...instanceScope, walletProvider: "APPLE" }, select: { id: true } }),
+    ])
+    await Promise.allSettled([
+      ...googleInstances.map((pi) => notifyGooglePassUpdate(pi.id)),
+      ...appleInstances.map((pi) => notifyApplePassUpdate(pi.id)),
+    ])
+  })
+}
+
 // ─── Update Organization Profile ──────────────────────────────
 
 export async function updateOrganizationProfile(input: z.infer<typeof updateProfileSchema>) {
   const parsed = updateProfileSchema.parse(input)
   await assertOrganizationRole(parsed.organizationId, "owner")
 
-  await db.organization.update({
+  const before = await db.organization.findUnique({
+    where: { id: parsed.organizationId },
+    select: { name: true, phone: true, website: true },
+  })
+  const updated = await db.organization.update({
     where: { id: parsed.organizationId },
     data: {
       name: sanitizeText(parsed.name, 100),
@@ -312,10 +376,15 @@ export async function updateOrganizationProfile(input: z.infer<typeof updateProf
       website: parsed.website || null,
       timezone: parsed.timezone,
     },
+    select: { name: true, phone: true, website: true },
   })
 
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
+  // Address and timezone aren't on the pass — don't push every holder for them
+  if (JSON.stringify(before) !== JSON.stringify(updated)) {
+    scheduleWalletRefresh({ organizationId: parsed.organizationId }, "TEMPLATE_CHANGE")
+  }
   return { success: true }
 }
 
@@ -958,42 +1027,7 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
   // If design hash changed, trigger bulk pass update
   const hashChanged = existingDesign?.designHash !== newHash
   if (hashChanged) {
-    if (process.env.TRIGGER_SECRET_KEY) {
-      import("@trigger.dev/sdk")
-        .then(({ tasks }) =>
-          tasks.trigger("update-all-passes", {
-            organizationId: template.organizationId,
-            templateId: parsed.templateId,
-            reason: "DESIGN_CHANGE",
-          })
-        )
-        .catch((err: unknown) =>
-          console.error("Failed to trigger bulk pass update:", err instanceof Error ? err.message : "Unknown error")
-        )
-    } else {
-      import("@/lib/wallet/google/update-pass")
-        .then(async ({ notifyGooglePassUpdate }) => {
-          const instances = await db.passInstance.findMany({
-            where: { passTemplateId: parsed.templateId, walletProvider: "GOOGLE", status: "ACTIVE" },
-            select: { id: true },
-          })
-          await Promise.allSettled(instances.map((pi) => notifyGooglePassUpdate(pi.id)))
-        })
-        .catch((err: unknown) =>
-          console.error("Direct Google pass update failed:", err instanceof Error ? err.message : "Unknown error")
-        )
-      import("@/lib/wallet/apple/update-pass")
-        .then(async ({ notifyApplePassUpdate }) => {
-          const instances = await db.passInstance.findMany({
-            where: { passTemplateId: parsed.templateId, walletProvider: "APPLE", status: "ACTIVE" },
-            select: { id: true },
-          })
-          await Promise.allSettled(instances.map((pi) => notifyApplePassUpdate(pi.id)))
-        })
-        .catch((err: unknown) =>
-          console.error("Direct Apple pass update failed:", err instanceof Error ? err.message : "Unknown error")
-        )
-    }
+    scheduleWalletRefresh({ organizationId: template.organizationId, templateId: parsed.templateId }, "DESIGN_CHANGE")
   }
 
   revalidatePath("/dashboard/settings")
@@ -1338,6 +1372,7 @@ export async function uploadOrganizationLogo(formData: FormData) {
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/programs")
+  scheduleWalletRefresh({ organizationId }, "DESIGN_CHANGE")
   return { success: true, url: logoUrl, appleUrl, googleUrl }
 }
 
@@ -1361,6 +1396,7 @@ export async function deleteOrganizationLogo(organizationId: string) {
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/programs")
+  scheduleWalletRefresh({ organizationId }, "DESIGN_CHANGE")
   return { success: true }
 }
 
@@ -1415,6 +1451,7 @@ export async function uploadProgramLogo(formData: FormData) {
   })
 
   revalidatePath(`/dashboard/programs/${templateId}`)
+  scheduleWalletRefresh({ organizationId, templateId }, "DESIGN_CHANGE")
   return { success: true, url: logoUrl, appleUrl, googleUrl }
 }
 
@@ -1436,6 +1473,7 @@ export async function deleteProgramLogo(organizationId: string, templateId: stri
   })
 
   revalidatePath(`/dashboard/programs/${templateId}`)
+  scheduleWalletRefresh({ organizationId, templateId }, "DESIGN_CHANGE")
   return { success: true }
 }
 
@@ -1465,6 +1503,7 @@ export async function uploadProgramPlatformLogo(formData: FormData) {
 
   await db.passDesign.update({ where: { passTemplateId: templateId }, data: { [field]: url } })
   revalidatePath(`/dashboard/programs/${templateId}`)
+  scheduleWalletRefresh({ organizationId, templateId }, "DESIGN_CHANGE")
   return { success: true, url }
 }
 
@@ -1484,6 +1523,7 @@ export async function resetProgramPlatformLogo(organizationId: string, templateI
   await db.passDesign.update({ where: { passTemplateId: templateId }, data: { [field]: sourceUrl } })
 
   revalidatePath(`/dashboard/programs/${templateId}`)
+  scheduleWalletRefresh({ organizationId, templateId }, "DESIGN_CHANGE")
   return { success: true, url: sourceUrl }
 }
 
@@ -1505,6 +1545,7 @@ export async function useOrgLogoForProgram(organizationId: string, templateId: s
   })
 
   revalidatePath(`/dashboard/programs/${templateId}`)
+  scheduleWalletRefresh({ organizationId, templateId }, "DESIGN_CHANGE")
   return { success: true }
 }
 
@@ -1562,7 +1603,7 @@ export async function updatePassTemplate(input: z.infer<typeof updatePassTemplat
 
   const template = await db.passTemplate.findUnique({
     where: { id: parsed.templateId },
-    select: { organizationId: true, config: true, passType: true },
+    select: { organizationId: true, config: true, passType: true, name: true, termsAndConditions: true, endsAt: true },
   })
 
   if (!template || template.organizationId !== parsed.organizationId) {
@@ -1586,14 +1627,20 @@ export async function updatePassTemplate(input: z.infer<typeof updatePassTemplat
   if (parsed.endsAt !== undefined) updateData.endsAt = parsed.endsAt
   if (parsed.config) updateData.config = JSON.parse(JSON.stringify(parsed.config))
 
-  await db.passTemplate.update({
+  const updated = await db.passTemplate.update({
     where: { id: parsed.templateId },
     data: updateData as Prisma.PassTemplateUpdateInput,
+    select: { name: true, termsAndConditions: true, endsAt: true, config: true },
   })
 
   revalidatePath("/dashboard/programs")
   revalidatePath(`/dashboard/programs/${parsed.templateId}`)
 
+  // Only fields rendered on the pass; a status-only save shouldn't push every holder
+  const passFields = (x: typeof updated) => JSON.stringify([x.name, x.termsAndConditions, x.endsAt, x.config])
+  if (passFields(template) !== passFields(updated)) {
+    scheduleWalletRefresh({ organizationId: parsed.organizationId, templateId: parsed.templateId }, "TEMPLATE_CHANGE")
+  }
   return { success: true }
 }
 
@@ -1659,6 +1706,7 @@ export async function uploadPlatformLogo(formData: FormData) {
 
   await db.organization.update({ where: { id: organizationId }, data: { [field]: url } })
   revalidatePath("/dashboard/settings")
+  scheduleWalletRefresh({ organizationId }, "DESIGN_CHANGE")
   return { success: true, url }
 }
 
@@ -1676,6 +1724,7 @@ export async function resetPlatformLogo(organizationId: string, platform: "apple
   await db.organization.update({ where: { id: organizationId }, data: { [field]: sourceUrl } })
 
   revalidatePath("/dashboard/settings")
+  scheduleWalletRefresh({ organizationId }, "DESIGN_CHANGE")
   return { success: true, url: sourceUrl }
 }
 
@@ -1696,6 +1745,7 @@ export async function deletePlatformLogo(organizationId: string, platform: "appl
   revalidatePath("/dashboard/settings")
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/programs")
+  scheduleWalletRefresh({ organizationId }, "DESIGN_CHANGE")
   return { success: true }
 }
 

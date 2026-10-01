@@ -21,7 +21,7 @@ const ALLOWED_ORIGINS: ReadonlySet<string> = new Set(
 
 const STATIC_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Request-Id",
+  "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Request-Id, X-App-Version",
   "Access-Control-Expose-Headers": "X-Request-Id",
   "Access-Control-Max-Age": "86400",
   Vary: "Origin",
