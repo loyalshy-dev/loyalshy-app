@@ -112,30 +112,61 @@
   },
   "featureShowcase": {
     "title": "The dashboard.",
-    "browserUrl": "loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Dashboard",
-        "description": "Each day's visits, stamps and redemptions, and which customers come back most.",
-        "alt": "Program overview dashboard with stat cards and template details"
+        "description": "Each day's visits, stamps and redemptions, and which customers come back most."
       },
       "cardDesigner": {
         "label": "Card designer",
-        "description": "Your logo, your colors, your reward. You see the card exactly as it will look in the wallet while you design it.",
-        "alt": "Card design studio with floating toolbar and live wallet pass preview"
+        "description": "Your logo, your colors, your reward. You see the card exactly as it will look in the wallet while you design it."
       },
       "distribution": {
         "label": "Distribution",
-        "description": "The QR code to print in several sizes, a link to share, and the option to hand a card out yourself.",
-        "alt": "Distribution page with QR code, shareable link, and print sizes"
-      },
-      "team": {
-        "label": "Team",
-        "description": "Invite your team. Staff stamp and redeem; billing and settings stay yours.",
-        "alt": "Team settings showing members with roles and invite button"
+        "description": "The QR code to print in several sizes, a link to share, and the option to hand a card out yourself."
       }
     },
-    "lead": "Who comes back, and when, at a glance. And everything you need to run the program."
+    "lead": "Who comes back, and when, at a glance. And everything you need to run the program.",
+    "mock": {
+      "overview": "Overview",
+      "newAction": "New interaction",
+      "contacts": "Customers",
+      "activePasses": "Active passes",
+      "activityMonth": "Activity this month",
+      "redeemedMonth": "Redeemed this month",
+      "stamps": "stamps",
+      "coupons": "coupons",
+      "activity": "Activity",
+      "chartTicks": [
+        "Sep 1",
+        "Sep 8",
+        "Sep 15",
+        "Sep 22",
+        "Sep 30"
+      ],
+      "busiestDays": "Busiest days",
+      "days": [
+        "M",
+        "T",
+        "W",
+        "T",
+        "F",
+        "S",
+        "S"
+      ],
+      "recent": "Recent activity",
+      "recentStamp": "Stamp added · Stamp card",
+      "recentRedeem": "Coupon redeemed · 2-for-1 coffees",
+      "recentJoin": "New customer · from the QR",
+      "ago2": "2 min ago",
+      "ago14": "14 min ago",
+      "ago1h": "1 h ago",
+      "topCustomers": "Top customers",
+      "programs": "Programs",
+      "couponProgram": "2-for-1 coupon",
+      "enrolled": "enrolled",
+      "active": "Active"
+    }
   },
   "gallery": {
     "title": "The loyalty card, up close.",

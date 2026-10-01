@@ -112,30 +112,61 @@
   },
   "featureShowcase": {
     "title": "El panel.",
-    "browserUrl": "loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Panel",
-        "description": "Las visitas, los sellos y los canjes de cada día, y qué clientes vuelven más.",
-        "alt": "Panel de control del programa con tarjetas de estadísticas y detalles de plantilla"
+        "description": "Las visitas, los sellos y los canjes de cada día, y qué clientes vuelven más."
       },
       "cardDesigner": {
         "label": "Diseñador",
-        "description": "Tu logo, tus colores y tu recompensa. Ves la tarjeta tal como quedará en el Wallet mientras la diseñas.",
-        "alt": "Estudio de diseño de tarjetas con barra flotante y vista previa del pase"
+        "description": "Tu logo, tus colores y tu recompensa. Ves la tarjeta tal como quedará en el Wallet mientras la diseñas."
       },
       "distribution": {
         "label": "Distribución",
-        "description": "El QR para imprimir en varios tamaños, el enlace para compartir y la opción de dar la tarjeta a mano.",
-        "alt": "Página de distribución con código QR, enlace compartible y tamaños de impresión"
-      },
-      "team": {
-        "label": "Equipo",
-        "description": "Invita a tu equipo. Los empleados sellan y canjean; la facturación y los ajustes son solo tuyos.",
-        "alt": "Configuración del equipo mostrando miembros con roles y botón de invitación"
+        "description": "El QR para imprimir en varios tamaños, el enlace para compartir y la opción de dar la tarjeta a mano."
       }
     },
-    "lead": "Quién vuelve y cuándo, de un vistazo. Y todo lo que necesitas para llevar el programa."
+    "lead": "Quién vuelve y cuándo, de un vistazo. Y todo lo que necesitas para llevar el programa.",
+    "mock": {
+      "overview": "Resumen",
+      "newAction": "Nueva interacción",
+      "contacts": "Clientes",
+      "activePasses": "Pases activos",
+      "activityMonth": "Actividad este mes",
+      "redeemedMonth": "Canjes este mes",
+      "stamps": "sellos",
+      "coupons": "cupones",
+      "activity": "Actividad",
+      "chartTicks": [
+        "1 sep",
+        "8 sep",
+        "15 sep",
+        "22 sep",
+        "30 sep"
+      ],
+      "busiestDays": "Días con más actividad",
+      "days": [
+        "L",
+        "M",
+        "X",
+        "J",
+        "V",
+        "S",
+        "D"
+      ],
+      "recent": "Actividad reciente",
+      "recentStamp": "Sello añadido · Tarjeta de sellos",
+      "recentRedeem": "Cupón canjeado · 2×1 en cafés",
+      "recentJoin": "Nueva clienta · desde el QR",
+      "ago2": "hace 2 min",
+      "ago14": "hace 14 min",
+      "ago1h": "hace 1 h",
+      "topCustomers": "Mejores clientes",
+      "programs": "Programas",
+      "couponProgram": "Cupón 2×1",
+      "enrolled": "inscritos",
+      "active": "Activo"
+    }
   },
   "gallery": {
     "title": "La tarjeta de fidelización, por dentro.",

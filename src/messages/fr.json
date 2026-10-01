@@ -112,30 +112,61 @@
   },
   "featureShowcase": {
     "title": "Le tableau de bord.",
-    "browserUrl": "loyalshy.com",
     "tabs": {
       "dashboard": {
         "label": "Tableau de bord",
-        "description": "Les visites, les tampons et les récompenses de chaque jour, et les clients qui reviennent le plus.",
-        "alt": "Tableau de bord de programme avec cartes statistiques et détails du modèle"
+        "description": "Les visites, les tampons et les récompenses de chaque jour, et les clients qui reviennent le plus."
       },
       "cardDesigner": {
         "label": "Éditeur de cartes",
-        "description": "Votre logo, vos couleurs, votre récompense. Vous voyez la carte telle qu'elle sera dans le Wallet pendant que vous la créez.",
-        "alt": "Studio de design de cartes avec barre d'outils flottante et aperçu du pass en direct"
+        "description": "Votre logo, vos couleurs, votre récompense. Vous voyez la carte telle qu'elle sera dans le Wallet pendant que vous la créez."
       },
       "distribution": {
         "label": "Distribution",
-        "description": "Le QR code à imprimer en plusieurs formats, un lien à partager et la possibilité de remettre une carte vous-même.",
-        "alt": "Page de distribution avec QR code, lien partageable et tailles d'impression"
-      },
-      "team": {
-        "label": "Équipe",
-        "description": "Invitez votre équipe. Les employés tamponnent et valident les coupons ; la facturation et les réglages restent à vous.",
-        "alt": "Paramètres d'équipe montrant les membres avec leurs rôles et le bouton d'invitation"
+        "description": "Le QR code à imprimer en plusieurs formats, un lien à partager et la possibilité de remettre une carte vous-même."
       }
     },
-    "lead": "Qui revient, et quand, en un coup d'œil. Et tout ce qu'il faut pour gérer le programme."
+    "lead": "Qui revient, et quand, en un coup d'œil. Et tout ce qu'il faut pour gérer le programme.",
+    "mock": {
+      "overview": "Vue d'ensemble",
+      "newAction": "Nouvelle interaction",
+      "contacts": "Clients",
+      "activePasses": "Cartes actives",
+      "activityMonth": "Activité ce mois",
+      "redeemedMonth": "Validés ce mois",
+      "stamps": "tampons",
+      "coupons": "coupons",
+      "activity": "Activité",
+      "chartTicks": [
+        "1 sept.",
+        "8 sept.",
+        "15 sept.",
+        "22 sept.",
+        "30 sept."
+      ],
+      "busiestDays": "Jours les plus actifs",
+      "days": [
+        "L",
+        "M",
+        "M",
+        "J",
+        "V",
+        "S",
+        "D"
+      ],
+      "recent": "Activité récente",
+      "recentStamp": "Tampon ajouté · Carte à tampons",
+      "recentRedeem": "Coupon validé · 2 cafés pour 1",
+      "recentJoin": "Nouvelle cliente · via le QR",
+      "ago2": "il y a 2 min",
+      "ago14": "il y a 14 min",
+      "ago1h": "il y a 1 h",
+      "topCustomers": "Meilleurs clients",
+      "programs": "Programmes",
+      "couponProgram": "Coupon 2 pour 1",
+      "enrolled": "inscrits",
+      "active": "Actif"
+    }
   },
   "gallery": {
     "title": "La carte de fidélité, de près.",
