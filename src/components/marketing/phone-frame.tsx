@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react"
+import { INK } from "./tokens"
 
 // One phone for the whole landing, drawn to look like the real thing: a
 // titanium band with a light edge, a black bezel, the island with its
@@ -12,8 +13,6 @@ import type { CSSProperties, ReactNode } from "react"
 // the screen box and may read `--phone-w` / `--sw` (screen width) for their
 // own proportions. `width` may itself be a `var()` from an ancestor — it is
 // copied into `--phone-w`, never into a variable of the same name.
-
-const INK = "#1F1410"
 
 function StatusIcons({ color }: { color: string }) {
   return (

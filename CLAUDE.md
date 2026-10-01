@@ -32,7 +32,7 @@ Multi-tenant SaaS for cafés, salons, and small retail to run digital loyalty pr
 | immer | ~10.x | Immutable state updates (zustand middleware) |
 | zundo | ~2.x | Undo/redo temporal middleware for zustand |
 | next-themes | 0.4.x | Light/dark mode with system preference detection |
-| motion | 12.x | Scroll-triggered animations for marketing landing page (FadeIn, Stagger, ScaleIn) |
+| motion | 12.x | Scroll-driven stages on the landing (hero film, card anatomy) via `useScroll` + springs; import from `motion/react` |
 | html-to-image | 1.11.x | DOM-to-PNG export for card design download (transparent bg, 3x resolution) |
 | next-intl | 4.8.x | i18n — marketing pages locale-prefixed (`/`, `/es`, `/fr`); app pages cookie-based |
 
@@ -192,7 +192,11 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
       /contacts     → Contact table, columns (stacked type icons), filters, detail sheet (passes/visits/rewards tabs, issue pass), empty state
       /programs     → Program list view, tab nav, pass instances, settings
     /marketing      → Landing page components (hero, features, pricing, FAQ, social proof, motion animations)
-      motion.tsx     → Reusable scroll-triggered animation components (FadeIn, Stagger, StaggerItem, ScaleIn) — used below-fold only; Hero/SocialProof use CSS animations
+      tokens.ts       → INK / CORAL literals + the two spring weights shared by every stage
+      film-timeline.ts → every moment of the hero film as a named window on scroll progress (edit here to re-time a chapter)
+      film-hooks.ts   → useFade / useMove / useVisibility / useCaption (sprung transforms; visibility follows opacity)
+      film-screens.tsx → the phone's screens (lock, camera, Wallet, team app), real banners, Wallet buttons, store badges
+      hero-film.tsx   → the pinned film (orchestration only) + reduced-motion frames
       contact-form.tsx → Contact form client component (Zod validation, honeypot, inquiry type pre-selection from URL params)
       staff-app.tsx → Staff app promotional section with phone mockup, screenshot carousel, feature cards, store badges
       features-carousel-mobile.tsx → Mobile horizontal scroll carousel for features section (client component extracted from server component)
@@ -541,8 +545,10 @@ Scoped via `[data-brand="loyalshy"]` on `src/app/[locale]/page.tsx`, `src/app/(a
 **Motion** (`motion` 12.x = framer-motion; import from `motion/react`)
 - The one auto-play element is the hero phone (`hero-phone.tsx`): four scenes of what the customer sees, looping every 4.4s — the pass on the lock screen when they are near, a stamp landing with its banner, a message from the business arriving as a notification (announcements), the reward ready. Scenes crossfade with `AnimatePresence mode="wait"`; notifications drop in with a spring; the pass slides up; the fourth stamp lands via `.mk-hero-card [data-slot-state="filled"]` (`data-slot-state` is set by the renderer's `StampGridOverlay`). Story-style segments under the phone (`.mk-seg`) show which moment plays and a tap jumps to one. `useReducedMotion` → the stamp scene at rest, no loop. Copy in `hero.scenes.*`, `hero.lockDate`, `hero.now`
 - Everything else answers the user: tabs, accordion, the demo card flip
-- No per-section fade-ins. `motion.tsx` (FadeIn/Stagger/ScaleIn) is no longer used on the landing; the contact page still imports it
-- Media queries go through `useMediaQuery` (`use-media-query.ts`, `useSyncExternalStore`) — no setState-in-effect
+- No per-section fade-ins. `motion.tsx` (FadeIn/Stagger/ScaleIn) was deleted 2026-10-01; nothing imported it
+- Media queries go through `useMediaQuery` (`use-media-query.ts`, `useSyncExternalStore`) — no setState-in-effect. It reports `false` on the server and the first client render, so it must never size anything visible at scroll 0: the hero phone is sized in CSS (`.mk-film` sets `--pw`; `PhoneFrame` derives every dimension from `--phone-w`), FeatureShowcase keeps both layouts in the HTML and lets CSS pick, and CardAnatomy renders its stage only once mounted (its title is server HTML)
+- Anything that fades out also toggles `visibility` (`useVisibility`): opacity alone leaves links focusable and text readable by screen readers. The film's stage is `aria-hidden`; an `sr-only` list carries the four chapters
+- The accent token is `--mk-accent` (coral); `--mk-brand-purple`/`--mk-brand-green` and the legacy `@layer marketing :root` tokens are gone
 
 **Sections (page.tsx order)**
 Hero (copy + film; chapter 1 carries the env-gated "Pruébala" line and the Add to Apple/Google Wallet buttons once the pass is in, and `#try-demo` is a sentinel at ~33% of the film so links land on that frame; the exit is the team app with the env-gated store badges) → CardAnatomy (`card-anatomy.tsx`, id `cards`: a second scroll-pinned stage, `PIN_VH` 380 — the stamp card settles and five parts are called out with drawn lines and labels, then it turns over into a coupon rendered by the same `WalletPassRenderer` with `cardType: "COUPON"` and four parts get called out; copy in `gallery.stamp/coupon.*`, title "La tarjeta, por dentro." (user rejected "Tu marca, en su bolsillo.": no owner-possessive framing); reduced motion shows both cards with their parts listed) → FeatureShowcase (4 dashboard screens, vertical list on desktop, chips + phone on mobile) → Pricing (compare grid, ink checks, Enterprise lives in the FAQ) → FAQ (seven questions: how it works, vs paper, what customers need, POS, free plan, data, several shops) → ClosingCTA (coral band) → Footer. Order chosen 2026-09-29 so the page reads customer (film) → the card (anatomy) → the owner (dashboard) → the team (app) → price.

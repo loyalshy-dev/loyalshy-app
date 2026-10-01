@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { WalletPassRenderer, type WalletPassDesign } from "@/components/wallet-pass-renderer"
 import { DEMO_PASS_DESIGN, DEMO_PASS_LOGO, DEMO_PASS_TOTAL } from "./demo-pass"
 import { SectionHeading } from "./section-heading"
+import { CORAL, INK, SPRING_HEAVY, SPRING_LIGHT } from "./tokens"
 import { useMediaQuery } from "./use-media-query"
 
 // "Made with Loyalshy": the anatomy of the two cards, told by scroll. The
@@ -20,13 +21,20 @@ import { useMediaQuery } from "./use-media-query"
 // mounted so the server never paints the wrong size. The title is in the
 // server HTML either way.
 
-const INK = "#1F1410"
-const CORAL = "#FF6B47"
-const SPRING = { stiffness: 110, damping: 24, mass: 0.6 }
-const HEAVY = { stiffness: 70, damping: 22, mass: 1 }
 const PIN_VH = 540
 const CARD_RATIO = 450 / 320
 const MAX_PARTS = 5
+
+// The act's timeline on scroll progress 0 → 1: the stamp card settles and
+// its parts are called out one by one; it turns over; the coupon's parts.
+const ACT = {
+  stamp: { settle: [0, 0.1], hold: 0.5, flipOut: 0.58, calloutsFrom: 0.13 },
+  coupon: { flipIn: [0.58, 0.66], calloutsFrom: 0.7 },
+  /** Progress between one callout and the next. */
+  calloutStep: 0.075,
+  /** Act names under the title. */
+  name: { stamp: [0.02, 0.09, 0.48, 0.55], coupon: [0.63, 0.7] },
+} as const
 
 // Callout targets as fractions of the Apple pass (320 × 450)
 type Part = { key: string; side: "left" | "right"; tx: number; ty: number }
@@ -67,8 +75,8 @@ function useVisibility(o: MotionValue<number>) {
 
 // Each callout owns a window of progress; label and line arrive together.
 function useCallout(p: MotionValue<number>, start: number) {
-  const o = useSpring(useTransform(p, [start, start + 0.06], [0, 1]), SPRING)
-  const x = useSpring(useTransform(p, [start, start + 0.07], [10, 0]), SPRING)
+  const o = useSpring(useTransform(p, [start, start + 0.06], [0, 1]), SPRING_LIGHT)
+  const x = useSpring(useTransform(p, [start, start + 0.07], [10, 0]), SPRING_LIGHT)
   const draw = useSpring(useTransform(p, [start, start + 0.08], [0, 1]), { stiffness: 80, damping: 22, mass: 0.8 })
   return { o, x, draw, visibility: useVisibility(o) }
 }
@@ -83,10 +91,10 @@ function Callouts({ parts, p, start, geo, ns }: { parts: Part[]; p: MotionValue<
   const labelW = 150
   // Hooks must run in a stable order, so there is one per possible part.
   const c0 = useCallout(p, start)
-  const c1 = useCallout(p, start + 0.075)
-  const c2 = useCallout(p, start + 0.15)
-  const c3 = useCallout(p, start + 0.225)
-  const c4 = useCallout(p, start + 0.3)
+  const c1 = useCallout(p, start + ACT.calloutStep)
+  const c2 = useCallout(p, start + ACT.calloutStep * 2)
+  const c3 = useCallout(p, start + ACT.calloutStep * 3)
+  const c4 = useCallout(p, start + ACT.calloutStep * 4)
   const cs = [c0, c1, c2, c3, c4]
   if (parts.length > MAX_PARTS) throw new Error(`Callouts supports at most ${MAX_PARTS} parts`)
   if (narrow) {
@@ -190,8 +198,8 @@ function useGeometry(narrow: boolean): Geometry {
 // Which card is on stage, under the title.
 function ActName({ p }: { p: MotionValue<number> }) {
   const tc = useTranslations("gallery")
-  const nameA = { o: useSpring(useTransform(p, [0.02, 0.09, 0.48, 0.55], [0, 1, 1, 0]), SPRING), y: useSpring(useTransform(p, [0.02, 0.09, 0.48, 0.55], [20, 0, 0, -16]), SPRING) }
-  const nameB = { o: useSpring(useTransform(p, [0.63, 0.7], [0, 1]), SPRING), y: useSpring(useTransform(p, [0.63, 0.7], [20, 0]), SPRING) }
+  const nameA = { o: useSpring(useTransform(p, [...ACT.name.stamp], [0, 1, 1, 0]), SPRING_LIGHT), y: useSpring(useTransform(p, [...ACT.name.stamp], [20, 0, 0, -16]), SPRING_LIGHT) }
+  const nameB = { o: useSpring(useTransform(p, [...ACT.name.coupon], [0, 1]), SPRING_LIGHT), y: useSpring(useTransform(p, [...ACT.name.coupon], [20, 0]), SPRING_LIGHT) }
   const nameAVisibility = useVisibility(nameA.o)
   const nameBVisibility = useVisibility(nameB.o)
   return (
@@ -213,11 +221,12 @@ function CardBox({ p, geo }: { p: MotionValue<number>; geo: Geometry }) {
   const { cardW, cardH, boxW, boxH, narrow } = geo
 
   // The stamp card settles, holds, then turns over into the coupon.
-  const stampRotate = useSpring(useTransform(p, [0, 0.1, 0.5, 0.58], [-22, 0, 0, -90]), HEAVY)
-  const stampScale = useSpring(useTransform(p, [0, 0.1], [0.92, 1]), HEAVY)
-  const stampVis = useTransform(p, [0.575, 0.58], [1, 0])
-  const couponRotate = useSpring(useTransform(p, [0.58, 0.66], [90, 0]), HEAVY)
-  const couponVis = useTransform(p, [0.575, 0.58], [0, 1])
+  const { stamp, coupon } = ACT
+  const stampRotate = useSpring(useTransform(p, [stamp.settle[0], stamp.settle[1], stamp.hold, stamp.flipOut], [-22, 0, 0, -90]), SPRING_HEAVY)
+  const stampScale = useSpring(useTransform(p, [...stamp.settle], [0.92, 1]), SPRING_HEAVY)
+  const stampVis = useTransform(p, [stamp.flipOut - 0.005, stamp.flipOut], [1, 0])
+  const couponRotate = useSpring(useTransform(p, [...coupon.flipIn], [90, 0]), SPRING_HEAVY)
+  const couponVis = useTransform(p, [stamp.flipOut - 0.005, stamp.flipOut], [0, 1])
 
   return (
     <div
@@ -235,10 +244,10 @@ function CardBox({ p, geo }: { p: MotionValue<number>; geo: Geometry }) {
         </div>
       </div>
       <motion.div style={{ opacity: stampVis }} className="absolute inset-0">
-        <Callouts parts={STAMP_PARTS} p={p} start={0.13} geo={geo} ns="stamp" />
+        <Callouts parts={STAMP_PARTS} p={p} start={ACT.stamp.calloutsFrom} geo={geo} ns="stamp" />
       </motion.div>
       <motion.div style={{ opacity: couponVis }} className="absolute inset-0">
-        <Callouts parts={COUPON_PARTS} p={p} start={0.7} geo={geo} ns="coupon" />
+        <Callouts parts={COUPON_PARTS} p={p} start={ACT.coupon.calloutsFrom} geo={geo} ns="coupon" />
       </motion.div>
     </div>
   )

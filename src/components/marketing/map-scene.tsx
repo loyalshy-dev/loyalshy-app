@@ -1,14 +1,12 @@
 "use client"
 
 import { motion, useTransform, type MotionValue } from "motion/react"
+import { CORAL, INK } from "./tokens"
 
 // A small town map behind the phone for "it shows up when they are nearby":
 // blocks, streets, a park, the business pin with its geofence, and a
 // customer walking along the street into the fence. The walk is a scroll
 // value: `walk` goes 0 → 1 across the chapter.
-
-const CORAL = "#FF6B47"
-const INK = "#1F1410"
 
 // The customer's route, in map units (viewBox 0 0 520 400)
 const ROUTE: Array<[number, number]> = [

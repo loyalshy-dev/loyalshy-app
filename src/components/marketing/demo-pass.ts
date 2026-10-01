@@ -1,12 +1,10 @@
 import type { WalletPassDesign } from "@/components/wallet-pass-renderer"
+import { CORAL, INK } from "./tokens"
 
 // The demo pass used by the hero and the customer-view scenes: a five-slot
 // stamp card in the brand ink with coral stamps — the mark as a product.
 // Same renderer as the studio and the join page, so it always looks like a
 // real Loyalshy pass.
-
-const INK = "#1F1410"
-const CORAL = "#FF6B47"
 
 export const DEMO_PASS_DESIGN: WalletPassDesign = {
   cardType: "STAMP",
