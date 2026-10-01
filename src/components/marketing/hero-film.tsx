@@ -68,7 +68,8 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   // The open's lift is a CSS length (`--lift`, from the viewport height);
   // the spring only drives how much of it applies, 1 → 0 over the pull-back.
   const liftK = useMove(p, FILM.intro.pullBack, 1, 0, SPRING_HEAVY)
-  const lift = useTransform(liftK, (k) => `calc(var(--lift, 0px) * ${k.toFixed(4)})`)
+  const exitY = useMove(p, phone.exit, 0, narrow ? 0 : phone.exitLift, SPRING_HEAVY)
+  const lift = useTransform([liftK, exitY], ([k, e]: number[]) => `calc(var(--lift, 0px) * ${k.toFixed(4)} + ${e.toFixed(1)}px)`)
   // Background layers drift the other way for depth.
   const parallax = useTransform(p, [0, 1], [phone.parallax, -phone.parallax])
   const xTrack = narrow ? { keys: phone.xNarrow.keys, values: phone.xNarrow.values } : { keys: phone.x.keys, values: phone.x.values(phone.shift, phone.side) }

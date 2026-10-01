@@ -142,16 +142,18 @@ export const FILM = {
      *  then a push-in on each chapter's climax — the pass in Wallet, the
      *  proximity banner, the announcement, the app — and wide again for the
      *  transitions. Chapter 3 stays a touch smaller so the crowd shows. The
-     *  card chapters hold a close-up so the pass reads. */
+     *  card chapters hold a close-up so the pass reads; after the last
+     *  callout the camera pulls wide so the phone and its shadow sit inside
+     *  the stage when it unpins. */
     zoom: {
-      keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.322, 0.35, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 1],
-      values: [1.5, 1, 1, 1.25, 1.25, 1, 1, 1.22, 1.22, 1, 0.94, 0.94, 1.12, 1.12, 0.96, 1.1, 1.1, 1.3, 1.3],
+      keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.322, 0.35, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 0.955, 1],
+      values: [1.5, 1, 1, 1.25, 1.25, 1, 1, 1.22, 1.22, 1, 0.94, 0.94, 1.12, 1.12, 0.96, 1.1, 1.1, 1.3, 1.3, 0.9],
     } as Keyframes,
     /** Phones: a smaller open and gentler push-ins (the captions sit right
      *  under the phone). */
     zoomNarrow: {
-      keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.322, 0.35, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 1],
-      values: [1.3, 1, 1, 1.1, 1.1, 1, 1, 1.1, 1.1, 1, 1, 1, 1.08, 1.08, 1, 1.05, 1.05, 1.1, 1.1],
+      keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.322, 0.35, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 0.955, 1],
+      values: [1.3, 1, 1, 1.1, 1.1, 1, 1, 1.1, 1.1, 1, 1, 1, 1.08, 1.08, 1, 1.05, 1.05, 1.1, 1.1, 1],
     } as Keyframes,
     /** x as a function of (shift, side): shift puts the phone right of the
      *  captions, side moves it a little further when a card sits beside it;
@@ -167,6 +169,10 @@ export const FILM = {
     xNarrow: { keys: [0.27, 0.3, 0.451, 0.49], values: [0, -60, -60, 0] } as Keyframes,
     /** Where the map's centre sits, right of the phone's centre, on phones. */
     mapOffsetNarrow: 170,
+    /** The exit: the phone also rises a little on desktop so its shadow
+     *  clears the stage's bottom edge on short windows. */
+    exit: [0.955, 1] as Move,
+    exitLift: -36,
     /** Background layers drift the other way for depth. */
     parallax: 40,
   },
