@@ -152,7 +152,7 @@ There is **no public REST API** (removed in the 2026-04-27 pivot — no API keys
 
 | Endpoint | Methods | Description |
 |----------|---------|-------------|
-| `/auth/*` | POST/GET | Sign-in flows (email, Google, QR device pairing, invite), `me`, `select-org` |
+| `/auth/*` | POST/GET | Sign-in flows (email, Google, QR device pairing, invite), `me`, `select-org`. `me` answers **426 `UPGRADE_REQUIRED`** when the app's `X-App-Version` is below `STAFF_APP_MIN_VERSION` (see below) |
 | `/contacts`, `/contacts/:id` | GET | Contact search + detail |
 | `/contacts` | POST | Counter signup: find-or-create the contact, issue the program's pass, email it with Add to Wallet links (plan contact limit enforced) |
 | `/passes`, `/passes/:id` | GET | Pass instances (lookup by id or walletPassId) |
@@ -163,6 +163,8 @@ There is **no public REST API** (removed in the 2026-04-27 pivot — no API keys
 | `/rewards` | GET | Pending stamp-card rewards, soonest-expiring first |
 | `/rewards/:id/redeem` | POST | Redeem an earned reward |
 | `/stats` | GET | Today in the org's time zone: stamps, rewards given, new customers (7 days), pending rewards |
+
+**Forcing a staff-app update:** set `STAFF_APP_MIN_VERSION` (e.g. `1.3.0`) on Vercel and redeploy. Staff builds below it get an "update required" screen on launch (their session is kept). `STAFF_APP_UPDATE_URL` optionally overrides the App Store / Play link. Builds up to 1.2.0 don't send the header and are never blocked. Raise it only once that version is live on both the App Store and Google Play. Logic: `src/lib/staff-app-version.ts`.
 | `/announcements` | GET / POST | Wallet broadcast quota + reach / send (owner and Program manager only) |
 | `/interactions` | GET | Interaction feed |
 | `/templates` | GET | Program list |
