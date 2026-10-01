@@ -72,20 +72,20 @@
       "sendTitle": "Enviar aviso",
       "sendButton": "Enviar a 128 clientes",
       "ch1": {
-        "title": "Del QR al Wallet.",
-        "caption": "Escanean el QR del mostrador o abren el email, y la tarjeta de sellos o el cupón se guarda en su Apple o Google Wallet. Sin app."
+        "title": "Con un QR o por email.",
+        "caption": "Lo escanean en el mostrador o abren el email que les mandas. Sin app que instalar."
       },
       "ch2": {
+        "title": "En su Wallet.",
+        "caption": "La tarjeta de sellos o el cupón se guarda en su Apple o Google Wallet."
+      },
+      "ch3": {
         "title": "Aparece cuando pasan cerca.",
         "caption": "Con la ubicación de tu local activada, la tarjeta sale en la pantalla de bloqueo cuando el cliente está cerca. El mensaje lo escribes tú."
       },
-      "ch3": {
+      "ch4": {
         "title": "El mensaje adecuado, en el momento adecuado.",
         "caption": "Escribes el aviso en el panel una vez, y les llega como notificación a todos los que tienen tu tarjeta: el 2x1 de hoy, el horario de fiestas, lo que quieras."
-      },
-      "ch4": {
-        "title": "Todo, desde la app.",
-        "caption": "Tu equipo sella, canjea y da de alta a clientes desde su móvil. Se conecta escaneando un QR del panel."
       },
       "tryLine": "Añade la tarjeta de prueba a tu Wallet. Es exactamente lo que verán tus clientes.",
       "sendText": "Hoy 2x1",
@@ -96,10 +96,14 @@
       "walletTitle": "Wallet",
       "chapters": "Capítulos",
       "ch5": {
+        "title": "Todo, desde la app.",
+        "caption": "Tu equipo sella, canjea y da de alta a clientes desde su móvil. Se conecta escaneando un QR del panel."
+      },
+      "ch6": {
         "title": "La tarjeta, por dentro.",
         "caption": "Un sello por visita. Al llegar al número que fijes, la recompensa aparece sola."
       },
-      "ch6": {
+      "ch7": {
         "title": "El cupón.",
         "caption": "Un descuento o un regalo con fecha. De un solo uso o de los que quieras."
       }

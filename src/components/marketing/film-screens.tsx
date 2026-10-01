@@ -104,7 +104,7 @@ export function LockScreen({ opacity, dim, children }: { opacity?: MotionValue<n
 }
 
 /** Chapter 1a: the counter QR in the camera's viewfinder. */
-export function CameraScreen({ opacity, scanFrame }: { opacity: MotionValue<number>; scanFrame: MotionValue<number> }) {
+export function CameraScreen({ opacity, scanFrame }: { opacity?: MotionValue<number>; scanFrame?: MotionValue<number> }) {
   const t = useTranslations("hero")
   const corners = ["top-0 left-0 border-t-2 border-l-2", "top-0 right-0 border-t-2 border-r-2", "bottom-0 left-0 border-b-2 border-l-2", "bottom-0 right-0 border-b-2 border-r-2"] as const
   return (

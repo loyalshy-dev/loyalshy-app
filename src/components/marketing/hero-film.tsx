@@ -14,22 +14,24 @@ import { PhoneFrame } from "./phone-frame"
 import { INK, SPRING_HEAVY, SPRING_LIGHT } from "./tokens"
 import { useMediaQuery } from "./use-media-query"
 
-// The hero film: one phone, six chapters, scroll as the only clock. The
+// The hero film: one phone, seven chapters, scroll as the only clock. The
 // phone fills the fold at the open and pulls back as the first scroll
 // happens; the camera then pushes in on each chapter's climax (see
 // `FILM.phone.zoom`). A rail on the left axis names the chapters and jumps.
-//   1. The card on their phone — the counter QR is scanned, the pass slides
-//      into Wallet, the Add to Wallet buttons come up under the caption.
-//   2. It shows up when they are nearby — lock screen, a customer walks
+//   1. With a QR or by email — the counter QR in the camera (a hard cut
+//      from the lock screen, as iOS does).
+//   2. In their Wallet — the pass slides in, the Add to Wallet buttons come
+//      up under the caption.
+//   3. It shows up when they are nearby — lock screen, a customer walks
 //      into the geofence on the map and the proximity banner drops in.
-//   3. Reach them all with one message — the owner writes the notice in the
+//   4. Reach them all with one message — the owner writes the notice in the
 //      dashboard, it flies to the phone and lands as a notification, two
 //      faint phones behind say it reached everyone.
-//   4. The team app — the phone's screen becomes the app, store badges.
-//   5. The stamp card, up close — the phone returns to the centre, the
+//   5. The team app — the phone's screen becomes the app, store badges.
+//   6. The stamp card, up close — the phone returns to the centre, the
 //      demo card rises into Wallet, the stamps land with the scroll, the
 //      reward lights up, and its parts are called out.
-//   6. The coupon — the card turns over; its parts; the film's last frame.
+//   7. The coupon — the card turns over; its parts; the film's last frame.
 // Every moment is a named window in `film-timeline.ts`; the screens are in
 // `film-screens.tsx`. Only transform and opacity animate. Rotation stays
 // under 20° so the screen stays legible. Reduced motion gets static frames.
@@ -69,7 +71,8 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const lift = useTransform(liftK, (k) => `calc(var(--lift, 0px) * ${k.toFixed(4)})`)
   // Background layers drift the other way for depth.
   const parallax = useTransform(p, [0, 1], [phone.parallax, -phone.parallax])
-  const x = useSpring(useTransform(p, [...phone.x.keys], narrow ? phone.x.values(0, 0) : phone.x.values(phone.shift, phone.side)), SPRING_HEAVY)
+  const xTrack = narrow ? { keys: phone.xNarrow.keys, values: phone.xNarrow.values } : { keys: phone.x.keys, values: phone.x.values(phone.shift, phone.side) }
+  const x = useSpring(useTransform(p, [...xTrack.keys], [...xTrack.values]), SPRING_HEAVY)
 
   // The lock screen under everything; the status bar flips with it.
   const lockOpacity = useSpring(useTransform(p, [...FILM.lock.opacity.keys], [...FILM.lock.opacity.values]), SPRING_LIGHT)
@@ -77,59 +80,60 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const [statusColor, setStatusColor] = useState("#fff")
   useMotionValueEvent(onLock, "change", (v) => setStatusColor(v ? "#fff" : INK))
 
-  // Chapter 1
+  // Chapter 1: the camera
   const cameraOpacity = useFade(p, FILM.ch1.camera)
   const scanFrame = useMove(p, FILM.ch1.scanFrame, 1.15, 1, SPRING_HEAVY)
-  const walletOpacity = useFade(p, FILM.ch1.wallet)
-  const passY = useMove(p, FILM.ch1.passRise, 380, 0, SPRING_HEAVY)
-  const buttonsOpacity = useFade(p, FILM.ch1.buttons)
-  const buttonsY = useMove(p, FILM.ch1.buttonsRise, 12, 0)
+  // Chapter 2: Wallet
+  const walletOpacity = useFade(p, FILM.ch2.wallet)
+  const passY = useMove(p, FILM.ch2.passRise, 380, 0, SPRING_HEAVY)
+  const buttonsOpacity = useFade(p, FILM.ch2.buttons)
+  const buttonsY = useMove(p, FILM.ch2.buttonsRise, 12, 0)
   const buttonsVisibility = useVisibility(buttonsOpacity)
 
   // Chapter 2: the map drifts up slowly and settles late; the customer
   // walks; the pulse fires when they cross the fence; the banner arrives a
   // beat later and overshoots a touch.
-  const mapOpacity = useFade(p, FILM.ch2.map)
-  const mapY = useMove(p, FILM.ch2.mapRise, 44, 0, { stiffness: 46, damping: 20, mass: 1.3 })
-  const walk = useMove(p, FILM.ch2.walk, 0, 1, { stiffness: 60, damping: 22, mass: 1 })
-  const pulse = useTransform(p, [...FILM.ch2.pulse], [0, 1])
-  const nearY = useMove(p, FILM.ch2.bannerDrop, 34, 0, { stiffness: 150, damping: 15, mass: 0.7 })
-  const nearOpacity = useFade(p, FILM.ch2.banner)
-  const announceOpacityEarly = useFade(p, FILM.ch3.banner)
+  const mapOpacity = useFade(p, FILM.ch3.map)
+  const mapY = useMove(p, FILM.ch3.mapRise, 44, 0, { stiffness: 46, damping: 20, mass: 1.3 })
+  const walk = useMove(p, FILM.ch3.walk, 0, 1, { stiffness: 60, damping: 22, mass: 1 })
+  const pulse = useTransform(p, [...FILM.ch3.pulse], [0, 1])
+  const nearY = useMove(p, FILM.ch3.bannerDrop, 34, 0, { stiffness: 150, damping: 15, mass: 0.7 })
+  const nearOpacity = useFade(p, FILM.ch3.banner)
+  const announceOpacityEarly = useFade(p, FILM.ch4.banner)
   const lockDim = useTransform([nearOpacity, announceOpacityEarly], ([a, b]: number[]) => Math.max(a, b) * 0.22)
 
   // Chapter 3: the dashboard card slides in from further away, quick and
   // dry; the message flies; the announcement lands with a small bounce; the
   // crowd spreads behind.
-  const cardOpacity = useFade(p, FILM.ch3.card)
-  const cardX = useMove(p, FILM.ch3.cardSlide, -48, 0, { stiffness: 170, damping: 26, mass: 0.5 })
-  const flyX = useMove(p, FILM.ch3.flight, narrow ? 0 : -220, 0)
-  const flyY = useMove(p, FILM.ch3.flight, narrow ? 120 : 40, -140)
-  const flyOpacity = useFade(p, FILM.ch3.message)
-  const announceY = useMove(p, FILM.ch3.bannerDrop, 30, 0, { stiffness: 140, damping: 14, mass: 0.8 })
+  const cardOpacity = useFade(p, FILM.ch4.card)
+  const cardX = useMove(p, FILM.ch4.cardSlide, -48, 0, { stiffness: 170, damping: 26, mass: 0.5 })
+  const flyX = useMove(p, FILM.ch4.flight, narrow ? 0 : -220, 0)
+  const flyY = useMove(p, FILM.ch4.flight, narrow ? 120 : 40, -140)
+  const flyOpacity = useFade(p, FILM.ch4.message)
+  const announceY = useMove(p, FILM.ch4.bannerDrop, 30, 0, { stiffness: 140, damping: 14, mass: 0.8 })
   const announceOpacity = announceOpacityEarly
-  const crowdOpacity = useFade(p, FILM.ch3.crowd)
-  const crowdSpread = useMove(p, FILM.ch3.crowdSpread, 0, 1, SPRING_HEAVY)
+  const crowdOpacity = useFade(p, FILM.ch4.crowd)
+  const crowdSpread = useMove(p, FILM.ch4.crowdSpread, 0, 1, SPRING_HEAVY)
   const crowdLeft = useTransform(crowdSpread, (v) => -110 * v)
   const crowdRight = useTransform(crowdSpread, (v) => 110 * v)
 
   // Chapter 4: the team app
-  const appOpacity = useFade(p, FILM.ch4.app)
-  const appY = useMove(p, FILM.ch4.appRise, 320, 0, SPRING_HEAVY)
-  const badgesOpacity = useFade(p, FILM.ch4.badges)
-  const badgesY = useMove(p, FILM.ch4.badgesRise, 16, 0)
+  const appOpacity = useFade(p, FILM.ch5.app)
+  const appY = useMove(p, FILM.ch5.appRise, 320, 0, SPRING_HEAVY)
+  const badgesOpacity = useFade(p, FILM.ch5.badges)
+  const badgesY = useMove(p, FILM.ch5.badgesRise, 16, 0)
   const badgesVisibility = useVisibility(badgesOpacity)
 
   // Chapters 5–6: the card in Wallet, filling with the scroll, then turned
   // over into the coupon. The callouts are drawn in the phone's own
   // coordinate space (unscaled 300px wide on desktop).
-  const passOpacity = useFade(p, FILM.ch5.wallet)
-  const pass2Y = useMove(p, FILM.ch5.passRise, 380, 0, SPRING_HEAVY)
-  const visits = useTransform(p, [...FILM.ch5.stamps], [0, 5])
-  const stampRotate = useSpring(useTransform(p, [FILM.ch5.flipOut[0], FILM.ch5.flipOut[1]], [0, -90]), SPRING_HEAVY)
-  const stampVis = useTransform(p, [FILM.ch5.flipOut[1] - 0.004, FILM.ch5.flipOut[1]], [1, 0])
-  const couponRotate = useSpring(useTransform(p, [...FILM.ch6.flipIn], [90, 0]), SPRING_HEAVY)
-  const couponVis = useTransform(p, [FILM.ch5.flipOut[1] - 0.004, FILM.ch5.flipOut[1]], [0, 1])
+  const passOpacity = useFade(p, FILM.ch6.wallet)
+  const pass2Y = useMove(p, FILM.ch6.passRise, 380, 0, SPRING_HEAVY)
+  const visits = useTransform(p, [...FILM.ch6.stamps], [0, 5])
+  const stampRotate = useSpring(useTransform(p, [FILM.ch6.flipOut[0], FILM.ch6.flipOut[1]], [0, -90]), SPRING_HEAVY)
+  const stampVis = useTransform(p, [FILM.ch6.flipOut[1] - 0.004, FILM.ch6.flipOut[1]], [1, 0])
+  const couponRotate = useSpring(useTransform(p, [...FILM.ch7.flipIn], [90, 0]), SPRING_HEAVY)
+  const couponVis = useTransform(p, [FILM.ch6.flipOut[1] - 0.004, FILM.ch6.flipOut[1]], [0, 1])
   const phoneW = 300
   const band = Math.max(2, phoneW * 0.012)
   const bezel = phoneW * 0.03
@@ -146,6 +150,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
     ch4: useCaption(p, FILM.ch4.caption, FILM.ch4.captionLag),
     ch5: useCaption(p, FILM.ch5.caption, FILM.ch5.captionLag),
     ch6: useCaption(p, FILM.ch6.caption, FILM.ch6.captionLag),
+    ch7: useCaption(p, FILM.ch7.caption, FILM.ch7.captionLag),
   }
   const intro = useFade(p, FILM.intro.fade)
   const introVisibility = useVisibility(intro)
@@ -193,10 +198,10 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
             {CHAPTERS.map((key) => {
               const c = captions[key]
               // Chapters 5–6 play with the phone at the centre: narrower captions.
-              const centred = key === "ch5" || key === "ch6"
+              const centred = key === "ch6" || key === "ch7"
               return (
                 <motion.div key={key} style={{ visibility: c.visibility }} className="absolute inset-x-0 top-0 text-center lg:text-left">
-                  {key === "ch4" && (
+                  {key === "ch5" && (
                     <motion.div style={{ opacity: c.title.o, y: c.title.y }} className="mb-3 flex justify-center lg:mb-5 lg:justify-start">
                       <AppIcon className="size-12 rounded-[11px] lg:size-16 lg:rounded-[15px]" />
                     </motion.div>
@@ -204,23 +209,23 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                   <motion.h2 style={{ opacity: c.title.o, y: c.title.y }} className={centred ? "font-display mk-display-2 lg:max-w-[10ch]" : "font-display mk-display-2 lg:max-w-[14ch]"}>
                     <span style={{ color: "var(--mk-text)" }}>{t(`film.${key}.title`)}</span>
                   </motion.h2>
-                  {key !== "ch2" && (
+                  {key !== "ch3" && (
                     <motion.p style={{ opacity: c.body.o, y: c.body.y }} className={centred ? "mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4 lg:max-w-[26ch]" : "mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4"}>
                       {t(`film.${key}.caption`)}
                     </motion.p>
                   )}
-                  {key === "ch1" && demoUrl && (
+                  {key === "ch2" && demoUrl && (
                     <motion.div style={{ opacity: buttonsOpacity, y: buttonsY, visibility: buttonsVisibility }} className="mt-4 lg:mt-6">
                       <WalletButtons demoUrl={demoUrl} align="left" />
                     </motion.div>
                   )}
-                  {key === "ch4" && (
+                  {key === "ch5" && (
                     <motion.div style={{ opacity: badgesOpacity, y: badgesY, visibility: badgesVisibility }} className="mt-5 lg:mt-7">
                       <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} align="left" />
                     </motion.div>
                   )}
-                  {key === "ch5" && <CalloutList p={p} parts={STAMP_PARTS} from={FILM.ch5.calloutsFrom} step={FILM.ch5.calloutStep} ns="stamp" />}
-                  {key === "ch6" && <CalloutList p={p} parts={COUPON_PARTS} from={FILM.ch6.calloutsFrom} step={FILM.ch6.calloutStep} ns="coupon" />}
+                  {key === "ch6" && <CalloutList p={p} parts={STAMP_PARTS} from={FILM.ch6.calloutsFrom} step={FILM.ch6.calloutStep} ns="stamp" />}
+                  {key === "ch7" && <CalloutList p={p} parts={COUPON_PARTS} from={FILM.ch7.calloutsFrom} step={FILM.ch7.calloutStep} ns="coupon" />}
                 </motion.div>
               )
             })}
@@ -235,7 +240,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
           >
             {/* Chapter 2: the map behind the phone */}
             <motion.div
-              style={{ opacity: mapOpacity, y: mapY, rotate: narrow ? 0 : -3, left: narrow ? "50%" : "42%", x: narrow ? "-50%" : 0 }}
+              style={{ opacity: mapOpacity, y: mapY, rotate: narrow ? 0 : -3, left: narrow ? `calc(50% + ${phone.mapOffsetNarrow}px)` : "42%", x: narrow ? "-50%" : 0 }}
               className="mk-film-map pointer-events-none absolute top-1/2 -translate-y-1/2"
             >
               <motion.div style={{ y: parallax }}>
@@ -291,8 +296,8 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                 <PassScreen opacity={passOpacity} passY={pass2Y} visits={visits} stampRotate={stampRotate} stampVis={stampVis} couponRotate={couponRotate} couponVis={couponVis} />
               </PhoneFrame>
               {/* The card's parts, beside the phone (desktop) */}
-              <CalloutLines p={p} parts={STAMP_PARTS} from={FILM.ch5.calloutsFrom} step={FILM.ch5.calloutStep} card={cardBox} phoneW={phoneW} ns="stamp" opacity={stampVis} />
-              <CalloutLines p={p} parts={COUPON_PARTS} from={FILM.ch6.calloutsFrom} step={FILM.ch6.calloutStep} card={cardBox} phoneW={phoneW} ns="coupon" opacity={couponVis} />
+              <CalloutLines p={p} parts={STAMP_PARTS} from={FILM.ch6.calloutsFrom} step={FILM.ch6.calloutStep} card={cardBox} phoneW={phoneW} ns="stamp" opacity={stampVis} />
+              <CalloutLines p={p} parts={COUPON_PARTS} from={FILM.ch7.calloutsFrom} step={FILM.ch7.calloutStep} card={cardBox} phoneW={phoneW} ns="coupon" opacity={couponVis} />
             </motion.div>
           </motion.div>
         </div>
@@ -312,9 +317,10 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const t = useTranslations("hero")
   const w = 230
   const frames: Array<{ key: Chapter; dark: boolean; screen: React.ReactNode }> = [
-    { key: "ch1", dark: false, screen: <WalletScreen passAlt={t("scenes.passAlt")} /> },
+    { key: "ch1", dark: true, screen: <CameraScreen /> },
+    { key: "ch2", dark: false, screen: <WalletScreen passAlt={t("scenes.passAlt")} /> },
     {
-      key: "ch2",
+      key: "ch3",
       dark: true,
       screen: (
         <LockScreen>
@@ -325,7 +331,7 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
       ),
     },
     {
-      key: "ch3",
+      key: "ch4",
       dark: true,
       screen: (
         <LockScreen>
@@ -335,12 +341,12 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
         </LockScreen>
       ),
     },
-    { key: "ch4", dark: false, screen: <AppScreen alt={t("film.appAlt")} sizes="230px" /> },
-    { key: "ch5", dark: false, screen: <PassScreen fixedVisits={4} /> },
-    { key: "ch6", dark: false, screen: <CouponFrame /> },
+    { key: "ch5", dark: false, screen: <AppScreen alt={t("film.appAlt")} sizes="230px" /> },
+    { key: "ch6", dark: false, screen: <PassScreen fixedVisits={4} /> },
+    { key: "ch7", dark: false, screen: <CouponFrame /> },
   ]
   return (
-    <div className="mk-wrap grid grid-cols-1 gap-12 py-16 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+    <div className="mk-wrap grid grid-cols-1 gap-12 py-16 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
       {frames.map((f) => (
         <figure key={f.key} className="flex flex-col items-center gap-5 text-center">
           <PhoneFrame width={w} screenBackground={SCREEN_BG} statusColor={f.dark ? "#fff" : INK}>{f.screen}</PhoneFrame>
@@ -351,11 +357,11 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
         </figure>
       ))}
       {demoUrl && (
-        <div id="try-demo" className="flex flex-col items-center text-center md:col-span-2 lg:col-span-3">
+        <div id="try-demo" className="flex flex-col items-center text-center md:col-span-2 lg:col-span-4">
           <WalletButtons demoUrl={demoUrl} align="center" />
         </div>
       )}
-      <div className="flex flex-col items-center gap-4 text-center md:col-span-2 lg:col-span-3">
+      <div className="flex flex-col items-center gap-4 text-center md:col-span-2 lg:col-span-4">
         <AppIcon className="size-16 rounded-[15px]" />
         <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} align="center" />
       </div>

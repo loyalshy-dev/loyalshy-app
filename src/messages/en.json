@@ -72,20 +72,20 @@
       "sendTitle": "Send a notice",
       "sendButton": "Send to 128 customers",
       "ch1": {
-        "title": "From the QR to the Wallet.",
-        "caption": "They scan the QR at the counter or open the email, and the stamp card or coupon saves to their Apple or Google Wallet. No app."
+        "title": "With a QR or by email.",
+        "caption": "They scan it at the counter or open the email you send. No app to install."
       },
       "ch2": {
+        "title": "In their Wallet.",
+        "caption": "The stamp card or the coupon is saved to their Apple or Google Wallet."
+      },
+      "ch3": {
         "title": "It shows up when they're nearby.",
         "caption": "With your shop's location on, the card appears on the lock screen when the customer is close. The message is yours to write."
       },
-      "ch3": {
+      "ch4": {
         "title": "The right message, at the right time.",
         "caption": "Write the notice in the dashboard once and it lands as a notification on every phone that holds your card: today's 2-for-1, holiday hours, whatever you need."
-      },
-      "ch4": {
-        "title": "Everything, from the app.",
-        "caption": "Your team stamps, redeems and signs customers up from their phone. It connects by scanning a QR code from the dashboard."
       },
       "tryLine": "Add the demo card to your Wallet. It's exactly what your customers will see.",
       "sendText": "Hoy 2x1",
@@ -96,10 +96,14 @@
       "walletTitle": "Wallet",
       "chapters": "Chapters",
       "ch5": {
+        "title": "Everything, from the app.",
+        "caption": "Your team stamps, redeems and signs customers up from their phone. It connects by scanning a QR code from the dashboard."
+      },
+      "ch6": {
         "title": "The card, up close.",
         "caption": "One stamp per visit. When they reach the number you set, the reward appears by itself."
       },
-      "ch6": {
+      "ch7": {
         "title": "The coupon.",
         "caption": "A discount or a gift with an end date. Single use or as many as you like."
       }

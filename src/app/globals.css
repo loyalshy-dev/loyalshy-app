@@ -510,7 +510,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(var(--pw) * 2.07 + 2.25rem);
+  top: calc(var(--pw) * 2.07 + 4.5rem);
 }
 .mk-film-map { width: calc(var(--pw) * 1.75); }
 .mk-film-crowd {
