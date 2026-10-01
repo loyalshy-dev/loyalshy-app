@@ -166,7 +166,7 @@ export const FILM = {
      *  fence and the customer's last steps show in the right gutter. */
     xNarrow: { keys: [0.27, 0.3, 0.451, 0.49], values: [0, -60, -60, 0] } as Keyframes,
     /** Where the map's centre sits, right of the phone's centre, on phones. */
-    mapOffsetNarrow: 130,
+    mapOffsetNarrow: 170,
     /** Background layers drift the other way for depth. */
     parallax: 40,
   },

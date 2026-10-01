@@ -240,11 +240,11 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
           >
             {/* Chapter 2: the map behind the phone */}
             <motion.div
-              style={{ opacity: mapOpacity, y: mapY, rotate: narrow ? 0 : -3, left: narrow ? `calc(50% + ${phone.mapOffsetNarrow}px)` : "42%", x: narrow ? "-50%" : 0 }}
+              style={{ opacity: mapOpacity, y: mapY, rotate: narrow ? 0 : -3, left: narrow ? `calc(50% + ${phone.mapOffsetNarrow}px)` : "50%", x: narrow ? "-50%" : 0 }}
               className="mk-film-map pointer-events-none absolute top-1/2 -translate-y-1/2"
             >
               <motion.div style={{ y: parallax }}>
-                <MapScene walk={walk} pulse={pulse} label={t("card.business")} className="h-auto w-full" style={{ filter: "drop-shadow(0 24px 40px oklch(0 0 0 / 0.14))" }} />
+                <MapScene walk={walk} pulse={pulse} label={t("card.business")} className="w-full" style={{ boxShadow: "0 30px 60px -20px oklch(0 0 0 / 0.45), 0 0 0 1px oklch(0 0 0 / 0.08)" }} />
               </motion.div>
             </motion.div>
 

@@ -512,7 +512,7 @@
   right: 0;
   top: calc(var(--pw) * 2.07 + 4.5rem);
 }
-.mk-film-map { width: calc(var(--pw) * 1.75); }
+.mk-film-map { width: calc(var(--pw) * 1.9); }
 .mk-film-crowd {
   width: calc(var(--pw) * 0.84);
   height: calc(var(--pw) * 0.84 * 1.86);
@@ -529,7 +529,7 @@
     width: 41.666%;
     transform: translateY(-50%);
   }
-  .mk-film-map { width: calc(var(--pw) * 1.55); }
+  .mk-film-map { width: calc(var(--pw) * 1.7); }
 }
 
 /* The stamp card in the film: a stamp lands when its slot fills. */
