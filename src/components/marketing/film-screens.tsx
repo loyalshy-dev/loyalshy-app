@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { motion, useMotionValue, useMotionValueEvent, type MotionValue } from "motion/react"
+import { motion, useAnimate, useMotionValue, useMotionValueEvent, type MotionValue } from "motion/react"
 import { useTranslations } from "next-intl"
 import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
 import { DEMO_COUPON_DESIGN, DEMO_PASS_DESIGN, DEMO_PASS_LOGO, DEMO_PASS_RATIO, DEMO_PASS_TOTAL } from "./demo-pass"
@@ -66,10 +66,37 @@ export function LockNotification({ opacity, y, children }: { opacity?: MotionVal
 // The lock screen as iOS lays it out: date and time up top, the flashlight
 // and camera buttons in the bottom corners, the home indicator under them.
 // Type scales with the phone (`--phone-w`, set by PhoneFrame).
-/** The opening loop: a notification drops in from under the island over
- *  the lock screen, stays three seconds, and leaves. 0.7s in, 3s hold,
- *  0.6s out, then a pause. */
-export const OPEN_LOOP = { duration: 4.3, times: [0, 0.163, 0.86, 1], ease: "easeOut" as const, repeat: Infinity, repeatDelay: 1.8 }
+/** The opening loop: a notification drops in from behind the top edge the
+ *  way iOS does — a spring that settles with a small bounce, no fade — sits
+ *  over the lock screen for three seconds, then is pulled back up quickly,
+ *  shrinking a touch and fading only at the very end. Pauses, repeats. */
+export function OpeningNotification({ children }: { children: React.ReactNode }) {
+  const [scope, animate] = useAnimate()
+  useEffect(() => {
+    let live = true
+    const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
+    const run = async () => {
+      while (live) {
+        await animate(scope.current, { y: 40, scale: 1, opacity: 1 }, { type: "spring", stiffness: 240, damping: 20, mass: 0.9 })
+        if (!live) return
+        await sleep(3000)
+        if (!live) return
+        await animate(scope.current, { y: -80, scale: 0.95, opacity: [1, 1, 0] }, { duration: 0.4, ease: [0.5, 0, 0.9, 0.4] })
+        if (!live) return
+        await sleep(1800)
+      }
+    }
+    run()
+    return () => {
+      live = false
+    }
+  }, [animate, scope])
+  return (
+    <motion.div ref={scope} initial={{ y: -80, scale: 0.96, opacity: 1 }} style={{ transformOrigin: "50% 0%" }} className="absolute left-3 right-3 top-0 z-20">
+      {children}
+    </motion.div>
+  )
+}
 
 export function LockScreen({ opacity, dim, children }: { opacity?: MotionValue<number>; /** 0–1: how much the wallpaper darkens behind a notification. */ dim?: MotionValue<number>; children?: React.ReactNode }) {
   const t = useTranslations("hero")

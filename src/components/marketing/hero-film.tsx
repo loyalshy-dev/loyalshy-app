@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { CHAPTERS, FILM, PIN_VH, type Chapter } from "./film-timeline"
 import { useCaption, useFade, useMove, useVisibility } from "./film-hooks"
 import { CalloutLines, CalloutList, COUPON_PARTS, STAMP_PARTS } from "./film-callouts"
-import { AppIcon, AppScreen, BANNERS, CameraScreen, CouponFrame, LockNotification, LockScreen, OPEN_LOOP, PASS_TOP, PassScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
+import { AppIcon, AppScreen, BANNERS, CameraScreen, CouponFrame, LockNotification, LockScreen, OpeningNotification, PASS_TOP, PassScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
 import { FilmRail } from "./film-rail"
 import { MapScene } from "./map-scene"
 import { DEMO_PASS_RATIO } from "./demo-pass"
@@ -291,13 +291,9 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                       island over the lock screen, stays three seconds and
                       leaves, on a loop */}
                   {atOpen && (
-                    <motion.div
-                      animate={{ y: [-90, 40, 40, -90], opacity: [0, 1, 1, 0] }}
-                      transition={OPEN_LOOP}
-                      className="absolute left-3 right-3 top-0 z-20"
-                    >
+                    <OpeningNotification>
                       <RealBanner {...BANNERS.near} alt="" />
-                    </motion.div>
+                    </OpeningNotification>
                   )}
                   <LockNotification opacity={nearOpacity} y={nearY}>
                     <RealBanner {...BANNERS.near} alt="" />
