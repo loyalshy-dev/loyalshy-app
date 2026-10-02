@@ -10,7 +10,7 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { SessionWatcher } from "@/components/dashboard/session-watcher"
 import { PartnerOrglessGate } from "@/components/dashboard/partner-orgless-gate"
 
-const DASHBOARD_NAMESPACES = ["common", "dashboard", "studio", "serverErrors"] as const
+const DASHBOARD_NAMESPACES = ["common", "dashboard", "studio", "serverErrors", "pricing"] as const
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
