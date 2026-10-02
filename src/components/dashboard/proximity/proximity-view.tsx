@@ -8,12 +8,12 @@ import { PROXIMITY_MESSAGE_MAX, proximitySettingsSchema } from "@/lib/proximity/
 import type { ProximityDashboardData } from "@/lib/proximity/dashboard"
 import { saveProximitySettings } from "@/server/proximity-actions"
 import { AddressAutocomplete } from "@/components/studio/address-autocomplete"
+import { LocationMap } from "./location-map"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { cn } from "@/lib/utils"
 
 type ProximityViewProps = {
   data: ProximityDashboardData
@@ -102,16 +102,30 @@ export function ProximityView({ data, organizationName }: ProximityViewProps) {
               maxLength={500}
               labels={{ searching: t("searching"), noResults: t("noResults") }}
             />
-            {address && (
-              <p
-                className={cn(
-                  "flex items-center gap-1.5 text-[11px]",
-                  coords ? "text-muted-foreground" : "text-amber-600",
-                )}
-              >
+            {address && !coords && (
+              <p className="flex items-center gap-1.5 text-[11px] text-amber-600">
                 <MapPin className="size-3 shrink-0" />
-                {coords ? t("locationSet") : t("pickFromList")}
+                {t("pickFromList")}
               </p>
+            )}
+            {coords && (
+              <div className="space-y-1.5">
+                <LocationMap
+                  latitude={coords.lat}
+                  longitude={coords.lng}
+                  onMove={(lat, lng) => setCoords({ lat, lng })}
+                  ariaLabel={t("mapLabel")}
+                />
+                <p className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="size-3 shrink-0" />
+                    {t("mapHint")}
+                  </span>
+                  <span className="tabular-nums" data-testid="proximity-coords">
+                    {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+                  </span>
+                </p>
+              </div>
             )}
             <p className="text-[11px] text-muted-foreground">{t("addressHint")}</p>
           </div>
