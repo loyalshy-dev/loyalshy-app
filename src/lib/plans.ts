@@ -19,9 +19,12 @@ export type PlanDefinition = {
   announcementPeriod: AnnouncementPeriod
   /** Google review prompt on wallet passes (src/lib/reviews). */
   reviewPrompts: boolean
-  features: string[]
 }
 
+// Limits and prices only. User-facing plan copy (names, descriptions,
+// feature lists) lives in the `pricing` i18n namespace, shared by the landing
+// pricing section and the dashboard billing tab. `name` here is the
+// internal/English label (admin, server messages).
 export const PLANS: Record<PlanId, PlanDefinition> = {
   FREE: {
     id: "FREE",
@@ -35,12 +38,6 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: 2,
     announcementPeriod: "lifetime",
     reviewPrompts: false,
-    features: [
-      "Up to 50 contacts",
-      "1 program",
-      "1 staff member",
-      "2 wallet announcements",
-    ],
   },
   STARTER: {
     id: "STARTER",
@@ -54,13 +51,6 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: 1,
     announcementPeriod: "week",
     reviewPrompts: true,
-    features: [
-      "Up to 500 contacts",
-      "Up to 2 programs",
-      "2 staff members",
-      "1 wallet announcement / week",
-      "Google review requests on wallet passes",
-    ],
   },
   GROWTH: {
     id: "GROWTH",
@@ -74,13 +64,6 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: 2,
     announcementPeriod: "week",
     reviewPrompts: true,
-    features: [
-      "Up to 2,500 contacts",
-      "Up to 5 programs",
-      "5 staff members",
-      "2 wallet announcements / week",
-      "Google review requests on wallet passes",
-    ],
   },
   SCALE: {
     id: "SCALE",
@@ -94,13 +77,6 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: 5,
     announcementPeriod: "week",
     reviewPrompts: true,
-    features: [
-      "Unlimited contacts",
-      "Unlimited programs",
-      "25 staff members",
-      "5 wallet announcements / week",
-      "Google review requests on wallet passes",
-    ],
   },
   ENTERPRISE: {
     id: "ENTERPRISE",
@@ -114,14 +90,6 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: Infinity,
     announcementPeriod: "week",
     reviewPrompts: true,
-    features: [
-      "Everything in Scale",
-      "Unlimited staff members",
-      "Unlimited programs",
-      "Unlimited wallet announcements",
-      "White-label branding",
-      "Dedicated support & SLA",
-    ],
   },
 }
 
