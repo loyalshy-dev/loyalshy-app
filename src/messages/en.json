@@ -113,26 +113,8 @@
     }
   },
   "featureShowcase": {
-    "title": "The dashboard.",
-    "tabs": {
-      "dashboard": {
-        "label": "Dashboard",
-        "description": "Each day's visits, stamps and redemptions, and which customers come back most."
-      },
-      "cardDesigner": {
-        "label": "Card designer",
-        "description": "Your logo, your colors, your reward. You see the card exactly as it will look in the wallet while you design it."
-      },
-      "distribution": {
-        "label": "Distribution",
-        "description": "The QR code to print in several sizes, a link to share, and the option to hand a card out yourself."
-      },
-      "nearby": {
-        "label": "Shows up when they walk by",
-        "description": "When a customer walks past your business, their pass appears on their iPhone lock screen. No apps, no pushy notifications."
-      }
-    },
-    "lead": "Who comes back, and when, at a glance. And everything you need to run the program.",
+    "title": "Complete monitoring.",
+    "lead": "Manage your programs and follow your customers' day-to-day from the dashboard.",
     "mock": {
       "overview": "Overview",
       "newAction": "New interaction",

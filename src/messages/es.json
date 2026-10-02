@@ -113,26 +113,8 @@
     }
   },
   "featureShowcase": {
-    "title": "El panel.",
-    "tabs": {
-      "dashboard": {
-        "label": "Panel",
-        "description": "Las visitas, los sellos y los canjes de cada día, y qué clientes vuelven más."
-      },
-      "cardDesigner": {
-        "label": "Diseñador",
-        "description": "Tu logo, tus colores y tu recompensa. Ves la tarjeta tal como quedará en el Wallet mientras la diseñas."
-      },
-      "distribution": {
-        "label": "Distribución",
-        "description": "El QR para imprimir en varios tamaños, el enlace para compartir y la opción de dar la tarjeta a mano."
-      },
-      "nearby": {
-        "label": "Aparece cuando pasan cerca",
-        "description": "Cuando un cliente pasa por delante de tu local, su pase aparece en la pantalla de bloqueo del iPhone. Sin apps ni notificaciones molestas."
-      }
-    },
-    "lead": "Quién vuelve y cuándo, de un vistazo. Y todo lo que necesitas para llevar el programa.",
+    "title": "Monitorización completa.",
+    "lead": "Gestiona los programas y sigue el día a día de tus clientes desde el panel.",
     "mock": {
       "overview": "Resumen",
       "newAction": "Nueva interacción",
