@@ -1,7 +1,7 @@
 import "server-only"
 
 import { db } from "@/lib/db"
-import { planAllowsReviewPrompts, type PlanId } from "@/lib/plans"
+import { orgAllowsReviewPrompts } from "./access"
 import { fetchPlaceRating } from "./places"
 
 /** Today's UTC date, as stored in GoogleRatingSnapshot.date (@db.Date). */
@@ -26,7 +26,7 @@ const CONCURRENCY = 5
 
 /**
  * Daily run (Vercel cron → /api/cron/google-ratings): one Places call per
- * org that picked its business and is on a plan with review prompts. Orgs
+ * org that picked its business and may use review prompts. Orgs
  * keep being tracked while the prompt itself is switched off, so the chart
  * shows what happens before and after.
  */
@@ -39,11 +39,12 @@ export async function snapshotAllPlaceRatings(): Promise<{ orgs: number; written
       organization: { select: { plan: true, subscriptionStatus: true } },
     },
   })
-  const targets = rows.filter(
-    (r): r is typeof r & { placeId: string } =>
-      r.placeId !== null &&
-      planAllowsReviewPrompts(r.organization.plan as PlanId, r.organization.subscriptionStatus),
-  )
+  const targets: { organizationId: string; placeId: string }[] = []
+  for (const r of rows) {
+    if (r.placeId && (await orgAllowsReviewPrompts({ id: r.organizationId, ...r.organization }))) {
+      targets.push({ organizationId: r.organizationId, placeId: r.placeId })
+    }
+  }
 
   let written = 0
   let failed = 0

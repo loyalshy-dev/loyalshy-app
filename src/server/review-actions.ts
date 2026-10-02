@@ -6,7 +6,7 @@ import { getLocale, getTranslations } from "next-intl/server"
 import { z } from "zod"
 import { db } from "@/lib/db"
 import { assertOrganizationRole, getOrganizationForUser } from "@/lib/dal"
-import { planAllowsReviewPrompts, type PlanId } from "@/lib/plans"
+import { orgAllowsReviewPrompts } from "@/lib/reviews/access"
 import { reviewSettingsSchema, resolveReviewUrl, type ReviewSettingsInput } from "@/lib/reviews/config"
 import { searchBusinesses, type BusinessSuggestion } from "@/lib/reviews/places"
 import { snapshotPlaceRating } from "@/lib/reviews/snapshots"
@@ -35,7 +35,7 @@ export async function saveReviewSettings(input: ReviewSettingsInput): Promise<Sa
   }
   const data = parsed.data
 
-  if (data.enabled && !planAllowsReviewPrompts(organization.plan as PlanId, organization.subscriptionStatus)) {
+  if (data.enabled && !(await orgAllowsReviewPrompts(organization))) {
     return { error: t("reviewPlanRequired") }
   }
 

@@ -90,6 +90,17 @@ describe("sendReviewPrompt", () => {
     expect(notifyApple).not.toHaveBeenCalled()
   })
 
+  it("sends for a Free org owned by a platform admin", async () => {
+    mockDb.passInstance.findUnique.mockResolvedValue(pass())
+    mockDb.googleReviewSettings.findUnique.mockResolvedValue(
+      liveSettings({ organization: { name: "C", timezone: "UTC", plan: "FREE", subscriptionStatus: "ACTIVE" } }),
+    )
+    mockDb.member.findFirst.mockResolvedValue({ id: "m-admin" })
+    mockDb.contact.updateMany.mockResolvedValue({ count: 1 })
+
+    expect(await send()).toEqual({ sent: true, provider: "APPLE" })
+  })
+
   it("sends at most once when another run claimed it first", async () => {
     mockDb.passInstance.findUnique.mockResolvedValue(pass())
     mockDb.googleReviewSettings.findUnique.mockResolvedValue(liveSettings())

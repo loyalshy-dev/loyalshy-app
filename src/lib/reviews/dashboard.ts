@@ -1,7 +1,7 @@
 import "server-only"
 
 import { db } from "@/lib/db"
-import { planAllowsReviewPrompts, type PlanId } from "@/lib/plans"
+import { orgAllowsReviewPrompts } from "./access"
 import { isPlacesConfigured } from "./places"
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -38,7 +38,8 @@ export async function getReviewsDashboard(organization: {
   const since365 = new Date(Date.now() - 365 * DAY_MS)
   const orgId = organization.id
 
-  const [settings, asked30d, opened30d, askedTotal, openedTotal, snapshots] = await Promise.all([
+  const [planAllowed, settings, asked30d, opened30d, askedTotal, openedTotal, snapshots] = await Promise.all([
+    orgAllowsReviewPrompts(organization),
     db.googleReviewSettings.findUnique({ where: { organizationId: orgId } }),
     db.contact.count({ where: { organizationId: orgId, reviewPromptedAt: { gte: since30 } } }),
     db.contact.count({
@@ -54,7 +55,7 @@ export async function getReviewsDashboard(organization: {
   ])
 
   return {
-    planAllowed: planAllowsReviewPrompts(organization.plan as PlanId, organization.subscriptionStatus),
+    planAllowed,
     placesConfigured: isPlacesConfigured(),
     settings: settings
       ? {
