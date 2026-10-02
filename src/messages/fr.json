@@ -1398,7 +1398,6 @@
       "addressLabel": "Adresse de l'établissement",
       "addressPlaceholder": "12 rue Principale, Ville",
       "addressHint": "Elle s'affiche aussi sur la carte et sert au lien vers le plan, dans tous vos programmes.",
-      "locationSet": "Emplacement défini",
       "pickFromList": "Choisissez l'adresse dans la liste pour définir l'emplacement",
       "searching": "Recherche d'adresses…",
       "noResults": "Aucune adresse trouvée. Essayez une recherche plus précise.",
@@ -1415,7 +1414,9 @@
       "previewStep1": "Près de votre établissement, la carte apparaît sur l'écran verrouillé.",
       "previewStep2": "La toucher ouvre la carte, prête à être scannée.",
       "previewStep3": "Elle disparaît quand le client s'éloigne.",
-      "previewNote": "La fréquence d'affichage dépend d'iOS et des réglages du client."
+      "previewNote": "La fréquence d'affichage dépend d'iOS et des réglages du client.",
+      "mapLabel": "Carte de l'emplacement de votre établissement. Faites glisser le repère pour l'ajuster.",
+      "mapHint": "Si le repère n'est pas pile devant votre porte, faites-le glisser. Le cercle correspond à peu près à la zone où l'iPhone affiche votre carte."
     }
   },
   "errors": {

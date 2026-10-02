@@ -1398,7 +1398,6 @@
       "addressLabel": "Dirección del negocio",
       "addressPlaceholder": "Calle Principal 123, Ciudad",
       "addressHint": "También se muestra en el pase y se usa para el enlace al mapa, en todos tus programas.",
-      "locationSet": "Ubicación fijada",
       "pickFromList": "Elige la dirección de la lista para fijar la ubicación",
       "searching": "Buscando direcciones…",
       "noResults": "No se encontraron direcciones. Prueba con una búsqueda más concreta.",
@@ -1415,7 +1414,9 @@
       "previewStep1": "Cerca de tu local, el pase aparece en la pantalla de bloqueo.",
       "previewStep2": "Al tocarlo se abre el pase, listo para escanear.",
       "previewStep3": "Desaparece cuando se aleja.",
-      "previewNote": "Cuántas veces aparece depende de iOS y de los ajustes del cliente."
+      "previewNote": "Cuántas veces aparece depende de iOS y de los ajustes del cliente.",
+      "mapLabel": "Mapa con la ubicación de tu negocio. Arrastra el punto para ajustarla.",
+      "mapHint": "Si el punto no está justo en tu puerta, arrástralo. El círculo es más o menos la zona donde el iPhone muestra tu pase."
     }
   },
   "errors": {

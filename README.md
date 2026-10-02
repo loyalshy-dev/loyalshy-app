@@ -112,6 +112,7 @@ Under **Automations → Near your business** (owners and Program managers, all p
 - **iPhone only:** the Apple pass carries the location (`locations` + `relevantText`), so iOS may show the pass on the lock screen when the customer is within ~100 m. It's a suggestion iOS decides on — no sound, not a push notification.
 - **Android:** nothing. Google Wallet doesn't alert by location, so the dashboard doesn't promise it.
 - The address is also the one shown on every program's pass and used for the Google Maps link; saving it updates all passes silently.
+- A map (Leaflet + OpenStreetMap) shows the spot and the ~100 m area; the merchant can drag the pin onto their door if the address search put it slightly off.
 
 ## Pass Updates After Edits
 

@@ -1398,7 +1398,6 @@
       "addressLabel": "Business address",
       "addressPlaceholder": "Main Street 123, City",
       "addressHint": "Also shown on the pass and used for the map link, in all your programs.",
-      "locationSet": "Location set",
       "pickFromList": "Pick the address from the list to set the location",
       "searching": "Searching addresses…",
       "noResults": "No addresses found. Try a more specific search.",
@@ -1415,7 +1414,9 @@
       "previewStep1": "Near your business, the pass appears on the lock screen.",
       "previewStep2": "Tapping it opens the pass, ready to scan.",
       "previewStep3": "It goes away when they leave the area.",
-      "previewNote": "How often it appears depends on iOS and the customer's settings."
+      "previewNote": "How often it appears depends on iOS and the customer's settings.",
+      "mapLabel": "Map of your business location. Drag the pin to adjust it.",
+      "mapHint": "Drag the pin onto your door if it's off. The circle is roughly where iPhones show your pass."
     }
   },
   "errors": {
