@@ -190,7 +190,8 @@
         "contacts": "Hasta 500 clientes",
         "programs": "Hasta 2 programas",
         "staff": "2 personas en el equipo",
-        "announcements": "1 aviso por semana"
+        "announcements": "1 aviso por semana",
+        "reviews": "Peticiones de reseña en Google"
       }
     },
     "growth": {
@@ -200,7 +201,8 @@
         "contacts": "Hasta 2.500 clientes",
         "programs": "Hasta 5 programas",
         "staff": "5 personas en el equipo",
-        "announcements": "2 avisos por semana"
+        "announcements": "2 avisos por semana",
+        "reviews": "Peticiones de reseña en Google"
       }
     },
     "scale": {
@@ -210,7 +212,8 @@
         "contacts": "Clientes ilimitados",
         "programs": "Programas ilimitados",
         "staff": "25 personas en el equipo",
-        "announcements": "5 avisos por semana"
+        "announcements": "5 avisos por semana",
+        "reviews": "Peticiones de reseña en Google"
       }
     },
     "enterprise": {
