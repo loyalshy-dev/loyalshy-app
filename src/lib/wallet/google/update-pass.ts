@@ -14,6 +14,7 @@ import { uploadFile } from "../../storage"
 import { getWalletRewardText, parseCouponConfig, formatCouponValue } from "../../pass-config"
 import { createWalletPassLog } from "../apple/update-pass"
 import { loadReviewPassField, type ReviewPassField } from "../../reviews/settings"
+import { loadWinbackPassField, type WinbackPassField } from "../../winback/pass-field"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -51,6 +52,8 @@ type GooglePassUpdateData = {
   // Google review prompt (null = feature off for this pass)
   reviewPrompt?: ReviewPassField | null
   contactId?: string
+  // Win-back message (null = org doesn't use it)
+  winback?: WinbackPassField | null
 }
 
 // ─── Update Google Wallet Pass ──────────────────────────────
@@ -238,6 +241,20 @@ async function patchGoogleWalletObject(
     ]
   }
 
+  // Win-back: TEXT_AND_NOTIFY on the pass it was sent through, while fresh.
+  // id per send, so Google notifies once per absence.
+  if (data.winback?.message && data.winback.fresh && data.winback.sendId) {
+    patchBody.messages = [
+      ...((patchBody.messages as Record<string, unknown>[] | undefined) ?? []),
+      {
+        id: `winback-${data.winback.sendId}`,
+        header: data.organizationName,
+        body: data.winback.message,
+        messageType: "TEXT_AND_NOTIFY",
+      },
+    ]
+  }
+
   // linksModuleData is replaced wholesale by a PATCH, so every link this
   // object should carry is rebuilt here (an empty list clears a revealed prize).
   const uris: { uri: string; description: string; id: string }[] = []
@@ -292,6 +309,7 @@ export async function notifyGooglePassUpdate(
           createdAt: true,
           reviewPromptedAt: true,
           reviewPromptPassId: true,
+          lastInteractionAt: true,
           organization: {
             select: {
               id: true,
@@ -410,6 +428,14 @@ export async function notifyGooglePassUpdate(
       reviewPromptPassId: passInstance.contact.reviewPromptPassId,
     })
 
+    const winback = await loadWinbackPassField({
+      organizationId: passInstance.contact.organization.id,
+      passInstanceId: passInstance.id,
+      passType: passInstance.passTemplate.passType,
+      templateConfig: passInstance.passTemplate.config,
+      lastInteractionAt: passInstance.contact.lastInteractionAt,
+    })
+
     await patchGoogleWalletObject({
       passInstanceId: passInstance.id,
       memberNumber: passInstance.contact.memberNumber,
@@ -438,6 +464,7 @@ export async function notifyGooglePassUpdate(
       editorConfig: passDesign?.editorConfig,
       reviewPrompt,
       contactId: passInstance.contact.id,
+      winback,
     })
   } catch (error) {
     console.error("Failed to update Google Wallet pass:", error instanceof Error ? error.message : "Unknown error")

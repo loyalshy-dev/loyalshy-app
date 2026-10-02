@@ -71,7 +71,7 @@ export async function saveReviewSettings(input: ReviewSettingsInput): Promise<Sa
     })
   }
 
-  revalidatePath("/dashboard/reviews")
+  revalidatePath("/dashboard/automations/reviews")
   return { success: true }
 }
 

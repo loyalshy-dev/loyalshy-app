@@ -14,7 +14,7 @@ import {
   Settings,
   Share2,
   Smartphone,
-  Star,
+  Zap,
   Users,
   Layers,
 } from "lucide-react"
@@ -152,7 +152,7 @@ export function AppSidebar({
     { label: t("contacts"), href: "/dashboard/contacts", icon: Users },
     { label: t("programs"), href: "/dashboard/programs", icon: Layers },
     ...(isOwnerOrAdmin
-      ? [{ label: t("reviews"), href: "/dashboard/reviews", icon: Star }]
+      ? [{ label: t("automations"), href: "/dashboard/automations", icon: Zap }]
       : []),
     ...(isPartnerUser
       ? [{ label: t("partnerConsole"), href: "/dashboard/partner", icon: Handshake }]

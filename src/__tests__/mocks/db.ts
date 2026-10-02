@@ -62,6 +62,8 @@ export function createMockDb() {
     programAnnouncement: createMockModel(),
     googleReviewSettings: createMockModel(),
     googleRatingSnapshot: createMockModel(),
+    winbackSettings: createMockModel(),
+    winbackSend: createMockModel(),
     $transaction: vi.fn(
       async (
         fnOrOps: ((tx: typeof mockTx) => Promise<unknown>) | Promise<unknown>[]

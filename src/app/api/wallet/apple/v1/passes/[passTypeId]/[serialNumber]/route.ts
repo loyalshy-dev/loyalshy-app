@@ -5,6 +5,7 @@ import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import { loadReviewPassField } from "@/lib/reviews/settings"
+import { loadWinbackPassField } from "@/lib/winback/pass-field"
 
 type Params = Promise<{
   passTypeId: string
@@ -41,6 +42,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
           memberNumber: true,
           reviewPromptedAt: true,
           reviewPromptPassId: true,
+          lastInteractionAt: true,
         },
       },
       passTemplate: {
@@ -110,6 +112,14 @@ export async function GET(request: Request, { params }: { params: Params }) {
     organization
   )
 
+  const winback = await loadWinbackPassField({
+    organizationId: template.organizationId,
+    passInstanceId: passInstance.id,
+    passType: template.passType,
+    templateConfig: template.config,
+    lastInteractionAt: passInstance.contact.lastInteractionAt,
+  })
+
   const reviewPrompt = await loadReviewPassField({
     organizationId: template.organizationId,
     passInstanceId: passInstance.id,
@@ -155,6 +165,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       redeemedAt,
       announcement: parseTemplateAnnouncement(template.announcement),
       reviewPrompt,
+      winback,
     })
 
     // Log update

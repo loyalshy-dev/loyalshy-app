@@ -91,6 +91,19 @@ Needs `CRON_SECRET` (same value on Vercel and Trigger.dev) and `GOOGLE_MAPS_API_
 
 > **Gotcha:** never give an Apple pass field both an `attributedValue` (a link) and a `changeMessage` — iOS puts the raw `<a href>` HTML in the lock-screen banner. The review message and the review link are separate fields for that reason.
 
+## Win Back Customers
+
+Under **Automations → Win back customers** (owners and Program managers, Pro plan and up), a business turns on an automatic "we miss you" message, written by them. **Message only** — no reward is created.
+
+- **Who:** regulars (2+ visits) who haven't come for **14 / 30 / 60 / 90 days**. Stamp cards and unlimited coupons; single-use coupons never.
+- **How often:** once per absence, at most once every 90 days.
+- **When:** the hourly Trigger.dev schedule `winback-hourly` calls `/api/internal/winback`; each organization is handled at 10:00 in its time zone.
+- **First run:** "only from now on" (default) or "also the N customers who are already inactive".
+- **Measuring it:** 10% of eligible customers are held back as a comparison group (on by default), so the dashboard can show how many more came back because of the message.
+- **On the pass:** its own back field, always present as a placeholder; the message shows (and notifies) only on the pass it was sent through, and the customer's next visit clears it.
+
+Needs `CRON_SECRET` on Vercel and Trigger.dev. For on-device testing, `WINBACK_TEST_INACTIVE_MINUTES=2` treats "inactive" as minutes and ignores the 10:00 send hour and the cooldown — remove it afterwards.
+
 ## Pass Updates After Edits
 
 Passes already in customers' wallets pick up edits automatically — no re-install:
@@ -100,7 +113,7 @@ Passes already in customers' wallets pick up edits automatically — no re-insta
 | Stamp, redeem, reward | Object PATCH | APNs push → device re-fetches the `.pkpass` |
 | Design studio (incl. location), program/org logos, program name/terms/config, business name/phone/website | Class PATCH (shared by every holder of the program) + object PATCHes | APNs push to every holder |
 
-Business-level edits refresh every program in the organization. Saves that change nothing visible on the pass (address, timezone, status) push nothing. These updates are silent — lock-screen banners only fire for stamps, redemptions, announcements and review prompts. The fan-out runs through the `update-all-passes` Trigger.dev task (direct calls when `TRIGGER_SECRET_KEY` is unset); see `scheduleWalletRefresh` in `src/server/org-settings-actions.ts`.
+Business-level edits refresh every program in the organization. Saves that change nothing visible on the pass (address, timezone, status) push nothing. These updates are silent — lock-screen banners only fire for stamps, redemptions, announcements, review prompts and win-back messages. The fan-out runs through the `update-all-passes` Trigger.dev task (direct calls when `TRIGGER_SECRET_KEY` is unset); see `scheduleWalletRefresh` in `src/server/org-settings-actions.ts`.
 
 > **Gotcha:** Google renders logo, colors, links, terms, program name and locations from the **class**, not the per-holder object. Anything that changes those must PATCH the class (`syncGoogleLoyaltyClass`), or existing holders never see it.
 

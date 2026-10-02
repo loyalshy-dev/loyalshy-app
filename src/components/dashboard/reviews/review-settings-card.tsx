@@ -90,7 +90,13 @@ export function ReviewSettingsCard({
       return
     }
     startSaving(async () => {
-      const result = await saveReviewSettings(parsed.data)
+      let result: Awaited<ReturnType<typeof saveReviewSettings>>
+      try {
+        result = await saveReviewSettings(parsed.data)
+      } catch {
+        toast.error(t("errorInvalid"))
+        return
+      }
       if ("error" in result) {
         toast.error(result.error)
         return
@@ -229,7 +235,14 @@ function BusinessSearch({ onPick }: { onPick: (s: BusinessSuggestion) => void })
     const timer = setTimeout(() => {
       latest.current = q
       startSearch(async () => {
-        const found = await searchReviewBusinesses(q)
+        // A throw inside a transition reaches the error boundary and takes
+        // the whole page down; a failed search just shows no results.
+        let found: BusinessSuggestion[] = []
+        try {
+          found = await searchReviewBusinesses(q)
+        } catch {
+          found = []
+        }
         // Ignore answers to queries the user has already typed past.
         if (latest.current !== q) return
         setResults(found)

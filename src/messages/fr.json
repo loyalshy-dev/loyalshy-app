@@ -523,7 +523,7 @@
       "overview": "Vue d'ensemble",
       "contacts": "Contacts",
       "programs": "Programmes",
-      "reviews": "Avis",
+      "automations": "Automatisations",
       "settings": "Paramètres",
       "connectDevice": "Connecter un appareil mobile",
       "switchOrganization": "Changer d'organisation",
@@ -1321,6 +1321,51 @@
       "previewStep1": "Toucher la notification ouvre la carte : Apple et Google ne permettent pas d'ouvrir un lien directement.",
       "previewStep2": "Le lien d'avis est la première ligne des détails de la carte (bouton ··· sur iPhone) et ouvre le formulaire Google.",
       "previewStep3": "Les clients qui le touchent sont comptés ci-dessus."
+    },
+    "automations": {
+      "title": "Automatisations",
+      "subtitle": "Les messages que vos cartes Wallet envoient toutes seules.",
+      "tabReviews": "Avis Google",
+      "tabWinback": "Faire revenir les clients"
+    },
+    "winback": {
+      "subtitle": "Quand un habitué ne vient plus, sa carte Wallet lui rappelle votre existence.",
+      "planRequired": "Les messages pour faire revenir les clients sont inclus à partir du plan Pro. Vous pouvez tout configurer maintenant et l'activer après avoir changé de plan.",
+      "upgradeCta": "Changer de plan",
+      "askOwner": "Demandez au propriétaire du compte de changer de plan.",
+      "statSent": "Messages envoyés",
+      "statControl": "Groupe de comparaison",
+      "statUnreachable": "Sans la carte dans leur Wallet",
+      "last30Days": "30 derniers jours",
+      "settingsTitle": "Message pour faire revenir les clients",
+      "settingsDescription": "Quand un habitué (2 visites ou plus) n'est pas venu depuis la durée choisie, sa carte affiche votre message sur l'écran verrouillé, vers 10 h dans votre fuseau horaire. Une fois par absence, et au plus une fois tous les 90 jours.",
+      "enableLabel": "Activer les messages pour faire revenir les clients",
+      "daysLabel": "Envoyer après",
+      "daysOption": "{days} jours sans visite",
+      "daysHint": "Adaptez-le au rythme de vos clients : dans un café, les habitués viennent chaque semaine ; dans un salon, tous les un ou deux mois.",
+      "messageLabel": "Message",
+      "messageHint": "Affiché sur l'écran verrouillé et sur la carte.",
+      "defaultMessage": "Vous nous manquez chez {business} ! Passez quand vous voulez.",
+      "firstRunLabel": "Qui le reçoit en premier",
+      "firstRunFromNow": "Seulement à partir de maintenant",
+      "firstRunFromNowHint": "Les clients qui atteignent {days} jours sans visite à partir d'aujourd'hui.",
+      "firstRunIncludeExisting": "{count, plural, =0 {Aussi les clients déjà inactifs} one {Aussi le # client déjà inactif} other {Aussi les # clients déjà inactifs}}",
+      "firstRunIncludeExistingHint": "Ils recevront le message lors de l'envoi du lendemain matin.",
+      "holdoutLabel": "Mesurer les résultats (groupe de comparaison de {percent} %)",
+      "holdoutHint": "Une partie des clients éligibles ne reçoit pas le message, pour voir combien de clients en plus reviennent grâce à lui.",
+      "countLoading": "Calcul en cours…",
+      "countToday": "{count, plural, =0 {Aucun client n'est éligible aujourd'hui.} one {# client est éligible aujourd'hui} other {# clients sont éligibles aujourd'hui}}{count, plural, =0 {} other { ({reachable} avec la carte dans leur Wallet).}}",
+      "save": "Enregistrer",
+      "savedOn": "Enregistré. Les messages pour faire revenir les clients sont activés.",
+      "savedOff": "Enregistré. Les messages pour faire revenir les clients sont désactivés.",
+      "errorInvalid": "Vérifiez les champs et réessayez.",
+      "promiseNote": "Si votre message promet quelque chose (« votre prochain café est offert »), votre équipe doit tenir parole. Loyalshy ne le suit pas.",
+      "previewTitle": "Ce que voit le client",
+      "previewLockScreen": "Écran verrouillé",
+      "previewPass": "Sur la carte",
+      "previewStep1": "Toucher la notification ouvre sa carte.",
+      "previewStep2": "À sa prochaine visite, le message disparaît de la carte.",
+      "previewStep3": "Les clients qui reviennent sont comptés ici."
     }
   },
   "errors": {
@@ -1715,7 +1760,8 @@
     "announcementQuotaReachedWeekTopPlan": "Vous avez utilisé toutes vos annonces de la semaine. D'autres seront disponibles quand les précédentes auront plus de 7 jours.",
     "reviewMissingTarget": "Choisissez votre établissement ou collez votre lien d'avis.",
     "reviewInvalidUrl": "Ce lien ne ressemble pas à un lien d'avis Google.",
-    "reviewPlanRequired": "Les demandes d'avis sont incluses à partir de l'offre Pro."
+    "reviewPlanRequired": "Les demandes d'avis sont incluses à partir de l'offre Pro.",
+    "winbackPlanRequired": "Les messages pour faire revenir les clients sont inclus à partir du plan Pro."
   },
   "admin": {
     "cohorts": {
