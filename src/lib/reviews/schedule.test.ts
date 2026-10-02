@@ -31,7 +31,9 @@ const settings = {
   organization: { name: "Café", timezone: "Europe/Madrid", plan: "GROWTH", subscriptionStatus: "ACTIVE" },
 }
 
-async function schedule(overrides: Partial<{ walletProvider: string; passType: string; newTotalVisits: number }> = {}) {
+async function schedule(
+  overrides: Partial<{ walletProvider: string; passType: string; templateConfig: unknown; newVisitCount: number }> = {},
+) {
   const { maybeScheduleReviewPrompt } = await import("./schedule")
   maybeScheduleReviewPrompt({
     organizationId: "org-1",
@@ -39,7 +41,8 @@ async function schedule(overrides: Partial<{ walletProvider: string; passType: s
     passInstanceId: "pi-1",
     walletProvider: "APPLE",
     passType: "STAMP_CARD",
-    newTotalVisits: 3,
+    templateConfig: { stampsRequired: 10 },
+    newVisitCount: 3,
     ...overrides,
   })
   for (const task of afterTasks) await task()
@@ -61,20 +64,20 @@ describe("maybeScheduleReviewPrompt", () => {
   it("also asks customers already past the trigger", async () => {
     mockDb.googleReviewSettings.findUnique.mockResolvedValue(settings)
     mockDb.contact.findUnique.mockResolvedValue({ reviewPromptedAt: null, deletedAt: null })
-    await schedule({ newTotalVisits: 12 })
+    await schedule({ newVisitCount: 12 })
     expect(trigger).toHaveBeenCalledTimes(1)
   })
 
   it("does nothing below the trigger, once asked, or without a wallet pass", async () => {
     mockDb.googleReviewSettings.findUnique.mockResolvedValue(settings)
     mockDb.contact.findUnique.mockResolvedValue({ reviewPromptedAt: null, deletedAt: null })
-    await schedule({ newTotalVisits: 2 })
+    await schedule({ newVisitCount: 2 })
 
     mockDb.contact.findUnique.mockResolvedValue({ reviewPromptedAt: new Date(), deletedAt: null })
     await schedule()
 
     await schedule({ walletProvider: "NONE" })
-    await schedule({ passType: "COUPON" })
+    await schedule({ passType: "COUPON", templateConfig: { redemptionLimit: "single", discountType: "percentage", discountValue: 10 } })
     expect(trigger).not.toHaveBeenCalled()
   })
 
@@ -97,5 +100,16 @@ describe("maybeScheduleReviewPrompt", () => {
     const delay = (trigger.mock.calls[0][2] as { delay: Date }).delay.getTime() - before
     expect(delay).toBeGreaterThanOrEqual(59_000)
     expect(delay).toBeLessThan(65_000)
+  })
+
+  it("schedules for an unlimited coupon once its redemptions reach the trigger", async () => {
+    mockDb.googleReviewSettings.findUnique.mockResolvedValue(settings)
+    mockDb.contact.findUnique.mockResolvedValue({ reviewPromptedAt: null, deletedAt: null })
+    await schedule({
+      passType: "COUPON",
+      templateConfig: { redemptionLimit: "unlimited", discountType: "percentage", discountValue: 10 },
+      newVisitCount: 3,
+    })
+    expect(trigger).toHaveBeenCalledTimes(1)
   })
 })

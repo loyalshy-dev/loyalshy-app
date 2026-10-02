@@ -186,10 +186,10 @@ describe("performRedeemCoupon — concurrency safety", () => {
       data: {
         redeemed: true,
         redeemedAt: new Date(Date.now() - 120_000).toISOString(),
+        redeemCount: 2,
       },
     })
     mockDb._tx.passInstance.update.mockResolvedValue({})
-    mockDb._tx.passInstance.create.mockResolvedValue({ id: "pi-new" })
     mockDb._tx.reward.findFirst.mockResolvedValue(null)
     mockDb._tx.reward.create.mockResolvedValue({})
     mockDb._tx.interaction.create.mockResolvedValue({ id: "int" })
@@ -199,7 +199,43 @@ describe("performRedeemCoupon — concurrency safety", () => {
     const { performRedeemCoupon } = await import("./route")
     await performRedeemCoupon(makeCouponPass("unlimited"), "user-1")
 
-    expect(mockDb._tx.passInstance.update).toHaveBeenCalled()
-    expect(mockDb._tx.passInstance.create).toHaveBeenCalled() // re-issued
+    expect(mockDb._tx.passInstance.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          data: expect.objectContaining({ redeemCount: 3 }),
+          status: "ACTIVE",
+        }),
+      }),
+    )
+    // The next reward goes on the SAME pass — a second PassInstance would hit
+    // the [contactId, passTemplateId] unique index and roll back the redeem.
+    expect(mockDb._tx.passInstance.create).not.toHaveBeenCalled()
+    expect(mockDb._tx.reward.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ passInstanceId: "pi-2", status: "AVAILABLE" }),
+      }),
+    )
+  })
+
+  it("single-use: counts the redemption and completes the pass", async () => {
+    mockDb._tx.passInstance.findUnique.mockResolvedValue({ data: { redeemed: false } })
+    mockDb._tx.passInstance.update.mockResolvedValue({})
+    mockDb._tx.reward.findFirst.mockResolvedValue(null)
+    mockDb._tx.interaction.create.mockResolvedValue({ id: "int" })
+    mockDb._tx.contact.update.mockResolvedValue({})
+    mockDb._tx.$queryRaw.mockResolvedValue([])
+
+    const { performRedeemCoupon } = await import("./route")
+    await performRedeemCoupon(makeCouponPass("single"), "user-1")
+
+    expect(mockDb._tx.passInstance.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          data: expect.objectContaining({ redeemCount: 1 }),
+          status: "COMPLETED",
+        }),
+      }),
+    )
+    expect(mockDb._tx.reward.create).not.toHaveBeenCalled()
   })
 })

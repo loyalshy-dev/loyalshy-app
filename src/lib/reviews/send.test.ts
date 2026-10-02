@@ -23,11 +23,14 @@ function pass(overrides: Record<string, unknown> = {}) {
     walletProvider: "APPLE",
     contactId: "c-1",
     data: { totalVisits: 3 },
-    passTemplate: { organizationId: "org-1", passType: "STAMP_CARD" },
+    passTemplate: { organizationId: "org-1", passType: "STAMP_CARD", config: { stampsRequired: 10 } },
     contact: { reviewPromptedAt: null, deletedAt: null },
     ...overrides,
   }
 }
+
+const SINGLE_COUPON = { redemptionLimit: "single", discountType: "percentage", discountValue: 10 }
+const UNLIMITED_COUPON = { ...SINGLE_COUPON, redemptionLimit: "unlimited" }
 
 function liveSettings(overrides: Record<string, unknown> = {}) {
   return {
@@ -101,6 +104,18 @@ describe("sendReviewPrompt", () => {
     expect(await send()).toEqual({ sent: true, provider: "APPLE" })
   })
 
+  it("counts redemptions on an unlimited coupon", async () => {
+    mockDb.googleReviewSettings.findUnique.mockResolvedValue(liveSettings())
+    mockDb.contact.updateMany.mockResolvedValue({ count: 1 })
+    const coupon = { organizationId: "org-1", passType: "COUPON", config: UNLIMITED_COUPON }
+
+    mockDb.passInstance.findUnique.mockResolvedValue(pass({ passTemplate: coupon, data: { redeemCount: 2 } }))
+    expect(await send()).toEqual({ sent: false, reason: "belowTrigger" })
+
+    mockDb.passInstance.findUnique.mockResolvedValue(pass({ passTemplate: coupon, data: { redeemCount: 3 } }))
+    expect(await send()).toEqual({ sent: true, provider: "APPLE" })
+  })
+
   it("sends at most once when another run claimed it first", async () => {
     mockDb.passInstance.findUnique.mockResolvedValue(pass())
     mockDb.googleReviewSettings.findUnique.mockResolvedValue(liveSettings())
@@ -117,8 +132,10 @@ describe("sendReviewPrompt", () => {
     mockDb.passInstance.findUnique.mockResolvedValue(pass({ contactId: "someone-else" }))
     expect(await send()).toEqual({ sent: false, reason: "passNotFound" })
 
-    mockDb.passInstance.findUnique.mockResolvedValue(pass({ passTemplate: { organizationId: "org-1", passType: "COUPON" } }))
-    expect(await send()).toEqual({ sent: false, reason: "notStampCard" })
+    mockDb.passInstance.findUnique.mockResolvedValue(
+      pass({ passTemplate: { organizationId: "org-1", passType: "COUPON", config: SINGLE_COUPON } }),
+    )
+    expect(await send()).toEqual({ sent: false, reason: "notEligible" })
   })
 
   it("releases the claim when the push throws, so the retry can send", async () => {

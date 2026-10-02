@@ -404,6 +404,7 @@ export async function notifyGooglePassUpdate(
       organizationId: passInstance.contact.organization.id,
       passInstanceId: passInstance.id,
       passType: passInstance.passTemplate.passType,
+      templateConfig: passInstance.passTemplate.config,
       reviewPromptedAt: passInstance.contact.reviewPromptedAt,
     })
 

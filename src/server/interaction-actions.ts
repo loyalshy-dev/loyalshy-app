@@ -20,6 +20,7 @@ import {
 } from "@/lib/dal"
 import { parseCouponConfig, formatCouponValue, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
+import { maybeScheduleReviewPrompt } from "@/lib/reviews/schedule"
 
 // NOTE: stamp-actions exports (searchContactsForStamp, registerStamp, lookupPassInstanceByWalletPassId)
 // must be imported directly from "@/server/stamp-actions" — Turbopack does not support
@@ -102,6 +103,7 @@ export async function redeemCoupon(
 
   // Find existing reward for this pass instance (created at issue time)
   let selectedPrize: string | undefined
+  let newRedeemCount = 0
 
   try {
   await db.$transaction(async (tx) => {
@@ -112,14 +114,22 @@ export async function redeemCoupon(
     })
     const freshData = (fresh?.data as Record<string, unknown>) ?? {}
     if ((freshData.redeemed as boolean) ?? false) {
-      throw new Error("ALREADY_REDEEMED")
+      // Single-use: done. Unlimited: allowed again, with the same 60s
+      // double-tap debounce as the staff-app route.
+      if (!isUnlimited) throw new Error("ALREADY_REDEEMED")
+      const lastRedeemedAt = freshData.redeemedAt as string | undefined
+      if (lastRedeemedAt && Date.now() - new Date(lastRedeemedAt).getTime() < 60_000) {
+        throw new Error("JUST_REDEEMED")
+      }
     }
 
-    // Mark coupon as redeemed in data JSON
+    // Mark coupon as redeemed in data JSON. redeemCount = the "visits" an
+    // unlimited coupon counts toward the Google review prompt trigger.
+    newRedeemCount = ((freshData.redeemCount as number | undefined) ?? 0) + 1
     await tx.passInstance.update({
       where: { id: passInstance.id },
       data: {
-        data: { ...freshData, redeemed: true, redeemedAt: new Date().toISOString() },
+        data: { ...freshData, redeemed: true, redeemedAt: new Date().toISOString(), redeemCount: newRedeemCount },
         status: isUnlimited ? "ACTIVE" : "COMPLETED",
       },
     })
@@ -159,18 +169,10 @@ export async function redeemCoupon(
       },
     })
 
-    // For unlimited coupons, reissue a fresh pass instance with a new Reward
+    // Unlimited coupons: the next reward goes on the same (still active) pass.
+    // A second PassInstance would hit the [contactId, passTemplateId] unique
+    // index and roll the whole redemption back.
     if (isUnlimited) {
-      const newPi = await tx.passInstance.create({
-        data: {
-          contactId: passInstance.contact.id,
-          passTemplateId: passInstance.passTemplate.id,
-          walletProvider: "NONE",
-          status: "ACTIVE",
-          data: { redeemed: false },
-        },
-      })
-
       const couponConfig2 = parseCouponConfig(passInstance.passTemplate.config)
       const rewardExpiryDays = (passInstance.passTemplate.config as Record<string, unknown>)?.rewardExpiryDays as number | undefined
       const newExpiresAt = couponConfig2?.validUntil
@@ -188,7 +190,7 @@ export async function redeemCoupon(
           contactId: passInstance.contact.id,
           organizationId: organization.id,
           passTemplateId: passInstance.passTemplate.id,
-          passInstanceId: newPi.id,
+          passInstanceId: passInstance.id,
           status: "AVAILABLE",
           expiresAt: newExpiresAt,
           ...(newPrize ? { description: newPrize, revealedAt: null } : {}),
@@ -200,10 +202,22 @@ export async function redeemCoupon(
     if (err instanceof Error && err.message === "ALREADY_REDEEMED") {
       return { success: false, error: t("couponAlreadyRedeemed") }
     }
+    if (err instanceof Error && err.message === "JUST_REDEEMED") {
+      return { success: false, error: t("couponJustRedeemed") }
+    }
     throw err
   }
 
   dispatchWalletUpdate(passInstance.id, passInstance.walletProvider, "COUPON_REDEEM")
+  maybeScheduleReviewPrompt({
+    organizationId: organization.id,
+    contactId: passInstance.contact.id,
+    passInstanceId: passInstance.id,
+    walletProvider: passInstance.walletProvider,
+    passType: passInstance.passTemplate.passType,
+    templateConfig: passInstance.passTemplate.config,
+    newVisitCount: newRedeemCount,
+  })
 
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/contacts")

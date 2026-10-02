@@ -2,6 +2,7 @@ import "server-only"
 
 import { after } from "next/server"
 import { db } from "@/lib/db"
+import { isReviewEligiblePass } from "./eligibility"
 import { getActiveReviewSettings } from "./settings"
 import { computeReviewDueAt } from "./timing"
 
@@ -11,7 +12,8 @@ export type SendReviewPromptPayload = {
 }
 
 /**
- * Called after every successful stamp (staff app + dashboard). Schedules the
+ * Called after every successful stamp and every unlimited-coupon redemption
+ * (staff app + dashboard). Schedules the
  * contact's one-time review prompt once their visit count reaches the org's
  * trigger, delivered ~90 min later inside local daytime hours. The delayed
  * Trigger.dev run calls back into /api/internal/review-prompt, which
@@ -27,14 +29,16 @@ export function maybeScheduleReviewPrompt(args: {
   passInstanceId: string
   walletProvider: string
   passType: string
-  newTotalVisits: number
+  templateConfig: unknown
+  /** Stamps (stamp card) or redemptions (unlimited coupon) including this one. */
+  newVisitCount: number
 }) {
-  if (args.walletProvider === "NONE" || args.passType !== "STAMP_CARD") return
+  if (args.walletProvider === "NONE" || !isReviewEligiblePass(args.passType, args.templateConfig)) return
 
   after(async () => {
     try {
       const settings = await getActiveReviewSettings(args.organizationId)
-      if (!settings || args.newTotalVisits < settings.triggerStamp) return
+      if (!settings || args.newVisitCount < settings.triggerStamp) return
 
       const contact = await db.contact.findUnique({
         where: { id: args.contactId },
