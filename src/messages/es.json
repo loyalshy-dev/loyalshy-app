@@ -207,7 +207,8 @@
         "programs": "Hasta 5 programas",
         "staff": "5 personas en el equipo",
         "announcements": "2 avisos por semana",
-        "reviews": "Peticiones de reseña en Google"
+        "reviews": "Peticiones de reseña en Google",
+        "winback": "Mensajes para recuperar clientes inactivos"
       }
     },
     "scale": {
@@ -218,7 +219,8 @@
         "programs": "Programas ilimitados",
         "staff": "25 personas en el equipo",
         "announcements": "5 avisos por semana",
-        "reviews": "Peticiones de reseña en Google"
+        "reviews": "Peticiones de reseña en Google",
+        "winback": "Mensajes para recuperar clientes inactivos"
       }
     },
     "billingPeriod": "Periodo de facturación",

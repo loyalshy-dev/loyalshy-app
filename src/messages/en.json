@@ -207,7 +207,8 @@
         "programs": "Up to 5 programs",
         "staff": "5 team members",
         "announcements": "2 messages a week",
-        "reviews": "Google review requests"
+        "reviews": "Google review requests",
+        "winback": "Win-back messages to inactive customers"
       }
     },
     "scale": {
@@ -218,7 +219,8 @@
         "programs": "Unlimited programs",
         "staff": "25 team members",
         "announcements": "5 messages a week",
-        "reviews": "Google review requests"
+        "reviews": "Google review requests",
+        "winback": "Win-back messages to inactive customers"
       }
     },
     "billingPeriod": "Billing period",
