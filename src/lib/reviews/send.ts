@@ -56,7 +56,7 @@ export async function sendReviewPrompt(args: {
 
   const claimed = await db.contact.updateMany({
     where: { id: args.contactId, reviewPromptedAt: null },
-    data: { reviewPromptedAt: new Date() },
+    data: { reviewPromptedAt: new Date(), reviewPromptPassId: pass.id },
   })
   if (claimed.count === 0) return { sent: false, reason: "alreadyPrompted" }
 
@@ -70,7 +70,10 @@ export async function sendReviewPrompt(args: {
     }
   } catch (err) {
     // Release the claim so the Trigger.dev retry can send again.
-    await db.contact.update({ where: { id: args.contactId }, data: { reviewPromptedAt: null } })
+    await db.contact.update({
+      where: { id: args.contactId },
+      data: { reviewPromptedAt: null, reviewPromptPassId: null },
+    })
     throw err
   }
   return { sent: true, provider: pass.walletProvider }

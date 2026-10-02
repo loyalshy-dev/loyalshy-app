@@ -291,6 +291,7 @@ export async function notifyGooglePassUpdate(
           memberNumber: true,
           createdAt: true,
           reviewPromptedAt: true,
+          reviewPromptPassId: true,
           organization: {
             select: {
               id: true,
@@ -406,6 +407,7 @@ export async function notifyGooglePassUpdate(
       passType: passInstance.passTemplate.passType,
       templateConfig: passInstance.passTemplate.config,
       reviewPromptedAt: passInstance.contact.reviewPromptedAt,
+      reviewPromptPassId: passInstance.contact.reviewPromptPassId,
     })
 
     await patchGoogleWalletObject({

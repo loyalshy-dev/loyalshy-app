@@ -40,6 +40,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
           email: true,
           memberNumber: true,
           reviewPromptedAt: true,
+          reviewPromptPassId: true,
         },
       },
       passTemplate: {
@@ -115,6 +116,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
     passType: template.passType,
     templateConfig: template.config,
     reviewPromptedAt: passInstance.contact.reviewPromptedAt,
+    reviewPromptPassId: passInstance.contact.reviewPromptPassId,
   })
 
   try {

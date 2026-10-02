@@ -25,7 +25,7 @@ beforeEach(() => {
   vi.doMock("../../card-access", () => ({ signCardAccess: () => "sig" }))
 })
 
-function passInstance(reviewPromptedAt: Date | null, unrevealedPrize = false) {
+function passInstance(reviewPromptedAt: Date | null, unrevealedPrize = false, reviewPromptPassId: string | null = "pi-1") {
   return {
     id: "pi-1",
     walletProvider: "GOOGLE",
@@ -37,6 +37,7 @@ function passInstance(reviewPromptedAt: Date | null, unrevealedPrize = false) {
       memberNumber: 7,
       createdAt: new Date("2026-01-01"),
       reviewPromptedAt,
+      reviewPromptPassId: reviewPromptedAt ? reviewPromptPassId : null,
       organization: { id: "org-1", name: "Café Lola", slug: "lola", brandColor: null, logo: null },
     },
     passTemplate: {
@@ -115,5 +116,16 @@ describe("Google review prompt", () => {
     const body = await patchBody()
     expect(body.linksModuleData).toEqual({ uris: [] })
     expect((body.messages as { id: string }[]).map((m) => m.id)).toEqual(["stamp-3"])
+  })
+
+  it("keeps a recently-asked contact's OTHER pass quiet", async () => {
+    // Asked 10 minutes ago through another pass (e.g. a second program, or a
+    // pass added after the prompt): link + no TEXT_AND_NOTIFY on this one.
+    mockDb.passInstance.findUnique.mockResolvedValue(passInstance(new Date(Date.now() - 600_000), false, "pi-other"))
+    mockDb.googleReviewSettings.findUnique.mockResolvedValue(settingsRow())
+
+    const body = await patchBody()
+    expect((body.messages as { id: string }[]).map((m) => m.id)).toEqual(["stamp-3"])
+    expect((body.linksModuleData as { uris: { id: string }[] }).uris.map((u) => u.id)).toEqual(["googleReview"])
   })
 })
