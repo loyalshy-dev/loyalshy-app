@@ -72,8 +72,8 @@
       "sendTitle": "Envoyer un message",
       "sendButton": "Envoyer à 128 clients",
       "ch1": {
-        "title": "Avec un QR ou par e-mail.",
-        "caption": "Ils le scannent au comptoir ou ouvrent l'e-mail que vous envoyez. Aucune app à installer."
+        "title": "Partagez vos programmes de fidélité.",
+        "caption": "Programmes publics ou privés, partagés par QR, e-mail ou réseaux sociaux."
       },
       "ch2": {
         "title": "Dans leur Wallet.",

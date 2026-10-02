@@ -37,8 +37,9 @@ export const FILM = {
     pullBack: [0, 0.077] as Move,
   },
 
-  /** 1. The counter QR in the camera (or the email — in the copy). A hard
-   *  cut from the lock screen, as iOS does. */
+  /** 1. Sharing a program: the counter QR in the camera (a hard cut from
+   *  the lock screen, as iOS does) and, around the phone, the tiles for
+   *  email and the social networks a link gets posted to. */
   ch1: {
     caption: [0.045, 0.085, 0.115, 0.14] as Fade,
     captionLag: 0.013,
@@ -46,6 +47,8 @@ export const FILM = {
     landAt: 0.085,
     camera: [0.058, 0.075, 0.129, 0.155] as Fade,
     scanFrame: [0.064, 0.129] as Move,
+    /** Each share tile rises in this much later than the one before. */
+    tileStep: 0.004,
   },
 
   /** 2. The pass slides into Wallet; the Add to Wallet buttons under the caption. */

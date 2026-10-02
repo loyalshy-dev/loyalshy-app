@@ -7,6 +7,7 @@ import { CHAPTERS, FILM, PIN_VH, type Chapter } from "./film-timeline"
 import { useCaption, useFade, useMove, useVisibility } from "./film-hooks"
 import { AppIcon, AppScreen, BANNERS, CameraScreen, CouponFrame, LockNotification, LockScreen, OpeningNotification, PassScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
 import { FilmRail } from "./film-rail"
+import { ShareTiles } from "./film-share"
 import { MapScene } from "./map-scene"
 import { PhoneFrame } from "./phone-frame"
 import { INK, SPRING_HEAVY, SPRING_LIGHT } from "./tokens"
@@ -16,8 +17,9 @@ import { useMediaQuery } from "./use-media-query"
 // phone fills the fold at the open and pulls back as the first scroll
 // happens; the camera then pushes in on each chapter's climax (see
 // `FILM.phone.zoom`). A rail on the left axis names the chapters and jumps.
-//   1. With a QR or by email — the counter QR in the camera (a hard cut
-//      from the lock screen, as iOS does).
+//   1. Share the programs — the counter QR in the camera (a hard cut from
+//      the lock screen, as iOS does), with email and social-network tiles
+//      floating around the phone (`film-share.tsx`).
 //   2. In their Wallet — the pass slides in, the Add to Wallet buttons come
 //      up under the caption.
 //   3. It shows up when they are nearby — lock screen, a customer walks
@@ -239,6 +241,9 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                 <MapScene walk={walk} pulse={pulse} label={t("film.mapLabel")} className="w-full" style={{ boxShadow: "0 30px 60px -20px oklch(0 0 0 / 0.45), 0 0 0 1px oklch(0 0 0 / 0.08)" }} />
               </motion.div>
             </motion.div>
+
+            {/* Chapter 1: how a program is shared, around the phone */}
+            <ShareTiles p={p} narrow={narrow} />
 
             {/* Chapter 3: the crowd behind */}
             {[crowdLeft, crowdRight].map((mv, i) => (
