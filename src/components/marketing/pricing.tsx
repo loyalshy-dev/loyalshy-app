@@ -86,7 +86,7 @@ export function Pricing() {
             const saved = plan && period === "annual" ? (monthly - (plan.annualPrice ?? 0)) * 12 : 0
             const features = Object.values(t.raw(`${col.key}.features`) as Record<string, string>)
             return (
-              <div key={col.key} className="flex flex-col items-center rounded-2xl border p-5 text-center sm:rounded-none sm:border-0 sm:p-0" style={{ borderColor: col.recommended ? "var(--mk-text)" : "var(--mk-border)" }}>
+              <div key={col.key} className="flex flex-col items-center rounded-2xl border p-5 text-center sm:rounded-none sm:border-0 sm:p-0" style={{ borderColor: "var(--mk-border)" }}>
                 <p className={col.recommended ? "mk-caption font-semibold" : "mk-caption hidden sm:block sm:min-h-[1lh]"} style={{ color: "var(--mk-text)" }}>
                   {col.recommended ? t("mostPopular") : ""}
                 </p>
