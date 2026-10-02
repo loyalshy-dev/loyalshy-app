@@ -84,6 +84,7 @@ From **Reviews** in the sidebar (owners and Program managers, Pro plan and up), 
 - **When:** about 90 minutes after the visit, moved to 10:00 local time if it would land outside 09:00–21:00 in the organization's time zone. The delay runs on Trigger.dev (`send-review-prompt`), which calls back into `/api/internal/review-prompt`.
 - **Where the link is:** a Wallet notification can only open the pass, never a URL. The review link is the first row of the pass details (the ··· button on iPhone; on the pass itself in Google Wallet) and goes through `/r/{token}`, which counts the tap and redirects to Google's review form.
 - **Tracking:** asked / opened-the-link counts, plus a daily snapshot of the business's Google rating and review count (Places API, Vercel cron `/api/cron/google-ratings`) for the "reviews over time" chart.
+- **Once per customer, on one pass:** only the pass the prompt went through shows the notification. A customer's other passes (another program, or a pass added later) show the message and link silently.
 - **Policy:** the stamp or discount never depends on the review, and there is no rating pre-filter — Google bans incentivised reviews and review gating.
 
 Needs `CRON_SECRET` (same value on Vercel and Trigger.dev) and `GOOGLE_MAPS_API_KEY` with the Places API (New) enabled. For on-device testing, `REVIEW_PROMPT_DELAY_SECONDS=60` sends the prompt a minute after the visit, ignoring quiet hours.
