@@ -1283,8 +1283,8 @@
       "previewTitle": "What the customer sees",
       "previewLockScreen": "Lock screen",
       "previewPass": "Back of the pass",
-      "previewStep1": "Tapping the notification opens the pass.",
-      "previewStep2": "The link opens Google's review form for your business.",
+      "previewStep1": "Tapping the notification opens the pass. Apple and Google don't allow it to open a link directly.",
+      "previewStep2": "The review link is the first thing in the pass details (the ··· button on iPhone) and opens Google's review form.",
       "previewStep3": "Customers who tap it are counted above."
     }
   },

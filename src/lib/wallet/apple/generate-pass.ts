@@ -201,8 +201,14 @@ export async function generateApplePass(
     ...appleLayout.secondary,
     ...appleLayout.auxiliary,
   ])
-  const pushBack = (field: { key: string; label: string; value: string; changeMessage?: string; attributedValue?: string }) => {
+  const pushBack = (field: { key: string; label?: string; value: string; changeMessage?: string; attributedValue?: string }) => {
     if (!frontFieldKeys.has(field.key)) pass.backFields.push(field)
+  }
+
+  // Google review prompt first: a Wallet notification can only open the
+  // pass, so the review link must be the first thing in Pass Details.
+  if (input.reviewPrompt) {
+    for (const field of buildAppleReviewFields(input.reviewPrompt)) pushBack(field)
   }
 
   // If programName is provided, add a "Program" back field
@@ -223,10 +229,6 @@ export async function generateApplePass(
     value: input.announcement?.message ?? "No announcements yet",
     changeMessage: "%@",
   })
-
-  if (input.reviewPrompt) {
-    pushBack(buildAppleReviewField(input.reviewPrompt))
-  }
 
   // Type-specific back fields
   if (input.programType === "COUPON" && couponConfig) {
@@ -654,31 +656,45 @@ export function buildAppleFrontFields(input: PassGenerationInput): {
   return { fieldData, appleLayout }
 }
 
-// ─── Google review prompt back field ────────────────────────
+// ─── Google review prompt back fields ───────────────────────
 
 const escapeHtml = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 
-/**
- * Before the contact is asked the field reads as a plain "leave a review"
- * link; once asked its value becomes the merchant's message. iOS banners
- * the new value ("%@") only while the prompt is fresh (24h), so editing the
- * message later doesn't re-notify everyone already asked. `value` is what
- * the banner shows; `attributedValue` makes it a tappable link on the back.
- */
-export function buildAppleReviewField(review: ReviewPassField): {
+type AppleBackField = {
   key: string
-  label: string
+  label?: string
   value: string
-  attributedValue: string
+  attributedValue?: string
   changeMessage?: string
-} {
-  const text = review.prompted ? review.message : review.linkLabel
-  return {
-    key: "googleReview",
-    label: "Google",
-    value: text,
-    attributedValue: `<a href="${escapeHtml(review.url)}">${escapeHtml(text)}</a>`,
-    ...(review.prompted && review.fresh ? { changeMessage: "%@" } : {}),
+}
+
+/**
+ * The review prompt's back fields.
+ *
+ * The banner text and the link MUST live in different fields: when a field
+ * has an `attributedValue`, iOS substitutes the raw HTML (`<a href=…>`) for
+ * `%@` in its changeMessage — that is what shipped in the first version.
+ *
+ * - Not asked yet: one row, the tappable "leave a review" link.
+ * - Asked: `googleReview` turns into the merchant's message (plain value; its
+ *   change fires the banner while the prompt is fresh, 24h) and the link
+ *   moves to its own `googleReviewLink` row, which never notifies. Keeping
+ *   the `googleReview` key across both states is what makes the value
+ *   "change" — iOS doesn't banner a field that is new on this version.
+ */
+export function buildAppleReviewFields(review: ReviewPassField): AppleBackField[] {
+  const link = `<a href="${escapeHtml(review.url)}">${escapeHtml(review.linkLabel)}</a>`
+  if (!review.prompted) {
+    return [{ key: "googleReview", label: "Google", value: review.linkLabel, attributedValue: link }]
   }
+  return [
+    {
+      key: "googleReview",
+      label: "Google",
+      value: review.message,
+      ...(review.fresh ? { changeMessage: "%@" } : {}),
+    },
+    { key: "googleReviewLink", value: review.linkLabel, attributedValue: link },
+  ]
 }
