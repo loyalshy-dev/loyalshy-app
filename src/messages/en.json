@@ -72,8 +72,8 @@
       "sendTitle": "Send a notice",
       "sendButton": "Send to 128 customers",
       "ch1": {
-        "title": "Share your loyalty programs.",
-        "caption": "Public or private programs, shared by QR, email or social media."
+        "title": "Share.",
+        "caption": "Public or private loyalty programs, shared by QR, email or social media."
       },
       "ch2": {
         "title": "In their Wallet.",
