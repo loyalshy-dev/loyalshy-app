@@ -191,7 +191,8 @@
         "programs": "Jusqu'à 2 programmes",
         "staff": "2 membres de l'équipe",
         "announcements": "1 message par semaine",
-        "reviews": "Demandes d'avis Google"
+        "reviews": "Demandes d'avis Google",
+        "winback": "Messages pour faire revenir les clients inactifs"
       }
     },
     "growth": {
@@ -202,7 +203,8 @@
         "programs": "Jusqu'à 5 programmes",
         "staff": "5 membres de l'équipe",
         "announcements": "2 messages par semaine",
-        "reviews": "Demandes d'avis Google"
+        "reviews": "Demandes d'avis Google",
+        "winback": "Messages pour faire revenir les clients inactifs"
       }
     },
     "scale": {
@@ -213,7 +215,8 @@
         "programs": "Programmes illimités",
         "staff": "25 membres de l'équipe",
         "announcements": "5 messages par semaine",
-        "reviews": "Demandes d'avis Google"
+        "reviews": "Demandes d'avis Google",
+        "winback": "Messages pour faire revenir les clients inactifs"
       }
     },
     "enterprise": {
