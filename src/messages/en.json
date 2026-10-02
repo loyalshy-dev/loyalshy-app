@@ -195,7 +195,8 @@
         "contacts": "Up to 500 customers",
         "programs": "Up to 2 programs",
         "staff": "2 team members",
-        "announcements": "1 message a week"
+        "announcements": "1 message a week",
+        "reviews": "Google review requests"
       }
     },
     "growth": {
@@ -205,7 +206,8 @@
         "contacts": "Up to 2,500 customers",
         "programs": "Up to 5 programs",
         "staff": "5 team members",
-        "announcements": "2 messages a week"
+        "announcements": "2 messages a week",
+        "reviews": "Google review requests"
       }
     },
     "scale": {
@@ -215,7 +217,8 @@
         "contacts": "Unlimited customers",
         "programs": "Unlimited programs",
         "staff": "25 team members",
-        "announcements": "5 messages a week"
+        "announcements": "5 messages a week",
+        "reviews": "Google review requests"
       }
     },
     "billingPeriod": "Billing period",

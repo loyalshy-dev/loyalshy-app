@@ -195,7 +195,8 @@
         "contacts": "Jusqu'à 500 clients",
         "programs": "Jusqu'à 2 programmes",
         "staff": "2 membres de l'équipe",
-        "announcements": "1 message par semaine"
+        "announcements": "1 message par semaine",
+        "reviews": "Demandes d'avis Google"
       }
     },
     "growth": {
@@ -205,7 +206,8 @@
         "contacts": "Jusqu'à 2 500 clients",
         "programs": "Jusqu'à 5 programmes",
         "staff": "5 membres de l'équipe",
-        "announcements": "2 messages par semaine"
+        "announcements": "2 messages par semaine",
+        "reviews": "Demandes d'avis Google"
       }
     },
     "scale": {
@@ -215,7 +217,8 @@
         "contacts": "Clients illimités",
         "programs": "Programmes illimités",
         "staff": "25 membres de l'équipe",
-        "announcements": "5 messages par semaine"
+        "announcements": "5 messages par semaine",
+        "reviews": "Demandes d'avis Google"
       }
     },
     "billingPeriod": "Période de facturation",

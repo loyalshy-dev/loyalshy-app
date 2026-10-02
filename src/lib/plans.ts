@@ -55,6 +55,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       "Up to 2 programs",
       "2 staff members",
       "1 wallet announcement / week",
+      "Google review requests on wallet passes",
     ],
   },
   GROWTH: {
@@ -73,6 +74,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       "Up to 5 programs",
       "5 staff members",
       "2 wallet announcements / week",
+      "Google review requests on wallet passes",
     ],
   },
   SCALE: {
@@ -91,6 +93,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       "Unlimited programs",
       "25 staff members",
       "5 wallet announcements / week",
+      "Google review requests on wallet passes",
     ],
   },
   ENTERPRISE: {
