@@ -113,6 +113,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
     organizationId: template.organizationId,
     passInstanceId: passInstance.id,
     passType: template.passType,
+    templateConfig: template.config,
     reviewPromptedAt: passInstance.contact.reviewPromptedAt,
   })
 

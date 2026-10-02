@@ -679,7 +679,8 @@ export async function registerStamp(
     passInstanceId: passInstance.id,
     walletProvider: passInstance.walletProvider,
     passType: passInstance.passTemplate.passType,
-    newTotalVisits,
+    templateConfig: passInstance.passTemplate.config,
+    newVisitCount: newTotalVisits,
   })
 
   revalidatePath("/dashboard")
