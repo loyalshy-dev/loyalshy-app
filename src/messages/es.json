@@ -102,12 +102,12 @@
         "caption": "Propietario y empleados pueden gestionarlo desde la app."
       },
       "ch6": {
-        "title": "La tarjeta, por dentro.",
-        "caption": "Un sello por visita. Al llegar al número que fijes, la recompensa aparece sola."
+        "title": "Tarjeta de sellos.",
+        "caption": "Un sello por visita. Al llegar al número indicado se obtiene una recompensa."
       },
       "ch7": {
-        "title": "El cupón.",
-        "caption": "Un descuento o un regalo con fecha. De un solo uso o de los que quieras."
+        "title": "Cupón.",
+        "caption": "Tarjeta versátil que se puede utilizar para un solo uso o los que quieras."
       },
       "mapLabel": "Establecimiento"
     }
