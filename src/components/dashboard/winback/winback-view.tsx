@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react"
 import Link from "next/link"
 import { Check, Loader2, Sparkles, Wallet } from "lucide-react"
-import { useLocale, useTranslations } from "next-intl"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import {
   WINBACK_DAY_OPTIONS,
@@ -15,6 +15,7 @@ import {
 } from "@/lib/winback/config"
 import type { WinbackDashboardData } from "@/lib/winback/dashboard"
 import { countWinbackEligible, saveWinbackSettings } from "@/server/winback-actions"
+import { WinbackResultsCard } from "./winback-results"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -30,8 +31,6 @@ type WinbackViewProps = {
 
 export function WinbackView({ data, organizationName, canManageBilling }: WinbackViewProps) {
   const t = useTranslations("dashboard.winback")
-  const locale = useLocale()
-  const nf = new Intl.NumberFormat(locale)
   const initial = data.settings
 
   const [enabled, setEnabled] = useState(initial?.enabled ?? false)
@@ -111,11 +110,7 @@ export function WinbackView({ data, organizationName, canManageBilling }: Winbac
         </Card>
       )}
 
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        <Stat label={t("statSent")} value={nf.format(data.last30.sent)} />
-        <Stat label={t("statControl")} value={nf.format(data.last30.control)} />
-        <Stat label={t("statUnreachable")} value={nf.format(data.last30.unreachable)} />
-      </div>
+      <WinbackResultsCard results={data.results} holdoutOn={initial?.holdout ?? true} />
 
       <Card className="grid grid-cols-1 gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="space-y-5">
@@ -220,17 +215,6 @@ export function WinbackView({ data, organizationName, canManageBilling }: Winbac
 
       <p className="text-[12px] text-muted-foreground">{t("promiseNote")}</p>
     </div>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  const t = useTranslations("dashboard.winback")
-  return (
-    <Card className="space-y-2 p-3 sm:p-4">
-      <span className="block text-[11px] font-medium leading-tight text-muted-foreground sm:text-[13px]">{label}</span>
-      <div className="text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">{value}</div>
-      <p className="text-[11px] text-muted-foreground">{t("last30Days")}</p>
-    </Card>
   )
 }
 
