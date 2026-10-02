@@ -523,7 +523,7 @@
       "overview": "Overview",
       "contacts": "Contacts",
       "programs": "Programs",
-      "reviews": "Reviews",
+      "automations": "Automations",
       "settings": "Settings",
       "connectDevice": "Connect mobile device",
       "switchOrganization": "Switch organization",
@@ -1321,6 +1321,51 @@
       "previewStep1": "Tapping the notification opens the pass. Apple and Google don't allow it to open a link directly.",
       "previewStep2": "The review link is the first thing in the pass details (the ··· button on iPhone) and opens Google's review form.",
       "previewStep3": "Customers who tap it are counted above."
+    },
+    "automations": {
+      "title": "Automations",
+      "subtitle": "Messages your wallet passes send on their own.",
+      "tabReviews": "Google reviews",
+      "tabWinback": "Win back customers"
+    },
+    "winback": {
+      "subtitle": "When a regular stops coming, their wallet pass reminds them of you.",
+      "planRequired": "Win-back messages are included in Pro and above. You can set everything up now and turn it on after upgrading.",
+      "upgradeCta": "Upgrade",
+      "askOwner": "Ask the account owner to upgrade.",
+      "statSent": "Messages sent",
+      "statControl": "Comparison group",
+      "statUnreachable": "Without a pass in their wallet",
+      "last30Days": "Last 30 days",
+      "settingsTitle": "Win-back message",
+      "settingsDescription": "When a regular (2+ visits) hasn't come for the time you choose, their wallet pass shows your message on the lock screen, around 10:00 your time. Once per absence, and at most once every 90 days.",
+      "enableLabel": "Turn win-back messages on",
+      "daysLabel": "Send after",
+      "daysOption": "{days} days without a visit",
+      "daysHint": "Match how often your customers usually come: a café's regulars come weekly, a salon's every month or two.",
+      "messageLabel": "Message",
+      "messageHint": "Shown on the lock screen and on the pass.",
+      "defaultMessage": "We miss you at {business}! Drop by whenever you like.",
+      "firstRunLabel": "Who gets it first",
+      "firstRunFromNow": "Only from now on",
+      "firstRunFromNowHint": "Customers who reach {days} days without a visit from today.",
+      "firstRunIncludeExisting": "{count, plural, =0 {Also customers who are already inactive} one {Also the # customer who is already inactive} other {Also the # customers who are already inactive}}",
+      "firstRunIncludeExistingHint": "They get the message in the next morning's run.",
+      "holdoutLabel": "Measure results ({percent}% comparison group)",
+      "holdoutHint": "Some eligible customers don't get the message, so you can see how many more came back because of it.",
+      "countLoading": "Counting customers…",
+      "countToday": "{count, plural, =0 {No customers qualify today.} one {# customer qualifies today} other {# customers qualify today}}{count, plural, =0 {} other { ({reachable} with the pass in their wallet).}}",
+      "save": "Save",
+      "savedOn": "Saved. Win-back messages are on.",
+      "savedOff": "Saved. Win-back messages are off.",
+      "errorInvalid": "Check the fields and try again.",
+      "promiseNote": "If your message promises something (\"your next coffee is free\"), your staff has to honor it. Loyalshy doesn't track it.",
+      "previewTitle": "What the customer sees",
+      "previewLockScreen": "Lock screen",
+      "previewPass": "On the pass",
+      "previewStep1": "Tapping the notification opens their pass.",
+      "previewStep2": "Their next visit takes the message off the pass.",
+      "previewStep3": "Customers who come back are counted here."
     }
   },
   "errors": {
@@ -1715,7 +1760,8 @@
     "announcementQuotaReachedWeekTopPlan": "You've used all your announcements for this week. More will be available as older ones pass the 7-day mark.",
     "reviewMissingTarget": "Pick your business or paste your review link.",
     "reviewInvalidUrl": "That doesn't look like a Google review link.",
-    "reviewPlanRequired": "Review prompts are included in Pro and above."
+    "reviewPlanRequired": "Review prompts are included in Pro and above.",
+    "winbackPlanRequired": "Win-back messages are included in Pro and above."
   },
   "admin": {
     "cohorts": {

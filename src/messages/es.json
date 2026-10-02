@@ -523,7 +523,7 @@
       "overview": "Resumen",
       "contacts": "Contactos",
       "programs": "Programas",
-      "reviews": "Reseñas",
+      "automations": "Automatizaciones",
       "settings": "Ajustes",
       "connectDevice": "Conectar dispositivo móvil",
       "switchOrganization": "Cambiar de organización",
@@ -1321,6 +1321,51 @@
       "previewStep1": "Al tocar la notificación se abre el pase: Apple y Google no permiten que abra un enlace directamente.",
       "previewStep2": "El enlace de reseña es lo primero en los detalles del pase (botón ··· en iPhone) y abre el formulario de Google.",
       "previewStep3": "Quienes lo tocan se cuentan arriba."
+    },
+    "automations": {
+      "title": "Automatizaciones",
+      "subtitle": "Mensajes que tus pases de Wallet envían solos.",
+      "tabReviews": "Reseñas en Google",
+      "tabWinback": "Recuperar clientes"
+    },
+    "winback": {
+      "subtitle": "Cuando un cliente habitual deja de venir, su pase del Wallet le recuerda que existes.",
+      "planRequired": "Los mensajes para recuperar clientes están incluidos a partir del plan Pro. Puedes dejarlo todo configurado y activarlo cuando mejores el plan.",
+      "upgradeCta": "Mejorar plan",
+      "askOwner": "Pide al propietario de la cuenta que mejore el plan.",
+      "statSent": "Mensajes enviados",
+      "statControl": "Grupo de comparación",
+      "statUnreachable": "Sin el pase en el Wallet",
+      "last30Days": "Últimos 30 días",
+      "settingsTitle": "Mensaje para recuperar clientes",
+      "settingsDescription": "Cuando un cliente habitual (2 o más visitas) lleva el tiempo que elijas sin venir, su pase muestra tu mensaje en la pantalla de bloqueo, hacia las 10:00 de tu zona horaria. Una vez por ausencia y, como mucho, una vez cada 90 días.",
+      "enableLabel": "Activar mensajes para recuperar clientes",
+      "daysLabel": "Enviar tras",
+      "daysOption": "{days} días sin venir",
+      "daysHint": "Ajústalo a lo que suelen tardar tus clientes en volver: en una cafetería vienen cada semana; en una peluquería, cada uno o dos meses.",
+      "messageLabel": "Mensaje",
+      "messageHint": "Aparece en la pantalla de bloqueo y en el pase.",
+      "defaultMessage": "¡Te echamos de menos en {business}! Pásate cuando quieras.",
+      "firstRunLabel": "A quién se le envía primero",
+      "firstRunFromNow": "Solo a partir de ahora",
+      "firstRunFromNowHint": "A los clientes que lleguen a {days} días sin venir desde hoy.",
+      "firstRunIncludeExisting": "{count, plural, =0 {También a los clientes que ya están inactivos} one {También al # cliente que ya está inactivo} other {También a los # clientes que ya están inactivos}}",
+      "firstRunIncludeExistingHint": "Lo recibirán en el envío de la mañana siguiente.",
+      "holdoutLabel": "Medir resultados (grupo de comparación del {percent} %)",
+      "holdoutHint": "Algunos clientes que cumplen las condiciones no reciben el mensaje, para que veas cuántos más vuelven gracias a él.",
+      "countLoading": "Contando clientes…",
+      "countToday": "{count, plural, =0 {Hoy no cumple las condiciones ningún cliente.} one {Hoy cumple las condiciones # cliente} other {Hoy cumplen las condiciones # clientes}}{count, plural, =0 {} other { ({reachable} con el pase en el Wallet).}}",
+      "save": "Guardar",
+      "savedOn": "Guardado. Los mensajes para recuperar clientes están activados.",
+      "savedOff": "Guardado. Los mensajes para recuperar clientes están desactivados.",
+      "errorInvalid": "Revisa los campos e inténtalo de nuevo.",
+      "promiseNote": "Si tu mensaje promete algo («tu próximo café es gratis»), tu equipo tiene que cumplirlo. Loyalshy no lo controla.",
+      "previewTitle": "Lo que ve el cliente",
+      "previewLockScreen": "Pantalla de bloqueo",
+      "previewPass": "En el pase",
+      "previewStep1": "Al tocar la notificación se abre su pase.",
+      "previewStep2": "En su siguiente visita, el mensaje desaparece del pase.",
+      "previewStep3": "Los clientes que vuelven se cuentan aquí."
     }
   },
   "errors": {
@@ -1715,7 +1760,8 @@
     "announcementQuotaReachedWeekTopPlan": "Ya usaste todos tus anuncios de esta semana. Tendrás más disponibles cuando los anteriores cumplan 7 días.",
     "reviewMissingTarget": "Elige tu negocio o pega tu enlace de reseñas.",
     "reviewInvalidUrl": "Eso no parece un enlace de reseñas de Google.",
-    "reviewPlanRequired": "Las peticiones de reseña están incluidas a partir del plan Pro."
+    "reviewPlanRequired": "Las peticiones de reseña están incluidas a partir del plan Pro.",
+    "winbackPlanRequired": "Los mensajes para recuperar clientes están incluidos a partir del plan Pro."
   },
   "admin": {
     "cohorts": {

@@ -13,6 +13,7 @@ import type { CardDesignData, CardType } from "../card-design"
 import { formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters, getFieldConfig, splitFieldsForApple } from "../card-design"
 import { parseCouponConfig, formatCouponValue } from "../../pass-config"
 import type { ReviewPassField } from "../../reviews/settings"
+import type { WinbackPassField } from "../../winback/pass-field"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -63,6 +64,10 @@ export type PassGenerationInput = {
   // Present on stamp cards and unlimited coupons whenever the feature is on,
   // so the prompt's value change 90 min after the triggering visit fires the banner.
   reviewPrompt?: ReviewPassField | null
+  // Win-back message (src/lib/winback/pass-field.ts → loadWinbackPassField).
+  // Always present while the org uses win-back (placeholder otherwise) so a
+  // send changes an existing value and iOS banners it.
+  winback?: WinbackPassField | null
 }
 
 // ─── Generate Pass ──────────────────────────────────────────
@@ -209,6 +214,10 @@ export async function generateApplePass(
   // pass, so the review link must be the first thing in Pass Details.
   if (input.reviewPrompt) {
     for (const field of buildAppleReviewFields(input.reviewPrompt)) pushBack(field)
+  }
+
+  if (input.winback) {
+    pushBack(buildAppleWinbackField(input.winback, input.organizationName))
   }
 
   // If programName is provided, add a "Program" back field
@@ -697,4 +706,26 @@ export function buildAppleReviewFields(review: ReviewPassField): AppleBackField[
     },
     { key: "googleReviewLink", value: review.linkLabel, attributedValue: link },
   ]
+}
+
+// ─── Win-back back field ────────────────────────────────────
+
+export const WINBACK_PLACEHOLDER = "—"
+
+/**
+ * Plain text only (never an attributedValue next to a changeMessage — iOS
+ * puts the raw HTML in the banner). The banner fires only on the pass the
+ * message was sent through, for 24h; the next visit puts the placeholder back
+ * without a changeMessage, i.e. silently.
+ */
+export function buildAppleWinbackField(
+  winback: WinbackPassField,
+  organizationName: string,
+): AppleBackField {
+  return {
+    key: "winback",
+    label: organizationName,
+    value: winback.message ?? WINBACK_PLACEHOLDER,
+    ...(winback.message && winback.fresh ? { changeMessage: "%@" } : {}),
+  }
 }

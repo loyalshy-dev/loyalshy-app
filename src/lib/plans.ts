@@ -19,6 +19,8 @@ export type PlanDefinition = {
   announcementPeriod: AnnouncementPeriod
   /** Google review prompt on wallet passes (src/lib/reviews). */
   reviewPrompts: boolean
+  /** Automatic "we miss you" message to inactive regulars (src/lib/winback). */
+  winback: boolean
 }
 
 // Limits and prices only. User-facing plan copy (names, descriptions,
@@ -38,6 +40,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: 2,
     announcementPeriod: "lifetime",
     reviewPrompts: false,
+    winback: false,
   },
   STARTER: {
     id: "STARTER",
@@ -51,6 +54,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: 1,
     announcementPeriod: "week",
     reviewPrompts: true,
+    winback: true,
   },
   GROWTH: {
     id: "GROWTH",
@@ -64,6 +68,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: 2,
     announcementPeriod: "week",
     reviewPrompts: true,
+    winback: true,
   },
   SCALE: {
     id: "SCALE",
@@ -77,6 +82,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: 5,
     announcementPeriod: "week",
     reviewPrompts: true,
+    winback: true,
   },
   ENTERPRISE: {
     id: "ENTERPRISE",
@@ -90,6 +96,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: Infinity,
     announcementPeriod: "week",
     reviewPrompts: true,
+    winback: true,
   },
 }
 
@@ -111,9 +118,17 @@ export function getPlanLimits(plan: PlanId) {
   }
 }
 
+/** Boolean plan features (Pro+ automations). */
+export type PlanFeature = "reviewPrompts" | "winback"
+
+/** A plan feature is on: the plan includes it and the subscription is live. */
+export function planAllowsFeature(plan: PlanId, subscriptionStatus: string, feature: PlanFeature): boolean {
+  return PLANS[plan][feature] && isActiveSubscription(subscriptionStatus)
+}
+
 /** Google review prompts: paid plans (Pro+) with a live subscription. */
 export function planAllowsReviewPrompts(plan: PlanId, subscriptionStatus: string): boolean {
-  return PLANS[plan].reviewPrompts && isActiveSubscription(subscriptionStatus)
+  return planAllowsFeature(plan, subscriptionStatus, "reviewPrompts")
 }
 
 /** Returns true if the subscription is in a state that allows feature usage */

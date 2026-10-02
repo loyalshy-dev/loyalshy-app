@@ -342,6 +342,8 @@ model Organization {
   announcements       ProgramAnnouncement[]
   reviewSettings      GoogleReviewSettings?
   ratingSnapshots     GoogleRatingSnapshot[]
+  winbackSettings     WinbackSettings?
+  winbackSends        WinbackSend[]
 
   @@index([referredById])
   @@map("organization")
@@ -476,6 +478,7 @@ model PassInstance {
   rewards             Reward[]
   walletPassLogs      WalletPassLog[]
   deviceRegistrations DeviceRegistration[]
+  winbackSends        WinbackSend[]
 
   @@unique([contactId, passTemplateId])
   @@index([contactId])
@@ -514,6 +517,7 @@ model Contact {
   passInstances PassInstance[]
   interactions  Interaction[]
   rewards       Reward[]
+  winbackSends  WinbackSend[]
 
   @@unique([organizationId, email])
   @@unique([organizationId, phone])
@@ -807,4 +811,51 @@ model DevicePairingToken {
 
   @@index([organizationId])
   @@map("device_pairing_token")
+}
+
+// Win-back ("we miss you"): after `inactiveDays` without a visit, a regular
+// (2+ visits) gets the org's message on their wallet pass, once per absence
+// (src/lib/winback). Message only — no reward.
+model WinbackSettings {
+  organizationId String    @id
+  enabled        Boolean   @default(false)
+  inactiveDays   Int       @default(30)
+  message        String
+  // Keep back ~10% of eligible customers (no message) to measure the real lift.
+  holdout        Boolean   @default(true)
+  // Also message customers who were already inactive when it was turned on.
+  includeExisting Boolean  @default(false)
+  // First time it was enabled; with includeExisting=false only absences that
+  // cross the threshold after this date qualify.
+  startedAt      DateTime?
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("winback_settings")
+}
+
+// One row per contact per absence. lapseKey = the contact's lastInteractionAt
+// when the absence was handled, so a second run (or overlapping runs) can't
+// handle the same absence twice. control = held back for measurement (no
+// message); reachable=false = no wallet pass to deliver to.
+model WinbackSend {
+  id             String    @id @default(dbgenerated("uuidv7()::text"))
+  organizationId String
+  contactId      String
+  passInstanceId String?
+  lapseKey       DateTime
+  control        Boolean   @default(false)
+  reachable      Boolean   @default(true)
+  message        String
+  sentAt         DateTime  @default(now())
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact      Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  passInstance PassInstance? @relation(fields: [passInstanceId], references: [id], onDelete: SetNull)
+
+  @@unique([contactId, lapseKey])
+  @@index([organizationId, sentAt])
+  @@index([passInstanceId, sentAt])
+  @@map("winback_send")
 }

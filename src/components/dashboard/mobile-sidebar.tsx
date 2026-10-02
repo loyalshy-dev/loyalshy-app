@@ -7,7 +7,7 @@ import {
   Layers,
   LogOut,
   Settings,
-  Star,
+  Zap,
   Users,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -61,7 +61,7 @@ export function MobileSidebar({
     { label: t("contacts"), href: "/dashboard/contacts", icon: Users },
     { label: t("programs"), href: "/dashboard/programs", icon: Layers },
     ...(isOwner || orgRole === "admin"
-      ? [{ label: t("reviews"), href: "/dashboard/reviews", icon: Star }]
+      ? [{ label: t("automations"), href: "/dashboard/automations", icon: Zap }]
       : []),
   ]
   const ownerItems = [
