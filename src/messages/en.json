@@ -126,6 +126,10 @@
       "distribution": {
         "label": "Distribution",
         "description": "The QR code to print in several sizes, a link to share, and the option to hand a card out yourself."
+      },
+      "nearby": {
+        "label": "Shows up when they walk by",
+        "description": "When a customer walks past your business, their pass appears on their iPhone lock screen. No apps, no pushy notifications."
       }
     },
     "lead": "Who comes back, and when, at a glance. And everything you need to run the program.",

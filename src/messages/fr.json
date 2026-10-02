@@ -126,6 +126,10 @@
       "distribution": {
         "label": "Distribution",
         "description": "Le QR code à imprimer en plusieurs formats, un lien à partager et la possibilité de remettre une carte vous-même."
+      },
+      "nearby": {
+        "label": "Apparaît quand ils passent devant",
+        "description": "Quand un client passe devant votre établissement, sa carte apparaît sur l'écran verrouillé de son iPhone. Sans appli ni notifications intrusives."
       }
     },
     "lead": "Qui revient, et quand, en un coup d'œil. Et tout ce qu'il faut pour gérer le programme.",
