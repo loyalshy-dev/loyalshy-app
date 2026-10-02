@@ -317,8 +317,11 @@ function ReviewPreview({
 
       <div className="space-y-1.5">
         <p className="text-[11px] text-muted-foreground">{t("previewPass")}</p>
+        {/* Mirrors buildAppleReviewFields once the customer was asked: the
+            message row, then the link in its own row. */}
         <div className="space-y-2 rounded-xl border border-border p-3">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Google</p>
+          <p className={cn("text-[13px] leading-snug", !message && "text-muted-foreground")}>{message || "—"}</p>
           <p className="flex items-center gap-1.5 text-[13px] text-sky-600 dark:text-sky-400">
             <Star className="size-3.5" />
             {linkLabel || "—"}

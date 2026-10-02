@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest"
 
 vi.mock("@/lib/db", () => ({ db: {} }))
 
-import { buildAppleReviewField } from "@/lib/wallet/apple/generate-pass"
+import { buildAppleReviewFields } from "@/lib/wallet/apple/generate-pass"
 
 const review = {
   url: "https://loyalshy.com/r/p1.sig",
@@ -12,24 +12,47 @@ const review = {
   fresh: false,
 }
 
-describe("buildAppleReviewField", () => {
-  it("is a quiet link before the contact is asked", () => {
-    const f = buildAppleReviewField(review)
-    expect(f.value).toBe("Dejar una reseña")
-    expect(f.changeMessage).toBeUndefined()
-    expect(f.attributedValue).toBe('<a href="https://loyalshy.com/r/p1.sig">Dejar una reseña</a>')
+describe("buildAppleReviewFields", () => {
+  it("is a single quiet link before the contact is asked", () => {
+    const fields = buildAppleReviewFields(review)
+    expect(fields).toEqual([
+      {
+        key: "googleReview",
+        label: "Google",
+        value: "Dejar una reseña",
+        attributedValue: '<a href="https://loyalshy.com/r/p1.sig">Dejar una reseña</a>',
+      },
+    ])
   })
 
-  it("carries the message with a banner while the prompt is fresh", () => {
-    const f = buildAppleReviewField({ ...review, prompted: true, fresh: true })
-    expect(f.value).toBe(review.message)
-    expect(f.changeMessage).toBe("%@")
-    expect(f.attributedValue).toContain("Café &lt;Lola&gt; &amp; co?")
+  it("banners the plain message, with the link in its own row", () => {
+    const [message, link] = buildAppleReviewFields({ ...review, prompted: true, fresh: true })
+    expect(message).toEqual({ key: "googleReview", label: "Google", value: review.message, changeMessage: "%@" })
+    expect(link.key).toBe("googleReviewLink")
+    expect(link.changeMessage).toBeUndefined()
+    expect(link.attributedValue).toBe('<a href="https://loyalshy.com/r/p1.sig">Dejar una reseña</a>')
+  })
+
+  it("never puts HTML in a field that notifies", () => {
+    for (const state of [
+      { prompted: false, fresh: false },
+      { prompted: true, fresh: true },
+      { prompted: true, fresh: false },
+    ]) {
+      for (const field of buildAppleReviewFields({ ...review, ...state })) {
+        if (field.changeMessage) expect(field.attributedValue).toBeUndefined()
+      }
+    }
   })
 
   it("keeps the message but goes quiet after 24h", () => {
-    const f = buildAppleReviewField({ ...review, prompted: true, fresh: false })
-    expect(f.value).toBe(review.message)
-    expect(f.changeMessage).toBeUndefined()
+    const [message] = buildAppleReviewFields({ ...review, prompted: true, fresh: false })
+    expect(message.value).toBe(review.message)
+    expect(message.changeMessage).toBeUndefined()
+  })
+
+  it("escapes the link text", () => {
+    const [, link] = buildAppleReviewFields({ ...review, linkLabel: "Café <Lola>", prompted: true, fresh: true })
+    expect(link.attributedValue).toContain(">Café &lt;Lola&gt;</a>")
   })
 })

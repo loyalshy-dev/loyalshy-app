@@ -1318,8 +1318,8 @@
       "previewTitle": "Lo que ve el cliente",
       "previewLockScreen": "Pantalla de bloqueo",
       "previewPass": "Reverso del pase",
-      "previewStep1": "Al tocar la notificación se abre el pase.",
-      "previewStep2": "El enlace abre el formulario de reseñas de Google de tu negocio.",
+      "previewStep1": "Al tocar la notificación se abre el pase: Apple y Google no permiten que abra un enlace directamente.",
+      "previewStep2": "El enlace de reseña es lo primero en los detalles del pase (botón ··· en iPhone) y abre el formulario de Google.",
       "previewStep3": "Quienes lo tocan se cuentan arriba."
     }
   },

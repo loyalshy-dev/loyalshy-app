@@ -1318,8 +1318,8 @@
       "previewTitle": "Ce que voit le client",
       "previewLockScreen": "Écran verrouillé",
       "previewPass": "Verso de la carte",
-      "previewStep1": "Toucher la notification ouvre la carte.",
-      "previewStep2": "Le lien ouvre le formulaire d'avis Google de votre établissement.",
+      "previewStep1": "Toucher la notification ouvre la carte : Apple et Google ne permettent pas d'ouvrir un lien directement.",
+      "previewStep2": "Le lien d'avis est la première ligne des détails de la carte (bouton ··· sur iPhone) et ouvre le formulaire Google.",
       "previewStep3": "Les clients qui le touchent sont comptés ci-dessus."
     }
   },
