@@ -100,6 +100,7 @@ Under **Automations → Win back customers** (owners and Program managers, Pro p
 - **When:** the hourly Trigger.dev schedule `winback-hourly` calls `/api/internal/winback`; each organization is handled at 10:00 in its time zone.
 - **First run:** "only from now on" (default) or "also the N customers who are already inactive".
 - **Measuring it:** 10% of eligible customers are held back as a comparison group (on by default), so the dashboard can show how many more came back because of the message.
+- **Results:** the tab shows how many customers came back within 14 days of the message vs the comparison group, and — once both groups have at least 20 customers — how many came back *because of* the message. Sends younger than 14 days show as "being measured".
 - **On the pass:** its own back field, always present as a placeholder; the message shows (and notifies) only on the pass it was sent through, and the customer's next visit clears it.
 
 Needs `CRON_SECRET` on Vercel and Trigger.dev. For on-device testing, `WINBACK_TEST_INACTIVE_MINUTES=2` treats "inactive" as minutes and ignores the 10:00 send hour and the cooldown — remove it afterwards.

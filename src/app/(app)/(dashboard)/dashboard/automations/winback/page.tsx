@@ -3,10 +3,12 @@ import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { assertAuthenticated, assertOrganizationRole, getOrganizationForUser, getOrgMember } from "@/lib/dal"
 import { getWinbackDashboard } from "@/lib/winback/dashboard"
+import { parseWinbackPeriod } from "@/lib/winback/results"
 import { WinbackView } from "@/components/dashboard/winback/winback-view"
 
-export default async function WinbackPage() {
+export default async function WinbackPage(props: { searchParams: Promise<{ period?: string }> }) {
   await connection()
+  const period = parseWinbackPeriod((await props.searchParams).period)
   const [t] = await Promise.all([getTranslations("dashboard.winback"), assertAuthenticated()])
 
   const organization = await getOrganizationForUser()
@@ -15,7 +17,7 @@ export default async function WinbackPage() {
 
   const [member, data] = await Promise.all([
     getOrgMember(organization.id),
-    getWinbackDashboard(organization),
+    getWinbackDashboard(organization, period),
   ])
 
   return (
