@@ -2,6 +2,7 @@ import "server-only"
 
 import { db } from "@/lib/db"
 import { orgAllowsReviewPrompts } from "./access"
+import { isReviewEligiblePass } from "./eligibility"
 import { isReviewPromptFresh } from "./timing"
 import { buildReviewLinkUrl } from "./token"
 
@@ -57,16 +58,17 @@ export type ReviewPassField = {
 }
 
 /**
- * Review field for one stamp-card pass, or null when the feature is off.
- * Coupons never carry it — the prompt is triggered by stamps.
+ * Review field for one pass, or null when the feature is off or the pass
+ * can't ask (single-use coupons — see eligibility.ts).
  */
 export async function loadReviewPassField(args: {
   organizationId: string
   passInstanceId: string
   passType: string | null | undefined
+  templateConfig: unknown
   reviewPromptedAt: Date | null
 }): Promise<ReviewPassField | null> {
-  if (args.passType && args.passType !== "STAMP_CARD") return null
+  if (!isReviewEligiblePass(args.passType, args.templateConfig)) return null
   // Best-effort: this runs inside every Apple pass fetch and Google PATCH, so
   // a failure here drops the review field instead of failing the pass update.
   let settings: ActiveReviewSettings | null

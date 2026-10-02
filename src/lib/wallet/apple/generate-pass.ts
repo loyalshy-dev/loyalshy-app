@@ -60,8 +60,8 @@ export type PassGenerationInput = {
   // field updates silently.
   announcement?: { message: string } | null
   // Google review prompt (src/lib/reviews/settings.ts → loadReviewPassField).
-  // Present on stamp cards whenever the feature is on, so the prompt's value
-  // change 90 min after the triggering stamp fires the banner.
+  // Present on stamp cards and unlimited coupons whenever the feature is on,
+  // so the prompt's value change 90 min after the triggering visit fires the banner.
   reviewPrompt?: ReviewPassField | null
 }
 

@@ -1,6 +1,7 @@
 import "server-only"
 
 import { db } from "@/lib/db"
+import { reviewVisitCount } from "./eligibility"
 import { getActiveReviewSettings } from "./settings"
 
 export type SendReviewPromptResult =
@@ -29,7 +30,7 @@ export async function sendReviewPrompt(args: {
       walletProvider: true,
       contactId: true,
       data: true,
-      passTemplate: { select: { organizationId: true, passType: true } },
+      passTemplate: { select: { organizationId: true, passType: true, config: true } },
       contact: { select: { reviewPromptedAt: true, deletedAt: true } },
     },
   })
@@ -38,7 +39,12 @@ export async function sendReviewPrompt(args: {
   if (pass.walletProvider !== "APPLE" && pass.walletProvider !== "GOOGLE") {
     return { sent: false, reason: "noWallet" }
   }
-  if (pass.passTemplate.passType !== "STAMP_CARD") return { sent: false, reason: "notStampCard" }
+  const visits = reviewVisitCount({
+    passType: pass.passTemplate.passType,
+    templateConfig: pass.passTemplate.config,
+    data: pass.data,
+  })
+  if (visits === null) return { sent: false, reason: "notEligible" }
   if (pass.contact.deletedAt) return { sent: false, reason: "contactDeleted" }
   if (pass.contact.reviewPromptedAt) return { sent: false, reason: "alreadyPrompted" }
 
@@ -46,8 +52,7 @@ export async function sendReviewPrompt(args: {
   if (!settings) return { sent: false, reason: "featureOff" }
 
   // The triggering stamp may have been undone since it was scheduled.
-  const totalVisits = Number((pass.data as Record<string, unknown> | null)?.totalVisits ?? 0)
-  if (totalVisits < settings.triggerStamp) return { sent: false, reason: "belowTrigger" }
+  if (visits < settings.triggerStamp) return { sent: false, reason: "belowTrigger" }
 
   const claimed = await db.contact.updateMany({
     where: { id: args.contactId, reviewPromptedAt: null },
