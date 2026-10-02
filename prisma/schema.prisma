@@ -503,6 +503,10 @@ model Contact {
   // Google review prompt (src/lib/reviews). Per contact, not per pass: the
   // review is about the business, so a contact in two programs is asked once.
   reviewPromptedAt   DateTime?
+  // The pass the prompt was delivered through. Only that pass carries the
+  // notifying version of the field; the contact's other passes show the
+  // message silently (otherwise a second pass re-banners the same ask).
+  reviewPromptPassId String?
   reviewLinkOpenedAt DateTime?
   reviewLinkOpens    Int       @default(0)
 

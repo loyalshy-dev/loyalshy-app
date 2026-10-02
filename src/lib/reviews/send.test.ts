@@ -58,7 +58,7 @@ describe("sendReviewPrompt", () => {
     expect(await send()).toEqual({ sent: true, provider: "APPLE" })
     expect(mockDb.contact.updateMany).toHaveBeenCalledWith({
       where: { id: "c-1", reviewPromptedAt: null },
-      data: { reviewPromptedAt: expect.any(Date) },
+      data: { reviewPromptedAt: expect.any(Date), reviewPromptPassId: "pi-1" },
     })
     expect(notifyApple).toHaveBeenCalledWith("pi-1")
     expect(notifyGoogle).not.toHaveBeenCalled()
@@ -145,6 +145,9 @@ describe("sendReviewPrompt", () => {
     notifyApple.mockRejectedValue(new Error("apns down"))
 
     await expect(send()).rejects.toThrow("apns down")
-    expect(mockDb.contact.update).toHaveBeenCalledWith({ where: { id: "c-1" }, data: { reviewPromptedAt: null } })
+    expect(mockDb.contact.update).toHaveBeenCalledWith({
+      where: { id: "c-1" },
+      data: { reviewPromptedAt: null, reviewPromptPassId: null },
+    })
   })
 })

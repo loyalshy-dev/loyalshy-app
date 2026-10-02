@@ -53,7 +53,10 @@ export type ReviewPassField = {
   message: string
   /** The contact has been asked (the pass shows the message, not the label). */
   prompted: boolean
-  /** Asked within the last 24h: the pass carries the notifying version. */
+  /**
+   * Asked within the last 24h THROUGH THIS PASS: only then does the pass carry
+   * the notifying version. The contact's other passes stay quiet.
+   */
   fresh: boolean
 }
 
@@ -67,6 +70,7 @@ export async function loadReviewPassField(args: {
   passType: string | null | undefined
   templateConfig: unknown
   reviewPromptedAt: Date | null
+  reviewPromptPassId: string | null
 }): Promise<ReviewPassField | null> {
   if (!isReviewEligiblePass(args.passType, args.templateConfig)) return null
   // Best-effort: this runs inside every Apple pass fetch and Google PATCH, so
@@ -84,6 +88,6 @@ export async function loadReviewPassField(args: {
     linkLabel: settings.linkLabel,
     message: settings.message,
     prompted: args.reviewPromptedAt !== null,
-    fresh: isReviewPromptFresh(args.reviewPromptedAt),
+    fresh: args.reviewPromptPassId === args.passInstanceId && isReviewPromptFresh(args.reviewPromptedAt),
   }
 }
