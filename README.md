@@ -76,6 +76,20 @@ From a program's **Distribution** page (or the staff app's **Announcement** scre
 
 > **Gotcha:** Apple only banners *changed* field values, never newly added fields. Passes issued before the announcement feature receive their first broadcast silently (the field appears without a banner); every broadcast after that notifies normally.
 
+## Google Reviews
+
+From **Reviews** in the sidebar (owners and Program managers, Pro plan and up), a business turns on review prompts: after the visit it chooses (default the 3rd), each customer gets **one** wallet notification asking for a Google review, with the merchant's own message.
+
+- **What counts as a visit:** a stamp on a stamp card, or a redemption of an **unlimited** coupon. Single-use coupons never ask (the pass is voided once redeemed).
+- **When:** about 90 minutes after the visit, moved to 10:00 local time if it would land outside 09:00–21:00 in the organization's time zone. The delay runs on Trigger.dev (`send-review-prompt`), which calls back into `/api/internal/review-prompt`.
+- **Where the link is:** a Wallet notification can only open the pass, never a URL. The review link is the first row of the pass details (the ··· button on iPhone; on the pass itself in Google Wallet) and goes through `/r/{token}`, which counts the tap and redirects to Google's review form.
+- **Tracking:** asked / opened-the-link counts, plus a daily snapshot of the business's Google rating and review count (Places API, Vercel cron `/api/cron/google-ratings`) for the "reviews over time" chart.
+- **Policy:** the stamp or discount never depends on the review, and there is no rating pre-filter — Google bans incentivised reviews and review gating.
+
+Needs `CRON_SECRET` (same value on Vercel and Trigger.dev) and `GOOGLE_MAPS_API_KEY` with the Places API (New) enabled. For on-device testing, `REVIEW_PROMPT_DELAY_SECONDS=60` sends the prompt a minute after the visit, ignoring quiet hours.
+
+> **Gotcha:** never give an Apple pass field both an `attributedValue` (a link) and a `changeMessage` — iOS puts the raw `<a href>` HTML in the lock-screen banner. The review message and the review link are separate fields for that reason.
+
 ## Pass Updates After Edits
 
 Passes already in customers' wallets pick up edits automatically — no re-install:
@@ -85,7 +99,7 @@ Passes already in customers' wallets pick up edits automatically — no re-insta
 | Stamp, redeem, reward | Object PATCH | APNs push → device re-fetches the `.pkpass` |
 | Design studio (incl. location), program/org logos, program name/terms/config, business name/phone/website | Class PATCH (shared by every holder of the program) + object PATCHes | APNs push to every holder |
 
-Business-level edits refresh every program in the organization. Saves that change nothing visible on the pass (address, timezone, status) push nothing. These updates are silent — lock-screen banners only fire for stamps, redemptions and announcements. The fan-out runs through the `update-all-passes` Trigger.dev task (direct calls when `TRIGGER_SECRET_KEY` is unset); see `scheduleWalletRefresh` in `src/server/org-settings-actions.ts`.
+Business-level edits refresh every program in the organization. Saves that change nothing visible on the pass (address, timezone, status) push nothing. These updates are silent — lock-screen banners only fire for stamps, redemptions, announcements and review prompts. The fan-out runs through the `update-all-passes` Trigger.dev task (direct calls when `TRIGGER_SECRET_KEY` is unset); see `scheduleWalletRefresh` in `src/server/org-settings-actions.ts`.
 
 > **Gotcha:** Google renders logo, colors, links, terms, program name and locations from the **class**, not the per-holder object. Anything that changes those must PATCH the class (`syncGoogleLoyaltyClass`), or existing holders never see it.
 
@@ -144,6 +158,7 @@ APPLE_WWDR_CERTIFICATE="base64-encoded-wwdr"
 | **Cloudflare R2** | For file uploads | S3-compatible object storage |
 | **Sentry** | For error tracking | [sentry.io](https://sentry.io) — free tier available |
 | **Plausible** | For analytics | [plausible.io](https://plausible.io) — optional, privacy-first |
+| **Google Places API (New)** | For review prompts | Same `GOOGLE_MAPS_API_KEY` as address autocomplete — business search + daily rating snapshots (`rating`/`userRatingCount` are billed per call) |
 | **Upstash Redis** | For rate limiting | [upstash.com](https://upstash.com) — auth endpoints fail open to an in-memory fallback if unreachable. Free-tier DBs are auto-deleted after inactivity; prefer pay-as-you-go |
 
 ## Staff-App API (`/api/v1`)
@@ -210,6 +225,9 @@ Org roles are now three-tier: `owner` > `admin` (Program manager) > `member` (St
       /api/v1       — Staff-app API (session-token auth only)
       /api/wallet   — Apple/Google Wallet callbacks + downloads
       /api/health   — Dependency health check (uptime monitoring)
+      /api/cron     — Vercel cron jobs (Bearer CRON_SECRET)
+      /api/internal — Trigger.dev callbacks (Bearer CRON_SECRET)
+    /r/[token]      — Tracked Google review link (redirects to Google)
   /components       — Reusable UI (studio, dashboard, marketing, card-renderer)
   /i18n, /messages  — next-intl config + en/es/fr translations
   /lib              — DB client, auth, DAL, wallet generation, rate limiting
