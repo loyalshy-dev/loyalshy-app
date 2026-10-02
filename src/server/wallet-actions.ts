@@ -8,6 +8,7 @@ import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import { revalidatePath } from "next/cache"
+import { loadPassProximity } from "@/lib/proximity/settings"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -104,6 +105,7 @@ export async function issueAppleWalletPass(
 
   try {
     const passBuffer = await generateApplePass({
+      proximity: await loadPassProximity(passInstance.id),
       serialNumber,
       authenticationToken: walletPassId,
       memberNumber: passInstance.contact.memberNumber,

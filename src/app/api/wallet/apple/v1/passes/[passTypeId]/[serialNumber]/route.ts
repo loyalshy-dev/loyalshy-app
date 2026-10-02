@@ -6,6 +6,7 @@ import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import { loadReviewPassField } from "@/lib/reviews/settings"
 import { loadWinbackPassField } from "@/lib/winback/pass-field"
+import { loadPassProximity } from "@/lib/proximity/settings"
 
 type Params = Promise<{
   passTypeId: string
@@ -131,6 +132,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
 
   try {
     const passBuffer = await generateApplePass({
+      proximity: await loadPassProximity(passInstance.id),
       serialNumber: passInstance.walletPassSerialNumber,
       authenticationToken: passInstance.walletPassId,
       memberNumber: passInstance.contact.memberNumber,

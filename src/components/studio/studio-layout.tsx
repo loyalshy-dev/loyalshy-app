@@ -540,7 +540,7 @@ export function StudioLayout({
       case "logo":
         return <LogoPanel store={store} organizationId={organizationId} organizationName={organizationName} organizationLogo={organizationLogo} organizationLogoApple={organizationLogoApple} organizationLogoGoogle={organizationLogoGoogle} templateId={templateId} />
       case "notifications":
-        return <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
+        return <NotificationsPanel />
       case "details":
         return <DetailsPanel store={store} />
       case "prize":

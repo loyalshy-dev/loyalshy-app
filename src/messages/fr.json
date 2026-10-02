@@ -1328,7 +1328,8 @@
       "title": "Automatisations",
       "subtitle": "Les messages que vos cartes Wallet envoient toutes seules.",
       "tabReviews": "Avis Google",
-      "tabWinback": "Faire revenir les clients"
+      "tabWinback": "Faire revenir les clients",
+      "tabProximity": "Près de votre établissement"
     },
     "winback": {
       "subtitle": "Quand un habitué ne vient plus, sa carte Wallet lui rappelle votre existence.",
@@ -1386,6 +1387,35 @@
       "tableRate": "Taux",
       "footerMeasuring": "{count, plural, one {# envoi récent encore en mesure} other {# envois récents encore en mesure}}",
       "footerUnreachable": "{count, plural, one {# client inactif sans la carte dans son Wallet} other {# clients inactifs sans la carte dans leur Wallet}}"
+    },
+    "proximity": {
+      "subtitle": "Quand un client passe près de votre établissement, sa carte apparaît sur l'écran verrouillé de l'iPhone.",
+      "settingsTitle": "Près de votre établissement",
+      "settingsDescription": "L'adresse de votre établissement. Quand un client avec votre carte est à proximité (environ 100 m), l'iPhone peut afficher la carte sur l'écran verrouillé avec votre texte.",
+      "enableLabel": "Afficher la carte près de votre établissement",
+      "iphoneOnlyTitle": "iPhone uniquement.",
+      "iphoneOnlyBody": "Google Wallet (Android) n'alerte pas selon la position. Et ce n'est pas une notification : iOS décide quand afficher la carte, sans son.",
+      "addressLabel": "Adresse de l'établissement",
+      "addressPlaceholder": "12 rue Principale, Ville",
+      "addressHint": "Elle s'affiche aussi sur la carte et sert au lien vers le plan, dans tous vos programmes.",
+      "locationSet": "Emplacement défini",
+      "pickFromList": "Choisissez l'adresse dans la liste pour définir l'emplacement",
+      "searching": "Recherche d'adresses…",
+      "noResults": "Aucune adresse trouvée. Essayez une recherche plus précise.",
+      "messageLabel": "Texte sur l'écran verrouillé",
+      "messageHint": "Laissez vide pour afficher le nom de votre établissement.",
+      "defaultMessage": "Passez nous voir ! Montrez votre carte au comptoir.",
+      "save": "Enregistrer",
+      "savedOn": "Enregistré. Votre carte apparaîtra près de votre établissement.",
+      "savedOff": "Enregistré. Les alertes de proximité sont désactivées.",
+      "errorNoLocation": "Choisissez votre adresse dans la liste pour définir l'emplacement.",
+      "errorInvalid": "Vérifiez les champs et réessayez.",
+      "previewTitle": "Ce que voit le client",
+      "previewLockScreen": "Écran verrouillé de l'iPhone",
+      "previewStep1": "Près de votre établissement, la carte apparaît sur l'écran verrouillé.",
+      "previewStep2": "La toucher ouvre la carte, prête à être scannée.",
+      "previewStep3": "Elle disparaît quand le client s'éloigne.",
+      "previewNote": "La fréquence d'affichage dépend d'iOS et des réglages du client."
     }
   },
   "errors": {
@@ -1650,24 +1680,9 @@
       "resetLogoAria": "Réinitialiser le logo {platform} à l'image générée automatiquement"
     },
     "notifications": {
-      "description": "Quand un client est proche de votre établissement, son pass apparaît automatiquement sur l'écran de verrouillage.",
-      "businessAddress": "Adresse de l'établissement",
-      "addressPlaceholder": "12 Rue de la Paix, 75002 Paris",
-      "locationActive": "Localisation active",
-      "coordinatesResolved": "Les coordonnées seront résolues à l'enregistrement",
-      "notificationMessage": "Message de notification",
-      "messagePlaceholder": "Vous êtes à proximité ! Présentez votre pass.",
-      "messageHint": "Affiché sur l'écran de verrouillage à proximité de votre établissement. Laissez vide pour le message par défaut.",
-      "preview": "Aperçu",
-      "ios": "iOS",
-      "android": "Android",
-      "howItWorks": "Comment ça fonctionne",
-      "apple": "Apple :",
-      "google": "Google :",
-      "wallet": "Wallet",
-      "googleWallet": "Google Wallet",
-      "searching": "Recherche d'adresses…",
-      "noResults": "Aucune adresse trouvée. Essayez une recherche plus précise."
+      "movedTitle": "Déplacé dans Automatisations",
+      "movedBody": "« Près de votre établissement » est désormais un seul emplacement pour tout votre établissement, et non par programme.",
+      "movedCta": "Ouvrir Près de votre établissement"
     },
     "details": {
       "description": "Détails au verso du pass. Ceux-ci apparaissent lorsque le client touche la carte pour plus d'informations.",

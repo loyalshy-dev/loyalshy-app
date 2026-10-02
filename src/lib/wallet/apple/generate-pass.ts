@@ -14,6 +14,7 @@ import { formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilte
 import { parseCouponConfig, formatCouponValue } from "../../pass-config"
 import type { ReviewPassField } from "../../reviews/settings"
 import type { WinbackPassField } from "../../winback/pass-field"
+import type { PassProximity } from "../../proximity/settings"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -68,6 +69,10 @@ export type PassGenerationInput = {
   // Always present while the org uses win-back (placeholder otherwise) so a
   // send changes an existing value and iOS banners it.
   winback?: WinbackPassField | null
+  // "Near your business" (src/lib/proximity → loadPassProximity): the org's
+  // location + lock-screen text. Null = off. Not read from the design any
+  // more — it's one location per business, set under Automations.
+  proximity?: PassProximity | null
 }
 
 // ─── Generate Pass ──────────────────────────────────────────
@@ -390,13 +395,13 @@ export async function generateApplePass(
     value: "Loyalshy — Digital Loyalty Cards\nhttps://loyalshy.com",
   })
 
-  // Location relevance — shows pass on lock screen when near the organization
-  if (design?.mapLatitude != null && design?.mapLongitude != null) {
-    const relevantText = stripFilters.locationMessage || `You're near ${input.organizationName}`
+  // "Near your business": iOS may show the pass on the lock screen near the
+  // org's location (a suggestion, not a push notification).
+  if (input.proximity) {
     pass.setLocations({
-      latitude: design.mapLatitude,
-      longitude: design.mapLongitude,
-      relevantText,
+      latitude: input.proximity.latitude,
+      longitude: input.proximity.longitude,
+      relevantText: input.proximity.relevantText,
     })
   }
 

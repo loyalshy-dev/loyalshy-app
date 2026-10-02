@@ -6,6 +6,7 @@ import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import { uploadFile } from "@/lib/storage"
+import { loadPassProximity } from "@/lib/proximity/settings"
 
 /**
  * Generate an Apple Wallet .pkpass, upload it to R2, and return the public URL.
@@ -89,6 +90,7 @@ export async function generateApplePassForEmail(
 
   try {
     const passBuffer = await generateApplePass({
+      proximity: await loadPassProximity(passInstance.id),
       serialNumber,
       authenticationToken: walletPassId,
       memberNumber: contact.memberNumber,

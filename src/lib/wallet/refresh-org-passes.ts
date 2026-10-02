@@ -11,8 +11,18 @@ import { db } from "@/lib/db"
  * Fans out through the `update-all-passes` Trigger.dev task; direct calls
  * when Trigger.dev isn't configured (local dev).
  */
-export function refreshOrgPasses(organizationId: string) {
+export function refreshOrgPasses(organizationId: string, opts: { syncGoogleClasses?: boolean } = {}) {
   after(async () => {
+    // Class-level Google fields (links, locations, …) only change through a
+    // class PATCH — object updates alone never show them to existing holders.
+    if (opts.syncGoogleClasses) {
+      try {
+        const { syncGoogleLoyaltyClassesForOrganization } = await import("@/lib/wallet/google/generate-pass")
+        await syncGoogleLoyaltyClassesForOrganization(organizationId)
+      } catch (err) {
+        console.error("[refresh-org-passes] Google class sync failed:", err instanceof Error ? err.message : err)
+      }
+    }
     try {
       if (process.env.TRIGGER_SECRET_KEY) {
         const { tasks } = await import("@trigger.dev/sdk")

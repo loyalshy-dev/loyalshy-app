@@ -6,6 +6,7 @@ import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { generateGoogleWalletSaveUrl } from "@/lib/wallet/google/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { parseMinigameConfig, parseTemplateAnnouncement } from "@/lib/pass-config"
+import { loadPassProximity } from "@/lib/proximity/settings"
 
 export async function GET(
   request: Request,
@@ -107,6 +108,7 @@ export async function GET(
   if (platform === "apple") {
     try {
       const passBuffer = await generateApplePass({
+        proximity: await loadPassProximity(passInstance.id),
         serialNumber,
         authenticationToken: walletPassId,
         memberNumber: contact.memberNumber,
