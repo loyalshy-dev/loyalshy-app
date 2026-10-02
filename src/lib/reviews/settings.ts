@@ -1,7 +1,7 @@
 import "server-only"
 
 import { db } from "@/lib/db"
-import { planAllowsReviewPrompts, type PlanId } from "@/lib/plans"
+import { orgAllowsReviewPrompts } from "./access"
 import { isReviewPromptFresh } from "./timing"
 import { buildReviewLinkUrl } from "./token"
 
@@ -17,7 +17,7 @@ export type ActiveReviewSettings = {
 
 /**
  * The org's review prompt config when it is live: enabled, has a target,
- * and the plan allows it. Null otherwise — callers treat null as "feature off".
+ * and the org may use it (plan, or an admin-owned org — see access.ts). Null otherwise — callers treat null as "feature off".
  */
 export async function getActiveReviewSettings(organizationId: string): Promise<ActiveReviewSettings | null> {
   const row = await db.googleReviewSettings.findUnique({
@@ -32,7 +32,7 @@ export async function getActiveReviewSettings(organizationId: string): Promise<A
     },
   })
   if (!row || !row.enabled || !row.reviewUrl) return null
-  if (!planAllowsReviewPrompts(row.organization.plan as PlanId, row.organization.subscriptionStatus)) return null
+  if (!(await orgAllowsReviewPrompts({ id: organizationId, ...row.organization }))) return null
   return {
     organizationId,
     organizationName: row.organization.name,
