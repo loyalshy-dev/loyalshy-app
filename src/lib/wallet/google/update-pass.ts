@@ -13,6 +13,7 @@ import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from ".
 import { uploadFile } from "../../storage"
 import { getWalletRewardText, parseCouponConfig, formatCouponValue } from "../../pass-config"
 import { createWalletPassLog } from "../apple/update-pass"
+import { loadReviewPassField, type ReviewPassField } from "../../reviews/settings"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -47,6 +48,9 @@ type GooglePassUpdateData = {
   redeemedAt?: Date | null
   // Editor config for custom field labels
   editorConfig?: unknown
+  // Google review prompt (null = feature off for this pass)
+  reviewPrompt?: ReviewPassField | null
+  contactId?: string
 }
 
 // ─── Update Google Wallet Pass ──────────────────────────────
@@ -219,18 +223,31 @@ async function patchGoogleWalletObject(
     ]
   }
 
-  if (data.revealLink) {
-    patchBody.linksModuleData = {
-      uris: [{
-        uri: data.revealLink,
-        description: "Reveal your prize!",
-        id: "revealLink",
-      }],
-    }
-  } else {
-    // Clear reveal link after prize has been revealed
-    patchBody.linksModuleData = { uris: [] }
+  // Google review prompt: a TEXT_AND_NOTIFY message while the prompt is
+  // fresh (24h). id is per contact, so Google notifies once; appended so the
+  // stamp/redeem message above (already delivered, same id) stays put.
+  if (data.reviewPrompt?.prompted && data.reviewPrompt.fresh && data.contactId) {
+    patchBody.messages = [
+      ...((patchBody.messages as Record<string, unknown>[] | undefined) ?? []),
+      {
+        id: `review-${data.contactId}`,
+        header: data.organizationName,
+        body: data.reviewPrompt.message,
+        messageType: "TEXT_AND_NOTIFY",
+      },
+    ]
   }
+
+  // linksModuleData is replaced wholesale by a PATCH, so every link this
+  // object should carry is rebuilt here (an empty list clears a revealed prize).
+  const uris: { uri: string; description: string; id: string }[] = []
+  if (data.revealLink) {
+    uris.push({ uri: data.revealLink, description: "Reveal your prize!", id: "revealLink" })
+  }
+  if (data.reviewPrompt) {
+    uris.push({ uri: data.reviewPrompt.url, description: data.reviewPrompt.linkLabel, id: "googleReview" })
+  }
+  patchBody.linksModuleData = { uris }
 
   const response = await fetch(
     `${GOOGLE_WALLET_API_BASE}/loyaltyObject/${encodeURIComponent(objectId)}`,
@@ -273,6 +290,7 @@ export async function notifyGooglePassUpdate(
           fullName: true,
           memberNumber: true,
           createdAt: true,
+          reviewPromptedAt: true,
           organization: {
             select: {
               id: true,
@@ -382,6 +400,13 @@ export async function notifyGooglePassUpdate(
       revealLink = `${baseUrl}/join/${slug}/card/${passInstance.id}?sig=${sig}`
     }
 
+    const reviewPrompt = await loadReviewPassField({
+      organizationId: passInstance.contact.organization.id,
+      passInstanceId: passInstance.id,
+      passType: passInstance.passTemplate.passType,
+      reviewPromptedAt: passInstance.contact.reviewPromptedAt,
+    })
+
     await patchGoogleWalletObject({
       passInstanceId: passInstance.id,
       memberNumber: passInstance.contact.memberNumber,
@@ -408,6 +433,8 @@ export async function notifyGooglePassUpdate(
       isRedeemed,
       redeemedAt,
       editorConfig: passDesign?.editorConfig,
+      reviewPrompt,
+      contactId: passInstance.contact.id,
     })
   } catch (error) {
     console.error("Failed to update Google Wallet pass:", error instanceof Error ? error.message : "Unknown error")

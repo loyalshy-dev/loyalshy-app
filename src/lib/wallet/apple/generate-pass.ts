@@ -12,6 +12,7 @@ import {
 import type { CardDesignData, CardType } from "../card-design"
 import { formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters, getFieldConfig, splitFieldsForApple } from "../card-design"
 import { parseCouponConfig, formatCouponValue } from "../../pass-config"
+import type { ReviewPassField } from "../../reviews/settings"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -58,6 +59,10 @@ export type PassGenerationInput = {
   // changeMessage banner for a field whose VALUE changed — a newly added
   // field updates silently.
   announcement?: { message: string } | null
+  // Google review prompt (src/lib/reviews/settings.ts → loadReviewPassField).
+  // Present on stamp cards whenever the feature is on, so the prompt's value
+  // change 90 min after the triggering stamp fires the banner.
+  reviewPrompt?: ReviewPassField | null
 }
 
 // ─── Generate Pass ──────────────────────────────────────────
@@ -196,7 +201,7 @@ export async function generateApplePass(
     ...appleLayout.secondary,
     ...appleLayout.auxiliary,
   ])
-  const pushBack = (field: { key: string; label: string; value: string; changeMessage?: string }) => {
+  const pushBack = (field: { key: string; label: string; value: string; changeMessage?: string; attributedValue?: string }) => {
     if (!frontFieldKeys.has(field.key)) pass.backFields.push(field)
   }
 
@@ -218,6 +223,10 @@ export async function generateApplePass(
     value: input.announcement?.message ?? "No announcements yet",
     changeMessage: "%@",
   })
+
+  if (input.reviewPrompt) {
+    pushBack(buildAppleReviewField(input.reviewPrompt))
+  }
 
   // Type-specific back fields
   if (input.programType === "COUPON" && couponConfig) {
@@ -643,4 +652,33 @@ export function buildAppleFrontFields(input: PassGenerationInput): {
   }
 
   return { fieldData, appleLayout }
+}
+
+// ─── Google review prompt back field ────────────────────────
+
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+
+/**
+ * Before the contact is asked the field reads as a plain "leave a review"
+ * link; once asked its value becomes the merchant's message. iOS banners
+ * the new value ("%@") only while the prompt is fresh (24h), so editing the
+ * message later doesn't re-notify everyone already asked. `value` is what
+ * the banner shows; `attributedValue` makes it a tappable link on the back.
+ */
+export function buildAppleReviewField(review: ReviewPassField): {
+  key: string
+  label: string
+  value: string
+  attributedValue: string
+  changeMessage?: string
+} {
+  const text = review.prompted ? review.message : review.linkLabel
+  return {
+    key: "googleReview",
+    label: "Google",
+    value: text,
+    attributedValue: `<a href="${escapeHtml(review.url)}">${escapeHtml(text)}</a>`,
+    ...(review.prompted && review.fresh ? { changeMessage: "%@" } : {}),
+  }
 }

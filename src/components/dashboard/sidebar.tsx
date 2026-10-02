@@ -14,6 +14,7 @@ import {
   Settings,
   Share2,
   Smartphone,
+  Star,
   Users,
   Layers,
 } from "lucide-react"
@@ -119,6 +120,7 @@ export function AppSidebar({
   const pathname = usePathname()
   const router = useRouter()
   const isOwner = orgRole === "owner"
+  const isOwnerOrAdmin = isOwner || orgRole === "admin"
   // Lifted out of the dropdown so the dialog isn't unmounted when the
   // dropdown closes after the menu item is selected.
   const [connectDeviceOpen, setConnectDeviceOpen] = useState(false)
@@ -149,6 +151,9 @@ export function AppSidebar({
     { label: t("overview"), href: "/dashboard", icon: LayoutGrid },
     { label: t("contacts"), href: "/dashboard/contacts", icon: Users },
     { label: t("programs"), href: "/dashboard/programs", icon: Layers },
+    ...(isOwnerOrAdmin
+      ? [{ label: t("reviews"), href: "/dashboard/reviews", icon: Star }]
+      : []),
     ...(isPartnerUser
       ? [{ label: t("partnerConsole"), href: "/dashboard/partner", icon: Handshake }]
       : []),

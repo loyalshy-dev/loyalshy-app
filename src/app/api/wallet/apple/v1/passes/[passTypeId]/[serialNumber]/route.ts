@@ -4,6 +4,7 @@ import { validateApplePassAuth } from "@/lib/wallet/apple/auth"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { parseTemplateAnnouncement } from "@/lib/pass-config"
+import { loadReviewPassField } from "@/lib/reviews/settings"
 
 type Params = Promise<{
   passTypeId: string
@@ -38,6 +39,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
           fullName: true,
           email: true,
           memberNumber: true,
+          reviewPromptedAt: true,
         },
       },
       passTemplate: {
@@ -48,6 +50,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
           config: true,
           announcement: true,
           termsAndConditions: true,
+          organizationId: true,
           organization: {
             select: {
               name: true,
@@ -106,6 +109,13 @@ export async function GET(request: Request, { params }: { params: Params }) {
     organization
   )
 
+  const reviewPrompt = await loadReviewPassField({
+    organizationId: template.organizationId,
+    passInstanceId: passInstance.id,
+    passType: template.passType,
+    reviewPromptedAt: passInstance.contact.reviewPromptedAt,
+  })
+
   try {
     const passBuffer = await generateApplePass({
       serialNumber: passInstance.walletPassSerialNumber,
@@ -141,6 +151,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
       isRedeemed,
       redeemedAt,
       announcement: parseTemplateAnnouncement(template.announcement),
+      reviewPrompt,
     })
 
     // Log update
