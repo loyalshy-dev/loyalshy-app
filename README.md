@@ -2,6 +2,8 @@
 
 Multi-tenant SaaS for cafés, salons, and small retail to run digital loyalty programs in Apple Wallet and Google Wallet. Two pass types: **stamp cards** (reward after N visits) and **coupons** (single-use or unlimited redeemable offers). Customers join via QR code, shareable link, direct issue, or email — no app install required.
 
+**Automations** run on their own from the passes: a Google review request after the visit the business chooses (Pro+), a "we miss you" message to regulars who stopped coming, with measured results (Business+), and the pass on the iPhone lock screen near the business (all plans).
+
 A companion staff app ([loyalshy-staff](../loyalshy-staff)) lets employees scan passes and register stamps/redemptions from their phone.
 
 ## Tech Stack
@@ -78,7 +80,7 @@ From a program's **Distribution** page (or the staff app's **Announcement** scre
 
 ## Google Reviews
 
-From **Reviews** in the sidebar (owners and Program managers, Pro plan and up), a business turns on review prompts: after the visit it chooses (default the 3rd), each customer gets **one** wallet notification asking for a Google review, with the merchant's own message.
+Under **Automations → Google reviews** (owners and Program managers, Pro plan and up), a business turns on review prompts: after the visit it chooses (default the 3rd), each customer gets **one** wallet notification asking for a Google review, with the merchant's own message.
 
 - **What counts as a visit:** a stamp on a stamp card, or a redemption of an **unlimited** coupon. Single-use coupons never ask (the pass is voided once redeemed).
 - **When:** about 90 minutes after the visit, moved to 10:00 local time if it would land outside 09:00–21:00 in the organization's time zone. The delay runs on Trigger.dev (`send-review-prompt`), which calls back into `/api/internal/review-prompt`.
@@ -243,7 +245,7 @@ Org roles are now three-tier: `owner` > `admin` (Program manager) > `member` (St
 /src
   /app              — App Router pages
     /(auth)         — Login / Register / Forgot password / Invite / Claim (ownership handoff)
-    /(dashboard)    — Protected dashboard (programs, contacts, settings, admin)
+    /(dashboard)    — Protected dashboard (programs, contacts, automations, settings, admin)
     /(public)       — Landing, pricing, contact, legal, /join/[slug] self-join pages
     /api            — API routes
       /api/v1       — Staff-app API (session-token auth only)

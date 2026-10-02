@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Multi-tenant SaaS for cafés, salons, and small retail to run digital loyalty programs in Apple/Google Wallet. **Two pass types only**: STAMP_CARD (reward after N visits) and COUPON (one-time or unlimited redeemable offers). Contacts receive wallet passes via QR code scan, shareable link, direct issue, or email. Passes can broadcast announcements, ask regulars for a Google review and message inactive regulars (Pro+, see Phases GOOGLE-REVIEWS-2026-10-02 and WINBACK-2026-10-02).
+Multi-tenant SaaS for cafés, salons, and small retail to run digital loyalty programs in Apple/Google Wallet. **Two pass types only**: STAMP_CARD (reward after N visits) and COUPON (one-time or unlimited redeemable offers). Contacts receive wallet passes via QR code scan, shareable link, direct issue, or email. Passes can broadcast announcements, and **Automations** (`/dashboard/automations`) lets them ask regulars for a Google review (Pro+), message regulars who stopped coming (Business+) and show up on the iPhone lock screen near the business (all plans) — see the 2026-10-02 phases and "Automations status" below.
 
 **Strategic pivot 2026-04-27**: cut from 7 pass types + public REST API to 2 types + staff-app-only API. See `.claude/memory/project_pivot_loyalty_only.md` for the full context.
 
@@ -170,9 +170,11 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
         /programs/[id]/settings   → Status management + delete (owner)
         /contacts             → Contact management
         /rewards              → Cross-program rewards (not in sidebar)
+        /automations          → Automations (owner + admin): /reviews (Google review prompt), /winback (win-back + results), /proximity (near your business + map)
         /settings             → General, Team, Billing, API (owner, all plans)
     /(studio)       → Redirects to /programs/[id]/design (studio now embedded)
     /(public)       → Public join + card pages (/join/[slug])
+    /r/[token]      → Tracked Google review link (counts the tap, 302s to Google)
     /api            → API routes
       /api/v1       → Staff-app REST API (session token only, no public API key)
         /auth/{me,select-org,email-signin,google-mobile,invite,device-pair/{create,claim}}
@@ -182,6 +184,8 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
         /interactions
         /templates
       /api/image-proxy → Same-origin proxy for R2 images (CORS bypass for PNG export)
+      /api/internal → Trigger.dev callbacks (Bearer CRON_SECRET): /review-prompt, /winback
+      /api/cron     → Vercel cron (Bearer CRON_SECRET): /google-ratings (daily 04:00 UTC)
       /api/health   → Dependency health check (Neon + Upstash pings, 200/503) for external uptime monitors
   /components       → Reusable UI components
     /ui             → Shadcn components
@@ -318,6 +322,7 @@ The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
 - [x] **Phase PLANS-AUTOMATIONS-2026-10-02** (branch `feat/plans-winback`) — Plan split decided with the user: Google review prompts from **Pro**, win-back from **Business** (STARTER `winback: false`). Plan cards list "Peticiones de reseña en Google" on Pro/Business/Scale and "Mensajes para recuperar clientes inactivos" on Business/Scale (`pricing.*.features.winback`; the billing tab reads the same keys). `planRequired` / `serverErrors.winbackPlanRequired` copy says Business. `src/lib/plans.test.ts` pins the split.
 - [x] **Phase PROXIMITY-2026-10-02** (branch `feat/proximity-automation`) — "Near your business" moved from each program's studio "Notificaciones" panel to **Automations → Cerca de tu local**: ONE location per business (`ProximitySettings`: enabled, address, lat/lng, message ≤80 or null = business name), all plans incl. Free. **iPhone only**: the Apple pass gets `locations` + `relevantText` from `loadPassProximity(passInstanceId)` (`src/lib/proximity/settings.ts`), wired into all 6 `generateApplePass` call sites (generator stays DB-free) — it's a lock-screen suggestion iOS decides on, not a push. **Google:** the class `locations` + the `TEXT` proximity message were removed (TEXT never notified and Google Wallet doesn't alert by location; the old UI promised it). Address is the business's: saving mirrors address/coords into every program's `PassDesign` (shown on the pass, Google Maps link) and refreshes all passes via `refreshOrgPasses(orgId, { syncGoogleClasses: true })` (new option: class PATCH for class-level fields); `savePassDesign` now takes `mapAddress`/coords from `ProximitySettings` instead of the studio (until an org sets its location, a design keeps the address/coords it already had — some had an address without coordinates, which the migration doesn't copy). Migration `20261002180000_proximity_settings` creates the table and copies each org's most relevant existing program location (active first, then most recently edited; whitespace message → null) — verified on real Postgres in a rolled-back transaction. Studio panel is now a pointer to the new tab. Automations tabs scroll horizontally on phones. Behavior change: orgs with different addresses per program now have one (the copied one) for all passes.
 - [x] **Phase PROXIMITY-MAP-2026-10-02** (branch `feat/proximity-map`) — Map on Automations → Cerca de tu local (`src/components/dashboard/proximity/location-map.tsx`): Leaflet 1.9 + OpenStreetMap tiles (no key; OSM attribution required), a draggable coral pin (`divIcon` CSS dot — Leaflet's default marker images don't resolve through the bundler) and the ~100 m relevance circle; dragging updates the saved coordinates (shown under the map) without changing the address text. Leaflet is imported inside the effect (it touches `window`), the map is created once and moved by a second effect. Circle colors go through a Tailwind class (`[stroke:var(--chart-1)]`) because Leaflet writes SVG attributes, where CSS variables don't resolve. Verified in Playwright: drag changes the coords, tiles load, circle uses the coral token in light and dark.
+- [x] **Automations status (end of 2026-10-02)** — Everything above from GOOGLE-REVIEWS on is **merged to `main` and verified on a device by the user**: reviews #4–#9 + one-pass fix #11 + docs #10; win-back #12 + results #13; plan split #14 (reviews Pro+, win-back Business+); near-your-business move #15 + map #16. (The "branch …" notes in those entries are where each was built, not pending work.) Trigger.dev prod is **v20261002.2** (`send-review-prompt`, `winback-hourly` included — 11 tasks). The reviews page is `/dashboard/automations/reviews` now (`/dashboard/reviews` redirects); the sidebar item is "Automatizaciones". **Ops reminders:** `CRON_SECRET` is set on Vercel + Trigger.dev; the test hooks `REVIEW_PROMPT_DELAY_SECONDS` and `WINBACK_TEST_INACTIVE_MINUTES` must NOT stay set on Vercel (they skip quiet hours / use minutes). **Open follow-ups:** `feat/landing-redesign` still needs the plan-card lines (reviews on Pro/Business/Scale, win-back on Business/Scale) and a "Cerca de tu local" card in its features section; the staff app labels a used unlimited coupon "Ya canjeado" although redeeming works; an email copy of the review prompt is parked (LSSI consent).
 
 ## Conversation Strategy
 
@@ -468,7 +473,8 @@ Update the "Current Progress" section above to track what's done.
 | Database | Neon PostgreSQL | Serverless, connection pooling, DB branching, `eu-central-1` (Frankfurt) |
 | Cache / Rate Limiting | Upstash Redis | HTTP-based, serverless-safe, @upstash/ratelimit |
 | File Storage | Cloudflare R2 | Already configured (S3-compatible) |
-| Background Jobs | Trigger.dev | Already configured (9 tasks, 5 queues) |
+| Background Jobs | Trigger.dev | 11 tasks, 5 queues (incl. `send-review-prompt`, hourly `winback-hourly`); deployed separately from Vercel (`npx trigger.dev deploy --env prod` from `main`) |
+| Cron | Vercel Cron | `/api/cron/google-ratings` daily 04:00 UTC (`vercel.json`) |
 | Email | Resend | Already configured (via Trigger.dev) |
 | Payments | Stripe | Already configured (subscriptions, webhooks) |
 | Error Tracking | Sentry | Already configured (source maps) |
@@ -480,7 +486,7 @@ For email setup (Cloudflare Email Routing + Gmail + Resend SMTP), see **`docs/em
 
 ## Environment Variables
 
-See `.env.example` for full list. Key vars: DATABASE_URL, DATABASE_URL_UNPOOLED, BETTER_AUTH_SECRET, BETTER_AUTH_URL, SUPER_ADMIN_EMAIL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TRIGGER_SECRET_KEY, RESEND_API_KEY, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL, APPLE_PASS_* (5 vars), GOOGLE_WALLET_* (2 vars), UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN, NEXT_PUBLIC_SENTRY_DSN, NEXT_PUBLIC_PLAUSIBLE_DOMAIN. Optional: STAFF_APP_MIN_VERSION, STAFF_APP_UPDATE_URL (staff-app forced update).
+See `.env.example` for full list. Key vars: DATABASE_URL, DATABASE_URL_UNPOOLED, BETTER_AUTH_SECRET, BETTER_AUTH_URL, SUPER_ADMIN_EMAIL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TRIGGER_SECRET_KEY, RESEND_API_KEY, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL, APPLE_PASS_* (5 vars), GOOGLE_WALLET_* (2 vars), UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN, NEXT_PUBLIC_SENTRY_DSN, NEXT_PUBLIC_PLAUSIBLE_DOMAIN. CRON_SECRET (Vercel cron + Trigger.dev callbacks; same value on Vercel and Trigger.dev), GOOGLE_MAPS_API_KEY (Places API (New): address autocomplete, review business search, daily rating snapshots). Optional: STAFF_APP_MIN_VERSION, STAFF_APP_UPDATE_URL (staff-app forced update). Test hooks only, never left on in production: REVIEW_PROMPT_DELAY_SECONDS, WINBACK_TEST_INACTIVE_MINUTES.
 
 ## Detailed File References
 
