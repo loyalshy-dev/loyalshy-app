@@ -10,7 +10,10 @@ import { SectionHeading } from "./section-heading"
 
 // Apple's "compare" layout: centered columns, no box around them, a
 // hairline under each header, the recommended plan is the one with the
-// coral button. Prices come from the same plan table billing uses.
+// coral button. Prices come from the same plan table billing uses. On
+// phones the columns stack, so each plan becomes a hairline card with the
+// column-alignment spacers dropped; otherwise the stack reads as scattered
+// lines.
 
 type BillingPeriod = "monthly" | "annual"
 type Column = { key: "free" | "starter" | "growth" | "scale"; planId: Exclude<PlanId, "ENTERPRISE"> | null; recommended?: boolean }
@@ -75,7 +78,7 @@ export function Pricing() {
           <BillingToggle period={period} onChange={setPeriod} />
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4 lg:gap-x-8">
+        <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:mt-12 sm:gap-y-12 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4 lg:gap-x-8">
           {COLUMNS.map((col) => {
             const plan = col.planId ? PLANS[col.planId] : null
             const monthly = plan?.price ?? 0
@@ -83,27 +86,27 @@ export function Pricing() {
             const saved = plan && period === "annual" ? (monthly - (plan.annualPrice ?? 0)) * 12 : 0
             const features = Object.values(t.raw(`${col.key}.features`) as Record<string, string>)
             return (
-              <div key={col.key} className="flex flex-col items-center text-center">
-                <p className="mk-caption min-h-[1lh] font-semibold" style={{ color: "var(--mk-text)" }}>
+              <div key={col.key} className="flex flex-col items-center rounded-2xl border p-5 text-center sm:rounded-none sm:border-0 sm:p-0" style={{ borderColor: col.recommended ? "var(--mk-text)" : "var(--mk-border)" }}>
+                <p className={col.recommended ? "mk-caption font-semibold" : "mk-caption hidden sm:block sm:min-h-[1lh]"} style={{ color: "var(--mk-text)" }}>
                   {col.recommended ? t("mostPopular") : ""}
                 </p>
-                <h3 className="mk-title-4 mt-2" style={{ color: "var(--mk-text)" }}>
+                <h3 className={col.recommended ? "mk-title-4 mt-2" : "mk-title-4 sm:mt-2"} style={{ color: "var(--mk-text)" }}>
                   {t(`${col.key}.name`)}
                 </h3>
-                <p className="mk-body-sm mt-1 min-h-[2lh] max-w-[26ch]" style={{ color: "var(--mk-text-muted)" }}>
+                <p className="mk-body-sm mt-1 max-w-[26ch] sm:min-h-[2lh]" style={{ color: "var(--mk-text-muted)" }}>
                   {t(`${col.key}.description`)}
                 </p>
-                <p className="mt-5 flex items-baseline gap-1" aria-live="polite" style={{ color: "var(--mk-text)" }}>
+                <p className="mt-4 flex items-baseline gap-1 sm:mt-5" aria-live="polite" style={{ color: "var(--mk-text)" }}>
                   <span className="font-display text-5xl font-bold leading-none tracking-tight tabular-nums">{price}</span>
                   <span className="text-[15px] font-medium" style={{ color: "var(--mk-text-dimmed)" }}>{tc("perMonth")}</span>
                 </p>
-                <p className="mk-caption mt-2 min-h-[1lh]" style={{ color: "var(--mk-text-dimmed)" }}>
+                <p className={saved > 0 ? "mk-caption mt-2" : "mk-caption hidden sm:block sm:mt-2 sm:min-h-[1lh]"} style={{ color: "var(--mk-text-dimmed)" }}>
                   {saved > 0 ? `${price * 12} € ${t("perYear")} · ${saved} € ${t("savedPerYear")}` : ""}
                 </p>
-                <Link href="/register" className={col.recommended ? "mk-btn-primary mt-5 w-full" : "mk-btn-ghost mt-5 w-full"} aria-label={`${tc("getStarted")} · ${t(`${col.key}.name`)}`}>
+                <Link href="/register" className={col.recommended ? "mk-btn-primary mt-4 w-full sm:mt-5" : "mk-btn-ghost mt-4 w-full sm:mt-5"} aria-label={`${tc("getStarted")} · ${t(`${col.key}.name`)}`}>
                   {tc("getStarted")}
                 </Link>
-                <ul className="mt-6 w-full border-t pt-5 text-left" style={{ borderColor: "var(--mk-border)" }}>
+                <ul className="mt-5 w-full border-t pt-4 text-left sm:mt-6 sm:pt-5" style={{ borderColor: "var(--mk-border)" }}>
                   {features.map((feature) => (
                     <li key={feature} className="mk-body-sm flex items-start gap-2.5 py-1.5" style={{ color: "var(--mk-text)" }}>
                       <Check className="mt-[3px] size-4 shrink-0" strokeWidth={2} style={{ color: "var(--mk-text)" }} />
