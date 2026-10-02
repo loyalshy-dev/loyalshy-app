@@ -191,8 +191,7 @@
         "programs": "Jusqu'à 2 programmes",
         "staff": "2 membres de l'équipe",
         "announcements": "1 message par semaine",
-        "reviews": "Demandes d'avis Google",
-        "winback": "Messages pour faire revenir les clients inactifs"
+        "reviews": "Demandes d'avis Google"
       }
     },
     "growth": {
@@ -1333,7 +1332,7 @@
     },
     "winback": {
       "subtitle": "Quand un habitué ne vient plus, sa carte Wallet lui rappelle votre existence.",
-      "planRequired": "Les messages pour faire revenir les clients sont inclus à partir du plan Pro. Vous pouvez tout configurer maintenant et l'activer après avoir changé de plan.",
+      "planRequired": "Les messages pour faire revenir les clients sont inclus à partir du plan Business. Vous pouvez tout configurer maintenant et l'activer après avoir changé de plan.",
       "upgradeCta": "Changer de plan",
       "askOwner": "Demandez au propriétaire du compte de changer de plan.",
       "settingsTitle": "Message pour faire revenir les clients",
@@ -1782,7 +1781,7 @@
     "reviewMissingTarget": "Choisissez votre établissement ou collez votre lien d'avis.",
     "reviewInvalidUrl": "Ce lien ne ressemble pas à un lien d'avis Google.",
     "reviewPlanRequired": "Les demandes d'avis sont incluses à partir de l'offre Pro.",
-    "winbackPlanRequired": "Les messages pour faire revenir les clients sont inclus à partir du plan Pro."
+    "winbackPlanRequired": "Les messages pour faire revenir les clients sont inclus à partir du plan Business."
   },
   "admin": {
     "cohorts": {

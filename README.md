@@ -93,7 +93,7 @@ Needs `CRON_SECRET` (same value on Vercel and Trigger.dev) and `GOOGLE_MAPS_API_
 
 ## Win Back Customers
 
-Under **Automations → Win back customers** (owners and Program managers, Pro plan and up), a business turns on an automatic "we miss you" message, written by them. **Message only** — no reward is created.
+Under **Automations → Win back customers** (owners and Program managers, **Business plan and up**), a business turns on an automatic "we miss you" message, written by them. **Message only** — no reward is created.
 
 - **Who:** regulars (2+ visits) who haven't come for **14 / 30 / 60 / 90 days**. Stamp cards and unlimited coupons; single-use coupons never.
 - **How often:** once per absence, at most once every 90 days.

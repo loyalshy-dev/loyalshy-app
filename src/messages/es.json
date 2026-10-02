@@ -191,8 +191,7 @@
         "programs": "Hasta 2 programas",
         "staff": "2 personas en el equipo",
         "announcements": "1 aviso por semana",
-        "reviews": "Peticiones de reseña en Google",
-        "winback": "Mensajes para recuperar clientes inactivos"
+        "reviews": "Peticiones de reseña en Google"
       }
     },
     "growth": {
@@ -1333,7 +1332,7 @@
     },
     "winback": {
       "subtitle": "Cuando un cliente habitual deja de venir, su pase del Wallet le recuerda que existes.",
-      "planRequired": "Los mensajes para recuperar clientes están incluidos a partir del plan Pro. Puedes dejarlo todo configurado y activarlo cuando mejores el plan.",
+      "planRequired": "Los mensajes para recuperar clientes están incluidos a partir del plan Business. Puedes dejarlo todo configurado y activarlo cuando mejores el plan.",
       "upgradeCta": "Mejorar plan",
       "askOwner": "Pide al propietario de la cuenta que mejore el plan.",
       "settingsTitle": "Mensaje para recuperar clientes",
@@ -1782,7 +1781,7 @@
     "reviewMissingTarget": "Elige tu negocio o pega tu enlace de reseñas.",
     "reviewInvalidUrl": "Eso no parece un enlace de reseñas de Google.",
     "reviewPlanRequired": "Las peticiones de reseña están incluidas a partir del plan Pro.",
-    "winbackPlanRequired": "Los mensajes para recuperar clientes están incluidos a partir del plan Pro."
+    "winbackPlanRequired": "Los mensajes para recuperar clientes están incluidos a partir del plan Business."
   },
   "admin": {
     "cohorts": {

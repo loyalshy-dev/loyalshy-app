@@ -37,7 +37,7 @@ function settingsRow(overrides: Record<string, unknown> = {}) {
     holdout: false,
     includeExisting: true,
     startedAt: new Date("2026-05-01T00:00:00Z"),
-    organization: { plan: "STARTER", subscriptionStatus: "ACTIVE", timezone: "Europe/Madrid" },
+    organization: { plan: "GROWTH", subscriptionStatus: "ACTIVE", timezone: "Europe/Madrid" },
     ...overrides,
   }
 }
@@ -65,6 +65,15 @@ describe("runWinback", () => {
     ])
     mockDb.member.findFirst.mockResolvedValue(null)
     expect(await run()).toEqual([])
+  })
+
+  it("Pro doesn't include win-back (Business and up)", async () => {
+    mockDb.winbackSettings.findMany.mockResolvedValue([
+      settingsRow({ organization: { plan: "STARTER", subscriptionStatus: "ACTIVE", timezone: "Europe/Madrid" } }),
+    ])
+    mockDb.member.findFirst.mockResolvedValue(null)
+    expect(await run()).toEqual([])
+    expect(mockDb.$queryRaw).not.toHaveBeenCalled()
   })
 
   it("records the absence and pushes the most recently used eligible pass", async () => {
