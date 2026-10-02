@@ -6,6 +6,7 @@ import { orgScope } from "@/lib/org-scope"
 import { toApiPassInstanceDetail } from "@/lib/api-serializers"
 import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
+import { maybeScheduleReviewPrompt } from "@/lib/reviews/schedule"
 
 export function OPTIONS() {
   return handlePreflight()
@@ -119,7 +120,7 @@ export async function performStamp(pass: NonNullable<PassForAction>, performedBy
   const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
   const rewardExpiryDays = (templateConfig.rewardExpiryDays as number) ?? 90
 
-  await db.$transaction(async (tx) => {
+  const newTotalVisits = await db.$transaction(async (tx) => {
     // Serialize concurrent stamps on the same pass — second caller waits here
     // until the first transaction commits, then sees the just-created interaction below.
     await tx.$queryRaw`SELECT id FROM pass_instance WHERE id = ${pass.id} FOR UPDATE`
@@ -192,9 +193,19 @@ export async function performStamp(pass: NonNullable<PassForAction>, performedBy
       where: { id: pass.contact.id },
       data: { totalInteractions: { increment: 1 }, lastInteractionAt: new Date() },
     })
+
+    return newTotal
   })
 
   dispatchWalletUpdate(pass.id, pass.walletProvider, "STAMP")
+  maybeScheduleReviewPrompt({
+    organizationId: pass.contact.organizationId,
+    contactId: pass.contact.id,
+    passInstanceId: pass.id,
+    walletProvider: pass.walletProvider,
+    passType: pass.passTemplate.passType,
+    newTotalVisits,
+  })
 }
 
 // ─── Coupon redeem logic ───────────────────────────────────

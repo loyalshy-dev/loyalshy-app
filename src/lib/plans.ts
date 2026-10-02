@@ -17,6 +17,8 @@ export type PlanDefinition = {
   announcementLimit: number
   /** "lifetime" = total ever sent; "week" = rolling 7 days. */
   announcementPeriod: AnnouncementPeriod
+  /** Google review prompt on wallet passes (src/lib/reviews). */
+  reviewPrompts: boolean
   features: string[]
 }
 
@@ -32,6 +34,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: 1,
     announcementLimit: 2,
     announcementPeriod: "lifetime",
+    reviewPrompts: false,
     features: [
       "Up to 50 contacts",
       "1 program",
@@ -50,6 +53,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: 2,
     announcementLimit: 1,
     announcementPeriod: "week",
+    reviewPrompts: true,
     features: [
       "Up to 500 contacts",
       "Up to 2 programs",
@@ -68,6 +72,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: 5,
     announcementLimit: 2,
     announcementPeriod: "week",
+    reviewPrompts: true,
     features: [
       "Up to 2,500 contacts",
       "Up to 5 programs",
@@ -86,6 +91,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: Infinity,
     announcementLimit: 5,
     announcementPeriod: "week",
+    reviewPrompts: true,
     features: [
       "Unlimited contacts",
       "Unlimited programs",
@@ -104,6 +110,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: Infinity,
     announcementLimit: Infinity,
     announcementPeriod: "week",
+    reviewPrompts: true,
     features: [
       "Everything in Scale",
       "Unlimited staff members",
@@ -131,6 +138,11 @@ export function getPlanLimits(plan: PlanId) {
     announcementLimit: PLANS[plan].announcementLimit,
     announcementPeriod: PLANS[plan].announcementPeriod,
   }
+}
+
+/** Google review prompts: paid plans (Pro+) with a live subscription. */
+export function planAllowsReviewPrompts(plan: PlanId, subscriptionStatus: string): boolean {
+  return PLANS[plan].reviewPrompts && isActiveSubscription(subscriptionStatus)
 }
 
 /** Returns true if the subscription is in a state that allows feature usage */
