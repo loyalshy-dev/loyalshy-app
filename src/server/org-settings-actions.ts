@@ -848,9 +848,18 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     x: parsed.socialLinks?.x || undefined,
   }
 
+  // The pass address/coords are the business location (Automations → "Near
+  // your business"), not a per-program studio setting any more.
+  const orgLocation = await db.proximitySettings.findUnique({
+    where: { organizationId: template.organizationId },
+    select: { address: true, latitude: true, longitude: true },
+  })
+
   const existingDesign = await db.passDesign.findUnique({
     where: { passTemplateId: parsed.templateId },
     select: {
+      mapLatitude: true,
+      mapLongitude: true,
       designHash: true,
       generatedStripApple: true,
       generatedStripGoogle: true,
@@ -861,6 +870,9 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
       mapAddress: true,
     },
   })
+  // Until the business sets its location, the design keeps whatever address
+  // it already had (some only had an address, no coordinates).
+  const mapAddress = orgLocation ? orgLocation.address || null : existingDesign?.mapAddress ?? null
 
   // Re-crop strip image when position/zoom changed
   let reCroppedApple: string | null = null
@@ -915,7 +927,7 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     generatedStripApple,
     generatedStripGoogle,
     businessHours: parsed.businessHours || null,
-    mapAddress: parsed.mapAddress || null,
+    mapAddress,
     socialLinks,
     customMessage: parsed.customMessage || null,
     editorConfig,
@@ -946,7 +958,7 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
       palettePreset: parsed.palettePreset ?? null,
       templateId: designTemplateId,
       businessHours: parsed.businessHours || null,
-      mapAddress: parsed.mapAddress || null,
+      mapAddress,
       socialLinks,
       customMessage: parsed.customMessage || null,
       designHash: newHash,
@@ -969,7 +981,7 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
       palettePreset: parsed.palettePreset ?? null,
       templateId: designTemplateId,
       businessHours: parsed.businessHours || null,
-      mapAddress: parsed.mapAddress || null,
+      mapAddress,
       socialLinks,
       customMessage: parsed.customMessage || null,
       designHash: newHash,
@@ -977,41 +989,12 @@ export async function savePassDesign(input: z.infer<typeof savePassDesignSchema>
     },
   })
 
-  // Update coordinates: use client-provided coords (from autocomplete) or fall back to server geocoding
-  const newMapAddress = parsed.mapAddress || null
-  const oldMapAddress = existingDesign?.mapAddress ?? null
-  const clientLat = parsed.mapLatitude ?? null
-  const clientLng = parsed.mapLongitude ?? null
-
-  if (clientLat != null && clientLng != null) {
-    // Client provided coordinates from place autocomplete — use directly
-    await db.passDesign.update({
-      where: { passTemplateId: parsed.templateId },
-      data: { mapLatitude: clientLat, mapLongitude: clientLng },
-    })
-  } else if (newMapAddress !== oldMapAddress) {
-    if (newMapAddress) {
-      // Fall back to server-side geocoding
-      try {
-        const { geocodeAddress } = await import("@/lib/geocoding")
-        const coords = await geocodeAddress(newMapAddress)
-        await db.passDesign.update({
-          where: { passTemplateId: parsed.templateId },
-          data: {
-            mapLatitude: coords?.lat ?? null,
-            mapLongitude: coords?.lng ?? null,
-          },
-        })
-      } catch {
-        // Geocoding failure never blocks save
-      }
-    } else {
-      await db.passDesign.update({
-        where: { passTemplateId: parsed.templateId },
-        data: { mapLatitude: null, mapLongitude: null },
-      })
-    }
-  }
+  await db.passDesign.update({
+    where: { passTemplateId: parsed.templateId },
+    data: orgLocation
+      ? { mapLatitude: orgLocation.latitude, mapLongitude: orgLocation.longitude }
+      : { mapLatitude: existingDesign?.mapLatitude ?? null, mapLongitude: existingDesign?.mapLongitude ?? null },
+  })
 
   // Sync colors back to Organization for brand consistency
   if (primaryColor || secondaryColor) {

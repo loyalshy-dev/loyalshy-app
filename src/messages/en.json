@@ -1328,7 +1328,8 @@
       "title": "Automations",
       "subtitle": "Messages your wallet passes send on their own.",
       "tabReviews": "Google reviews",
-      "tabWinback": "Win back customers"
+      "tabWinback": "Win back customers",
+      "tabProximity": "Near your business"
     },
     "winback": {
       "subtitle": "When a regular stops coming, their wallet pass reminds them of you.",
@@ -1386,6 +1387,35 @@
       "tableRate": "Rate",
       "footerMeasuring": "{count, plural, one {# recent message still being measured} other {# recent messages still being measured}}",
       "footerUnreachable": "{count, plural, one {# inactive customer without the pass in their wallet} other {# inactive customers without the pass in their wallet}}"
+    },
+    "proximity": {
+      "subtitle": "When a customer walks past your business, their pass shows up on the iPhone lock screen.",
+      "settingsTitle": "Near your business",
+      "settingsDescription": "Your business location. When a customer with your pass is nearby (about 100 m), iPhone can show the pass on their lock screen with your text.",
+      "enableLabel": "Show the pass near your business",
+      "iphoneOnlyTitle": "iPhone only.",
+      "iphoneOnlyBody": "Google Wallet (Android) doesn't alert by location. And it isn't a notification: iOS decides when to show the pass, with no sound.",
+      "addressLabel": "Business address",
+      "addressPlaceholder": "Main Street 123, City",
+      "addressHint": "Also shown on the pass and used for the map link, in all your programs.",
+      "locationSet": "Location set",
+      "pickFromList": "Pick the address from the list to set the location",
+      "searching": "Searching addresses…",
+      "noResults": "No addresses found. Try a more specific search.",
+      "messageLabel": "Lock-screen text",
+      "messageHint": "Leave it empty to show your business name.",
+      "defaultMessage": "Drop by! Show your pass at the counter.",
+      "save": "Save",
+      "savedOn": "Saved. Your pass shows up near your business.",
+      "savedOff": "Saved. Location alerts are off.",
+      "errorNoLocation": "Pick your address from the list to set the location.",
+      "errorInvalid": "Check the fields and try again.",
+      "previewTitle": "What the customer sees",
+      "previewLockScreen": "iPhone lock screen",
+      "previewStep1": "Near your business, the pass appears on the lock screen.",
+      "previewStep2": "Tapping it opens the pass, ready to scan.",
+      "previewStep3": "It goes away when they leave the area.",
+      "previewNote": "How often it appears depends on iOS and the customer's settings."
     }
   },
   "errors": {
@@ -1650,24 +1680,9 @@
       "resetLogoAria": "Reset {platform} logo to auto-generated"
     },
     "notifications": {
-      "description": "When a customer is near your location, their wallet pass appears on the lock screen automatically.",
-      "businessAddress": "Business address",
-      "addressPlaceholder": "123 Main St, City, State",
-      "locationActive": "Location active",
-      "coordinatesResolved": "Coordinates will be resolved on save",
-      "notificationMessage": "Notification message",
-      "messagePlaceholder": "You're nearby! Show your pass.",
-      "messageHint": "Shown on the lock screen when near your location. Leave empty for default.",
-      "preview": "Preview",
-      "ios": "iOS",
-      "android": "Android",
-      "howItWorks": "How it works",
-      "apple": "Apple:",
-      "google": "Google:",
-      "wallet": "Wallet",
-      "googleWallet": "Google Wallet",
-      "searching": "Searching for addresses…",
-      "noResults": "No addresses found. Try a more specific query."
+      "movedTitle": "Moved to Automations",
+      "movedBody": "\"Near your business\" is now one location for your whole business, not per program.",
+      "movedCta": "Open Near your business"
     },
     "details": {
       "description": "Back-of-pass details. These appear when the customer taps the card for more info.",

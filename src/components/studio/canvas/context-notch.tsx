@@ -725,7 +725,7 @@ export function ContextPanel({ store, passType, organizationId, organizationName
           <PrizeRevealPanel store={store} />
         )}
         {mode === "tool" && activeTool === "notifications" && (
-          <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
+          <NotificationsPanel />
         )}
         {mode === "tool" && activeTool === "details" && (
           <DetailsPanel store={store} />

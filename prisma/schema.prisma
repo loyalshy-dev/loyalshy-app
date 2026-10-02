@@ -344,6 +344,7 @@ model Organization {
   ratingSnapshots     GoogleRatingSnapshot[]
   winbackSettings     WinbackSettings?
   winbackSends        WinbackSend[]
+  proximitySettings   ProximitySettings?
 
   @@index([referredById])
   @@map("organization")
@@ -858,4 +859,24 @@ model WinbackSend {
   @@index([organizationId, sentAt])
   @@index([passInstanceId, sentAt])
   @@map("winback_send")
+}
+
+// "Near your business" (Automations): the org's single location. When
+// enabled, iPhone shows the pass on the lock screen near it (Apple pass
+// `locations` + relevantText). iPhone only — Google Wallet doesn't notify by
+// location, so nothing is promised there. The address/coords are mirrored
+// into every program's PassDesign (shown on the pass, Google Maps link).
+model ProximitySettings {
+  organizationId String   @id
+  enabled        Boolean  @default(true)
+  address        String
+  latitude       Float
+  longitude      Float
+  // Lock-screen text; null = the business name.
+  message        String?
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("proximity_settings")
 }

@@ -4,6 +4,7 @@ import { verifyCardSignature } from "@/lib/card-access"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { parseTemplateAnnouncement } from "@/lib/pass-config"
+import { loadPassProximity } from "@/lib/proximity/settings"
 
 export async function GET(
   request: Request,
@@ -91,6 +92,7 @@ export async function GET(
 
   try {
     const passBuffer = await generateApplePass({
+      proximity: await loadPassProximity(passInstance.id),
       serialNumber: passInstance.walletPassSerialNumber,
       authenticationToken: passInstance.walletPassId,
       memberNumber: passInstance.contact.memberNumber,

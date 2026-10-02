@@ -1328,7 +1328,8 @@
       "title": "Automatizaciones",
       "subtitle": "Mensajes que tus pases de Wallet envían solos.",
       "tabReviews": "Reseñas en Google",
-      "tabWinback": "Recuperar clientes"
+      "tabWinback": "Recuperar clientes",
+      "tabProximity": "Cerca de tu local"
     },
     "winback": {
       "subtitle": "Cuando un cliente habitual deja de venir, su pase del Wallet le recuerda que existes.",
@@ -1386,6 +1387,35 @@
       "tableRate": "Porcentaje",
       "footerMeasuring": "{count, plural, one {# envío reciente aún en medición} other {# envíos recientes aún en medición}}",
       "footerUnreachable": "{count, plural, one {# cliente inactivo sin el pase en el Wallet} other {# clientes inactivos sin el pase en el Wallet}}"
+    },
+    "proximity": {
+      "subtitle": "Cuando un cliente pasa cerca de tu negocio, su pase aparece en la pantalla de bloqueo del iPhone.",
+      "settingsTitle": "Cerca de tu local",
+      "settingsDescription": "La ubicación de tu negocio. Cuando un cliente con tu pase está cerca (unos 100 m), el iPhone puede mostrar el pase en su pantalla de bloqueo con tu texto.",
+      "enableLabel": "Mostrar el pase cerca de tu local",
+      "iphoneOnlyTitle": "Solo iPhone.",
+      "iphoneOnlyBody": "Google Wallet (Android) no avisa por cercanía. Y no es una notificación: iOS decide cuándo mostrar el pase, sin sonido.",
+      "addressLabel": "Dirección del negocio",
+      "addressPlaceholder": "Calle Principal 123, Ciudad",
+      "addressHint": "También se muestra en el pase y se usa para el enlace al mapa, en todos tus programas.",
+      "locationSet": "Ubicación fijada",
+      "pickFromList": "Elige la dirección de la lista para fijar la ubicación",
+      "searching": "Buscando direcciones…",
+      "noResults": "No se encontraron direcciones. Prueba con una búsqueda más concreta.",
+      "messageLabel": "Texto en la pantalla de bloqueo",
+      "messageHint": "Si lo dejas vacío, se muestra el nombre de tu negocio.",
+      "defaultMessage": "¡Pásate! Enseña tu pase en el mostrador.",
+      "save": "Guardar",
+      "savedOn": "Guardado. Tu pase aparecerá cerca de tu local.",
+      "savedOff": "Guardado. Los avisos por cercanía están desactivados.",
+      "errorNoLocation": "Elige tu dirección de la lista para fijar la ubicación.",
+      "errorInvalid": "Revisa los campos e inténtalo de nuevo.",
+      "previewTitle": "Lo que ve el cliente",
+      "previewLockScreen": "Pantalla de bloqueo del iPhone",
+      "previewStep1": "Cerca de tu local, el pase aparece en la pantalla de bloqueo.",
+      "previewStep2": "Al tocarlo se abre el pase, listo para escanear.",
+      "previewStep3": "Desaparece cuando se aleja.",
+      "previewNote": "Cuántas veces aparece depende de iOS y de los ajustes del cliente."
     }
   },
   "errors": {
@@ -1650,24 +1680,9 @@
       "resetLogoAria": "Restablecer logo de {platform} al generado automáticamente"
     },
     "notifications": {
-      "description": "Cuando un cliente está cerca de tu local, su pase aparece en la pantalla de bloqueo automáticamente.",
-      "businessAddress": "Dirección del negocio",
-      "addressPlaceholder": "Calle Principal 123, Ciudad",
-      "locationActive": "Ubicación activa",
-      "coordinatesResolved": "Las coordenadas se resolverán al guardar",
-      "notificationMessage": "Mensaje de notificación",
-      "messagePlaceholder": "¡Estás cerca! Muestra tu pase.",
-      "messageHint": "Se muestra en la pantalla de bloqueo cuando estás cerca. Déjalo vacío para el predeterminado.",
-      "preview": "Vista previa",
-      "ios": "iOS",
-      "android": "Android",
-      "howItWorks": "Cómo funciona",
-      "apple": "Apple:",
-      "google": "Google:",
-      "wallet": "Wallet",
-      "googleWallet": "Google Wallet",
-      "searching": "Buscando direcciones…",
-      "noResults": "No se encontraron direcciones. Intenta una búsqueda más específica."
+      "movedTitle": "Ahora está en Automatizaciones",
+      "movedBody": "«Cerca de tu local» es ahora una única ubicación para todo tu negocio, no por programa.",
+      "movedCta": "Abrir Cerca de tu local"
     },
     "details": {
       "description": "Detalles del reverso del pase. Aparecen cuando el cliente toca la tarjeta para más información.",

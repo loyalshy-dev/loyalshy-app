@@ -105,6 +105,14 @@ Under **Automations → Win back customers** (owners and Program managers, **Bus
 
 Needs `CRON_SECRET` on Vercel and Trigger.dev. For on-device testing, `WINBACK_TEST_INACTIVE_MINUTES=2` treats "inactive" as minutes and ignores the 10:00 send hour and the cooldown — remove it afterwards.
 
+## Near Your Business (iPhone)
+
+Under **Automations → Near your business** (owners and Program managers, all plans), a business sets **one location** for the whole business and an optional lock-screen text (≤80 characters; empty = the business name).
+
+- **iPhone only:** the Apple pass carries the location (`locations` + `relevantText`), so iOS may show the pass on the lock screen when the customer is within ~100 m. It's a suggestion iOS decides on — no sound, not a push notification.
+- **Android:** nothing. Google Wallet doesn't alert by location, so the dashboard doesn't promise it.
+- The address is also the one shown on every program's pass and used for the Google Maps link; saving it updates all passes silently.
+
 ## Pass Updates After Edits
 
 Passes already in customers' wallets pick up edits automatically — no re-install:
