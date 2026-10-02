@@ -202,7 +202,8 @@
         "programs": "Up to 5 programs",
         "staff": "5 team members",
         "announcements": "2 messages a week",
-        "reviews": "Google review requests"
+        "reviews": "Google review requests",
+        "winback": "Win-back messages to inactive customers"
       }
     },
     "scale": {
@@ -213,7 +214,8 @@
         "programs": "Unlimited programs",
         "staff": "25 team members",
         "announcements": "5 messages a week",
-        "reviews": "Google review requests"
+        "reviews": "Google review requests",
+        "winback": "Win-back messages to inactive customers"
       }
     },
     "enterprise": {
@@ -1330,7 +1332,7 @@
     },
     "winback": {
       "subtitle": "When a regular stops coming, their wallet pass reminds them of you.",
-      "planRequired": "Win-back messages are included in Pro and above. You can set everything up now and turn it on after upgrading.",
+      "planRequired": "Win-back messages are included in Business and above. You can set everything up now and turn it on after upgrading.",
       "upgradeCta": "Upgrade",
       "askOwner": "Ask the account owner to upgrade.",
       "settingsTitle": "Win-back message",
@@ -1779,7 +1781,7 @@
     "reviewMissingTarget": "Pick your business or paste your review link.",
     "reviewInvalidUrl": "That doesn't look like a Google review link.",
     "reviewPlanRequired": "Review prompts are included in Pro and above.",
-    "winbackPlanRequired": "Win-back messages are included in Pro and above."
+    "winbackPlanRequired": "Win-back messages are included in Business and above."
   },
   "admin": {
     "cohorts": {

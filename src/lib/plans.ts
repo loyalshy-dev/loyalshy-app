@@ -19,7 +19,11 @@ export type PlanDefinition = {
   announcementPeriod: AnnouncementPeriod
   /** Google review prompt on wallet passes (src/lib/reviews). */
   reviewPrompts: boolean
-  /** Automatic "we miss you" message to inactive regulars (src/lib/winback). */
+  /**
+   * Automatic "we miss you" message to inactive regulars (src/lib/winback).
+   * Business and up: its measured lift needs ~200 sends per period (both
+   * groups ≥20 at a 10% holdout), which Pro's 500-contact cap rarely reaches.
+   */
   winback: boolean
 }
 
@@ -54,7 +58,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     announcementLimit: 1,
     announcementPeriod: "week",
     reviewPrompts: true,
-    winback: true,
+    winback: false,
   },
   GROWTH: {
     id: "GROWTH",
