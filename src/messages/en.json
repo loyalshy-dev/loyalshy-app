@@ -93,6 +93,8 @@
       "appStore": "Download on the App Store",
       "playStore": "Get it on Google Play",
       "appAlt": "The team app: find a customer, new customer, rewards, share a program, notice, and latest activity",
+      "stampAlt": "A pizzeria's stamp card in Apple Wallet, 2 of 7 stamps",
+      "couponAlt": "A burger bar's 10% off coupon in Apple Wallet",
       "walletTitle": "Wallet",
       "chapters": "Chapters",
       "ch5": {
@@ -166,33 +168,6 @@
       "couponProgram": "2-for-1 coupon",
       "enrolled": "enrolled",
       "active": "Active"
-    }
-  },
-  "gallery": {
-    "title": "The loyalty card, up close.",
-    "stamp": {
-      "name": "Stamp card.",
-      "lead": "One stamp per visit. When they reach the number you set, the reward appears by itself.",
-      "parts": {
-        "logo": "Your logo and your colours",
-        "stamps": "The stamps, over your photo or your colour",
-        "reward": "The next reward",
-        "name": "The customer's name",
-        "qr": "The QR your team scans"
-      }
-    },
-    "coupon": {
-      "name": "Coupon.",
-      "lead": "A discount or a gift with an end date. Single use or as many as you like.",
-      "offer": "2-for-1 coffees",
-      "validUntil": "Oct 31",
-      "code": "SOL2X1",
-      "parts": {
-        "offer": "The offer, front and centre",
-        "valid": "How long it's good for",
-        "code": "A code, if you use one",
-        "qr": "Redeemed with the same scan"
-      }
     }
   },
   "pricing": {

@@ -5,11 +5,9 @@ import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, us
 import { useTranslations } from "next-intl"
 import { CHAPTERS, FILM, PIN_VH, type Chapter } from "./film-timeline"
 import { useCaption, useFade, useMove, useVisibility } from "./film-hooks"
-import { CalloutLines, CalloutList, COUPON_PARTS, STAMP_PARTS } from "./film-callouts"
-import { AppIcon, AppScreen, BANNERS, CameraScreen, CouponFrame, LockNotification, LockScreen, OpeningNotification, PASS_TOP, PassScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
+import { AppIcon, AppScreen, BANNERS, CameraScreen, CouponFrame, LockNotification, LockScreen, OpeningNotification, PassScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
 import { FilmRail } from "./film-rail"
 import { MapScene } from "./map-scene"
-import { DEMO_PASS_RATIO } from "./demo-pass"
 import { PhoneFrame } from "./phone-frame"
 import { INK, SPRING_HEAVY, SPRING_LIGHT } from "./tokens"
 import { useMediaQuery } from "./use-media-query"
@@ -28,10 +26,10 @@ import { useMediaQuery } from "./use-media-query"
 //      dashboard, it flies to the phone and lands as a notification, two
 //      faint phones behind say it reached everyone.
 //   5. The team app — the phone's screen becomes the app, store badges.
-//   6. The stamp card, up close — the phone returns to the centre, the
-//      demo card rises into Wallet, the stamps land with the scroll, the
-//      reward lights up, and its parts are called out.
-//   7. The coupon — the card turns over; its parts; the film's last frame.
+//   6. The stamp card, up close — the phone returns to the centre and a
+//      real stamp card rises into Wallet.
+//   7. The coupon — the card turns over into a real coupon; the film's
+//      last frame.
 // Every moment is a named window in `film-timeline.ts`; the screens are in
 // `film-screens.tsx`. Only transform and opacity animate. Rotation stays
 // under 20° so the screen stays legible. Reduced motion gets static frames.
@@ -125,23 +123,14 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const badgesY = useMove(p, FILM.ch5.badgesRise, 16, 0)
   const badgesVisibility = useVisibility(badgesOpacity)
 
-  // Chapters 5–6: the card in Wallet, filling with the scroll, then turned
-  // over into the coupon. The callouts are drawn in the phone's own
-  // coordinate space (unscaled 300px wide on desktop).
+  // Chapters 6–7: the real stamp card in Wallet, then turned over into the
+  // real coupon.
   const passOpacity = useFade(p, FILM.ch6.wallet)
   const pass2Y = useMove(p, FILM.ch6.passRise, 380, 0, SPRING_HEAVY)
-  const visits = useTransform(p, [...FILM.ch6.stamps], [0, 5])
   const stampRotate = useSpring(useTransform(p, [FILM.ch6.flipOut[0], FILM.ch6.flipOut[1]], [0, -90]), SPRING_HEAVY)
   const stampVis = useTransform(p, [FILM.ch6.flipOut[1] - 0.004, FILM.ch6.flipOut[1]], [1, 0])
   const couponRotate = useSpring(useTransform(p, [...FILM.ch7.flipIn], [90, 0]), SPRING_HEAVY)
   const couponVis = useTransform(p, [FILM.ch6.flipOut[1] - 0.004, FILM.ch6.flipOut[1]], [0, 1])
-  const phoneW = 300
-  const band = Math.max(2, phoneW * 0.012)
-  const bezel = phoneW * 0.03
-  const screenX = band + bezel
-  const screenW = phoneW - 2 * screenX
-  const cardW = screenW - 24
-  const cardBox = { x: screenX + 12, y: screenX + phoneW * PASS_TOP, w: cardW, h: cardW * DEMO_PASS_RATIO }
 
   // Captions
   const captions: Record<Chapter, ReturnType<typeof useCaption>> = {
@@ -202,7 +191,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
           <div className="mk-film-captions">
             {CHAPTERS.map((key) => {
               const c = captions[key]
-              // Chapters 5–6 play with the phone at the centre: narrower captions.
+              // Chapters 6–7 play with the phone at the centre: narrower captions.
               const centred = key === "ch6" || key === "ch7"
               return (
                 <motion.div key={key} style={{ visibility: c.visibility }} className="absolute inset-x-0 top-0 text-center lg:text-left">
@@ -229,8 +218,6 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                       <StoreBadges appStoreUrl={appStoreUrl} playStoreUrl={playStoreUrl} align="left" />
                     </motion.div>
                   )}
-                  {key === "ch6" && <CalloutList p={p} parts={STAMP_PARTS} from={FILM.ch6.calloutsFrom} step={FILM.ch6.calloutStep} ns="stamp" />}
-                  {key === "ch7" && <CalloutList p={p} parts={COUPON_PARTS} from={FILM.ch7.calloutsFrom} step={FILM.ch7.calloutStep} ns="coupon" />}
                 </motion.div>
               )
             })}
@@ -306,11 +293,8 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                 <CameraScreen opacity={cameraOpacity} scanFrame={scanFrame} />
                 <WalletScreen opacity={walletOpacity} passY={passY} />
                 <AppScreen opacity={appOpacity} y={appY} />
-                <PassScreen opacity={passOpacity} passY={pass2Y} visits={visits} stampRotate={stampRotate} stampVis={stampVis} couponRotate={couponRotate} couponVis={couponVis} />
+                <PassScreen opacity={passOpacity} passY={pass2Y} stampRotate={stampRotate} stampVis={stampVis} couponRotate={couponRotate} couponVis={couponVis} />
               </PhoneFrame>
-              {/* The card's parts, beside the phone (desktop) */}
-              <CalloutLines p={p} parts={STAMP_PARTS} from={FILM.ch6.calloutsFrom} step={FILM.ch6.calloutStep} card={cardBox} phoneW={phoneW} ns="stamp" opacity={stampVis} />
-              <CalloutLines p={p} parts={COUPON_PARTS} from={FILM.ch7.calloutsFrom} step={FILM.ch7.calloutStep} card={cardBox} phoneW={phoneW} ns="coupon" opacity={couponVis} />
             </motion.div>
           </motion.div>
         </div>
@@ -355,8 +339,8 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
       ),
     },
     { key: "ch5", dark: false, screen: <AppScreen alt={t("film.appAlt")} sizes="230px" /> },
-    { key: "ch6", dark: false, screen: <PassScreen fixedVisits={4} /> },
-    { key: "ch7", dark: false, screen: <CouponFrame /> },
+    { key: "ch6", dark: false, screen: <PassScreen still stampAlt={t("film.stampAlt")} /> },
+    { key: "ch7", dark: false, screen: <CouponFrame alt={t("film.couponAlt")} /> },
   ]
   return (
     <div className="mk-wrap grid grid-cols-1 gap-12 py-16 md:grid-cols-2 md:gap-8 lg:grid-cols-4">

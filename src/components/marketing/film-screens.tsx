@@ -1,11 +1,9 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect } from "react"
 import Image from "next/image"
-import { motion, useAnimate, useMotionValue, useMotionValueEvent, type MotionValue } from "motion/react"
+import { motion, useAnimate, type MotionValue } from "motion/react"
 import { useTranslations } from "next-intl"
-import { WalletPassRenderer } from "@/components/wallet-pass-renderer"
-import { DEMO_COUPON_DESIGN, DEMO_PASS_DESIGN, DEMO_PASS_LOGO, DEMO_PASS_RATIO, DEMO_PASS_TOTAL } from "./demo-pass"
 import { INK } from "./tokens"
 
 // The screens the hero phone shows, and the real artefacts on them. Each
@@ -178,128 +176,76 @@ export function WalletScreen({ opacity, passY, passAlt = "" }: { opacity?: Motio
 export const PASS_TOP = 0.38
 const PASS_INSET = 12
 
-/** The width of an element, kept up to date. 0 until measured. */
-function useMeasuredWidth<T extends HTMLElement>() {
-  const ref = useRef<T>(null)
-  const [width, setWidth] = useState(0)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const ro = new ResizeObserver(([entry]) => setWidth(Math.round(entry.contentRect.width)))
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-  return { ref, width }
+// Two real passes, as issued: a pizzeria's stamp card and a burger bar's
+// coupon (the same renders the pass-type picker uses). They carry their own
+// names and text, so they are not translated.
+export const REAL_CARDS = {
+  stamp: "/pass-types/stamp-2-apple.webp",
+  coupon: "/pass-types/coupon-3-apple.webp",
+} as const
+
+/** A real pass, full width of its slot; the shadow follows the rounded
+ *  corners baked into the image. */
+export function RealCard({ src, alt }: { src: string; alt: string }) {
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={960}
+      height={1350}
+      className="h-auto w-full"
+      style={{ filter: "drop-shadow(0 14px 18px oklch(0 0 0 / 0.22))" }}
+      sizes="400px"
+    />
+  )
 }
 
-/** Chapters 5–6: Wallet with the demo card drawn by the product's own
- *  renderer — the stamp card first, filling with the scroll, then turned
- *  over into the coupon. The renderer needs pixel sizes, so the card slot
- *  is measured; this screen is never visible at scroll 0. */
+/** Chapters 6–7: Wallet with a real stamp card that rises in, then turns
+ *  over into a real coupon. With `still` (reduced-motion frames) the stamp
+ *  card sits at rest and there is no coupon. */
 export function PassScreen({
-  opacity, passY, visits, stampRotate, stampVis, couponRotate, couponVis, fixedVisits,
+  opacity, passY, stampRotate, stampVis, couponRotate, couponVis, still, stampAlt = "", couponAlt = "",
 }: {
   opacity?: MotionValue<number>
   passY?: MotionValue<number>
-  /** 0–5, from the scroll: four stamps, then the reward. */
-  visits?: MotionValue<number>
   stampRotate?: MotionValue<number>
   stampVis?: MotionValue<number>
   couponRotate?: MotionValue<number>
   couponVis?: MotionValue<number>
-  /** Reduced-motion frames: a fixed count and no coupon. */
-  fixedVisits?: number
+  still?: boolean
+  stampAlt?: string
+  couponAlt?: string
 }) {
   const t = useTranslations("hero")
-  const tc = useTranslations("gallery")
-  const { ref, width } = useMeasuredWidth<HTMLDivElement>()
-  const [count, setCount] = useState(fixedVisits ?? 0)
-  const still = useMotionValue(fixedVisits ?? 0)
-  useMotionValueEvent(visits ?? still, "change", (v) => {
-    const next = Math.min(DEMO_PASS_TOTAL, Math.max(0, Math.round(v)))
-    if (next !== count) setCount(next)
-  })
-  const h = Math.round(width * DEMO_PASS_RATIO)
-  const shadow = { boxShadow: "0 14px 34px oklch(0 0 0 / 0.22)" }
   return (
-    <motion.div style={{ opacity }} className="mk-film-pass absolute inset-0">
+    <motion.div style={{ opacity }} className="absolute inset-0">
       <div className="absolute inset-0" style={{ background: SCREEN_BG }} />
       <p className="absolute inset-x-0 top-12 text-center text-[13px] font-semibold" style={{ color: INK }}>{t("film.walletTitle")}</p>
-      <motion.div ref={ref} style={{ y: passY, left: PASS_INSET, right: PASS_INSET, top: `calc(var(--phone-w) * ${PASS_TOP})` }} className="absolute">
-        {width > 0 && (
-          <div className="relative" style={{ width, height: h, perspective: 1200 }}>
-            <motion.div style={{ rotateY: stampRotate, opacity: stampVis, transformStyle: "preserve-3d" }} className="absolute inset-0">
-              <WalletPassRenderer
-                design={DEMO_PASS_DESIGN}
-                format="apple"
-                compact
-                width={width}
-                height={h}
-                logoUrl={DEMO_PASS_LOGO}
-                organizationName={t("card.business")}
-                programName={t("card.program")}
-                currentVisits={count}
-                totalVisits={DEMO_PASS_TOTAL}
-                rewardDescription={t("card.reward")}
-                customerName={t("card.customer")}
-                memberNumber="42"
-                style={shadow}
-              />
+      <motion.div style={{ y: passY, left: PASS_INSET, right: PASS_INSET, top: `calc(var(--phone-w) * ${PASS_TOP})` }} className="absolute">
+        <div className="relative" style={{ perspective: 1200 }}>
+          <motion.div style={{ rotateY: stampRotate, opacity: stampVis, transformStyle: "preserve-3d" }}>
+            <RealCard src={REAL_CARDS.stamp} alt={stampAlt} />
+          </motion.div>
+          {!still && (
+            <motion.div style={{ rotateY: couponRotate, opacity: couponVis, transformStyle: "preserve-3d" }} className="absolute inset-0">
+              <RealCard src={REAL_CARDS.coupon} alt={couponAlt} />
             </motion.div>
-            {fixedVisits === undefined && (
-              <motion.div style={{ rotateY: couponRotate, opacity: couponVis, transformStyle: "preserve-3d" }} className="absolute inset-0">
-                <WalletPassRenderer
-                  design={DEMO_COUPON_DESIGN}
-                  format="apple"
-                  compact
-                  width={width}
-                  height={h}
-                  logoUrl={DEMO_PASS_LOGO}
-                  organizationName={t("card.business")}
-                  programName={tc("coupon.name")}
-                  customerName={t("card.customer")}
-                  discountText={tc("coupon.offer")}
-                  validUntil={tc("coupon.validUntil")}
-                  couponCode={tc("coupon.code")}
-                  style={shadow}
-                />
-              </motion.div>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </motion.div>
     </motion.div>
   )
 }
 
-/** A frame with a fixed coupon, for reduced motion. */
-export function CouponFrame() {
+/** A frame with the coupon at rest, for reduced motion. */
+export function CouponFrame({ alt = "" }: { alt?: string }) {
   const t = useTranslations("hero")
-  const tc = useTranslations("gallery")
-  const { ref, width } = useMeasuredWidth<HTMLDivElement>()
-  const h = Math.round(width * DEMO_PASS_RATIO)
   return (
     <div className="absolute inset-0">
       <div className="absolute inset-0" style={{ background: SCREEN_BG }} />
       <p className="absolute inset-x-0 top-12 text-center text-[13px] font-semibold" style={{ color: INK }}>{t("film.walletTitle")}</p>
-      <div ref={ref} style={{ left: PASS_INSET, right: PASS_INSET, top: `calc(var(--phone-w) * ${PASS_TOP})` }} className="absolute">
-        {width > 0 && (
-          <WalletPassRenderer
-            design={DEMO_COUPON_DESIGN}
-            format="apple"
-            compact
-            width={width}
-            height={h}
-            logoUrl={DEMO_PASS_LOGO}
-            organizationName={t("card.business")}
-            programName={tc("coupon.name")}
-            customerName={t("card.customer")}
-            discountText={tc("coupon.offer")}
-            validUntil={tc("coupon.validUntil")}
-            couponCode={tc("coupon.code")}
-            style={{ boxShadow: "0 14px 34px oklch(0 0 0 / 0.22)" }}
-          />
-        )}
+      <div style={{ left: PASS_INSET, right: PASS_INSET, top: `calc(var(--phone-w) * ${PASS_TOP})` }} className="absolute">
+        <RealCard src={REAL_CARDS.coupon} alt={alt} />
       </div>
     </div>
   )

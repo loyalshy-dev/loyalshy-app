@@ -93,6 +93,8 @@
       "appStore": "Descargar en la App Store",
       "playStore": "Disponible en Google Play",
       "appAlt": "La app del equipo: buscar cliente, nuevo cliente, recompensas, compartir programa, aviso y la última actividad",
+      "stampAlt": "Tarjeta de sellos de una pizzería en Apple Wallet, 2 de 7 sellos",
+      "couponAlt": "Cupón del 10 % de una hamburguesería en Apple Wallet",
       "walletTitle": "Wallet",
       "chapters": "Capítulos",
       "ch5": {
@@ -166,33 +168,6 @@
       "couponProgram": "Cupón 2×1",
       "enrolled": "inscritos",
       "active": "Activo"
-    }
-  },
-  "gallery": {
-    "title": "La tarjeta de fidelización, por dentro.",
-    "stamp": {
-      "name": "Tarjeta de sellos.",
-      "lead": "Un sello por visita. Al llegar al número que fijes, la recompensa aparece sola.",
-      "parts": {
-        "logo": "Tu logo y tus colores",
-        "stamps": "Los sellos, sobre tu foto o tu color",
-        "reward": "La próxima recompensa",
-        "name": "El nombre del cliente",
-        "qr": "El QR que escanea tu equipo"
-      }
-    },
-    "coupon": {
-      "name": "Cupón.",
-      "lead": "Un descuento o un regalo con fecha. De un solo uso o de los que quieras.",
-      "offer": "2×1 en cafés",
-      "validUntil": "31 oct",
-      "code": "SOL2X1",
-      "parts": {
-        "offer": "La oferta, bien grande",
-        "valid": "Hasta cuándo vale",
-        "code": "Un código, si lo usas",
-        "qr": "Se canjea con el mismo escaneo"
-      }
     }
   },
   "pricing": {

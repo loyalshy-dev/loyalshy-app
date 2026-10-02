@@ -96,7 +96,7 @@ async function JsonLd({ locale }: { locale: Locale }) {
 
 const MARKETING_NAMESPACES = [
   "common", "nav", "hero", "featureShowcase",
-  "gallery", "pricing",
+  "pricing",
   "faq", "tryDemo", "closingCta", "footer",
 ] as const
 

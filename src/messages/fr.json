@@ -93,6 +93,8 @@
       "appStore": "Télécharger dans l'App Store",
       "playStore": "Disponible sur Google Play",
       "appAlt": "L'app de l'équipe : recherche client, nouveau client, récompenses, partager un programme, message et dernière activité",
+      "stampAlt": "Carte à tampons d'une pizzeria dans Apple Wallet, 2 tampons sur 7",
+      "couponAlt": "Coupon de 10 % d'un restaurant de burgers dans Apple Wallet",
       "walletTitle": "Wallet",
       "chapters": "Chapitres",
       "ch5": {
@@ -166,33 +168,6 @@
       "couponProgram": "Coupon 2 pour 1",
       "enrolled": "inscrits",
       "active": "Actif"
-    }
-  },
-  "gallery": {
-    "title": "La carte de fidélité, de près.",
-    "stamp": {
-      "name": "Carte à tampons.",
-      "lead": "Un tampon par visite. Au nombre que vous fixez, la récompense apparaît d'elle-même.",
-      "parts": {
-        "logo": "Votre logo et vos couleurs",
-        "stamps": "Les tampons, sur votre photo ou votre couleur",
-        "reward": "La prochaine récompense",
-        "name": "Le nom du client",
-        "qr": "Le QR que scanne votre équipe"
-      }
-    },
-    "coupon": {
-      "name": "Coupon.",
-      "lead": "Une remise ou un cadeau avec une date. À usage unique ou autant de fois que vous voulez.",
-      "offer": "2 cafés pour 1",
-      "validUntil": "31 oct.",
-      "code": "SOL2X1",
-      "parts": {
-        "offer": "L'offre, bien en vue",
-        "valid": "Jusqu'à quand",
-        "code": "Un code, si vous en utilisez un",
-        "qr": "Validé avec le même scan"
-      }
     }
   },
   "pricing": {

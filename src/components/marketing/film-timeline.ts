@@ -6,8 +6,8 @@
 //   Move  = [start, end]                         → a value travelling once
 //
 // Seven chapters: the five about the customer and the team take the first
-// ~64% of the film at the pace they always had; the card's anatomy (stamp
-// card, then coupon) takes the rest. Chapters are separated by a short
+// ~64% of the film at the pace they always had; the card up close (a real
+// stamp card, then a real coupon) takes the rest. Chapters are separated by a short
 // breath where only the phone is on screen.
 
 export type Fade = readonly [number, number, number, number]
@@ -98,19 +98,13 @@ export const FILM = {
     badgesRise: [0.625, 0.638] as Move,
   },
 
-  /** 6. The stamp card, up close: it rises into Wallet, the stamps land
-   *  one by one with the scroll, the reward lights up, and its parts are
-   *  called out. */
+  /** 6. The stamp card, up close: a real one rises into Wallet and holds. */
   ch6: {
     caption: [0.715, 0.745, 0.86, 0.885] as Fade,
     captionLag: 0.013,
     landAt: 0.745,
-    wallet: [0.70, 0.725, 1.5, 1.6] as Fade, // the screen stays through ch6
+    wallet: [0.70, 0.725, 1.5, 1.6] as Fade, // the screen stays through ch7
     passRise: [0.705, 0.745] as Move,
-    /** `visits` 0 → 5 over this window: four stamps, then the reward. */
-    stamps: [0.755, 0.805] as Move,
-    calloutsFrom: 0.805,
-    calloutStep: 0.011,
     /** The card turns over into the coupon. */
     flipOut: [0.875, 0.895] as Move,
   },
@@ -121,8 +115,6 @@ export const FILM = {
     captionLag: 0.01,
     landAt: 0.91,
     flipIn: [0.895, 0.915] as Move,
-    calloutsFrom: 0.915,
-    calloutStep: 0.011,
   },
 
   /** The lock screen is under everything in the intro, chapter 2 and 3. */
@@ -142,9 +134,9 @@ export const FILM = {
      *  then a push-in on each chapter's climax — the pass in Wallet, the
      *  proximity banner, the announcement, the app — and wide again for the
      *  transitions. Chapter 3 stays a touch smaller so the crowd shows. The
-     *  card chapters hold a close-up so the pass reads; after the last
-     *  callout the camera pulls wide so the phone and its shadow sit inside
-     *  the stage when it unpins. */
+     *  card chapters hold a close-up so the pass reads; at the end the
+     *  camera pulls wide so the phone and its shadow sit inside the stage
+     *  when it unpins. */
     zoom: {
       keys: [0, 0.077, 0.129, 0.167, 0.213, 0.245, 0.322, 0.35, 0.425, 0.451, 0.49, 0.528, 0.554, 0.592, 0.612, 0.625, 0.7, 0.745, 0.955, 1],
       values: [1.5, 1, 1, 1.25, 1.25, 1, 1, 1.22, 1.22, 1, 0.94, 0.94, 1.12, 1.12, 0.96, 1.1, 1.1, 1.3, 1.3, 0.9],
