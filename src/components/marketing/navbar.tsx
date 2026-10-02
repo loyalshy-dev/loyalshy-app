@@ -15,7 +15,8 @@ import { useLocalePath } from "@/i18n/use-locale-path"
 // hairline; once the page scrolls it lifts into a floating translucent
 // capsule, a little narrower than the page. Links show which section is on
 // screen. The one action is the coral pill. On phones the bar is 44px and
-// the menu drops down full-screen.
+// the menu is a full-screen sheet over everything (bar included) with its
+// own close button, so it reads the same wherever the page was scrolled.
 
 interface NavLink {
   label: string
@@ -33,6 +34,9 @@ export function MarketingNavbar() {
   const pathname = usePathname()
   const [open, setOpen] = React.useState(false)
   const [scrolled, setScrolled] = React.useState(false)
+  const burgerRef = React.useRef<HTMLButtonElement>(null)
+  const closeRef = React.useRef<HTMLButtonElement>(null)
+  const wasOpen = React.useRef(false)
   const [active, setActive] = React.useState<string | null>(null)
   const onLanding = pathname === lp("/")
 
@@ -94,6 +98,14 @@ export function MarketingNavbar() {
     }
   }, [open])
 
+  // Focus follows the sheet: the close button when it opens, the burger
+  // when it closes.
+  React.useEffect(() => {
+    if (open) closeRef.current?.focus()
+    else if (wasOpen.current) burgerRef.current?.focus()
+    wasOpen.current = open
+  }, [open])
+
   React.useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
@@ -138,6 +150,7 @@ export function MarketingNavbar() {
           </div>
 
           <button
+            ref={burgerRef}
             type="button"
             className="mk-nav-burger"
             aria-label={open ? t("closeMenu") : t("openMenu")}
@@ -151,31 +164,33 @@ export function MarketingNavbar() {
         </div>
       </div>
 
-      {/* Phone menu: drops from the bar, links stacked over hairlines */}
+      {/* Phone menu: a full-screen sheet with its own close button; the
+          links, then sign in and sign up, as one list in large type */}
       <div id="mk-nav-menu" className={cn("mk-nav-menu", open && "mk-nav-menu-open")} aria-hidden={!open}>
-        <nav aria-label="Mobile navigation" className="mk-wrap">
-          <ul className="mk-nav-menu-list">
-            {links.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href} onClick={() => setOpen(false)} className="mk-nav-menu-link" tabIndex={open ? 0 : -1}>
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="mk-nav-menu-foot">
-            <Link href="/register" onClick={() => setOpen(false)} className="mk-btn-primary w-full" tabIndex={open ? 0 : -1}>
-              {tCommon("getStartedFree")}
-            </Link>
-            <Link href="/login" onClick={() => setOpen(false)} className="mk-body font-semibold" style={{ color: "var(--mk-text)" }} tabIndex={open ? 0 : -1}>
-              {tCommon("logIn")}
-            </Link>
-            <div className="flex items-center gap-1">
-              <LanguageSwitcher size="icon" className="size-10" />
-              <ThemeToggle className="size-10" />
-            </div>
+        <div className="mk-wrap">
+          <div className="mk-nav-menu-top">
+            <button ref={closeRef} type="button" className="mk-nav-close" aria-label={t("closeMenu")} onClick={() => setOpen(false)} tabIndex={open ? 0 : -1}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                <path d="M3 3l16 16M19 3L3 19" />
+              </svg>
+            </button>
           </div>
-        </nav>
+          <nav aria-label="Mobile navigation">
+            <ul className="mk-nav-menu-list">
+              {[...links, { label: tCommon("logIn"), href: "/login" }, { label: tCommon("getStartedFree"), href: "/register" }].map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} onClick={() => setOpen(false)} className="mk-nav-menu-link" tabIndex={open ? 0 : -1}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="mk-nav-menu-foot">
+            <LanguageSwitcher size="icon" className="size-10" />
+            <ThemeToggle className="size-10" />
+          </div>
+        </div>
       </div>
     </header>
   )

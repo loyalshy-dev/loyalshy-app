@@ -628,42 +628,52 @@
 }
 .mk-nav-burger-line-a { transform: translateY(3.25px) rotate(45deg); }
 .mk-nav-burger-line-b { transform: translateY(-3.25px) rotate(-45deg); }
+/* The phone menu: a full-screen opaque sheet over the bar, a close button
+   in the bar's slot, then the links as one list in large regular type. It
+   is fixed to the viewport, so it is whole wherever the page was scrolled. */
 .mk-nav-menu {
   position: fixed;
-  inset: 44px 0 0 0;
-  background: color-mix(in oklch, var(--mk-bg) 94%, transparent);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
+  inset: 0;
+  background: var(--mk-bg);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-8px);
-  transition: opacity 220ms ease, transform 220ms ease, visibility 0s linear 220ms;
+  transition: opacity 180ms ease, visibility 0s linear 180ms;
   overflow-y: auto;
-  padding-top: 1rem;
-  padding-bottom: 2rem;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
 }
 .mk-nav-menu-open {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
-  transition: opacity 220ms ease, transform 220ms ease, visibility 0s;
+  transition: opacity 180ms ease, visibility 0s;
 }
-.mk-nav-menu-list { display: flex; flex-direction: column; }
+.mk-nav-menu-top { height: 44px; display: flex; align-items: center; justify-content: flex-end; margin-right: -0.75rem; }
+.mk-nav-close {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  color: var(--mk-text);
+}
+.mk-nav-close:active { opacity: 0.6; }
+.mk-nav-menu-list { display: flex; flex-direction: column; margin-top: 2.5rem; }
 .mk-nav-menu-link {
   display: block;
-  padding: 0.9rem 0;
-  font-size: 1.75rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  padding: 0.75rem 0;
+  font-size: 1.625rem;
+  line-height: 1.25;
+  font-weight: 400;
+  letter-spacing: -0.015em;
   color: var(--mk-text);
-  border-bottom: 1px solid var(--mk-border);
 }
+.mk-nav-menu-link:active { opacity: 0.6; }
 .mk-nav-menu-foot {
   display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding-top: 1.5rem;
-  align-items: flex-start;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 2.5rem;
+  margin-left: -0.5rem;
 }
 @media (min-width: 1024px) {
   .mk-nav-inner, .mk-footer-inner { padding-inline: 2.5rem; }
