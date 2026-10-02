@@ -205,11 +205,9 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                   <motion.h2 style={{ opacity: c.title.o, y: c.title.y }} className={centred ? "font-display mk-display-2 lg:max-w-[10ch]" : "font-display mk-display-2 lg:max-w-[14ch]"}>
                     <span style={{ color: "var(--mk-text)" }}>{t(`film.${key}.title`)}</span>
                   </motion.h2>
-                  {key !== "ch3" && (
-                    <motion.p style={{ opacity: c.body.o, y: c.body.y }} className={centred ? "mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4 lg:max-w-[26ch]" : "mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4"}>
-                      {t(`film.${key}.caption`)}
-                    </motion.p>
-                  )}
+                  <motion.p style={{ opacity: c.body.o, y: c.body.y }} className={centred ? "mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4 lg:max-w-[26ch]" : "mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4"}>
+                    {t(`film.${key}.caption`)}
+                  </motion.p>
                   {key === "ch2" && demoUrl && (
                     <motion.div style={{ opacity: buttonsOpacity, y: buttonsY, visibility: buttonsVisibility }} className="mt-4 lg:mt-6">
                       <WalletButtons demoUrl={demoUrl} align="left" />
