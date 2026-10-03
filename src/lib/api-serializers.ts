@@ -137,6 +137,7 @@ export function toApiTemplate(t: TemplateWithCount) {
     description: t.description,
     passType: t.passType,
     status: t.status,
+    joinMode: t.joinMode,
     config: (t.config as Record<string, unknown>) ?? {},
     startsAt: t.startsAt.toISOString(),
     endsAt: t.endsAt?.toISOString() ?? null,

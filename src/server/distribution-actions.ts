@@ -48,6 +48,46 @@ const issuePassSchema = z.object({
   contactIds: z.array(z.string().min(1)).min(1).max(100),
 })
 
+// ─── Join mode (public / invite only) ───────────────────────
+
+const joinModeSchema = z.object({
+  templateId: z.string().min(1),
+  joinMode: z.enum(["PUBLIC", "INVITE_ONLY"]),
+})
+
+export type SetJoinModeInput = z.infer<typeof joinModeSchema>
+
+/**
+ * Who can get a pass for a program. PUBLIC: anyone via /join (QR, link,
+ * NFC). INVITE_ONLY: only the team — direct issue by email here, or the
+ * staff app's counter signup; the public page hides the program and the
+ * join action refuses it. Admin and owner.
+ */
+export async function setProgramJoinMode(
+  input: SetJoinModeInput
+): Promise<{ success: true } | { error: string }> {
+  const t = await getTranslations("serverErrors")
+  await assertAuthenticated()
+  const organization = await getOrganizationForUser()
+  if (!organization) return { error: t("noOrganization") }
+  await assertOrganizationRole(organization.id, "admin")
+
+  const parsed = joinModeSchema.safeParse(input)
+  if (!parsed.success) return { error: t("invalidInput") }
+  const { templateId, joinMode } = parsed.data
+
+  // Scoped by organization: a foreign id updates nothing.
+  const { count } = await db.passTemplate.updateMany({
+    where: { id: templateId, organizationId: organization.id },
+    data: { joinMode },
+  })
+  if (count === 0) return { error: t("programNotFound") }
+
+  revalidatePath(`/dashboard/programs/${templateId}`)
+  revalidatePath(`/dashboard/programs/${templateId}/distribution`)
+  return { success: true }
+}
+
 // ─── Pass Type Labels ───────────────────────────────────────
 
 // PASS_TYPE_LABELS lives in @/lib/issue-pass (shared with the staff API)

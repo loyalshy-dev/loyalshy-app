@@ -28,10 +28,12 @@ type Item = {
  * relevant section on the same page; item 3 deep-links to settings with
  * ?connect=1 to auto-open the Connect Device dialog.
  */
-export function FirstCustomerChecklist() {
+export function FirstCustomerChecklist({ isPublic = true }: { isPublic?: boolean }) {
   const t = useTranslations("dashboard.distribution.firstCustomer")
 
-  const items: Item[] = [
+  // Invite-only programs have no QR or link to share: only the scanner and
+  // direct issue steps apply (the page does not render those sections).
+  const allItems: Item[] = [
     {
       id: "qr",
       icon: FileText,
@@ -62,6 +64,7 @@ export function FirstCustomerChecklist() {
       href: "#direct-issue-section",
     },
   ]
+  const items = allItems.filter((item) => isPublic || (item.id !== "qr" && item.id !== "share"))
 
   return (
     <div className="rounded-2xl border bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6">

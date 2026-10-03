@@ -9,6 +9,7 @@ import { DistributionStats } from "@/components/dashboard/programs/distribution-
 import { NfcSection } from "@/components/dashboard/programs/nfc-section"
 import { FirstCustomerChecklist } from "@/components/dashboard/programs/first-customer-checklist"
 import { AnnouncementSection } from "@/components/dashboard/programs/announcement-section"
+import { JoinModeSection } from "@/components/dashboard/programs/join-mode-section"
 import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import {
   getAnnouncementQuota,
@@ -53,6 +54,7 @@ export default async function ProgramDistributionPage(props: {
         name: true,
         passType: true,
         status: true,
+        joinMode: true,
         config: true,
         announcement: true,
         passDesign: {
@@ -100,6 +102,10 @@ export default async function ProgramDistributionPage(props: {
     notFound()
   }
 
+  // Invite-only programs have no public entry: the QR, the link and NFC
+  // are hidden and passes come from direct issue or the staff app.
+  const isPublic = program.joinMode === "PUBLIC"
+
   // Announcement quota: per-org plan quota + per-program Google delivery cap
   // (mirrors the server action)
   const announcement = parseTemplateAnnouncement(program.announcement)
@@ -114,7 +120,7 @@ export default async function ProgramDistributionPage(props: {
   return (
     <div className="space-y-6">
       {totalIssued === 0 ? (
-        <FirstCustomerChecklist />
+        <FirstCustomerChecklist isPublic={isPublic} />
       ) : (
         <DistributionStats
           totalIssued={totalIssued}
@@ -124,38 +130,47 @@ export default async function ProgramDistributionPage(props: {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <section id="qr-section" className="scroll-mt-6">
-          <QrCodeDisplay
-            organization={{
-              name: organization.name,
-              slug: organization.slug,
-              logo: organization.logo,
-              logoApple: organization.logoApple ?? null,
-              logoGoogle: organization.logoGoogle ?? null,
-              brandColor: organization.brandColor,
-            }}
-            templates={[
-              {
-                id: program.id,
-                name: program.name,
-                passType: program.passType,
-                templateConfig: program.config,
-                rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
-                visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
-                cardDesign: program.passDesign ?? null,
-              },
-            ]}
-            joinUrl={joinUrl}
-          />
-        </section>
         <div className="space-y-6">
-          <section id="share-section" className="scroll-mt-6">
-            <ShareLinkSection
-              joinUrl={joinUrl}
-              templateName={program.name}
-              organizationName={organization.name}
-            />
+          <section id="join-mode-section" className="scroll-mt-6">
+            <JoinModeSection templateId={program.id} joinMode={program.joinMode} />
           </section>
+          {isPublic && (
+            <section id="qr-section" className="scroll-mt-6">
+              <QrCodeDisplay
+                organization={{
+                  name: organization.name,
+                  slug: organization.slug,
+                  logo: organization.logo,
+                  logoApple: organization.logoApple ?? null,
+                  logoGoogle: organization.logoGoogle ?? null,
+                  brandColor: organization.brandColor,
+                }}
+                templates={[
+                  {
+                    id: program.id,
+                    name: program.name,
+                    passType: program.passType,
+                    templateConfig: program.config,
+                    rewardDescription: (program.config as Record<string, unknown> | null)?.rewardDescription as string ?? "",
+                    visitsRequired: (program.config as Record<string, unknown> | null)?.stampsRequired as number ?? 10,
+                    cardDesign: program.passDesign ?? null,
+                  },
+                ]}
+                joinUrl={joinUrl}
+              />
+            </section>
+          )}
+        </div>
+        <div className="space-y-6">
+          {isPublic && (
+            <section id="share-section" className="scroll-mt-6">
+              <ShareLinkSection
+                joinUrl={joinUrl}
+                templateName={program.name}
+                organizationName={organization.name}
+              />
+            </section>
+          )}
           <section id="direct-issue-section" className="scroll-mt-6">
             <DirectIssueSection
               templateId={program.id}
@@ -185,7 +200,7 @@ export default async function ProgramDistributionPage(props: {
               walletHolders={walletHolders}
             />
           </section>
-          <NfcSection joinUrl={joinUrl} />
+          {isPublic && <NfcSection joinUrl={joinUrl} />}
         </div>
       </div>
 

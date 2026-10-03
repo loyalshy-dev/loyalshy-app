@@ -3,6 +3,7 @@
 import { randomUUID } from "crypto"
 import { z } from "zod"
 import { headers } from "next/headers"
+import { getTranslations } from "next-intl/server"
 import { db, getNextMemberNumber } from "@/lib/db"
 import { sanitizeText } from "@/lib/sanitize"
 import { publicFormLimiter, joinPassLimiter } from "@/lib/rate-limit"
@@ -28,7 +29,10 @@ export type OrganizationPublicInfo = {
   logoGoogle: string | null
   brandColor: string | null
   secondaryColor: string | null
+  /** Public programs only; invite-only ones are never listed. */
   templates: PublicTemplateInfo[]
+  /** The business has active programs the team hands out by invitation. */
+  hasInviteOnlyPrograms: boolean
 }
 
 export type OnboardingResult = {
@@ -90,6 +94,7 @@ export async function getOrganizationBySlug(
           id: true,
           name: true,
           passType: true,
+          joinMode: true,
           config: true,
           passDesign: {
             select: {
@@ -122,6 +127,12 @@ export async function getOrganizationBySlug(
   // Must have at least one active template
   if (organization.passTemplates.length === 0) return null
 
+  // Invite-only programs never appear on the public page. With none left
+  // to list, the page still resolves (with a flag) so an old QR or link
+  // gets an explanation instead of a 404.
+  const publicTemplates = organization.passTemplates.filter((t) => t.joinMode === "PUBLIC")
+  const hasInviteOnlyPrograms = publicTemplates.length < organization.passTemplates.length
+
   // Extract visitsRequired and rewardDescription from config
   return {
     id: organization.id,
@@ -132,7 +143,8 @@ export async function getOrganizationBySlug(
     logoGoogle: organization.logoGoogle ?? null,
     brandColor: organization.brandColor,
     secondaryColor: organization.secondaryColor,
-    templates: organization.passTemplates.map((t) => {
+    hasInviteOnlyPrograms,
+    templates: publicTemplates.map((t) => {
       return {
         id: t.id,
         name: t.name,
@@ -379,11 +391,18 @@ export async function joinTemplate(
       organizationId: organization.id,
       status: "ACTIVE",
     },
-    select: { id: true, passType: true, config: true },
+    select: { id: true, passType: true, config: true, joinMode: true },
   })
 
   if (!template) {
     return { success: false, error: "No active pass template found" }
+  }
+
+  // Invite-only programs are issued by the team (direct issue, staff app),
+  // never through the public page — even with the URL in hand.
+  if (template.joinMode !== "PUBLIC") {
+    const tJoin = await getTranslations("join")
+    return { success: false, error: tJoin("inviteOnlyError") }
   }
 
   // Email is required for self-join
