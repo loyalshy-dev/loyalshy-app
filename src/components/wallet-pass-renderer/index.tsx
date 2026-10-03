@@ -1292,6 +1292,7 @@ function StampGridOverlay({
                 return (
                   <div
                     key={i}
+                    data-slot-state="reward-filled"
                     style={{
                       width: slotSize,
                       height: slotSize,
@@ -1312,6 +1313,7 @@ function StampGridOverlay({
               return (
                 <div
                   key={i}
+                  data-slot-state="reward-filled"
                   style={{
                     width: slotSize,
                     height: slotSize,
@@ -1357,6 +1359,7 @@ function StampGridOverlay({
             return (
               <div
                 key={i}
+                data-slot-state="reward"
                 style={{
                   width: slotSize,
                   height: slotSize,
@@ -1404,6 +1407,7 @@ function StampGridOverlay({
               return (
                 <div
                   key={i}
+                  data-slot-state="filled"
                   style={{
                     width: slotSize,
                     height: slotSize,
@@ -1424,6 +1428,7 @@ function StampGridOverlay({
             return (
               <div
                 key={i}
+                data-slot-state="filled"
                 style={{
                   width: slotSize,
                   height: slotSize,
@@ -1471,6 +1476,7 @@ function StampGridOverlay({
           return (
             <div
               key={i}
+              data-slot-state="empty"
               style={{
                 width: slotSize,
                 height: slotSize,

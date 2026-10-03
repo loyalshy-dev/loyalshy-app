@@ -2,330 +2,67 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Check, ArrowRight } from "lucide-react"
+import { Check } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useLocalePath } from "@/i18n/use-locale-path"
-
-import { Button } from "@/components/ui/button"
 import { PLANS, type PlanId } from "@/lib/plans"
-import { FadeIn, Stagger, StaggerItem } from "./motion"
+import { useLocalePath } from "@/i18n/use-locale-path"
+import { SectionHeading } from "./section-heading"
 
-const ENTERPRISE = PLANS.ENTERPRISE
-
-function formatPrice(price: number | null): string {
-  if (price === null) return "Custom"
-  return `${price}`
-}
+// Apple's "compare" layout: centered columns, no box around them, a
+// hairline under each header, the recommended plan is the one with the
+// coral button. Prices come from the same plan table billing uses. On
+// phones the columns stack, so each plan becomes a hairline card with the
+// column-alignment spacers dropped; otherwise the stack reads as scattered
+// lines.
 
 type BillingPeriod = "monthly" | "annual"
+type Column = { key: "free" | "starter" | "growth" | "scale"; planId: Exclude<PlanId, "ENTERPRISE"> | null; recommended?: boolean }
 
-function BillingToggle({
-  period,
-  onChange,
-}: {
-  period: BillingPeriod
-  onChange: (p: BillingPeriod) => void
-}) {
+const COLUMNS: Column[] = [
+  { key: "free", planId: null },
+  { key: "starter", planId: "STARTER" },
+  { key: "growth", planId: "GROWTH", recommended: true },
+  { key: "scale", planId: "SCALE" },
+]
+
+const PERIODS: BillingPeriod[] = ["monthly", "annual"]
+
+function BillingToggle({ period, onChange }: { period: BillingPeriod; onChange: (p: BillingPeriod) => void }) {
   const t = useTranslations("pricing")
-
+  // A radio group: Tab lands on the checked option, arrows move the check.
+  const onKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return
+    e.preventDefault()
+    const next = PERIODS[(PERIODS.indexOf(period) + 1) % PERIODS.length]
+    onChange(next)
+    ;(e.currentTarget.parentElement?.querySelector(`[data-period="${next}"]`) as HTMLButtonElement | null)?.focus()
+  }
   return (
-    <div
-      className="inline-flex items-center gap-1 rounded-full p-1"
-      style={{
-        background: "var(--mk-surface)",
-        border: "1px solid var(--mk-border)",
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => onChange("monthly")}
-        className="rounded-full px-5 py-2 text-[14px] font-medium transition-all"
-        style={{
-          background:
-            period === "monthly" ? "var(--mk-text)" : "transparent",
-          color:
-            period === "monthly" ? "var(--mk-bg)" : "var(--mk-text-muted)",
-        }}
-      >
-        {t("monthly")}
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange("annual")}
-        className="relative rounded-full px-5 py-2 text-[14px] font-medium transition-all"
-        style={{
-          background:
-            period === "annual" ? "var(--mk-text)" : "transparent",
-          color:
-            period === "annual" ? "var(--mk-bg)" : "var(--mk-text-muted)",
-        }}
-      >
-        {t("annual")}
-        <span
-          className="absolute -top-2.5 -right-8 sm:-right-12 rounded-full px-2 py-0.5 text-[11px] font-bold whitespace-nowrap"
-          style={{
-            background: "oklch(0.704 0.193 32 / 0.12)",
-            color: "var(--mk-brand-purple)",
-          }}
-        >
-          {t("save20")}
-        </span>
-      </button>
-    </div>
-  )
-}
-
-/* ─── Free tier card (marketing-only, not in billing system) ─────── */
-
-function FreePlanCard() {
-  const t = useTranslations("pricing")
-  const tc = useTranslations("common")
-
-  const freeFeatures = [
-    t("free.features.contacts"),
-    t("free.features.programs"),
-    t("free.features.staff"),
-    t("free.features.announcements"),
-  ] as const
-
-  return (
-    <div
-      className="relative flex flex-col rounded-2xl p-7 transition-all duration-300"
-      style={{
-        background: "var(--mk-card)",
-        border: "1px solid var(--mk-border)",
-        boxShadow: "0 1px 3px oklch(0 0 0 / 0.04)",
-      }}
-    >
-      <div className="mb-5">
-        <p
-          className="text-[13px] font-semibold tracking-wide mb-1"
-          style={{ color: "var(--mk-text-dimmed)" }}
-        >
-          {t("free.name")}
-        </p>
-        <p
-          className="text-[14px]"
-          style={{ color: "var(--mk-text-muted)" }}
-        >
-          {t("free.description")}
-        </p>
-      </div>
-
-      <div className="mb-2 flex items-baseline gap-1">
-        <span
-          className="text-5xl font-bold tracking-tight"
-          style={{ color: "var(--mk-text)" }}
-        >
-          0
-        </span>
-        <span
-          className="text-[15px] font-medium"
-          style={{ color: "var(--mk-text-dimmed)" }}
-        >
-          {tc("perMonth")}
-        </span>
-      </div>
-
-      <div className="mb-5" />
-
-      <Button
-        asChild
-        variant="outline"
-        size="lg"
-        className="w-full mb-6 text-[14px] font-medium rounded-full"
-      >
-        <Link href="/register">{tc("getStarted")}</Link>
-      </Button>
-
-      <div
-        className="mb-5"
-        style={{ borderTop: "1px solid var(--mk-border)" }}
-      />
-
-      <ul className="flex flex-col gap-3">
-        {freeFeatures.map((feature) => (
-          <li key={feature} className="flex items-start gap-3">
-            <div
-              className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"
-              style={{ background: "oklch(0.704 0.193 32 / 0.1)" }}
-            >
-              <Check
-                className="size-3"
-                strokeWidth={2.5}
-                style={{ color: "var(--mk-brand-purple)" }}
-              />
-            </div>
-            <span
-              className="text-[14px]"
-              style={{ color: "var(--mk-text)" }}
-            >
-              {feature}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
-/* ─── Plan card ───────────────────────────────────────────────────── */
-
-type PlanCardProps = {
-  planKey: Exclude<PlanId, "ENTERPRISE">
-  highlighted?: boolean
-  period: BillingPeriod
-}
-
-const PLAN_KEY_MAP: Record<string, string> = {
-  STARTER: "starter",
-  GROWTH: "growth",
-  SCALE: "scale",
-}
-
-function PlanCard({
-  planKey,
-  highlighted = false,
-  period,
-}: PlanCardProps) {
-  const t = useTranslations("pricing")
-  const tc = useTranslations("common")
-  const plan = PLANS[planKey]
-  const tKey = PLAN_KEY_MAP[planKey]
-  const price = period === "annual" ? plan.annualPrice : plan.price
-
-  const features = Object.values(
-    t.raw(`${tKey}.features`) as Record<string, string>
-  )
-
-  return (
-    <div
-      className="relative flex flex-col rounded-2xl p-7 transition-all duration-300"
-      style={{
-        background: "var(--mk-card)",
-        border: highlighted
-          ? "1px solid oklch(0.704 0.193 32 / 0.3)"
-          : "1px solid var(--mk-border)",
-        boxShadow: highlighted
-          ? "0 0 0 1px oklch(0.704 0.193 32 / 0.15), 0 20px 60px oklch(0 0 0 / 0.10), 0 0 100px oklch(0.704 0.193 32 / 0.06)"
-          : "0 1px 3px oklch(0 0 0 / 0.04)",
-        transform: highlighted ? "scale(1.04)" : "scale(1)",
-      }}
-    >
-      {highlighted && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-          <span
-            className="inline-flex items-center rounded-full px-4 py-1 text-xs font-bold tracking-wide"
-            style={{
-              background:
-                "linear-gradient(135deg, oklch(0.704 0.193 32), oklch(0.704 0.193 32))",
-              color: "oklch(0.99 0 0)",
-              letterSpacing: "0.08em",
-              boxShadow: "0 2px 12px oklch(0.704 0.193 32 / 0.3)",
-            }}
+    <div className="flex flex-col items-center gap-2">
+      <div role="radiogroup" aria-label={t("billingPeriod")} className="inline-flex rounded-full p-1" style={{ border: "1px solid var(--mk-border)" }}>
+        {PERIODS.map((p) => (
+          <button
+            key={p}
+            type="button"
+            role="radio"
+            aria-checked={period === p}
+            tabIndex={period === p ? 0 : -1}
+            data-period={p}
+            onClick={() => onChange(p)}
+            onKeyDown={onKeyDown}
+            className="rounded-full px-4 py-1.5 text-[14px] font-medium transition-colors"
+            style={{ background: period === p ? "var(--mk-text)" : "transparent", color: period === p ? "var(--mk-bg)" : "var(--mk-text-muted)" }}
           >
-            {t("mostPopular")}
-          </span>
-        </div>
-      )}
-
-      <div className="mb-5">
-        <p
-          className="text-[13px] font-semibold tracking-wide mb-1"
-          style={{ color: "var(--mk-text-dimmed)" }}
-        >
-          {t(`${tKey}.name`)}
-        </p>
-        <p
-          className="text-[14px]"
-          style={{ color: "var(--mk-text-muted)" }}
-        >
-          {t(`${tKey}.description`)}
-        </p>
-      </div>
-
-      <div className="mb-2 flex items-baseline gap-1">
-        <span
-          className="text-5xl font-bold tracking-tight"
-          style={{ color: "var(--mk-text)" }}
-        >
-          {formatPrice(price)}
-        </span>
-        <span
-          className="text-[15px] font-medium"
-          style={{ color: "var(--mk-text-dimmed)" }}
-        >
-          {tc("perMonth")}
-        </span>
-      </div>
-
-      {period === "annual" && plan.price !== null && (
-        <p
-          className="text-[13px] font-medium mb-5"
-          style={{ color: "var(--mk-brand-purple)" }}
-        >
-          {(plan.price - (plan.annualPrice ?? 0)) * 12}&euro; {t("savedPerYear")}
-        </p>
-      )}
-      {period === "monthly" && <div className="mb-5" />}
-
-      {highlighted ? (
-        <Link
-          href="/register"
-          className="mk-btn-primary w-full text-center mb-6 gap-2"
-        >
-          {tc("getStarted")}
-          <ArrowRight className="size-4" />
-        </Link>
-      ) : (
-        <Button
-          asChild
-          variant="outline"
-          size="lg"
-          className="w-full mb-6 text-[14px] font-medium rounded-full"
-        >
-          <Link href="/register">{tc("getStarted")}</Link>
-        </Button>
-      )}
-
-      <div
-        className="mb-5"
-        style={{ borderTop: "1px solid var(--mk-border)" }}
-      />
-
-      <ul className="flex flex-col gap-3">
-        {features.map((feature) => (
-          <li key={feature} className="flex items-start gap-3">
-            <div
-              className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"
-              style={{
-                background: highlighted
-                  ? "oklch(0.704 0.193 32 / 0.1)"
-                  : "oklch(0.704 0.193 32 / 0.1)",
-              }}
-            >
-              <Check
-                className="size-3"
-                strokeWidth={2.5}
-                style={{
-                  color: "var(--mk-brand-purple)",
-                }}
-              />
-            </div>
-            <span
-              className="text-[14px]"
-              style={{ color: "var(--mk-text)" }}
-            >
-              {feature}
-            </span>
-          </li>
+            {t(p)}
+          </button>
         ))}
-      </ul>
+      </div>
+      <span className="mk-caption font-medium" style={{ color: "var(--mk-text-muted)" }} aria-live="polite">
+        {period === "annual" ? t("billedYearly") : t("save20")}
+      </span>
     </div>
   )
 }
-
-/* ─── Section ─────────────────────────────────────────────────────── */
 
 export function Pricing() {
   const [period, setPeriod] = React.useState<BillingPeriod>("monthly")
@@ -334,88 +71,61 @@ export function Pricing() {
   const lp = useLocalePath()
 
   return (
-    <section
-      id="pricing"
-      className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden mk-mesh-bg"
-      style={{ background: "var(--mk-surface)" }}
-    >
-      <div className="relative mx-auto max-w-6xl">
-        <FadeIn>
-          <div className="text-center mb-10">
-            <h2
-              className="font-display mk-clamp-h2 font-bold leading-[1.1] mb-4"
-              style={{ color: "var(--mk-text)" }}
-            >
-              {t("title")}
-            </h2>
-            <p
-              className="text-[16px] max-w-md mx-auto"
-              style={{ color: "var(--mk-text-muted)" }}
-            >
-              {t("subtitle")}
-            </p>
-          </div>
-        </FadeIn>
+    <section id="pricing" className="scroll-mt-24" style={{ background: "var(--mk-bg)" }}>
+      <div className="mk-wrap py-20 lg:py-28">
+        <SectionHeading title={t("title")} lead={t("subtitle")} align="center" />
+        <div className="mt-8 flex justify-center">
+          <BillingToggle period={period} onChange={setPeriod} />
+        </div>
 
-        <FadeIn delay={0.1}>
-          <div className="mb-10 flex justify-center">
-            <BillingToggle period={period} onChange={setPeriod} />
-          </div>
-        </FadeIn>
+        <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:mt-12 sm:gap-y-12 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4 lg:gap-x-8">
+          {COLUMNS.map((col) => {
+            const plan = col.planId ? PLANS[col.planId] : null
+            const monthly = plan?.price ?? 0
+            const price = period === "annual" ? (plan?.annualPrice ?? 0) : monthly
+            const saved = plan && period === "annual" ? (monthly - (plan.annualPrice ?? 0)) * 12 : 0
+            const features = Object.values(t.raw(`${col.key}.features`) as Record<string, string>)
+            return (
+              <div key={col.key} className="flex flex-col items-center rounded-2xl border p-5 text-center sm:rounded-none sm:border-0 sm:p-0" style={{ borderColor: "var(--mk-border)" }}>
+                <p className={col.recommended ? "mk-caption font-semibold" : "mk-caption hidden sm:block sm:min-h-[1lh]"} style={{ color: "var(--mk-text)" }}>
+                  {col.recommended ? t("mostPopular") : ""}
+                </p>
+                <h3 className={col.recommended ? "mk-title-4 mt-2" : "mk-title-4 sm:mt-2"} style={{ color: "var(--mk-text)" }}>
+                  {t(`${col.key}.name`)}
+                </h3>
+                <p className="mk-body-sm mt-1 max-w-[26ch] sm:min-h-[2lh]" style={{ color: "var(--mk-text-muted)" }}>
+                  {t(`${col.key}.description`)}
+                </p>
+                <p className="mt-4 flex items-baseline gap-1 sm:mt-5" aria-live="polite" style={{ color: "var(--mk-text)" }}>
+                  <span className="font-display text-5xl font-bold leading-none tracking-tight tabular-nums">{price}</span>
+                  <span className="text-[15px] font-medium" style={{ color: "var(--mk-text-dimmed)" }}>{tc("perMonth")}</span>
+                </p>
+                <p className={saved > 0 ? "mk-caption mt-2" : "mk-caption hidden sm:block sm:mt-2 sm:min-h-[1lh]"} style={{ color: "var(--mk-text-dimmed)" }}>
+                  {saved > 0 ? `${price * 12} € ${t("perYear")} · ${saved} € ${t("savedPerYear")}` : ""}
+                </p>
+                <Link href="/register" className={col.recommended ? "mk-btn-primary mt-4 w-full sm:mt-5" : "mk-btn-ghost mt-4 w-full sm:mt-5"} aria-label={`${tc("getStarted")} · ${t(`${col.key}.name`)}`}>
+                  {tc("getStarted")}
+                </Link>
+                <ul className="mt-5 w-full border-t pt-4 text-left sm:mt-6 sm:pt-5" style={{ borderColor: "var(--mk-border)" }}>
+                  {features.map((feature) => (
+                    <li key={feature} className="mk-body-sm flex items-start gap-2.5 py-1.5" style={{ color: "var(--mk-text)" }}>
+                      <Check className="mt-[3px] size-4 shrink-0" strokeWidth={2} style={{ color: "var(--mk-text)" }} />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
+        </div>
 
-        <Stagger
-          className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 items-start"
-          stagger={0.08}
-        >
-          <StaggerItem>
-            <FreePlanCard />
-          </StaggerItem>
-          <StaggerItem>
-            <PlanCard planKey="STARTER" period={period} />
-          </StaggerItem>
-          <StaggerItem>
-            <PlanCard planKey="GROWTH" highlighted period={period} />
-          </StaggerItem>
-          <StaggerItem>
-            <PlanCard planKey="SCALE" period={period} />
-          </StaggerItem>
-        </Stagger>
-
-        {/* Enterprise */}
-        <FadeIn delay={0.4}>
-          <div
-            className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-7 py-6 rounded-2xl"
-            style={{
-              background: "var(--mk-card)",
-              border: "1px solid transparent",
-              backgroundClip: "padding-box",
-              boxShadow: "0 0 0 1px oklch(0.704 0.193 32 / 0.15), 0 4px 16px oklch(0 0 0 / 0.06)",
-            }}
-          >
-            <div>
-              <p
-                className="text-[15px] font-semibold mb-1"
-                style={{ color: "var(--mk-text)" }}
-              >
-                {t("enterprise.name")}
-              </p>
-              <p
-                className="text-[14px]"
-                style={{ color: "var(--mk-text-muted)" }}
-              >
-                {t("enterprise.description")}. {t("enterprise.features")}
-              </p>
-            </div>
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="shrink-0 text-[14px] font-medium rounded-full"
-            >
-              <Link href={`${lp("/contact")}?type=sales`}>{tc("contactSales")}</Link>
-            </Button>
-          </div>
-        </FadeIn>
+        {/* Several locations or a chain: a word, not a column */}
+        <p className="mk-body mt-14 text-center" style={{ color: "var(--mk-text-muted)" }}>
+          {t("multiLocation")}{" "}
+          <Link href={`${lp("/contact")}?type=sales`} className="font-medium underline underline-offset-4" style={{ color: "var(--mk-text)" }}>
+            {t("multiLocationCta")}
+          </Link>
+        </p>
       </div>
     </section>
   )

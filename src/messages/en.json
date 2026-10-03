@@ -30,139 +30,130 @@
     }
   },
   "nav": {
-    "features": "Features",
     "pricing": "Pricing",
     "faq": "FAQ",
-    "apiDocs": "API Docs",
     "home": "Loyalshy home",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "switchLanguage": "Switch language"
+    "switchLanguage": "Switch language",
+    "cards": "Cards",
+    "dashboard": "Dashboard"
   },
   "hero": {
-    "title1": "Your stamp card,",
-    "title2": "on your",
-    "titleHighlight": "customers' phones",
-    "subtitle": "Customers scan a QR code at the counter and the card saves to their Apple or Google Wallet. You stamp it from your phone. Free for up to 50 customers.",
+    "subtitle": "Stamp cards and coupons your customers save to Apple Wallet or Google Wallet. No app, no account, no paper.",
     "seeHowItWorks": "See how it works",
-    "freeForever": "Free forever",
-    "noCreditCard": "No credit card required",
-    "screenshotAlt": "Loyalshy dashboard showing loyalty programs with beautiful card designs",
-    "browserUrl": "loyalshy.com/dashboard"
+    "title": "Turn occasional customers into regulars.",
+    "tryInWallet": "Try it in your Wallet",
+    "note": "Free for up to 50 customers. No credit card.",
+    "card": {
+      "business": "Café Sol",
+      "program": "Stamp card",
+      "reward": "Free coffee",
+      "customer": "Jane D."
+    },
+    "lockDate": "Monday, October 6",
+    "scenes": {
+      "near": {
+        "alt": "A real Wallet notification on an iPhone: the business's logo, its name and the message it wrote, with the card in miniature"
+      },
+      "stamp": {
+        "notification": "Stamp added. 4 of 5."
+      },
+      "announce": {
+        "alt": "A real notification of a notice sent from the dashboard: “Hoy 2x1” (2-for-1 today)"
+      },
+      "passAlt": "A real customer's stamp card in Apple Wallet: six of seven stamps, next reward a free haircut"
+    },
+    "tagline": "The digital loyalty card, in Apple and Google Wallet.",
+    "film": {
+      "scroll": "Keep scrolling.",
+      "camera": "Camera",
+      "openLink": "Open loyalshy.com",
+      "sendTitle": "Send a notice",
+      "sendButton": "Send to 128 customers",
+      "ch1": {
+        "title": "Share.",
+        "caption": "Public or private loyalty programs, shared by QR, email or social media."
+      },
+      "ch2": {
+        "title": "In the Wallet.",
+        "caption": "The customer carries the stamp card or the coupon on their phone."
+      },
+      "ch3": {
+        "title": "Smart notifications.",
+        "caption": "Proximity notifications, Google review requests and reminders when it's been a while since their last visit."
+      },
+      "ch4": {
+        "title": "Announcements.",
+        "caption": "Let your customers know what's new."
+      },
+      "tryLine": "Add the demo card to your Wallet. It's exactly what your customers will see.",
+      "sendText": "Hoy 2x1",
+      "qrAlt": "A real Loyalshy program QR code, ready for the counter",
+      "appStore": "Download on the App Store",
+      "playStore": "Get it on Google Play",
+      "appAlt": "The team app: find a customer, new customer, rewards, share a program, notice, and latest activity",
+      "stampAlt": "A pizzeria's stamp card in Apple Wallet, 2 of 7 stamps",
+      "couponAlt": "A burger bar's 10% off coupon in Apple Wallet",
+      "walletTitle": "Wallet",
+      "chapters": "Chapters",
+      "ch5": {
+        "title": "Management app.",
+        "caption": "Owner and staff can run it all from the app."
+      },
+      "ch6": {
+        "title": "Stamp card.",
+        "caption": "One stamp per visit. At the set number, a reward is earned."
+      },
+      "ch7": {
+        "title": "Coupon.",
+        "caption": "A versatile card for a single use or as many as you like."
+      },
+      "mapLabel": "Your business"
+    }
   },
   "featureShowcase": {
-    "title": "Who comes back, and when, at a glance",
-    "browserUrl": "loyalshy.com",
-    "tabs": {
-      "dashboard": {
-        "label": "Dashboard",
-        "description": "Each day's visits, stamps and redemptions, and which customers come back most.",
-        "alt": "Program overview dashboard with stat cards and template details"
-      },
-      "cardDesigner": {
-        "label": "Card designer",
-        "description": "Your logo, your colors, your reward. You see the card exactly as it will look in the wallet while you design it.",
-        "alt": "Card design studio with floating toolbar and live wallet pass preview"
-      },
-      "programs": {
-        "label": "Programs",
-        "description": "Stamp cards and coupons, each with its own design and rules.",
-        "alt": "Programs grid showing different loyalty card types and designs"
-      },
-      "passes": {
-        "label": "Passes",
-        "description": "Every card you've given out, with its status. Find a customer by name, email or phone.",
-        "alt": "Pass instances list with status filters and search"
-      },
-      "distribution": {
-        "label": "Distribution",
-        "description": "The QR code to print in several sizes, a link to share, and the option to hand a card out yourself.",
-        "alt": "Distribution page with QR code, shareable link, and print sizes"
-      },
-      "team": {
-        "label": "Team",
-        "description": "Invite your team. Staff stamp and redeem; billing and settings stay yours.",
-        "alt": "Team settings showing members with roles and invite button"
-      }
-    }
-  },
-  "howItWorks": {
-    "title": "How it works at your counter",
-    "subtitle": "Set it up in a few minutes. After that, it's just stamping.",
-    "steps": {
-      "design": {
-        "title": "Design the card",
-        "description": "Pick a stamp card or a coupon, add your logo and colors, and choose the reward.",
-        "alt": "Card design studio with a live wallet preview"
-      },
-      "issue": {
-        "title": "Put the QR code out",
-        "description": "Print the QR code for the counter, share the link, or write it to an NFC sticker. The customer scans and the card saves to their wallet.",
-        "alt": "Distribution page with QR code and manual issue"
-      },
-      "scan": {
-        "title": "Stamp from your phone",
-        "description": "Scan the customer's card with the app to add a stamp or redeem a coupon. Their wallet updates on the spot.",
-        "alt": "Scanning a wallet pass to record an interaction"
-      }
-    }
-  },
-  "walletPreview": {
-    "badge1": "Works with Apple Wallet and Google Wallet",
-    "badge2": "Updates itself on every visit",
-    "badge3": "Added with one scan, nothing to download",
-    "title": "In their Wallet, not lost in their wallet",
-    "description": "No app to download, no account to create. The card sits next to their boarding passes and counts the stamps by itself on every visit.",
-    "seePricing": "See pricing"
-  },
-  "testimonials": {
-    "sectionLabel": "Testimonials",
-    "title": "Loved by business owners",
-    "subtitle": "See how businesses are growing repeat customers with Loyalshy",
-    "avatarAlt": "Avatar for {name}",
-    "items": {
-      "maria": {
-        "name": "Maria Santos",
-        "role": "Owner, Trattoria Bella",
-        "stat": "3x",
-        "statLabel": "more repeat visits",
-        "quote": "We replaced our old paper punch cards and saw 3x more repeat visits in the first month. The wallet passes are beautiful and customers actually keep them."
-      },
-      "james": {
-        "name": "James Chen",
-        "role": "Manager, Sushi Express",
-        "stat": "5 min",
-        "statLabel": "setup time",
-        "quote": "Setup took literally 5 minutes. Our staff loves how easy it is to register visits, and customers love the digital cards. No more lost punch cards."
-      },
-      "sophie": {
-        "name": "Sophie Dubois",
-        "role": "Owner, Cafe Lumiere",
-        "stat": "40%",
-        "statLabel": "revenue increase",
-        "quote": "The analytics alone are worth it. I finally know which customers are my regulars and can reward them properly. Revenue from repeat customers is up 40%."
-      },
-      "luca": {
-        "name": "Luca Moretti",
-        "role": "Owner, Pizzeria Napoli",
-        "stat": "850+",
-        "statLabel": "loyalty members",
-        "quote": "We went from zero to 850 loyalty members in three months. The QR code at the counter does all the work — customers sign up themselves."
-      },
-      "aisha": {
-        "name": "Aisha Patel",
-        "role": "Manager, Spice Garden",
-        "stat": "92%",
-        "statLabel": "redemption rate",
-        "quote": "Our redemption rate went from 15% with paper cards to 92% with Loyalshy. Digital passes actually get used because they're always in the customer's phone."
-      },
-      "thomas": {
-        "name": "Thomas Bergstrom",
-        "role": "Owner, Nordic Kitchen",
-        "stat": "2 hrs",
-        "statLabel": "saved per week",
-        "quote": "We used to spend hours managing punch cards and tracking rewards manually. Loyalshy automated everything. My staff can focus on what matters — great food."
-      }
+    "title": "Complete monitoring.",
+    "lead": "Manage your programs and follow your customers' day-to-day from the dashboard.",
+    "mock": {
+      "overview": "Overview",
+      "newAction": "New interaction",
+      "contacts": "Customers",
+      "activePasses": "Active passes",
+      "activityMonth": "Activity this month",
+      "redeemedMonth": "Redeemed this month",
+      "stamps": "stamps",
+      "coupons": "coupons",
+      "activity": "Activity",
+      "chartTicks": [
+        "Sep 1",
+        "Sep 8",
+        "Sep 15",
+        "Sep 22",
+        "Sep 30"
+      ],
+      "busiestDays": "Busiest days",
+      "days": [
+        "M",
+        "T",
+        "W",
+        "T",
+        "F",
+        "S",
+        "S"
+      ],
+      "recent": "Recent activity",
+      "recentStamp": "Stamp added · Stamp card",
+      "recentRedeem": "Coupon redeemed · 2-for-1 coffees",
+      "recentJoin": "New customer · from the QR",
+      "ago2": "2 min ago",
+      "ago14": "14 min ago",
+      "ago1h": "1 h ago",
+      "topCustomers": "Top customers",
+      "programs": "Programs",
+      "couponProgram": "2-for-1 coupon",
+      "enrolled": "enrolled",
+      "active": "Active"
     }
   },
   "pricing": {
@@ -218,70 +209,58 @@
         "winback": "Win-back messages to inactive customers"
       }
     },
-    "enterprise": {
-      "name": "Enterprise",
-      "description": "For chains with their own needs",
-      "features": "Custom limits, dedicated support and contract terms."
-    }
+    "billingPeriod": "Billing period",
+    "billedYearly": "Billed yearly",
+    "perYear": "a year",
+    "multiLocation": "Several locations or a chain? A plan to fit, with every location in one dashboard.",
+    "multiLocationCta": "Book a demo"
   },
   "faq": {
     "title": "Frequently asked questions",
-    "subtitle": "What people usually ask us before they start",
     "stillHaveQuestions": "Anything else?",
     "emailUs": "Email us",
     "replyTime": "and we'll answer by email.",
     "items": {
       "howWorks": {
         "question": "How does Loyalshy work?",
-        "answer": "You design your stamp card or coupon in the dashboard and print the QR code. Your customers scan it and the card saves to their Apple or Google Wallet. When they come back, your team scans the card with the Loyalshy app and adds the stamp. When the card is full, the reward shows up by itself."
+        "answer": "Loyalshy is a digital loyalty card for cafés, salons and small shops. You design your stamp card or coupon in the dashboard and print the QR code. Your customers scan it and the card saves to their Apple or Google Wallet. When they come back, your team scans the card with the Loyalshy app and adds the stamp. When the card is full, the reward shows up by itself."
+      },
+      "paper": {
+        "question": "How is it different from the paper card?",
+        "answer": "Your team still gives the stamp, scanning instead of stamping. The difference is on the customer's side: the card can't be lost, forgotten at home or faked. And the count updates on their phone on the spot."
       },
       "devices": {
         "question": "What do my customers need?",
         "answer": "An iPhone with Apple Wallet or an Android phone with Google Wallet. They don't download anything or create an account. On iPhone, the card also shows up on Apple Watch."
       },
-      "setup": {
-        "question": "How long does it take to start?",
-        "answer": "Creating the account, designing the card and printing the QR code takes a few minutes. To stamp, your team installs the app on their phone and connects it by scanning a QR code from the dashboard."
-      },
-      "passTypes": {
-        "question": "What kinds of card can I create?",
-        "answer": "Two: stamp cards, which give a reward after a number of visits, and coupons, which can be redeemed once or as many times as you like. Both work in Apple and Google Wallet."
+      "pos": {
+        "question": "Does it work with my POS?",
+        "answer": "It doesn't touch the counter. Loyalshy runs beside your POS: your team scans the card with their phone and that's it. Nothing to integrate or change."
       },
       "freePlan": {
         "question": "Is there a free plan?",
         "answer": "Yes. The Free plan gives you 1 program and up to 50 customers, with no credit card and no end date. When you outgrow it, you change plans."
       },
-      "cancel": {
-        "question": "How do I cancel?",
-        "answer": "From your billing settings, whenever you want. No contract, no fee."
-      },
       "security": {
         "question": "What happens to my customers' data?",
         "answer": "It's yours. We don't sell it or use it for advertising, and you can export your customer list to CSV whenever you want."
       },
-      "customize": {
-        "question": "Can the card carry my brand?",
-        "answer": "Yes. Upload your logo, choose the colors and background image, and decide which fields show. As you change it, you see how it looks in Apple and Google Wallet."
+      "enterprise": {
+        "question": "What if I have several shops?",
+        "answer": "Chains and businesses with their own needs get the Enterprise plan: custom limits, dedicated support and contract terms. Write to hello@loyalshy.com and we'll work it out."
       }
     }
   },
   "tryDemo": {
-    "title": "Try it yourself first",
-    "subtitle": "Scan the code or tap a button to add a demo card to your wallet. It's exactly what your customers will see.",
+    "title": "Try it.",
     "addToAppleWallet": "Add to Apple Wallet",
-    "addToGoogleWallet": "Add to Google Wallet",
-    "cardPreviewAlt": "Demo loyalty card preview",
-    "or": "or open the link",
-    "openJoinPage": "Open the demo card",
-    "tapToFlip": "Tap to flip"
+    "addToGoogleWallet": "Add to Google Wallet"
   },
   "closingCta": {
     "title1": "Print the QR code today.",
     "titleHighlight": "Get your first stamps tomorrow.",
     "subtitle": "Free for up to 50 customers, no credit card.",
-    "viewPricing": "See pricing",
-    "talkToUs": "Talk to us",
-    "floatingCardAlt": "Example loyalty card"
+    "requestDemo": "Book a demo"
   },
   "footer": {
     "product": "Product",
@@ -290,9 +269,10 @@
     "privacyPolicy": "Privacy policy",
     "termsOfService": "Terms of service",
     "cookiePolicy": "Cookie policy",
-    "tagline": "Stamp cards and coupons in Apple and Google Wallet.",
+    "tagline": "Turn occasional customers into regulars.",
     "copyright": "© 2026 Loyalshy, a product by HEX CONCEPTS STUDIO, S.L. All rights reserved.",
     "builtWith": "Made in Spain.",
+    "tryDemo": "Demo card",
     "instagram": "Loyalshy on Instagram",
     "tiktok": "Loyalshy on TikTok"
   },
@@ -2089,36 +2069,6 @@
         "description": "Help with your account, API integration, wallet pass issues, or billing questions."
       }
     }
-  },
-  "staffApp": {
-    "title": "Your team stamps from their own phone",
-    "subtitle": "An app to scan cards, add stamps and redeem coupons at the counter. It connects by scanning a QR code from the dashboard.",
-    "screenshots": {
-      "home": "Staff home with contacts and activity",
-      "scan": "QR code scanner screen",
-      "history": "Interaction history feed",
-      "share": "Share a loyalty program"
-    },
-    "features": {
-      "scan": {
-        "title": "Scan and stamp",
-        "description": "Point at the customer's card and the stamp is added in a second. Made a mistake? Undo it."
-      },
-      "activity": {
-        "title": "Today's activity",
-        "description": "The latest stamps and redemptions across all your programs, in order."
-      },
-      "pairing": {
-        "title": "Connects with a QR code",
-        "description": "Scan a code from the dashboard and the phone is connected, no passwords."
-      },
-      "secure": {
-        "title": "Everyone sees their part",
-        "description": "Staff stamp and redeem. Settings and billing stay in the dashboard."
-      }
-    },
-    "downloadAppStore": "Download on the App Store",
-    "downloadPlayStore": "Get it on Google Play"
   },
   "metadata": {
     "home": {

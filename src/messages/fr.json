@@ -30,139 +30,130 @@
     }
   },
   "nav": {
-    "features": "Fonctionnalités",
     "pricing": "Tarifs",
     "faq": "FAQ",
-    "apiDocs": "Documentation API",
     "home": "Accueil Loyalshy",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
-    "switchLanguage": "Changer de langue"
+    "switchLanguage": "Changer de langue",
+    "cards": "Cartes",
+    "dashboard": "Tableau de bord"
   },
   "hero": {
-    "title1": "Votre carte à tampons,",
-    "title2": "dans le téléphone de",
-    "titleHighlight": "vos clients",
-    "subtitle": "Vos clients scannent un QR code au comptoir et la carte s'enregistre dans leur Apple ou Google Wallet. Vous tamponnez depuis votre téléphone. Gratuit jusqu'à 50 clients.",
+    "subtitle": "Cartes à tampons et coupons que vos clients enregistrent dans Apple Wallet ou Google Wallet. Sans app, sans compte et sans papier.",
     "seeHowItWorks": "Voir comment ça marche",
-    "freeForever": "Gratuit pour toujours",
-    "noCreditCard": "Aucune carte bancaire requise",
-    "screenshotAlt": "Tableau de bord Loyalshy montrant les programmes de fidélité avec de superbes designs de cartes",
-    "browserUrl": "loyalshy.com/dashboard"
+    "title": "Fidélisez vos clients occasionnels.",
+    "tryInWallet": "Essayez-la dans votre Wallet",
+    "note": "Gratuit jusqu'à 50 clients. Sans carte bancaire.",
+    "card": {
+      "business": "Café Sol",
+      "program": "Carte à tampons",
+      "reward": "Café offert",
+      "customer": "Léa M."
+    },
+    "lockDate": "lundi 6 octobre",
+    "scenes": {
+      "near": {
+        "alt": "Une vraie notification Wallet sur un iPhone : le logo du commerce, son nom et le message qu'il a écrit, avec la carte en miniature"
+      },
+      "stamp": {
+        "notification": "Tampon ajouté. 4 sur 5."
+      },
+      "announce": {
+        "alt": "Vraie notification d'un message envoyé depuis le tableau de bord : « Hoy 2x1 » (2 pour 1 aujourd'hui)"
+      },
+      "passAlt": "Vraie carte à tampons d'un client dans Apple Wallet : six tampons sur sept, prochaine récompense une coupe offerte"
+    },
+    "tagline": "La carte de fidélité digitale, dans Apple et Google Wallet.",
+    "film": {
+      "scroll": "Continuez à défiler.",
+      "camera": "Appareil photo",
+      "openLink": "Ouvrir loyalshy.com",
+      "sendTitle": "Envoyer un message",
+      "sendButton": "Envoyer à 128 clients",
+      "ch1": {
+        "title": "Partagez.",
+        "caption": "Programmes de fidélité publics ou privés, partagés par QR, e-mail ou réseaux sociaux."
+      },
+      "ch2": {
+        "title": "Dans le Wallet.",
+        "caption": "Le client garde la carte à tampons ou le coupon sur son téléphone."
+      },
+      "ch3": {
+        "title": "Notifications intelligentes.",
+        "caption": "Notifications de proximité, demandes d'avis Google et rappels quand la dernière visite remonte à un moment."
+      },
+      "ch4": {
+        "title": "Annonces.",
+        "caption": "Faites savoir à vos clients ce qu'il y a de nouveau."
+      },
+      "tryLine": "Ajoutez la carte de démonstration à votre Wallet. C'est exactement ce que verront vos clients.",
+      "sendText": "Hoy 2x1",
+      "qrAlt": "Vrai QR d'un programme Loyalshy, prêt pour le comptoir",
+      "appStore": "Télécharger dans l'App Store",
+      "playStore": "Disponible sur Google Play",
+      "appAlt": "L'app de l'équipe : recherche client, nouveau client, récompenses, partager un programme, message et dernière activité",
+      "stampAlt": "Carte à tampons d'une pizzeria dans Apple Wallet, 2 tampons sur 7",
+      "couponAlt": "Coupon de 10 % d'un restaurant de burgers dans Apple Wallet",
+      "walletTitle": "Wallet",
+      "chapters": "Chapitres",
+      "ch5": {
+        "title": "App de gestion.",
+        "caption": "Propriétaire et employés peuvent tout gérer depuis l'app."
+      },
+      "ch6": {
+        "title": "Carte à tampons.",
+        "caption": "Un tampon par visite. Au nombre fixé, une récompense est obtenue."
+      },
+      "ch7": {
+        "title": "Coupon.",
+        "caption": "Une carte polyvalente, à usage unique ou autant de fois que vous voulez."
+      },
+      "mapLabel": "Établissement"
+    }
   },
   "featureShowcase": {
-    "title": "Qui revient, et quand, en un coup d'œil",
-    "browserUrl": "loyalshy.com",
-    "tabs": {
-      "dashboard": {
-        "label": "Tableau de bord",
-        "description": "Les visites, les tampons et les récompenses de chaque jour, et les clients qui reviennent le plus.",
-        "alt": "Tableau de bord de programme avec cartes statistiques et détails du modèle"
-      },
-      "cardDesigner": {
-        "label": "Éditeur de cartes",
-        "description": "Votre logo, vos couleurs, votre récompense. Vous voyez la carte telle qu'elle sera dans le Wallet pendant que vous la créez.",
-        "alt": "Studio de design de cartes avec barre d'outils flottante et aperçu du pass en direct"
-      },
-      "programs": {
-        "label": "Programmes",
-        "description": "Cartes à tampons et coupons, chacun avec son design et ses règles.",
-        "alt": "Grille de programmes montrant différents types et designs de cartes de fidélité"
-      },
-      "passes": {
-        "label": "Passes",
-        "description": "Chaque carte distribuée, avec son statut. Retrouvez un client par nom, e-mail ou téléphone.",
-        "alt": "Liste des instances de pass avec filtres de statut et recherche"
-      },
-      "distribution": {
-        "label": "Distribution",
-        "description": "Le QR code à imprimer en plusieurs formats, un lien à partager et la possibilité de remettre une carte vous-même.",
-        "alt": "Page de distribution avec QR code, lien partageable et tailles d'impression"
-      },
-      "team": {
-        "label": "Équipe",
-        "description": "Invitez votre équipe. Les employés tamponnent et valident les coupons ; la facturation et les réglages restent à vous.",
-        "alt": "Paramètres d'équipe montrant les membres avec leurs rôles et le bouton d'invitation"
-      }
-    }
-  },
-  "howItWorks": {
-    "title": "Comment ça marche au comptoir",
-    "subtitle": "Quelques minutes pour tout préparer. Ensuite, il n'y a plus qu'à tamponner.",
-    "steps": {
-      "design": {
-        "title": "Créez la carte",
-        "description": "Choisissez une carte à tampons ou un coupon, ajoutez votre logo et vos couleurs, et fixez la récompense.",
-        "alt": "Éditeur de cartes avec aperçu du Wallet en direct"
-      },
-      "issue": {
-        "title": "Affichez le QR code",
-        "description": "Imprimez le QR code pour le comptoir, partagez le lien ou enregistrez-le sur un autocollant NFC. Le client scanne et la carte s'enregistre dans son Wallet.",
-        "alt": "Page de distribution avec QR code et émission manuelle"
-      },
-      "scan": {
-        "title": "Tamponnez avec votre téléphone",
-        "description": "Scannez la carte du client avec l'app pour ajouter un tampon ou valider un coupon. Son Wallet se met à jour sur le moment.",
-        "alt": "Scan d'un pass digital pour enregistrer une interaction"
-      }
-    }
-  },
-  "walletPreview": {
-    "badge1": "Compatible Apple Wallet et Google Wallet",
-    "badge2": "Se met à jour toute seule à chaque visite",
-    "badge3": "S'ajoute en un scan, rien à télécharger",
-    "title": "Dans son Wallet, pas au fond de son portefeuille",
-    "description": "Aucune app à télécharger, aucun compte à créer. La carte se range à côté de ses cartes d'embarquement et compte les tampons toute seule à chaque visite.",
-    "seePricing": "Voir les tarifs"
-  },
-  "testimonials": {
-    "sectionLabel": "Témoignages",
-    "title": "Adoré par les chefs d'entreprise",
-    "subtitle": "Découvre comment des entreprises développent leur clientèle fidèle avec Loyalshy",
-    "avatarAlt": "Avatar de {name}",
-    "items": {
-      "maria": {
-        "name": "Maria Santos",
-        "role": "Gérante, Trattoria Bella",
-        "stat": "3x",
-        "statLabel": "plus de visites récurrentes",
-        "quote": "On a remplacé nos vieilles cartes tampons papier et on a vu 3x plus de visites récurrentes le premier mois. Les passes sont magnifiques et les clients les gardent vraiment."
-      },
-      "james": {
-        "name": "James Chen",
-        "role": "Gérant, Sushi Express",
-        "stat": "5 min",
-        "statLabel": "de mise en place",
-        "quote": "La mise en place a littéralement pris 5 minutes. Notre équipe adore la facilité pour enregistrer les visites, et les clients adorent les cartes digitales. Plus de cartes tampons perdues."
-      },
-      "sophie": {
-        "name": "Sophie Dubois",
-        "role": "Gérante, Café Lumière",
-        "stat": "40%",
-        "statLabel": "d'augmentation du CA",
-        "quote": "Les analytiques seules valent le coup. Je sais enfin quels clients sont des habitués et je peux les récompenser comme il faut. Le CA des clients récurrents a augmenté de 40 %."
-      },
-      "luca": {
-        "name": "Luca Moretti",
-        "role": "Gérant, Pizzeria Napoli",
-        "stat": "850+",
-        "statLabel": "membres fidélité",
-        "quote": "On est passé de zéro à 850 membres fidélité en trois mois. Le QR code au comptoir fait tout le travail — les clients s'inscrivent d'eux-mêmes."
-      },
-      "aisha": {
-        "name": "Aisha Patel",
-        "role": "Gérante, Spice Garden",
-        "stat": "92%",
-        "statLabel": "taux d'utilisation",
-        "quote": "Notre taux d'utilisation est passé de 15 % avec les cartes papier à 92 % avec Loyalshy. Les passes digitaux sont vraiment utilisés car ils sont toujours dans le téléphone du client."
-      },
-      "thomas": {
-        "name": "Thomas Bergström",
-        "role": "Gérant, Nordic Kitchen",
-        "stat": "2 h",
-        "statLabel": "gagnées par semaine",
-        "quote": "On passait des heures à gérer les cartes tampons et à suivre les récompenses manuellement. Loyalshy a tout automatisé. Mon équipe peut se concentrer sur l'essentiel — une cuisine de qualité."
-      }
+    "title": "Un suivi complet.",
+    "lead": "Gérez vos programmes et suivez le quotidien de vos clients depuis le tableau de bord.",
+    "mock": {
+      "overview": "Vue d'ensemble",
+      "newAction": "Nouvelle interaction",
+      "contacts": "Clients",
+      "activePasses": "Cartes actives",
+      "activityMonth": "Activité ce mois",
+      "redeemedMonth": "Validés ce mois",
+      "stamps": "tampons",
+      "coupons": "coupons",
+      "activity": "Activité",
+      "chartTicks": [
+        "1 sept.",
+        "8 sept.",
+        "15 sept.",
+        "22 sept.",
+        "30 sept."
+      ],
+      "busiestDays": "Jours les plus actifs",
+      "days": [
+        "L",
+        "M",
+        "M",
+        "J",
+        "V",
+        "S",
+        "D"
+      ],
+      "recent": "Activité récente",
+      "recentStamp": "Tampon ajouté · Carte à tampons",
+      "recentRedeem": "Coupon validé · 2 cafés pour 1",
+      "recentJoin": "Nouvelle cliente · via le QR",
+      "ago2": "il y a 2 min",
+      "ago14": "il y a 14 min",
+      "ago1h": "il y a 1 h",
+      "topCustomers": "Meilleurs clients",
+      "programs": "Programmes",
+      "couponProgram": "Coupon 2 pour 1",
+      "enrolled": "inscrits",
+      "active": "Actif"
     }
   },
   "pricing": {
@@ -218,70 +209,58 @@
         "winback": "Messages pour faire revenir les clients inactifs"
       }
     },
-    "enterprise": {
-      "name": "Entreprise",
-      "description": "Pour les enseignes aux besoins spécifiques",
-      "features": "Limites sur mesure, support dédié et conditions contractuelles."
-    }
+    "billingPeriod": "Période de facturation",
+    "billedYearly": "Facturé à l'année",
+    "perYear": "par an",
+    "multiLocation": "Plusieurs établissements ou une chaîne ? Un plan sur mesure, tous vos établissements dans un seul tableau de bord.",
+    "multiLocationCta": "Demander une démo"
   },
   "faq": {
     "title": "Questions fréquemment posées",
-    "subtitle": "Ce qu'on nous demande le plus souvent avant de commencer",
     "stillHaveQuestions": "Une autre question ?",
     "emailUs": "Écris-nous",
     "replyTime": "et nous vous répondons par e-mail.",
     "items": {
       "howWorks": {
         "question": "Comment fonctionne Loyalshy ?",
-        "answer": "Vous créez votre carte à tampons ou votre coupon dans le tableau de bord et vous imprimez le QR code. Vos clients le scannent et la carte s'enregistre dans leur Apple ou Google Wallet. Quand ils reviennent, votre équipe scanne la carte avec l'app Loyalshy et ajoute le tampon. Quand la carte est pleine, la récompense apparaît toute seule."
+        "answer": "Loyalshy est une carte de fidélité digitale pour les cafés, salons et petits commerces. Vous créez votre carte à tampons ou votre coupon dans le tableau de bord et vous imprimez le QR code. Vos clients le scannent et la carte s'enregistre dans leur Apple ou Google Wallet. Quand ils reviennent, votre équipe scanne la carte avec l'app Loyalshy et ajoute le tampon. Quand la carte est pleine, la récompense apparaît toute seule."
+      },
+      "paper": {
+        "question": "Qu'est-ce qui change par rapport à la carte papier ?",
+        "answer": "Votre équipe donne toujours le tampon, en scannant au lieu de tamponner. La différence est côté client : la carte ne se perd pas, ne reste pas à la maison et ne se falsifie pas. Et le compte se met à jour sur son téléphone à l'instant."
       },
       "devices": {
         "question": "De quoi mes clients ont-ils besoin ?",
         "answer": "D'un iPhone avec Apple Wallet ou d'un téléphone Android avec Google Wallet. Ils ne téléchargent rien et ne créent pas de compte. Sur iPhone, la carte apparaît aussi sur l'Apple Watch."
       },
-      "setup": {
-        "question": "Combien de temps faut-il pour démarrer ?",
-        "answer": "Créer le compte, concevoir la carte et imprimer le QR code prend quelques minutes. Pour tamponner, votre équipe installe l'app sur son téléphone et la connecte en scannant un QR code du tableau de bord."
-      },
-      "passTypes": {
-        "question": "Quels types de cartes puis-je créer ?",
-        "answer": "Deux : des cartes à tampons, qui donnent une récompense après un nombre de visites, et des coupons, utilisables une fois ou autant de fois que vous voulez. Les deux fonctionnent dans Apple et Google Wallet."
+      "pos": {
+        "question": "Ça marche avec ma caisse ?",
+        "answer": "Ça ne touche pas au comptoir. Loyalshy fonctionne à côté de votre caisse : votre équipe scanne la carte avec son téléphone, c'est tout. Rien à intégrer ni à changer."
       },
       "freePlan": {
         "question": "Y a-t-il un plan gratuit ?",
         "answer": "Oui. Le forfait Gratuit vous donne 1 programme et jusqu'à 50 clients, sans carte bancaire et sans date de fin. Quand il devient trop petit, vous changez de forfait."
       },
-      "cancel": {
-        "question": "Comment résilier ?",
-        "answer": "Depuis les réglages de facturation, quand vous voulez. Sans engagement ni frais."
-      },
       "security": {
         "question": "Que deviennent les données de mes clients ?",
         "answer": "Elles vous appartiennent. Nous ne les vendons pas et ne les utilisons pas pour de la publicité, et vous pouvez exporter votre liste de clients en CSV quand vous voulez."
       },
-      "customize": {
-        "question": "La carte peut-elle porter ma marque ?",
-        "answer": "Oui. Ajoutez votre logo, choisissez les couleurs et l'image de fond, et décidez quels champs s'affichent. Pendant que vous modifiez, vous voyez le rendu dans Apple et Google Wallet."
+      "enterprise": {
+        "question": "Et si j'ai plusieurs boutiques ?",
+        "answer": "Pour les chaînes et les commerces aux besoins particuliers, il y a le plan Enterprise : limites sur mesure, support dédié et conditions par contrat. Écrivez-nous à hello@loyalshy.com."
       }
     }
   },
   "tryDemo": {
-    "title": "Essayez-la d'abord",
-    "subtitle": "Scannez le code ou appuyez sur un bouton pour ajouter une carte de démonstration à votre Wallet. C'est exactement ce que verront vos clients.",
+    "title": "Essayez-la.",
     "addToAppleWallet": "Ajouter à Apple Wallet",
-    "addToGoogleWallet": "Ajouter à Google Wallet",
-    "cardPreviewAlt": "Aperçu de la carte de démo",
-    "or": "ou visite le lien ci-dessous",
-    "openJoinPage": "Ouvrir la carte de démonstration",
-    "tapToFlip": "Touchez pour retourner"
+    "addToGoogleWallet": "Ajouter à Google Wallet"
   },
   "closingCta": {
     "title1": "Imprimez le QR code aujourd'hui.",
     "titleHighlight": "Vos premiers tampons demain.",
     "subtitle": "Gratuit jusqu'à 50 clients, sans carte bancaire.",
-    "viewPricing": "Voir les tarifs",
-    "talkToUs": "Nous contacter",
-    "floatingCardAlt": "Exemple de carte de fidélité"
+    "requestDemo": "Demander une démo"
   },
   "footer": {
     "product": "Produit",
@@ -290,9 +269,10 @@
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation",
     "cookiePolicy": "Politique de cookies",
-    "tagline": "Cartes à tampons et coupons dans Apple et Google Wallet.",
+    "tagline": "Fidélisez vos clients occasionnels.",
     "copyright": "© 2026 Loyalshy, un produit de HEX CONCEPTS STUDIO, S.L. Tous droits réservés.",
     "builtWith": "Fait en Espagne.",
+    "tryDemo": "Carte de démonstration",
     "instagram": "Loyalshy sur Instagram",
     "tiktok": "Loyalshy sur TikTok"
   },
@@ -2089,36 +2069,6 @@
         "description": "Aide avec votre compte, intégration API, problèmes de pass ou questions de facturation."
       }
     }
-  },
-  "staffApp": {
-    "title": "Votre équipe tamponne avec son propre téléphone",
-    "subtitle": "Une app pour scanner les cartes, ajouter des tampons et valider des coupons au comptoir. Elle se connecte en scannant un QR code du tableau de bord.",
-    "screenshots": {
-      "home": "Accueil avec contacts et activité récente",
-      "scan": "Écran de scan QR",
-      "history": "Historique des interactions",
-      "share": "Partager un programme de fidélité"
-    },
-    "features": {
-      "scan": {
-        "title": "Scanner et tamponner",
-        "description": "Visez la carte du client et le tampon est ajouté en une seconde. Une erreur ? Vous l'annulez."
-      },
-      "activity": {
-        "title": "L'activité du jour",
-        "description": "Les derniers tampons et récompenses de tous vos programmes, dans l'ordre."
-      },
-      "pairing": {
-        "title": "Connexion par QR code",
-        "description": "Scannez un code depuis le tableau de bord et le téléphone est connecté, sans mot de passe."
-      },
-      "secure": {
-        "title": "Chacun voit sa partie",
-        "description": "Les employés tamponnent et valident. Les réglages et la facturation restent dans le tableau de bord."
-      }
-    },
-    "downloadAppStore": "Télécharger sur l'App Store",
-    "downloadPlayStore": "Disponible sur Google Play"
   },
   "metadata": {
     "home": {

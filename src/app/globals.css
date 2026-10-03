@@ -118,7 +118,7 @@
 
 [data-brand="loyalshy"] {
   /* Standard shadcn tokens (so any shadcn component inside inherits) */
-  --background: oklch(0.985 0.011 81);        /* Cream #FFF8F1 */
+  --background: oklch(1 0 0);                 /* Paper — white */
   --foreground: oklch(0.187 0.021 38);        /* Ink #1F1410 */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.187 0.021 38);
@@ -126,32 +126,31 @@
   --popover-foreground: oklch(0.187 0.021 38);
   --primary: oklch(0.704 0.193 32);           /* Coral #FF6B47 */
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.96 0.011 81);
+  --secondary: oklch(0.965 0.003 60);
   --secondary-foreground: oklch(0.187 0.021 38);
-  --muted: oklch(0.96 0.011 81);
+  --muted: oklch(0.965 0.003 60);
   --muted-foreground: oklch(0.45 0.015 38);
-  --accent: oklch(0.96 0.011 81);
+  --accent: oklch(0.965 0.003 60);
   --accent-foreground: oklch(0.187 0.021 38);
-  --border: oklch(0.92 0.012 81);
-  --input: oklch(0.92 0.012 81);
+  --border: oklch(0.91 0.005 60);
+  --input: oklch(0.91 0.005 60);
   --ring: oklch(0.704 0.193 32);              /* Coral focus ring */
   --brand: oklch(0.704 0.193 32);             /* Coral as brand */
   --brand-foreground: oklch(1 0 0);
 
   /* Marketing tokens */
-  --mk-bg: oklch(0.985 0.011 81);
-  --mk-surface: oklch(0.96 0.011 81);
+  --mk-bg: oklch(1 0 0);                       /* Paper */
+  --mk-surface: oklch(0.965 0.003 60);        /* Ash — phone screens, quiet panels */
   --mk-card: oklch(1 0 0);
-  --mk-border: oklch(0.92 0.012 81);
-  --mk-border-hover: oklch(0.85 0.015 81);
+  --mk-border: oklch(0.91 0.005 60);          /* Line */
+  --mk-border-hover: oklch(0.82 0.008 60);
   --mk-text: oklch(0.187 0.021 38);
-  --mk-text-muted: oklch(0.45 0.015 38);
-  --mk-text-dimmed: oklch(0.55 0.014 50);
-  --mk-brand-purple: oklch(0.704 0.193 32);   /* Coral hero */
-  --mk-brand-green: oklch(0.62 0.215 28);     /* Deeper coral — gradient endpoint for hero highlight */
+  --mk-text-muted: oklch(0.56 0.010 40);
+  --mk-text-dimmed: oklch(0.62 0.008 50);
+  --mk-accent: oklch(0.704 0.193 32);         /* Coral — the one accent */
   --mk-footer-bg: oklch(0.187 0.021 38);
   --mk-glass-bg: oklch(1 0 0 / 0.7);
-  --mk-glass-border: oklch(0.92 0.012 81 / 0.6);
+  --mk-glass-border: oklch(0.91 0.005 60 / 0.6);
 }
 
 /* Cabinet Grotesk is a display face: page titles and hero/section
@@ -197,8 +196,7 @@
   --mk-text: oklch(0.95 0 0);
   --mk-text-muted: oklch(0.65 0.01 285);
   --mk-text-dimmed: oklch(0.55 0.008 285);
-  --mk-brand-purple: oklch(0.74 0.19 32);     /* Coral accent stays in dark mode */
-  --mk-brand-green: oklch(0.66 0.22 28);      /* Deeper coral for gradient endpoint */
+  --mk-accent: oklch(0.74 0.19 32);           /* Coral accent stays in dark mode */
   --mk-footer-bg: oklch(0.1 0.004 285);
   --mk-glass-bg: oklch(1 0 0 / 0.06);
   --mk-glass-border: oklch(1 0 0 / 0.10);
@@ -353,73 +351,6 @@
    ═══════════════════════════════════════════════════════════ */
 
 @layer marketing {
-  /* — Custom Properties (Light) — */
-  :root {
-    --mk-bg: oklch(0.995 0 0);
-    --mk-surface: oklch(0.975 0.002 285);
-    --mk-card: oklch(1 0 0);
-    --mk-border: oklch(0.92 0.005 285);
-    --mk-border-hover: oklch(0.85 0.008 285);
-    --mk-text: oklch(0.13 0.005 285);
-    --mk-text-muted: oklch(0.45 0.01 285);
-    --mk-text-dimmed: oklch(0.50 0.008 285);
-    --mk-brand-purple: oklch(0.55 0.2 265);
-    --mk-brand-green: oklch(0.55 0.17 155);
-    --mk-footer-bg: oklch(0.13 0.005 285);
-    --mk-glass-bg: oklch(1 0 0 / 0.6);
-    --mk-glass-border: oklch(1 0 0 / 0.15);
-  }
-
-  /* — Custom Properties (Dark) — */
-  .dark {
-    --mk-bg: oklch(0.12 0.005 285);
-    --mk-surface: oklch(0.15 0.006 285);
-    --mk-card: oklch(0.18 0.007 285);
-    --mk-border: oklch(0.25 0.008 285);
-    --mk-border-hover: oklch(0.35 0.01 285);
-    --mk-text: oklch(0.95 0 0);
-    --mk-text-muted: oklch(0.65 0.01 285);
-    --mk-text-dimmed: oklch(0.55 0.008 285);
-    --mk-brand-purple: oklch(0.6 0.22 265);
-    --mk-brand-green: oklch(0.6 0.18 155);
-    --mk-footer-bg: oklch(0.1 0.004 285);
-    --mk-glass-bg: oklch(1 0 0 / 0.06);
-    --mk-glass-border: oklch(1 0 0 / 0.10);
-  }
-
-  /* — Gradient Text — */
-  .mk-gradient-text {
-    background: linear-gradient(135deg, var(--mk-brand-purple), var(--mk-brand-green));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* — Card — */
-  .mk-card-glass {
-    background: var(--mk-glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--mk-glass-border);
-    border-radius: 1rem;
-    box-shadow: 0 20px 40px -10px color-mix(in oklch, var(--mk-brand-purple) 6%, transparent);
-    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
-  }
-  .mk-card-glass:hover {
-    border-color: var(--mk-border-hover);
-    box-shadow: 0 20px 40px -10px color-mix(in oklch, var(--mk-brand-purple) 10%, transparent);
-  }
-
-  /* — Mesh background utility — */
-  .mk-mesh-bg {
-    background-image: radial-gradient(at 0% 0%, color-mix(in oklch, var(--mk-brand-purple) 5%, transparent) 0px, transparent 50%),
-                       radial-gradient(at 100% 100%, color-mix(in oklch, var(--mk-brand-green) 5%, transparent) 0px, transparent 50%);
-  }
-
-  /* — Fluid heading sizes — */
-  .mk-clamp-h1 { font-size: clamp(2.5rem, 6vw, 4rem); }
-  .mk-clamp-h2 { font-size: clamp(2rem, 5vw, 3rem); }
-
   /* — Primary Button (coral, brand-driven; adapts to light/dark via tokens) — */
   .mk-btn-primary {
     display: inline-flex;
@@ -429,7 +360,7 @@
     font-size: 0.875rem;
     font-weight: 600;
     color: oklch(0.99 0 0);
-    background: var(--mk-brand-purple);
+    background: var(--mk-accent);
     border: none;
     border-radius: 9999px;
     cursor: pointer;
@@ -437,13 +368,13 @@
     transition: background-color 150ms ease-out;
   }
   .mk-btn-primary:hover {
-    background: color-mix(in oklch, var(--mk-brand-purple) 90%, black);
+    background: color-mix(in oklch, var(--mk-accent) 90%, black);
   }
   .mk-btn-primary:active {
-    background: color-mix(in oklch, var(--mk-brand-purple) 84%, black);
+    background: color-mix(in oklch, var(--mk-accent) 84%, black);
   }
   .mk-btn-primary:focus-visible {
-    outline: 2px solid var(--mk-brand-purple);
+    outline: 2px solid var(--mk-accent);
     outline-offset: 2px;
   }
   .mk-btn-primary svg {
@@ -488,72 +419,306 @@
   }
   .mk-input:focus,
   .mk-input:focus-within {
-    border-color: color-mix(in oklch, var(--mk-brand-purple) 60%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--mk-brand-purple) 12%, transparent);
+    border-color: color-mix(in oklch, var(--mk-accent) 60%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--mk-accent) 12%, transparent);
     outline: none;
   }
   .mk-input::placeholder {
     color: var(--mk-text-dimmed);
   }
-
-  /* — Carousel — */
-  .mk-carousel-track {
-    display: flex;
-    gap: 1.5rem;
-    animation: mk-carousel-scroll 40s linear infinite;
-    will-change: transform;
-  }
-  .mk-carousel-track:hover {
-    animation-play-state: paused;
-  }
-  .mk-carousel-track[data-paused="true"] {
-    animation-play-state: paused;
-  }
-}
-
-/* — Hero CSS animations (no JS needed) — */
-.hero-fade-in {
-  animation: mk-fade-up 0.6s ease-out both;
-}
-
-/* — Marketing Keyframes — */
-
-@keyframes mk-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes mk-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes mk-carousel-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
 }
 
 /* — Reduced Motion — */
 @media (prefers-reduced-motion: reduce) {
   .mk-btn-primary,
-  .mk-btn-ghost,
-  .mk-card-glass {
+  .mk-btn-ghost {
     transition: none !important;
   }
   .mk-btn-primary:hover svg {
     transform: none;
   }
-  .mk-carousel-track {
-    animation: none !important;
-  }
-  .hero-fade-in {
-    animation: none !important;
-    opacity: 1 !important;
-  }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Landing 2026-09-29 — paper + one coral. Left axis, rules
+   instead of bands, one auto-play motion (the hero stamps).
+   ═══════════════════════════════════════════════════════════ */
+
+/* Type — Apple's rhythm with the brand's faces: semibold display, tight
+   tracking, 17px body at 1.47, one gray for everything secondary. */
+.mk-display-1 {
+  font-size: clamp(2.75rem, 5vw + 1rem, 5rem);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+.mk-display-2 {
+  font-size: clamp(2rem, 2.4vw + 1rem, 3rem);
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.mk-lead {
+  font-size: clamp(1.125rem, 0.6vw + 0.9rem, 1.3125rem);
+  line-height: 1.38;
+  font-weight: 400;
+  letter-spacing: -0.008em;
+  color: var(--mk-text-muted);
+  text-wrap: pretty;
+}
+.mk-body {
+  font-size: 1.0625rem;
+  line-height: 1.47;
+  letter-spacing: -0.012em;
+}
+.mk-body-sm {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  letter-spacing: -0.008em;
+}
+.mk-caption {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  letter-spacing: -0.006em;
+}
+.mk-wrap {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+@media (min-width: 1024px) {
+  .mk-wrap { padding-inline: 2.5rem; }
+}
+
+/* ─── The hero film's stage ────────────────────────────────────────── */
+/* `--pw` is the phone's width at zoom 1. On phones it also bows to the
+   viewport height so the phone (2.07 × its width tall) plus ~16rem of
+   caption fit in the pinned stage (chapter 2 is the tallest caption:
+   title, lead and the Wallet buttons); the captions start under it with room
+   for the push-in. Desktop: 300px, captions on the left axis. */
+.mk-film {
+  --pw: min(230px, calc((100svh - var(--mk-bar-h, 44px) - 16rem) / 2.07));
+  /* How far the phone sits above its centred stage position at the open,
+     so its top edge lands 12px inside the stage whatever the viewport
+     height (the phone is 2.07 × its width tall). Phones anchor the phone
+     at the top already. */
+  --lift: 0px;
+}
+/* Absolutely positioned, so the wrap's gutters don't apply: they are set
+   here (1.5rem, the page's phone gutter). */
+.mk-film-captions {
+  position: absolute;
+  left: 1.5rem;
+  right: 1.5rem;
+  top: calc(var(--pw) * 2.07 + 4.5rem);
+}
+.mk-film-map { width: calc(var(--pw) * 1.9); }
+/* Short phones (iPhone SE): the "try it" sentence gives way to the buttons. */
+@media (max-width: 1023px) and (max-height: 700px) {
+  .mk-film-tryline { display: none; }
+}
+.mk-film-crowd {
+  width: calc(var(--pw) * 0.84);
+  height: calc(var(--pw) * 0.84 * 1.86);
+}
+@media (min-width: 1024px) {
+  .mk-film {
+    --pw: 300px;
+    --lift: min(0px, calc(12px - ((100svh - var(--mk-bar-h, 48px)) - var(--pw) * 2.07) / 2));
+  }
+  .mk-film-captions {
+    left: 2.5rem;
+    right: auto;
+    top: 50%;
+    width: 41.666%;
+    transform: translateY(-50%);
+  }
+  .mk-film-map { width: calc(var(--pw) * 1.7); }
+}
+
+/* The share tiles around the phone in the film's first chapter. */
+.mk-film-tile { width: calc(var(--pw) * 0.19); height: calc(var(--pw) * 0.19); }
+@media (max-width: 1023px) {
+  .mk-film-tile { width: calc(var(--pw) * 0.2); height: calc(var(--pw) * 0.2); }
+}
+
+/* ─── Global bar and footer, in the Apple manner ───────────────────── */
+.mk-nav-bar {
+  height: 44px;
+  margin-inline: auto;
+  background: color-mix(in oklch, var(--mk-bg) 82%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid color-mix(in oklch, var(--mk-text) 10%, transparent);
+  transition: max-width 320ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-radius 320ms ease, box-shadow 320ms ease, background-color 200ms ease, border-color 200ms ease;
+}
+.mk-nav-inner {
+  height: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+.mk-nav-brand { display: inline-flex; align-items: center; color: var(--mk-text); }
+.mk-nav-brand:hover { opacity: 0.8; }
+.mk-nav-links { display: none; }
+.mk-nav-actions { display: none; }
+.mk-nav-link {
+  position: relative;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+  color: color-mix(in oklch, var(--mk-text) 62%, transparent);
+  padding: 0.5rem 0;
+  transition: color 150ms ease-out;
+}
+.mk-nav-link:hover, .mk-nav-link[data-active="true"], .mk-nav-link-strong { color: var(--mk-text); }
+.mk-nav-link[data-active="true"] { font-weight: 500; }
+/* The active mark: a coral dot under the link, sliding in from nothing. */
+.mk-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--mk-accent);
+  transform: translateX(-50%) scale(0);
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mk-nav-link[data-active="true"]::after { transform: translateX(-50%) scale(1); }
+.mk-nav-link-strong::after { display: none; }
+.mk-nav-icon { width: 28px; height: 28px; color: color-mix(in oklch, var(--mk-text) 62%, transparent); }
+.mk-nav-icon:hover { color: var(--mk-text); }
+.mk-nav-sep { width: 1px; height: 16px; background: color-mix(in oklch, var(--mk-text) 14%, transparent); margin-inline: 0.25rem; }
+.mk-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding-inline: 13px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #fff;
+  background: var(--mk-accent);
+  transition: background-color 150ms ease-out, transform 150ms ease-out;
+}
+.mk-nav-pill:hover { background: color-mix(in oklch, var(--mk-accent) 90%, black); }
+.mk-nav-pill:active { transform: scale(0.97); }
+.mk-nav-burger {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  margin-right: -0.75rem;
+  align-items: center;
+  color: var(--mk-text);
+}
+.mk-nav-burger-line {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 1px;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+.mk-nav-burger-line-a { transform: translateY(3.25px) rotate(45deg); }
+.mk-nav-burger-line-b { transform: translateY(-3.25px) rotate(-45deg); }
+/* The phone menu: a full-screen opaque sheet over the bar, a close button
+   in the bar's slot, then the links as one list in large regular type. It
+   is fixed to the viewport, so it is whole wherever the page was scrolled. */
+.mk-nav-menu {
+  position: fixed;
+  inset: 0;
+  background: var(--mk-bg);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms ease, visibility 0s linear 180ms;
+  overflow-y: auto;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+}
+.mk-nav-menu-open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 180ms ease, visibility 0s;
+}
+.mk-nav-menu-top { height: 44px; display: flex; align-items: center; justify-content: flex-end; margin-right: -0.75rem; }
+.mk-nav-close {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  color: var(--mk-text);
+}
+.mk-nav-close:active { opacity: 0.6; }
+.mk-nav-menu-list { display: flex; flex-direction: column; margin-top: 2.5rem; }
+.mk-nav-menu-link {
+  display: block;
+  padding: 0.75rem 0;
+  font-size: 1.625rem;
+  line-height: 1.25;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--mk-text);
+}
+.mk-nav-menu-link:active { opacity: 0.6; }
+.mk-nav-menu-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 2.5rem;
+  margin-left: -0.5rem;
+}
+@media (min-width: 1024px) {
+  .mk-nav-inner { padding-inline: 2.5rem; }
+}
+:root { --mk-bar-h: 44px; }
+@media (min-width: 900px) {
+  :root { --mk-bar-h: 48px; }
+  .mk-nav-bar { height: 48px; max-width: 100%; }
+  /* Scrolled: the bar lifts into a capsule a little narrower than the page.
+     The header keeps its 48px slot so the pinned stages below don't move. */
+  .mk-nav-bar[data-scrolled="true"] {
+    max-width: 72rem;
+    height: 44px;
+    transform: translateY(8px);
+    border-radius: 9999px;
+    border: 1px solid color-mix(in oklch, var(--mk-text) 9%, transparent);
+    background: color-mix(in oklch, var(--mk-bg) 78%, transparent);
+    box-shadow: 0 12px 32px -12px oklch(0 0 0 / 0.18), 0 1px 0 oklch(1 0 0 / 0.5) inset;
+  }
+  .mk-nav-bar[data-scrolled="true"] .mk-nav-inner { padding-inline: 1.25rem 0.5rem; }
+  .mk-nav-links { display: flex; align-items: center; gap: 2rem; }
+  .mk-nav-actions { display: flex; align-items: center; gap: 0.875rem; }
+  .mk-nav-burger, .mk-nav-menu { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-nav-bar, .mk-nav-link::after { transition: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-nav-menu, .mk-nav-burger-line { transition: none; }
+}
+
+/* ─── Small title ─────────────────────────────────────────────────── */
+.mk-title-4 {
+  font-size: 1.3125rem;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+

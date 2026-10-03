@@ -1,80 +1,47 @@
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
 import { getTranslations } from "next-intl/server"
-import { WalletStack } from "./wallet-stack"
+import { HeroFilm } from "./hero-film"
 
-/* ─── Hero ────────────────────────────────────────────────────────── */
+const DEMO_JOIN_URL = process.env.NEXT_PUBLIC_DEMO_JOIN_URL
+// Loyalshy Staff, live on both stores since 2026-10-01.
+const APP_STORE_URL = process.env.NEXT_PUBLIC_APP_STORE_URL || "https://apps.apple.com/app/id6761551059"
+const PLAY_STORE_URL = process.env.NEXT_PUBLIC_PLAY_STORE_URL || "https://play.google.com/store/apps/details?id=com.loyalshy.staff"
 
+// Apple's opener: the name of the thing in two lines, one tagline, the
+// action, and then the film — the phone fills the fold and the story plays
+// on a pinned stage, driven by scroll. The lead lives in the film's captions.
+// The section keeps a breath under the film so its last frame does not
+// land on the next title.
 export async function Hero() {
   const t = await getTranslations("hero")
   const tCommon = await getTranslations("common")
 
   return (
-    <section
-      className="relative overflow-hidden py-16 md:py-24 lg:py-32 mk-mesh-bg lg:flex lg:flex-col lg:justify-center lg:min-h-[calc(100svh-5rem)]"
-      style={{ background: "var(--mk-bg)" }}
-    >
-      <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-8">
-        {/* Asymmetric 7/5 grid layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left: Text content */}
-          <div className="lg:col-span-7 flex flex-col items-start gap-6 sm:gap-8">
-            {/* Headline */}
-            <div className="hero-fade-in" style={{ animationDelay: "100ms" }}>
-              <h1
-                className="font-display mk-clamp-h1 font-extrabold leading-none"
-                style={{ color: "var(--mk-text)" }}
-              >
-                {t("title1")}{" "}
-                <br className="hidden sm:block" />
-                {t("title2")}{" "}
-                <span className="mk-gradient-text">{t("titleHighlight")}</span>
-              </h1>
-            </div>
-
-            {/* Subtitle */}
-            <div className="hero-fade-in" style={{ animationDelay: "200ms" }}>
-              <p
-                className="max-w-xl text-lg font-medium leading-relaxed"
-                style={{ color: "var(--mk-text-muted)" }}
-              >
-                {t("subtitle")}
-              </p>
-            </div>
-
-            {/* CTAs */}
-            <div className="hero-fade-in w-full" style={{ animationDelay: "300ms" }}>
-              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
-                <Link href="/register" className="mk-btn-primary py-4! px-8! text-base! gap-2 w-full sm:w-auto">
-                  {tCommon("getStartedFree")}
-                  <ArrowRight className="size-4" />
-                </Link>
-                <Link href="#how-it-works" className="mk-btn-ghost py-4! px-8! text-base! w-full sm:w-auto">
-                  {t("seeHowItWorks")}
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Wallet stack */}
-          <div
-            className="hero-fade-in lg:col-span-5 flex justify-center"
-            style={{ animationDelay: "200ms" }}
+    <section className="relative pb-0 sm:pb-[10vh] lg:pb-[14vh]" style={{ background: "var(--mk-bg)" }}>
+      <div className="mk-wrap flex flex-col items-center pt-10 pb-4 text-center sm:pt-14 lg:pt-16 lg:pb-6">
+        <h1 className="font-display mk-display-1 max-w-[18ch]" style={{ color: "var(--mk-text)" }}>
+          {t("title")}
+        </h1>
+        <p className="font-display mt-4 text-[1.375rem] font-medium leading-tight tracking-[-0.015em] sm:text-[1.75rem]" style={{ color: "var(--mk-text-muted)" }}>
+          {t("tagline")}
+        </p>
+        <div className="mt-7 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+          <Link href="/register" className="mk-btn-primary px-8! py-4! text-base!">
+            {tCommon("getStartedFree")}
+          </Link>
+          <Link
+            href={DEMO_JOIN_URL ? "#try-demo" : "#features"}
+            className="text-base font-semibold underline-offset-4 hover:underline"
+            style={{ color: "var(--mk-text)" }}
           >
-            <div className="relative">
-              {/* Glow behind wallet stack */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 -z-10 scale-150 rounded-full blur-3xl"
-                style={{
-                  background: "radial-gradient(circle, oklch(0.704 0.193 32 / 0.1) 0%, transparent 70%)",
-                }}
-              />
-              <WalletStack />
-            </div>
-          </div>
+            {DEMO_JOIN_URL ? t("tryInWallet") : t("seeHowItWorks")}
+          </Link>
         </div>
+        <p className="mk-body-sm mt-4 hidden sm:block" style={{ color: "var(--mk-text-dimmed)" }}>
+          {t("note")}
+        </p>
       </div>
+      <HeroFilm demoUrl={DEMO_JOIN_URL} appStoreUrl={APP_STORE_URL} playStoreUrl={PLAY_STORE_URL} />
     </section>
   )
 }

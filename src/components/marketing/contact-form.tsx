@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, CheckCircle2, ArrowRight } from "lucide-react"
+import { Loader2, CheckCircle2 } from "lucide-react"
 import { submitContactForm } from "@/server/contact-form-actions"
 import type { ContactFormInput } from "@/server/contact-form-actions"
 
@@ -88,7 +88,7 @@ export function ContactForm() {
           {t("successTitle")}
         </h2>
         <p
-          className="mt-3 max-w-sm text-[15px] leading-relaxed"
+          className="mt-3 max-w-sm mk-body"
           style={{ color: "var(--mk-text-muted)" }}
         >
           {t("successMessage")}
@@ -219,7 +219,6 @@ export function ContactForm() {
         ) : (
           <>
             {t("submitButton")}
-            <ArrowRight className="size-4" />
           </>
         )}
       </Button>
