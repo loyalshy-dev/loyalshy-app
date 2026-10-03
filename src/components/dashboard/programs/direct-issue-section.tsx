@@ -13,6 +13,7 @@ import {
   SkipForward,
   Users,
 } from "lucide-react"
+import Link from "next/link"
 import { toast } from "sonner"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -68,6 +69,7 @@ export function DirectIssueSection({
   eligibleCount: initialEligibleCount,
 }: DirectIssueSectionProps) {
   const t = useTranslations("dashboard.distribution")
+  const tc = useTranslations("common")
   const [selectedContacts, setSelectedContacts] = useState<DirectIssueContact[]>([])
   const [searchResults, setSearchResults] = useState<DirectIssueContact[]>([])
   const [searchQuery, setSearchQuery] = useState("")
@@ -130,7 +132,7 @@ export function DirectIssueSection({
       )
 
       if (!result.success) {
-        toast.error(result.error ?? "Failed to issue passes")
+        toast.error(result.error ?? t("issueFailed"))
         return
       }
 
@@ -140,14 +142,12 @@ export function DirectIssueSection({
 
       if (result.issuedCount > 0) {
         toast.success(
-          `Issued ${result.issuedCount} pass${result.issuedCount !== 1 ? "es" : ""}${
-            result.skippedCount > 0
-              ? ` (${result.skippedCount} already had a pass)`
-              : ""
-          }`
+          result.skippedCount > 0
+            ? `${t("issuedCount", { count: result.issuedCount })} · ${t("skippedHadPass", { count: result.skippedCount })}`
+            : t("issuedCount", { count: result.issuedCount })
         )
       } else if (result.skippedCount > 0) {
-        toast.info("All selected contacts already have a pass for this program")
+        toast.info(t("allAlreadyHavePass"))
       }
     })
   }
@@ -157,7 +157,7 @@ export function DirectIssueSection({
       const result = await issuePassToAllEligible(templateId)
 
       if (!result.success) {
-        toast.error(result.error ?? "Failed to issue passes")
+        toast.error(result.error ?? t("issueFailed"))
         return
       }
 
@@ -165,11 +165,9 @@ export function DirectIssueSection({
       setEligibleCount((prev) => Math.max(0, prev - result.issuedCount))
 
       if (result.issuedCount > 0) {
-        toast.success(
-          `Issued ${result.issuedCount} pass${result.issuedCount !== 1 ? "es" : ""} to all eligible contacts`
-        )
+        toast.success(t("issuedToAllEligible", { count: result.issuedCount }))
       } else {
-        toast.info("No eligible contacts found")
+        toast.info(t("noEligibleFound"))
       }
     })
   }
@@ -192,11 +190,13 @@ export function DirectIssueSection({
         <div className="flex items-start gap-2 rounded-lg bg-muted/50 p-3">
           <AlertCircle className="size-3.5 text-muted-foreground mt-0.5 shrink-0" />
           <p className="text-[12px] text-muted-foreground">
-            No eligible contacts yet. Add contacts from the{" "}
-            <a href="/dashboard/contacts" className="underline underline-offset-4 hover:text-foreground">
-              Contacts
-            </a>{" "}
-            page, or use <strong>CSV Import</strong> below to add them in bulk.
+            {t.rich("noEligibleYet", {
+              link: (chunks) => (
+                <Link href="/dashboard/contacts" className="underline underline-offset-4 hover:text-foreground">
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         </div>
       )}
@@ -209,7 +209,7 @@ export function DirectIssueSection({
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              aria-label="Search contacts"
+              aria-label={t("searchContacts")}
               className="w-full justify-start h-9 text-[13px] font-normal text-muted-foreground"
             >
               <Search className="mr-2 size-3.5 shrink-0 opacity-50" />
@@ -219,7 +219,7 @@ export function DirectIssueSection({
           <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
             <Command shouldFilter={false}>
               <CommandInput
-                placeholder="Search contacts..."
+                placeholder={t("searchContactsPlaceholder")}
                 value={searchQuery}
                 onValueChange={handleSearch}
                 className="text-[13px]"
@@ -231,7 +231,7 @@ export function DirectIssueSection({
                   </div>
                 ) : searchQuery.trim() && searchResults.length === 0 ? (
                   <CommandEmpty className="text-[13px]">
-                    No contacts found
+                    {t("noContactsFound")}
                   </CommandEmpty>
                 ) : searchResults.length > 0 ? (
                   <CommandGroup>
@@ -248,7 +248,7 @@ export function DirectIssueSection({
                         <div className="flex flex-col gap-0.5">
                           <span className="font-medium">{contact.fullName}</span>
                           <span className="text-[11px] text-muted-foreground">
-                            {contact.email ?? contact.phone ?? "No contact info"}
+                            {contact.email ?? contact.phone ?? t("noContactInfo")}
                           </span>
                         </div>
                         {!contact.email && (
@@ -256,7 +256,7 @@ export function DirectIssueSection({
                             variant="outline"
                             className="ml-auto text-[10px] px-1.5 py-0"
                           >
-                            No email
+                            {t("noEmail")}
                           </Badge>
                         )}
                       </CommandItem>
@@ -285,7 +285,7 @@ export function DirectIssueSection({
                   type="button"
                   onClick={() => handleRemove(contact.id)}
                   className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
-                  aria-label={`Remove ${contact.fullName}`}
+                  aria-label={t("removeContact", { name: contact.fullName })}
                 >
                   <X className="size-3" />
                 </button>
@@ -308,8 +308,7 @@ export function DirectIssueSection({
           ) : (
             <Send className="size-3.5" />
           )}
-          Issue pass to {selectedContacts.length || ""}{" "}
-          contact{selectedContacts.length !== 1 ? "s" : ""}
+          {t("issueToSelected", { count: selectedContacts.length })}
         </Button>
 
         {/* Bulk issue all eligible */}
@@ -327,30 +326,25 @@ export function DirectIssueSection({
                 ) : (
                   <Users className="size-3.5" />
                 )}
-                Issue to all eligible ({eligibleCount > 100 ? "100+" : eligibleCount})
+                {t("issueToAllEligible", { count: eligibleCount > 100 ? "100+" : String(eligibleCount) })}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Issue passes to all eligible contacts?</AlertDialogTitle>
+                <AlertDialogTitle>{t("bulkConfirmTitle")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will create and deliver a pass for <strong>{templateName}</strong> to
                   {eligibleCount > 100
-                    ? " the first 100 eligible contacts (out of " + eligibleCount + " total)."
-                    : ` ${eligibleCount} contact${eligibleCount !== 1 ? "s" : ""}.`
-                  }
-                  {" "}Contacts with an email address will receive a notification.
+                    ? t.rich("bulkConfirmBodyCapped", { template: templateName, total: eligibleCount, strong: (chunks) => <strong>{chunks}</strong> })
+                    : t.rich("bulkConfirmBody", { template: templateName, count: eligibleCount, strong: (chunks) => <strong>{chunks}</strong> })}
                   {eligibleCount > 100 && (
-                    <span className="block mt-2 text-[13px]">
-                      Run this action again to issue passes to the next batch.
-                    </span>
+                    <span className="block mt-2 text-[13px]">{t("bulkConfirmNextBatch")}</span>
                   )}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleBulkIssue}>
-                  Issue passes
+                  {t("bulkConfirmAction")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -362,7 +356,7 @@ export function DirectIssueSection({
       {results && results.length > 0 && (
         <div className="space-y-1.5 border-t border-border pt-3">
           <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider">
-            Results
+            {t("results")}
           </p>
           <ul className="space-y-1 max-h-48 overflow-y-auto">
             {results.map((r, i) => (
@@ -384,10 +378,10 @@ export function DirectIssueSection({
                 )}
                 <span className="truncate">{r.contactName}</span>
                 <span className="text-[11px] text-muted-foreground ml-auto shrink-0">
-                  {r.status === "issued" && "Issued & emailed"}
-                  {r.status === "no_email" && "Issued (no email)"}
-                  {r.status === "already_exists" && "Already has pass"}
-                  {r.status === "error" && (r.error ?? "Failed")}
+                  {r.status === "issued" && t("resultIssuedEmailed")}
+                  {r.status === "no_email" && t("resultIssuedNoEmail")}
+                  {r.status === "already_exists" && t("resultAlreadyHasPass")}
+                  {r.status === "error" && (r.error ?? t("resultFailed"))}
                 </span>
               </li>
             ))}
@@ -398,7 +392,7 @@ export function DirectIssueSection({
             className="text-[12px] h-7 px-2"
             onClick={() => setResults(null)}
           >
-            Dismiss
+            {t("dismissResults")}
           </Button>
         </div>
       )}

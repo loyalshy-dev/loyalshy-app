@@ -1,5 +1,7 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
 import { useState, useRef } from "react"
 import QRCode from "qrcode"
 import {
@@ -59,6 +61,7 @@ export function QrCodeDisplay({
   templates,
   joinUrl,
 }: QrCodeDisplayProps) {
+  const t = useTranslations("dashboard.distribution")
   const activeTemplate = templates[0] ?? null
   const activeTemplateDesign = activeTemplate?.cardDesign ?? null
   const activeTemplateType = activeTemplate?.passType
@@ -283,7 +286,7 @@ export function QrCodeDisplay({
       pdf.setFontSize(18)
       pdf.setTextColor(31, 20, 16)
       pdf.text(
-        "Escanea para unirte a nuestro programa de fidelización",
+        t("posterTagline"),
         pageWidth / 2,
         qrY + qrSizeMm + 22,
         { align: "center", maxWidth: pageWidth - 40 }
@@ -315,7 +318,7 @@ export function QrCodeDisplay({
         <div className="flex size-7 items-center justify-center rounded-md bg-brand/10">
           <QrCode className="size-3.5 text-brand" />
         </div>
-        <h3 className="text-sm font-medium">QR code & print</h3>
+        <h3 className="text-sm font-medium">{t("qrTitle")}</h3>
       </div>
 
       <div className="space-y-5">
@@ -346,7 +349,7 @@ export function QrCodeDisplay({
                     <p className="text-[11px] text-muted-foreground/60">
                       {activeTemplateType === "COUPON" && couponConfig
                         ? formatCouponValue(couponConfig)
-                        : `${activeTemplate.rewardDescription} after ${activeTemplate.visitsRequired} visits`}
+                        : t("rewardAfterVisits", { reward: activeTemplate.rewardDescription, visits: activeTemplate.visitsRequired })}
                     </p>
                   </>
                 )}
@@ -381,7 +384,7 @@ export function QrCodeDisplay({
               className="w-full gap-2"
             >
               <Download className="size-4" />
-              {downloading ? "Generating..." : "Download PNG"}
+              {downloading ? t("generating") : t("downloadPng")}
             </Button>
             <Button
               onClick={downloadQrPdf}
@@ -389,7 +392,7 @@ export function QrCodeDisplay({
               className="w-full gap-2"
             >
               <FileText className="size-4" />
-              {downloading ? "Generating..." : "Download A4 poster (PDF)"}
+              {downloading ? t("generating") : t("downloadPdf")}
             </Button>
           </div>
 
@@ -397,7 +400,7 @@ export function QrCodeDisplay({
           <div className="flex items-start gap-2 rounded-lg bg-muted/50 p-3">
             <Smartphone className="size-3.5 text-muted-foreground mt-0.5 shrink-0" />
             <p className="text-[12px] text-muted-foreground">
-              You can also program NFC tags with this URL. Customers tap the tag to join instantly.
+              {t("qrNfcNote")}
             </p>
           </div>
         </div>
