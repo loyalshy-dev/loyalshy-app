@@ -269,11 +269,12 @@
     "privacyPolicy": "Política de privacidad",
     "termsOfService": "Términos del servicio",
     "cookiePolicy": "Política de cookies",
-    "tagline": "Tarjetas de sellos y cupones en Apple y Google Wallet.",
+    "tagline": "Fideliza a tus clientes ocasionales.",
     "copyright": "© 2026 Loyalshy, un producto de HEX CONCEPTS STUDIO, S.L. Todos los derechos reservados.",
     "builtWith": "Hecho en España.",
     "tryDemo": "Tarjeta de prueba",
-    "follow": "Síguenos"
+    "instagram": "Loyalshy en Instagram",
+    "tiktok": "Loyalshy en TikTok"
   },
   "cookieBanner": {
     "message": "Usamos cookies esenciales para autenticación y preferencias. Sin cookies de rastreo.",

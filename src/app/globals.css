@@ -682,7 +682,7 @@
   margin-left: -0.5rem;
 }
 @media (min-width: 1024px) {
-  .mk-nav-inner, .mk-footer-inner { padding-inline: 2.5rem; }
+  .mk-nav-inner { padding-inline: 2.5rem; }
 }
 :root { --mk-bar-h: 44px; }
 @media (min-width: 900px) {
@@ -709,38 +709,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .mk-nav-menu, .mk-nav-burger-line { transition: none; }
-}
-
-.mk-footer {
-  background: var(--mk-bg);
-  border-top: 1px solid var(--mk-border);
-  color: var(--mk-text-muted);
-  font-size: 12px;
-  line-height: 1.33;
-  letter-spacing: -0.006em;
-}
-.mk-footer-inner { max-width: 76rem; margin-inline: auto; padding-inline: 1.5rem; }
-.mk-footer a { transition: color 150ms ease-out; }
-.mk-footer a:hover { color: var(--mk-text); text-decoration: underline; text-underline-offset: 3px; }
-.mk-footer-note { padding-block: 1.25rem; border-bottom: 1px solid var(--mk-border); }
-.mk-footer-note p + p { margin-top: 0.5rem; }
-.mk-footer-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; padding-block: 1.5rem; }
-.mk-footer-col h2 { font-size: 12px; font-weight: 600; color: var(--mk-text); margin-bottom: 0.75rem; }
-.mk-footer-col ul { display: flex; flex-direction: column; gap: 0.6rem; }
-.mk-footer-col details summary { list-style: none; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--mk-text); padding-block: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
-.mk-footer-col details summary::-webkit-details-marker { display: none; }
-.mk-footer-col details summary::after { content: "+"; font-weight: 400; color: var(--mk-text-muted); }
-.mk-footer-col details[open] summary::after { content: "−"; }
-.mk-footer-col details ul { padding-bottom: 1rem; }
-.mk-footer-legal { border-top: 1px solid var(--mk-border); padding-block: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-@media (max-width: 767px) {
-  .mk-footer-cols { grid-template-columns: 1fr; gap: 0; padding-block: 0; }
-  .mk-footer-col { border-bottom: 1px solid var(--mk-border); }
-  .mk-footer-col > h2, .mk-footer-col > ul { display: none; }
-}
-@media (min-width: 768px) {
-  .mk-footer-col details { display: none; }
-  .mk-footer-legal { flex-direction: row; align-items: center; justify-content: space-between; }
 }
 
 /* ─── Small title ─────────────────────────────────────────────────── */

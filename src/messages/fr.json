@@ -269,11 +269,12 @@
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation",
     "cookiePolicy": "Politique de cookies",
-    "tagline": "Cartes à tampons et coupons dans Apple et Google Wallet.",
+    "tagline": "Fidélisez vos clients occasionnels.",
     "copyright": "© 2026 Loyalshy, un produit de HEX CONCEPTS STUDIO, S.L. Tous droits réservés.",
     "builtWith": "Fait en Espagne.",
     "tryDemo": "Carte de démonstration",
-    "follow": "Suivez-nous"
+    "instagram": "Loyalshy sur Instagram",
+    "tiktok": "Loyalshy sur TikTok"
   },
   "cookieBanner": {
     "message": "Nous utilisons des cookies essentiels pour l'authentification et les préférences. Aucun cookie de suivi.",
