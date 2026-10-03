@@ -67,15 +67,25 @@ export function LockNotification({ opacity, y, children }: { opacity?: MotionVal
 /** The opening loop: a notification drops in from behind the top edge the
  *  way iOS does — a spring that settles with a small bounce, no fade — sits
  *  over the lock screen for three seconds, then is pulled back up quickly,
- *  shrinking a touch and fading only at the very end. Pauses, repeats. */
+ *  shrinking a touch and fading only at the very end. Pauses, repeats.
+ *  On desktop it rests under the island; on phones it drops below the
+ *  clock, where iOS puts it. The rest is read from `--phone-w` when the
+ *  loop starts (client only, so the server markup is the same). */
 export function OpeningNotification({ children }: { children: React.ReactNode }) {
   const [scope, animate] = useAnimate()
   useEffect(() => {
     let live = true
     const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
+    const restY = () => {
+      const el = scope.current as HTMLElement | null
+      if (!el || !window.matchMedia("(max-width: 1023px)").matches) return 40
+      const pw = parseFloat(getComputedStyle(el).getPropertyValue("--phone-w")) || 230
+      // The clock: 0.2·pw of padding, the date line, the 0.22·pw time, a gap.
+      return Math.round(pw * 0.42 + 34)
+    }
     const run = async () => {
       while (live) {
-        await animate(scope.current, { y: 40, scale: 1, opacity: 1 }, { type: "spring", stiffness: 240, damping: 20, mass: 0.9 })
+        await animate(scope.current, { y: restY(), scale: 1, opacity: 1 }, { type: "spring", stiffness: 240, damping: 20, mass: 0.9 })
         if (!live) return
         await sleep(3000)
         if (!live) return
