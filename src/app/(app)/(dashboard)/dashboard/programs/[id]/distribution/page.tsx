@@ -102,15 +102,15 @@ export default async function ProgramDistributionPage(props: {
     notFound()
   }
 
+  // Invite-only programs have no public entry: the QR, the link and NFC
+  // are hidden and passes come from direct issue or the staff app.
+  const isPublic = program.joinMode === "PUBLIC"
+
   // Announcement quota: per-org plan quota + per-program Google delivery cap
   // (mirrors the server action)
   const announcement = parseTemplateAnnouncement(program.announcement)
   const plan = organization.plan as PlanId
   const announcementUpgrade = getAnnouncementUpgrade(plan)
-
-  // Invite-only programs have no public entry: the QR, the link and NFC
-  // are hidden and passes come from direct issue or the staff app.
-  const isPublic = program.joinMode === "PUBLIC"
 
   // Build join URL
   const origin = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? ""
@@ -120,7 +120,7 @@ export default async function ProgramDistributionPage(props: {
   return (
     <div className="space-y-6">
       {totalIssued === 0 ? (
-        <FirstCustomerChecklist />
+        <FirstCustomerChecklist isPublic={isPublic} />
       ) : (
         <DistributionStats
           totalIssued={totalIssued}

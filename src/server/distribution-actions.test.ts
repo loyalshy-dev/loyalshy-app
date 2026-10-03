@@ -37,7 +37,6 @@ describe("setProgramJoinMode", () => {
       data: { joinMode: "INVITE_ONLY" },
     })
     expect(revalidatePath).toHaveBeenCalledWith("/dashboard/programs/tpl-1/distribution")
-    expect(revalidatePath).toHaveBeenCalledWith("/join/cafe-sol")
   })
 
   it("reports programNotFound when the id belongs to another organization", async () => {

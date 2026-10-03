@@ -85,7 +85,6 @@ export async function setProgramJoinMode(
 
   revalidatePath(`/dashboard/programs/${templateId}`)
   revalidatePath(`/dashboard/programs/${templateId}/distribution`)
-  revalidatePath(`/join/${organization.slug}`)
   return { success: true }
 }
 

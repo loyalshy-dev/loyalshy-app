@@ -2013,6 +2013,10 @@
     "welcomeBack": "Bienvenue ! Chargement de votre pass...",
     "somethingWentWrong": "Une erreur est survenue",
     "stampSubtitle": "{reward} après {visits} visites",
+    "inviteOnlyTitle": "Ce programme est sur invitation",
+    "inviteOnlyBody": "{name} remet cette carte directement. Demandez-la au comptoir ou attendez de la recevoir par e-mail.",
+    "inviteOnlySeeOthers": "Voir les autres programmes",
+    "inviteOnlyError": "Ce programme est sur invitation. Demandez la carte au comptoir.",
     "card": {
       "title": "Carte de {name}",
       "rewardEarned": "Vous avez gagné une récompense !",

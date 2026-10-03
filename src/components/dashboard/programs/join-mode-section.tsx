@@ -1,7 +1,7 @@
 "use client"
 
 import { useTransition } from "react"
-import { useRouter } from "next/navigation"
+import type { JoinMode } from "@prisma/client"
 import { Globe, Lock, Loader2 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
@@ -12,8 +12,7 @@ import { cn } from "@/lib/utils"
 // Who can get a pass for this program: anyone with the QR / link (public)
 // or only the team (invite only). Two options as a radio group; the page
 // hides the QR, link and NFC sections while the program is invite only.
-
-type JoinMode = "PUBLIC" | "INVITE_ONLY"
+// The action revalidates this page, so there is no router.refresh().
 
 const OPTIONS: { value: JoinMode; Icon: typeof Globe; label: string; description: string }[] = [
   { value: "PUBLIC", Icon: Globe, label: "joinModeOpen", description: "joinModeOpenDescription" },
@@ -22,7 +21,6 @@ const OPTIONS: { value: JoinMode; Icon: typeof Globe; label: string; description
 
 export function JoinModeSection({ templateId, joinMode }: { templateId: string; joinMode: JoinMode }) {
   const t = useTranslations("dashboard.distribution")
-  const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
   function select(next: JoinMode) {
@@ -34,7 +32,6 @@ export function JoinModeSection({ templateId, joinMode }: { templateId: string; 
         return
       }
       toast.success(t("joinModeUpdated"))
-      router.refresh()
     })
   }
 

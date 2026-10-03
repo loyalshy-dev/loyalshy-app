@@ -21,15 +21,33 @@ beforeEach(() => {
   vi.doMock("@/lib/wallet/card-design", () => ({ resolveCardDesign: vi.fn() }))
   vi.doMock("@/lib/card-access", () => ({ buildCardUrl: vi.fn(), verifyCardSignature: vi.fn() }))
   vi.doMock("@/lib/proximity/settings", () => ({ loadPassProximity: vi.fn() }))
+  vi.doMock("next-intl/server", () => ({ getTranslations: async () => (key: string) => key }))
 })
 
+const tpl = (id: string, joinMode: "PUBLIC" | "INVITE_ONLY") => ({ id, name: id, passType: "STAMP_CARD", joinMode, config: {}, passDesign: null })
+const org = (templates: unknown[]) => ({ id: "org-1", name: "Café Sol", slug: "cafe-sol", logo: null, logoApple: null, logoGoogle: null, brandColor: null, secondaryColor: null, passTemplates: templates })
+
 describe("getOrganizationBySlug", () => {
-  it("only lists active PUBLIC programs", async () => {
-    mockDb.organization.findUnique.mockResolvedValue(null)
+  it("lists only the PUBLIC programs and flags the invite-only ones", async () => {
+    mockDb.organization.findUnique.mockResolvedValue(org([tpl("a", "INVITE_ONLY"), tpl("b", "PUBLIC")]))
+    const { getOrganizationBySlug } = await import("./onboarding-actions")
+    const result = await getOrganizationBySlug("cafe-sol")
+    expect(result?.templates.map((t) => t.id)).toEqual(["b"])
+    expect(result?.hasInviteOnlyPrograms).toBe(true)
+  })
+
+  it("still resolves, with nothing to list, when every active program is invite only", async () => {
+    mockDb.organization.findUnique.mockResolvedValue(org([tpl("a", "INVITE_ONLY")]))
+    const { getOrganizationBySlug } = await import("./onboarding-actions")
+    const result = await getOrganizationBySlug("cafe-sol")
+    expect(result?.templates).toEqual([])
+    expect(result?.hasInviteOnlyPrograms).toBe(true)
+  })
+
+  it("is null with no active programs at all (unchanged)", async () => {
+    mockDb.organization.findUnique.mockResolvedValue(org([]))
     const { getOrganizationBySlug } = await import("./onboarding-actions")
     expect(await getOrganizationBySlug("cafe-sol")).toBeNull()
-    const args = mockDb.organization.findUnique.mock.calls[0][0]
-    expect(args.select.passTemplates.where).toEqual({ status: "ACTIVE", joinMode: "PUBLIC" })
   })
 })
 
@@ -45,7 +63,7 @@ describe("joinTemplate", () => {
     mockDb.passTemplate.findFirst.mockResolvedValue({ id: "tpl-1", passType: "STAMP_CARD", config: {}, joinMode: "INVITE_ONLY" })
     const { joinTemplate } = await import("./onboarding-actions")
     const result = await joinTemplate(form({ fullName: "Ana", email: "ana@example.com", organizationSlug: "cafe-sol", templateId: "tpl-1" }))
-    expect(result).toEqual({ success: false, error: "This program is by invitation only." })
+    expect(result).toEqual({ success: false, error: "inviteOnlyError" })
     expect(mockDb.contact.findUnique).not.toHaveBeenCalled()
     expect(mockDb.contact.create).not.toHaveBeenCalled()
   })
