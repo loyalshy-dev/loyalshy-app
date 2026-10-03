@@ -85,6 +85,13 @@ enum PassType {
   @@map("pass_type")
 }
 
+enum JoinMode {
+  PUBLIC      @map("public")
+  INVITE_ONLY @map("invite_only")
+
+  @@map("join_mode")
+}
+
 enum TemplateStatus {
   DRAFT    @map("draft")
   ACTIVE   @map("active")
@@ -411,6 +418,10 @@ model PassTemplate {
   description        String?        @db.Text
   passType           PassType
   status             TemplateStatus @default(DRAFT)
+  // Who can get a pass: PUBLIC = anyone via /join (QR, link, NFC);
+  // INVITE_ONLY = only the team issues them (dashboard direct issue by
+  // email, staff-app counter signup). The public page hides the program.
+  joinMode           JoinMode       @default(PUBLIC)
   startsAt           DateTime       @default(now())
   endsAt             DateTime?
   termsAndConditions String?        @db.Text

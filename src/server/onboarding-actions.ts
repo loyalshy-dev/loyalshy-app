@@ -85,7 +85,8 @@ export async function getOrganizationBySlug(
       brandColor: true,
       secondaryColor: true,
       passTemplates: {
-        where: { status: "ACTIVE" },
+        // Invite-only programs never appear on the public page
+        where: { status: "ACTIVE", joinMode: "PUBLIC" },
         select: {
           id: true,
           name: true,
@@ -379,11 +380,17 @@ export async function joinTemplate(
       organizationId: organization.id,
       status: "ACTIVE",
     },
-    select: { id: true, passType: true, config: true },
+    select: { id: true, passType: true, config: true, joinMode: true },
   })
 
   if (!template) {
     return { success: false, error: "No active pass template found" }
+  }
+
+  // Invite-only programs are issued by the team (direct issue, staff app),
+  // never through the public page — even with the URL in hand.
+  if (template.joinMode !== "PUBLIC") {
+    return { success: false, error: "This program is by invitation only." }
   }
 
   // Email is required for self-join
