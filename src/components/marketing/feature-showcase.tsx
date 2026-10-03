@@ -10,7 +10,7 @@ export async function FeatureShowcase() {
   const t = await getTranslations("featureShowcase")
   return (
     <section id="features" className="scroll-mt-24" style={{ background: "var(--mk-bg)" }}>
-      <div className="mk-wrap py-20 lg:py-28">
+      <div className="mk-wrap pt-10 pb-20 sm:pt-20 lg:py-28">
         <SectionHeading title={t("title")} lead={t("lead")} align="center" />
         <div className="mt-10 lg:mt-14">
           <PanelMock />

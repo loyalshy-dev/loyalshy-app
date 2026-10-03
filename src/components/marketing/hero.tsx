@@ -17,7 +17,7 @@ export async function Hero() {
   const tCommon = await getTranslations("common")
 
   return (
-    <section className="relative pb-[10vh] lg:pb-[14vh]" style={{ background: "var(--mk-bg)" }}>
+    <section className="relative pb-0 sm:pb-[10vh] lg:pb-[14vh]" style={{ background: "var(--mk-bg)" }}>
       <div className="mk-wrap flex flex-col items-center pt-10 pb-4 text-center sm:pt-14 lg:pt-16 lg:pb-6">
         <h1 className="font-display mk-display-1 max-w-[18ch]" style={{ color: "var(--mk-text)" }}>
           {t("title")}
