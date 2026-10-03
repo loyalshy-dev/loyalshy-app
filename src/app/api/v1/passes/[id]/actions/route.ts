@@ -6,6 +6,7 @@ import { orgScope } from "@/lib/org-scope"
 import { toApiPassInstanceDetail } from "@/lib/api-serializers"
 import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
+import { maybeScheduleReviewPrompt } from "@/lib/reviews/schedule"
 
 export function OPTIONS() {
   return handlePreflight()
@@ -119,7 +120,7 @@ export async function performStamp(pass: NonNullable<PassForAction>, performedBy
   const visitsRequired = (templateConfig.stampsRequired as number) ?? 10
   const rewardExpiryDays = (templateConfig.rewardExpiryDays as number) ?? 90
 
-  await db.$transaction(async (tx) => {
+  const newTotalVisits = await db.$transaction(async (tx) => {
     // Serialize concurrent stamps on the same pass — second caller waits here
     // until the first transaction commits, then sees the just-created interaction below.
     await tx.$queryRaw`SELECT id FROM pass_instance WHERE id = ${pass.id} FOR UPDATE`
@@ -192,9 +193,20 @@ export async function performStamp(pass: NonNullable<PassForAction>, performedBy
       where: { id: pass.contact.id },
       data: { totalInteractions: { increment: 1 }, lastInteractionAt: new Date() },
     })
+
+    return newTotal
   })
 
   dispatchWalletUpdate(pass.id, pass.walletProvider, "STAMP")
+  maybeScheduleReviewPrompt({
+    organizationId: pass.contact.organizationId,
+    contactId: pass.contact.id,
+    passInstanceId: pass.id,
+    walletProvider: pass.walletProvider,
+    passType: pass.passTemplate.passType,
+    templateConfig: pass.passTemplate.config,
+    newVisitCount: newTotalVisits,
+  })
 }
 
 // ─── Coupon redeem logic ───────────────────────────────────
@@ -203,7 +215,7 @@ export async function performRedeemCoupon(pass: NonNullable<PassForAction>, perf
   const config = parseCouponConfig(pass.passTemplate.config)
   const isUnlimited = config?.redemptionLimit === "unlimited"
 
-  await db.$transaction(async (tx) => {
+  const newRedeemCount = await db.$transaction(async (tx) => {
     // Serialize concurrent redeems on the same pass — second caller waits here
     // until the first transaction commits, then sees redeemed=true below.
     await tx.$queryRaw`SELECT id FROM pass_instance WHERE id = ${pass.id} FOR UPDATE`
@@ -223,10 +235,13 @@ export async function performRedeemCoupon(pass: NonNullable<PassForAction>, perf
       }
     }
 
+    // Redemptions so far — the "visits" an unlimited coupon counts toward the
+    // Google review prompt trigger (src/lib/reviews/eligibility.ts).
+    const redeemCount = ((freshData.redeemCount as number | undefined) ?? 0) + 1
     await tx.passInstance.update({
       where: { id: pass.id },
       data: {
-        data: { ...freshData, redeemed: true, redeemedAt: new Date().toISOString() },
+        data: { ...freshData, redeemed: true, redeemedAt: new Date().toISOString(), redeemCount },
         status: isUnlimited ? "ACTIVE" : "COMPLETED",
       },
     })
@@ -264,17 +279,11 @@ export async function performRedeemCoupon(pass: NonNullable<PassForAction>, perf
       data: { totalInteractions: { increment: 1 }, lastInteractionAt: new Date() },
     })
 
-    // Reissue for unlimited coupons
+    // Unlimited coupons: the same pass stays active in the wallet, so the next
+    // reward goes on it. (This used to create a second PassInstance, which
+    // the [contactId, passTemplateId] unique index rejects — every unlimited
+    // redemption rolled back.)
     if (isUnlimited) {
-      const newPi = await tx.passInstance.create({
-        data: {
-          contactId: pass.contact.id,
-          passTemplateId: pass.passTemplate.id,
-          walletProvider: "NONE",
-          status: "ACTIVE",
-          data: { redeemed: false },
-        },
-      })
       const rewardExpiryDays = (pass.passTemplate.config as Record<string, unknown>)?.rewardExpiryDays as number | undefined
       const newExpiresAt = config?.validUntil
         ? new Date(config.validUntil)
@@ -288,15 +297,27 @@ export async function performRedeemCoupon(pass: NonNullable<PassForAction>, perf
           contactId: pass.contact.id,
           organizationId: pass.contact.organizationId,
           passTemplateId: pass.passTemplate.id,
-          passInstanceId: newPi.id,
+          passInstanceId: pass.id,
           status: "AVAILABLE",
           expiresAt: newExpiresAt,
           ...(newPrize ? { description: newPrize, revealedAt: null } : {}),
         },
       })
     }
+
+    return redeemCount
   })
 
   dispatchWalletUpdate(pass.id, pass.walletProvider, "COUPON_REDEEM")
+  // No-op for single-use coupons (not review-eligible).
+  maybeScheduleReviewPrompt({
+    organizationId: pass.contact.organizationId,
+    contactId: pass.contact.id,
+    passInstanceId: pass.id,
+    walletProvider: pass.walletProvider,
+    passType: pass.passTemplate.passType,
+    templateConfig: pass.passTemplate.config,
+    newVisitCount: newRedeemCount,
+  })
 }
 

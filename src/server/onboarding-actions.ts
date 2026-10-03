@@ -15,6 +15,7 @@ import { parseCouponConfig, parseMinigameConfig, parseTemplateAnnouncement, weig
 import { verifyCardSignature } from "@/lib/card-access"
 import type { PublicTemplateInfo } from "@/types/pass-instance"
 import type { MinigameConfig } from "@/types/pass-types"
+import { loadPassProximity } from "@/lib/proximity/settings"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -727,6 +728,7 @@ async function issuePassForInstance(
 
     try {
       const passBuffer = await generateApplePass({
+        proximity: await loadPassProximity(instance.passInstanceId),
         serialNumber,
         authenticationToken: walletPassId,
         memberNumber: instance.memberNumber,

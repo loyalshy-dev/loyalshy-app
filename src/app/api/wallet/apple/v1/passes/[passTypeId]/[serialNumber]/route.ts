@@ -4,6 +4,9 @@ import { validateApplePassAuth } from "@/lib/wallet/apple/auth"
 import { generateApplePass } from "@/lib/wallet/apple/generate-pass"
 import { resolveCardDesign } from "@/lib/wallet/card-design"
 import { parseTemplateAnnouncement } from "@/lib/pass-config"
+import { loadReviewPassField } from "@/lib/reviews/settings"
+import { loadWinbackPassField } from "@/lib/winback/pass-field"
+import { loadPassProximity } from "@/lib/proximity/settings"
 
 type Params = Promise<{
   passTypeId: string
@@ -38,6 +41,9 @@ export async function GET(request: Request, { params }: { params: Params }) {
           fullName: true,
           email: true,
           memberNumber: true,
+          reviewPromptedAt: true,
+          reviewPromptPassId: true,
+          lastInteractionAt: true,
         },
       },
       passTemplate: {
@@ -48,6 +54,7 @@ export async function GET(request: Request, { params }: { params: Params }) {
           config: true,
           announcement: true,
           termsAndConditions: true,
+          organizationId: true,
           organization: {
             select: {
               name: true,
@@ -106,8 +113,26 @@ export async function GET(request: Request, { params }: { params: Params }) {
     organization
   )
 
+  const winback = await loadWinbackPassField({
+    organizationId: template.organizationId,
+    passInstanceId: passInstance.id,
+    passType: template.passType,
+    templateConfig: template.config,
+    lastInteractionAt: passInstance.contact.lastInteractionAt,
+  })
+
+  const reviewPrompt = await loadReviewPassField({
+    organizationId: template.organizationId,
+    passInstanceId: passInstance.id,
+    passType: template.passType,
+    templateConfig: template.config,
+    reviewPromptedAt: passInstance.contact.reviewPromptedAt,
+    reviewPromptPassId: passInstance.contact.reviewPromptPassId,
+  })
+
   try {
     const passBuffer = await generateApplePass({
+      proximity: await loadPassProximity(passInstance.id),
       serialNumber: passInstance.walletPassSerialNumber,
       authenticationToken: passInstance.walletPassId,
       memberNumber: passInstance.contact.memberNumber,
@@ -141,6 +166,8 @@ export async function GET(request: Request, { params }: { params: Params }) {
       isRedeemed,
       redeemedAt,
       announcement: parseTemplateAnnouncement(template.announcement),
+      reviewPrompt,
+      winback,
     })
 
     // Log update

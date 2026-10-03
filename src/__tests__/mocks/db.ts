@@ -60,6 +60,11 @@ export function createMockDb() {
     orgHandoffToken: createMockModel(),
     orgAuditLog: createMockModel(),
     programAnnouncement: createMockModel(),
+    googleReviewSettings: createMockModel(),
+    googleRatingSnapshot: createMockModel(),
+    winbackSettings: createMockModel(),
+    winbackSend: createMockModel(),
+    proximitySettings: createMockModel(),
     $transaction: vi.fn(
       async (
         fnOrOps: ((tx: typeof mockTx) => Promise<unknown>) | Promise<unknown>[]

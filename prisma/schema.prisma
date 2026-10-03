@@ -340,6 +340,11 @@ model Organization {
   orgAuditLogs        OrgAuditLog[]
   handoffTokens       OrgHandoffToken[]
   announcements       ProgramAnnouncement[]
+  reviewSettings      GoogleReviewSettings?
+  ratingSnapshots     GoogleRatingSnapshot[]
+  winbackSettings     WinbackSettings?
+  winbackSends        WinbackSend[]
+  proximitySettings   ProximitySettings?
 
   @@index([referredById])
   @@map("organization")
@@ -474,6 +479,7 @@ model PassInstance {
   rewards             Reward[]
   walletPassLogs      WalletPassLog[]
   deviceRegistrations DeviceRegistration[]
+  winbackSends        WinbackSend[]
 
   @@unique([contactId, passTemplateId])
   @@index([contactId])
@@ -498,10 +504,21 @@ model Contact {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
+  // Google review prompt (src/lib/reviews). Per contact, not per pass: the
+  // review is about the business, so a contact in two programs is asked once.
+  reviewPromptedAt   DateTime?
+  // The pass the prompt was delivered through. Only that pass carries the
+  // notifying version of the field; the contact's other passes show the
+  // message silently (otherwise a second pass re-banners the same ask).
+  reviewPromptPassId String?
+  reviewLinkOpenedAt DateTime?
+  reviewLinkOpens    Int       @default(0)
+
   organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   passInstances PassInstance[]
   interactions  Interaction[]
   rewards       Reward[]
+  winbackSends  WinbackSend[]
 
   @@unique([organizationId, email])
   @@unique([organizationId, phone])
@@ -509,7 +526,46 @@ model Contact {
   @@index([organizationId, deletedAt])
   @@index([organizationId, totalInteractions])
   @@index([email])
+  @@index([organizationId, reviewPromptedAt])
   @@map("contact")
+}
+
+// Google review prompt config, one row per org. After the contact's
+// `triggerStamp`-th stamp, their wallet pass asks for a Google review
+// (delayed, quiet-hours aware) — never as a reward (Google policy).
+model GoogleReviewSettings {
+  organizationId String   @id
+  enabled        Boolean  @default(false)
+  // Set when the business was picked from the Places search; null when the
+  // merchant pasted their own review link instead.
+  placeId        String?
+  placeName      String?
+  reviewUrl      String
+  triggerStamp   Int      @default(3)
+  message        String
+  linkLabel      String
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("google_review_settings")
+}
+
+// Daily Google rating + review count per org with a placeId (Places API),
+// written by the /api/cron/google-ratings Vercel cron. Powers the
+// "reviews since Loyalshy" chart.
+model GoogleRatingSnapshot {
+  id             String   @id @default(dbgenerated("uuidv7()::text"))
+  organizationId String
+  date           DateTime @db.Date
+  rating         Float?
+  ratingCount    Int
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, date])
+  @@map("google_rating_snapshot")
 }
 
 model Interaction {
@@ -756,4 +812,71 @@ model DevicePairingToken {
 
   @@index([organizationId])
   @@map("device_pairing_token")
+}
+
+// Win-back ("we miss you"): after `inactiveDays` without a visit, a regular
+// (2+ visits) gets the org's message on their wallet pass, once per absence
+// (src/lib/winback). Message only — no reward.
+model WinbackSettings {
+  organizationId String    @id
+  enabled        Boolean   @default(false)
+  inactiveDays   Int       @default(30)
+  message        String
+  // Keep back ~10% of eligible customers (no message) to measure the real lift.
+  holdout        Boolean   @default(true)
+  // Also message customers who were already inactive when it was turned on.
+  includeExisting Boolean  @default(false)
+  // First time it was enabled; with includeExisting=false only absences that
+  // cross the threshold after this date qualify.
+  startedAt      DateTime?
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("winback_settings")
+}
+
+// One row per contact per absence. lapseKey = the contact's lastInteractionAt
+// when the absence was handled, so a second run (or overlapping runs) can't
+// handle the same absence twice. control = held back for measurement (no
+// message); reachable=false = no wallet pass to deliver to.
+model WinbackSend {
+  id             String    @id @default(dbgenerated("uuidv7()::text"))
+  organizationId String
+  contactId      String
+  passInstanceId String?
+  lapseKey       DateTime
+  control        Boolean   @default(false)
+  reachable      Boolean   @default(true)
+  message        String
+  sentAt         DateTime  @default(now())
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact      Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  passInstance PassInstance? @relation(fields: [passInstanceId], references: [id], onDelete: SetNull)
+
+  @@unique([contactId, lapseKey])
+  @@index([organizationId, sentAt])
+  @@index([passInstanceId, sentAt])
+  @@map("winback_send")
+}
+
+// "Near your business" (Automations): the org's single location. When
+// enabled, iPhone shows the pass on the lock screen near it (Apple pass
+// `locations` + relevantText). iPhone only — Google Wallet doesn't notify by
+// location, so nothing is promised there. The address/coords are mirrored
+// into every program's PassDesign (shown on the pass, Google Maps link).
+model ProximitySettings {
+  organizationId String   @id
+  enabled        Boolean  @default(true)
+  address        String
+  latitude       Float
+  longitude      Float
+  // Lock-screen text; null = the business name.
+  message        String?
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("proximity_settings")
 }

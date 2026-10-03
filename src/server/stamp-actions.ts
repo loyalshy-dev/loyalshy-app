@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import { assertAuthenticated, getOrganizationForUser, assertOrganizationAccess } from "@/lib/dal"
 import { parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 import { dispatchWalletUpdate } from "@/lib/wallet/dispatch"
+import { maybeScheduleReviewPrompt } from "@/lib/reviews/schedule"
 import type { PassInstanceSummary } from "@/types/pass-instance"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -672,6 +673,15 @@ export async function registerStamp(
     passInstance.walletProvider,
     wasRewardEarned ? "REWARD_EARNED" : "STAMP",
   )
+  maybeScheduleReviewPrompt({
+    organizationId: organization.id,
+    contactId: passInstance.contact.id,
+    passInstanceId: passInstance.id,
+    walletProvider: passInstance.walletProvider,
+    passType: passInstance.passTemplate.passType,
+    templateConfig: passInstance.passTemplate.config,
+    newVisitCount: newTotalVisits,
+  })
 
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/contacts")

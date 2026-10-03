@@ -208,7 +208,7 @@ export function StudioSidebar({
       )}
 
       <Section title="Notifications" isOpen={openSections.has("notifications")} onToggle={() => toggle("notifications")}>
-        <NotificationsPanel store={store} organizationName={organizationName} organizationLogo={organizationLogo} />
+        <NotificationsPanel />
       </Section>
 
       <Section title="Back of Pass" isOpen={openSections.has("details")} onToggle={() => toggle("details")}>

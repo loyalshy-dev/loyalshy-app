@@ -17,9 +17,20 @@ export type PlanDefinition = {
   announcementLimit: number
   /** "lifetime" = total ever sent; "week" = rolling 7 days. */
   announcementPeriod: AnnouncementPeriod
-  features: string[]
+  /** Google review prompt on wallet passes (src/lib/reviews). */
+  reviewPrompts: boolean
+  /**
+   * Automatic "we miss you" message to inactive regulars (src/lib/winback).
+   * Business and up: its measured lift needs ~200 sends per period (both
+   * groups ≥20 at a 10% holdout), which Pro's 500-contact cap rarely reaches.
+   */
+  winback: boolean
 }
 
+// Limits and prices only. User-facing plan copy (names, descriptions,
+// feature lists) lives in the `pricing` i18n namespace, shared by the landing
+// pricing section and the dashboard billing tab. `name` here is the
+// internal/English label (admin, server messages).
 export const PLANS: Record<PlanId, PlanDefinition> = {
   FREE: {
     id: "FREE",
@@ -32,12 +43,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: 1,
     announcementLimit: 2,
     announcementPeriod: "lifetime",
-    features: [
-      "Up to 50 contacts",
-      "1 program",
-      "1 staff member",
-      "2 wallet announcements",
-    ],
+    reviewPrompts: false,
+    winback: false,
   },
   STARTER: {
     id: "STARTER",
@@ -50,13 +57,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: 2,
     announcementLimit: 1,
     announcementPeriod: "week",
-    features: [
-      "Up to 500 contacts",
-      "Up to 2 programs",
-      "2 staff members",
-      "1 wallet announcement / week",
-      "Google review requests on wallet passes",
-    ],
+    reviewPrompts: true,
+    winback: false,
   },
   GROWTH: {
     id: "GROWTH",
@@ -69,13 +71,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: 5,
     announcementLimit: 2,
     announcementPeriod: "week",
-    features: [
-      "Up to 2,500 contacts",
-      "Up to 5 programs",
-      "5 staff members",
-      "2 wallet announcements / week",
-      "Google review requests on wallet passes",
-    ],
+    reviewPrompts: true,
+    winback: true,
   },
   SCALE: {
     id: "SCALE",
@@ -88,13 +85,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: Infinity,
     announcementLimit: 5,
     announcementPeriod: "week",
-    features: [
-      "Unlimited contacts",
-      "Unlimited programs",
-      "25 staff members",
-      "5 wallet announcements / week",
-      "Google review requests on wallet passes",
-    ],
+    reviewPrompts: true,
+    winback: true,
   },
   ENTERPRISE: {
     id: "ENTERPRISE",
@@ -107,14 +99,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     programLimit: Infinity,
     announcementLimit: Infinity,
     announcementPeriod: "week",
-    features: [
-      "Everything in Scale",
-      "Unlimited staff members",
-      "Unlimited programs",
-      "Unlimited wallet announcements",
-      "White-label branding",
-      "Dedicated support & SLA",
-    ],
+    reviewPrompts: true,
+    winback: true,
   },
 }
 
@@ -134,6 +120,19 @@ export function getPlanLimits(plan: PlanId) {
     announcementLimit: PLANS[plan].announcementLimit,
     announcementPeriod: PLANS[plan].announcementPeriod,
   }
+}
+
+/** Boolean plan features (Pro+ automations). */
+export type PlanFeature = "reviewPrompts" | "winback"
+
+/** A plan feature is on: the plan includes it and the subscription is live. */
+export function planAllowsFeature(plan: PlanId, subscriptionStatus: string, feature: PlanFeature): boolean {
+  return PLANS[plan][feature] && isActiveSubscription(subscriptionStatus)
+}
+
+/** Google review prompts: paid plans (Pro+) with a live subscription. */
+export function planAllowsReviewPrompts(plan: PlanId, subscriptionStatus: string): boolean {
+  return planAllowsFeature(plan, subscriptionStatus, "reviewPrompts")
 }
 
 /** Returns true if the subscription is in a state that allows feature usage */

@@ -40,6 +40,16 @@ const planBorders: Record<string, string> = {
   ENTERPRISE: "border-brand/30 ring-1 ring-brand/20",
 }
 
+// Plan copy (name, description, features) comes from the landing's
+// `pricing` namespace so billing and the pricing page always say the same.
+const PRICING_KEYS = {
+  FREE: "free",
+  STARTER: "starter",
+  GROWTH: "growth",
+  SCALE: "scale",
+  ENTERPRISE: "enterprise",
+} as const satisfies Record<PlanId, string>
+
 // ─── Status Labels ─────────────────────────────────────────
 
 function StatusBadge({ status, t }: { status: string; t: ReturnType<typeof useTranslations> }) {
@@ -63,6 +73,7 @@ type BillingPeriod = "monthly" | "annual"
 
 export function BillingSettings({ data }: { data: BillingData }) {
   const t = useTranslations("dashboard.settingsForms")
+  const tp = useTranslations("pricing")
   const router = useRouter()
   const searchParams = useSearchParams()
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
@@ -98,10 +109,10 @@ export function BillingSettings({ data }: { data: BillingData }) {
       if (data.url) {
         window.location.href = data.url
       } else {
-        toast.error(data.error ?? "Failed to start checkout")
+        toast.error(data.error ?? t("billingCheckoutFailed"))
       }
     } catch {
-      toast.error("Something went wrong")
+      toast.error(t("billingGenericError"))
     } finally {
       setLoadingPlan(null)
     }
@@ -116,10 +127,10 @@ export function BillingSettings({ data }: { data: BillingData }) {
       if (data.url) {
         window.location.href = data.url
       } else {
-        toast.error(data.error ?? "Failed to open billing portal")
+        toast.error(data.error ?? t("billingPortalFailed"))
       }
     } catch {
-      toast.error("Something went wrong")
+      toast.error(t("billingGenericError"))
     } finally {
       setPortalLoading(false)
     }
@@ -130,6 +141,13 @@ export function BillingSettings({ data }: { data: BillingData }) {
     ? Math.max(0, Math.ceil((new Date(organization.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : null
 
+  const planName = (planId: PlanId) => tp(`${PRICING_KEYS[planId]}.name`)
+  const planDescription = (planId: PlanId) => tp(`${PRICING_KEYS[planId]}.description`)
+  const planFeatures = (planId: PlanId): string[] =>
+    planId === "ENTERPRISE"
+      ? Object.values(t.raw("billingEnterpriseFeatures") as Record<string, string>)
+      : Object.values(tp.raw(`${PRICING_KEYS[planId]}.features`) as Record<string, string>)
+
   return (
     <div className="space-y-6">
       {/* Checkout success/canceled banners */}
@@ -137,19 +155,19 @@ export function BillingSettings({ data }: { data: BillingData }) {
         <div className="flex items-center justify-between gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3">
           <div className="flex items-center gap-2">
             <Check className="h-4 w-4 text-emerald-600" />
-            <p className="text-sm text-emerald-700">Subscription activated! Your plan has been updated.</p>
+            <p className="text-sm text-emerald-700">{t("billingCheckoutSuccess")}</p>
           </div>
           <button onClick={dismissCheckout} className="text-xs text-muted-foreground hover:text-foreground">
-            Dismiss
+            {t("billingDismiss")}
           </button>
         </div>
       )}
 
       {checkoutStatus === "canceled" && (
         <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3">
-          <p className="text-sm text-muted-foreground">Checkout was canceled. No changes were made.</p>
+          <p className="text-sm text-muted-foreground">{t("billingCheckoutCanceled")}</p>
           <button onClick={dismissCheckout} className="text-xs text-muted-foreground hover:text-foreground">
-            Dismiss
+            {t("billingDismiss")}
           </button>
         </div>
       )}
@@ -159,8 +177,10 @@ export function BillingSettings({ data }: { data: BillingData }) {
         <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
           <Clock className="h-4 w-4 text-amber-600 shrink-0" />
           <p className="text-sm text-amber-700">
-            <strong>{trialDaysRemaining} day{trialDaysRemaining !== 1 ? "s" : ""}</strong> remaining in your trial.
-            Upgrade to keep all your features.
+            {t.rich("billingTrialBanner", {
+              days: trialDaysRemaining,
+              b: (chunks) => <strong>{chunks}</strong>,
+            })}
           </p>
         </div>
       )}
@@ -170,9 +190,9 @@ export function BillingSettings({ data }: { data: BillingData }) {
         <div className="flex items-center gap-3 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3">
           <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
           <div className="flex-1">
-            <p className="text-sm text-red-700 font-medium">Payment failed</p>
+            <p className="text-sm text-red-700 font-medium">{t("billingPaymentFailedTitle")}</p>
             <p className="text-xs text-red-600/80 mt-0.5">
-              Please update your payment method to avoid service interruption.
+              {t("billingPaymentFailedBody")}
             </p>
           </div>
           <Button
@@ -182,7 +202,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
             onClick={handleManageBilling}
             disabled={portalLoading}
           >
-            {portalLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Update Payment"}
+            {portalLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t("billingUpdatePayment")}
           </Button>
         </div>
       )}
@@ -196,26 +216,26 @@ export function BillingSettings({ data }: { data: BillingData }) {
           </p>
         </div>
         <div className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${planAccents[currentPlan] ?? planAccents.STARTER}`}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${planAccents[currentPlan] ?? planAccents.STARTER}`}>
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold">
-                    {plans[currentPlan as keyof typeof plans]?.name ?? currentPlan} Plan
+                    {t("billingPlanName", { name: planName(currentPlan) })}
                   </p>
                   <StatusBadge status={organization.subscriptionStatus} t={t} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {organization.subscriptionStatus === "TRIALING"
-                    ? `Trial ends in ${trialDaysRemaining} day${trialDaysRemaining !== 1 ? "s" : ""}`
+                    ? t("billingTrialEnds", { days: trialDaysRemaining ?? 0 })
                     : organization.subscriptionStatus === "CANCELED"
-                      ? "Subscribe to continue using Loyalshy"
+                      ? t("billingSubscribeToContinue")
                       : currentPlan === "FREE"
-                        ? "Free forever — upgrade anytime"
-                        : "Your subscription renews monthly"}
+                        ? t("billingFreeForever")
+                        : t("billingRenews")}
                 </p>
               </div>
             </div>
@@ -397,9 +417,9 @@ export function BillingSettings({ data }: { data: BillingData }) {
         <div className="border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold">Plans</h2>
+              <h2 className="text-sm font-semibold">{t("plansSection")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Choose the plan that fits your business.
+                {t("plansDescription")}
               </p>
             </div>
             <div className="flex items-center gap-1 rounded-full border border-border bg-muted/30 p-0.5">
@@ -412,7 +432,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Monthly
+                {tp("monthly")}
               </button>
               <button
                 type="button"
@@ -423,7 +443,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Annual
+                {tp("annual")}
               </button>
             </div>
           </div>
@@ -443,19 +463,19 @@ export function BillingSettings({ data }: { data: BillingData }) {
                   <Sparkles className="h-4 w-4" />
                 </span>
                 {currentPlan === "FREE" && (
-                  <Badge variant="secondary" className="text-[10px]">Current</Badge>
+                  <Badge variant="secondary" className="text-[10px]">{t("billingCurrentBadge")}</Badge>
                 )}
               </div>
 
-              <h3 className="text-sm font-semibold">{plans.FREE.name}</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">{plans.FREE.description}</p>
+              <h3 className="text-sm font-semibold">{planName("FREE")}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{planDescription("FREE")}</p>
 
               <div className="mt-3 mb-4">
-                <p className="text-2xl font-bold tracking-tight">0€<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                <p className="text-2xl font-bold tracking-tight">0€<span className="text-sm font-normal text-muted-foreground">{t("billingPerMonth")}</span></p>
               </div>
 
               <ul className="space-y-2 mb-5 flex-1">
-                {plans.FREE.features.map((feature) => (
+                {planFeatures("FREE").map((feature) => (
                   <li key={feature} className="flex items-start gap-2 text-xs text-muted-foreground">
                     <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
                     {feature}
@@ -464,7 +484,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
               </ul>
 
               <Button variant="outline" size="sm" disabled className="w-full">
-                Free Forever
+                {t("billingFreeForeverButton")}
               </Button>
             </div>
 
@@ -489,22 +509,22 @@ export function BillingSettings({ data }: { data: BillingData }) {
                       <Sparkles className="h-4 w-4" />
                     </span>
                     {isCurrent && (
-                      <Badge variant="secondary" className="text-[10px]">Current</Badge>
+                      <Badge variant="secondary" className="text-[10px]">{t("billingCurrentBadge")}</Badge>
                     )}
                   </div>
 
-                  <h3 className="text-sm font-semibold">{plan.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{plan.description}</p>
+                  <h3 className="text-sm font-semibold">{planName(planId)}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">{planDescription(planId)}</p>
 
                   <div className="mt-3 mb-4">
                     {displayPrice === null ? (
-                      <p className="text-2xl font-bold tracking-tight">Custom</p>
+                      <p className="text-2xl font-bold tracking-tight">{t("billingPriceCustom")}</p>
                     ) : (
                       <>
-                        <p className="text-2xl font-bold tracking-tight">{displayPrice}€<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                        <p className="text-2xl font-bold tracking-tight">{displayPrice}€<span className="text-sm font-normal text-muted-foreground">{t("billingPerMonth")}</span></p>
                         {billingPeriod === "annual" && plan.price !== null && (
                           <p className="text-[10px] text-emerald-600 mt-0.5">
-                            Save {(plan.price - (plan.annualPrice ?? 0)) * 12}€/year
+                            {t("billingSavePerYear", { amount: (plan.price - (plan.annualPrice ?? 0)) * 12 })}
                           </p>
                         )}
                       </>
@@ -512,7 +532,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                   </div>
 
                   <ul className="space-y-2 mb-5 flex-1">
-                    {plan.features.map((feature) => (
+                    {planFeatures(planId).map((feature) => (
                       <li key={feature} className="flex items-start gap-2 text-xs text-muted-foreground">
                         <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
                         {feature}
@@ -522,12 +542,12 @@ export function BillingSettings({ data }: { data: BillingData }) {
 
                   {isCurrent ? (
                     <Button variant="outline" size="sm" disabled className="w-full">
-                      Current Plan
+                      {t("billingCurrentPlanButton")}
                     </Button>
                   ) : isEnterprise ? (
                     <Button variant="outline" size="sm" className="w-full" asChild>
                       <a href="mailto:sales@loyalshy.com">
-                        Contact Us
+                        {t("billingContactUs")}
                         <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
                       </a>
                     </Button>
@@ -543,11 +563,11 @@ export function BillingSettings({ data }: { data: BillingData }) {
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : isUpgrade(currentPlan, planId) ? (
                         <>
-                          Upgrade
+                          {t("billingUpgrade")}
                           <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
                         </>
                       ) : (
-                        "Downgrade"
+                        t("billingDowngrade")
                       )}
                     </Button>
                   ) : lookupKey ? (
@@ -562,7 +582,7 @@ export function BillingSettings({ data }: { data: BillingData }) {
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
                         <>
-                          Subscribe
+                          {t("billingSubscribe")}
                           <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
                         </>
                       )}

@@ -311,24 +311,8 @@ function buildLoyaltyClass(input: LoyaltyClassInput) {
     ]
   }
 
-  // Merchant locations from coordinates + nearby notification
-  if (design?.mapLatitude != null && design?.mapLongitude != null) {
-    const stripFiltersLoc = parseStripFilters(design.editorConfig)
-    const messageBody = stripFiltersLoc.locationMessage || `You're near ${input.organizationName}! Show your pass.`
-    loyaltyClass.locations = [
-      { latitude: design.mapLatitude, longitude: design.mapLongitude },
-    ]
-    loyaltyClass.messages = [
-      ...(loyaltyClass.messages as Record<string, unknown>[] ?? []),
-      {
-        header: input.organizationName,
-        body: messageBody,
-        messageType: "TEXT",
-        localizedHeader: { defaultValue: { language: "en", value: input.organizationName } },
-        localizedBody: { defaultValue: { language: "en", value: messageBody } },
-      },
-    ]
-  }
+  // No `locations` / proximity message: Google Wallet doesn't alert by
+  // location, so "near your business" is iPhone-only (src/lib/proximity).
 
   return loyaltyClass
 }
