@@ -507,10 +507,12 @@
      at the top already. */
   --lift: 0px;
 }
+/* Absolutely positioned, so the wrap's gutters don't apply: they are set
+   here (1.5rem, the page's phone gutter). */
 .mk-film-captions {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 1.5rem;
+  right: 1.5rem;
   top: calc(var(--pw) * 2.07 + 4.5rem);
 }
 .mk-film-map { width: calc(var(--pw) * 1.9); }

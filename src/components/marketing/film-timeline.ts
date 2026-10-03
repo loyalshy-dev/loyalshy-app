@@ -160,8 +160,9 @@ export const FILM = {
     shift: 240,
     side: 56,
     /** Phones: the phone steps left for the map chapter so the pin, the
-     *  fence and the customer's last steps show in the right gutter. */
-    xNarrow: { keys: [0.27, 0.3, 0.451, 0.49], values: [0, -60, -60, 0] } as Keyframes,
+     *  fence and the customer's last steps show in the right gutter (44px:
+     *  the phone keeps a gutter's width from the left edge). */
+    xNarrow: { keys: [0.27, 0.3, 0.451, 0.49], values: [0, -44, -44, 0] } as Keyframes,
     /** Where the map's centre sits, right of the phone's centre, on phones. */
     mapOffsetNarrow: 170,
     /** The exit: the phone also rises a little on desktop so its shadow
