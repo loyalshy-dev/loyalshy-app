@@ -11,6 +11,7 @@ import { Photo } from "./photo"
 import { Steps } from "./steps"
 import { FeatureGrid } from "./feature-grid"
 import { PageFAQ } from "./page-faq"
+import { JsonLd, pageJsonLd } from "./json-ld"
 
 // One page per business type, same bones: the opener with a photo, the
 // counter in three steps, the two programs as real passes, what the card
@@ -44,7 +45,7 @@ function PassCard({ src, alt, label, title, body }: { src: string; alt: string; 
     <div className="grid grid-cols-1 gap-6 border-t pt-6 sm:grid-cols-12 sm:gap-8" style={{ borderColor: "var(--mk-border)" }}>
       <div className="sm:col-span-5">
         <div className="mx-auto max-w-[240px] sm:mx-0">
-          <Image src={src} alt={alt} width={960} height={1350} className="h-auto w-full" sizes="240px" style={{ filter: "drop-shadow(0 14px 18px oklch(0 0 0 / 0.18))" }} />
+          <Image src={src} alt={alt} width={960} height={1350} className="h-auto w-full" sizes="(min-width: 1024px) 240px, 45vw" quality={60} style={{ filter: "drop-shadow(0 14px 18px oklch(0 0 0 / 0.18))" }} />
         </div>
       </div>
       <div className="sm:col-span-7">
@@ -60,7 +61,9 @@ export async function IndustryPage({ locale, slug }: { locale: Locale; slug: Ind
   const t = await getTranslations(`pages.industries.${slug}`)
   const tc = await getTranslations("pages.common")
   const tCommon = await getTranslations("common")
+  const tNav = await getTranslations("nav")
   const photos = PHOTOS[slug]
+  const jsonLd = await pageJsonLd(locale, `/for/${slug}`, slug, { parents: [{ name: tNav("forBusiness"), path: "/for" }] })
   const beyondLinks: Record<string, string> = {
     reviews: localePath(locale, "/automations"),
     winback: localePath(locale, "/automations"),
@@ -71,6 +74,7 @@ export async function IndustryPage({ locale, slug }: { locale: Locale; slug: Ind
 
   return (
     <MarketingPage>
+      <JsonLd data={jsonLd} />
       <PageHero
         title={t("title")}
         lead={t("lead")}
@@ -108,7 +112,7 @@ export async function IndustryPage({ locale, slug }: { locale: Locale; slug: Ind
       </PageSection>
 
       <PageSection tight>
-        <Photo id={photos.second} alt={t("photoAlt")} ratio="21/9" sizes="(min-width: 1280px) 76rem, 100vw" />
+        <Photo id={photos.second} alt={t("photoAlt")} ratio="21/9" sizes="(min-width: 1280px) 1136px, 100vw" />
       </PageSection>
 
       <PageFAQ

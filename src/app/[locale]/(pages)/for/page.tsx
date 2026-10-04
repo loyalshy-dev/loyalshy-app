@@ -4,6 +4,7 @@ import type { Locale } from "@/i18n/config"
 import { localePath } from "@/i18n/marketing"
 import { pageMetadata } from "@/components/marketing/pages/metadata"
 import { MarketingPage } from "@/components/marketing/pages/shell"
+import { JsonLd, pageJsonLd } from "@/components/marketing/pages/json-ld"
 import { PageHero } from "@/components/marketing/pages/page-hero"
 import { PageSection } from "@/components/marketing/pages/section"
 import { LinkCards } from "@/components/marketing/pages/link-cards"
@@ -30,9 +31,11 @@ export default async function IndustriesPage({ params }: PageProps) {
   const t = await getTranslations("pages.industries.hub")
   const tc = await getTranslations("pages.common")
   const tCommon = await getTranslations("common")
+  const jsonLd = await pageJsonLd(locale, "/for", "for", { type: "CollectionPage" })
 
   return (
     <MarketingPage>
+      <JsonLd data={jsonLd} />
       <PageHero
         title={t("title")}
         lead={t("lead")}

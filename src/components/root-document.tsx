@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { Geist_Mono, Inter } from "next/font/google"
+import localFont from "next/font/local"
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
 import { NextIntlClientProvider } from "next-intl"
@@ -13,9 +14,26 @@ import "@/app/globals.css"
 //   src/app/(app)/layout.tsx      → app (cookie locale)
 //   src/app/[locale]/layout.tsx   → marketing site (URL locale)
 
+// Mono is a dashboard face (ids, codes): not preloaded, so it never sits
+// ahead of a marketing page's LCP image.
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
+})
+
+// Cabinet Grotesk (Indian Type Foundry) is the display face, `.font-display`
+// in globals.css, 24px and up. Self-hosted in the two weights the site uses
+// — the Fontshare stylesheet was a render-blocking cross-origin request on
+// every page (≈0.9 s of mobile FCP). Licence note in src/fonts/README.md.
+const cabinet = localFont({
+  src: [
+    { path: "../fonts/CabinetGrotesk-Medium.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/CabinetGrotesk-Bold.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-cabinet",
+  display: "swap",
+  adjustFontFallback: "Arial",
 })
 
 // Inter is the one body face on the web (landing, dashboard, studio, admin) —
@@ -89,17 +107,7 @@ export function RootDocument({
 }) {
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
-        {/* Cabinet Grotesk (Indian Type Foundry / Fontshare) — display
-            sizes only, via globals.css. */}
-        <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
-        <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&display=swap"
-        />
-      </head>
-      <body className={`${geistMono.variable} ${inter.variable} antialiased`}>
+      <body className={`${geistMono.variable} ${inter.variable} ${cabinet.variable} antialiased`}>
         <NextIntlClientProvider locale={locale} messages={pickMessages(messages, SHARED_NAMESPACES)}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange forcedTheme={forcedTheme}>
             {children}

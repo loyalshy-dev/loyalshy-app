@@ -5,6 +5,7 @@ import type { Locale } from "@/i18n/config"
 import { localePath } from "@/i18n/marketing"
 import { pageMetadata } from "@/components/marketing/pages/metadata"
 import { MarketingPage } from "@/components/marketing/pages/shell"
+import { JsonLd, ORG_ID, pageJsonLd } from "@/components/marketing/pages/json-ld"
 import { PageHero } from "@/components/marketing/pages/page-hero"
 import { PageSection } from "@/components/marketing/pages/section"
 import { Photo } from "@/components/marketing/pages/photo"
@@ -24,9 +25,11 @@ export default async function AboutPage({ params }: PageProps) {
   setRequestLocale(locale)
   const t = await getTranslations("pages.about")
   const tCommon = await getTranslations("common")
+  const jsonLd = await pageJsonLd(locale, "/about", "about", { type: "AboutPage", mainEntity: ORG_ID })
 
   return (
     <MarketingPage>
+      <JsonLd data={jsonLd} />
       <PageHero title={t("title")} lead={t("lead")} media={<Photo id="1559925393-8be0ec4767c8" alt={t("heroAlt")} ratio="4/3" priority />} />
 
       <PageSection>
@@ -44,7 +47,7 @@ export default async function AboutPage({ params }: PageProps) {
       </PageSection>
 
       <PageSection tight>
-        <Photo id="1522071820081-009f0129c71c" alt={t("photoAlt")} ratio="21/9" sizes="(min-width: 1280px) 76rem, 100vw" />
+        <Photo id="1522071820081-009f0129c71c" alt={t("photoAlt")} ratio="21/9" sizes="(min-width: 1280px) 1136px, 100vw" />
       </PageSection>
 
       <PageSection>

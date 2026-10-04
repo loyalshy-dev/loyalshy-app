@@ -39,8 +39,9 @@ export function PageHero({
           {actions ? <div className="mt-8">{actions}</div> : null}
           {primary || secondary ? (
             <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
+              {/* /register and /login live in the other root layout: a full load, nothing to prefetch */}
               {primary ? (
-                <Link href={primary.href} className="mk-btn-primary px-8! py-4! text-base!">
+                <Link href={primary.href} prefetch={primary.href.startsWith("/register") || primary.href.startsWith("/login") ? false : undefined} className="mk-btn-primary px-8! py-4! text-base!">
                   {primary.label}
                 </Link>
               ) : null}

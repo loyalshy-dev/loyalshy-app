@@ -25,6 +25,7 @@ export async function ClosingCTA() {
         <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
           <Link
             href="/register"
+            prefetch={false}
             className="inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-base font-semibold transition-colors hover:bg-white/90"
             style={{ color: "var(--mk-accent)" }}
           >

@@ -76,8 +76,8 @@ export async function MarketingFooter() {
   ]
 
   const social: { label: string; href: string; name: BrandName }[] = [
-    { label: t("instagram"), href: "https://instagram.com/loyalshy", name: "instagram" },
-    { label: t("tiktok"), href: "https://tiktok.com/@loyalshy_", name: "tiktok" },
+    { label: t("instagram"), href: "https://www.instagram.com/loyalshy/", name: "instagram" },
+    { label: t("tiktok"), href: "https://www.tiktok.com/@loyalshy_", name: "tiktok" },
   ]
 
   return (

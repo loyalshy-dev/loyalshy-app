@@ -5,6 +5,7 @@ import type { Locale } from "@/i18n/config"
 import { localePath } from "@/i18n/marketing"
 import { pageMetadata } from "@/components/marketing/pages/metadata"
 import { MarketingPage } from "@/components/marketing/pages/shell"
+import { JsonLd, pageJsonLd } from "@/components/marketing/pages/json-ld"
 import { PageHero } from "@/components/marketing/pages/page-hero"
 import { PageSection } from "@/components/marketing/pages/section"
 import { Photo } from "@/components/marketing/pages/photo"
@@ -36,8 +37,11 @@ export default async function AutomationsPage({ params }: PageProps) {
   const tc = await getTranslations("pages.common")
   const tCommon = await getTranslations("common")
 
+  const jsonLd = await pageJsonLd(locale, "/automations", "automations")
+
   return (
     <MarketingPage>
+      <JsonLd data={jsonLd} />
       <PageHero
         title={t("title")}
         lead={t("lead")}

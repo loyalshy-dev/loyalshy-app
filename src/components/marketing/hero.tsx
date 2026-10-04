@@ -28,7 +28,7 @@ export async function Hero() {
           {t("tagline")}
         </p>
         <div className="mt-7 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-          <Link href="/register" className="mk-btn-primary px-8! py-4! text-base!">
+          <Link href="/register" prefetch={false} className="mk-btn-primary px-8! py-4! text-base!">
             {tCommon("getStartedFree")}
           </Link>
           <Link

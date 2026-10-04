@@ -134,12 +134,12 @@ export function TicketPiece({ m, alt }: { m: MockCopy; alt: string }) {
   )
 }
 
-export function StoryPiece({ m, alt, passAlt }: { m: MockCopy; alt: string; passAlt: string }) {
+export function StoryPiece({ m, alt }: { m: MockCopy; alt: string }) {
   return (
     <Frame alt={alt}>
       <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-[18px]" style={{ width: 132, aspectRatio: "9/16", background: "linear-gradient(160deg, oklch(0.25 0.03 38), oklch(0.17 0.02 38))", boxShadow: PAPER.boxShadow }}>
         <div className="w-[70%] rotate-[-6deg]">
-          <Image src="/pass-types/stamp-2-apple.webp" alt={passAlt} width={960} height={1350} className="h-auto w-full rounded-[5px]" sizes="100px" />
+          <Image src="/pass-types/stamp-2-apple.webp" alt="" width={960} height={1350} className="h-auto w-full rounded-[5px]" sizes="100px" />
         </div>
         <p className="mt-4 rounded-full bg-white px-2.5 py-1 text-[8px] font-semibold" style={{ color: "#1F1410" }}>{m.storyLine}</p>
         <p className="mt-1.5 text-[7px] text-white/70">loyalshy.com/join/cafe-sol</p>

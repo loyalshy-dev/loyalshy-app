@@ -205,7 +205,7 @@ export function RealCard({ src, alt }: { src: string; alt: string }) {
       height={1350}
       className="h-auto w-full"
       style={{ filter: "drop-shadow(0 14px 18px oklch(0 0 0 / 0.22))" }}
-      sizes="400px"
+      sizes="(min-width: 1024px) 400px, 330px"
     />
   )
 }
