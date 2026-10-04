@@ -10,7 +10,8 @@ import { isLocale, marketingAlternates, marketingSocial } from "@/i18n/marketing
 // (/, /es, /fr — see src/i18n/marketing.ts), so every language is its
 // own crawlable page with hreflang alternates.
 
-export const viewport: Viewport = rootViewport
+// Paper, always: the marketing site ignores the system / dashboard theme.
+export const viewport: Viewport = { ...rootViewport, themeColor: "#ffffff" }
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
@@ -45,7 +46,7 @@ export default async function MarketingRootLayout({ children, params }: LayoutPr
   const messages = await getMessages()
 
   return (
-    <RootDocument locale={locale} messages={messages}>
+    <RootDocument locale={locale} messages={messages} forcedTheme="light">
       <LocaleCookieSync locale={locale} />
       {children}
     </RootDocument>

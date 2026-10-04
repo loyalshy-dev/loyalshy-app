@@ -79,10 +79,13 @@ export function RootDocument({
   locale,
   messages,
   children,
+  forcedTheme,
 }: {
   locale: string
   messages: Record<string, unknown>
   children: React.ReactNode
+  /** The marketing site is always light; the app follows the system / the user's choice. */
+  forcedTheme?: "light" | "dark"
 }) {
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -98,7 +101,7 @@ export function RootDocument({
       </head>
       <body className={`${geistMono.variable} ${inter.variable} antialiased`}>
         <NextIntlClientProvider locale={locale} messages={pickMessages(messages, SHARED_NAMESPACES)}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange forcedTheme={forcedTheme}>
             {children}
             <SpeedInsights />
             <Analytics />

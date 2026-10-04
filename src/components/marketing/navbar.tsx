@@ -3,19 +3,22 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 
 import { Wordmark } from "@/components/brand-mark"
 import { LanguageSwitcher } from "@/components/language-switcher"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
+import { localeNames, locales, type Locale } from "@/i18n/config"
+import { localePath, parseMarketingPath } from "@/i18n/marketing"
 import { useLocalePath } from "@/i18n/use-locale-path"
 
 // The global bar. At the top of the page it runs edge to edge over a
 // hairline; once the page scrolls it lifts into a floating translucent
 // capsule, a little narrower than the page. Links go to the secondary pages
 // (no anchors into the landing since 2026-10-04) and the one of the page on
-// screen is marked. The one action is the coral pill. On phones the bar is 44px and
+// screen is marked. The language shows as its code ("ES") and opens the
+// same dropdown as the dashboard's switcher; there is no theme toggle (the
+// marketing site is forced light). The one action is the coral pill. On phones the bar is 44px and
 // the menu is a full-screen sheet over everything (bar included) with its
 // own close button, so it reads the same wherever the page was scrolled.
 
@@ -113,8 +116,7 @@ export function MarketingNavbar() {
           </nav>
 
           <div className="mk-nav-actions">
-            <LanguageSwitcher className="mk-nav-icon" />
-            <ThemeToggle className="mk-nav-icon" />
+            <LanguageSwitcher variant="code" className="mk-nav-link mk-nav-lang" />
             <span className="mk-nav-sep" aria-hidden="true" />
             <Link href="/login" className="mk-nav-link mk-nav-link-strong">
               {tCommon("logIn")}
@@ -161,12 +163,38 @@ export function MarketingNavbar() {
               ))}
             </ul>
           </nav>
-          <div className="mk-nav-menu-foot">
-            <LanguageSwitcher size="icon" className="size-10" />
-            <ThemeToggle className="size-10" />
-          </div>
+          <MenuLanguages pathname={pathname} open={open} />
         </div>
       </div>
     </header>
+  )
+}
+
+// The three languages at the foot of the phone menu, the current one in
+// ink. Plain links to the same page in the other language; the cookie is
+// written first so the unprefixed English URL isn't bounced back by the
+// locale redirect in next.config.ts.
+function MenuLanguages({ pathname, open }: { pathname: string; open: boolean }) {
+  const t = useTranslations("nav")
+  const current = useLocale() as Locale
+  const path = parseMarketingPath(pathname)?.path ?? "/"
+  return (
+    <nav className="mk-nav-menu-langs" aria-label={t("switchLanguage")}>
+      {locales.map((l) => (
+        <a
+          key={l}
+          href={localePath(l, path)}
+          lang={l}
+          hrefLang={l}
+          aria-current={l === current ? "true" : undefined}
+          tabIndex={open ? 0 : -1}
+          onClick={() => {
+            document.cookie = `locale=${l};path=/;max-age=31536000;samesite=lax`
+          }}
+        >
+          {localeNames[l]}
+        </a>
+      ))}
+    </nav>
   )
 }
