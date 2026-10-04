@@ -3,9 +3,10 @@ import Image from "next/image"
 import Link from "next/link"
 import { getTranslations, setRequestLocale } from "next-intl/server"
 import type { Locale } from "@/i18n/config"
-import { localePath } from "@/i18n/marketing"
+import { localePath, marketingUrl, siteUrl } from "@/i18n/marketing"
 import { pageMetadata } from "@/components/marketing/pages/metadata"
 import { MarketingPage } from "@/components/marketing/pages/shell"
+import { JsonLd, ORG_ID, SOFTWARE_ID, STAFF_APP_ID, pageJsonLd } from "@/components/marketing/pages/json-ld"
 import { PageHero } from "@/components/marketing/pages/page-hero"
 import { PageSection } from "@/components/marketing/pages/section"
 import { SplitRows } from "@/components/marketing/pages/split"
@@ -55,6 +56,26 @@ export default async function StaffAppPage({ params }: PageProps) {
   setRequestLocale(locale)
   const t = await getTranslations("pages.staffApp")
   const tc = await getTranslations("pages.common")
+  const tm = await getTranslations({ locale, namespace: "metadata.staffApp" })
+  // The team app as its own entity, tied to both store listings and to the platform.
+  const mobileApp = {
+    "@type": "MobileApplication",
+    "@id": STAFF_APP_ID,
+    name: "Loyalshy Staff",
+    url: marketingUrl(locale, "/staff-app"),
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "iOS, Android",
+    installUrl: [APP_STORE_URL, PLAY_STORE_URL],
+    downloadUrl: [APP_STORE_URL, PLAY_STORE_URL],
+    sameAs: [APP_STORE_URL, PLAY_STORE_URL],
+    screenshot: [`${siteUrl}/staff-app/scan.webp`, `${siteUrl}/staff-app/today.webp`, `${siteUrl}/staff-app/share.webp`],
+    offers: { "@type": "Offer", price: 0, priceCurrency: "EUR" },
+    isPartOf: { "@id": SOFTWARE_ID },
+    publisher: { "@id": ORG_ID },
+    inLanguage: ["es", "en", "fr"],
+    description: tm("description"),
+  }
+  const jsonLd = await pageJsonLd(locale, "/staff-app", "staffApp", { about: STAFF_APP_ID, extra: [mobileApp] })
 
   const badges = (
     <div className="flex flex-wrap items-center gap-3">
@@ -69,6 +90,7 @@ export default async function StaffAppPage({ params }: PageProps) {
 
   return (
     <MarketingPage>
+      <JsonLd data={jsonLd} />
       <PageHero
         title={t("title")}
         lead={t("lead")}

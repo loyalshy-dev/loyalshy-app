@@ -19,6 +19,30 @@ const securityHeaders = [
     value: "camera=(self), microphone=(), geolocation=()",
   },
   { key: "X-DNS-Prefetch-Control", value: "on" },
+  // Report-only first: Sentry/devtools show what it would block. Promote to
+  // Content-Security-Policy once a week of traffic shows no violations.
+  // Origins actually used on the marketing pages: Unsplash photos, the R2
+  // bucket (logos), Sentry ingest, Plausible when enabled.
+  {
+    key: "Content-Security-Policy-Report-Only",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://plausible.io",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self'",
+      "img-src 'self' data: blob: https://images.unsplash.com https://pub-7c8a43a8edf44acb9ce148cb7547aa00.r2.dev https://*.tile.openstreetmap.org",
+      "connect-src 'self' https://*.ingest.sentry.io https://*.sentry.io https://plausible.io",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; "),
+  },
+];
+
+// Files in /public are not content-hashed, so a day in the browser plus a
+// week of stale-while-revalidate; rename a file when it changes.
+const staticAssetHeaders = [
+  { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" },
 ];
 
 // ─── Marketing locale routing (see src/i18n/marketing.ts) ────
@@ -77,6 +101,10 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    // Optimized images were sent with max-age=0 (the upstream /public files
+    // have no cache header); a month in the browser is right for assets
+    // that only change with a deploy.
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       {
         protocol: "https",
@@ -95,6 +123,10 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: securityHeaders,
+      },
+      {
+        source: "/:path*.(webp|png|jpg|jpeg|svg|ico|woff2)",
+        headers: staticAssetHeaders,
       },
     ];
   },

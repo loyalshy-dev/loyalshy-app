@@ -9,89 +9,42 @@ import { ClosingCTA } from "@/components/marketing/closing-cta"
 import { MarketingFooter } from "@/components/marketing/footer"
 import type { Locale } from "@/i18n/config"
 import { marketingUrl, siteUrl } from "@/i18n/marketing"
+import { JsonLd, ORG_ID, SITE_ID, SOFTWARE_ID, siteNodes } from "@/components/marketing/pages/json-ld"
 
 type PageProps = { params: Promise<{ locale: string }> }
 
-async function JsonLd({ locale }: { locale: Locale }) {
+async function HomeJsonLd({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "metadata.home" })
   const pageUrl = marketingUrl(locale, "/")
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "Organization",
-        "@id": `${siteUrl}/#organization`,
-        name: "Loyalshy",
-        legalName: "HEX CONCEPTS STUDIO, S.L.",
-        url: siteUrl,
-        logo: `${siteUrl}/logo.svg`,
-        email: "hello@loyalshy.com",
-        sameAs: ["https://instagram.com/loyalshy", "https://tiktok.com/@loyalshy_"],
-        taxID: "B27646645",
-        vatID: "ESB27646645",
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: "Av. Convent 11",
-          postalCode: "25123",
-          addressLocality: "Torrefarrera",
-          addressRegion: "Lleida",
-          addressCountry: "ES",
-        },
-        description: t("jsonLdDescription"),
-      },
-      {
-        "@type": "WebSite",
-        "@id": `${siteUrl}/#website`,
-        name: "Loyalshy",
-        url: siteUrl,
-        publisher: { "@id": `${siteUrl}/#organization` },
-        inLanguage: ["en", "es", "fr"],
-      },
+      ...(await siteNodes(locale)),
       {
         "@type": "WebPage",
         "@id": `${pageUrl}/#webpage`,
         url: pageUrl,
         name: t("title"),
         description: t("description"),
-        isPartOf: { "@id": `${siteUrl}/#website` },
-        about: { "@id": `${siteUrl}/#software` },
+        isPartOf: { "@id": SITE_ID },
+        about: { "@id": SOFTWARE_ID },
         inLanguage: locale,
       },
       {
         "@type": "SoftwareApplication",
-        "@id": `${siteUrl}/#software`,
+        "@id": SOFTWARE_ID,
         name: "Loyalshy",
         url: siteUrl,
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         description: t("description"),
-        offers: {
-          "@type": "AggregateOffer",
-          priceCurrency: "EUR",
-          lowPrice: "0",
-          highPrice: "99",
-          offerCount: "4",
-        },
-        featureList: [
-          "Digital stamp cards",
-          "Digital coupons",
-          "Apple Wallet integration",
-          "Google Wallet integration",
-          "QR code onboarding",
-          "Real-time analytics",
-          "Team management",
-        ],
-        provider: { "@id": `${siteUrl}/#organization` },
+        // Free 0 / Pro 29 / Business 49 / Scale 99; Enterprise is custom
+        offers: { "@type": "AggregateOffer", priceCurrency: "EUR", lowPrice: 0, highPrice: 99, offerCount: 4 },
+        provider: { "@id": ORG_ID },
       },
     ],
   }
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-    />
-  )
+  return <JsonLd data={structuredData} />
 }
 
 const MARKETING_NAMESPACES = [
@@ -112,7 +65,7 @@ export default async function LandingPage({ params }: PageProps) {
 
   return (
     <NextIntlClientProvider messages={marketingMessages}>
-      <JsonLd locale={locale} />
+      <HomeJsonLd locale={locale} />
       <div data-brand="loyalshy" className="min-h-screen" style={{ background: "var(--mk-bg)" }}>
         <MarketingNavbar />
         <main>

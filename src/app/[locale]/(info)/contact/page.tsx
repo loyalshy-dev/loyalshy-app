@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl"
 import { MarketingNavbar } from "@/components/marketing/navbar"
 import { MarketingFooter } from "@/components/marketing/footer"
 import { ContactForm } from "@/components/marketing/contact-form"
+import { JsonLd, ORG_ID, pageJsonLd } from "@/components/marketing/pages/json-ld"
 
 type PageProps = { params: Promise<{ locale: string }> }
 
@@ -31,6 +32,7 @@ export default async function ContactPage({ params }: PageProps) {
   setRequestLocale(locale)
   const t = await getTranslations("contact")
   const tCommon = await getTranslations("common")
+  const jsonLd = await pageJsonLd(locale, "/contact", "contact", { type: "ContactPage", mainEntity: ORG_ID })
   const messages = await getMessages()
   const contactMessages: Record<string, unknown> = {}
   for (const ns of CONTACT_NAMESPACES) {
@@ -43,6 +45,7 @@ export default async function ContactPage({ params }: PageProps) {
         <MarketingNavbar />
 
         <main>
+          <JsonLd data={jsonLd} />
           <section style={{ background: "var(--mk-bg)" }}>
             <div className="mk-wrap py-14 lg:py-20">
               <div className="max-w-[52ch]">

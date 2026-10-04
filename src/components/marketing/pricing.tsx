@@ -107,7 +107,7 @@ export function Pricing() {
                 <p className={saved > 0 ? "mk-caption mt-1" : "mk-caption hidden sm:block sm:mt-1 sm:min-h-[1lh]"} style={{ color: "var(--mk-text-dimmed)" }}>
                   {saved > 0 ? `${price * 12} € ${t("perYear")} · ${saved} € ${t("savedPerYear")}` : ""}
                 </p>
-                <Link href="/register" className={col.recommended ? "mk-btn-primary mt-4 w-full sm:mt-5" : "mk-btn-ghost mt-4 w-full sm:mt-5"} aria-label={`${tc("getStarted")} · ${t(`${col.key}.name`)}`}>
+                <Link href="/register" prefetch={false} className={col.recommended ? "mk-btn-primary mt-4 w-full sm:mt-5" : "mk-btn-ghost mt-4 w-full sm:mt-5"} aria-label={`${tc("getStarted")} · ${t(`${col.key}.name`)}`}>
                   {tc("getStarted")}
                 </Link>
                 <ul className="mt-5 w-full border-t pt-4 text-left sm:mt-6 sm:pt-5" style={{ borderColor: "var(--mk-border)" }}>
