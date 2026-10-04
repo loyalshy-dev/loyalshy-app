@@ -70,6 +70,17 @@ Open [http://localhost:3000](http://localhost:3000).
 | STAMP_CARD | Collect stamps, earn rewards | `{ action: "stamp" }` |
 | COUPON | Single-use or unlimited redeemable offer | `{ action: "redeem" }` |
 
+## Private Programs (Invite Only)
+
+Every program has an **access mode** (`PassTemplate.joinMode`), set from the program's **Distribution** tab by owners and Program managers:
+
+| Mode | Who gets a pass | Public page `/join/{slug}` |
+|------|-----------------|----------------------------|
+| `PUBLIC` (default) | Anyone — QR, shareable link, NFC tag, plus the team | Lists the program; the join form issues the pass |
+| `INVITE_ONLY` | Only the team — **Direct issue** by email from the dashboard, or **counter signup** from the staff app | Hides the program. An old QR/link shows "This program is by invitation" (never enrols the visitor in another program); the join action refuses the id even if someone has it |
+
+Switching to invite only removes the QR, share-link and NFC sections from Distribution and the matching steps from the first-customer checklist. Existing holders keep their card page. The staff app receives `joinMode` on every template and leaves invite-only programs out of "Share a program" / Counter mode.
+
 ## Announcements (Wallet Broadcast)
 
 From a program's **Distribution** page (or the staff app's **Announcement** screen, for owners and Program managers), merchants can push a short message (max 160 chars, e.g. "2x1 today") to everyone holding that program's pass — it appears as a lock-screen notification on both Apple and Google Wallet. Sends are limited per organization by plan and shared across all programs: **Free 2 in total, Pro 1, Business 2, Scale 5 per rolling 7 days, Enterprise unlimited**. On top of that, each program is capped at 3 sends per 24h (Google's notification cap). Google holders are notified via a single class-level `TEXT_AND_NOTIFY` PATCH; Apple holders via APNs push + a `changeMessage` field on the pass. Delivery is best-effort — users can mute a pass's notifications.
@@ -206,7 +217,7 @@ There is **no public REST API** (removed in the 2026-04-27 pivot — no API keys
 **Forcing a staff-app update:** set `STAFF_APP_MIN_VERSION` (e.g. `1.3.0`) on Vercel and redeploy. Staff builds below it get an "update required" screen on launch (their session is kept). `STAFF_APP_UPDATE_URL` optionally overrides the App Store / Play link. Builds up to 1.2.0 don't send the header and are never blocked. Raise it only once that version is live on both the App Store and Google Play. Logic: `src/lib/staff-app-version.ts`.
 | `/announcements` | GET / POST | Wallet broadcast quota + reach / send (owner and Program manager only) |
 | `/interactions` | GET | Interaction feed |
-| `/templates` | GET | Program list |
+| `/templates` | GET | Program list (each with `joinMode`: `PUBLIC` or `INVITE_ONLY`) |
 
 Errors are RFC 7807 problem bodies; conflicts carry a machine-readable `code` (e.g. `alreadyHasPass`, `quotaReached`, `rewardAlreadyUsed`).
 
