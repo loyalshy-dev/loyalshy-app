@@ -239,6 +239,16 @@ The public REST API was deleted in the pivot. Only the loyalshy-staff mobile app
 ### Interaction Types (6)
 `STAMP`, `COUPON_REDEEM`, `STATUS_CHANGE`, `REWARD_EARNED`, `REWARD_REDEEMED`, `NOTE`
 
+## Branching & Release Workflow (agreed 2026-10-04)
+
+`main` deploys to production on every push (Vercel, migrations in the build). The rules:
+
+- **Anything that compiles or ships goes through a branch and a PR**: code, `prisma/`, `src/messages/*.json` (a malformed messages file breaks the build), config, assets. Branch from `origin/main`, commit as the work lands, **do not push or open the PR until the user asks**; when asked, run `/code-review origin/main...<branch>`, fix what is real, then push and hand over the compare URL (the `gh` CLI is read-only on these repos — the user opens and merges the PR). Never merge `main` into a feature branch as a side effect of another task; conflicts are resolved as their own explicit step.
+- **Documentation-only changes go directly on `main`**: `CLAUDE.md`, `README.md`, `docs/`. They do not affect the build output, and a PR per sentence is overhead (the only cost is a no-op Vercel build). If the docs accompany a feature, they travel in that feature's branch instead.
+- **Outside git**: the monorepo-root `CLAUDE.md` has no repository, and the assistant's memory lives in its own directory; neither passes through a branch.
+- After the user says a PR is merged: apply new migrations locally (`npx prisma migrate deploy`, dev DB only), `git checkout main && git pull --ff-only`, regenerate the Prisma client if the schema changed, `pnpm install --frozen-lockfile` if `package.json` changed.
+- Verify before reporting: `npx tsc --noEmit -p .`, `npx eslint <touched files>`, `npx vitest run`, and a Playwright screenshot of the affected screen (dashboard screens: log in with the dev fixtures `owner@cafe.test` / `cafeowner1234`, org `cafe-sol-e2e`).
+
 ## Development Phases
 
 The full rewrite plan is in `.claude/plans/happy-growing-stroustrup.md`. Phases:
