@@ -53,8 +53,28 @@ export default async function SubprocessorsPage({ params }: PageProps) {
       </section>
 
       <PageSection>
-        <div className="-mx-6 overflow-x-auto px-6 lg:mx-0 lg:px-0">
-          <table className="w-full min-w-[720px] border-collapse text-left">
+        {/* Phones: one block per vendor */}
+        <ul className="md:hidden" role="list">
+          {ROWS.map((row) => (
+            <li key={row.key} className="border-t py-5" style={{ borderColor: "var(--mk-border)" }}>
+              <a href={row.href} target="_blank" rel="noopener noreferrer" className="mk-title-4 underline underline-offset-4" style={{ color: "var(--mk-text)" }}>
+                {row.name}
+              </a>
+              <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                {(["purpose", "data", "location"] as const).map((c) => (
+                  <div key={c} className="contents">
+                    <dt className="mk-caption pt-0.5 font-medium" style={{ color: "var(--mk-text-dimmed)" }}>{t(`columns.${c}`)}</dt>
+                    <dd className="mk-body-sm" style={{ color: c === "purpose" ? "var(--mk-text)" : "var(--mk-text-muted)" }}>{t(`rows.${row.key}.${c}`)}</dd>
+                  </div>
+                ))}
+              </dl>
+            </li>
+          ))}
+        </ul>
+
+        {/* Tablet and up: the table */}
+        <div className="hidden overflow-x-auto md:block">
+          <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b" style={{ borderColor: "var(--mk-border)" }}>
                 {(["name", "purpose", "data", "location"] as const).map((c) => (
