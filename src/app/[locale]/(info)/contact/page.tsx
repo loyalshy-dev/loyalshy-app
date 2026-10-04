@@ -31,6 +31,7 @@ export default async function ContactPage({ params }: PageProps) {
   const locale = (await params).locale as Locale
   setRequestLocale(locale)
   const t = await getTranslations("contact")
+  const tCommon = await getTranslations("common")
   const jsonLd = await pageJsonLd(locale, "/contact", "contact", { type: "ContactPage", mainEntity: ORG_ID })
   const messages = await getMessages()
   const contactMessages: Record<string, unknown> = {}
@@ -82,6 +83,11 @@ export default async function ContactPage({ params }: PageProps) {
                       hello@loyalshy.com
                     </a>
                   </p>
+                  <address className="mk-body-sm mt-6 not-italic" style={{ color: "var(--mk-text-muted)" }}>
+                    <span className="font-medium" style={{ color: "var(--mk-text)" }}>{tCommon("companyInfo.name")}</span>
+                    <br />
+                    {tCommon("companyInfo.address")}
+                  </address>
                 </aside>
               </div>
             </div>

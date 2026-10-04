@@ -102,7 +102,7 @@ export default async function StaffAppPage({ params }: PageProps) {
         }
       />
 
-      <PageSection>
+      <PageSection title={t("rowsTitle")}>
         <SplitRows
           rows={ROWS.map((r) => ({
             id: r.key,
