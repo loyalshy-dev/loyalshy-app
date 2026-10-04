@@ -11,6 +11,5 @@ export async function pageMetadata(locale: Locale, path: MarketingPath, key: str
     description: t("description"),
     alternates: marketingAlternates(locale, path),
     ...marketingSocial(locale, path, `${t("title")} — Loyalshy`, t("description")),
-    robots: { index: true, follow: true },
   }
 }

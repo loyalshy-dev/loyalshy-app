@@ -12,6 +12,7 @@ import { SplitRows } from "@/components/marketing/pages/split"
 import { FeatureGrid } from "@/components/marketing/pages/feature-grid"
 import { PageFAQ } from "@/components/marketing/pages/page-faq"
 import { PhoneFrame } from "@/components/marketing/phone-frame"
+import { APP_STORE_URL, PLAY_STORE_URL } from "@/components/marketing/store-links"
 import { ClosingCTA } from "@/components/marketing/closing-cta"
 
 type PageProps = { params: Promise<{ locale: string }> }
@@ -21,10 +22,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const locale = (await params).locale as Locale
   return pageMetadata(locale, "/staff-app", "staffApp")
 }
-
-// Loyalshy Staff, live on both stores since 2026-10-01.
-const APP_STORE_URL = process.env.NEXT_PUBLIC_APP_STORE_URL || "https://apps.apple.com/app/id6761551059"
-const PLAY_STORE_URL = process.env.NEXT_PUBLIC_PLAY_STORE_URL || "https://play.google.com/store/apps/details?id=com.loyalshy.staff"
 
 // Real screenshots (pre-redesign, see "Known stale assets" in CLAUDE.md).
 const SCREENS = {

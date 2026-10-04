@@ -2594,7 +2594,7 @@
         },
         "annual": {
           "question": "¿Cómo funciona el pago anual?",
-          "answer": "Pagas doce meses de una vez al precio que aparece bajo Anual, que es un 20 % menos que pagar mes a mes."
+          "answer": "Pagas doce meses de una vez al precio que aparece bajo Anual, hasta un 20 % menos que pagar mes a mes."
         },
         "vat": {
           "question": "¿Los precios incluyen IVA?",

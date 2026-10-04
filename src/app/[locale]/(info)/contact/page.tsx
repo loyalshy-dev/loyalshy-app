@@ -19,7 +19,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: t("description"),
     alternates: marketingAlternates(locale, "/contact"),
     ...marketingSocial(locale, "/contact", `${t("title")} — Loyalshy`, t("description")),
-    robots: { index: true, follow: true },
   }
 }
 

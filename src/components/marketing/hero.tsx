@@ -2,10 +2,9 @@ import Link from "next/link"
 import { getTranslations } from "next-intl/server"
 import { HeroFilm } from "./hero-film"
 
+import { APP_STORE_URL, PLAY_STORE_URL } from "./store-links"
+
 const DEMO_JOIN_URL = process.env.NEXT_PUBLIC_DEMO_JOIN_URL
-// Loyalshy Staff, live on both stores since 2026-10-01.
-const APP_STORE_URL = process.env.NEXT_PUBLIC_APP_STORE_URL || "https://apps.apple.com/app/id6761551059"
-const PLAY_STORE_URL = process.env.NEXT_PUBLIC_PLAY_STORE_URL || "https://play.google.com/store/apps/details?id=com.loyalshy.staff"
 
 // Apple's opener: the name of the thing in two lines, one tagline, the
 // action, and then the film — the phone fills the fold and the story plays

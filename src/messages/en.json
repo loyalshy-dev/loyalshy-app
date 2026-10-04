@@ -2594,7 +2594,7 @@
         },
         "annual": {
           "question": "How does yearly billing work?",
-          "answer": "You pay twelve months at once at the price shown under Annual, which is 20% less than paying month by month."
+          "answer": "You pay twelve months at once at the price shown under Annual, up to 20% less than paying month by month."
         },
         "vat": {
           "question": "Do prices include VAT?",

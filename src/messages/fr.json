@@ -2594,7 +2594,7 @@
         },
         "annual": {
           "question": "Comment fonctionne le paiement annuel ?",
-          "answer": "Vous payez douze mois d'un coup au prix affiché sous Annuel, soit 20 % de moins que mois par mois."
+          "answer": "Vous payez douze mois d'un coup au prix affiché sous Annuel, jusqu'à 20 % de moins que mois par mois."
         },
         "vat": {
           "question": "Les prix incluent-ils la TVA ?",

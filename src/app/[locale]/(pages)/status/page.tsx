@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 import { connection } from "next/server"
+import { cacheLife } from "next/cache"
 import { getTranslations, setRequestLocale } from "next-intl/server"
 import type { Locale } from "@/i18n/config"
 import { siteUrl } from "@/i18n/marketing"
@@ -47,12 +48,21 @@ function Row({ status, name, desc, detail }: { status: CheckStatus; name: string
   )
 }
 
-// The live part: runs the same checks as /api/health at request time. It
-// sits in its own Suspense boundary so the rest of the page prerenders.
+// The checks cost a database round trip and a Redis request, and this page
+// is public and in the sitemap, so one result is shared for 30 s across
+// visitors and languages. /api/health stays uncached for the monitors.
+async function cachedHealthChecks() {
+  "use cache"
+  cacheLife({ stale: 30, revalidate: 30, expire: 300 })
+  return runHealthChecks()
+}
+
+// The live part, in its own Suspense boundary so the rest of the page
+// prerenders; connection() keeps it out of the static shell.
 async function LiveStatus() {
   await connection()
   const t = await getTranslations("pages.status")
-  const report = await runHealthChecks()
+  const report = await cachedHealthChecks()
   const time = report.timestamp.slice(11, 19)
   const label = (s: CheckStatus) => t(`states.${s}`)
   const detail = (s: CheckStatus, ms?: number) => (s === "ok" && ms !== undefined ? `${label(s)} · ${t("latency", { ms })}` : label(s))

@@ -5,7 +5,9 @@ import { PLANS, type PlanId } from "@/lib/plans"
 
 // The plans side by side, row by row, on hairlines. Limits come from the
 // same plan table billing uses; names from the `pricing` namespace. Ink
-// checks (coral is for the button only).
+// checks (coral is for the button only). No prices here: the grid above
+// shows them, and its toggle may be on Annual. The six rows that are `true`
+// everywhere are the features no plan gates.
 
 type Column = { key: "free" | "starter" | "growth" | "scale"; planId: PlanId }
 const COLUMNS: Column[] = [
@@ -20,7 +22,6 @@ type Cell = { kind: "text"; value: string } | { kind: "bool"; value: boolean }
 export async function PlanCompare({ locale }: { locale: Locale }) {
   const t = await getTranslations("pages.pricing")
   const tp = await getTranslations("pricing")
-  const tc = await getTranslations("common")
   const n = new Intl.NumberFormat(locale)
   const count = (v: number) => (Number.isFinite(v) ? n.format(v) : t("values.unlimited"))
 
@@ -56,13 +57,9 @@ export async function PlanCompare({ locale }: { locale: Locale }) {
               <span className="sr-only">{t("compareTitle")}</span>
             </th>
             {COLUMNS.map((c) => {
-              const plan = PLANS[c.planId]
               return (
                 <th key={c.key} scope="col" className="py-4 pr-4 align-bottom">
                   <span className="mk-title-4 block" style={{ color: "var(--mk-text)" }}>{tp(`${c.key}.name`)}</span>
-                  <span className="mk-body-sm mt-1 block tabular-nums" style={{ color: "var(--mk-text-muted)" }}>
-                    {plan.price} {tc("perMonth")}
-                  </span>
                 </th>
               )
             })}

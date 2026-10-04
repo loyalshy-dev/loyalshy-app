@@ -1,5 +1,6 @@
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages } from "next-intl/server"
+import { pickMessages } from "@/components/root-document"
 import { MarketingNavbar } from "@/components/marketing/navbar"
 import { MarketingFooter } from "@/components/marketing/footer"
 
@@ -18,11 +19,7 @@ export async function MarketingPage({
   children: React.ReactNode
   clientNamespaces?: readonly string[]
 }) {
-  const messages = await getMessages()
-  const picked: Record<string, unknown> = {}
-  for (const ns of [...BASE_NAMESPACES, ...clientNamespaces]) {
-    if (ns in messages) picked[ns] = messages[ns as keyof typeof messages]
-  }
+  const picked = pickMessages(await getMessages(), [...BASE_NAMESPACES, ...clientNamespaces])
 
   return (
     <NextIntlClientProvider messages={picked}>
