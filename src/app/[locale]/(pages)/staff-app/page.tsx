@@ -72,15 +72,13 @@ export default async function StaffAppPage({ params }: PageProps) {
       <PageHero
         title={t("title")}
         lead={t("lead")}
+        actions={badges}
         media={
           <div className="flex justify-center lg:justify-end">
             <Screen src={SCREENS.scan} alt={t("screens.scan")} width={300} priority />
           </div>
         }
       />
-      <section style={{ background: "var(--mk-bg)" }}>
-        <div className="mk-wrap -mt-6 pb-10 lg:-mt-14 lg:pb-16">{badges}</div>
-      </section>
 
       <PageSection>
         <SplitRows

@@ -14,6 +14,7 @@ export function PageHero({
   primary,
   secondary,
   note,
+  actions,
   media,
   mediaClassName,
 }: {
@@ -22,6 +23,8 @@ export function PageHero({
   primary?: Cta
   secondary?: Cta
   note?: string
+  /** Replaces the button pair (e.g. the store badges on /staff-app). */
+  actions?: ReactNode
   media?: ReactNode
   mediaClassName?: string
 }) {
@@ -33,6 +36,7 @@ export function PageHero({
             {title}
           </h1>
           <p className="mk-lead mt-5 max-w-[48ch]">{lead}</p>
+          {actions ? <div className="mt-8">{actions}</div> : null}
           {primary || secondary ? (
             <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
               {primary ? (
