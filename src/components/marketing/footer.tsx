@@ -42,6 +42,7 @@ export async function MarketingFooter() {
         { label: t("automations"), href: localePath(locale, "/automations") },
         { label: t("staffApp"), href: localePath(locale, "/staff-app") },
         { label: t("privatePrograms"), href: localePath(locale, "/private-programs") },
+        { label: t("promote"), href: localePath(locale, "/promote") },
         { label: tNav("pricing"), href: localePath(locale, "/pricing") },
       ],
     },

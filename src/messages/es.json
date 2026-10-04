@@ -286,7 +286,8 @@
     "about": "Sobre nosotros",
     "partners": "Partners",
     "status": "Estado",
-    "subprocessors": "Subencargados"
+    "subprocessors": "Subencargados",
+    "promote": "Cómo promocionarlo"
   },
   "cookieBanner": {
     "message": "Usamos cookies esenciales para autenticación y preferencias. Sin cookies de rastreo.",
@@ -925,7 +926,18 @@
       "shareNative": "Compartir...",
       "embedOnSite": "Insertar en tu web",
       "copyEmbed": "Copiar código de inserción",
-      "issueToSelected": "{count, plural, =0 {Emitir pase a contactos} one {Emitir pase a # contacto} other {Emitir pase a # contactos}}"
+      "issueToSelected": "{count, plural, =0 {Emitir pase a contactos} one {Emitir pase a # contacto} other {Emitir pase a # contactos}}",
+      "materialTitle": "Material para el mostrador",
+      "materialDescription": "PDF listos para imprimir con tu logo, tus colores y el QR de este programa. Imprímelos en cualquier copistería.",
+      "materialCounterCard": "Tarjeta de mostrador (A6)",
+      "materialTableTent": "Expositor de mesa (A4, plegado)",
+      "materialTentReviews": "La segunda cara lleva tu enlace de reseñas de Google.",
+      "materialTentNoReviews": "Configura tu enlace de reseñas de Google en Automatizaciones y la segunda cara pedirá una reseña.",
+      "materialScanLine": "Escanea y guarda tu tarjeta en tu Wallet",
+      "materialReviewsLine": "¿Te ha gustado? Déjanos una reseña en Google",
+      "materialFold": "Doblar por aquí",
+      "materialIdeas": "Ideas para promocionar tu programa",
+      "materialFailed": "No se ha podido generar el PDF. Inténtalo de nuevo."
     },
     "programSettings": {
       "title": "Ajustes",
@@ -2194,6 +2206,10 @@
     "subprocessors": {
       "title": "Subencargados",
       "description": "Los terceros que tratan datos personales por cuenta de Loyalshy, para qué y dónde."
+    },
+    "promote": {
+      "title": "Cómo conseguir que tus clientes se apunten a tu programa de fidelización",
+      "description": "Ocho sitios y momentos que traen altas: la caja, la mesa, la puerta, el ticket, Instagram, las reseñas de Google. Material listo para imprimir gratis desde tu panel, o te lo hacemos nosotros."
     }
   },
   "pages": {
@@ -2212,7 +2228,8 @@
       "writeToUs": "Escríbenos",
       "anythingElse": "¿Algo más?",
       "emailUs": "Escríbenos",
-      "replyTime": "y te contestamos por correo."
+      "replyTime": "y te contestamos por correo.",
+      "seePromote": "Cómo promocionarlo en el mostrador"
     },
     "industries": {
       "hub": {
@@ -3002,6 +3019,152 @@
       "changesBody": "Actualizamos esta página cuando se añade o se sustituye un subencargado. Los clientes de un plan de pago pueden pedir que se les avise por correo.",
       "dpaTitle": "Acuerdos.",
       "dpaBody": "¿Preguntas sobre el tratamiento de datos, o necesitas un acuerdo de encargo de tratamiento? Escribe a"
+    },
+    "promote": {
+      "title": "Dónde se apuntan tus clientes.",
+      "lead": "La tarjeta ya está en el Wallet. Ahora tiene que verse. Ocho sitios y momentos de un negocio pequeño que traen altas, con qué poner en cada uno y qué decir. La tarjeta de mostrador y el expositor salen gratis de tu panel; el resto, te lo podemos hacer nosotros.",
+      "orderCta": "Pídenoslo hecho",
+      "freeCta": "Gratis desde tu panel",
+      "blocks": {
+        "counter": {
+          "title": "La caja.",
+          "body": "Una tarjeta de mostrador con el QR, del lado del cliente, junto a donde pagan. Es el mejor sitio del negocio: el móvil ya está fuera y hay unos segundos de espera.",
+          "tip": "De pie, en A6, a la altura de la mano. No detrás de la caja.",
+          "piece": "Tarjeta de mostrador",
+          "alt": "Una tarjeta de mostrador con el QR del programa y la frase del Wallet"
+        },
+        "staff": {
+          "title": "Lo que dice el equipo.",
+          "body": "«¿Tienes nuestra tarjeta? Es un segundo». Dicho mientras pagan, trae más altas que cualquier cartel. Que forme parte de la rutina de la primera semana y lo demás viene solo.",
+          "tip": "La app de equipo abre en la cámara. Todo son cinco segundos.",
+          "piece": "La frase",
+          "alt": "Un bocadillo con la frase que dice el equipo en el mostrador"
+        },
+        "tent": {
+          "title": "La mesa.",
+          "body": "Un expositor que se lee mientras esperan. Una cara apunta al programa; la otra pide una reseña en Google, para los que quieren hacerlo ahora mismo.",
+          "tip": "La cara de la reseña hacia la silla, la del programa hacia el pasillo.",
+          "piece": "Expositor de mesa",
+          "alt": "Un expositor de mesa plegado: el QR del programa por un lado, el de reseñas de Google por el otro"
+        },
+        "door": {
+          "title": "La puerta y el escaparate.",
+          "body": "Una pegatina para el que pasa, con el motivo escrito: el premio. Es también donde «cerca de tu local» enciende la tarjeta en los iPhone que ya la tienen.",
+          "tip": "A la altura de los ojos, por fuera, sobre el cristal.",
+          "piece": "Pegatina de puerta",
+          "alt": "Una pegatina redonda de puerta con el premio y el QR"
+        },
+        "ticket": {
+          "title": "El ticket.",
+          "body": "Una línea al pie del ticket, o un sello de caucho encima: «Pregunta por nuestra tarjeta». Para quien ya imprime tickets, sin instalar nada.",
+          "tip": "Si tu TPV imprime códigos QR, pon ahí el enlace de alta.",
+          "piece": "Sello de caucho",
+          "alt": "Un ticket con la frase que pide la tarjeta y un QR pequeño"
+        },
+        "social": {
+          "title": "Instagram y WhatsApp.",
+          "body": "El enlace de alta en la bio, una historia destacada que enseña la tarjeta entrando en el Wallet, y el mensaje de «gracias por venir» con el enlace. «Compartir un programa» en la app de equipo te da el enlace y el QR.",
+          "tip": "La historia funciona mejor con la tarjeta real que con un diseño.",
+          "piece": "Plantillas para historias y publicaciones",
+          "alt": "Un marco de historia de Instagram con la tarjeta y una pegatina de enlace"
+        },
+        "reviews": {
+          "title": "Reseñas en Google.",
+          "body": "La tarjeta pide la reseña sola tras la visita que elijas, desde el plan Pro. En el mostrador, un QR pequeño a tu ficha de Google para los que quieren hacerlo ahora. Nunca un premio a cambio.",
+          "tip": "Pídela tras la tercera visita, no en la primera.",
+          "piece": "Tarjeta de reseñas",
+          "alt": "Una tarjeta pequeña que pide una reseña en Google con un QR"
+        },
+        "welcome": {
+          "title": "El cupón de bienvenida.",
+          "body": "Un cupón de un solo uso para la primera compra le da al QR un motivo para escanearse hoy. «Escanea y llévate un 10 %»: la tarjeta llega al Wallet con el descuento ya puesto.",
+          "tip": "Un cupón junto a una tarjeta de sellos necesita el plan Pro.",
+          "piece": "Cupón",
+          "alt": "El cupón del 10 % de una hamburguesería en Apple Wallet"
+        }
+      },
+      "freeTitle": "Gratis desde tu panel.",
+      "freeLead": "La tarjeta de mostrador y el expositor de mesa salen de Distribución como PDF listos para imprimir, con tu logo, tus colores y el QR de tu programa. La segunda cara del expositor lleva tu enlace de reseñas de Google en cuanto lo configures.",
+      "freeSteps": {
+        "1": {
+          "title": "Publica el programa",
+          "body": "El QR apunta a su página de alta, y no cambia nunca por mucho que edites la tarjeta."
+        },
+        "2": {
+          "title": "Distribución, Material para el mostrador",
+          "body": "Dos botones: la tarjeta A6 y el expositor A4. Los PDF salen listos para imprimir."
+        },
+        "3": {
+          "title": "Imprímelo",
+          "body": "Cualquier copistería. Cartulina de 250 a 300 g, mate. El expositor se dobla por la línea de puntos."
+        }
+      },
+      "orderTitle": "O te lo hacemos nosotros.",
+      "orderLead": "Dinos qué necesitas y te contestamos con precio y fecha de entrega en dos días laborables. Impreso en cartulina, cortado y enviado a tu negocio, con tu logo y el QR de tu programa.",
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Correo",
+        "emailPlaceholder": "tu@tunegocio.com",
+        "business": "Negocio",
+        "businessPlaceholder": "Nombre de la cafetería, peluquería o tienda",
+        "pieces": "¿Qué necesitas?",
+        "pieceOptions": {
+          "counterCard": "Tarjeta de mostrador",
+          "tableTent": "Expositor de mesa",
+          "doorSticker": "Pegatina de puerta",
+          "windowSticker": "Pegatina de escaparate",
+          "stamp": "Sello de caucho para tickets",
+          "social": "Plantillas para historias y publicaciones",
+          "other": "Otra cosa"
+        },
+        "quantity": "¿Cuántas de cada?",
+        "quantityOptions": {
+          "1": "1",
+          "2-5": "De 2 a 5",
+          "6-10": "De 6 a 10",
+          "more": "Más de 10"
+        },
+        "message": "Algo más",
+        "messagePlaceholder": "Tamaños, colores, la dirección de envío…",
+        "submit": "Pedir presupuesto",
+        "note": "Sin compromiso. Te contestamos por correo con precio y fecha.",
+        "successTitle": "Petición recibida",
+        "successBody": "Te escribimos en dos días laborables con precio y fecha de entrega. Mira tu correo: te hemos enviado la confirmación.",
+        "piecesRequired": "Elige al menos una pieza."
+      },
+      "faqTitle": "Preguntas sobre promocionar.",
+      "faq": {
+        "change": {
+          "question": "¿Y si después cambio el programa?",
+          "answer": "El QR apunta a la página de alta del programa, no a su diseño. Cambia los sellos, el premio o los colores y el QR impreso sigue funcionando."
+        },
+        "ownPrinter": {
+          "question": "¿Puedo imprimirlo en mi propia imprenta?",
+          "answer": "Sí. La tarjeta de mostrador y el expositor son PDF gratuitos desde Distribución, a resolución de imprenta. Llévalos a cualquier copistería."
+        },
+        "time": {
+          "question": "¿Cuánto tarda un pedido?",
+          "answer": "Contestamos en dos días laborables con precio y fecha. La impresión y el envío dependen de la pieza; pegatinas y tarjetas suelen tardar una semana."
+        },
+        "private": {
+          "question": "¿Un programa solo por invitación tiene QR?",
+          "answer": "No. Los programas solo por invitación no tienen página pública de alta, así que no hay QR que imprimir. El material es para programas públicos."
+        }
+      },
+      "mock": {
+        "business": "Café Sol",
+        "program": "Tarjeta de sellos",
+        "reward": "El décimo café, gratis",
+        "scanLine": "Escanea y guarda tu tarjeta en tu Wallet",
+        "reviewLine": "¿Te ha gustado? Déjanos una reseña en Google",
+        "askLine": "Pregunta por nuestra tarjeta",
+        "doorLine": "El décimo café, gratis. Escanea.",
+        "storyLine": "Guárdala en tu Wallet",
+        "staffLine": "¿Tienes nuestra tarjeta? Es un segundo.",
+        "receiptTotal": "Total",
+        "fold": "Doblar por aquí"
+      }
     }
   }
 }

@@ -286,7 +286,8 @@
     "about": "About",
     "partners": "Partners",
     "status": "Status",
-    "subprocessors": "Subprocessors"
+    "subprocessors": "Subprocessors",
+    "promote": "How to promote it"
   },
   "cookieBanner": {
     "message": "We use essential cookies for authentication and preferences. No tracking cookies.",
@@ -925,7 +926,18 @@
       "shareNative": "Share...",
       "embedOnSite": "Embed on your website",
       "copyEmbed": "Copy embed code",
-      "issueToSelected": "{count, plural, =0 {Issue pass to contacts} one {Issue pass to # contact} other {Issue pass to # contacts}}"
+      "issueToSelected": "{count, plural, =0 {Issue pass to contacts} one {Issue pass to # contact} other {Issue pass to # contacts}}",
+      "materialTitle": "Counter material",
+      "materialDescription": "Print-ready PDFs with your logo, your colors and this program's QR. Print them at any copy shop.",
+      "materialCounterCard": "Counter card (A6)",
+      "materialTableTent": "Table tent (A4, folded)",
+      "materialTentReviews": "The second side carries your Google reviews link.",
+      "materialTentNoReviews": "Set your Google reviews link in Automations and the second side will ask for a review.",
+      "materialScanLine": "Scan and save your card to your Wallet",
+      "materialReviewsLine": "Enjoyed it? Leave us a review on Google",
+      "materialFold": "Fold here",
+      "materialIdeas": "Ideas for promoting your program",
+      "materialFailed": "Couldn't generate the PDF. Try again."
     },
     "programSettings": {
       "title": "Settings",
@@ -2194,6 +2206,10 @@
     "subprocessors": {
       "title": "Subprocessors",
       "description": "The third parties that process personal data on Loyalshy's behalf, what for and where."
+    },
+    "promote": {
+      "title": "How to get customers to join your loyalty program",
+      "description": "Eight places and moments that bring sign-ups: the till, the table, the door, the receipt, Instagram, Google reviews. Free print-ready material from your dashboard, or we make it for you."
     }
   },
   "pages": {
@@ -2212,7 +2228,8 @@
       "writeToUs": "Write to us",
       "anythingElse": "Anything else?",
       "emailUs": "Email us",
-      "replyTime": "and we'll answer by email."
+      "replyTime": "and we'll answer by email.",
+      "seePromote": "How to promote it at the counter"
     },
     "industries": {
       "hub": {
@@ -3002,6 +3019,152 @@
       "changesBody": "We update this page when a subprocessor is added or replaced. Customers on a paid plan can ask to be notified by email.",
       "dpaTitle": "Agreements.",
       "dpaBody": "Questions about data processing, or need a data processing agreement? Write to"
+    },
+    "promote": {
+      "title": "Where your customers sign up.",
+      "lead": "The card is in the Wallet. Now it has to be seen. Eight places and moments in a small business that bring sign-ups, with what to put there and what to say. The counter card and the table tent come free from your dashboard; the rest, we can make for you.",
+      "orderCta": "Ask us to make it",
+      "freeCta": "Free from your dashboard",
+      "blocks": {
+        "counter": {
+          "title": "The till.",
+          "body": "A counter card with the QR, on the customer's side, next to where they pay. It's the best spot in the business: the phone is already out and there are a few seconds to wait.",
+          "tip": "Standing up, A6, at hand height. Not behind the till.",
+          "piece": "Counter card",
+          "alt": "A counter card with the program's QR code and the Wallet line"
+        },
+        "staff": {
+          "title": "What the team says.",
+          "body": "“Do you have our card? It takes a second.” Said while they pay, it brings more sign-ups than any sign. Make it part of the first week's routine and the rest follows.",
+          "tip": "The team app opens on the camera. The whole thing is five seconds.",
+          "piece": "The line",
+          "alt": "A speech bubble with the line the team says at the counter"
+        },
+        "tent": {
+          "title": "The table.",
+          "body": "A tent card people read while they wait. One side joins the program; the other asks for a Google review, for the ones who want to do it right now.",
+          "tip": "The review side facing the chair, the program side facing the aisle.",
+          "piece": "Table tent",
+          "alt": "A folded table tent: the program's QR on one side, the Google reviews QR on the other"
+        },
+        "door": {
+          "title": "The door and the window.",
+          "body": "A sticker for the person walking past, with the reason on it: the reward. It's also where “near your business” lights the card on the iPhones that already have it.",
+          "tip": "Eye height, outside, on the glass.",
+          "piece": "Door sticker",
+          "alt": "A round door sticker with the reward and the QR"
+        },
+        "ticket": {
+          "title": "The receipt.",
+          "body": "A line at the bottom of the ticket, or a rubber stamp on it: “Ask for our card”. For whoever already prints receipts, with nothing to install.",
+          "tip": "If your POS prints QR codes, put the join link there.",
+          "piece": "Rubber stamp",
+          "alt": "A receipt with the line asking for the card and a small QR"
+        },
+        "social": {
+          "title": "Instagram and WhatsApp.",
+          "body": "The join link in the bio, a highlighted story that shows the card going into the Wallet, and the “thanks for coming” message with the link. Share-a-program in the team app gives you the link and the QR.",
+          "tip": "The story works better with the real card than with a design.",
+          "piece": "Story and post templates",
+          "alt": "An Instagram story frame showing the card and a link sticker"
+        },
+        "reviews": {
+          "title": "Google reviews.",
+          "body": "The card asks for the review by itself after the visit you choose, from the Pro plan. At the counter, a small QR to your Google page for the ones who want to do it now. Never a reward in exchange.",
+          "tip": "Ask after the third visit, not the first.",
+          "piece": "Reviews card",
+          "alt": "A small card asking for a Google review with a QR"
+        },
+        "welcome": {
+          "title": "The welcome coupon.",
+          "body": "A single-use coupon for the first purchase gives the QR a reason to be scanned today. “Scan and get 10% off”: the card lands in the Wallet with the discount already on it.",
+          "tip": "A coupon alongside a stamp card needs the Pro plan.",
+          "piece": "Coupon",
+          "alt": "A burger bar's 10% off coupon in Apple Wallet"
+        }
+      },
+      "freeTitle": "Free from your dashboard.",
+      "freeLead": "The counter card and the table tent come out of Distribution as print-ready PDFs, with your logo, your colors and your program's QR. The tent's second side carries your Google reviews link once you've set it up.",
+      "freeSteps": {
+        "1": {
+          "title": "Publish the program",
+          "body": "The QR points to its join page, and it never changes, however much you edit the card."
+        },
+        "2": {
+          "title": "Distribution, then Counter material",
+          "body": "Two buttons: the A6 card and the A4 tent. The PDFs are ready to print."
+        },
+        "3": {
+          "title": "Print it",
+          "body": "Any copy shop. Card of 250 to 300 g, matte. Fold the tent along the dotted line."
+        }
+      },
+      "orderTitle": "Or we make it for you.",
+      "orderLead": "Tell us what you need and we'll answer with a price and a delivery date within two working days. Printed on card, cut, and sent to your business, with your logo and your program's QR.",
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "you@yourbusiness.com",
+        "business": "Business",
+        "businessPlaceholder": "Name of the café, salon or shop",
+        "pieces": "What do you need?",
+        "pieceOptions": {
+          "counterCard": "Counter card",
+          "tableTent": "Table tent",
+          "doorSticker": "Door sticker",
+          "windowSticker": "Window sticker",
+          "stamp": "Rubber stamp for receipts",
+          "social": "Story and post templates",
+          "other": "Something else"
+        },
+        "quantity": "How many of each?",
+        "quantityOptions": {
+          "1": "1",
+          "2-5": "2 to 5",
+          "6-10": "6 to 10",
+          "more": "More than 10"
+        },
+        "message": "Anything else",
+        "messagePlaceholder": "Sizes, colors, the address to send it to…",
+        "submit": "Ask for a quote",
+        "note": "No commitment. We reply by email with a price and a date.",
+        "successTitle": "Request received",
+        "successBody": "We'll write back within two working days with a price and a delivery date. Check your inbox for the confirmation.",
+        "piecesRequired": "Pick at least one piece."
+      },
+      "faqTitle": "Questions about promoting.",
+      "faq": {
+        "change": {
+          "question": "What if I change my program later?",
+          "answer": "The QR points to the program's join page, not to its design. Change the stamps, the reward or the colors and the printed QR keeps working."
+        },
+        "ownPrinter": {
+          "question": "Can I print it at my own printer?",
+          "answer": "Yes. The counter card and the table tent are free PDFs from Distribution, at print resolution. Take them to any copy shop."
+        },
+        "time": {
+          "question": "How long does an order take?",
+          "answer": "We answer within two working days with a price and a date. Printing and shipping depend on the piece; stickers and cards usually take about a week."
+        },
+        "private": {
+          "question": "Does an invite-only program have a QR?",
+          "answer": "No. Invite-only programs have no public join page, so there's no QR to print. The material is for public programs."
+        }
+      },
+      "mock": {
+        "business": "Café Sol",
+        "program": "Stamp card",
+        "reward": "The 10th coffee is free",
+        "scanLine": "Scan and save your card to your Wallet",
+        "reviewLine": "Enjoyed it? Leave us a review on Google",
+        "askLine": "Ask for our card",
+        "doorLine": "The 10th coffee, free. Scan.",
+        "storyLine": "Save it to your Wallet",
+        "staffLine": "Do you have our card? It takes a second.",
+        "receiptTotal": "Total",
+        "fold": "Fold here"
+      }
     }
   }
 }

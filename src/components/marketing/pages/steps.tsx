@@ -1,7 +1,11 @@
-// A numbered list on hairlines: the step's number in the margin, its
+// A numbered list on hairlines. `import Link` sits below the type on purpose: see
+// the step's optional link.
+//: the step's number in the margin, its
 // title, and one sentence. Reads as a procedure, not as cards.
 
-export type Step = { title: string; body: string }
+import Link from "next/link"
+
+export type Step = { title: string; body: string; link?: { label: string; href: string } }
 
 export function Steps({ steps }: { steps: Step[] }) {
   return (
@@ -16,9 +20,16 @@ export function Steps({ steps }: { steps: Step[] }) {
               {step.title}
             </h3>
           </div>
-          <p className="mk-body col-start-2 mt-2 max-w-[56ch] lg:col-span-7 lg:col-start-6 lg:mt-0" style={{ color: "var(--mk-text-muted)" }}>
-            {step.body}
-          </p>
+          <div className="col-start-2 mt-2 lg:col-span-7 lg:col-start-6 lg:mt-0">
+            <p className="mk-body max-w-[56ch]" style={{ color: "var(--mk-text-muted)" }}>
+              {step.body}
+            </p>
+            {step.link ? (
+              <Link href={step.link.href} className="mk-body-sm mt-3 inline-block font-medium underline underline-offset-4" style={{ color: "var(--mk-text)" }}>
+                {step.link.label}
+              </Link>
+            ) : null}
+          </div>
         </li>
       ))}
     </ol>

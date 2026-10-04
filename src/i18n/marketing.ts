@@ -23,6 +23,7 @@ export const MARKETING_PATHS = [
   "/staff-app",
   "/partners",
   "/private-programs",
+  "/promote",
   "/about",
   "/status",
   "/subprocessors",

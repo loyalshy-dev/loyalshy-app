@@ -80,7 +80,13 @@ export async function IndustryPage({ locale, slug }: { locale: Locale; slug: Ind
       />
 
       <PageSection title={t("counterTitle")} lead={t("counterLead")}>
-        <Steps steps={["1", "2", "3"].map((k) => ({ title: t(`steps.${k}.title`), body: t(`steps.${k}.body`) }))} />
+        <Steps
+          steps={["1", "2", "3"].map((k) => ({
+            title: t(`steps.${k}.title`),
+            body: t(`steps.${k}.body`),
+            link: k === "1" ? { label: tc("seePromote"), href: localePath(locale, "/promote") } : undefined,
+          }))}
+        />
       </PageSection>
 
       <PageSection title={t("programsTitle")} lead={t("programsLead")}>

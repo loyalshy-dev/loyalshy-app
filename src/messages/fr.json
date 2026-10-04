@@ -286,7 +286,8 @@
     "about": "À propos",
     "partners": "Partenaires",
     "status": "État du service",
-    "subprocessors": "Sous-traitants"
+    "subprocessors": "Sous-traitants",
+    "promote": "Comment le promouvoir"
   },
   "cookieBanner": {
     "message": "Nous utilisons des cookies essentiels pour l'authentification et les préférences. Aucun cookie de suivi.",
@@ -925,7 +926,18 @@
       "shareNative": "Partager...",
       "embedOnSite": "Intégrer à votre site",
       "copyEmbed": "Copier le code d'intégration",
-      "issueToSelected": "{count, plural, =0 {Émettre la carte aux contacts} one {Émettre la carte à # contact} other {Émettre la carte à # contacts}}"
+      "issueToSelected": "{count, plural, =0 {Émettre la carte aux contacts} one {Émettre la carte à # contact} other {Émettre la carte à # contacts}}",
+      "materialTitle": "Matériel de comptoir",
+      "materialDescription": "Des PDF prêts à imprimer avec votre logo, vos couleurs et le QR de ce programme. À imprimer dans n'importe quelle reprographie.",
+      "materialCounterCard": "Carte de comptoir (A6)",
+      "materialTableTent": "Chevalet de table (A4, plié)",
+      "materialTentReviews": "La seconde face porte votre lien d'avis Google.",
+      "materialTentNoReviews": "Renseignez votre lien d'avis Google dans Automatisations et la seconde face demandera un avis.",
+      "materialScanLine": "Scannez et enregistrez votre carte dans votre Wallet",
+      "materialReviewsLine": "Ça vous a plu ? Laissez-nous un avis sur Google",
+      "materialFold": "Plier ici",
+      "materialIdeas": "Des idées pour promouvoir votre programme",
+      "materialFailed": "Impossible de générer le PDF. Réessayez."
     },
     "programSettings": {
       "title": "Paramètres",
@@ -2194,6 +2206,10 @@
     "subprocessors": {
       "title": "Sous-traitants",
       "description": "Les tiers qui traitent des données personnelles pour le compte de Loyalshy, pour quoi et où."
+    },
+    "promote": {
+      "title": "Comment amener vos clients à rejoindre votre programme de fidélité",
+      "description": "Huit endroits et moments qui amènent des inscriptions : la caisse, la table, la porte, le ticket, Instagram, les avis Google. Du matériel prêt à imprimer, gratuit depuis votre tableau de bord, ou nous le fabriquons pour vous."
     }
   },
   "pages": {
@@ -2212,7 +2228,8 @@
       "writeToUs": "Écrivez-nous",
       "anythingElse": "Une autre question ?",
       "emailUs": "Écrivez-nous",
-      "replyTime": "et nous répondons par e-mail."
+      "replyTime": "et nous répondons par e-mail.",
+      "seePromote": "Comment le promouvoir au comptoir"
     },
     "industries": {
       "hub": {
@@ -3002,6 +3019,152 @@
       "changesBody": "Nous mettons cette page à jour quand un sous-traitant est ajouté ou remplacé. Les clients d'une formule payante peuvent demander à être prévenus par e-mail.",
       "dpaTitle": "Accords.",
       "dpaBody": "Des questions sur le traitement des données, ou besoin d'un accord de sous-traitance ? Écrivez à"
+    },
+    "promote": {
+      "title": "Là où vos clients s'inscrivent.",
+      "lead": "La carte est dans le Wallet. Maintenant, il faut qu'on la voie. Huit endroits et moments d'un petit commerce qui amènent des inscriptions, avec quoi y mettre et quoi dire. La carte de comptoir et le chevalet sortent gratuitement de votre tableau de bord ; le reste, nous pouvons le fabriquer pour vous.",
+      "orderCta": "Demandez-le-nous",
+      "freeCta": "Gratuit depuis votre tableau de bord",
+      "blocks": {
+        "counter": {
+          "title": "La caisse.",
+          "body": "Une carte de comptoir avec le QR, côté client, à côté de l'endroit où l'on paie. C'est le meilleur emplacement du commerce : le téléphone est déjà sorti et il y a quelques secondes d'attente.",
+          "tip": "Debout, en A6, à hauteur de main. Pas derrière la caisse.",
+          "piece": "Carte de comptoir",
+          "alt": "Une carte de comptoir avec le QR du programme et la phrase du Wallet"
+        },
+        "staff": {
+          "title": "Ce que dit l'équipe.",
+          "body": "« Vous avez notre carte ? Ça prend une seconde. » Dit au moment de payer, ça amène plus d'inscriptions que n'importe quelle affiche. Intégrez-le à la routine de la première semaine et le reste suit.",
+          "tip": "L'appli équipe s'ouvre sur la caméra. Le tout prend cinq secondes.",
+          "piece": "La phrase",
+          "alt": "Une bulle avec la phrase que dit l'équipe au comptoir"
+        },
+        "tent": {
+          "title": "La table.",
+          "body": "Un chevalet qu'on lit en attendant. Une face mène au programme ; l'autre demande un avis Google, pour ceux qui veulent le faire tout de suite.",
+          "tip": "La face avis vers la chaise, la face programme vers le passage.",
+          "piece": "Chevalet de table",
+          "alt": "Un chevalet de table plié : le QR du programme d'un côté, le QR des avis Google de l'autre"
+        },
+        "door": {
+          "title": "La porte et la vitrine.",
+          "body": "Un autocollant pour celui qui passe, avec la raison écrite dessus : la récompense. C'est aussi là que « près de votre commerce » fait apparaître la carte sur les iPhone qui l'ont déjà.",
+          "tip": "À hauteur des yeux, à l'extérieur, sur la vitre.",
+          "piece": "Autocollant de porte",
+          "alt": "Un autocollant rond de porte avec la récompense et le QR"
+        },
+        "ticket": {
+          "title": "Le ticket.",
+          "body": "Une ligne en bas du ticket, ou un tampon dessus : « Demandez notre carte ». Pour qui imprime déjà des tickets, sans rien installer.",
+          "tip": "Si votre caisse imprime des QR codes, mettez-y le lien d'inscription.",
+          "piece": "Tampon encreur",
+          "alt": "Un ticket avec la phrase qui demande la carte et un petit QR"
+        },
+        "social": {
+          "title": "Instagram et WhatsApp.",
+          "body": "Le lien d'inscription dans la bio, une story à la une qui montre la carte entrant dans le Wallet, et le message « merci de votre visite » avec le lien. « Partager un programme » dans l'appli équipe vous donne le lien et le QR.",
+          "tip": "La story marche mieux avec la vraie carte qu'avec un visuel.",
+          "piece": "Modèles de stories et de publications",
+          "alt": "Un cadre de story Instagram avec la carte et un sticker de lien"
+        },
+        "reviews": {
+          "title": "Les avis Google.",
+          "body": "La carte demande l'avis toute seule après la visite que vous choisissez, à partir de la formule Pro. Au comptoir, un petit QR vers votre fiche Google pour ceux qui veulent le faire maintenant. Jamais de récompense en échange.",
+          "tip": "Demandez après la troisième visite, pas la première.",
+          "piece": "Carte avis",
+          "alt": "Une petite carte demandant un avis Google avec un QR"
+        },
+        "welcome": {
+          "title": "Le coupon de bienvenue.",
+          "body": "Un coupon à usage unique pour le premier achat donne au QR une raison d'être scanné aujourd'hui. « Scannez et profitez de 10 % » : la carte arrive dans le Wallet avec la remise déjà dessus.",
+          "tip": "Un coupon en plus d'une carte à tampons demande la formule Pro.",
+          "piece": "Coupon",
+          "alt": "Le coupon de 10 % d'un restaurant de burgers dans Apple Wallet"
+        }
+      },
+      "freeTitle": "Gratuit depuis votre tableau de bord.",
+      "freeLead": "La carte de comptoir et le chevalet de table sortent de la Distribution en PDF prêts à imprimer, avec votre logo, vos couleurs et le QR de votre programme. La seconde face du chevalet porte votre lien d'avis Google dès que vous l'avez renseigné.",
+      "freeSteps": {
+        "1": {
+          "title": "Publiez le programme",
+          "body": "Le QR pointe vers sa page d'inscription, et il ne change jamais, quoi que vous modifiiez sur la carte."
+        },
+        "2": {
+          "title": "Distribution, puis Matériel de comptoir",
+          "body": "Deux boutons : la carte A6 et le chevalet A4. Les PDF sortent prêts à imprimer."
+        },
+        "3": {
+          "title": "Imprimez-le",
+          "body": "N'importe quelle reprographie. Carton de 250 à 300 g, mat. Le chevalet se plie le long des pointillés."
+        }
+      },
+      "orderTitle": "Ou nous le fabriquons pour vous.",
+      "orderLead": "Dites-nous ce qu'il vous faut et nous répondons avec un prix et une date de livraison sous deux jours ouvrés. Imprimé sur carton, découpé et envoyé à votre commerce, avec votre logo et le QR de votre programme.",
+      "form": {
+        "name": "Nom",
+        "namePlaceholder": "Votre nom",
+        "email": "E-mail",
+        "emailPlaceholder": "vous@votrecommerce.com",
+        "business": "Commerce",
+        "businessPlaceholder": "Nom du café, du salon ou de la boutique",
+        "pieces": "De quoi avez-vous besoin ?",
+        "pieceOptions": {
+          "counterCard": "Carte de comptoir",
+          "tableTent": "Chevalet de table",
+          "doorSticker": "Autocollant de porte",
+          "windowSticker": "Autocollant de vitrine",
+          "stamp": "Tampon encreur pour tickets",
+          "social": "Modèles de stories et de publications",
+          "other": "Autre chose"
+        },
+        "quantity": "Combien de chaque ?",
+        "quantityOptions": {
+          "1": "1",
+          "2-5": "De 2 à 5",
+          "6-10": "De 6 à 10",
+          "more": "Plus de 10"
+        },
+        "message": "Autre chose",
+        "messagePlaceholder": "Tailles, couleurs, l'adresse de livraison…",
+        "submit": "Demander un devis",
+        "note": "Sans engagement. Nous répondons par e-mail avec un prix et une date.",
+        "successTitle": "Demande reçue",
+        "successBody": "Nous vous écrivons sous deux jours ouvrés avec un prix et une date de livraison. Regardez votre boîte mail : la confirmation est partie.",
+        "piecesRequired": "Choisissez au moins une pièce."
+      },
+      "faqTitle": "Questions sur la promotion.",
+      "faq": {
+        "change": {
+          "question": "Et si je change mon programme plus tard ?",
+          "answer": "Le QR pointe vers la page d'inscription du programme, pas vers son design. Changez les tampons, la récompense ou les couleurs : le QR imprimé continue de fonctionner."
+        },
+        "ownPrinter": {
+          "question": "Puis-je l'imprimer chez mon imprimeur ?",
+          "answer": "Oui. La carte de comptoir et le chevalet sont des PDF gratuits depuis la Distribution, en résolution d'impression. Apportez-les à n'importe quelle reprographie."
+        },
+        "time": {
+          "question": "Combien de temps prend une commande ?",
+          "answer": "Nous répondons sous deux jours ouvrés avec un prix et une date. L'impression et l'envoi dépendent de la pièce ; autocollants et cartes prennent en général une semaine."
+        },
+        "private": {
+          "question": "Un programme sur invitation a-t-il un QR ?",
+          "answer": "Non. Les programmes sur invitation n'ont pas de page publique d'inscription, donc pas de QR à imprimer. Le matériel est pour les programmes publics."
+        }
+      },
+      "mock": {
+        "business": "Café Sol",
+        "program": "Carte à tampons",
+        "reward": "Le 10e café offert",
+        "scanLine": "Scannez et enregistrez votre carte dans votre Wallet",
+        "reviewLine": "Ça vous a plu ? Laissez-nous un avis sur Google",
+        "askLine": "Demandez notre carte",
+        "doorLine": "Le 10e café offert. Scannez.",
+        "storyLine": "Enregistrez-la dans votre Wallet",
+        "staffLine": "Vous avez notre carte ? Ça prend une seconde.",
+        "receiptTotal": "Total",
+        "fold": "Plier ici"
+      }
     }
   }
 }
