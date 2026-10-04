@@ -213,7 +213,8 @@
     "billedYearly": "Facturado al año",
     "perYear": "al año",
     "multiLocation": "¿Varios locales o una cadena? Un plan a medida, con todos los locales en un solo panel.",
-    "multiLocationCta": "Pide una demo"
+    "multiLocationCta": "Pide una demo",
+    "vatIncluded": "IVA incluido"
   },
   "faq": {
     "title": "Preguntas frecuentes",

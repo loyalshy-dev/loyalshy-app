@@ -213,7 +213,8 @@
     "billedYearly": "Facturé à l'année",
     "perYear": "par an",
     "multiLocation": "Plusieurs établissements ou une chaîne ? Un plan sur mesure, tous vos établissements dans un seul tableau de bord.",
-    "multiLocationCta": "Demander une démo"
+    "multiLocationCta": "Demander une démo",
+    "vatIncluded": "TVA incluse"
   },
   "faq": {
     "title": "Questions fréquemment posées",

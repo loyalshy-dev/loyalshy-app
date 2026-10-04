@@ -213,7 +213,8 @@
     "billedYearly": "Billed yearly",
     "perYear": "a year",
     "multiLocation": "Several locations or a chain? A plan to fit, with every location in one dashboard.",
-    "multiLocationCta": "Book a demo"
+    "multiLocationCta": "Book a demo",
+    "vatIncluded": "VAT included"
   },
   "faq": {
     "title": "Frequently asked questions",
