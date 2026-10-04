@@ -15,7 +15,9 @@ type PageProps = { params: Promise<{ locale: string }> }
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   // Validated by the [locale] layout.
   const locale = (await params).locale as Locale
-  return pageMetadata(locale, "/status", "status")
+  // Reachable (footer link, monitors) but kept out of search results and
+  // the sitemap: an operational page, not content.
+  return { ...(await pageMetadata(locale, "/status", "status")), robots: { index: false, follow: true } }
 }
 
 // Each provider publishes its own status page.

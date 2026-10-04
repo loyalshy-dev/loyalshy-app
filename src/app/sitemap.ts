@@ -6,8 +6,11 @@ import { MARKETING_PATHS, marketingUrl } from "@/i18n/marketing"
 // hreflang alternates. Bump LAST_MODIFIED when marketing copy changes.
 const LAST_MODIFIED = "2026-10-04"
 
+// Public but not for search: /status is operational, not content.
+const UNLISTED = new Set<string>(["/status"])
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  return MARKETING_PATHS.flatMap((path) => {
+  return MARKETING_PATHS.filter((path) => !UNLISTED.has(path)).flatMap((path) => {
     const languages = Object.fromEntries(
       locales.map((l) => [l, marketingUrl(l, path)])
     )
