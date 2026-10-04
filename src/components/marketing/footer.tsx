@@ -13,7 +13,9 @@ interface FooterColumn {
 // The footer as it is on main: an ink ground, the wordmark with the
 // tagline and the social marks, three link columns with white headings,
 // and one legal line under a hairline. Links are 14px gray; hover lifts
-// them to white.
+// them to white. Four link columns since 2026-10-04: the secondary pages
+// (industries, automations, team app, partners, status, subprocessors)
+// are reached from here.
 
 const DEMO_JOIN_URL = process.env.NEXT_PUBLIC_DEMO_JOIN_URL
 
@@ -41,15 +43,30 @@ export async function MarketingFooter() {
       links: [
         { label: tNav("cards"), href: `${home}#cards` },
         { label: tNav("dashboard"), href: `${home}#features` },
-        { label: tNav("pricing"), href: `${home}#pricing` },
+        { label: t("automations"), href: localePath(locale, "/automations") },
+        { label: t("staffApp"), href: localePath(locale, "/staff-app") },
+        { label: t("privatePrograms"), href: localePath(locale, "/private-programs") },
+        { label: tNav("pricing"), href: localePath(locale, "/pricing") },
         ...(DEMO_JOIN_URL ? [{ label: t("tryDemo"), href: `${home}#try-demo` }] : []),
+      ],
+    },
+    {
+      heading: t("forBusiness"),
+      links: [
+        { label: t("cafes"), href: localePath(locale, "/for/cafes") },
+        { label: t("salons"), href: localePath(locale, "/for/salons") },
+        { label: t("retail"), href: localePath(locale, "/for/retail") },
+        { label: t("allIndustries"), href: localePath(locale, "/for") },
       ],
     },
     {
       heading: t("company"),
       links: [
+        { label: t("about"), href: localePath(locale, "/about") },
+        { label: t("partners"), href: localePath(locale, "/partners") },
         { label: tCommon("contact"), href: localePath(locale, "/contact") },
         { label: tNav("faq"), href: `${home}#faq` },
+        { label: t("status"), href: localePath(locale, "/status") },
       ],
     },
     {
@@ -58,6 +75,7 @@ export async function MarketingFooter() {
         { label: t("privacyPolicy"), href: localePath(locale, "/privacy") },
         { label: t("termsOfService"), href: localePath(locale, "/terms") },
         { label: t("cookiePolicy"), href: localePath(locale, "/cookies") },
+        { label: t("subprocessors"), href: localePath(locale, "/subprocessors") },
       ],
     },
   ]
@@ -70,7 +88,7 @@ export async function MarketingFooter() {
   return (
     <footer aria-label="Site footer" style={{ background: "var(--mk-footer-bg)", ...MUTED }}>
       <div className="w-full px-6 pb-12 pt-16 sm:px-8 lg:px-12">
-        <div className="grid grid-cols-2 gap-10 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-10 lg:grid-cols-5">
           {/* Brand column */}
           <div className="col-span-2 lg:col-span-1">
             <Link href={home} className="inline-flex items-center transition-opacity hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30" aria-label="Loyalshy">

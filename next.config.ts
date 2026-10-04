@@ -82,6 +82,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "pub-7c8a43a8edf44acb9ce148cb7547aa00.r2.dev",
       },
+      // Placeholder photography on the marketing pages (industries, about, …).
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
   async redirects() {

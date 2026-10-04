@@ -274,7 +274,19 @@
     "builtWith": "Made in Spain.",
     "tryDemo": "Demo card",
     "instagram": "Loyalshy on Instagram",
-    "tiktok": "Loyalshy on TikTok"
+    "tiktok": "Loyalshy on TikTok",
+    "forBusiness": "For your business",
+    "cafes": "Cafés and bakeries",
+    "salons": "Salons and barbers",
+    "retail": "Shops and retail",
+    "allIndustries": "All business types",
+    "automations": "Automations",
+    "staffApp": "Team app",
+    "privatePrograms": "Private programs",
+    "about": "About",
+    "partners": "Partners",
+    "status": "Status",
+    "subprocessors": "Subprocessors"
   },
   "cookieBanner": {
     "message": "We use essential cookies for authentication and preferences. No tracking cookies.",
@@ -2134,6 +2146,862 @@
     "cookies": {
       "title": "Cookie Policy",
       "description": "How Loyalshy uses cookies and similar technologies."
+    },
+    "for": {
+      "title": "Loyalty programs by business type",
+      "description": "Digital stamp cards and coupons in Apple and Google Wallet for cafés, salons and shops. The same mechanics, adapted to your counter."
+    },
+    "cafes": {
+      "title": "Digital stamp card for cafés and bakeries",
+      "description": "Nine coffees, the tenth free, in your customers' Apple or Google Wallet. No app, no paper. Scan with the Loyalshy team app. Free up to 50 customers."
+    },
+    "salons": {
+      "title": "Loyalty card for hair and beauty salons",
+      "description": "A stamp per appointment, a reward at the fifth, and a reminder when a regular hasn't been in for a while. In Apple and Google Wallet, no app."
+    },
+    "retail": {
+      "title": "Loyalty cards and coupons for shops",
+      "description": "A stamp card for regulars and a coupon for the next purchase, in Apple and Google Wallet. Scanned at the till with the Loyalshy app. Free up to 50 customers."
+    },
+    "automations": {
+      "title": "Automations: Google reviews, win-back and nearby",
+      "description": "The card asks for a Google review, brings back regulars who stopped coming and shows up on the lock screen near your business. Set once from the dashboard."
+    },
+    "pricing": {
+      "title": "Pricing",
+      "description": "Free for up to 50 customers. Pro €29, Business €49, Scale €99 a month, 20% less yearly. No contract, no card to start. Every plan has both wallets and the team app."
+    },
+    "staffApp": {
+      "title": "The team app for iPhone and Android",
+      "description": "Scan the card, add the stamp, redeem the coupon. Counter mode, new-customer signup and pending rewards. Free with every Loyalshy plan."
+    },
+    "partners": {
+      "title": "Partner program for agencies and consultants",
+      "description": "Set Loyalshy up for your clients, hand the business over with one link and stay on as program manager. Referral links and a partner console included."
+    },
+    "privatePrograms": {
+      "title": "Private, invite-only loyalty programs",
+      "description": "Members' cards, VIP coupons and staff perks hidden from the public join page. Only your team issues them, from the dashboard or the counter app."
+    },
+    "about": {
+      "title": "About Loyalshy",
+      "description": "Loyalshy is made by HEX CONCEPTS STUDIO in Lleida, Spain. One product: the loyalty card in Apple and Google Wallet, for cafés, salons and shops."
+    },
+    "status": {
+      "title": "System status",
+      "description": "Live status of loyalshy.com, its database and the providers Loyalshy depends on."
+    },
+    "subprocessors": {
+      "title": "Subprocessors",
+      "description": "The third parties that process personal data on Loyalshy's behalf, what for and where."
+    }
+  },
+  "pages": {
+    "common": {
+      "seePricing": "See pricing",
+      "bookDemo": "Book a demo",
+      "allPlans": "All plans",
+      "fromPro": "Pro and up",
+      "fromBusiness": "Business and up",
+      "iphoneOnly": "iPhone only",
+      "stampCard": "Stamp card",
+      "coupon": "Coupon",
+      "seeAutomations": "See the automations",
+      "seeStaffApp": "See the team app",
+      "seePrivatePrograms": "Private programs",
+      "writeToUs": "Write to us",
+      "anythingElse": "Anything else?",
+      "emailUs": "Email us",
+      "replyTime": "and we'll answer by email."
+    },
+    "industries": {
+      "hub": {
+        "title": "Loyalty for the businesses that see the same faces.",
+        "lead": "Cafés, salons and shops run on regulars. Loyalshy gives each of them a stamp card or a coupon in Apple and Google Wallet, and gives you a dashboard that shows who comes back.",
+        "cards": {
+          "cafes": {
+            "title": "Cafés and bakeries",
+            "lead": "The tenth coffee free, without the paper card.",
+            "alt": "A café's tables and counter"
+          },
+          "salons": {
+            "title": "Salons and barbers",
+            "lead": "A stamp per appointment, a reward at the fifth, a reminder when it's been a while.",
+            "alt": "A hairdresser at work in a bright salon"
+          },
+          "retail": {
+            "title": "Shops and retail",
+            "lead": "A coupon for the next purchase, and a card for the regulars.",
+            "alt": "A small clothing shop with racks and a counter"
+          }
+        },
+        "sameTitle": "The same everywhere.",
+        "sameLead": "Whatever the counter looks like, the mechanics don't change.",
+        "same": {
+          "noApp": {
+            "title": "No app for the customer",
+            "body": "They scan a QR code once and the card lands in Apple Wallet or Google Wallet. No download, no account, no password."
+          },
+          "counter": {
+            "title": "Nothing changes at the counter",
+            "body": "Your team scans the card with the Loyalshy app and adds the stamp or redeems the coupon. The POS stays as it is."
+          },
+          "data": {
+            "title": "Your customers, your data",
+            "body": "Every stamp shows up in the dashboard. You see who comes back and who stopped coming, and you can export the list whenever you want."
+          }
+        }
+      },
+      "cafes": {
+        "title": "The stamp card for cafés.",
+        "lead": "Nine coffees, the tenth free. The card lives in your customers' Apple or Google Wallet, so it can't be lost, forgotten or faked, and you see every stamp in the dashboard.",
+        "heroAlt": "A barista smiling behind the counter",
+        "counterTitle": "At the counter.",
+        "counterLead": "The morning rush doesn't slow down. Here is what changes and what doesn't.",
+        "steps": {
+          "1": {
+            "title": "The customer scans the QR",
+            "body": "A table tent or a sticker by the till. The first time, the card saves to their Wallet in a few seconds. No app, no form beyond an email."
+          },
+          "2": {
+            "title": "Your team scans the card",
+            "body": "The customer shows the card on their phone, the barista scans it with the Loyalshy app and the stamp lands on the spot. If it was a mistake, there are ten minutes to undo it."
+          },
+          "3": {
+            "title": "The reward shows by itself",
+            "body": "At the last stamp the card says so, and the customer redeems the free coffee on their next visit. Then the card starts again."
+          }
+        },
+        "programsTitle": "Two programs.",
+        "programsLead": "A stamp card for the daily coffee, a coupon for the quiet hours.",
+        "stamp": {
+          "title": "Buy nine, the tenth is on us",
+          "body": "The classic card, in the Wallet. You choose the number of stamps, the reward and the design: the strip, the stamp icon and the colors are yours.",
+          "alt": "A pizzeria's stamp card in Apple Wallet"
+        },
+        "coupon": {
+          "title": "2-for-1 from four in the afternoon",
+          "body": "A single-use or unlimited coupon for the afternoon lull, a new pastry or the first week of a new location. Redeemed with the same scan.",
+          "alt": "A burger bar's coupon in Apple Wallet"
+        },
+        "beyondTitle": "Beyond the card.",
+        "beyondLead": "What a paper card can never do.",
+        "beyond": {
+          "reviews": {
+            "title": "Ask for a Google review",
+            "body": "After the visit you choose, the card asks once for a review on Google, about an hour and a half later, with a link you can track."
+          },
+          "winback": {
+            "title": "Bring back the ones who stopped coming",
+            "body": "A regular who hasn't been in for a month gets your “we miss you” message on their lock screen."
+          },
+          "nearby": {
+            "title": "Show up on the lock screen nearby",
+            "body": "When a customer with an iPhone walks past your café, the card appears on their lock screen."
+          },
+          "announcements": {
+            "title": "Tell everyone what's new",
+            "body": "A new blend, the holiday opening hours, a 2-for-1 today. One message from the dashboard reaches every card."
+          }
+        },
+        "photoAlt": "The counter of a café",
+        "faqTitle": "Questions from cafés.",
+        "faq": {
+          "rush": {
+            "question": "Does scanning slow down the morning rush?",
+            "answer": "The scan takes about as long as a stamp did. The barista opens the Loyalshy app, points the camera at the card and it's done. After each stamp the camera comes back by itself, ready for the next customer."
+          },
+          "two": {
+            "question": "Can a customer get two stamps in one visit?",
+            "answer": "Yes, if you want. Your team adds as many stamps as the order deserves. A stamp added by mistake can be undone for ten minutes."
+          },
+          "android": {
+            "question": "What about customers without an iPhone?",
+            "answer": "Google Wallet works the same way on Android. The customer scans the same QR and the card saves to Google Wallet."
+          },
+          "design": {
+            "question": "Can the card look like my café?",
+            "answer": "Yes. The design studio sets the logo, the colors, the strip image and the stamp icon. The card in the Wallet is the card you designed."
+          },
+          "hardware": {
+            "question": "Do I need new hardware?",
+            "answer": "No. The team scans with the phone they already have, using the Loyalshy app for iPhone and Android. Nothing connects to the POS."
+          }
+        }
+      },
+      "salons": {
+        "title": "The loyalty card for salons.",
+        "lead": "A stamp per appointment, a reward at the fifth. The card lives in your clients' Apple or Google Wallet, and when a regular hasn't booked in a while, it reminds them.",
+        "heroAlt": "A hairdresser at work in a bright salon",
+        "counterTitle": "At the front desk.",
+        "counterLead": "Clients come every four to six weeks. The card has to survive that gap, and paper doesn't.",
+        "steps": {
+          "1": {
+            "title": "The client scans the QR at reception",
+            "body": "On a card by the mirror or at the desk. The card saves to their Wallet with an email. No app to download."
+          },
+          "2": {
+            "title": "A stamp per appointment",
+            "body": "While they pay, your team scans the card with the Loyalshy app. A stamp per visit, or more for a treatment, as you decide."
+          },
+          "3": {
+            "title": "The reward at the fifth",
+            "body": "A free blow-dry, a treatment, a discount on products. The card shows it and the client redeems it at the next appointment."
+          }
+        },
+        "programsTitle": "Two programs.",
+        "programsLead": "A stamp card for the regulars, a coupon for the ones you want back.",
+        "stamp": {
+          "title": "Five appointments, one free treatment",
+          "body": "You pick the number of stamps, the reward and the look. A different card for the barber chair and for color, if you want.",
+          "alt": "A stamp card in Apple Wallet"
+        },
+        "coupon": {
+          "title": "20% off a first color",
+          "body": "A single-use coupon for a new service, for the quiet weekday mornings, or for the client who brought a friend.",
+          "alt": "A coupon in Apple Wallet"
+        },
+        "beyondTitle": "Beyond the card.",
+        "beyondLead": "Where a salon gets the most out of it.",
+        "beyond": {
+          "winback": {
+            "title": "The reminder after a while",
+            "body": "A client who hasn't been in for sixty days gets your message on their lock screen. You write it once; it goes out by itself."
+          },
+          "reviews": {
+            "title": "A Google review at the right time",
+            "body": "After the visit you choose, the card asks once for a review, an hour and a half later, when they're home and happy with the cut."
+          },
+          "private": {
+            "title": "A card only for members",
+            "body": "An invite-only program for your VIP clients or a membership perk, hidden from the public page. Only your team issues it."
+          },
+          "announcements": {
+            "title": "Openings, closures and news",
+            "body": "A new stylist, holiday hours, a product launch. One message from the dashboard reaches every card."
+          }
+        },
+        "photoAlt": "An empty salon with chairs by the windows",
+        "faqTitle": "Questions from salons.",
+        "faq": {
+          "services": {
+            "question": "Can different services earn different stamps?",
+            "answer": "Your team decides how many stamps each visit earns when they scan. If you want separate programs, a Pro plan runs two and Business runs five."
+          },
+          "booking": {
+            "question": "Does it connect to my booking system?",
+            "answer": "No, and it doesn't need to. The card is scanned at the desk, next to whatever you use to book. Nothing to integrate."
+          },
+          "staff": {
+            "question": "Can each stylist have the app?",
+            "answer": "Yes. Each team member signs in on their own phone, by QR pairing, email or Google. The plan sets how many team members you can have."
+          },
+          "gap": {
+            "question": "What if a client doesn't come back for months?",
+            "answer": "The card stays in their Wallet with the stamps they earned. On Business and up, the win-back message reminds them after the number of days you set."
+          },
+          "android": {
+            "question": "Do my clients need an iPhone?",
+            "answer": "No. Google Wallet works the same way on Android. Only the near-your-business suggestion is iPhone only."
+          }
+        }
+      },
+      "retail": {
+        "title": "Cards and coupons for shops.",
+        "lead": "A stamp card for the customers who come every week and a coupon for the ones who might come back. Both in Apple and Google Wallet, both scanned at the till with the same app.",
+        "heroAlt": "A small clothing shop with racks and a counter",
+        "counterTitle": "At the till.",
+        "counterLead": "The card is scanned while they pay. Nothing touches your POS.",
+        "steps": {
+          "1": {
+            "title": "A QR by the till",
+            "body": "A sticker, a counter card or a link in your Instagram bio. The customer scans it, enters an email and the card is in their Wallet."
+          },
+          "2": {
+            "title": "One stamp per purchase",
+            "body": "Your team scans the card with the Loyalshy app. A stamp for every purchase, or for every purchase over an amount you set as the rule."
+          },
+          "3": {
+            "title": "The reward, or the coupon",
+            "body": "At the last stamp the card shows the reward. A coupon is redeemed the same way: one scan, used or still valid, no codes to type."
+          }
+        },
+        "programsTitle": "Two programs.",
+        "programsLead": "Stamps for the regulars, a coupon for everyone else.",
+        "stamp": {
+          "title": "Ten purchases, one gift",
+          "body": "The regulars' card. You set the number of stamps, the reward and the design, and the stamp icon can be your product.",
+          "alt": "A stamp card in Apple Wallet"
+        },
+        "coupon": {
+          "title": "10% off your next purchase",
+          "body": "A single-use coupon that walks out with the first purchase, or an unlimited one for a season. Share it by QR, link or Instagram.",
+          "alt": "A 10% off coupon in Apple Wallet"
+        },
+        "beyondTitle": "Beyond the card.",
+        "beyondLead": "What the card does between visits.",
+        "beyond": {
+          "nearby": {
+            "title": "On the lock screen in the street",
+            "body": "A customer with an iPhone walks past your shop and the card appears on their lock screen with your line."
+          },
+          "announcements": {
+            "title": "New collection, sale, late opening",
+            "body": "One message from the dashboard reaches every card as a notification. Each plan has a weekly quota."
+          },
+          "winback": {
+            "title": "Bring back the quiet ones",
+            "body": "A regular who hasn't bought in ninety days gets your message. One in ten doesn't, so you can see whether it worked."
+          },
+          "reviews": {
+            "title": "Ask for a Google review",
+            "body": "After the purchase you choose, the card asks once for a review on Google, with a link you can track."
+          }
+        },
+        "photoAlt": "A customer paying at the till",
+        "faqTitle": "Questions from shops.",
+        "faq": {
+          "amount": {
+            "question": "Can a stamp depend on how much they spend?",
+            "answer": "The rule is yours: your team adds a stamp when the purchase qualifies. The app doesn't read the ticket, so there's nothing to connect."
+          },
+          "online": {
+            "question": "Can I share the card online?",
+            "answer": "Yes. Every public program has a join link you can put in your Instagram bio, in an email or on your website, and a QR for the shop."
+          },
+          "coupon": {
+            "question": "Can a coupon be used more than once?",
+            "answer": "You choose. A single-use coupon is voided after the first scan. An unlimited one can be redeemed again after a minute, for as long as the program runs."
+          },
+          "locations": {
+            "question": "I have two shops. Does the card work in both?",
+            "answer": "Yes. Both scan the same cards with the same app. Each team member signs in on their own phone."
+          },
+          "export": {
+            "question": "Can I take my customer list with me?",
+            "answer": "Yes, at any time, to CSV from the dashboard. It's your list."
+          }
+        }
+      }
+    },
+    "automations": {
+      "title": "The card does the follow-up.",
+      "lead": "Three things the card does by itself, set once from the dashboard: ask for a Google review, bring back a regular who stopped coming, and show up on the lock screen when a customer walks by.",
+      "heroAlt": "A hand holding a phone",
+      "rows": {
+        "reviews": {
+          "meta": "Google reviews · Pro and up",
+          "title": "Ask for a review.",
+          "body": "After the visit you choose, the third by default, the card asks once for a Google review, about an hour and a half after the visit and never at night. The link is tracked, so you see how many were asked and how many opened it.",
+          "more": "No reward for reviewing and no filtering by rating. The daily chart shows your Google rating and review count over time.",
+          "alt": "A restaurant's tables after service"
+        },
+        "winback": {
+          "meta": "Win-back · Business and up",
+          "title": "Bring them back.",
+          "body": "A regular who hasn't visited in 14, 30, 60 or 90 days gets your message on their lock screen, once per absence. You write it; it goes out at ten in the morning, your time.",
+          "more": "One in ten gets no message, so the results card can tell you how many came back because of it rather than by chance.",
+          "alt": "An empty café"
+        },
+        "nearby": {
+          "meta": "Near your business · All plans, iPhone",
+          "title": "On the lock screen nearby.",
+          "body": "Set your location once. When a customer with an iPhone is near, their card appears on the lock screen with the line you wrote. It's a suggestion iOS makes, not a push notification.",
+          "more": "Drag the pin on the map to the door of your business.",
+          "alt": "A pedestrian with shopping bags passing shop windows"
+        }
+      },
+      "announceTitle": "And when you have something to say.",
+      "announceBody": "Announcements are the manual one: a message of up to 160 characters from the dashboard or the team app, delivered as a notification to every card of a program. Each plan has a weekly quota.",
+      "measureTitle": "Measured.",
+      "measureLead": "Each automation shows its numbers in the dashboard.",
+      "measure": {
+        "asked": {
+          "title": "Asked and opened",
+          "body": "How many customers the card asked for a review and how many opened the link."
+        },
+        "rating": {
+          "title": "Rating over time",
+          "body": "Your Google rating and review count, snapshotted daily, from the day you turned it on."
+        },
+        "lift": {
+          "title": "Came back, against the comparison group",
+          "body": "Messaged customers who returned within two weeks, next to the ones who got no message."
+        }
+      },
+      "faqTitle": "Questions about automations.",
+      "faq": {
+        "frequency": {
+          "question": "Will my customers get too many notifications?",
+          "answer": "A review is asked once per customer, ever. A win-back message goes out once per absence and never more than once every ninety days. Announcements have a weekly quota per plan. Near your business isn't a notification: the card just surfaces on the lock screen."
+        },
+        "android": {
+          "question": "Does it work on Android?",
+          "answer": "Review prompts, win-back messages and announcements reach both Apple and Google Wallet. Near your business is an iPhone feature; Google Wallet doesn't surface cards by location."
+        },
+        "edit": {
+          "question": "Can I change the messages?",
+          "answer": "Yes, at any time, from Automations in the dashboard. The next send uses the new text."
+        },
+        "plans": {
+          "question": "Which plan do I need?",
+          "answer": "Near your business is on every plan, including Free. Google review requests start at Pro. Win-back messages start at Business, because measuring them needs a few hundred sends."
+        },
+        "coupons": {
+          "question": "Do automations work on coupons?",
+          "answer": "On unlimited coupons, yes: each redemption counts as a visit. Single-use coupons never ask. Once redeemed, the pass is used up."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Plans and pricing.",
+      "lead": "Monthly or yearly, no contract, and you can stop whenever you want. Every plan has both card types, both wallets, the team app and the dashboard.",
+      "compareTitle": "Plan by plan.",
+      "compareLead": "What each plan includes, line by line.",
+      "rows": {
+        "customers": "Customers",
+        "programs": "Active programs",
+        "team": "Team members",
+        "announcements": "Wallet announcements",
+        "reviews": "Google review requests",
+        "winback": "Win-back messages",
+        "nearby": "Near your business",
+        "private": "Private programs",
+        "wallets": "Apple and Google Wallet",
+        "staffApp": "Team app for iPhone and Android",
+        "studio": "Card design studio",
+        "export": "Customer export to CSV"
+      },
+      "values": {
+        "unlimited": "Unlimited",
+        "lifetime": "{count} in total",
+        "perWeek": "{count, plural, one {# a week} other {# a week}}",
+        "included": "Included",
+        "notIncluded": "Not included"
+      },
+      "faqTitle": "Questions about pricing.",
+      "faq": {
+        "customer": {
+          "question": "What counts as a customer?",
+          "answer": "A contact with at least one card. If the same person has your stamp card and a coupon, that's one customer."
+        },
+        "limit": {
+          "question": "What happens when I reach the limit?",
+          "answer": "New customers can't join until you move to the next plan. The cards already issued keep working and keep getting stamps."
+        },
+        "change": {
+          "question": "Can I change plans later?",
+          "answer": "Yes, from Settings at any time. An upgrade applies right away."
+        },
+        "annual": {
+          "question": "How does yearly billing work?",
+          "answer": "You pay twelve months at once at the price shown under Annual, which is 20% less than paying month by month."
+        },
+        "vat": {
+          "question": "Do prices include VAT?",
+          "answer": "Prices are shown without VAT. It's added on the invoice where it applies."
+        },
+        "cancel": {
+          "question": "How do I cancel?",
+          "answer": "From Settings. The plan stays active until the end of the paid period and then goes back to Free. Your cards and customers stay."
+        },
+        "enterprise": {
+          "question": "What if I have several shops?",
+          "answer": "Chains and businesses with their own needs get the Enterprise plan: custom limits, dedicated support and contract terms. Write to hello@loyalshy.com and we'll work it out."
+        }
+      }
+    },
+    "staffApp": {
+      "title": "The team app.",
+      "lead": "Scan, stamp, redeem. Loyalshy for iPhone and Android is what your team holds at the counter, and it comes with every plan.",
+      "appStore": "Download on the App Store",
+      "playStore": "Get it on Google Play",
+      "screens": {
+        "scan": "The Scan tab: the camera, ready for a card",
+        "today": "The Today tab with the business name and the day's shortcuts",
+        "share": "Share a program: the join QR and link",
+        "history": "The latest activity: stamps and redemptions"
+      },
+      "rows": {
+        "scan": {
+          "meta": "Scan",
+          "title": "One scan, one stamp.",
+          "body": "The app opens on the camera. Point it at the customer's card and the stamp lands, or the coupon is redeemed. Four seconds later the camera is back, ready for the next customer.",
+          "more": "Added a stamp by mistake? Undo it within ten minutes."
+        },
+        "find": {
+          "meta": "Find customer",
+          "title": "No phone at hand.",
+          "body": "A customer without their phone? Search them by name or email and add the stamp from the same sheet."
+        },
+        "counter": {
+          "meta": "Counter mode",
+          "title": "The QR on screen.",
+          "body": "A full-screen join code for a tablet or a spare phone at the till. The screen stays awake, and a long press exits."
+        },
+        "signup": {
+          "meta": "New customer",
+          "title": "Sign up at the counter.",
+          "body": "Type the customer's email and the card is issued and emailed on the spot. It's also how private programs get their members."
+        },
+        "rewards": {
+          "meta": "Pending rewards",
+          "title": "Who has a reward waiting.",
+          "body": "The rewards earned and not yet redeemed, soonest to expire first."
+        },
+        "announce": {
+          "meta": "Announcements",
+          "title": "A message to every card.",
+          "body": "Owners and program managers can send a wallet announcement from the app, with the same quota as the dashboard."
+        }
+      },
+      "signinTitle": "Signing in.",
+      "signinLead": "Four ways in, so a new team member is ready in a minute.",
+      "signin": {
+        "qr": {
+          "title": "Pair with a QR",
+          "body": "From Settings, Team, show a QR with a six-digit PIN. The team member scans it, types the PIN and is in. No password."
+        },
+        "email": {
+          "title": "Email and password",
+          "body": "The same account as the dashboard."
+        },
+        "google": {
+          "title": "Google",
+          "body": "One tap with the Google account that's on the team."
+        },
+        "invite": {
+          "title": "The invitation link",
+          "body": "The invite email opens the app directly on the right workspace."
+        }
+      },
+      "faqTitle": "Questions about the app.",
+      "faq": {
+        "free": {
+          "question": "Does the app cost extra?",
+          "answer": "No. It's included with every plan, Free included. The plan sets how many team members can use it."
+        },
+        "devices": {
+          "question": "Which phones does it run on?",
+          "answer": "iPhone, from the App Store, and Android, from Google Play. Any phone with a camera."
+        },
+        "roles": {
+          "question": "What can staff do and what can't they?",
+          "answer": "Staff stamp, redeem, sign customers up and undo their own stamps. Owners and program managers can also undo anyone's stamp and send announcements. Billing and settings stay in the dashboard."
+        },
+        "offline": {
+          "question": "What if the connection drops?",
+          "answer": "The stamp is kept on the phone and sent when the connection returns."
+        },
+        "demo": {
+          "question": "Can I try it before I have customers?",
+          "answer": "Yes. The app has a demo mode with sample data, so you can see every screen before the first scan."
+        }
+      }
+    },
+    "partners": {
+      "title": "Set Loyalshy up for your clients.",
+      "lead": "Agencies, consultants and POS resellers set up loyalty programs for the businesses they already serve. You set it up, hand it over, and stay on as program manager.",
+      "heroAlt": "Two people shaking hands over a counter",
+      "howTitle": "How it works.",
+      "steps": {
+        "1": {
+          "title": "Become a partner",
+          "body": "Write to us. We flag your account as a partner and the partner console appears in your dashboard."
+        },
+        "2": {
+          "title": "Set the client up",
+          "body": "“New client setup” creates the client's workspace with you as owner. Design the card, print the QR, invite their team."
+        },
+        "3": {
+          "title": "Hand it over",
+          "body": "Generate a one-time claim link and send it to the owner. When they claim it, the business is theirs: billing, team, settings."
+        },
+        "4": {
+          "title": "Stay on as program manager",
+          "body": "You keep access to design, distribution and programs, without seeing their billing. Your seat never counts against their plan."
+        }
+      },
+      "consoleTitle": "The partner console.",
+      "consoleLead": "Every client in one place.",
+      "console": {
+        "portfolio": {
+          "title": "Portfolio",
+          "body": "Every client you set up, with a checklist: program published, first customers in, owner claimed."
+        },
+        "referral": {
+          "title": "Referral link",
+          "body": "A link with your code. Businesses that sign up through it are attributed to you."
+        },
+        "access": {
+          "title": "Request access",
+          "body": "Lost access to a client you set up? Ask the owner in one click. They get an email that opens the invite dialog."
+        },
+        "seat": {
+          "title": "A seat that doesn't count",
+          "body": "Your membership in a client's workspace is exempt from their plan's team limit."
+        }
+      },
+      "whoTitle": "Who it's for.",
+      "who": {
+        "agencies": {
+          "title": "Marketing agencies",
+          "body": "Add loyalty to the services you already sell to local businesses."
+        },
+        "consultants": {
+          "title": "Hospitality consultants",
+          "body": "Set the program up as part of an opening or a refresh."
+        },
+        "pos": {
+          "title": "POS resellers",
+          "body": "Loyalshy runs beside any POS. Sell it with the till."
+        },
+        "designers": {
+          "title": "Designers and printers",
+          "body": "You design the card and the counter material; the client gets the whole program."
+        }
+      },
+      "termsTitle": "Terms.",
+      "termsBody": "Partner terms are agreed one to one: a setup fee you charge your client and a share of the subscription. Write to us and we'll work it out.",
+      "cta": "Write to us about partnering",
+      "faqTitle": "Questions from partners.",
+      "faq": {
+        "cost": {
+          "question": "Does the partner program cost anything?",
+          "answer": "No. Partner accounts are free. Your clients pay for their own plan once they outgrow Free."
+        },
+        "ownership": {
+          "question": "Who owns the client's account?",
+          "answer": "After the handoff, the client. They own billing, team and settings. You keep program access as program manager, and they can remove you whenever they want."
+        },
+        "billing": {
+          "question": "Can I pay for the client's plan?",
+          "answer": "Before the handoff you are the owner, so you can. After it, billing belongs to the client."
+        },
+        "referral": {
+          "question": "What does the referral link do?",
+          "answer": "Businesses that register through your link are attributed to you, even if you never set anything up for them. The attribution lasts as long as the account does."
+        },
+        "share": {
+          "question": "How much is the revenue share?",
+          "answer": "It depends on the volume and on what you bring. We agree it with each partner. Write to us."
+        }
+      }
+    },
+    "privatePrograms": {
+      "title": "Programs by invitation only.",
+      "lead": "Some cards aren't for everyone: the members' card, the VIP coupon, a perk for your own staff. An invite-only program is hidden from the public join page, and only your team issues it.",
+      "heroAlt": "A quiet members' lounge with armchairs",
+      "whatTitle": "What changes.",
+      "what": {
+        "hidden": {
+          "title": "Hidden from the join page",
+          "body": "The program doesn't appear on your public page, and its QR, link and NFC sections disappear from Distribution."
+        },
+        "team": {
+          "title": "Only the team issues it",
+          "body": "Cards are issued from the dashboard, to one contact or a selection, or from the team app at the counter by email."
+        },
+        "same": {
+          "title": "Everything else is the same",
+          "body": "Stamps, coupons, announcements, review prompts and win-back messages work exactly as on a public program."
+        }
+      },
+      "forTitle": "What it's for.",
+      "for": {
+        "members": {
+          "title": "The members' card",
+          "body": "A stamp card for the people who pay a membership, issued when they join."
+        },
+        "vip": {
+          "title": "The VIP coupon",
+          "body": "A coupon for your best customers, handed out by the team rather than printed on a poster."
+        },
+        "staff": {
+          "title": "Staff and friends",
+          "body": "A perk for your own team or your suppliers that nobody else should be able to scan into."
+        },
+        "events": {
+          "title": "An event or a launch",
+          "body": "A card for the guests of one evening, issued at the door from the app."
+        }
+      },
+      "howTitle": "Issuing a card.",
+      "steps": {
+        "1": {
+          "title": "Set the program to invite only",
+          "body": "On the program's Distribution page, choose “Invite only”. Public programs can be switched at any time; existing cards keep working."
+        },
+        "2": {
+          "title": "Issue from the dashboard",
+          "body": "Pick a contact, or several, and issue the card. They get it by email with the Add to Wallet buttons."
+        },
+        "3": {
+          "title": "Or sign them up at the counter",
+          "body": "In the team app, “New customer” asks for an email and issues the card on the spot."
+        }
+      },
+      "faqTitle": "Questions about private programs.",
+      "faq": {
+        "existing": {
+          "question": "What happens to cards already issued when I switch a program to invite only?",
+          "answer": "Nothing. They keep working, keep getting stamps and keep receiving messages. Only new joins through the public page stop."
+        },
+        "qr": {
+          "question": "What if someone scans the old QR?",
+          "answer": "The join page says the program is by invitation only. It never enrols them in another program by mistake."
+        },
+        "plans": {
+          "question": "Which plan do I need?",
+          "answer": "Any plan, Free included. An invite-only program counts like any other against your plan's program limit."
+        },
+        "both": {
+          "question": "Can I run a public and a private program at the same time?",
+          "answer": "Yes, on a plan with two or more programs. The public one shows on your join page; the private one doesn't."
+        }
+      }
+    },
+    "about": {
+      "title": "A small company for small businesses.",
+      "lead": "Loyalshy is made by HEX CONCEPTS STUDIO, a studio in Lleida, Spain. We build one thing: the loyalty card in the Wallet.",
+      "heroAlt": "A street of small shops with terraces",
+      "whyTitle": "Why.",
+      "whyBody1": "Paper stamp cards get lost, forgotten at home, and nobody counts them. Loyalty apps get downloaded once and never opened. Apple Wallet and Google Wallet are already on every phone, and a card in there behaves like a card: it shows up when it's needed.",
+      "whyBody2": "So we built the card for the Wallet, the dashboard that counts the stamps, and the app the team scans with. Nothing else.",
+      "holdTitle": "What we hold to.",
+      "hold": {
+        "noApp": {
+          "title": "No app for the customer",
+          "body": "The card goes where they already keep their cards. Nothing to install, nothing to remember."
+        },
+        "data": {
+          "title": "The customer list is yours",
+          "body": "We don't sell it or use it for advertising, and you can export it whenever you want."
+        },
+        "honest": {
+          "title": "No tricks on the customer",
+          "body": "No reward for a review and no filtering by rating. The messages that go out are the ones you wrote."
+        },
+        "counter": {
+          "title": "Built for one counter",
+          "body": "A café with one till, a salon with three chairs, a shop on a corner. Chains fit too, but we design for the counter first."
+        }
+      },
+      "photoAlt": "A team working together at one table",
+      "companyTitle": "The company.",
+      "companyBody": "HEX CONCEPTS STUDIO, S.L. is a software studio in Torrefarrera, Lleida. Loyalshy is its product. It runs on servers in Frankfurt, the data stays in the European Union, and support is answered by the people who build it.",
+      "contactCta": "Get in touch"
+    },
+    "status": {
+      "title": "System status.",
+      "lead": "Live checks on the services Loyalshy runs on, and the providers it depends on.",
+      "checkedAt": "Checked at {time} UTC",
+      "overall": {
+        "ok": "All systems operational",
+        "degraded": "Some systems are degraded"
+      },
+      "components": {
+        "web": {
+          "name": "Web app and dashboard",
+          "desc": "loyalshy.com, the dashboard and the team app's API. If this page loads, they're up."
+        },
+        "database": {
+          "name": "Database",
+          "desc": "Where programs, customers and stamps live."
+        },
+        "redis": {
+          "name": "Rate limiting",
+          "desc": "Protection for sign-in and the contact form. If it's down, signing in still works with a reduced limit."
+        }
+      },
+      "states": {
+        "ok": "Operational",
+        "down": "Down",
+        "unconfigured": "Not configured"
+      },
+      "latency": "{ms} ms",
+      "providersTitle": "Providers.",
+      "providersLead": "Loyalshy runs on these services. Each publishes its own status page.",
+      "providers": {
+        "vercel": "Hosting and web app",
+        "neon": "Database",
+        "upstash": "Rate limiting",
+        "stripe": "Payments",
+        "trigger": "Background jobs: notifications and emails",
+        "resend": "Email delivery",
+        "apple": "Apple Wallet pass updates",
+        "google": "Google Wallet"
+      },
+      "apiNote": "Monitoring tools can poll the same checks at",
+      "incidentsTitle": "Something wrong?",
+      "incidentsBody": "If a card isn't updating or the dashboard misbehaves and this page shows everything green, write to"
+    },
+    "subprocessors": {
+      "title": "Subprocessors.",
+      "lead": "The third parties that process personal data on Loyalshy's behalf, what for, and where. This list is part of our",
+      "updated": "Last updated 4 October 2026",
+      "columns": {
+        "name": "Subprocessor",
+        "purpose": "Purpose",
+        "data": "Data",
+        "location": "Location"
+      },
+      "rows": {
+        "vercel": {
+          "purpose": "Hosting of the web app, dashboard and API",
+          "data": "All data in transit; request logs",
+          "location": "EU (Frankfurt); edge network worldwide"
+        },
+        "neon": {
+          "purpose": "Database hosting",
+          "data": "Accounts, programs, customers and interactions",
+          "location": "EU (Frankfurt)"
+        },
+        "upstash": {
+          "purpose": "Rate limiting",
+          "data": "Hashed sign-in identifiers, kept for minutes",
+          "location": "EU (Frankfurt)"
+        },
+        "cloudflare": {
+          "purpose": "Image storage and DNS",
+          "data": "Logos and card images uploaded by businesses",
+          "location": "EU and worldwide"
+        },
+        "stripe": {
+          "purpose": "Payments and invoicing",
+          "data": "Business billing details",
+          "location": "United States and EU"
+        },
+        "trigger": {
+          "purpose": "Background jobs",
+          "data": "Pass and contact identifiers, email contents",
+          "location": "EU and United States"
+        },
+        "resend": {
+          "purpose": "Transactional email",
+          "data": "Email addresses and email contents",
+          "location": "United States and EU"
+        },
+        "sentry": {
+          "purpose": "Error monitoring",
+          "data": "Technical error reports, which may include identifiers",
+          "location": "EU and United States"
+        },
+        "apple": {
+          "purpose": "Apple Wallet passes and push updates",
+          "data": "Pass data, device push tokens",
+          "location": "Worldwide"
+        },
+        "google": {
+          "purpose": "Google Wallet, Google sign-in, Places",
+          "data": "Pass data; Google account identifiers for sign-in",
+          "location": "Worldwide"
+        }
+      },
+      "changesTitle": "Changes.",
+      "changesBody": "We update this page when a subprocessor is added or replaced. Customers on a paid plan can ask to be notified by email.",
+      "dpaTitle": "Agreements.",
+      "dpaBody": "Questions about data processing, or need a data processing agreement? Write to"
     }
   }
 }

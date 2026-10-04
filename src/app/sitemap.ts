@@ -4,7 +4,7 @@ import { MARKETING_PATHS, marketingUrl } from "@/i18n/marketing"
 
 // Every marketing page in every language, each entry listing its
 // hreflang alternates. Bump LAST_MODIFIED when marketing copy changes.
-const LAST_MODIFIED = "2026-09-29"
+const LAST_MODIFIED = "2026-10-04"
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return MARKETING_PATHS.flatMap((path) => {

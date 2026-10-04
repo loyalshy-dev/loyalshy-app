@@ -25,7 +25,7 @@ interface NavLink {
   section?: string
 }
 
-const SECTIONS = ["cards", "features", "pricing", "faq"] as const
+const SECTIONS = ["cards", "features", "faq"] as const
 
 export function MarketingNavbar() {
   const t = useTranslations("nav")
@@ -43,11 +43,13 @@ export function MarketingNavbar() {
   const links: NavLink[] = [
     { label: t("cards"), href: `${lp("/")}#cards`, section: "cards" },
     { label: t("dashboard"), href: `${lp("/")}#features`, section: "features" },
-    { label: t("pricing"), href: `${lp("/")}#pricing`, section: "pricing" },
+    { label: t("pricing"), href: lp("/pricing"), section: "pricing" },
     { label: t("faq"), href: `${lp("/")}#faq`, section: "faq" },
     { label: tCommon("contact"), href: lp("/contact"), section: "contact" },
   ]
-  const current = onLanding ? active : pathname === lp("/contact") ? "contact" : null
+  // Off the landing, the link of the page itself is the active one.
+  const PAGE_SECTIONS: Record<string, string> = { [lp("/pricing")]: "pricing", [lp("/contact")]: "contact" }
+  const current = onLanding ? active : (PAGE_SECTIONS[pathname] ?? null)
 
   // Lift the bar into its capsule once the page has moved.
   React.useEffect(() => {

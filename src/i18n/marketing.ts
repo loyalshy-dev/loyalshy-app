@@ -12,7 +12,25 @@ import { defaultLocale, locales, type Locale } from "./config"
 export const siteUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "https://loyalshy.com"
 
 /** Unprefixed marketing paths (the English URLs). */
-export const MARKETING_PATHS = ["/", "/contact", "/privacy", "/terms", "/cookies"] as const
+export const MARKETING_PATHS = [
+  "/",
+  "/for",
+  "/for/cafes",
+  "/for/salons",
+  "/for/retail",
+  "/automations",
+  "/pricing",
+  "/staff-app",
+  "/partners",
+  "/private-programs",
+  "/about",
+  "/status",
+  "/subprocessors",
+  "/contact",
+  "/privacy",
+  "/terms",
+  "/cookies",
+] as const
 export type MarketingPath = (typeof MARKETING_PATHS)[number]
 
 /** hreflang / Open Graph codes per locale. */
