@@ -539,11 +539,10 @@
   .mk-film-map { width: calc(var(--pw) * 1.7); }
 }
 
-/* The share tiles around the phone in the film's first chapter. */
-.mk-film-tile { width: calc(var(--pw) * 0.19); height: calc(var(--pw) * 0.19); }
-@media (max-width: 1023px) {
-  .mk-film-tile { width: calc(var(--pw) * 0.2); height: calc(var(--pw) * 0.2); }
-}
+/* The counter pieces around the phone in the film's first chapter: each
+   wrapper is a size container (width from --pw), the piece inside is drawn
+   in cqw. */
+.mk-film-piece { container-type: inline-size; }
 
 /* ─── Global bar and footer, in the Apple manner ───────────────────── */
 .mk-nav-bar {

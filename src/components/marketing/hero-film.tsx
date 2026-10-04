@@ -7,7 +7,10 @@ import { CHAPTERS, FILM, PIN_VH, type Chapter } from "./film-timeline"
 import { useCaption, useFade, useMove, useVisibility } from "./film-hooks"
 import { AppIcon, AppScreen, BANNERS, CameraScreen, CouponFrame, LockNotification, LockScreen, OpeningNotification, PassScreen, RealBanner, SCREEN_BG, StoreBadges, WalletButtons, WalletScreen } from "./film-screens"
 import { FilmRail } from "./film-rail"
+import Link from "next/link"
 import { ShareTiles } from "./film-share"
+import type { MockCopy } from "./pages/promote-pieces"
+import { useLocalePath } from "@/i18n/use-locale-path"
 import { MapScene } from "./map-scene"
 import { PhoneFrame } from "./phone-frame"
 import { INK, SPRING_HEAVY, SPRING_LIGHT } from "./tokens"
@@ -42,12 +45,13 @@ import { useMediaQuery } from "./use-media-query"
 // `narrow` (a client-only media query) only drives motion values that are
 // invisible at scroll 0, so the hydration swap never shows.
 
-type FilmProps = { demoUrl?: string; appStoreUrl: string; playStoreUrl: string }
+type FilmProps = { demoUrl?: string; appStoreUrl: string; playStoreUrl: string; mock: MockCopy }
 
 /* ─── The pinned film ─────────────────────────────────────────────── */
 
-function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
+function Film({ demoUrl, appStoreUrl, playStoreUrl, mock }: FilmProps) {
   const t = useTranslations("hero")
+  const lp = useLocalePath()
   const narrow = useMediaQuery("(max-width: 1023px)")
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress: p } = useScroll({ target: ref, offset: ["start start", "end end"] })
@@ -208,6 +212,13 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
                   <motion.p style={{ opacity: c.body.o, y: c.body.y }} className={centred ? "mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4 lg:max-w-[26ch]" : "mk-lead mx-auto mt-3 max-w-[40ch] lg:mx-0 lg:mt-4"}>
                     {t(`film.${key}.caption`)}
                   </motion.p>
+                  {key === "ch1" && (
+                    <motion.p style={{ opacity: c.body.o, y: c.body.y }} className="mt-4 lg:mt-5">
+                      <Link href={lp("/promote")} className="mk-body font-medium underline underline-offset-4" style={{ color: "var(--mk-text)" }}>
+                        {t("film.ch1.link")}
+                      </Link>
+                    </motion.p>
+                  )}
                   {key === "ch2" && demoUrl && (
                     <motion.div style={{ opacity: buttonsOpacity, y: buttonsY, visibility: buttonsVisibility }} className="mt-4 lg:mt-6">
                       <WalletButtons demoUrl={demoUrl} align="left" />
@@ -241,7 +252,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
             </motion.div>
 
             {/* Chapter 1: how a program is shared, around the phone */}
-            <ShareTiles p={p} narrow={narrow} />
+            <ShareTiles p={p} narrow={narrow} mock={mock} />
 
             {/* Chapter 3: the crowd behind */}
             {[crowdLeft, crowdRight].map((mv, i) => (
@@ -315,6 +326,7 @@ function Film({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
 
 function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
   const t = useTranslations("hero")
+  const lp = useLocalePath()
   const w = 230
   const frames: Array<{ key: Chapter; dark: boolean; screen: React.ReactNode }> = [
     { key: "ch1", dark: true, screen: <CameraScreen /> },
@@ -353,6 +365,11 @@ function Frames({ demoUrl, appStoreUrl, playStoreUrl }: FilmProps) {
           <figcaption>
             <h2 className="mk-title-4" style={{ color: "var(--mk-text)" }}>{t(`film.${f.key}.title`)}</h2>
             <p className="mk-body-sm mt-1 max-w-[32ch]" style={{ color: "var(--mk-text-muted)" }}>{t(`film.${f.key}.caption`)}</p>
+            {f.key === "ch1" && (
+              <Link href={lp("/promote")} className="mk-body-sm mt-2 inline-block font-medium underline underline-offset-4" style={{ color: "var(--mk-text)" }}>
+                {t("film.ch1.link")}
+              </Link>
+            )}
           </figcaption>
         </figure>
       ))}

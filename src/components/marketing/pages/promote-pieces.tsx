@@ -9,6 +9,10 @@ import { BrandMark } from "@/components/brand-mark"
 const QR = "/hero/real-qr.webp"
 const ACCENT = "var(--mk-accent)"
 
+/** A size in px or any CSS length (the film passes container units), times a factor. */
+type Size = number | string
+const mul = (size: Size, f: number): Size => (typeof size === "number" ? size * f : `calc(${size} * ${f})`)
+
 export type MockCopy = {
   business: string
   program: string
@@ -36,23 +40,23 @@ function Frame({ children, alt }: { children: React.ReactNode; alt: string }) {
   )
 }
 
-function Qr({ size }: { size: number }) {
-  return <Image src={QR} alt="" width={640} height={640} style={{ width: size, height: size }} sizes={`${size}px`} className="rounded-sm" />
+function Qr({ size }: { size: Size }) {
+  return <Image src={QR} alt="" width={640} height={640} style={{ width: size, height: size }} sizes={typeof size === "number" ? `${size}px` : "200px"} className="rounded-sm" />
 }
 
 const PAPER = { background: "#fff", color: "#1F1410", boxShadow: "0 18px 30px -16px oklch(0 0 0 / 0.35), 0 0 0 1px oklch(0 0 0 / 0.05)" }
 
-/** A6 card standing on the counter. */
-function CardFace({ m, width = 176, reviews = false }: { m: MockCopy; width?: number; reviews?: boolean }) {
+/** A6 card standing on the counter (bare; also floats in the hero film). */
+export function CardFace({ m, width = 176, reviews = false }: { m: MockCopy; width?: Size; reviews?: boolean }) {
   return (
     <div className="flex flex-col items-center overflow-hidden rounded-[6px] text-center" style={{ ...PAPER, width, aspectRatio: "105/148" }}>
       <div className="h-[5%] w-full" style={{ background: ACCENT }} />
       <div className="flex flex-1 flex-col items-center justify-center gap-[6%] px-[8%] py-[8%]">
-        <p className="font-semibold leading-tight" style={{ fontSize: width * 0.075 }}>{m.business}</p>
-        <Qr size={width * 0.56} />
-        <p className="leading-snug" style={{ fontSize: width * 0.052, color: "#5a4f4a" }}>{reviews ? m.reviewLine : m.scanLine}</p>
+        <p className="font-semibold leading-tight" style={{ fontSize: mul(width, 0.075) }}>{m.business}</p>
+        <Qr size={mul(width, 0.56)} />
+        <p className="leading-snug" style={{ fontSize: mul(width, 0.052), color: "#5a4f4a" }}>{reviews ? m.reviewLine : m.scanLine}</p>
       </div>
-      <p className="pb-[5%]" style={{ fontSize: width * 0.04, color: "#9b918c" }}>loyalshy.com</p>
+      <p className="pb-[5%]" style={{ fontSize: mul(width, 0.04), color: "#9b918c" }}>loyalshy.com</p>
     </div>
   )
 }
@@ -80,16 +84,25 @@ export function TentPiece({ m, alt }: { m: MockCopy; alt: string }) {
   )
 }
 
+/** The round door sticker (bare; also floats in the hero film). */
+export function DoorStickerArt({ m, size = 200 }: { m: MockCopy; size?: Size }) {
+  return (
+    <div className="flex flex-col items-center justify-center rounded-full text-center text-white" style={{ width: size, height: size, gap: mul(size, 0.06), background: ACCENT, boxShadow: PAPER.boxShadow }}>
+      <p className="max-w-[9ch] font-display font-bold leading-tight" style={{ fontSize: mul(size, 0.075) }}>{m.doorLine}</p>
+      <div className="rounded-md bg-white" style={{ padding: mul(size, 0.03) }}>
+        <Qr size={mul(size, 0.32)} />
+      </div>
+      <span className="flex text-white/80" style={{ height: mul(size, 0.05) }}>
+        <BrandMark className="h-full" />
+      </span>
+    </div>
+  )
+}
+
 export function DoorStickerPiece({ m, alt }: { m: MockCopy; alt: string }) {
   return (
     <Frame alt={alt}>
-      <div className="flex flex-col items-center justify-center gap-3 rounded-full text-center text-white" style={{ width: 200, height: 200, background: ACCENT, boxShadow: PAPER.boxShadow }}>
-        <p className="max-w-[9ch] font-display text-[15px] font-bold leading-tight">{m.doorLine}</p>
-        <div className="rounded-md bg-white p-1.5">
-          <Qr size={64} />
-        </div>
-        <BrandMark className="h-2.5 text-white/80" />
-      </div>
+      <DoorStickerArt m={m} />
     </Frame>
   )
 }
@@ -149,23 +162,31 @@ export function StaffPiece({ m, alt }: { m: MockCopy; alt: string }) {
   )
 }
 
+/** The small reviews card (bare; also floats in the hero film). */
+export function ReviewsCardArt({ m, width = 220 }: { m: MockCopy; width?: Size }) {
+  const u = (px: number) => mul(width, px / 220)
+  return (
+    <div className="flex items-center rounded-[8px]" style={{ ...PAPER, width, aspectRatio: "148/105", gap: u(16), padding: u(16) }}>
+      <div className="flex-1">
+        <div className="flex gap-0.5" aria-hidden="true">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <svg key={i} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" style={{ width: u(12), height: u(12) }}>
+              <path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.7 5.9 21l1.3-6.8-5-4.7 6.8-.8z" />
+            </svg>
+          ))}
+        </div>
+        <p className="font-semibold leading-snug" style={{ fontSize: u(11), marginTop: u(8) }}>{m.reviewLine}</p>
+        <p style={{ fontSize: u(8), marginTop: u(8), color: "#9b918c" }}>{m.business}</p>
+      </div>
+      <Qr size={u(64)} />
+    </div>
+  )
+}
+
 export function ReviewsPiece({ m, alt }: { m: MockCopy; alt: string }) {
   return (
     <Frame alt={alt}>
-      <div className="flex w-[220px] items-center gap-4 rounded-[8px] px-4 py-4" style={{ ...PAPER, aspectRatio: "148/105" }}>
-        <div className="flex-1">
-          <div className="flex gap-0.5" aria-hidden="true">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
-                <path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.7 5.9 21l1.3-6.8-5-4.7 6.8-.8z" />
-              </svg>
-            ))}
-          </div>
-          <p className="mt-2 text-[11px] font-semibold leading-snug">{m.reviewLine}</p>
-          <p className="mt-2 text-[8px]" style={{ color: "#9b918c" }}>{m.business}</p>
-        </div>
-        <Qr size={64} />
-      </div>
+      <ReviewsCardArt m={m} />
     </Frame>
   )
 }

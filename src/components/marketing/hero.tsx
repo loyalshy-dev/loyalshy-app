@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
 import { HeroFilm } from "./hero-film"
+import type { MockCopy } from "./pages/promote-pieces"
 
 import { APP_STORE_URL, PLAY_STORE_URL } from "./store-links"
 
@@ -14,6 +15,8 @@ const DEMO_JOIN_URL = process.env.NEXT_PUBLIC_DEMO_JOIN_URL
 export async function Hero() {
   const t = await getTranslations("hero")
   const tCommon = await getTranslations("common")
+  // Café Sol's lines on the counter pieces that float in the film's first chapter
+  const mock = (await getTranslations("pages.promote")).raw("mock") as MockCopy
 
   return (
     <section className="relative pb-0 sm:pb-[10vh] lg:pb-[14vh]" style={{ background: "var(--mk-bg)" }}>
@@ -40,7 +43,7 @@ export async function Hero() {
           {t("note")}
         </p>
       </div>
-      <HeroFilm demoUrl={DEMO_JOIN_URL} appStoreUrl={APP_STORE_URL} playStoreUrl={PLAY_STORE_URL} />
+      <HeroFilm demoUrl={DEMO_JOIN_URL} appStoreUrl={APP_STORE_URL} playStoreUrl={PLAY_STORE_URL} mock={mock} />
     </section>
   )
 }

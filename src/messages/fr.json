@@ -73,7 +73,8 @@
       "sendButton": "Envoyer à 128 clients",
       "ch1": {
         "title": "Partagez.",
-        "caption": "Programmes de fidélité publics ou privés, partagés par QR, e-mail ou réseaux sociaux."
+        "caption": "Programmes de fidélité publics ou privés, partagés par QR, e-mail ou réseaux sociaux.",
+        "link": "Des idées pour promouvoir votre programme"
       },
       "ch2": {
         "title": "Dans le Wallet.",
