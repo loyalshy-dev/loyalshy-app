@@ -539,11 +539,10 @@
   .mk-film-map { width: calc(var(--pw) * 1.7); }
 }
 
-/* The share tiles around the phone in the film's first chapter. */
-.mk-film-tile { width: calc(var(--pw) * 0.19); height: calc(var(--pw) * 0.19); }
-@media (max-width: 1023px) {
-  .mk-film-tile { width: calc(var(--pw) * 0.2); height: calc(var(--pw) * 0.2); }
-}
+/* The counter pieces around the phone in the film's first chapter: each
+   wrapper is a size container (width from --pw), the piece inside is drawn
+   in cqw. */
+.mk-film-piece { container-type: inline-size; }
 
 /* ─── Global bar and footer, in the Apple manner ───────────────────── */
 .mk-nav-bar {
@@ -676,13 +675,19 @@
   color: var(--mk-text);
 }
 .mk-nav-menu-link:active { opacity: 0.6; }
-.mk-nav-menu-foot {
+.mk-nav-lang { letter-spacing: 0.02em; }
+.mk-nav-lang:disabled { opacity: 0.6; }
+/* The languages at the foot of the phone menu: a quiet row, the current one in ink. */
+.mk-nav-menu-langs {
   display: flex;
-  align-items: center;
-  gap: 0.25rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
   margin-top: 2.5rem;
-  margin-left: -0.5rem;
+  font-size: 15px;
+  color: var(--mk-text-muted);
 }
+.mk-nav-menu-langs a[aria-current="true"] { color: var(--mk-text); font-weight: 500; }
+.mk-nav-menu-langs a:hover { color: var(--mk-text); }
 @media (min-width: 1024px) {
   .mk-nav-inner { padding-inline: 2.5rem; }
 }

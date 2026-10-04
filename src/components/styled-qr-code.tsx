@@ -68,6 +68,48 @@ function hexLuminance(hex: string): number | null {
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
 }
 
+/**
+ * Where the centre logo sits on a styled QR of `size` px: the same
+ * geometry renderStyledQr clears for it (2.5 cells of padding a side, a
+ * disc of ~18% of the modules). Shared by the canvas exports.
+ */
+export function qrLogoGeometry(size: number, moduleCount: number) {
+  const cellSize = size / (moduleCount + 5)
+  const radius = Math.ceil(moduleCount * 0.18) * cellSize * 0.42
+  return { center: size / 2, radius }
+}
+
+/** Draws the accent disc and the clipped logo in the middle of a QR already on `ctx`. */
+export function drawQrLogo(ctx: CanvasRenderingContext2D, size: number, moduleCount: number, accent: string, logo: CanvasImageSource) {
+  const { center: c, radius } = qrLogoGeometry(size, moduleCount)
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(c, c, radius + 1, 0, Math.PI * 2)
+  ctx.fillStyle = accent
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(c, c, radius, 0, Math.PI * 2)
+  ctx.clip()
+  ctx.drawImage(logo, c - radius, c - radius, radius * 2, radius * 2)
+  ctx.restore()
+}
+
+/** A logo (R2 is cross-origin) through the same-origin proxy so the canvas isn't tainted. */
+export async function loadLogoImage(url: string): Promise<HTMLImageElement | null> {
+  try {
+    const img = new window.Image()
+    img.crossOrigin = "anonymous"
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve()
+      img.onerror = () => reject()
+      img.src = `/api/image-proxy?url=${encodeURIComponent(url)}`
+    })
+    return img
+  } catch {
+    return null
+  }
+}
+
 export function renderStyledQr(
   modules: { size: number; data: Uint8Array },
   size: number,
@@ -75,7 +117,7 @@ export function renderStyledQr(
   colors?: { bg: string; fg: string },
   logoUrl?: string
 ): string {
-  let bg = colors?.bg ?? "var(--foreground)"
+  const bg = colors?.bg ?? "var(--foreground)"
   let fg = colors?.fg ?? "var(--background)"
 
   // If background is very light, swap to dark dots so the QR stays visible

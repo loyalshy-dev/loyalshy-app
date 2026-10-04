@@ -31,13 +31,13 @@
   },
   "nav": {
     "pricing": "Precios",
-    "faq": "Preguntas",
     "home": "Inicio Loyalshy",
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú",
     "switchLanguage": "Cambiar idioma",
-    "cards": "Tarjetas",
-    "dashboard": "El panel"
+    "forBusiness": "Para tu negocio",
+    "automations": "Automatizaciones",
+    "staffApp": "App de equipo"
   },
   "hero": {
     "subtitle": "Tarjetas de sellos y cupones que tus clientes guardan en Apple Wallet o Google Wallet. Sin app, sin cuenta y sin papel.",
@@ -73,7 +73,8 @@
       "sendButton": "Enviar a 128 clientes",
       "ch1": {
         "title": "Comparte.",
-        "caption": "Programas de fidelidad públicos o privados, compartidos por QR, email o redes."
+        "caption": "Programas de fidelidad públicos o privados, compartidos por QR, email o redes.",
+        "link": "Ideas para promocionar tu programa"
       },
       "ch2": {
         "title": "En la Wallet.",
@@ -213,7 +214,8 @@
     "billedYearly": "Facturado al año",
     "perYear": "al año",
     "multiLocation": "¿Varios locales o una cadena? Un plan a medida, con todos los locales en un solo panel.",
-    "multiLocationCta": "Pide una demo"
+    "multiLocationCta": "Pide una demo",
+    "vatIncluded": "IVA incluido"
   },
   "faq": {
     "title": "Preguntas frecuentes",
@@ -272,9 +274,21 @@
     "tagline": "Fideliza a tus clientes ocasionales.",
     "copyright": "© 2026 Loyalshy, un producto de HEX CONCEPTS STUDIO, S.L. Todos los derechos reservados.",
     "builtWith": "Hecho en España.",
-    "tryDemo": "Tarjeta de prueba",
     "instagram": "Loyalshy en Instagram",
-    "tiktok": "Loyalshy en TikTok"
+    "tiktok": "Loyalshy en TikTok",
+    "forBusiness": "Para tu negocio",
+    "cafes": "Cafeterías y panaderías",
+    "salons": "Peluquerías y barberías",
+    "retail": "Tiendas y comercio",
+    "allIndustries": "Todos los negocios",
+    "automations": "Automatizaciones",
+    "staffApp": "App de equipo",
+    "privatePrograms": "Programas privados",
+    "about": "Sobre nosotros",
+    "partners": "Partners",
+    "status": "Estado",
+    "subprocessors": "Subencargados",
+    "promote": "Cómo promocionarlo"
   },
   "cookieBanner": {
     "message": "Usamos cookies esenciales para autenticación y preferencias. Sin cookies de rastreo.",
@@ -913,7 +927,18 @@
       "shareNative": "Compartir...",
       "embedOnSite": "Insertar en tu web",
       "copyEmbed": "Copiar código de inserción",
-      "issueToSelected": "{count, plural, =0 {Emitir pase a contactos} one {Emitir pase a # contacto} other {Emitir pase a # contactos}}"
+      "issueToSelected": "{count, plural, =0 {Emitir pase a contactos} one {Emitir pase a # contacto} other {Emitir pase a # contactos}}",
+      "materialTitle": "Material para el mostrador",
+      "materialDescription": "PDF listos para imprimir con tu logo, tus colores y el QR de este programa. Imprímelos en cualquier copistería.",
+      "materialCounterCard": "Tarjeta de mostrador (A6)",
+      "materialTableTent": "Expositor de mesa (A4, plegado)",
+      "materialTentReviews": "La segunda cara lleva tu enlace de reseñas de Google.",
+      "materialTentNoReviews": "Configura tu enlace de reseñas de Google en Automatizaciones y la segunda cara pedirá una reseña.",
+      "materialScanLine": "Escanea y guarda tu tarjeta en tu Wallet",
+      "materialReviewsLine": "¿Te ha gustado? Déjanos una reseña en Google",
+      "materialFold": "Doblar por aquí",
+      "materialIdeas": "Ideas para promocionar tu programa",
+      "materialFailed": "No se ha podido generar el PDF. Inténtalo de nuevo."
     },
     "programSettings": {
       "title": "Ajustes",
@@ -2134,6 +2159,1013 @@
     "cookies": {
       "title": "Política de cookies",
       "description": "Cómo usa Loyalshy las cookies y tecnologías similares."
+    },
+    "for": {
+      "title": "Programas de fidelización por tipo de negocio",
+      "description": "Tarjetas de sellos y cupones digitales en Apple y Google Wallet para cafeterías, peluquerías y tiendas. La misma mecánica, adaptada a tu mostrador."
+    },
+    "cafes": {
+      "title": "Tarjeta de sellos digital para cafeterías y panaderías",
+      "description": "Nueve cafés y el décimo gratis, en el Apple o Google Wallet de tus clientes. Sin app, sin papel. Se escanea con la app de equipo de Loyalshy. Gratis hasta 50 clientes."
+    },
+    "salons": {
+      "title": "Tarjeta de fidelización para peluquerías y salones de belleza",
+      "description": "Un sello por cita, un premio a la quinta y un recordatorio cuando un cliente habitual lleva tiempo sin venir. En Apple y Google Wallet, sin app."
+    },
+    "retail": {
+      "title": "Tarjetas de fidelización y cupones para tiendas",
+      "description": "Una tarjeta de sellos para los habituales y un cupón para la próxima compra, en Apple y Google Wallet. Se escanea en caja con la app de Loyalshy. Gratis hasta 50 clientes."
+    },
+    "automations": {
+      "title": "Automatizaciones: reseñas en Google, recuperar clientes y cerca de tu local",
+      "description": "La tarjeta pide una reseña en Google, recupera a los habituales que dejaron de venir y aparece en la pantalla de bloqueo cerca de tu local. Se configura una vez desde el panel."
+    },
+    "pricing": {
+      "title": "Precios",
+      "description": "Gratis hasta 50 clientes. Pro 29 €, Business 49 €, Scale 99 € al mes, un 20 % menos al año. Sin permanencia ni tarjeta para empezar. Todos los planes incluyen ambos wallets y la app de equipo."
+    },
+    "staffApp": {
+      "title": "La app de equipo para iPhone y Android",
+      "description": "Escanea la tarjeta, añade el sello, canjea el cupón. Modo mostrador, alta de clientes nuevos y premios pendientes. Incluida en todos los planes de Loyalshy."
+    },
+    "partners": {
+      "title": "Programa de partners para agencias y consultores",
+      "description": "Monta Loyalshy para tus clientes, traspásales el negocio con un enlace y quédate como gestor de programas. Con enlaces de referido y una consola de partner."
+    },
+    "privatePrograms": {
+      "title": "Programas privados, solo por invitación",
+      "description": "Tarjetas de socio, cupones VIP y ventajas para el equipo, ocultos de la página pública. Solo tu equipo los emite, desde el panel o desde la app en el mostrador."
+    },
+    "about": {
+      "title": "Sobre Loyalshy",
+      "description": "Loyalshy lo hace HEX CONCEPTS STUDIO en Lleida. Un solo producto: la tarjeta de fidelización en Apple y Google Wallet, para cafeterías, peluquerías y tiendas."
+    },
+    "status": {
+      "title": "Estado del sistema",
+      "description": "Estado en tiempo real de loyalshy.com, su base de datos y los proveedores de los que depende Loyalshy."
+    },
+    "subprocessors": {
+      "title": "Subencargados",
+      "description": "Los terceros que tratan datos personales por cuenta de Loyalshy, para qué y dónde."
+    },
+    "promote": {
+      "title": "Cómo conseguir que tus clientes se apunten a tu programa de fidelización",
+      "description": "Ocho sitios y momentos que traen altas: la caja, la mesa, la puerta, el ticket, Instagram, las reseñas de Google. Material listo para imprimir gratis desde tu panel, o te lo hacemos nosotros."
+    }
+  },
+  "pages": {
+    "common": {
+      "seePricing": "Ver precios",
+      "bookDemo": "Pide una demo",
+      "allPlans": "Todos los planes",
+      "fromPro": "Desde Pro",
+      "fromBusiness": "Desde Business",
+      "iphoneOnly": "Solo iPhone",
+      "stampCard": "Tarjeta de sellos",
+      "coupon": "Cupón",
+      "seeAutomations": "Ver las automatizaciones",
+      "seeStaffApp": "Ver la app de equipo",
+      "seePrivatePrograms": "Programas privados",
+      "writeToUs": "Escríbenos",
+      "anythingElse": "¿Algo más?",
+      "emailUs": "Escríbenos",
+      "replyTime": "y te contestamos por correo.",
+      "seePromote": "Cómo promocionarlo en el mostrador"
+    },
+    "industries": {
+      "hub": {
+        "title": "Fidelización para los negocios que ven las mismas caras.",
+        "lead": "Cafeterías, peluquerías y tiendas viven de los habituales. Loyalshy le da a cada uno una tarjeta de sellos o un cupón en Apple y Google Wallet, y a ti un panel que te enseña quién vuelve.",
+        "cards": {
+          "cafes": {
+            "title": "Cafeterías y panaderías",
+            "lead": "El décimo café gratis, sin la tarjeta de papel.",
+            "alt": "Las mesas y el mostrador de una cafetería"
+          },
+          "salons": {
+            "title": "Peluquerías y barberías",
+            "lead": "Un sello por cita, un premio a la quinta, un recordatorio cuando hace tiempo.",
+            "alt": "Una peluquera trabajando en un salón luminoso"
+          },
+          "retail": {
+            "title": "Tiendas y comercio",
+            "lead": "Un cupón para la próxima compra y una tarjeta para los habituales.",
+            "alt": "Una tienda de ropa pequeña con percheros y mostrador"
+          }
+        },
+        "sameTitle": "Lo mismo en todas partes.",
+        "sameLead": "Sea como sea el mostrador, la mecánica no cambia.",
+        "same": {
+          "noApp": {
+            "title": "Sin app para el cliente",
+            "body": "Escanea un código QR una vez y la tarjeta se guarda en Apple Wallet o Google Wallet. Sin descargas, sin cuenta, sin contraseña."
+          },
+          "counter": {
+            "title": "En el mostrador no cambia nada",
+            "body": "Tu equipo escanea la tarjeta con la app de Loyalshy y añade el sello o canjea el cupón. El TPV se queda como está."
+          },
+          "data": {
+            "title": "Tus clientes, tus datos",
+            "body": "Cada sello aparece en el panel. Ves quién vuelve y quién dejó de venir, y puedes exportar la lista cuando quieras."
+          }
+        }
+      },
+      "cafes": {
+        "title": "La tarjeta de sellos para cafeterías.",
+        "lead": "Nueve cafés y el décimo gratis. La tarjeta vive en el Apple o Google Wallet de tus clientes, así que no se pierde, no se olvida ni se falsifica, y tú ves cada sello en el panel.",
+        "heroAlt": "Una barista sonriendo detrás del mostrador",
+        "counterTitle": "En el mostrador.",
+        "counterLead": "La hora punta de la mañana no se frena. Esto es lo que cambia y lo que no.",
+        "steps": {
+          "1": {
+            "title": "El cliente escanea el QR",
+            "body": "Un expositor de mesa o una pegatina junto a la caja. La primera vez, la tarjeta se guarda en su Wallet en unos segundos. Sin app, sin más formulario que un correo."
+          },
+          "2": {
+            "title": "Tu equipo escanea la tarjeta",
+            "body": "El cliente enseña la tarjeta en el móvil, el barista la escanea con la app de Loyalshy y el sello cae al momento. Si fue un error, hay diez minutos para deshacerlo."
+          },
+          "3": {
+            "title": "El premio aparece solo",
+            "body": "Con el último sello la tarjeta lo dice, y el cliente canjea el café gratis en su siguiente visita. Después la tarjeta empieza de nuevo."
+          }
+        },
+        "programsTitle": "Dos programas.",
+        "programsLead": "Una tarjeta de sellos para el café de cada día, un cupón para las horas tranquilas.",
+        "stamp": {
+          "title": "Nueve cafés, el décimo lo ponemos nosotros",
+          "body": "La tarjeta clásica, en el Wallet. Tú eliges el número de sellos, el premio y el diseño: la franja, el icono del sello y los colores son tuyos.",
+          "alt": "La tarjeta de sellos de una pizzería en Apple Wallet"
+        },
+        "coupon": {
+          "title": "2x1 a partir de las cuatro",
+          "body": "Un cupón de un solo uso o ilimitado para el bajón de la tarde, un dulce nuevo o la primera semana de un local nuevo. Se canjea con el mismo escaneo.",
+          "alt": "El cupón de una hamburguesería en Apple Wallet"
+        },
+        "beyondTitle": "Más allá de la tarjeta.",
+        "beyondLead": "Lo que una tarjeta de papel nunca podrá hacer.",
+        "beyond": {
+          "reviews": {
+            "title": "Pedir una reseña en Google",
+            "body": "Tras la visita que elijas, la tarjeta pide una vez una reseña en Google, hora y media después, con un enlace que puedes seguir."
+          },
+          "winback": {
+            "title": "Recuperar a los que dejaron de venir",
+            "body": "Un habitual que lleva un mes sin venir recibe tu mensaje de «te echamos de menos» en la pantalla de bloqueo."
+          },
+          "nearby": {
+            "title": "Aparecer en la pantalla de bloqueo al pasar",
+            "body": "Cuando un cliente con iPhone pasa por delante de tu cafetería, la tarjeta aparece en su pantalla de bloqueo."
+          },
+          "announcements": {
+            "title": "Contar a todos lo nuevo",
+            "body": "Un café nuevo, el horario de fiestas, un 2x1 hoy. Un mensaje desde el panel llega a todas las tarjetas."
+          }
+        },
+        "photoAlt": "El mostrador de una cafetería",
+        "faqTitle": "Preguntas de cafeterías.",
+        "faq": {
+          "rush": {
+            "question": "¿Escanear frena la hora punta de la mañana?",
+            "answer": "El escaneo tarda más o menos lo que tardaba un sello. El barista abre la app de Loyalshy, apunta la cámara a la tarjeta y listo. Tras cada sello la cámara vuelve sola, lista para el siguiente cliente."
+          },
+          "two": {
+            "question": "¿Un cliente puede recibir dos sellos en una visita?",
+            "answer": "Sí, si quieres. Tu equipo añade tantos sellos como merezca el pedido. Un sello puesto por error se puede deshacer durante diez minutos."
+          },
+          "android": {
+            "question": "¿Y los clientes sin iPhone?",
+            "answer": "Google Wallet funciona igual en Android. El cliente escanea el mismo QR y la tarjeta se guarda en Google Wallet."
+          },
+          "design": {
+            "question": "¿La tarjeta puede parecerse a mi cafetería?",
+            "answer": "Sí. En el diseñador eliges el logo, los colores, la imagen de la franja y el icono del sello. La tarjeta del Wallet es la tarjeta que diseñaste."
+          },
+          "hardware": {
+            "question": "¿Necesito algún aparato nuevo?",
+            "answer": "No. El equipo escanea con el móvil que ya tiene, con la app de Loyalshy para iPhone y Android. Nada se conecta al TPV."
+          }
+        }
+      },
+      "salons": {
+        "title": "La tarjeta de fidelización para peluquerías.",
+        "lead": "Un sello por cita, un premio a la quinta. La tarjeta vive en el Apple o Google Wallet de tus clientes y, cuando un habitual lleva tiempo sin reservar, se lo recuerda.",
+        "heroAlt": "Una peluquera trabajando en un salón luminoso",
+        "counterTitle": "En recepción.",
+        "counterLead": "Los clientes vienen cada cuatro o seis semanas. La tarjeta tiene que sobrevivir a ese hueco, y el papel no lo hace.",
+        "steps": {
+          "1": {
+            "title": "El cliente escanea el QR en recepción",
+            "body": "En una tarjeta junto al espejo o en el mostrador. La tarjeta se guarda en su Wallet con un correo. Sin app que descargar."
+          },
+          "2": {
+            "title": "Un sello por cita",
+            "body": "Mientras paga, tu equipo escanea la tarjeta con la app de Loyalshy. Un sello por visita, o más por un tratamiento, como decidas."
+          },
+          "3": {
+            "title": "El premio a la quinta",
+            "body": "Un peinado gratis, un tratamiento, un descuento en productos. La tarjeta lo muestra y el cliente lo canjea en la siguiente cita."
+          }
+        },
+        "programsTitle": "Dos programas.",
+        "programsLead": "Una tarjeta de sellos para los habituales, un cupón para los que quieres que vuelvan.",
+        "stamp": {
+          "title": "Cinco citas, un tratamiento gratis",
+          "body": "Eliges el número de sellos, el premio y el aspecto. Una tarjeta distinta para el sillón de barbero y para el color, si quieres.",
+          "alt": "Una tarjeta de sellos en Apple Wallet"
+        },
+        "coupon": {
+          "title": "20 % en el primer color",
+          "body": "Un cupón de un solo uso para un servicio nuevo, para las mañanas tranquilas entre semana, o para la clienta que trajo a una amiga.",
+          "alt": "Un cupón en Apple Wallet"
+        },
+        "beyondTitle": "Más allá de la tarjeta.",
+        "beyondLead": "Donde una peluquería le saca más partido.",
+        "beyond": {
+          "winback": {
+            "title": "El recordatorio cuando hace tiempo",
+            "body": "Un cliente que lleva sesenta días sin venir recibe tu mensaje en la pantalla de bloqueo. Lo escribes una vez; sale solo."
+          },
+          "reviews": {
+            "title": "Una reseña en Google en el momento justo",
+            "body": "Tras la visita que elijas, la tarjeta pide una vez una reseña, hora y media después, cuando ya está en casa y contento con el corte."
+          },
+          "private": {
+            "title": "Una tarjeta solo para socios",
+            "body": "Un programa solo por invitación para tus clientes VIP o una ventaja de socio, oculto de la página pública. Solo tu equipo lo emite."
+          },
+          "announcements": {
+            "title": "Aperturas, cierres y novedades",
+            "body": "Un estilista nuevo, el horario de fiestas, un producto nuevo. Un mensaje desde el panel llega a todas las tarjetas."
+          }
+        },
+        "photoAlt": "Un salón vacío con sillones junto a las ventanas",
+        "faqTitle": "Preguntas de peluquerías.",
+        "faq": {
+          "services": {
+            "question": "¿Servicios distintos pueden dar sellos distintos?",
+            "answer": "Tu equipo decide cuántos sellos da cada visita al escanear. Si quieres programas separados, el plan Pro permite dos y Business cinco."
+          },
+          "booking": {
+            "question": "¿Se conecta con mi sistema de reservas?",
+            "answer": "No, y no hace falta. La tarjeta se escanea en recepción, junto a lo que uses para reservar. Nada que integrar."
+          },
+          "staff": {
+            "question": "¿Cada estilista puede tener la app?",
+            "answer": "Sí. Cada miembro del equipo entra en su propio móvil, por emparejamiento con QR, por correo o con Google. El plan fija cuántos miembros puedes tener."
+          },
+          "gap": {
+            "question": "¿Y si un cliente no vuelve en meses?",
+            "answer": "La tarjeta se queda en su Wallet con los sellos que ganó. Desde Business, el mensaje de recuperación se lo recuerda pasados los días que fijes."
+          },
+          "android": {
+            "question": "¿Mis clientes necesitan un iPhone?",
+            "answer": "No. Google Wallet funciona igual en Android. Solo la sugerencia de «cerca de tu local» es exclusiva de iPhone."
+          }
+        }
+      },
+      "retail": {
+        "title": "Tarjetas y cupones para tiendas.",
+        "lead": "Una tarjeta de sellos para los clientes que vienen cada semana y un cupón para los que podrían volver. Las dos en Apple y Google Wallet, las dos escaneadas en caja con la misma app.",
+        "heroAlt": "Una tienda de ropa pequeña con percheros y mostrador",
+        "counterTitle": "En caja.",
+        "counterLead": "La tarjeta se escanea mientras pagan. Nada toca tu TPV.",
+        "steps": {
+          "1": {
+            "title": "Un QR junto a la caja",
+            "body": "Una pegatina, un cartel de mostrador o un enlace en la bio de Instagram. El cliente lo escanea, pone un correo y la tarjeta está en su Wallet."
+          },
+          "2": {
+            "title": "Un sello por compra",
+            "body": "Tu equipo escanea la tarjeta con la app de Loyalshy. Un sello por cada compra, o por cada compra a partir de un importe que fijes como norma."
+          },
+          "3": {
+            "title": "El premio, o el cupón",
+            "body": "Con el último sello la tarjeta muestra el premio. Un cupón se canjea igual: un escaneo, usado o aún válido, sin códigos que teclear."
+          }
+        },
+        "programsTitle": "Dos programas.",
+        "programsLead": "Sellos para los habituales, un cupón para todos los demás.",
+        "stamp": {
+          "title": "Diez compras, un regalo",
+          "body": "La tarjeta de los habituales. Fijas el número de sellos, el premio y el diseño, y el icono del sello puede ser tu producto.",
+          "alt": "Una tarjeta de sellos en Apple Wallet"
+        },
+        "coupon": {
+          "title": "10 % en tu próxima compra",
+          "body": "Un cupón de un solo uso que se va con la primera compra, o uno ilimitado para una temporada. Compártelo por QR, enlace o Instagram.",
+          "alt": "Un cupón del 10 % en Apple Wallet"
+        },
+        "beyondTitle": "Más allá de la tarjeta.",
+        "beyondLead": "Lo que hace la tarjeta entre visita y visita.",
+        "beyond": {
+          "nearby": {
+            "title": "En la pantalla de bloqueo, en la calle",
+            "body": "Un cliente con iPhone pasa por delante de tu tienda y la tarjeta aparece en su pantalla de bloqueo con tu frase."
+          },
+          "announcements": {
+            "title": "Colección nueva, rebajas, apertura tardía",
+            "body": "Un mensaje desde el panel llega a todas las tarjetas como notificación. Cada plan tiene una cuota semanal."
+          },
+          "winback": {
+            "title": "Recuperar a los que se han enfriado",
+            "body": "Un habitual que lleva noventa días sin comprar recibe tu mensaje. Uno de cada diez no lo recibe, para que veas si funcionó."
+          },
+          "reviews": {
+            "title": "Pedir una reseña en Google",
+            "body": "Tras la compra que elijas, la tarjeta pide una vez una reseña en Google, con un enlace que puedes seguir."
+          }
+        },
+        "photoAlt": "Una clienta pagando en caja",
+        "faqTitle": "Preguntas de tiendas.",
+        "faq": {
+          "amount": {
+            "question": "¿Un sello puede depender de cuánto gastan?",
+            "answer": "La norma es tuya: tu equipo añade un sello cuando la compra cumple. La app no lee el ticket, así que no hay nada que conectar."
+          },
+          "online": {
+            "question": "¿Puedo compartir la tarjeta online?",
+            "answer": "Sí. Cada programa público tiene un enlace de alta que puedes poner en la bio de Instagram, en un correo o en tu web, y un QR para la tienda."
+          },
+          "coupon": {
+            "question": "¿Un cupón se puede usar más de una vez?",
+            "answer": "Tú eliges. Un cupón de un solo uso queda anulado tras el primer escaneo. Uno ilimitado se puede canjear de nuevo pasado un minuto, mientras dure el programa."
+          },
+          "locations": {
+            "question": "Tengo dos tiendas. ¿La tarjeta sirve en las dos?",
+            "answer": "Sí. Las dos escanean las mismas tarjetas con la misma app. Cada miembro del equipo entra en su propio móvil."
+          },
+          "export": {
+            "question": "¿Puedo llevarme mi lista de clientes?",
+            "answer": "Sí, cuando quieras, a CSV desde el panel. La lista es tuya."
+          }
+        }
+      }
+    },
+    "automations": {
+      "title": "La tarjeta hace el seguimiento.",
+      "lead": "Tres cosas que la tarjeta hace sola, configuradas una vez desde el panel: pedir una reseña en Google, recuperar a un habitual que dejó de venir y aparecer en la pantalla de bloqueo cuando un cliente pasa por delante.",
+      "heroAlt": "Una mano sosteniendo un móvil",
+      "rows": {
+        "reviews": {
+          "meta": "Reseñas en Google · Desde Pro",
+          "title": "Pide una reseña.",
+          "body": "Tras la visita que elijas, la tercera por defecto, la tarjeta pide una vez una reseña en Google, hora y media después de la visita y nunca de noche. El enlace se registra, así que ves a cuántos se les pidió y cuántos lo abrieron.",
+          "more": "Sin premio por reseñar y sin filtrar por puntuación. La gráfica diaria muestra tu puntuación en Google y el número de reseñas a lo largo del tiempo.",
+          "alt": "Las mesas de un restaurante después del servicio"
+        },
+        "winback": {
+          "meta": "Recuperar clientes · Desde Business",
+          "title": "Haz que vuelvan.",
+          "body": "Un habitual que lleva 14, 30, 60 o 90 días sin venir recibe tu mensaje en la pantalla de bloqueo, una vez por ausencia. Tú lo escribes; sale a las diez de la mañana, en tu hora.",
+          "more": "Uno de cada diez no recibe mensaje, para que la tarjeta de resultados pueda decirte cuántos volvieron gracias a él y no por casualidad.",
+          "alt": "Una cafetería vacía"
+        },
+        "nearby": {
+          "meta": "Cerca de tu local · Todos los planes, iPhone",
+          "title": "En la pantalla de bloqueo al pasar.",
+          "body": "Fija tu ubicación una vez. Cuando un cliente con iPhone está cerca, su tarjeta aparece en la pantalla de bloqueo con la frase que escribiste. Es una sugerencia que hace iOS, no una notificación push.",
+          "more": "Arrastra el pin del mapa hasta la puerta de tu negocio.",
+          "alt": "Una persona con bolsas de la compra pasando por delante de escaparates"
+        }
+      },
+      "announceTitle": "Y cuando tienes algo que decir.",
+      "announceBody": "Los avisos son la parte manual: un mensaje de hasta 160 caracteres desde el panel o desde la app de equipo, entregado como notificación a todas las tarjetas de un programa. Cada plan tiene una cuota semanal.",
+      "measureTitle": "Medido.",
+      "measureLead": "Cada automatización enseña sus números en el panel.",
+      "measure": {
+        "asked": {
+          "title": "Pedidas y abiertas",
+          "body": "A cuántos clientes les pidió la tarjeta una reseña y cuántos abrieron el enlace."
+        },
+        "rating": {
+          "title": "Puntuación a lo largo del tiempo",
+          "body": "Tu puntuación en Google y el número de reseñas, capturados cada día desde que lo activaste."
+        },
+        "lift": {
+          "title": "Volvieron, frente al grupo de comparación",
+          "body": "Clientes con mensaje que volvieron en dos semanas, junto a los que no recibieron ninguno."
+        }
+      },
+      "faqTitle": "Preguntas sobre las automatizaciones.",
+      "faq": {
+        "frequency": {
+          "question": "¿Mis clientes recibirán demasiadas notificaciones?",
+          "answer": "La reseña se pide una vez por cliente, para siempre. El mensaje de recuperación sale una vez por ausencia y nunca más de una vez cada noventa días. Los avisos tienen una cuota semanal por plan. «Cerca de tu local» no es una notificación: la tarjeta simplemente asoma en la pantalla de bloqueo."
+        },
+        "android": {
+          "question": "¿Funciona en Android?",
+          "answer": "Las peticiones de reseña, los mensajes de recuperación y los avisos llegan tanto a Apple Wallet como a Google Wallet. «Cerca de tu local» es una función de iPhone; Google Wallet no muestra tarjetas por ubicación."
+        },
+        "edit": {
+          "question": "¿Puedo cambiar los mensajes?",
+          "answer": "Sí, cuando quieras, desde Automatizaciones en el panel. El siguiente envío usa el texto nuevo."
+        },
+        "plans": {
+          "question": "¿Qué plan necesito?",
+          "answer": "«Cerca de tu local» está en todos los planes, incluido Free. Las peticiones de reseña en Google empiezan en Pro. Los mensajes de recuperación empiezan en Business, porque medirlos necesita unos cientos de envíos."
+        },
+        "coupons": {
+          "question": "¿Las automatizaciones funcionan con cupones?",
+          "answer": "Con cupones ilimitados, sí: cada canje cuenta como visita. Los cupones de un solo uso nunca piden nada. Una vez canjeados, la tarjeta queda usada."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Planes y precios.",
+      "lead": "Mensual o anual, sin permanencia, y puedes parar cuando quieras. Todos los planes incluyen los dos tipos de tarjeta, los dos wallets, la app de equipo y el panel.",
+      "compareTitle": "Plan por plan.",
+      "compareLead": "Lo que incluye cada plan, línea a línea.",
+      "rows": {
+        "customers": "Clientes",
+        "programs": "Programas activos",
+        "team": "Miembros del equipo",
+        "announcements": "Avisos en el Wallet",
+        "reviews": "Peticiones de reseña en Google",
+        "winback": "Mensajes de recuperación",
+        "nearby": "Cerca de tu local",
+        "private": "Programas privados",
+        "wallets": "Apple y Google Wallet",
+        "staffApp": "App de equipo para iPhone y Android",
+        "studio": "Diseñador de tarjetas",
+        "export": "Exportar clientes a CSV"
+      },
+      "values": {
+        "unlimited": "Ilimitados",
+        "lifetime": "{count} en total",
+        "perWeek": "{count, plural, one {# a la semana} other {# a la semana}}",
+        "included": "Incluido",
+        "notIncluded": "No incluido"
+      },
+      "faqTitle": "Preguntas sobre precios.",
+      "faq": {
+        "customer": {
+          "question": "¿Qué cuenta como cliente?",
+          "answer": "Un contacto con al menos una tarjeta. Si la misma persona tiene tu tarjeta de sellos y un cupón, es un cliente."
+        },
+        "limit": {
+          "question": "¿Qué pasa cuando llego al límite?",
+          "answer": "No pueden darse de alta clientes nuevos hasta que pases al siguiente plan. Las tarjetas ya emitidas siguen funcionando y recibiendo sellos."
+        },
+        "change": {
+          "question": "¿Puedo cambiar de plan más adelante?",
+          "answer": "Sí, desde Ajustes en cualquier momento. Una subida de plan se aplica al instante."
+        },
+        "annual": {
+          "question": "¿Cómo funciona el pago anual?",
+          "answer": "Pagas doce meses de una vez al precio que aparece bajo Anual, hasta un 20 % menos que pagar mes a mes."
+        },
+        "vat": {
+          "question": "¿Los precios incluyen IVA?",
+          "answer": "Sí. Los precios que ves incluyen el IVA, y en la factura aparece desglosado."
+        },
+        "cancel": {
+          "question": "¿Cómo cancelo?",
+          "answer": "Desde Ajustes. El plan sigue activo hasta el final del periodo pagado y después vuelve a Free. Tus tarjetas y clientes se quedan."
+        },
+        "enterprise": {
+          "question": "¿Y si tengo varios locales?",
+          "answer": "Las cadenas y los negocios con necesidades propias tienen el plan Enterprise: límites a medida, soporte dedicado y condiciones por contrato. Escribe a hello@loyalshy.com y lo vemos."
+        }
+      }
+    },
+    "staffApp": {
+      "title": "La app de equipo.",
+      "lead": "Escanear, sellar, canjear. Loyalshy para iPhone y Android es lo que tu equipo tiene en la mano en el mostrador, y viene con todos los planes.",
+      "appStore": "Descargar en el App Store",
+      "playStore": "Disponible en Google Play",
+      "screens": {
+        "scan": "La pestaña Escanear: la cámara, lista para una tarjeta",
+        "today": "La pestaña Hoy con el nombre del negocio y los accesos del día",
+        "share": "Compartir un programa: el QR y el enlace de alta",
+        "history": "La actividad reciente: sellos y canjes"
+      },
+      "rows": {
+        "scan": {
+          "meta": "Escanear",
+          "title": "Un escaneo, un sello.",
+          "body": "La app abre en la cámara. Apúntala a la tarjeta del cliente y el sello cae, o el cupón se canjea. Cuatro segundos después la cámara vuelve, lista para el siguiente cliente.",
+          "more": "¿Un sello por error? Deshazlo en los diez minutos siguientes."
+        },
+        "find": {
+          "meta": "Buscar cliente",
+          "title": "Sin el móvil a mano.",
+          "body": "¿Un cliente sin su móvil? Búscalo por nombre o correo y añade el sello desde la misma hoja."
+        },
+        "counter": {
+          "meta": "Modo mostrador",
+          "title": "El QR en pantalla.",
+          "body": "Un código de alta a pantalla completa para una tablet o un móvil de sobra en la caja. La pantalla no se apaga, y se sale con una pulsación larga."
+        },
+        "signup": {
+          "meta": "Cliente nuevo",
+          "title": "Alta en el mostrador.",
+          "body": "Escribe el correo del cliente y la tarjeta se emite y se envía al momento. Es también la vía de entrada de los programas privados."
+        },
+        "rewards": {
+          "meta": "Premios pendientes",
+          "title": "Quién tiene un premio esperando.",
+          "body": "Los premios ganados y aún no canjeados, los que caducan antes primero."
+        },
+        "announce": {
+          "meta": "Avisos",
+          "title": "Un mensaje a todas las tarjetas.",
+          "body": "Propietarios y gestores de programas pueden enviar un aviso al Wallet desde la app, con la misma cuota que en el panel."
+        }
+      },
+      "signinTitle": "Entrar.",
+      "signinLead": "Cuatro maneras de entrar, para que un miembro nuevo esté listo en un minuto.",
+      "signin": {
+        "qr": {
+          "title": "Emparejar con un QR",
+          "body": "Desde Ajustes, Equipo, muestra un QR con un PIN de seis cifras. El miembro del equipo lo escanea, teclea el PIN y ya está dentro. Sin contraseña."
+        },
+        "email": {
+          "title": "Correo y contraseña",
+          "body": "La misma cuenta que en el panel."
+        },
+        "google": {
+          "title": "Google",
+          "body": "Un toque con la cuenta de Google que está en el equipo."
+        },
+        "invite": {
+          "title": "El enlace de invitación",
+          "body": "El correo de invitación abre la app directamente en el espacio correcto."
+        }
+      },
+      "faqTitle": "Preguntas sobre la app.",
+      "faq": {
+        "free": {
+          "question": "¿La app cuesta aparte?",
+          "answer": "No. Está incluida en todos los planes, Free incluido. El plan fija cuántos miembros del equipo pueden usarla."
+        },
+        "devices": {
+          "question": "¿En qué móviles funciona?",
+          "answer": "iPhone, desde el App Store, y Android, desde Google Play. Cualquier móvil con cámara."
+        },
+        "roles": {
+          "question": "¿Qué puede hacer el personal y qué no?",
+          "answer": "El personal sella, canjea, da de alta clientes y deshace sus propios sellos. Propietarios y gestores de programas pueden además deshacer el sello de cualquiera y enviar avisos. La facturación y los ajustes se quedan en el panel."
+        },
+        "offline": {
+          "question": "¿Y si se cae la conexión?",
+          "answer": "El sello se guarda en el móvil y se envía cuando vuelve la conexión."
+        },
+        "demo": {
+          "question": "¿Puedo probarla antes de tener clientes?",
+          "answer": "Sí. La app tiene un modo demo con datos de ejemplo, para que veas cada pantalla antes del primer escaneo."
+        }
+      }
+    },
+    "partners": {
+      "title": "Monta Loyalshy para tus clientes.",
+      "lead": "Agencias, consultores y distribuidores de TPV montan programas de fidelización para los negocios a los que ya sirven. Lo montas, lo traspasas y te quedas como gestor de programas.",
+      "heroAlt": "Dos personas dándose la mano sobre un mostrador",
+      "howTitle": "Cómo funciona.",
+      "steps": {
+        "1": {
+          "title": "Hazte partner",
+          "body": "Escríbenos. Marcamos tu cuenta como partner y la consola de partner aparece en tu panel."
+        },
+        "2": {
+          "title": "Monta el cliente",
+          "body": "«Nuevo cliente» crea el espacio del cliente contigo como propietario. Diseña la tarjeta, imprime el QR, invita a su equipo."
+        },
+        "3": {
+          "title": "Traspásalo",
+          "body": "Genera un enlace de reclamación de un solo uso y envíaselo al propietario. Cuando lo reclama, el negocio es suyo: facturación, equipo, ajustes."
+        },
+        "4": {
+          "title": "Quédate como gestor de programas",
+          "body": "Conservas el acceso al diseño, la distribución y los programas, sin ver su facturación. Tu plaza nunca cuenta contra su plan."
+        }
+      },
+      "consoleTitle": "La consola de partner.",
+      "consoleLead": "Todos tus clientes en un sitio.",
+      "console": {
+        "portfolio": {
+          "title": "Cartera",
+          "body": "Cada cliente que montaste, con una lista de comprobación: programa publicado, primeros clientes dentro, propietario reclamado."
+        },
+        "referral": {
+          "title": "Enlace de referido",
+          "body": "Un enlace con tu código. Los negocios que se registran a través de él se te atribuyen."
+        },
+        "access": {
+          "title": "Pedir acceso",
+          "body": "¿Perdiste el acceso a un cliente que montaste? Pídeselo al propietario con un clic. Recibe un correo que abre el diálogo de invitación."
+        },
+        "seat": {
+          "title": "Una plaza que no cuenta",
+          "body": "Tu membresía en el espacio de un cliente está exenta del límite de equipo de su plan."
+        }
+      },
+      "whoTitle": "Para quién es.",
+      "who": {
+        "agencies": {
+          "title": "Agencias de marketing",
+          "body": "Añade la fidelización a los servicios que ya vendes a negocios locales."
+        },
+        "consultants": {
+          "title": "Consultores de hostelería",
+          "body": "Monta el programa como parte de una apertura o una renovación."
+        },
+        "pos": {
+          "title": "Distribuidores de TPV",
+          "body": "Loyalshy funciona junto a cualquier TPV. Véndelo con la caja."
+        },
+        "designers": {
+          "title": "Diseñadores e imprentas",
+          "body": "Tú diseñas la tarjeta y el material de mostrador; el cliente se lleva el programa entero."
+        }
+      },
+      "termsTitle": "Condiciones.",
+      "termsBody": "Las condiciones de partner se acuerdan una a una: una cuota de montaje que cobras a tu cliente y una parte de la suscripción. Escríbenos y lo vemos.",
+      "cta": "Escríbenos para ser partner",
+      "faqTitle": "Preguntas de partners.",
+      "faq": {
+        "cost": {
+          "question": "¿El programa de partners cuesta algo?",
+          "answer": "No. Las cuentas de partner son gratuitas. Tus clientes pagan su propio plan cuando se les queda pequeño el Free."
+        },
+        "ownership": {
+          "question": "¿De quién es la cuenta del cliente?",
+          "answer": "Tras el traspaso, del cliente. Es suya la facturación, el equipo y los ajustes. Tú conservas el acceso a los programas como gestor de programas, y pueden quitarte cuando quieran."
+        },
+        "billing": {
+          "question": "¿Puedo pagar yo el plan del cliente?",
+          "answer": "Antes del traspaso eres el propietario, así que sí. Después, la facturación es del cliente."
+        },
+        "referral": {
+          "question": "¿Qué hace el enlace de referido?",
+          "answer": "Los negocios que se registran a través de tu enlace se te atribuyen, aunque nunca les montes nada. La atribución dura lo que dure la cuenta."
+        },
+        "share": {
+          "question": "¿Cuánto es la comisión?",
+          "answer": "Depende del volumen y de lo que aportes. Lo acordamos con cada partner. Escríbenos."
+        }
+      }
+    },
+    "privatePrograms": {
+      "title": "Programas solo por invitación.",
+      "lead": "Algunas tarjetas no son para todos: la tarjeta de socio, el cupón VIP, una ventaja para tu propio equipo. Un programa solo por invitación está oculto de la página pública de alta, y solo tu equipo lo emite.",
+      "heroAlt": "Un barbero atendiendo a un cliente",
+      "whatTitle": "Qué cambia.",
+      "what": {
+        "hidden": {
+          "title": "Oculto de la página de alta",
+          "body": "El programa no aparece en tu página pública, y sus secciones de QR, enlace y NFC desaparecen de Distribución."
+        },
+        "team": {
+          "title": "Solo lo emite el equipo",
+          "body": "Las tarjetas se emiten desde el panel, a un contacto o a una selección, o desde la app de equipo en el mostrador con un correo."
+        },
+        "same": {
+          "title": "Todo lo demás es igual",
+          "body": "Sellos, cupones, avisos, peticiones de reseña y mensajes de recuperación funcionan exactamente igual que en un programa público."
+        }
+      },
+      "forTitle": "Para qué sirve.",
+      "for": {
+        "members": {
+          "title": "La tarjeta de socio",
+          "body": "Una tarjeta de sellos para quienes pagan una cuota, emitida cuando se apuntan."
+        },
+        "vip": {
+          "title": "El cupón VIP",
+          "body": "Un cupón para tus mejores clientes, entregado por el equipo en vez de impreso en un cartel."
+        },
+        "staff": {
+          "title": "Equipo y amigos",
+          "body": "Una ventaja para tu propio equipo o tus proveedores a la que nadie más debería poder apuntarse."
+        },
+        "events": {
+          "title": "Un evento o un lanzamiento",
+          "body": "Una tarjeta para los invitados de una noche, emitida en la puerta desde la app."
+        }
+      },
+      "howTitle": "Emitir una tarjeta.",
+      "steps": {
+        "1": {
+          "title": "Pon el programa en solo por invitación",
+          "body": "En la página de Distribución del programa, elige «Solo por invitación». Un programa público se puede cambiar en cualquier momento; las tarjetas existentes siguen funcionando."
+        },
+        "2": {
+          "title": "Emite desde el panel",
+          "body": "Elige un contacto, o varios, y emite la tarjeta. La reciben por correo con los botones de Añadir al Wallet."
+        },
+        "3": {
+          "title": "O dalos de alta en el mostrador",
+          "body": "En la app de equipo, «Cliente nuevo» pide un correo y emite la tarjeta al momento."
+        }
+      },
+      "faqTitle": "Preguntas sobre programas privados.",
+      "faq": {
+        "existing": {
+          "question": "¿Qué pasa con las tarjetas ya emitidas cuando paso un programa a solo por invitación?",
+          "answer": "Nada. Siguen funcionando, siguen recibiendo sellos y siguen recibiendo mensajes. Solo se detienen las altas nuevas por la página pública."
+        },
+        "qr": {
+          "question": "¿Y si alguien escanea el QR antiguo?",
+          "answer": "La página de alta dice que el programa es solo por invitación. Nunca lo apunta a otro programa por error."
+        },
+        "plans": {
+          "question": "¿Qué plan necesito?",
+          "answer": "Cualquiera, Free incluido. Un programa solo por invitación cuenta como cualquier otro contra el límite de programas de tu plan."
+        },
+        "both": {
+          "question": "¿Puedo tener un programa público y uno privado a la vez?",
+          "answer": "Sí, en un plan con dos o más programas. El público aparece en tu página de alta; el privado no."
+        }
+      }
+    },
+    "about": {
+      "title": "Una empresa pequeña para negocios pequeños.",
+      "lead": "Loyalshy lo hace HEX CONCEPTS STUDIO, un estudio de Lleida. Construimos una sola cosa: la tarjeta de fidelización en el Wallet.",
+      "heroAlt": "Una calle de pequeños comercios con terrazas",
+      "whyTitle": "Por qué.",
+      "whyBody1": "Las tarjetas de sellos de papel se pierden, se olvidan en casa y nadie las cuenta. Las apps de fidelización se descargan una vez y no se abren más. Apple Wallet y Google Wallet ya están en todos los móviles, y una tarjeta ahí se comporta como una tarjeta: aparece cuando hace falta.",
+      "whyBody2": "Así que construimos la tarjeta para el Wallet, el panel que cuenta los sellos y la app con la que escanea el equipo. Nada más.",
+      "holdTitle": "A lo que nos atenemos.",
+      "hold": {
+        "noApp": {
+          "title": "Sin app para el cliente",
+          "body": "La tarjeta va donde ya guarda sus tarjetas. Nada que instalar, nada que recordar."
+        },
+        "data": {
+          "title": "La lista de clientes es tuya",
+          "body": "No la vendemos ni la usamos para publicidad, y puedes exportarla cuando quieras."
+        },
+        "honest": {
+          "title": "Sin trucos con el cliente",
+          "body": "Sin premio por reseñar y sin filtrar por puntuación. Los mensajes que salen son los que tú escribiste."
+        },
+        "counter": {
+          "title": "Hecho para un mostrador",
+          "body": "Una cafetería con una caja, una peluquería con tres sillones, una tienda de esquina. Las cadenas también caben, pero diseñamos para el mostrador primero."
+        }
+      },
+      "photoAlt": "Un equipo trabajando en la misma mesa",
+      "companyTitle": "La empresa.",
+      "companyBody": "HEX CONCEPTS STUDIO, S.L. es un estudio de software en Torrefarrera, Lleida. Loyalshy es su producto. Funciona en servidores de Fráncfort, los datos se quedan en la Unión Europea y el soporte lo responden las personas que lo construyen.",
+      "contactCta": "Contacta con nosotros"
+    },
+    "status": {
+      "title": "Estado del sistema.",
+      "lead": "Comprobaciones en tiempo real de los servicios en los que corre Loyalshy, y de los proveedores de los que depende.",
+      "checkedAt": "Comprobado a las {time} UTC",
+      "overall": {
+        "ok": "Todo funciona con normalidad",
+        "degraded": "Algunos sistemas están degradados"
+      },
+      "components": {
+        "web": {
+          "name": "Web y panel",
+          "desc": "loyalshy.com, el panel y la API de la app de equipo. Si esta página carga, funcionan."
+        },
+        "database": {
+          "name": "Base de datos",
+          "desc": "Donde viven los programas, los clientes y los sellos."
+        },
+        "redis": {
+          "name": "Límite de peticiones",
+          "desc": "Protección del inicio de sesión y del formulario de contacto. Si está caído, se puede seguir entrando con un límite reducido."
+        }
+      },
+      "states": {
+        "ok": "Operativo",
+        "down": "Caído",
+        "unconfigured": "Sin configurar"
+      },
+      "latency": "{ms} ms",
+      "providersTitle": "Proveedores.",
+      "providersLead": "Loyalshy corre sobre estos servicios. Cada uno publica su propia página de estado.",
+      "providers": {
+        "vercel": "Alojamiento y web",
+        "neon": "Base de datos",
+        "upstash": "Límite de peticiones",
+        "stripe": "Pagos",
+        "trigger": "Tareas en segundo plano: notificaciones y correos",
+        "resend": "Envío de correo",
+        "apple": "Actualización de tarjetas en Apple Wallet",
+        "google": "Google Wallet"
+      },
+      "apiNote": "Las herramientas de monitorización pueden consultar las mismas comprobaciones en",
+      "incidentsTitle": "¿Algo va mal?",
+      "incidentsBody": "Si una tarjeta no se actualiza o el panel falla y esta página lo muestra todo en verde, escribe a"
+    },
+    "subprocessors": {
+      "title": "Subencargados.",
+      "lead": "Los terceros que tratan datos personales por cuenta de Loyalshy, para qué y dónde. Esta lista forma parte de nuestra",
+      "updated": "Última actualización: 4 de octubre de 2026",
+      "columns": {
+        "name": "Subencargado",
+        "purpose": "Finalidad",
+        "data": "Datos",
+        "location": "Ubicación"
+      },
+      "rows": {
+        "vercel": {
+          "purpose": "Alojamiento de la web, el panel y la API",
+          "data": "Todos los datos en tránsito; registros de peticiones",
+          "location": "UE (Fráncfort); red perimetral mundial"
+        },
+        "neon": {
+          "purpose": "Alojamiento de la base de datos",
+          "data": "Cuentas, programas, clientes e interacciones",
+          "location": "UE (Fráncfort)"
+        },
+        "upstash": {
+          "purpose": "Límite de peticiones",
+          "data": "Identificadores de inicio de sesión cifrados, conservados minutos",
+          "location": "UE (Fráncfort)"
+        },
+        "cloudflare": {
+          "purpose": "Almacenamiento de imágenes y DNS",
+          "data": "Logos e imágenes de tarjeta subidos por los negocios",
+          "location": "UE y mundial"
+        },
+        "stripe": {
+          "purpose": "Pagos y facturación",
+          "data": "Datos de facturación del negocio",
+          "location": "Estados Unidos y UE"
+        },
+        "trigger": {
+          "purpose": "Tareas en segundo plano",
+          "data": "Identificadores de tarjetas y contactos, contenido de correos",
+          "location": "UE y Estados Unidos"
+        },
+        "resend": {
+          "purpose": "Correo transaccional",
+          "data": "Direcciones de correo y contenido de los correos",
+          "location": "Estados Unidos y UE"
+        },
+        "sentry": {
+          "purpose": "Monitorización de errores",
+          "data": "Informes técnicos de error, que pueden incluir identificadores",
+          "location": "UE y Estados Unidos"
+        },
+        "apple": {
+          "purpose": "Tarjetas de Apple Wallet y notificaciones push",
+          "data": "Datos de la tarjeta, tokens push del dispositivo",
+          "location": "Mundial"
+        },
+        "google": {
+          "purpose": "Google Wallet, inicio de sesión con Google, Places",
+          "data": "Datos de la tarjeta; identificadores de cuenta de Google para el inicio de sesión",
+          "location": "Mundial"
+        }
+      },
+      "changesTitle": "Cambios.",
+      "changesBody": "Actualizamos esta página cuando se añade o se sustituye un subencargado. Los clientes de un plan de pago pueden pedir que se les avise por correo.",
+      "dpaTitle": "Acuerdos.",
+      "dpaBody": "¿Preguntas sobre el tratamiento de datos, o necesitas un acuerdo de encargo de tratamiento? Escribe a"
+    },
+    "promote": {
+      "title": "Dónde se apuntan tus clientes.",
+      "lead": "La tarjeta ya está en el Wallet. Ahora tiene que verse. Ocho sitios y momentos de un negocio pequeño que traen altas, con qué poner en cada uno y qué decir. La tarjeta de mostrador y el expositor salen gratis de tu panel; el resto, te lo podemos hacer nosotros.",
+      "orderCta": "Pídenoslo hecho",
+      "freeCta": "Gratis desde tu panel",
+      "blocks": {
+        "counter": {
+          "title": "La caja.",
+          "body": "Una tarjeta de mostrador con el QR, del lado del cliente, junto a donde pagan. Es el mejor sitio del negocio: el móvil ya está fuera y hay unos segundos de espera.",
+          "tip": "De pie, en A6, a la altura de la mano. No detrás de la caja.",
+          "piece": "Tarjeta de mostrador",
+          "alt": "Una tarjeta de mostrador con el QR del programa y la frase del Wallet"
+        },
+        "staff": {
+          "title": "Lo que dice el equipo.",
+          "body": "«¿Tienes nuestra tarjeta? Es un segundo». Dicho mientras pagan, trae más altas que cualquier cartel. Que forme parte de la rutina de la primera semana y lo demás viene solo.",
+          "tip": "La app de equipo abre en la cámara. Todo son cinco segundos.",
+          "piece": "La frase",
+          "alt": "Un bocadillo con la frase que dice el equipo en el mostrador"
+        },
+        "tent": {
+          "title": "La mesa.",
+          "body": "Un expositor que se lee mientras esperan. Una cara apunta al programa; la otra pide una reseña en Google, para los que quieren hacerlo ahora mismo.",
+          "tip": "La cara de la reseña hacia la silla, la del programa hacia el pasillo.",
+          "piece": "Expositor de mesa",
+          "alt": "Un expositor de mesa plegado: el QR del programa por un lado, el de reseñas de Google por el otro"
+        },
+        "door": {
+          "title": "La puerta y el escaparate.",
+          "body": "Una pegatina para el que pasa, con el motivo escrito: el premio. Es también donde «cerca de tu local» enciende la tarjeta en los iPhone que ya la tienen.",
+          "tip": "A la altura de los ojos, por fuera, sobre el cristal.",
+          "piece": "Pegatina de puerta",
+          "alt": "Una pegatina redonda de puerta con el premio y el QR"
+        },
+        "ticket": {
+          "title": "El ticket.",
+          "body": "Una línea al pie del ticket, o un sello de caucho encima: «Pregunta por nuestra tarjeta». Para quien ya imprime tickets, sin instalar nada.",
+          "tip": "Si tu TPV imprime códigos QR, pon ahí el enlace de alta.",
+          "piece": "Sello de caucho",
+          "alt": "Un ticket con la frase que pide la tarjeta y un QR pequeño"
+        },
+        "social": {
+          "title": "Instagram y WhatsApp.",
+          "body": "El enlace de alta en la bio, una historia destacada que enseña la tarjeta entrando en el Wallet, y el mensaje de «gracias por venir» con el enlace. «Compartir un programa» en la app de equipo te da el enlace y el QR.",
+          "tip": "La historia funciona mejor con la tarjeta real que con un diseño.",
+          "piece": "Plantillas para historias y publicaciones",
+          "alt": "Un marco de historia de Instagram con la tarjeta y una pegatina de enlace"
+        },
+        "reviews": {
+          "title": "Reseñas en Google.",
+          "body": "La tarjeta pide la reseña sola tras la visita que elijas, desde el plan Pro. En el mostrador, un QR pequeño a tu ficha de Google para los que quieren hacerlo ahora. Nunca un premio a cambio.",
+          "tip": "Pídela tras la tercera visita, no en la primera.",
+          "piece": "Tarjeta de reseñas",
+          "alt": "Una tarjeta pequeña que pide una reseña en Google con un QR"
+        },
+        "welcome": {
+          "title": "El cupón de bienvenida.",
+          "body": "Un cupón de un solo uso para la primera compra le da al QR un motivo para escanearse hoy. «Escanea y llévate un 10 %»: la tarjeta llega al Wallet con el descuento ya puesto.",
+          "tip": "Un cupón junto a una tarjeta de sellos necesita el plan Pro.",
+          "piece": "Cupón",
+          "alt": "El cupón del 10 % de una hamburguesería en Apple Wallet"
+        }
+      },
+      "freeTitle": "Gratis desde tu panel.",
+      "freeLead": "La tarjeta de mostrador y el expositor de mesa salen de Distribución como PDF listos para imprimir, con tu logo, tus colores y el QR de tu programa. La segunda cara del expositor lleva tu enlace de reseñas de Google en cuanto lo configures.",
+      "freeSteps": {
+        "1": {
+          "title": "Publica el programa",
+          "body": "El QR apunta a su página de alta, y no cambia nunca por mucho que edites la tarjeta."
+        },
+        "2": {
+          "title": "Distribución, Material para el mostrador",
+          "body": "Dos botones: la tarjeta A6 y el expositor A4. Los PDF salen listos para imprimir."
+        },
+        "3": {
+          "title": "Imprímelo",
+          "body": "Cualquier copistería. Cartulina de 250 a 300 g, mate. El expositor se dobla por la línea de puntos."
+        }
+      },
+      "orderTitle": "O te lo hacemos nosotros.",
+      "orderLead": "Dinos qué necesitas y te contestamos con precio y fecha de entrega en dos días laborables. Impreso en cartulina, cortado y enviado a tu negocio, con tu logo y el QR de tu programa.",
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Correo",
+        "emailPlaceholder": "tu@tunegocio.com",
+        "business": "Negocio",
+        "businessPlaceholder": "Nombre de la cafetería, peluquería o tienda",
+        "pieces": "¿Qué necesitas?",
+        "pieceOptions": {
+          "counterCard": "Tarjeta de mostrador",
+          "tableTent": "Expositor de mesa",
+          "doorSticker": "Pegatina de puerta",
+          "windowSticker": "Pegatina de escaparate",
+          "stamp": "Sello de caucho para tickets",
+          "social": "Plantillas para historias y publicaciones",
+          "other": "Otra cosa"
+        },
+        "quantity": "¿Cuántas de cada?",
+        "quantityOptions": {
+          "1": "1",
+          "2-5": "De 2 a 5",
+          "6-10": "De 6 a 10",
+          "more": "Más de 10"
+        },
+        "message": "Algo más",
+        "messagePlaceholder": "Tamaños, colores, la dirección de envío…",
+        "submit": "Pedir presupuesto",
+        "note": "Sin compromiso. Te contestamos por correo con precio y fecha.",
+        "successTitle": "Petición recibida",
+        "successBody": "Te escribimos en dos días laborables con precio y fecha de entrega. Mira tu correo: te hemos enviado la confirmación.",
+        "piecesRequired": "Elige al menos una pieza."
+      },
+      "faqTitle": "Preguntas sobre promocionar.",
+      "faq": {
+        "change": {
+          "question": "¿Y si después cambio el programa?",
+          "answer": "El QR apunta a la página de alta del programa, no a su diseño. Cambia los sellos, el premio o los colores y el QR impreso sigue funcionando."
+        },
+        "ownPrinter": {
+          "question": "¿Puedo imprimirlo en mi propia imprenta?",
+          "answer": "Sí. La tarjeta de mostrador y el expositor son PDF gratuitos desde Distribución, a resolución de imprenta. Llévalos a cualquier copistería."
+        },
+        "time": {
+          "question": "¿Cuánto tarda un pedido?",
+          "answer": "Contestamos en dos días laborables con precio y fecha. La impresión y el envío dependen de la pieza; pegatinas y tarjetas suelen tardar una semana."
+        },
+        "private": {
+          "question": "¿Un programa solo por invitación tiene QR?",
+          "answer": "No. Los programas solo por invitación no tienen página pública de alta, así que no hay QR que imprimir. El material es para programas públicos."
+        }
+      },
+      "mock": {
+        "business": "Café Sol",
+        "program": "Tarjeta de sellos",
+        "reward": "El décimo café, gratis",
+        "scanLine": "Escanea y guarda tu tarjeta en tu Wallet",
+        "reviewLine": "¿Te ha gustado? Déjanos una reseña en Google",
+        "askLine": "Pregunta por nuestra tarjeta",
+        "doorLine": "El décimo café, gratis. Escanea.",
+        "storyLine": "Guárdala en tu Wallet",
+        "staffLine": "¿Tienes nuestra tarjeta? Es un segundo.",
+        "receiptTotal": "Total",
+        "fold": "Doblar por aquí"
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 import { connection } from "next/server"
 import { notFound, redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { assertAuthenticated, getOrganizationForUser, assertOrganizationRole, getOrgMember } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { QrCodeDisplay } from "@/components/dashboard/settings/qr-code-display"
@@ -10,6 +11,7 @@ import { NfcSection } from "@/components/dashboard/programs/nfc-section"
 import { FirstCustomerChecklist } from "@/components/dashboard/programs/first-customer-checklist"
 import { AnnouncementSection } from "@/components/dashboard/programs/announcement-section"
 import { JoinModeSection } from "@/components/dashboard/programs/join-mode-section"
+import { CounterMaterialSection } from "@/components/dashboard/programs/counter-material-section"
 import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import {
   getAnnouncementQuota,
@@ -46,6 +48,7 @@ export default async function ProgramDistributionPage(props: {
     announcementQuota,
     programSendsLast24h,
     member,
+    reviewSettings,
   ] = await Promise.all([
     db.passTemplate.findFirst({
       where: { id: programId, organizationId: organization.id },
@@ -96,6 +99,8 @@ export default async function ProgramDistributionPage(props: {
     getAnnouncementQuota(db, organization),
     countProgramSendsLast24h(db, programId),
     getOrgMember(organization.id),
+    // The table tent's second face asks for a Google review when a link exists
+    db.googleReviewSettings.findUnique({ where: { organizationId: organization.id }, select: { reviewUrl: true } }),
   ])
 
   if (!program) {
@@ -116,6 +121,18 @@ export default async function ProgramDistributionPage(props: {
   const origin = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? ""
   const joinPath = `/join/${organization.slug}?program=${program.id}`
   const joinUrl = origin ? `${origin}${joinPath}` : joinPath
+
+  // Counter material: the same accent + QR logo the QR card uses, and the
+  // reward in words for the card's title. Coupons print the program's own
+  // name (formatCouponValue is English with a dollar sign — not for paper).
+  const tDist = await getTranslations("dashboard.distribution")
+  const config = program.config as Record<string, unknown> | null
+  const rewardLine =
+    program.passType === "COUPON"
+      ? program.name
+      : tDist("rewardAfterVisits", { reward: (config?.rewardDescription as string) ?? "", visits: (config?.stampsRequired as number) ?? 10 })
+  const materialAccent = program.passDesign?.primaryColor ?? organization.brandColor ?? "#1a1a2e"
+  const materialLogo = program.passDesign?.logoGoogleUrl ?? organization.logoGoogle ?? program.passDesign?.logoUrl ?? organization.logo ?? null
 
   return (
     <div className="space-y-6">
@@ -200,6 +217,16 @@ export default async function ProgramDistributionPage(props: {
               walletHolders={walletHolders}
             />
           </section>
+          {isPublic && (
+            <section id="counter-material-section" className="scroll-mt-6">
+              <CounterMaterialSection
+                organization={{ name: organization.name, slug: organization.slug }}
+                template={{ name: program.name, rewardLine, accentColor: materialAccent, qrLogoUrl: materialLogo }}
+                joinUrl={joinUrl}
+                reviewUrl={reviewSettings?.reviewUrl ?? null}
+              />
+            </section>
+          )}
           {isPublic && <NfcSection joinUrl={joinUrl} />}
         </div>
       </div>

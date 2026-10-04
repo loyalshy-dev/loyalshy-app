@@ -31,13 +31,13 @@
   },
   "nav": {
     "pricing": "Tarifs",
-    "faq": "FAQ",
     "home": "Accueil Loyalshy",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
     "switchLanguage": "Changer de langue",
-    "cards": "Cartes",
-    "dashboard": "Tableau de bord"
+    "forBusiness": "Pour votre commerce",
+    "automations": "Automatisations",
+    "staffApp": "Appli équipe"
   },
   "hero": {
     "subtitle": "Cartes à tampons et coupons que vos clients enregistrent dans Apple Wallet ou Google Wallet. Sans app, sans compte et sans papier.",
@@ -73,7 +73,8 @@
       "sendButton": "Envoyer à 128 clients",
       "ch1": {
         "title": "Partagez.",
-        "caption": "Programmes de fidélité publics ou privés, partagés par QR, e-mail ou réseaux sociaux."
+        "caption": "Programmes de fidélité publics ou privés, partagés par QR, e-mail ou réseaux sociaux.",
+        "link": "Des idées pour promouvoir votre programme"
       },
       "ch2": {
         "title": "Dans le Wallet.",
@@ -213,7 +214,8 @@
     "billedYearly": "Facturé à l'année",
     "perYear": "par an",
     "multiLocation": "Plusieurs établissements ou une chaîne ? Un plan sur mesure, tous vos établissements dans un seul tableau de bord.",
-    "multiLocationCta": "Demander une démo"
+    "multiLocationCta": "Demander une démo",
+    "vatIncluded": "TVA incluse"
   },
   "faq": {
     "title": "Questions fréquemment posées",
@@ -272,9 +274,21 @@
     "tagline": "Fidélisez vos clients occasionnels.",
     "copyright": "© 2026 Loyalshy, un produit de HEX CONCEPTS STUDIO, S.L. Tous droits réservés.",
     "builtWith": "Fait en Espagne.",
-    "tryDemo": "Carte de démonstration",
     "instagram": "Loyalshy sur Instagram",
-    "tiktok": "Loyalshy sur TikTok"
+    "tiktok": "Loyalshy sur TikTok",
+    "forBusiness": "Pour votre commerce",
+    "cafes": "Cafés et boulangeries",
+    "salons": "Salons et barbiers",
+    "retail": "Boutiques et commerces",
+    "allIndustries": "Tous les commerces",
+    "automations": "Automatisations",
+    "staffApp": "Appli équipe",
+    "privatePrograms": "Programmes privés",
+    "about": "À propos",
+    "partners": "Partenaires",
+    "status": "État du service",
+    "subprocessors": "Sous-traitants",
+    "promote": "Comment le promouvoir"
   },
   "cookieBanner": {
     "message": "Nous utilisons des cookies essentiels pour l'authentification et les préférences. Aucun cookie de suivi.",
@@ -913,7 +927,18 @@
       "shareNative": "Partager...",
       "embedOnSite": "Intégrer à votre site",
       "copyEmbed": "Copier le code d'intégration",
-      "issueToSelected": "{count, plural, =0 {Émettre la carte aux contacts} one {Émettre la carte à # contact} other {Émettre la carte à # contacts}}"
+      "issueToSelected": "{count, plural, =0 {Émettre la carte aux contacts} one {Émettre la carte à # contact} other {Émettre la carte à # contacts}}",
+      "materialTitle": "Matériel de comptoir",
+      "materialDescription": "Des PDF prêts à imprimer avec votre logo, vos couleurs et le QR de ce programme. À imprimer dans n'importe quelle reprographie.",
+      "materialCounterCard": "Carte de comptoir (A6)",
+      "materialTableTent": "Chevalet de table (A4, plié)",
+      "materialTentReviews": "La seconde face porte votre lien d'avis Google.",
+      "materialTentNoReviews": "Renseignez votre lien d'avis Google dans Automatisations et la seconde face demandera un avis.",
+      "materialScanLine": "Scannez et enregistrez votre carte dans votre Wallet",
+      "materialReviewsLine": "Ça vous a plu ? Laissez-nous un avis sur Google",
+      "materialFold": "Plier ici",
+      "materialIdeas": "Des idées pour promouvoir votre programme",
+      "materialFailed": "Impossible de générer le PDF. Réessayez."
     },
     "programSettings": {
       "title": "Paramètres",
@@ -2134,6 +2159,1013 @@
     "cookies": {
       "title": "Politique relative aux cookies",
       "description": "Comment Loyalshy utilise les cookies et technologies similaires."
+    },
+    "for": {
+      "title": "Programmes de fidélité par type de commerce",
+      "description": "Cartes à tampons et coupons digitaux dans Apple et Google Wallet pour cafés, salons et boutiques. La même mécanique, adaptée à votre comptoir."
+    },
+    "cafes": {
+      "title": "Carte à tampons digitale pour cafés et boulangeries",
+      "description": "Neuf cafés, le dixième offert, dans l'Apple ou Google Wallet de vos clients. Sans appli, sans papier. Scannée avec l'appli équipe Loyalshy. Gratuit jusqu'à 50 clients."
+    },
+    "salons": {
+      "title": "Carte de fidélité pour salons de coiffure et instituts",
+      "description": "Un tampon par rendez-vous, une récompense au cinquième, et un rappel quand un habitué n'est pas venu depuis un moment. Dans Apple et Google Wallet, sans appli."
+    },
+    "retail": {
+      "title": "Cartes de fidélité et coupons pour boutiques",
+      "description": "Une carte à tampons pour les habitués et un coupon pour le prochain achat, dans Apple et Google Wallet. Scannés en caisse avec l'appli Loyalshy. Gratuit jusqu'à 50 clients."
+    },
+    "automations": {
+      "title": "Automatisations : avis Google, reconquête et proximité",
+      "description": "La carte demande un avis Google, fait revenir les habitués qui ne venaient plus et s'affiche sur l'écran verrouillé près de votre commerce. Réglé une fois depuis le tableau de bord."
+    },
+    "pricing": {
+      "title": "Tarifs",
+      "description": "Gratuit jusqu'à 50 clients. Pro 29 €, Business 49 €, Scale 99 € par mois, 20 % de moins à l'année. Sans engagement, sans carte pour commencer. Chaque formule inclut les deux wallets et l'appli équipe."
+    },
+    "staffApp": {
+      "title": "L'appli équipe pour iPhone et Android",
+      "description": "Scannez la carte, ajoutez le tampon, validez le coupon. Mode comptoir, inscription des nouveaux clients et récompenses en attente. Incluse dans chaque formule Loyalshy."
+    },
+    "partners": {
+      "title": "Programme partenaires pour agences et consultants",
+      "description": "Installez Loyalshy chez vos clients, transmettez-leur le commerce avec un lien et restez gestionnaire de programmes. Liens de parrainage et console partenaire inclus."
+    },
+    "privatePrograms": {
+      "title": "Programmes privés, sur invitation uniquement",
+      "description": "Cartes de membre, coupons VIP et avantages pour l'équipe, masqués de la page publique d'inscription. Seule votre équipe les émet, depuis le tableau de bord ou l'appli au comptoir."
+    },
+    "about": {
+      "title": "À propos de Loyalshy",
+      "description": "Loyalshy est développé par HEX CONCEPTS STUDIO à Lleida, en Espagne. Un seul produit : la carte de fidélité dans Apple et Google Wallet, pour cafés, salons et boutiques."
+    },
+    "status": {
+      "title": "État du système",
+      "description": "État en direct de loyalshy.com, de sa base de données et des prestataires dont dépend Loyalshy."
+    },
+    "subprocessors": {
+      "title": "Sous-traitants",
+      "description": "Les tiers qui traitent des données personnelles pour le compte de Loyalshy, pour quoi et où."
+    },
+    "promote": {
+      "title": "Comment amener vos clients à rejoindre votre programme de fidélité",
+      "description": "Huit endroits et moments qui amènent des inscriptions : la caisse, la table, la porte, le ticket, Instagram, les avis Google. Du matériel prêt à imprimer, gratuit depuis votre tableau de bord, ou nous le fabriquons pour vous."
+    }
+  },
+  "pages": {
+    "common": {
+      "seePricing": "Voir les tarifs",
+      "bookDemo": "Demander une démo",
+      "allPlans": "Toutes les formules",
+      "fromPro": "À partir de Pro",
+      "fromBusiness": "À partir de Business",
+      "iphoneOnly": "iPhone uniquement",
+      "stampCard": "Carte à tampons",
+      "coupon": "Coupon",
+      "seeAutomations": "Voir les automatisations",
+      "seeStaffApp": "Voir l'appli équipe",
+      "seePrivatePrograms": "Programmes privés",
+      "writeToUs": "Écrivez-nous",
+      "anythingElse": "Une autre question ?",
+      "emailUs": "Écrivez-nous",
+      "replyTime": "et nous répondons par e-mail.",
+      "seePromote": "Comment le promouvoir au comptoir"
+    },
+    "industries": {
+      "hub": {
+        "title": "La fidélité pour les commerces qui voient les mêmes visages.",
+        "lead": "Cafés, salons et boutiques vivent de leurs habitués. Loyalshy donne à chacun d'eux une carte à tampons ou un coupon dans Apple et Google Wallet, et vous donne un tableau de bord qui montre qui revient.",
+        "cards": {
+          "cafes": {
+            "title": "Cafés et boulangeries",
+            "lead": "Le dixième café offert, sans la carte en papier.",
+            "alt": "Les tables et le comptoir d'un café"
+          },
+          "salons": {
+            "title": "Salons et barbiers",
+            "lead": "Un tampon par rendez-vous, une récompense au cinquième, un rappel quand ça fait longtemps.",
+            "alt": "Une coiffeuse au travail dans un salon lumineux"
+          },
+          "retail": {
+            "title": "Boutiques et commerces",
+            "lead": "Un coupon pour le prochain achat, et une carte pour les habitués.",
+            "alt": "Une petite boutique de vêtements avec portants et comptoir"
+          }
+        },
+        "sameTitle": "Pareil partout.",
+        "sameLead": "Quel que soit le comptoir, la mécanique ne change pas.",
+        "same": {
+          "noApp": {
+            "title": "Pas d'appli pour le client",
+            "body": "Il scanne un QR code une fois et la carte arrive dans Apple Wallet ou Google Wallet. Rien à télécharger, pas de compte, pas de mot de passe."
+          },
+          "counter": {
+            "title": "Rien ne change au comptoir",
+            "body": "Votre équipe scanne la carte avec l'appli Loyalshy et ajoute le tampon ou valide le coupon. La caisse reste telle quelle."
+          },
+          "data": {
+            "title": "Vos clients, vos données",
+            "body": "Chaque tampon apparaît dans le tableau de bord. Vous voyez qui revient et qui ne vient plus, et vous pouvez exporter la liste quand vous voulez."
+          }
+        }
+      },
+      "cafes": {
+        "title": "La carte à tampons pour les cafés.",
+        "lead": "Neuf cafés, le dixième offert. La carte vit dans l'Apple ou Google Wallet de vos clients : elle ne se perd pas, ne s'oublie pas et ne se falsifie pas, et vous voyez chaque tampon dans le tableau de bord.",
+        "heroAlt": "Une barista souriante derrière le comptoir",
+        "counterTitle": "Au comptoir.",
+        "counterLead": "Le coup de feu du matin ne ralentit pas. Voici ce qui change et ce qui ne change pas.",
+        "steps": {
+          "1": {
+            "title": "Le client scanne le QR",
+            "body": "Un chevalet de table ou un autocollant près de la caisse. La première fois, la carte s'enregistre dans son Wallet en quelques secondes. Pas d'appli, pas de formulaire au-delà d'un e-mail."
+          },
+          "2": {
+            "title": "Votre équipe scanne la carte",
+            "body": "Le client montre la carte sur son téléphone, le barista la scanne avec l'appli Loyalshy et le tampon tombe sur-le-champ. En cas d'erreur, il y a dix minutes pour l'annuler."
+          },
+          "3": {
+            "title": "La récompense s'affiche toute seule",
+            "body": "Au dernier tampon, la carte le dit, et le client récupère son café offert à la visite suivante. Puis la carte repart de zéro."
+          }
+        },
+        "programsTitle": "Deux programmes.",
+        "programsLead": "Une carte à tampons pour le café de tous les jours, un coupon pour les heures creuses.",
+        "stamp": {
+          "title": "Neuf achetés, le dixième offert",
+          "body": "La carte classique, dans le Wallet. Vous choisissez le nombre de tampons, la récompense et le design : la bande, l'icône du tampon et les couleurs sont à vous.",
+          "alt": "La carte à tampons d'une pizzeria dans Apple Wallet"
+        },
+        "coupon": {
+          "title": "Un acheté, un offert à partir de 16 h",
+          "body": "Un coupon à usage unique ou illimité pour le creux de l'après-midi, une nouvelle pâtisserie ou la première semaine d'une nouvelle adresse. Validé avec le même scan.",
+          "alt": "Le coupon d'un restaurant de burgers dans Apple Wallet"
+        },
+        "beyondTitle": "Au-delà de la carte.",
+        "beyondLead": "Ce qu'une carte en papier ne pourra jamais faire.",
+        "beyond": {
+          "reviews": {
+            "title": "Demander un avis Google",
+            "body": "Après la visite que vous choisissez, la carte demande une fois un avis sur Google, environ une heure et demie plus tard, avec un lien que vous pouvez suivre."
+          },
+          "winback": {
+            "title": "Faire revenir ceux qui ne viennent plus",
+            "body": "Un habitué qui n'est pas venu depuis un mois reçoit votre message « vous nous manquez » sur son écran verrouillé."
+          },
+          "nearby": {
+            "title": "S'afficher sur l'écran verrouillé à proximité",
+            "body": "Quand un client avec un iPhone passe devant votre café, la carte apparaît sur son écran verrouillé."
+          },
+          "announcements": {
+            "title": "Annoncer les nouveautés à tous",
+            "body": "Un nouveau mélange, les horaires des fêtes, un deux pour un aujourd'hui. Un message depuis le tableau de bord atteint toutes les cartes."
+          }
+        },
+        "photoAlt": "Le comptoir d'un café",
+        "faqTitle": "Questions de cafés.",
+        "faq": {
+          "rush": {
+            "question": "Le scan ralentit-il le coup de feu du matin ?",
+            "answer": "Le scan prend à peu près le temps d'un coup de tampon. Le barista ouvre l'appli Loyalshy, pointe la caméra vers la carte et c'est fait. Après chaque tampon, la caméra revient d'elle-même, prête pour le client suivant."
+          },
+          "two": {
+            "question": "Un client peut-il recevoir deux tampons en une visite ?",
+            "answer": "Oui, si vous le voulez. Votre équipe ajoute autant de tampons que la commande le mérite. Un tampon ajouté par erreur peut être annulé pendant dix minutes."
+          },
+          "android": {
+            "question": "Et les clients sans iPhone ?",
+            "answer": "Google Wallet fonctionne de la même façon sur Android. Le client scanne le même QR et la carte s'enregistre dans Google Wallet."
+          },
+          "design": {
+            "question": "La carte peut-elle ressembler à mon café ?",
+            "answer": "Oui. Le studio de design règle le logo, les couleurs, l'image de la bande et l'icône du tampon. La carte dans le Wallet est la carte que vous avez dessinée."
+          },
+          "hardware": {
+            "question": "Faut-il du nouveau matériel ?",
+            "answer": "Non. L'équipe scanne avec le téléphone qu'elle a déjà, avec l'appli Loyalshy pour iPhone et Android. Rien ne se connecte à la caisse."
+          }
+        }
+      },
+      "salons": {
+        "title": "La carte de fidélité pour les salons.",
+        "lead": "Un tampon par rendez-vous, une récompense au cinquième. La carte vit dans l'Apple ou Google Wallet de vos clients et, quand un habitué n'a pas réservé depuis un moment, elle le lui rappelle.",
+        "heroAlt": "Une coiffeuse au travail dans un salon lumineux",
+        "counterTitle": "À l'accueil.",
+        "counterLead": "Les clients viennent toutes les quatre à six semaines. La carte doit survivre à cet intervalle, et le papier n'y arrive pas.",
+        "steps": {
+          "1": {
+            "title": "Le client scanne le QR à l'accueil",
+            "body": "Sur une carte près du miroir ou sur le comptoir. La carte s'enregistre dans son Wallet avec un e-mail. Aucune appli à télécharger."
+          },
+          "2": {
+            "title": "Un tampon par rendez-vous",
+            "body": "Pendant qu'il règle, votre équipe scanne la carte avec l'appli Loyalshy. Un tampon par visite, ou plus pour un soin, comme vous le décidez."
+          },
+          "3": {
+            "title": "La récompense au cinquième",
+            "body": "Un brushing offert, un soin, une remise sur les produits. La carte l'affiche et le client la récupère au rendez-vous suivant."
+          }
+        },
+        "programsTitle": "Deux programmes.",
+        "programsLead": "Une carte à tampons pour les habitués, un coupon pour ceux que vous voulez revoir.",
+        "stamp": {
+          "title": "Cinq rendez-vous, un soin offert",
+          "body": "Vous choisissez le nombre de tampons, la récompense et le style. Une carte différente pour le fauteuil de barbier et pour la couleur, si vous voulez.",
+          "alt": "Une carte à tampons dans Apple Wallet"
+        },
+        "coupon": {
+          "title": "20 % sur une première couleur",
+          "body": "Un coupon à usage unique pour un nouveau service, pour les matinées calmes en semaine, ou pour la cliente qui a amené une amie.",
+          "alt": "Un coupon dans Apple Wallet"
+        },
+        "beyondTitle": "Au-delà de la carte.",
+        "beyondLead": "Là où un salon en tire le plus.",
+        "beyond": {
+          "winback": {
+            "title": "Le rappel quand ça fait longtemps",
+            "body": "Un client qui n'est pas venu depuis soixante jours reçoit votre message sur son écran verrouillé. Vous l'écrivez une fois ; il part tout seul."
+          },
+          "reviews": {
+            "title": "Un avis Google au bon moment",
+            "body": "Après la visite que vous choisissez, la carte demande une fois un avis, une heure et demie plus tard, quand le client est rentré et content de sa coupe."
+          },
+          "private": {
+            "title": "Une carte réservée aux membres",
+            "body": "Un programme sur invitation pour vos clients VIP ou un avantage d'abonnement, masqué de la page publique. Seule votre équipe l'émet."
+          },
+          "announcements": {
+            "title": "Ouvertures, fermetures et nouveautés",
+            "body": "Un nouveau coiffeur, les horaires des fêtes, un lancement de produit. Un message depuis le tableau de bord atteint toutes les cartes."
+          }
+        },
+        "photoAlt": "Un salon vide avec des fauteuils près des fenêtres",
+        "faqTitle": "Questions de salons.",
+        "faq": {
+          "services": {
+            "question": "Des services différents peuvent-ils donner des tampons différents ?",
+            "answer": "Votre équipe décide combien de tampons chaque visite rapporte au moment du scan. Si vous voulez des programmes séparés, la formule Pro en fait tourner deux et Business cinq."
+          },
+          "booking": {
+            "question": "Est-ce relié à mon système de réservation ?",
+            "answer": "Non, et ce n'est pas nécessaire. La carte est scannée à l'accueil, à côté de ce que vous utilisez pour réserver. Rien à intégrer."
+          },
+          "staff": {
+            "question": "Chaque coiffeur peut-il avoir l'appli ?",
+            "answer": "Oui. Chaque membre de l'équipe se connecte sur son propre téléphone, par appairage QR, e-mail ou Google. La formule fixe le nombre de membres possibles."
+          },
+          "gap": {
+            "question": "Et si un client ne revient pas pendant des mois ?",
+            "answer": "La carte reste dans son Wallet avec les tampons gagnés. À partir de Business, le message de reconquête le lui rappelle après le nombre de jours que vous fixez."
+          },
+          "android": {
+            "question": "Mes clients ont-ils besoin d'un iPhone ?",
+            "answer": "Non. Google Wallet fonctionne de la même façon sur Android. Seule la suggestion « près de votre commerce » est réservée à l'iPhone."
+          }
+        }
+      },
+      "retail": {
+        "title": "Cartes et coupons pour les boutiques.",
+        "lead": "Une carte à tampons pour les clients qui viennent chaque semaine et un coupon pour ceux qui pourraient revenir. Les deux dans Apple et Google Wallet, les deux scannés en caisse avec la même appli.",
+        "heroAlt": "Une petite boutique de vêtements avec portants et comptoir",
+        "counterTitle": "En caisse.",
+        "counterLead": "La carte est scannée pendant le paiement. Rien ne touche à votre caisse.",
+        "steps": {
+          "1": {
+            "title": "Un QR près de la caisse",
+            "body": "Un autocollant, un chevalet de comptoir ou un lien dans votre bio Instagram. Le client le scanne, saisit un e-mail et la carte est dans son Wallet."
+          },
+          "2": {
+            "title": "Un tampon par achat",
+            "body": "Votre équipe scanne la carte avec l'appli Loyalshy. Un tampon par achat, ou par achat au-delà d'un montant que vous fixez comme règle."
+          },
+          "3": {
+            "title": "La récompense, ou le coupon",
+            "body": "Au dernier tampon, la carte affiche la récompense. Un coupon se valide de la même façon : un scan, utilisé ou encore valable, aucun code à saisir."
+          }
+        },
+        "programsTitle": "Deux programmes.",
+        "programsLead": "Des tampons pour les habitués, un coupon pour tous les autres.",
+        "stamp": {
+          "title": "Dix achats, un cadeau",
+          "body": "La carte des habitués. Vous fixez le nombre de tampons, la récompense et le design, et l'icône du tampon peut être votre produit.",
+          "alt": "Une carte à tampons dans Apple Wallet"
+        },
+        "coupon": {
+          "title": "10 % sur votre prochain achat",
+          "body": "Un coupon à usage unique qui repart avec le premier achat, ou un coupon illimité pour une saison. Partagez-le par QR, lien ou Instagram.",
+          "alt": "Un coupon de 10 % dans Apple Wallet"
+        },
+        "beyondTitle": "Au-delà de la carte.",
+        "beyondLead": "Ce que fait la carte entre deux visites.",
+        "beyond": {
+          "nearby": {
+            "title": "Sur l'écran verrouillé, dans la rue",
+            "body": "Un client avec un iPhone passe devant votre boutique et la carte apparaît sur son écran verrouillé avec votre phrase."
+          },
+          "announcements": {
+            "title": "Nouvelle collection, soldes, nocturne",
+            "body": "Un message depuis le tableau de bord atteint toutes les cartes sous forme de notification. Chaque formule a un quota hebdomadaire."
+          },
+          "winback": {
+            "title": "Faire revenir ceux qui se sont éloignés",
+            "body": "Un habitué qui n'a rien acheté depuis quatre-vingt-dix jours reçoit votre message. Un sur dix ne le reçoit pas, pour que vous voyiez si ça a marché."
+          },
+          "reviews": {
+            "title": "Demander un avis Google",
+            "body": "Après l'achat que vous choisissez, la carte demande une fois un avis sur Google, avec un lien que vous pouvez suivre."
+          }
+        },
+        "photoAlt": "Une cliente réglant en caisse",
+        "faqTitle": "Questions de boutiques.",
+        "faq": {
+          "amount": {
+            "question": "Un tampon peut-il dépendre du montant dépensé ?",
+            "answer": "La règle est la vôtre : votre équipe ajoute un tampon quand l'achat y donne droit. L'appli ne lit pas le ticket, il n'y a donc rien à connecter."
+          },
+          "online": {
+            "question": "Puis-je partager la carte en ligne ?",
+            "answer": "Oui. Chaque programme public a un lien d'inscription à mettre dans votre bio Instagram, dans un e-mail ou sur votre site, et un QR pour la boutique."
+          },
+          "coupon": {
+            "question": "Un coupon peut-il être utilisé plusieurs fois ?",
+            "answer": "À vous de choisir. Un coupon à usage unique est annulé après le premier scan. Un coupon illimité peut être validé à nouveau après une minute, tant que le programme dure."
+          },
+          "locations": {
+            "question": "J'ai deux boutiques. La carte marche-t-elle dans les deux ?",
+            "answer": "Oui. Les deux scannent les mêmes cartes avec la même appli. Chaque membre de l'équipe se connecte sur son propre téléphone."
+          },
+          "export": {
+            "question": "Puis-je emporter ma liste de clients ?",
+            "answer": "Oui, à tout moment, en CSV depuis le tableau de bord. C'est votre liste."
+          }
+        }
+      }
+    },
+    "automations": {
+      "title": "La carte assure le suivi.",
+      "lead": "Trois choses que la carte fait toute seule, réglées une fois depuis le tableau de bord : demander un avis Google, faire revenir un habitué qui ne venait plus, et s'afficher sur l'écran verrouillé quand un client passe devant.",
+      "heroAlt": "Une main tenant un téléphone",
+      "rows": {
+        "reviews": {
+          "meta": "Avis Google · À partir de Pro",
+          "title": "Demandez un avis.",
+          "body": "Après la visite que vous choisissez, la troisième par défaut, la carte demande une fois un avis Google, environ une heure et demie après la visite et jamais la nuit. Le lien est suivi : vous voyez combien ont été sollicités et combien l'ont ouvert.",
+          "more": "Aucune récompense pour un avis et aucun filtrage par note. Le graphique quotidien montre votre note Google et le nombre d'avis dans le temps.",
+          "alt": "Les tables d'un restaurant après le service"
+        },
+        "winback": {
+          "meta": "Reconquête · À partir de Business",
+          "title": "Faites-les revenir.",
+          "body": "Un habitué qui n'est pas venu depuis 14, 30, 60 ou 90 jours reçoit votre message sur son écran verrouillé, une fois par absence. Vous l'écrivez ; il part à dix heures du matin, à votre heure.",
+          "more": "Un sur dix ne reçoit pas de message, pour que la carte des résultats puisse vous dire combien sont revenus grâce à lui plutôt que par hasard.",
+          "alt": "Un café vide"
+        },
+        "nearby": {
+          "meta": "Près de votre commerce · Toutes les formules, iPhone",
+          "title": "Sur l'écran verrouillé à proximité.",
+          "body": "Réglez votre adresse une fois. Quand un client avec un iPhone est à proximité, sa carte apparaît sur l'écran verrouillé avec la phrase que vous avez écrite. C'est une suggestion d'iOS, pas une notification push.",
+          "more": "Faites glisser le repère sur la carte jusqu'à la porte de votre commerce.",
+          "alt": "Une passante avec des sacs devant des vitrines"
+        }
+      },
+      "announceTitle": "Et quand vous avez quelque chose à dire.",
+      "announceBody": "Les annonces, c'est la partie manuelle : un message de 160 caractères au plus, depuis le tableau de bord ou l'appli équipe, livré en notification à toutes les cartes d'un programme. Chaque formule a un quota hebdomadaire.",
+      "measureTitle": "Mesuré.",
+      "measureLead": "Chaque automatisation affiche ses chiffres dans le tableau de bord.",
+      "measure": {
+        "asked": {
+          "title": "Sollicités et ouverts",
+          "body": "Combien de clients la carte a sollicités pour un avis et combien ont ouvert le lien."
+        },
+        "rating": {
+          "title": "La note dans le temps",
+          "body": "Votre note Google et le nombre d'avis, relevés chaque jour depuis l'activation."
+        },
+        "lift": {
+          "title": "Revenus, face au groupe de comparaison",
+          "body": "Les clients contactés revenus sous deux semaines, à côté de ceux qui n'ont reçu aucun message."
+        }
+      },
+      "faqTitle": "Questions sur les automatisations.",
+      "faq": {
+        "frequency": {
+          "question": "Mes clients recevront-ils trop de notifications ?",
+          "answer": "L'avis est demandé une fois par client, pour toujours. Le message de reconquête part une fois par absence et jamais plus d'une fois tous les quatre-vingt-dix jours. Les annonces ont un quota hebdomadaire par formule. « Près de votre commerce » n'est pas une notification : la carte apparaît simplement sur l'écran verrouillé."
+        },
+        "android": {
+          "question": "Ça marche sur Android ?",
+          "answer": "Les demandes d'avis, les messages de reconquête et les annonces atteignent Apple Wallet comme Google Wallet. « Près de votre commerce » est une fonction iPhone ; Google Wallet n'affiche pas les cartes selon le lieu."
+        },
+        "edit": {
+          "question": "Puis-je modifier les messages ?",
+          "answer": "Oui, à tout moment, depuis Automatisations dans le tableau de bord. Le prochain envoi utilise le nouveau texte."
+        },
+        "plans": {
+          "question": "Quelle formule me faut-il ?",
+          "answer": "« Près de votre commerce » est dans toutes les formules, Free compris. Les demandes d'avis Google commencent avec Pro. Les messages de reconquête commencent avec Business, parce que les mesurer demande quelques centaines d'envois."
+        },
+        "coupons": {
+          "question": "Les automatisations marchent-elles avec les coupons ?",
+          "answer": "Avec les coupons illimités, oui : chaque validation compte comme une visite. Les coupons à usage unique ne demandent jamais rien. Une fois validée, la carte est consommée."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Formules et tarifs.",
+      "lead": "Au mois ou à l'année, sans engagement, et vous pouvez arrêter quand vous voulez. Chaque formule inclut les deux types de carte, les deux wallets, l'appli équipe et le tableau de bord.",
+      "compareTitle": "Formule par formule.",
+      "compareLead": "Ce que chaque formule inclut, ligne par ligne.",
+      "rows": {
+        "customers": "Clients",
+        "programs": "Programmes actifs",
+        "team": "Membres de l'équipe",
+        "announcements": "Annonces dans le Wallet",
+        "reviews": "Demandes d'avis Google",
+        "winback": "Messages de reconquête",
+        "nearby": "Près de votre commerce",
+        "private": "Programmes privés",
+        "wallets": "Apple et Google Wallet",
+        "staffApp": "Appli équipe pour iPhone et Android",
+        "studio": "Studio de design de carte",
+        "export": "Export des clients en CSV"
+      },
+      "values": {
+        "unlimited": "Illimité",
+        "lifetime": "{count} au total",
+        "perWeek": "{count, plural, one {# par semaine} other {# par semaine}}",
+        "included": "Inclus",
+        "notIncluded": "Non inclus"
+      },
+      "faqTitle": "Questions sur les tarifs.",
+      "faq": {
+        "customer": {
+          "question": "Qu'est-ce qui compte comme un client ?",
+          "answer": "Un contact avec au moins une carte. Si la même personne a votre carte à tampons et un coupon, c'est un seul client."
+        },
+        "limit": {
+          "question": "Que se passe-t-il quand j'atteins la limite ?",
+          "answer": "Les nouveaux clients ne peuvent plus s'inscrire tant que vous ne passez pas à la formule suivante. Les cartes déjà émises continuent de fonctionner et de recevoir des tampons."
+        },
+        "change": {
+          "question": "Puis-je changer de formule plus tard ?",
+          "answer": "Oui, depuis les Réglages, à tout moment. Un passage à une formule supérieure s'applique immédiatement."
+        },
+        "annual": {
+          "question": "Comment fonctionne le paiement annuel ?",
+          "answer": "Vous payez douze mois d'un coup au prix affiché sous Annuel, jusqu'à 20 % de moins que mois par mois."
+        },
+        "vat": {
+          "question": "Les prix incluent-ils la TVA ?",
+          "answer": "Oui. Les prix affichés incluent la TVA, et la facture la détaille."
+        },
+        "cancel": {
+          "question": "Comment résilier ?",
+          "answer": "Depuis les Réglages. La formule reste active jusqu'à la fin de la période payée, puis repasse en Free. Vos cartes et vos clients restent."
+        },
+        "enterprise": {
+          "question": "Et si j'ai plusieurs établissements ?",
+          "answer": "Les chaînes et les commerces aux besoins particuliers ont la formule Enterprise : limites sur mesure, support dédié et conditions contractuelles. Écrivez à hello@loyalshy.com et nous verrons ensemble."
+        }
+      }
+    },
+    "staffApp": {
+      "title": "L'appli équipe.",
+      "lead": "Scanner, tamponner, valider. Loyalshy pour iPhone et Android, c'est ce que votre équipe tient en main au comptoir, et elle est fournie avec chaque formule.",
+      "appStore": "Télécharger dans l'App Store",
+      "playStore": "Disponible sur Google Play",
+      "screens": {
+        "scan": "L'onglet Scanner : la caméra, prête pour une carte",
+        "today": "L'onglet Aujourd'hui avec le nom du commerce et les raccourcis du jour",
+        "share": "Partager un programme : le QR et le lien d'inscription",
+        "history": "L'activité récente : tampons et validations"
+      },
+      "rows": {
+        "scan": {
+          "meta": "Scanner",
+          "title": "Un scan, un tampon.",
+          "body": "L'appli s'ouvre sur la caméra. Pointez-la vers la carte du client et le tampon tombe, ou le coupon est validé. Quatre secondes plus tard, la caméra est de retour, prête pour le client suivant.",
+          "more": "Un tampon ajouté par erreur ? Annulez-le dans les dix minutes."
+        },
+        "find": {
+          "meta": "Trouver un client",
+          "title": "Sans téléphone sous la main.",
+          "body": "Un client sans son téléphone ? Cherchez-le par nom ou e-mail et ajoutez le tampon depuis la même fiche."
+        },
+        "counter": {
+          "meta": "Mode comptoir",
+          "title": "Le QR à l'écran.",
+          "body": "Un code d'inscription en plein écran pour une tablette ou un téléphone de rechange en caisse. L'écran reste allumé, et un appui long permet de sortir."
+        },
+        "signup": {
+          "meta": "Nouveau client",
+          "title": "Inscription au comptoir.",
+          "body": "Saisissez l'e-mail du client et la carte est émise et envoyée sur-le-champ. C'est aussi par là qu'entrent les membres des programmes privés."
+        },
+        "rewards": {
+          "meta": "Récompenses en attente",
+          "title": "Qui a une récompense qui attend.",
+          "body": "Les récompenses gagnées et pas encore récupérées, celles qui expirent le plus tôt en premier."
+        },
+        "announce": {
+          "meta": "Annonces",
+          "title": "Un message à toutes les cartes.",
+          "body": "Les propriétaires et gestionnaires de programmes peuvent envoyer une annonce Wallet depuis l'appli, avec le même quota que le tableau de bord."
+        }
+      },
+      "signinTitle": "Se connecter.",
+      "signinLead": "Quatre façons d'entrer, pour qu'un nouveau membre soit prêt en une minute.",
+      "signin": {
+        "qr": {
+          "title": "Appairer avec un QR",
+          "body": "Depuis Réglages, Équipe, affichez un QR avec un code PIN à six chiffres. Le membre de l'équipe le scanne, saisit le PIN et c'est fait. Sans mot de passe."
+        },
+        "email": {
+          "title": "E-mail et mot de passe",
+          "body": "Le même compte que le tableau de bord."
+        },
+        "google": {
+          "title": "Google",
+          "body": "Un appui avec le compte Google qui fait partie de l'équipe."
+        },
+        "invite": {
+          "title": "Le lien d'invitation",
+          "body": "L'e-mail d'invitation ouvre l'appli directement sur le bon espace."
+        }
+      },
+      "faqTitle": "Questions sur l'appli.",
+      "faq": {
+        "free": {
+          "question": "L'appli coûte-t-elle un supplément ?",
+          "answer": "Non. Elle est incluse dans chaque formule, Free comprise. La formule fixe combien de membres de l'équipe peuvent l'utiliser."
+        },
+        "devices": {
+          "question": "Sur quels téléphones fonctionne-t-elle ?",
+          "answer": "iPhone, depuis l'App Store, et Android, depuis Google Play. N'importe quel téléphone avec une caméra."
+        },
+        "roles": {
+          "question": "Que peut faire le personnel, et que ne peut-il pas faire ?",
+          "answer": "Le personnel tamponne, valide, inscrit des clients et annule ses propres tampons. Les propriétaires et gestionnaires de programmes peuvent aussi annuler le tampon de n'importe qui et envoyer des annonces. La facturation et les réglages restent dans le tableau de bord."
+        },
+        "offline": {
+          "question": "Et si la connexion tombe ?",
+          "answer": "Le tampon est gardé sur le téléphone et envoyé au retour de la connexion."
+        },
+        "demo": {
+          "question": "Puis-je l'essayer avant d'avoir des clients ?",
+          "answer": "Oui. L'appli a un mode démo avec des données d'exemple, pour voir chaque écran avant le premier scan."
+        }
+      }
+    },
+    "partners": {
+      "title": "Installez Loyalshy chez vos clients.",
+      "lead": "Agences, consultants et revendeurs de caisses mettent en place des programmes de fidélité pour les commerces qu'ils servent déjà. Vous installez, vous transmettez, et vous restez gestionnaire de programmes.",
+      "heroAlt": "Deux personnes se serrant la main au-dessus d'un comptoir",
+      "howTitle": "Comment ça marche.",
+      "steps": {
+        "1": {
+          "title": "Devenez partenaire",
+          "body": "Écrivez-nous. Nous marquons votre compte comme partenaire et la console partenaire apparaît dans votre tableau de bord."
+        },
+        "2": {
+          "title": "Installez le client",
+          "body": "« Nouveau client » crée l'espace du client avec vous comme propriétaire. Dessinez la carte, imprimez le QR, invitez son équipe."
+        },
+        "3": {
+          "title": "Transmettez",
+          "body": "Générez un lien de reprise à usage unique et envoyez-le au propriétaire. Quand il le réclame, le commerce est à lui : facturation, équipe, réglages."
+        },
+        "4": {
+          "title": "Restez gestionnaire de programmes",
+          "body": "Vous gardez l'accès au design, à la distribution et aux programmes, sans voir sa facturation. Votre siège ne compte jamais dans sa formule."
+        }
+      },
+      "consoleTitle": "La console partenaire.",
+      "consoleLead": "Tous vos clients au même endroit.",
+      "console": {
+        "portfolio": {
+          "title": "Portefeuille",
+          "body": "Chaque client que vous avez installé, avec une liste de contrôle : programme publié, premiers clients inscrits, propriétaire en place."
+        },
+        "referral": {
+          "title": "Lien de parrainage",
+          "body": "Un lien avec votre code. Les commerces qui s'inscrivent par ce lien vous sont attribués."
+        },
+        "access": {
+          "title": "Demander l'accès",
+          "body": "Vous avez perdu l'accès à un client que vous aviez installé ? Demandez-le au propriétaire en un clic. Il reçoit un e-mail qui ouvre la boîte de dialogue d'invitation."
+        },
+        "seat": {
+          "title": "Un siège qui ne compte pas",
+          "body": "Votre place dans l'espace d'un client est exemptée de la limite d'équipe de sa formule."
+        }
+      },
+      "whoTitle": "Pour qui.",
+      "who": {
+        "agencies": {
+          "title": "Agences marketing",
+          "body": "Ajoutez la fidélité aux services que vous vendez déjà aux commerces locaux."
+        },
+        "consultants": {
+          "title": "Consultants en restauration",
+          "body": "Mettez le programme en place dans le cadre d'une ouverture ou d'une rénovation."
+        },
+        "pos": {
+          "title": "Revendeurs de caisses",
+          "body": "Loyalshy fonctionne à côté de n'importe quelle caisse. Vendez-le avec."
+        },
+        "designers": {
+          "title": "Designers et imprimeurs",
+          "body": "Vous dessinez la carte et le matériel de comptoir ; le client reçoit le programme complet."
+        }
+      },
+      "termsTitle": "Conditions.",
+      "termsBody": "Les conditions partenaires se négocient au cas par cas : des frais d'installation que vous facturez à votre client et une part de l'abonnement. Écrivez-nous et nous verrons ensemble.",
+      "cta": "Écrivez-nous pour devenir partenaire",
+      "faqTitle": "Questions de partenaires.",
+      "faq": {
+        "cost": {
+          "question": "Le programme partenaires coûte-t-il quelque chose ?",
+          "answer": "Non. Les comptes partenaires sont gratuits. Vos clients paient leur propre formule quand Free ne leur suffit plus."
+        },
+        "ownership": {
+          "question": "À qui appartient le compte du client ?",
+          "answer": "Après la transmission, au client. La facturation, l'équipe et les réglages sont à lui. Vous gardez l'accès aux programmes comme gestionnaire de programmes, et il peut vous retirer quand il veut."
+        },
+        "billing": {
+          "question": "Puis-je payer la formule du client ?",
+          "answer": "Avant la transmission, vous êtes propriétaire, donc oui. Après, la facturation appartient au client."
+        },
+        "referral": {
+          "question": "À quoi sert le lien de parrainage ?",
+          "answer": "Les commerces qui s'inscrivent via votre lien vous sont attribués, même si vous ne leur installez jamais rien. L'attribution dure aussi longtemps que le compte."
+        },
+        "share": {
+          "question": "À combien s'élève la commission ?",
+          "answer": "Ça dépend du volume et de ce que vous apportez. Nous la fixons avec chaque partenaire. Écrivez-nous."
+        }
+      }
+    },
+    "privatePrograms": {
+      "title": "Des programmes sur invitation.",
+      "lead": "Certaines cartes ne sont pas pour tout le monde : la carte de membre, le coupon VIP, un avantage pour votre propre équipe. Un programme sur invitation est masqué de la page publique d'inscription, et seule votre équipe l'émet.",
+      "heroAlt": "Un barbier s'occupant d'un client",
+      "whatTitle": "Ce qui change.",
+      "what": {
+        "hidden": {
+          "title": "Masqué de la page d'inscription",
+          "body": "Le programme n'apparaît pas sur votre page publique, et ses sections QR, lien et NFC disparaissent de la Distribution."
+        },
+        "team": {
+          "title": "Seule l'équipe l'émet",
+          "body": "Les cartes sont émises depuis le tableau de bord, à un contact ou à une sélection, ou depuis l'appli équipe au comptoir avec un e-mail."
+        },
+        "same": {
+          "title": "Tout le reste est identique",
+          "body": "Tampons, coupons, annonces, demandes d'avis et messages de reconquête fonctionnent exactement comme sur un programme public."
+        }
+      },
+      "forTitle": "À quoi ça sert.",
+      "for": {
+        "members": {
+          "title": "La carte de membre",
+          "body": "Une carte à tampons pour ceux qui paient un abonnement, émise à leur adhésion."
+        },
+        "vip": {
+          "title": "Le coupon VIP",
+          "body": "Un coupon pour vos meilleurs clients, remis par l'équipe plutôt qu'imprimé sur une affiche."
+        },
+        "staff": {
+          "title": "Équipe et amis",
+          "body": "Un avantage pour votre propre équipe ou vos fournisseurs, auquel personne d'autre ne devrait pouvoir s'inscrire."
+        },
+        "events": {
+          "title": "Un événement ou un lancement",
+          "body": "Une carte pour les invités d'une soirée, émise à l'entrée depuis l'appli."
+        }
+      },
+      "howTitle": "Émettre une carte.",
+      "steps": {
+        "1": {
+          "title": "Passez le programme sur invitation",
+          "body": "Sur la page Distribution du programme, choisissez « Sur invitation ». Un programme public peut changer à tout moment ; les cartes existantes continuent de fonctionner."
+        },
+        "2": {
+          "title": "Émettez depuis le tableau de bord",
+          "body": "Choisissez un contact, ou plusieurs, et émettez la carte. Ils la reçoivent par e-mail avec les boutons Ajouter au Wallet."
+        },
+        "3": {
+          "title": "Ou inscrivez-les au comptoir",
+          "body": "Dans l'appli équipe, « Nouveau client » demande un e-mail et émet la carte sur-le-champ."
+        }
+      },
+      "faqTitle": "Questions sur les programmes privés.",
+      "faq": {
+        "existing": {
+          "question": "Que deviennent les cartes déjà émises quand je passe un programme sur invitation ?",
+          "answer": "Rien. Elles continuent de fonctionner, de recevoir des tampons et de recevoir des messages. Seules les nouvelles inscriptions par la page publique s'arrêtent."
+        },
+        "qr": {
+          "question": "Et si quelqu'un scanne l'ancien QR ?",
+          "answer": "La page d'inscription indique que le programme est sur invitation. Elle ne l'inscrit jamais à un autre programme par erreur."
+        },
+        "plans": {
+          "question": "Quelle formule me faut-il ?",
+          "answer": "N'importe laquelle, Free comprise. Un programme sur invitation compte comme un autre dans la limite de programmes de votre formule."
+        },
+        "both": {
+          "question": "Puis-je avoir un programme public et un programme privé en même temps ?",
+          "answer": "Oui, avec une formule à deux programmes ou plus. Le public apparaît sur votre page d'inscription ; le privé non."
+        }
+      }
+    },
+    "about": {
+      "title": "Une petite entreprise pour les petits commerces.",
+      "lead": "Loyalshy est développé par HEX CONCEPTS STUDIO, un studio de Lleida, en Espagne. Nous construisons une seule chose : la carte de fidélité dans le Wallet.",
+      "heroAlt": "Une rue de petits commerces avec des terrasses",
+      "whyTitle": "Pourquoi.",
+      "whyBody1": "Les cartes à tampons en papier se perdent, s'oublient à la maison, et personne ne les compte. Les applis de fidélité se téléchargent une fois et ne s'ouvrent plus. Apple Wallet et Google Wallet sont déjà sur tous les téléphones, et une carte qui s'y trouve se comporte comme une carte : elle apparaît quand on en a besoin.",
+      "whyBody2": "Alors nous avons construit la carte pour le Wallet, le tableau de bord qui compte les tampons, et l'appli avec laquelle l'équipe scanne. Rien d'autre.",
+      "holdTitle": "Ce à quoi nous tenons.",
+      "hold": {
+        "noApp": {
+          "title": "Pas d'appli pour le client",
+          "body": "La carte va là où il range déjà ses cartes. Rien à installer, rien à retenir."
+        },
+        "data": {
+          "title": "La liste de clients est à vous",
+          "body": "Nous ne la vendons pas et ne l'utilisons pas pour la publicité, et vous pouvez l'exporter quand vous voulez."
+        },
+        "honest": {
+          "title": "Pas de ruse envers le client",
+          "body": "Aucune récompense pour un avis et aucun filtrage par note. Les messages qui partent sont ceux que vous avez écrits."
+        },
+        "counter": {
+          "title": "Conçu pour un comptoir",
+          "body": "Un café avec une caisse, un salon avec trois fauteuils, une boutique au coin de la rue. Les chaînes y trouvent leur place aussi, mais nous concevons d'abord pour le comptoir."
+        }
+      },
+      "photoAlt": "Une équipe au travail autour d'une même table",
+      "companyTitle": "L'entreprise.",
+      "companyBody": "HEX CONCEPTS STUDIO, S.L. est un studio logiciel à Torrefarrera, Lleida. Loyalshy est son produit. Il tourne sur des serveurs à Francfort, les données restent dans l'Union européenne, et le support est assuré par les personnes qui le développent.",
+      "contactCta": "Nous contacter"
+    },
+    "status": {
+      "title": "État du système.",
+      "lead": "Vérifications en direct des services sur lesquels tourne Loyalshy, et des prestataires dont il dépend.",
+      "checkedAt": "Vérifié à {time} UTC",
+      "overall": {
+        "ok": "Tous les systèmes fonctionnent",
+        "degraded": "Certains systèmes sont dégradés"
+      },
+      "components": {
+        "web": {
+          "name": "Site et tableau de bord",
+          "desc": "loyalshy.com, le tableau de bord et l'API de l'appli équipe. Si cette page se charge, ils fonctionnent."
+        },
+        "database": {
+          "name": "Base de données",
+          "desc": "Là où vivent les programmes, les clients et les tampons."
+        },
+        "redis": {
+          "name": "Limitation des requêtes",
+          "desc": "Protection de la connexion et du formulaire de contact. En cas de panne, la connexion fonctionne encore avec une limite réduite."
+        }
+      },
+      "states": {
+        "ok": "Opérationnel",
+        "down": "En panne",
+        "unconfigured": "Non configuré"
+      },
+      "latency": "{ms} ms",
+      "providersTitle": "Prestataires.",
+      "providersLead": "Loyalshy tourne sur ces services. Chacun publie sa propre page d'état.",
+      "providers": {
+        "vercel": "Hébergement et site",
+        "neon": "Base de données",
+        "upstash": "Limitation des requêtes",
+        "stripe": "Paiements",
+        "trigger": "Tâches en arrière-plan : notifications et e-mails",
+        "resend": "Envoi d'e-mails",
+        "apple": "Mises à jour des cartes Apple Wallet",
+        "google": "Google Wallet"
+      },
+      "apiNote": "Les outils de supervision peuvent interroger les mêmes vérifications sur",
+      "incidentsTitle": "Quelque chose ne va pas ?",
+      "incidentsBody": "Si une carte ne se met pas à jour ou si le tableau de bord se comporte mal alors que tout est au vert ici, écrivez à"
+    },
+    "subprocessors": {
+      "title": "Sous-traitants.",
+      "lead": "Les tiers qui traitent des données personnelles pour le compte de Loyalshy, pour quoi, et où. Cette liste fait partie de notre",
+      "updated": "Dernière mise à jour : 4 octobre 2026",
+      "columns": {
+        "name": "Sous-traitant",
+        "purpose": "Finalité",
+        "data": "Données",
+        "location": "Localisation"
+      },
+      "rows": {
+        "vercel": {
+          "purpose": "Hébergement du site, du tableau de bord et de l'API",
+          "data": "Toutes les données en transit ; journaux de requêtes",
+          "location": "UE (Francfort) ; réseau périphérique mondial"
+        },
+        "neon": {
+          "purpose": "Hébergement de la base de données",
+          "data": "Comptes, programmes, clients et interactions",
+          "location": "UE (Francfort)"
+        },
+        "upstash": {
+          "purpose": "Limitation des requêtes",
+          "data": "Identifiants de connexion hachés, conservés quelques minutes",
+          "location": "UE (Francfort)"
+        },
+        "cloudflare": {
+          "purpose": "Stockage d'images et DNS",
+          "data": "Logos et images de carte envoyés par les commerces",
+          "location": "UE et monde"
+        },
+        "stripe": {
+          "purpose": "Paiements et facturation",
+          "data": "Coordonnées de facturation du commerce",
+          "location": "États-Unis et UE"
+        },
+        "trigger": {
+          "purpose": "Tâches en arrière-plan",
+          "data": "Identifiants de cartes et de contacts, contenu des e-mails",
+          "location": "UE et États-Unis"
+        },
+        "resend": {
+          "purpose": "E-mails transactionnels",
+          "data": "Adresses e-mail et contenu des e-mails",
+          "location": "États-Unis et UE"
+        },
+        "sentry": {
+          "purpose": "Suivi des erreurs",
+          "data": "Rapports d'erreur techniques, pouvant inclure des identifiants",
+          "location": "UE et États-Unis"
+        },
+        "apple": {
+          "purpose": "Cartes Apple Wallet et notifications push",
+          "data": "Données de la carte, jetons push de l'appareil",
+          "location": "Monde"
+        },
+        "google": {
+          "purpose": "Google Wallet, connexion Google, Places",
+          "data": "Données de la carte ; identifiants de compte Google pour la connexion",
+          "location": "Monde"
+        }
+      },
+      "changesTitle": "Modifications.",
+      "changesBody": "Nous mettons cette page à jour quand un sous-traitant est ajouté ou remplacé. Les clients d'une formule payante peuvent demander à être prévenus par e-mail.",
+      "dpaTitle": "Accords.",
+      "dpaBody": "Des questions sur le traitement des données, ou besoin d'un accord de sous-traitance ? Écrivez à"
+    },
+    "promote": {
+      "title": "Là où vos clients s'inscrivent.",
+      "lead": "La carte est dans le Wallet. Maintenant, il faut qu'on la voie. Huit endroits et moments d'un petit commerce qui amènent des inscriptions, avec quoi y mettre et quoi dire. La carte de comptoir et le chevalet sortent gratuitement de votre tableau de bord ; le reste, nous pouvons le fabriquer pour vous.",
+      "orderCta": "Demandez-le-nous",
+      "freeCta": "Gratuit depuis votre tableau de bord",
+      "blocks": {
+        "counter": {
+          "title": "La caisse.",
+          "body": "Une carte de comptoir avec le QR, côté client, à côté de l'endroit où l'on paie. C'est le meilleur emplacement du commerce : le téléphone est déjà sorti et il y a quelques secondes d'attente.",
+          "tip": "Debout, en A6, à hauteur de main. Pas derrière la caisse.",
+          "piece": "Carte de comptoir",
+          "alt": "Une carte de comptoir avec le QR du programme et la phrase du Wallet"
+        },
+        "staff": {
+          "title": "Ce que dit l'équipe.",
+          "body": "« Vous avez notre carte ? Ça prend une seconde. » Dit au moment de payer, ça amène plus d'inscriptions que n'importe quelle affiche. Intégrez-le à la routine de la première semaine et le reste suit.",
+          "tip": "L'appli équipe s'ouvre sur la caméra. Le tout prend cinq secondes.",
+          "piece": "La phrase",
+          "alt": "Une bulle avec la phrase que dit l'équipe au comptoir"
+        },
+        "tent": {
+          "title": "La table.",
+          "body": "Un chevalet qu'on lit en attendant. Une face mène au programme ; l'autre demande un avis Google, pour ceux qui veulent le faire tout de suite.",
+          "tip": "La face avis vers la chaise, la face programme vers le passage.",
+          "piece": "Chevalet de table",
+          "alt": "Un chevalet de table plié : le QR du programme d'un côté, le QR des avis Google de l'autre"
+        },
+        "door": {
+          "title": "La porte et la vitrine.",
+          "body": "Un autocollant pour celui qui passe, avec la raison écrite dessus : la récompense. C'est aussi là que « près de votre commerce » fait apparaître la carte sur les iPhone qui l'ont déjà.",
+          "tip": "À hauteur des yeux, à l'extérieur, sur la vitre.",
+          "piece": "Autocollant de porte",
+          "alt": "Un autocollant rond de porte avec la récompense et le QR"
+        },
+        "ticket": {
+          "title": "Le ticket.",
+          "body": "Une ligne en bas du ticket, ou un tampon dessus : « Demandez notre carte ». Pour qui imprime déjà des tickets, sans rien installer.",
+          "tip": "Si votre caisse imprime des QR codes, mettez-y le lien d'inscription.",
+          "piece": "Tampon encreur",
+          "alt": "Un ticket avec la phrase qui demande la carte et un petit QR"
+        },
+        "social": {
+          "title": "Instagram et WhatsApp.",
+          "body": "Le lien d'inscription dans la bio, une story à la une qui montre la carte entrant dans le Wallet, et le message « merci de votre visite » avec le lien. « Partager un programme » dans l'appli équipe vous donne le lien et le QR.",
+          "tip": "La story marche mieux avec la vraie carte qu'avec un visuel.",
+          "piece": "Modèles de stories et de publications",
+          "alt": "Un cadre de story Instagram avec la carte et un sticker de lien"
+        },
+        "reviews": {
+          "title": "Les avis Google.",
+          "body": "La carte demande l'avis toute seule après la visite que vous choisissez, à partir de la formule Pro. Au comptoir, un petit QR vers votre fiche Google pour ceux qui veulent le faire maintenant. Jamais de récompense en échange.",
+          "tip": "Demandez après la troisième visite, pas la première.",
+          "piece": "Carte avis",
+          "alt": "Une petite carte demandant un avis Google avec un QR"
+        },
+        "welcome": {
+          "title": "Le coupon de bienvenue.",
+          "body": "Un coupon à usage unique pour le premier achat donne au QR une raison d'être scanné aujourd'hui. « Scannez et profitez de 10 % » : la carte arrive dans le Wallet avec la remise déjà dessus.",
+          "tip": "Un coupon en plus d'une carte à tampons demande la formule Pro.",
+          "piece": "Coupon",
+          "alt": "Le coupon de 10 % d'un restaurant de burgers dans Apple Wallet"
+        }
+      },
+      "freeTitle": "Gratuit depuis votre tableau de bord.",
+      "freeLead": "La carte de comptoir et le chevalet de table sortent de la Distribution en PDF prêts à imprimer, avec votre logo, vos couleurs et le QR de votre programme. La seconde face du chevalet porte votre lien d'avis Google dès que vous l'avez renseigné.",
+      "freeSteps": {
+        "1": {
+          "title": "Publiez le programme",
+          "body": "Le QR pointe vers sa page d'inscription, et il ne change jamais, quoi que vous modifiiez sur la carte."
+        },
+        "2": {
+          "title": "Distribution, puis Matériel de comptoir",
+          "body": "Deux boutons : la carte A6 et le chevalet A4. Les PDF sortent prêts à imprimer."
+        },
+        "3": {
+          "title": "Imprimez-le",
+          "body": "N'importe quelle reprographie. Carton de 250 à 300 g, mat. Le chevalet se plie le long des pointillés."
+        }
+      },
+      "orderTitle": "Ou nous le fabriquons pour vous.",
+      "orderLead": "Dites-nous ce qu'il vous faut et nous répondons avec un prix et une date de livraison sous deux jours ouvrés. Imprimé sur carton, découpé et envoyé à votre commerce, avec votre logo et le QR de votre programme.",
+      "form": {
+        "name": "Nom",
+        "namePlaceholder": "Votre nom",
+        "email": "E-mail",
+        "emailPlaceholder": "vous@votrecommerce.com",
+        "business": "Commerce",
+        "businessPlaceholder": "Nom du café, du salon ou de la boutique",
+        "pieces": "De quoi avez-vous besoin ?",
+        "pieceOptions": {
+          "counterCard": "Carte de comptoir",
+          "tableTent": "Chevalet de table",
+          "doorSticker": "Autocollant de porte",
+          "windowSticker": "Autocollant de vitrine",
+          "stamp": "Tampon encreur pour tickets",
+          "social": "Modèles de stories et de publications",
+          "other": "Autre chose"
+        },
+        "quantity": "Combien de chaque ?",
+        "quantityOptions": {
+          "1": "1",
+          "2-5": "De 2 à 5",
+          "6-10": "De 6 à 10",
+          "more": "Plus de 10"
+        },
+        "message": "Autre chose",
+        "messagePlaceholder": "Tailles, couleurs, l'adresse de livraison…",
+        "submit": "Demander un devis",
+        "note": "Sans engagement. Nous répondons par e-mail avec un prix et une date.",
+        "successTitle": "Demande reçue",
+        "successBody": "Nous vous écrivons sous deux jours ouvrés avec un prix et une date de livraison. Regardez votre boîte mail : la confirmation est partie.",
+        "piecesRequired": "Choisissez au moins une pièce."
+      },
+      "faqTitle": "Questions sur la promotion.",
+      "faq": {
+        "change": {
+          "question": "Et si je change mon programme plus tard ?",
+          "answer": "Le QR pointe vers la page d'inscription du programme, pas vers son design. Changez les tampons, la récompense ou les couleurs : le QR imprimé continue de fonctionner."
+        },
+        "ownPrinter": {
+          "question": "Puis-je l'imprimer chez mon imprimeur ?",
+          "answer": "Oui. La carte de comptoir et le chevalet sont des PDF gratuits depuis la Distribution, en résolution d'impression. Apportez-les à n'importe quelle reprographie."
+        },
+        "time": {
+          "question": "Combien de temps prend une commande ?",
+          "answer": "Nous répondons sous deux jours ouvrés avec un prix et une date. L'impression et l'envoi dépendent de la pièce ; autocollants et cartes prennent en général une semaine."
+        },
+        "private": {
+          "question": "Un programme sur invitation a-t-il un QR ?",
+          "answer": "Non. Les programmes sur invitation n'ont pas de page publique d'inscription, donc pas de QR à imprimer. Le matériel est pour les programmes publics."
+        }
+      },
+      "mock": {
+        "business": "Café Sol",
+        "program": "Carte à tampons",
+        "reward": "Le 10e café offert",
+        "scanLine": "Scannez et enregistrez votre carte dans votre Wallet",
+        "reviewLine": "Ça vous a plu ? Laissez-nous un avis sur Google",
+        "askLine": "Demandez notre carte",
+        "doorLine": "Le 10e café offert. Scannez.",
+        "storyLine": "Enregistrez-la dans votre Wallet",
+        "staffLine": "Vous avez notre carte ? Ça prend une seconde.",
+        "receiptTotal": "Total",
+        "fold": "Plier ici"
+      }
     }
   }
 }

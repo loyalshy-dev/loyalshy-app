@@ -3,29 +3,29 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 
 import { Wordmark } from "@/components/brand-mark"
 import { LanguageSwitcher } from "@/components/language-switcher"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
+import { localeNames, locales, type Locale } from "@/i18n/config"
+import { localePath, parseMarketingPath } from "@/i18n/marketing"
 import { useLocalePath } from "@/i18n/use-locale-path"
 
 // The global bar. At the top of the page it runs edge to edge over a
 // hairline; once the page scrolls it lifts into a floating translucent
-// capsule, a little narrower than the page. Links show which section is on
-// screen. The one action is the coral pill. On phones the bar is 44px and
+// capsule, a little narrower than the page. Links go to the secondary pages
+// (no anchors into the landing since 2026-10-04) and the one of the page on
+// screen is marked. The language shows as its code ("ES") and opens the
+// same dropdown as the dashboard's switcher; there is no theme toggle (the
+// marketing site is forced light). The one action is the coral pill. On phones the bar is 44px and
 // the menu is a full-screen sheet over everything (bar included) with its
 // own close button, so it reads the same wherever the page was scrolled.
 
 interface NavLink {
   label: string
   href: string
-  /** Section id on the landing this link points at (for the active state). */
-  section?: string
 }
-
-const SECTIONS = ["cards", "features", "pricing", "faq"] as const
 
 export function MarketingNavbar() {
   const t = useTranslations("nav")
@@ -37,17 +37,17 @@ export function MarketingNavbar() {
   const burgerRef = React.useRef<HTMLButtonElement>(null)
   const closeRef = React.useRef<HTMLButtonElement>(null)
   const wasOpen = React.useRef(false)
-  const [active, setActive] = React.useState<string | null>(null)
-  const onLanding = pathname === lp("/")
 
+  // Five pages. The link of the page on screen is the active one; the
+  // industry pages all light "For your business".
   const links: NavLink[] = [
-    { label: t("cards"), href: `${lp("/")}#cards`, section: "cards" },
-    { label: t("dashboard"), href: `${lp("/")}#features`, section: "features" },
-    { label: t("pricing"), href: `${lp("/")}#pricing`, section: "pricing" },
-    { label: t("faq"), href: `${lp("/")}#faq`, section: "faq" },
-    { label: tCommon("contact"), href: lp("/contact"), section: "contact" },
+    { label: t("forBusiness"), href: lp("/for") },
+    { label: t("automations"), href: lp("/automations") },
+    { label: t("staffApp"), href: lp("/staff-app") },
+    { label: t("pricing"), href: lp("/pricing") },
+    { label: tCommon("contact"), href: lp("/contact") },
   ]
-  const current = onLanding ? active : pathname === lp("/contact") ? "contact" : null
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   // Lift the bar into its capsule once the page has moved.
   React.useEffect(() => {
@@ -56,28 +56,6 @@ export function MarketingNavbar() {
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
-
-  // Which section is on screen: the one whose top has passed the upper
-  // third of the viewport and whose bottom has not.
-  React.useEffect(() => {
-    if (!onLanding) return
-    const els = SECTIONS.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => Boolean(el))
-    if (els.length === 0) return
-    const visible = new Map<string, boolean>()
-    const update = () => {
-      const hit = SECTIONS.find((id) => visible.get(id))
-      setActive(hit ?? null)
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) visible.set(entry.target.id, entry.isIntersecting)
-        update()
-      },
-      { rootMargin: "-34% 0px -60% 0px", threshold: 0 },
-    )
-    els.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
-  }, [onLanding])
 
   // On the landing the wordmark just scrolls to the top; elsewhere it goes home.
   const onBrand = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -129,8 +107,8 @@ export function MarketingNavbar() {
                 key={link.href}
                 href={link.href}
                 className="mk-nav-link"
-                data-active={current === link.section}
-                aria-current={current === link.section ? "location" : undefined}
+                data-active={isActive(link.href)}
+                aria-current={isActive(link.href) ? "page" : undefined}
               >
                 {link.label}
               </Link>
@@ -138,8 +116,7 @@ export function MarketingNavbar() {
           </nav>
 
           <div className="mk-nav-actions">
-            <LanguageSwitcher className="mk-nav-icon" />
-            <ThemeToggle className="mk-nav-icon" />
+            <LanguageSwitcher variant="code" className="mk-nav-link mk-nav-lang" />
             <span className="mk-nav-sep" aria-hidden="true" />
             <Link href="/login" className="mk-nav-link mk-nav-link-strong">
               {tCommon("logIn")}
@@ -186,12 +163,38 @@ export function MarketingNavbar() {
               ))}
             </ul>
           </nav>
-          <div className="mk-nav-menu-foot">
-            <LanguageSwitcher size="icon" className="size-10" />
-            <ThemeToggle className="size-10" />
-          </div>
+          <MenuLanguages pathname={pathname} open={open} />
         </div>
       </div>
     </header>
+  )
+}
+
+// The three languages at the foot of the phone menu, the current one in
+// ink. Plain links to the same page in the other language; the cookie is
+// written first so the unprefixed English URL isn't bounced back by the
+// locale redirect in next.config.ts.
+function MenuLanguages({ pathname, open }: { pathname: string; open: boolean }) {
+  const t = useTranslations("nav")
+  const current = useLocale() as Locale
+  const path = parseMarketingPath(pathname)?.path ?? "/"
+  return (
+    <nav className="mk-nav-menu-langs" aria-label={t("switchLanguage")}>
+      {locales.map((l) => (
+        <a
+          key={l}
+          href={localePath(l, path)}
+          lang={l}
+          hrefLang={l}
+          aria-current={l === current ? "true" : undefined}
+          tabIndex={open ? 0 : -1}
+          onClick={() => {
+            document.cookie = `locale=${l};path=/;max-age=31536000;samesite=lax`
+          }}
+        >
+          {localeNames[l]}
+        </a>
+      ))}
+    </nav>
   )
 }

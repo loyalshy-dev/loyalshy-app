@@ -17,9 +17,11 @@ import { cn } from "@/lib/utils"
 interface LanguageSwitcherProps {
   className?: string
   size?: "icon-sm" | "icon"
+  /** `code` shows the current locale ("ES") as a text link instead of the icon (marketing bar). */
+  variant?: "icon" | "code"
 }
 
-export function LanguageSwitcher({ className, size = "icon-sm" }: LanguageSwitcherProps = {}) {
+export function LanguageSwitcher({ className, size = "icon-sm", variant = "icon" }: LanguageSwitcherProps = {}) {
   const locale = useLocale()
   const [isPending, startTransition] = useTransition()
 
@@ -41,15 +43,21 @@ export function LanguageSwitcher({ className, size = "icon-sm" }: LanguageSwitch
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size={size}
-          disabled={isPending}
-          aria-label="Switch language"
-          className={className}
-        >
-          <Languages className="size-4" />
-        </Button>
+        {variant === "code" ? (
+          <button type="button" disabled={isPending} aria-label="Switch language" className={className}>
+            {locale.toUpperCase()}
+          </button>
+        ) : (
+          <Button
+            variant="ghost"
+            size={size}
+            disabled={isPending}
+            aria-label="Switch language"
+            className={className}
+          >
+            <Languages className="size-4" />
+          </Button>
+        )}
       </DropdownMenuTrigger>
       {/* z-[110] keeps the dropdown above the marketing mobile menu overlay (z-100). */}
       <DropdownMenuContent align="end" className="z-[110]">

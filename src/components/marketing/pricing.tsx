@@ -100,7 +100,11 @@ export function Pricing() {
                   <span className="font-display text-5xl font-bold leading-none tracking-tight tabular-nums">{price}</span>
                   <span className="text-[15px] font-medium" style={{ color: "var(--mk-text-dimmed)" }}>{tc("perMonth")}</span>
                 </p>
-                <p className={saved > 0 ? "mk-caption mt-2" : "mk-caption hidden sm:block sm:mt-2 sm:min-h-[1lh]"} style={{ color: "var(--mk-text-dimmed)" }}>
+                {/* Prices are final: say so under them (not under the free plan's 0) */}
+                <p className={plan ? "mk-caption mt-1" : "mk-caption mt-1 hidden sm:block sm:min-h-[1lh]"} style={{ color: "var(--mk-text-dimmed)" }}>
+                  {plan ? t("vatIncluded") : ""}
+                </p>
+                <p className={saved > 0 ? "mk-caption mt-1" : "mk-caption hidden sm:block sm:mt-1 sm:min-h-[1lh]"} style={{ color: "var(--mk-text-dimmed)" }}>
                   {saved > 0 ? `${price * 12} € ${t("perYear")} · ${saved} € ${t("savedPerYear")}` : ""}
                 </p>
                 <Link href="/register" className={col.recommended ? "mk-btn-primary mt-4 w-full sm:mt-5" : "mk-btn-ghost mt-4 w-full sm:mt-5"} aria-label={`${tc("getStarted")} · ${t(`${col.key}.name`)}`}>

@@ -3,6 +3,7 @@
 import { z } from "zod"
 import { headers } from "next/headers"
 import { getTranslations } from "next-intl/server"
+import { checkContactRateLimit, clientIpFromHeaders, escapeHtml } from "@/lib/contact-rate-limit"
 
 // ─── Schema ──────────────────────────────────────────────────
 
@@ -12,64 +13,11 @@ const contactFormSchema = z.object({
   inquiryType: z.enum(["general", "sales", "partnership", "support"]),
   company: z.string().max(100).optional().or(z.literal("")),
   message: z.string().min(10).max(5000),
-  // Honeypot — must be empty
-  website: z.string().max(0).optional().or(z.literal("")),
+  // Honeypot: any value is accepted here and handled below, so a bot sees a success
+  website: z.string().max(500).optional(),
 })
 
 export type ContactFormInput = z.infer<typeof contactFormSchema>
-
-// ─── Rate Limiting (Upstash with in-memory fallback) ─────────
-
-let _limiter: { limit: (key: string) => Promise<{ success: boolean }> } | null =
-  null
-let _upstashChecked = false
-
-async function getRateLimiter() {
-  if (_limiter) return _limiter
-  if (_upstashChecked) return null
-
-  const url = process.env.UPSTASH_REDIS_REST_URL
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN
-  if (!url || !token) {
-    _upstashChecked = true
-    return null
-  }
-
-  try {
-    const { Ratelimit } = await import("@upstash/ratelimit")
-    const { Redis } = await import("@upstash/redis")
-    const redis = new Redis({ url, token })
-    _limiter = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(3, "1 h"),
-      prefix: "contact:rl",
-    })
-    _upstashChecked = true
-    return _limiter
-  } catch {
-    // Don't set _upstashChecked — retry on next invocation in case of transient failure
-    return null
-  }
-}
-
-// In-memory fallback
-const memoryStore = new Map<string, { count: number; resetAt: number }>()
-
-function checkMemoryLimit(key: string): boolean {
-  const now = Date.now()
-  const window = 3_600_000 // 1 hour
-  const maxRequests = 3
-
-  const entry = memoryStore.get(key)
-  if (!entry || now > entry.resetAt) {
-    memoryStore.set(key, { count: 1, resetAt: now + window })
-    return true
-  }
-
-  if (entry.count >= maxRequests) return false
-  entry.count++
-  return true
-}
 
 // ─── Action ──────────────────────────────────────────────────
 
@@ -90,30 +38,9 @@ export async function submitContactForm(
     return { success: true }
   }
 
-  // 3. Rate limit by IP
-  const hdrs = await headers()
-  const ip =
-    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    hdrs.get("x-real-ip") ||
-    "unknown"
-
-  const limiter = await getRateLimiter()
-  let limitOk: boolean | null = null
-  if (limiter) {
-    try {
-      const result = await limiter.limit(`contact:${ip}`)
-      limitOk = result.success
-    } catch (err) {
-      // Redis unreachable — degrade to the in-memory fallback below
-      console.error("[contact-form] Upstash rate-limit check failed, using in-memory fallback:", err)
-      const Sentry = await import("@sentry/nextjs")
-      Sentry.captureException(err, { tags: { component: "contact-form-rate-limit" } })
-    }
-  }
-  if (limitOk === null) {
-    limitOk = checkMemoryLimit(`contact:${ip}`)
-  }
-  if (!limitOk) {
+  // 3. Rate limit by IP (3/h, shared helper with the material request form)
+  const ip = clientIpFromHeaders(await headers())
+  if (!(await checkContactRateLimit("contact", ip))) {
     return { error: t("rateLimitExceeded") }
   }
 
@@ -138,7 +65,8 @@ export async function submitContactForm(
       from: "Loyalshy <noreply@loyalshy.com>",
       to: inquiryType === "sales" ? "sales@loyalshy.com" : "hello@loyalshy.com",
       replyTo: email,
-      subject: `[${inquiryLabels[inquiryType]}] New contact from ${escapeHtml(name)}`,
+      // A header, not HTML: strip line breaks, don't entity-escape
+      subject: `[${inquiryLabels[inquiryType]}] New contact from ${name.replace(/[\r\n]/g, " ")}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #111; margin-bottom: 24px;">New Contact Form Submission</h2>
@@ -181,15 +109,4 @@ export async function submitContactForm(
     console.error("[contact-form] Failed to send email:", (error as Error).message)
     return { error: t("contactFormFailed") }
   }
-}
-
-// ─── Helpers ─────────────────────────────────────────────────
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;")
 }

@@ -97,7 +97,7 @@ async function JsonLd({ locale }: { locale: Locale }) {
 const MARKETING_NAMESPACES = [
   "common", "nav", "hero", "featureShowcase",
   "pricing",
-  "faq", "tryDemo", "closingCta", "footer",
+  "tryDemo", "closingCta", "footer",
 ] as const
 
 export default async function LandingPage({ params }: PageProps) {
