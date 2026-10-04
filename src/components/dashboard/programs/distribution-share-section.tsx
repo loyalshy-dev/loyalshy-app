@@ -32,9 +32,9 @@ export function ShareLinkSection({
   const [showEmbed, setShowEmbed] = useState(false)
   const [embedCopied, setEmbedCopied] = useState(false)
 
-  const shareText = `Join ${templateName} by ${organizationName}`
+  const shareText = t("shareText", { template: templateName, organization: organizationName })
 
-  const embedCode = `<a href="${joinUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#111;color:#fff;border-radius:8px;font-family:system-ui,sans-serif;font-size:14px;font-weight:500;text-decoration:none">Join ${templateName}</a>`
+  const embedCode = `<a href="${joinUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#111;color:#fff;border-radius:8px;font-family:system-ui,sans-serif;font-size:14px;font-weight:500;text-decoration:none">${t("embedJoin", { template: templateName })}</a>`
 
   async function copyLink() {
     try {
@@ -145,7 +145,7 @@ export function ShareLinkSection({
           onClick={shareNative}
         >
           <Share2 className="size-3.5" />
-          Share...
+          {t("shareNative")}
         </Button>
       </div>
 
@@ -157,7 +157,7 @@ export function ShareLinkSection({
           className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
         >
           <Code2 className="size-3.5" />
-          Embed on your website
+          {t("embedOnSite")}
           <ChevronDown
             className={`size-3 transition-transform ${showEmbed ? "rotate-180" : ""}`}
           />
@@ -180,7 +180,7 @@ export function ShareLinkSection({
               ) : (
                 <Copy className="size-3" />
               )}
-              Copy embed code
+              {t("copyEmbed")}
             </Button>
           </div>
         )}
