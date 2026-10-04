@@ -46,7 +46,9 @@ export async function PlanCompare({ locale }: { locale: Locale }) {
   ]
 
   return (
-    <div className="-mx-6 overflow-x-auto px-6 lg:mx-0 lg:px-0">
+    // `relative` so the sr-only (absolutely positioned) cell labels are clipped
+    // by this scroll container instead of widening the page on phones.
+    <div className="relative -mx-6 overflow-x-auto px-6 lg:mx-0 lg:px-0">
       <table className="w-full min-w-[640px] border-collapse text-left">
         <thead>
           <tr className="border-b" style={{ borderColor: "var(--mk-border)" }}>
