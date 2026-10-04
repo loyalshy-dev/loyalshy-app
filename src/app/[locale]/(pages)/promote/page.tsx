@@ -6,6 +6,7 @@ import type { Locale } from "@/i18n/config"
 import { localePath } from "@/i18n/marketing"
 import { pageMetadata } from "@/components/marketing/pages/metadata"
 import { MarketingPage } from "@/components/marketing/pages/shell"
+import { JsonLd, pageJsonLd } from "@/components/marketing/pages/json-ld"
 import { PageHero } from "@/components/marketing/pages/page-hero"
 import { PageSection } from "@/components/marketing/pages/section"
 import { Steps } from "@/components/marketing/pages/steps"
@@ -55,14 +56,17 @@ export default async function PromotePage({ params }: PageProps) {
       case "tent": return <TentPiece m={m} alt={alt} />
       case "door": return <DoorStickerPiece m={m} alt={alt} />
       case "ticket": return <TicketPiece m={m} alt={alt} />
-      case "social": return <StoryPiece m={m} alt={alt} passAlt={t("blocks.welcome.alt")} />
+      case "social": return <StoryPiece m={m} alt={alt} />
       case "reviews": return <ReviewsPiece m={m} alt={alt} />
       case "welcome": return <CouponPiece alt={alt} />
     }
   }
 
+  const jsonLd = await pageJsonLd(locale, "/promote", "promote")
+
   return (
     <MarketingPage>
+      <JsonLd data={jsonLd} />
       <PageHero
         title={t("title")}
         lead={t("lead")}

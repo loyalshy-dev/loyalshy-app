@@ -23,6 +23,7 @@ export function FreeCta({ piece, label }: { piece: string; label: string }) {
   return (
     <Link
       href="/register"
+      prefetch={false}
       className="mk-body-sm font-medium underline underline-offset-4"
       style={{ color: "var(--mk-text)" }}
       onClick={() => track("material_free", { piece })}

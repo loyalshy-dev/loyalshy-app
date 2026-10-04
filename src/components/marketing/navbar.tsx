@@ -118,10 +118,10 @@ export function MarketingNavbar() {
           <div className="mk-nav-actions">
             <LanguageSwitcher variant="code" className="mk-nav-link mk-nav-lang" />
             <span className="mk-nav-sep" aria-hidden="true" />
-            <Link href="/login" className="mk-nav-link mk-nav-link-strong">
+            <Link href="/login" prefetch={false} className="mk-nav-link mk-nav-link-strong">
               {tCommon("logIn")}
             </Link>
-            <Link href="/register" className="mk-nav-pill">
+            <Link href="/register" prefetch={false} className="mk-nav-pill">
               {tCommon("getStartedFree")}
             </Link>
           </div>
@@ -156,7 +156,7 @@ export function MarketingNavbar() {
             <ul className="mk-nav-menu-list">
               {[...links, { label: tCommon("logIn"), href: "/login" }, { label: tCommon("getStartedFree"), href: "/register" }].map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} onClick={() => setOpen(false)} className="mk-nav-menu-link" tabIndex={open ? 0 : -1}>
+                  <Link href={link.href} prefetch={link.href.startsWith("/login") || link.href.startsWith("/register") ? false : undefined} onClick={() => setOpen(false)} className="mk-nav-menu-link" tabIndex={open ? 0 : -1}>
                     {link.label}
                   </Link>
                 </li>
