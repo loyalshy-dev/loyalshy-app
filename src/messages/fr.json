@@ -31,13 +31,13 @@
   },
   "nav": {
     "pricing": "Tarifs",
-    "faq": "FAQ",
     "home": "Accueil Loyalshy",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
     "switchLanguage": "Changer de langue",
-    "cards": "Cartes",
-    "dashboard": "Tableau de bord"
+    "forBusiness": "Pour votre commerce",
+    "automations": "Automatisations",
+    "staffApp": "Appli équipe"
   },
   "hero": {
     "subtitle": "Cartes à tampons et coupons que vos clients enregistrent dans Apple Wallet ou Google Wallet. Sans app, sans compte et sans papier.",
@@ -272,7 +272,6 @@
     "tagline": "Fidélisez vos clients occasionnels.",
     "copyright": "© 2026 Loyalshy, un produit de HEX CONCEPTS STUDIO, S.L. Tous droits réservés.",
     "builtWith": "Fait en Espagne.",
-    "tryDemo": "Carte de démonstration",
     "instagram": "Loyalshy sur Instagram",
     "tiktok": "Loyalshy sur TikTok",
     "forBusiness": "Pour votre commerce",

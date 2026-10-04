@@ -17,8 +17,6 @@ interface FooterColumn {
 // (industries, automations, team app, partners, status, subprocessors)
 // are reached from here.
 
-const DEMO_JOIN_URL = process.env.NEXT_PUBLIC_DEMO_JOIN_URL
-
 function BrandIcon({ name, className }: { name: BrandName; className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
@@ -41,13 +39,10 @@ export async function MarketingFooter() {
     {
       heading: t("product"),
       links: [
-        { label: tNav("cards"), href: `${home}#cards` },
-        { label: tNav("dashboard"), href: `${home}#features` },
         { label: t("automations"), href: localePath(locale, "/automations") },
         { label: t("staffApp"), href: localePath(locale, "/staff-app") },
         { label: t("privatePrograms"), href: localePath(locale, "/private-programs") },
         { label: tNav("pricing"), href: localePath(locale, "/pricing") },
-        ...(DEMO_JOIN_URL ? [{ label: t("tryDemo"), href: `${home}#try-demo` }] : []),
       ],
     },
     {
@@ -65,7 +60,6 @@ export async function MarketingFooter() {
         { label: t("about"), href: localePath(locale, "/about") },
         { label: t("partners"), href: localePath(locale, "/partners") },
         { label: tCommon("contact"), href: localePath(locale, "/contact") },
-        { label: tNav("faq"), href: `${home}#faq` },
         { label: t("status"), href: localePath(locale, "/status") },
       ],
     },

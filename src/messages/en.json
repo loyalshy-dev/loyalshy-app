@@ -31,13 +31,13 @@
   },
   "nav": {
     "pricing": "Pricing",
-    "faq": "FAQ",
     "home": "Loyalshy home",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "switchLanguage": "Switch language",
-    "cards": "Cards",
-    "dashboard": "Dashboard"
+    "forBusiness": "For your business",
+    "automations": "Automations",
+    "staffApp": "Team app"
   },
   "hero": {
     "subtitle": "Stamp cards and coupons your customers save to Apple Wallet or Google Wallet. No app, no account, no paper.",
@@ -272,7 +272,6 @@
     "tagline": "Turn occasional customers into regulars.",
     "copyright": "© 2026 Loyalshy, a product by HEX CONCEPTS STUDIO, S.L. All rights reserved.",
     "builtWith": "Made in Spain.",
-    "tryDemo": "Demo card",
     "instagram": "Loyalshy on Instagram",
     "tiktok": "Loyalshy on TikTok",
     "forBusiness": "For your business",

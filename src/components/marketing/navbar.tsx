@@ -13,19 +13,16 @@ import { useLocalePath } from "@/i18n/use-locale-path"
 
 // The global bar. At the top of the page it runs edge to edge over a
 // hairline; once the page scrolls it lifts into a floating translucent
-// capsule, a little narrower than the page. Links show which section is on
-// screen. The one action is the coral pill. On phones the bar is 44px and
+// capsule, a little narrower than the page. Links go to the secondary pages
+// (no anchors into the landing since 2026-10-04) and the one of the page on
+// screen is marked. The one action is the coral pill. On phones the bar is 44px and
 // the menu is a full-screen sheet over everything (bar included) with its
 // own close button, so it reads the same wherever the page was scrolled.
 
 interface NavLink {
   label: string
   href: string
-  /** Section id on the landing this link points at (for the active state). */
-  section?: string
 }
-
-const SECTIONS = ["cards", "features", "faq"] as const
 
 export function MarketingNavbar() {
   const t = useTranslations("nav")
@@ -37,19 +34,17 @@ export function MarketingNavbar() {
   const burgerRef = React.useRef<HTMLButtonElement>(null)
   const closeRef = React.useRef<HTMLButtonElement>(null)
   const wasOpen = React.useRef(false)
-  const [active, setActive] = React.useState<string | null>(null)
-  const onLanding = pathname === lp("/")
 
+  // Five pages. The link of the page on screen is the active one; the
+  // industry pages all light "For your business".
   const links: NavLink[] = [
-    { label: t("cards"), href: `${lp("/")}#cards`, section: "cards" },
-    { label: t("dashboard"), href: `${lp("/")}#features`, section: "features" },
-    { label: t("pricing"), href: lp("/pricing"), section: "pricing" },
-    { label: t("faq"), href: `${lp("/")}#faq`, section: "faq" },
-    { label: tCommon("contact"), href: lp("/contact"), section: "contact" },
+    { label: t("forBusiness"), href: lp("/for") },
+    { label: t("automations"), href: lp("/automations") },
+    { label: t("staffApp"), href: lp("/staff-app") },
+    { label: t("pricing"), href: lp("/pricing") },
+    { label: tCommon("contact"), href: lp("/contact") },
   ]
-  // Off the landing, the link of the page itself is the active one.
-  const PAGE_SECTIONS: Record<string, string> = { [lp("/pricing")]: "pricing", [lp("/contact")]: "contact" }
-  const current = onLanding ? active : (PAGE_SECTIONS[pathname] ?? null)
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   // Lift the bar into its capsule once the page has moved.
   React.useEffect(() => {
@@ -58,28 +53,6 @@ export function MarketingNavbar() {
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
-
-  // Which section is on screen: the one whose top has passed the upper
-  // third of the viewport and whose bottom has not.
-  React.useEffect(() => {
-    if (!onLanding) return
-    const els = SECTIONS.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => Boolean(el))
-    if (els.length === 0) return
-    const visible = new Map<string, boolean>()
-    const update = () => {
-      const hit = SECTIONS.find((id) => visible.get(id))
-      setActive(hit ?? null)
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) visible.set(entry.target.id, entry.isIntersecting)
-        update()
-      },
-      { rootMargin: "-34% 0px -60% 0px", threshold: 0 },
-    )
-    els.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
-  }, [onLanding])
 
   // On the landing the wordmark just scrolls to the top; elsewhere it goes home.
   const onBrand = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -131,8 +104,8 @@ export function MarketingNavbar() {
                 key={link.href}
                 href={link.href}
                 className="mk-nav-link"
-                data-active={current === link.section}
-                aria-current={current === link.section ? "location" : undefined}
+                data-active={isActive(link.href)}
+                aria-current={isActive(link.href) ? "page" : undefined}
               >
                 {link.label}
               </Link>

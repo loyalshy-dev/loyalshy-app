@@ -31,13 +31,13 @@
   },
   "nav": {
     "pricing": "Precios",
-    "faq": "Preguntas",
     "home": "Inicio Loyalshy",
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú",
     "switchLanguage": "Cambiar idioma",
-    "cards": "Tarjetas",
-    "dashboard": "El panel"
+    "forBusiness": "Para tu negocio",
+    "automations": "Automatizaciones",
+    "staffApp": "App de equipo"
   },
   "hero": {
     "subtitle": "Tarjetas de sellos y cupones que tus clientes guardan en Apple Wallet o Google Wallet. Sin app, sin cuenta y sin papel.",
@@ -272,7 +272,6 @@
     "tagline": "Fideliza a tus clientes ocasionales.",
     "copyright": "© 2026 Loyalshy, un producto de HEX CONCEPTS STUDIO, S.L. Todos los derechos reservados.",
     "builtWith": "Hecho en España.",
-    "tryDemo": "Tarjeta de prueba",
     "instagram": "Loyalshy en Instagram",
     "tiktok": "Loyalshy en TikTok",
     "forBusiness": "Para tu negocio",
