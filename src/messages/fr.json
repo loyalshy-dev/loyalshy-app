@@ -42,7 +42,7 @@
   "hero": {
     "subtitle": "Cartes à tampons et coupons que vos clients enregistrent dans Apple Wallet ou Google Wallet. Sans app, sans compte et sans papier.",
     "seeHowItWorks": "Voir comment ça marche",
-    "title": "Fidélisez vos clients occasionnels.",
+    "title": "La carte de fidélité digitale, dans leur Wallet.",
     "tryInWallet": "Essayez-la dans votre Wallet",
     "note": "Gratuit jusqu'à 50 clients. Sans carte bancaire.",
     "card": {
@@ -64,7 +64,7 @@
       },
       "passAlt": "Vraie carte à tampons d'un client dans Apple Wallet : six tampons sur sept, prochaine récompense une coupe offerte"
     },
-    "tagline": "La carte de fidélité digitale, dans Apple et Google Wallet.",
+    "tagline": "Carte à tampons ou coupon dans Apple et Google Wallet. Sans appli pour le client, sans papier.",
     "film": {
       "scroll": "Continuez à défiler.",
       "camera": "Appareil photo",
@@ -271,7 +271,7 @@
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation",
     "cookiePolicy": "Politique de cookies",
-    "tagline": "Fidélisez vos clients occasionnels.",
+    "tagline": "La carte de fidélité digitale, dans leur Wallet.",
     "copyright": "© 2026 Loyalshy, un produit de HEX CONCEPTS STUDIO, S.L. Tous droits réservés.",
     "builtWith": "Fait en Espagne.",
     "instagram": "Loyalshy sur Instagram",
@@ -2096,8 +2096,8 @@
   },
   "contact": {
     "sectionLabel": "Contact",
-    "pageTitle": "Contactez-nous",
-    "pageSubtitle": "Vous avez une question sur notre plateforme, besoin d'aide avec votre compte ou intéressé par notre plan Enterprise ? Nous serions ravis de vous entendre.",
+    "pageTitle": "Écrivez-nous.",
+    "pageSubtitle": "Des questions sur la carte, votre compte ou une formule pour plusieurs établissements. Nous répondons par e-mail sous un à deux jours ouvrés.",
     "nameLabel": "Nom",
     "namePlaceholder": "Votre nom complet",
     "emailLabel": "Email",
@@ -2121,32 +2121,32 @@
     "directEmail": "Vous préférez l'email ?",
     "highlights": {
       "general": {
-        "title": "Demandes générales",
-        "description": "Questions sur notre plateforme, ses fonctionnalités ou comment Loyalshy peut aider votre entreprise."
+        "title": "Questions générales",
+        "description": "Comment fonctionne la carte, quelle formule vous convient, si elle s'adapte à votre commerce."
       },
       "sales": {
-        "title": "Ventes et Enterprise",
-        "description": "Plans personnalisés, tarifs volume, support dédié et solutions adaptées à votre organisation."
+        "title": "Plusieurs établissements",
+        "description": "Chaînes et commerces à plusieurs établissements : limites sur mesure et conditions contractuelles."
       },
       "partnership": {
-        "title": "Partenariats",
-        "description": "Opportunités d'intégration, programmes revendeurs et collaborations stratégiques."
+        "title": "Partenaires",
+        "description": "Agences, consultants et revendeurs de caisses qui installent Loyalshy pour leurs clients."
       },
       "support": {
-        "title": "Support technique",
-        "description": "Aide avec votre compte, intégration API, problèmes de pass ou questions de facturation."
+        "title": "Support",
+        "description": "Votre compte, une carte qui ne se met pas à jour dans le Wallet, l'appli équipe ou une facture."
       }
     }
   },
   "metadata": {
     "home": {
-      "title": "Loyalshy — Fidélisez vos clients occasionnels",
-      "description": "Fidélisez vos clients occasionnels avec une carte à tampons digitale dans Apple et Google Wallet. Tampons, coupons, notifications, sans appli. Gratuit jusqu'à 50 clients.",
+      "title": "Carte de fidélité digitale, sans appli — Loyalshy",
+      "description": "La carte à tampons digitale pour cafés, salons et boutiques. Dans Apple et Google Wallet, sans appli ni papier. Gratuit jusqu'à 50 clients.",
       "jsonLdDescription": "Plateforme de fidélité digitale pour les petits commerces. Créez et gérez cartes à tampons et coupons dans Apple Wallet et Google Wallet."
     },
     "contact": {
       "title": "Contact",
-      "description": "Contactez l'équipe Loyalshy. Questions sur la carte de fidélité digitale, les offres entreprise ou les partenariats : écrivez-nous."
+      "description": "Écrivez-nous au sujet de la carte, de votre compte ou d'une formule pour plusieurs établissements. Réponse par e-mail sous deux jours ouvrés."
     },
     "privacy": {
       "title": "Politique de confidentialité",
@@ -2161,28 +2161,28 @@
       "description": "Comment Loyalshy utilise les cookies et technologies similaires."
     },
     "for": {
-      "title": "Programmes de fidélité par type de commerce",
-      "description": "Cartes à tampons et coupons digitaux dans Apple et Google Wallet pour cafés, salons et boutiques. La même mécanique, adaptée à votre comptoir."
+      "title": "Fidélité pour cafés, salons et boutiques",
+      "description": "Une carte à tampons digitale ou un coupon dans Apple et Google Wallet, adaptés à votre comptoir : cafés, salons et boutiques. Sans appli pour le client."
     },
     "cafes": {
-      "title": "Carte à tampons digitale pour cafés et boulangeries",
-      "description": "Neuf cafés, le dixième offert, dans l'Apple ou Google Wallet de vos clients. Sans appli, sans papier. Scannée avec l'appli équipe Loyalshy. Gratuit jusqu'à 50 clients."
+      "title": "Carte à tampons digitale pour les cafés",
+      "description": "La carte à tampons de votre café dans Apple et Google Wallet : neuf cafés, le dixième offert. Sans appli, sans papier. Gratuit jusqu'à 50 clients."
     },
     "salons": {
-      "title": "Carte de fidélité pour salons de coiffure et instituts",
-      "description": "Un tampon par rendez-vous, une récompense au cinquième, et un rappel quand un habitué n'est pas venu depuis un moment. Dans Apple et Google Wallet, sans appli."
+      "title": "Carte de fidélité pour salons de coiffure et barbiers",
+      "description": "Le programme de fidélité de votre salon dans Apple et Google Wallet : un tampon par rendez-vous, une récompense au cinquième. Sans appli."
     },
     "retail": {
       "title": "Cartes de fidélité et coupons pour boutiques",
-      "description": "Une carte à tampons pour les habitués et un coupon pour le prochain achat, dans Apple et Google Wallet. Scannés en caisse avec l'appli Loyalshy. Gratuit jusqu'à 50 clients."
+      "description": "Une carte à tampons et un coupon dans Apple et Google Wallet pour les clients de votre boutique. Scannés en caisse. Gratuit jusqu'à 50 clients."
     },
     "automations": {
-      "title": "Automatisations : avis Google, reconquête et proximité",
-      "description": "La carte demande un avis Google, fait revenir les habitués qui ne venaient plus et s'affiche sur l'écran verrouillé près de votre commerce. Réglé une fois depuis le tableau de bord."
+      "title": "Automatisations : avis et reconquête",
+      "description": "La carte demande un avis Google, fait revenir les habitués qui ne venaient plus et s'affiche sur l'écran verrouillé près de votre commerce."
     },
     "pricing": {
-      "title": "Tarifs",
-      "description": "Gratuit jusqu'à 50 clients. Pro 29 €, Business 49 €, Scale 99 € par mois, 20 % de moins à l'année. Sans engagement, sans carte pour commencer. Chaque formule inclut les deux wallets et l'appli équipe."
+      "title": "Tarifs de la carte de fidélité digitale",
+      "description": "Gratuit jusqu'à 50 clients. Pro 29 €, Business 49 €, Scale 99 € par mois, TVA incluse, jusqu'à 20 % de moins à l'année. Sans engagement."
     },
     "staffApp": {
       "title": "L'appli équipe pour iPhone et Android",
@@ -2209,8 +2209,8 @@
       "description": "Les tiers qui traitent des données personnelles pour le compte de Loyalshy, pour quoi et où."
     },
     "promote": {
-      "title": "Comment amener vos clients à rejoindre votre programme de fidélité",
-      "description": "Huit endroits et moments qui amènent des inscriptions : la caisse, la table, la porte, le ticket, Instagram, les avis Google. Du matériel prêt à imprimer, gratuit depuis votre tableau de bord, ou nous le fabriquons pour vous."
+      "title": "Comment promouvoir votre programme de fidélité",
+      "description": "Huit endroits qui amènent des inscriptions : caisse, table, porte, ticket, Instagram, avis Google. Matériel promotionnel gratuit depuis votre tableau de bord."
     }
   },
   "pages": {
@@ -2234,8 +2234,8 @@
     },
     "industries": {
       "hub": {
-        "title": "La fidélité pour les commerces qui voient les mêmes visages.",
-        "lead": "Cafés, salons et boutiques vivent de leurs habitués. Loyalshy donne à chacun d'eux une carte à tampons ou un coupon dans Apple et Google Wallet, et vous donne un tableau de bord qui montre qui revient.",
+        "title": "Fidélité pour cafés, salons et boutiques.",
+        "lead": "Cafés, salons et boutiques vivent de leurs habitués. Loyalshy donne à chacun un programme de fidélité dans Apple et Google Wallet, une carte à tampons ou un coupon, et vous donne un tableau de bord qui montre qui revient.",
         "cards": {
           "cafes": {
             "title": "Cafés et boulangeries",
@@ -2268,11 +2268,12 @@
             "title": "Vos clients, vos données",
             "body": "Chaque tampon apparaît dans le tableau de bord. Vous voyez qui revient et qui ne vient plus, et vous pouvez exporter la liste quand vous voulez."
           }
-        }
+        },
+        "chooseTitle": "Choisissez votre commerce."
       },
       "cafes": {
         "title": "La carte à tampons pour les cafés.",
-        "lead": "Neuf cafés, le dixième offert. La carte vit dans l'Apple ou Google Wallet de vos clients : elle ne se perd pas, ne s'oublie pas et ne se falsifie pas, et vous voyez chaque tampon dans le tableau de bord.",
+        "lead": "Neuf cafés, le dixième offert. Pour le café et la boulangerie de quartier : la carte vit dans l'Apple ou Google Wallet de vos clients, elle ne se perd pas, ne s'oublie pas et ne se falsifie pas, et vous voyez chaque tampon dans le tableau de bord.",
         "heroAlt": "Une barista souriante derrière le comptoir",
         "counterTitle": "Au comptoir.",
         "counterLead": "Le coup de feu du matin ne ralentit pas. Voici ce qui change et ce qui ne change pas.",
@@ -2349,7 +2350,7 @@
       },
       "salons": {
         "title": "La carte de fidélité pour les salons.",
-        "lead": "Un tampon par rendez-vous, une récompense au cinquième. La carte vit dans l'Apple ou Google Wallet de vos clients et, quand un habitué n'a pas réservé depuis un moment, elle le lui rappelle.",
+        "lead": "Le programme de fidélité de votre salon, dans le Wallet : un tampon par rendez-vous, une récompense au cinquième. La carte vit dans l'Apple ou Google Wallet de vos clients et, quand un habitué n'a pas réservé depuis un moment, elle le lui rappelle.",
         "heroAlt": "Une coiffeuse au travail dans un salon lumineux",
         "counterTitle": "À l'accueil.",
         "counterLead": "Les clients viennent toutes les quatre à six semaines. La carte doit survivre à cet intervalle, et le papier n'y arrive pas.",
@@ -2425,8 +2426,8 @@
         }
       },
       "retail": {
-        "title": "Cartes et coupons pour les boutiques.",
-        "lead": "Une carte à tampons pour les clients qui viennent chaque semaine et un coupon pour ceux qui pourraient revenir. Les deux dans Apple et Google Wallet, les deux scannés en caisse avec la même appli.",
+        "title": "La carte de fidélité pour les boutiques.",
+        "lead": "Fidélisez les clients de votre boutique avec une carte à tampons pour ceux qui viennent chaque semaine et un coupon pour ceux qui pourraient revenir. Les deux dans Apple et Google Wallet, les deux scannés en caisse avec la même appli.",
         "heroAlt": "Une petite boutique de vêtements avec portants et comptoir",
         "counterTitle": "En caisse.",
         "counterLead": "La carte est scannée pendant le paiement. Rien ne touche à votre caisse.",
@@ -2503,7 +2504,7 @@
       }
     },
     "automations": {
-      "title": "La carte assure le suivi.",
+      "title": "Des avis Google et des clients qui reviennent, tout seuls.",
       "lead": "Trois choses que la carte fait toute seule, réglées une fois depuis le tableau de bord : demander un avis Google, faire revenir un habitué qui ne venait plus, et s'afficher sur l'écran verrouillé quand un client passe devant.",
       "heroAlt": "Une main tenant un téléphone",
       "rows": {
@@ -2569,11 +2570,12 @@
           "question": "Les automatisations marchent-elles avec les coupons ?",
           "answer": "Avec les coupons illimités, oui : chaque validation compte comme une visite. Les coupons à usage unique ne demandent jamais rien. Une fois validée, la carte est consommée."
         }
-      }
+      },
+      "rowsTitle": "Trois choses qu'elle fait toute seule."
     },
     "pricing": {
       "title": "Formules et tarifs.",
-      "lead": "Au mois ou à l'année, sans engagement, et vous pouvez arrêter quand vous voulez. Chaque formule inclut les deux types de carte, les deux wallets, l'appli équipe et le tableau de bord.",
+      "lead": "La carte de fidélité digitale, au prix selon votre nombre de clients. Au mois ou à l'année, sans engagement, et vous pouvez arrêter quand vous voulez. Chaque formule inclut les deux types de carte, les deux wallets, l'appli équipe et le tableau de bord.",
       "compareTitle": "Formule par formule.",
       "compareLead": "Ce que chaque formule inclut, ligne par ligne.",
       "rows": {
@@ -2715,7 +2717,8 @@
           "question": "Puis-je l'essayer avant d'avoir des clients ?",
           "answer": "Oui. L'appli a un mode démo avec des données d'exemple, pour voir chaque écran avant le premier scan."
         }
-      }
+      },
+      "rowsTitle": "Ce qu'elle fait."
     },
     "partners": {
       "title": "Installez Loyalshy chez vos clients.",
@@ -3022,8 +3025,8 @@
       "dpaBody": "Des questions sur le traitement des données, ou besoin d'un accord de sous-traitance ? Écrivez à"
     },
     "promote": {
-      "title": "Là où vos clients s'inscrivent.",
-      "lead": "La carte est dans le Wallet. Maintenant, il faut qu'on la voie. Huit endroits et moments d'un petit commerce qui amènent des inscriptions, avec quoi y mettre et quoi dire. La carte de comptoir et le chevalet sortent gratuitement de votre tableau de bord ; le reste, nous pouvons le fabriquer pour vous.",
+      "title": "Comment promouvoir votre programme de fidélité.",
+      "lead": "La carte est dans le Wallet. Maintenant, il faut qu'on la voie. Huit endroits et moments d'un petit commerce qui amènent des inscriptions, avec quel matériel promotionnel y mettre et quoi dire. La carte de comptoir et le chevalet sortent gratuitement de votre tableau de bord ; le reste, nous pouvons le fabriquer pour vous.",
       "orderCta": "Demandez-le-nous",
       "freeCta": "Gratuit depuis votre tableau de bord",
       "blocks": {
@@ -3084,7 +3087,7 @@
           "alt": "Le coupon de 10 % d'un restaurant de burgers dans Apple Wallet"
         }
       },
-      "freeTitle": "Gratuit depuis votre tableau de bord.",
+      "freeTitle": "Matériel promotionnel gratuit depuis votre tableau de bord.",
       "freeLead": "La carte de comptoir et le chevalet de table sortent de la Distribution en PDF prêts à imprimer, avec votre logo, vos couleurs et le QR de votre programme. La seconde face du chevalet porte votre lien d'avis Google dès que vous l'avez renseigné.",
       "freeSteps": {
         "1": {

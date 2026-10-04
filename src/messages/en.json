@@ -42,7 +42,7 @@
   "hero": {
     "subtitle": "Stamp cards and coupons your customers save to Apple Wallet or Google Wallet. No app, no account, no paper.",
     "seeHowItWorks": "See how it works",
-    "title": "Turn occasional customers into regulars.",
+    "title": "The digital loyalty card, in their Wallet.",
     "tryInWallet": "Try it in your Wallet",
     "note": "Free for up to 50 customers. No credit card.",
     "card": {
@@ -64,7 +64,7 @@
       },
       "passAlt": "A real customer's stamp card in Apple Wallet: six of seven stamps, next reward a free haircut"
     },
-    "tagline": "The digital loyalty card, in Apple and Google Wallet.",
+    "tagline": "A stamp card or a coupon in Apple and Google Wallet. No app for the customer, no paper.",
     "film": {
       "scroll": "Keep scrolling.",
       "camera": "Camera",
@@ -271,7 +271,7 @@
     "privacyPolicy": "Privacy policy",
     "termsOfService": "Terms of service",
     "cookiePolicy": "Cookie policy",
-    "tagline": "Turn occasional customers into regulars.",
+    "tagline": "The digital loyalty card, in their Wallet.",
     "copyright": "© 2026 Loyalshy, a product by HEX CONCEPTS STUDIO, S.L. All rights reserved.",
     "builtWith": "Made in Spain.",
     "instagram": "Loyalshy on Instagram",
@@ -2096,8 +2096,8 @@
   },
   "contact": {
     "sectionLabel": "Contact",
-    "pageTitle": "Get in touch",
-    "pageSubtitle": "Have a question about our platform, need help with your account, or interested in our Enterprise plan? We'd love to hear from you.",
+    "pageTitle": "Write to us.",
+    "pageSubtitle": "Questions about the card, your account or a plan for several locations. We answer by email within one or two working days.",
     "nameLabel": "Name",
     "namePlaceholder": "Your full name",
     "emailLabel": "Email",
@@ -2121,32 +2121,32 @@
     "directEmail": "Prefer email?",
     "highlights": {
       "general": {
-        "title": "General inquiries",
-        "description": "Questions about our platform, features, or how Loyalshy can help your business."
+        "title": "General questions",
+        "description": "How the card works, which plan fits, whether it suits your business."
       },
       "sales": {
-        "title": "Sales & Enterprise",
-        "description": "Custom plans, volume pricing, dedicated support, and tailored solutions for your organization."
+        "title": "Several locations",
+        "description": "Chains and businesses with several locations: custom limits and contract terms."
       },
       "partnership": {
-        "title": "Partnerships",
-        "description": "Integration opportunities, reseller programs, and strategic collaborations."
+        "title": "Partners",
+        "description": "Agencies, consultants and POS resellers who set Loyalshy up for their clients."
       },
       "support": {
-        "title": "Technical support",
-        "description": "Help with your account, API integration, wallet pass issues, or billing questions."
+        "title": "Support",
+        "description": "Your account, a card that doesn't update in the Wallet, the team app or an invoice."
       }
     }
   },
   "metadata": {
     "home": {
-      "title": "Loyalshy — Turn occasional customers into regulars",
-      "description": "Turn occasional customers into regulars with a digital stamp card in Apple and Google Wallet. Stamps, coupons and notifications, no app. Free up to 50 customers.",
+      "title": "Digital loyalty card, no app — Loyalshy",
+      "description": "The digital stamp card for cafés, salons and shops. It lives in Apple and Google Wallet, no app, no paper. Free up to 50 customers.",
       "jsonLdDescription": "Digital loyalty platform for small businesses. Create and manage stamp cards and coupons in Apple and Google Wallet."
     },
     "contact": {
-      "title": "Contact us",
-      "description": "Get in touch with the Loyalshy team. Questions about our digital loyalty platform, enterprise plans, or partnerships — we'd love to hear from you."
+      "title": "Contact",
+      "description": "Write to us about the loyalty card, your account or a plan for several locations. We answer by email within one or two working days."
     },
     "privacy": {
       "title": "Privacy Policy",
@@ -2161,28 +2161,28 @@
       "description": "How Loyalshy uses cookies and similar technologies."
     },
     "for": {
-      "title": "Loyalty programs by business type",
-      "description": "Digital stamp cards and coupons in Apple and Google Wallet for cafés, salons and shops. The same mechanics, adapted to your counter."
+      "title": "Loyalty programs for cafés, salons and shops",
+      "description": "A digital stamp card or a coupon in Apple and Google Wallet, adapted to your counter: cafés, salons and shops. No app for the customer."
     },
     "cafes": {
-      "title": "Digital stamp card for cafés and bakeries",
-      "description": "Nine coffees, the tenth free, in your customers' Apple or Google Wallet. No app, no paper. Scan with the Loyalshy team app. Free up to 50 customers."
+      "title": "Digital stamp card for cafés",
+      "description": "Your café's stamp card in Apple and Google Wallet: nine coffees, the tenth free. No app, no paper, nothing on the POS. Free up to 50 customers."
     },
     "salons": {
-      "title": "Loyalty card for hair and beauty salons",
-      "description": "A stamp per appointment, a reward at the fifth, and a reminder when a regular hasn't been in for a while. In Apple and Google Wallet, no app."
+      "title": "Loyalty card for hair salons and barbers",
+      "description": "Your salon's loyalty program in Apple and Google Wallet: a stamp per appointment, a reward at the fifth and a reminder when it's been a while. No app."
     },
     "retail": {
       "title": "Loyalty cards and coupons for shops",
-      "description": "A stamp card for regulars and a coupon for the next purchase, in Apple and Google Wallet. Scanned at the till with the Loyalshy app. Free up to 50 customers."
+      "description": "A stamp card and a coupon in Apple and Google Wallet for your shop's customers. Scanned at the till, without touching the POS. Free up to 50 customers."
     },
     "automations": {
-      "title": "Automations: Google reviews, win-back and nearby",
-      "description": "The card asks for a Google review, brings back regulars who stopped coming and shows up on the lock screen near your business. Set once from the dashboard."
+      "title": "Automations: reviews and win-back",
+      "description": "The card asks for a Google review, brings back regulars who stopped coming and shows up on the lock screen near your business."
     },
     "pricing": {
-      "title": "Pricing",
-      "description": "Free for up to 50 customers. Pro €29, Business €49, Scale €99 a month, 20% less yearly. No contract, no card to start. Every plan has both wallets and the team app."
+      "title": "Pricing for the digital loyalty card",
+      "description": "Free for up to 50 customers. Pro €29, Business €49, Scale €99 a month, VAT included, up to 20% less yearly. No contract, no card to start."
     },
     "staffApp": {
       "title": "The team app for iPhone and Android",
@@ -2209,8 +2209,8 @@
       "description": "The third parties that process personal data on Loyalshy's behalf, what for and where."
     },
     "promote": {
-      "title": "How to get customers to join your loyalty program",
-      "description": "Eight places and moments that bring sign-ups: the till, the table, the door, the receipt, Instagram, Google reviews. Free print-ready material from your dashboard, or we make it for you."
+      "title": "How to promote your loyalty program",
+      "description": "Eight spots that bring sign-ups: till, table, door, receipt, Instagram and Google reviews. Free promotional material from your dashboard, or printed by us."
     }
   },
   "pages": {
@@ -2234,8 +2234,8 @@
     },
     "industries": {
       "hub": {
-        "title": "Loyalty for the businesses that see the same faces.",
-        "lead": "Cafés, salons and shops run on regulars. Loyalshy gives each of them a stamp card or a coupon in Apple and Google Wallet, and gives you a dashboard that shows who comes back.",
+        "title": "Loyalty for cafés, salons and shops.",
+        "lead": "Cafés, salons and shops run on regulars. Loyalshy gives each of them a loyalty program in Apple and Google Wallet, a stamp card or a coupon, and gives you a dashboard that shows who comes back.",
         "cards": {
           "cafes": {
             "title": "Cafés and bakeries",
@@ -2268,11 +2268,12 @@
             "title": "Your customers, your data",
             "body": "Every stamp shows up in the dashboard. You see who comes back and who stopped coming, and you can export the list whenever you want."
           }
-        }
+        },
+        "chooseTitle": "Pick your business."
       },
       "cafes": {
         "title": "The stamp card for cafés.",
-        "lead": "Nine coffees, the tenth free. The card lives in your customers' Apple or Google Wallet, so it can't be lost, forgotten or faked, and you see every stamp in the dashboard.",
+        "lead": "Nine coffees, the tenth free. For the café and the neighbourhood bakery: the card lives in your customers' Apple or Google Wallet, so it can't be lost, forgotten or faked, and you see every stamp in the dashboard.",
         "heroAlt": "A barista smiling behind the counter",
         "counterTitle": "At the counter.",
         "counterLead": "The morning rush doesn't slow down. Here is what changes and what doesn't.",
@@ -2349,7 +2350,7 @@
       },
       "salons": {
         "title": "The loyalty card for salons.",
-        "lead": "A stamp per appointment, a reward at the fifth. The card lives in your clients' Apple or Google Wallet, and when a regular hasn't booked in a while, it reminds them.",
+        "lead": "Your salon's loyalty program, in the Wallet: a stamp per appointment, a reward at the fifth. The card lives in your clients' Apple or Google Wallet, and when a regular hasn't booked in a while, it reminds them.",
         "heroAlt": "A hairdresser at work in a bright salon",
         "counterTitle": "At the front desk.",
         "counterLead": "Clients come every four to six weeks. The card has to survive that gap, and paper doesn't.",
@@ -2425,8 +2426,8 @@
         }
       },
       "retail": {
-        "title": "Cards and coupons for shops.",
-        "lead": "A stamp card for the customers who come every week and a coupon for the ones who might come back. Both in Apple and Google Wallet, both scanned at the till with the same app.",
+        "title": "The loyalty card for shops.",
+        "lead": "Keep your shop's customers coming back with a stamp card for the ones who come every week and a coupon for the ones who might. Both in Apple and Google Wallet, both scanned at the till with the same app.",
         "heroAlt": "A small clothing shop with racks and a counter",
         "counterTitle": "At the till.",
         "counterLead": "The card is scanned while they pay. Nothing touches your POS.",
@@ -2503,7 +2504,7 @@
       }
     },
     "automations": {
-      "title": "The card does the follow-up.",
+      "title": "Google reviews and customers who come back, on their own.",
       "lead": "Three things the card does by itself, set once from the dashboard: ask for a Google review, bring back a regular who stopped coming, and show up on the lock screen when a customer walks by.",
       "heroAlt": "A hand holding a phone",
       "rows": {
@@ -2569,11 +2570,12 @@
           "question": "Do automations work on coupons?",
           "answer": "On unlimited coupons, yes: each redemption counts as a visit. Single-use coupons never ask. Once redeemed, the pass is used up."
         }
-      }
+      },
+      "rowsTitle": "Three things it does on its own."
     },
     "pricing": {
       "title": "Plans and pricing.",
-      "lead": "Monthly or yearly, no contract, and you can stop whenever you want. Every plan has both card types, both wallets, the team app and the dashboard.",
+      "lead": "The digital loyalty card, priced by how many customers you have. Monthly or yearly, no contract, and you can stop whenever you want. Every plan has both card types, both wallets, the team app and the dashboard.",
       "compareTitle": "Plan by plan.",
       "compareLead": "What each plan includes, line by line.",
       "rows": {
@@ -2715,7 +2717,8 @@
           "question": "Can I try it before I have customers?",
           "answer": "Yes. The app has a demo mode with sample data, so you can see every screen before the first scan."
         }
-      }
+      },
+      "rowsTitle": "What it does."
     },
     "partners": {
       "title": "Set Loyalshy up for your clients.",
@@ -3022,8 +3025,8 @@
       "dpaBody": "Questions about data processing, or need a data processing agreement? Write to"
     },
     "promote": {
-      "title": "Where your customers sign up.",
-      "lead": "The card is in the Wallet. Now it has to be seen. Eight places and moments in a small business that bring sign-ups, with what to put there and what to say. The counter card and the table tent come free from your dashboard; the rest, we can make for you.",
+      "title": "How to promote your loyalty program.",
+      "lead": "The card is in the Wallet. Now it has to be seen. Eight places and moments in a small business that bring sign-ups, with what promotional material to put there and what to say. The counter card and the table tent come free from your dashboard; the rest, we can make for you.",
       "orderCta": "Ask us to make it",
       "freeCta": "Free from your dashboard",
       "blocks": {
@@ -3084,7 +3087,7 @@
           "alt": "A burger bar's 10% off coupon in Apple Wallet"
         }
       },
-      "freeTitle": "Free from your dashboard.",
+      "freeTitle": "Free promotional material from your dashboard.",
       "freeLead": "The counter card and the table tent come out of Distribution as print-ready PDFs, with your logo, your colors and your program's QR. The tent's second side carries your Google reviews link once you've set it up.",
       "freeSteps": {
         "1": {

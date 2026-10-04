@@ -42,7 +42,7 @@
   "hero": {
     "subtitle": "Tarjetas de sellos y cupones que tus clientes guardan en Apple Wallet o Google Wallet. Sin app, sin cuenta y sin papel.",
     "seeHowItWorks": "Ver cómo funciona",
-    "title": "Fideliza a tus clientes ocasionales.",
+    "title": "La tarjeta de fidelización digital, en su Wallet.",
     "tryInWallet": "Pruébala en tu Wallet",
     "note": "Gratis hasta 50 clientes. Sin tarjeta de crédito.",
     "card": {
@@ -64,7 +64,7 @@
       },
       "passAlt": "Tarjeta de sellos real de un cliente en Apple Wallet: seis de siete sellos, próxima recompensa un corte gratis"
     },
-    "tagline": "La tarjeta de fidelización digital, en Apple y Google Wallet.",
+    "tagline": "Tarjeta de sellos o cupón en Apple y Google Wallet. Sin app para el cliente, sin papel.",
     "film": {
       "scroll": "Sigue bajando.",
       "camera": "Cámara",
@@ -271,7 +271,7 @@
     "privacyPolicy": "Política de privacidad",
     "termsOfService": "Términos del servicio",
     "cookiePolicy": "Política de cookies",
-    "tagline": "Fideliza a tus clientes ocasionales.",
+    "tagline": "La tarjeta de fidelización digital, en su Wallet.",
     "copyright": "© 2026 Loyalshy, un producto de HEX CONCEPTS STUDIO, S.L. Todos los derechos reservados.",
     "builtWith": "Hecho en España.",
     "instagram": "Loyalshy en Instagram",
@@ -2096,8 +2096,8 @@
   },
   "contact": {
     "sectionLabel": "Contacto",
-    "pageTitle": "Contáctanos",
-    "pageSubtitle": "¿Tienes alguna pregunta sobre nuestra plataforma, necesitas ayuda con tu cuenta o te interesa nuestro plan Enterprise? Nos encantaría saber de ti.",
+    "pageTitle": "Escríbenos.",
+    "pageSubtitle": "Dudas sobre la tarjeta, tu cuenta o un plan para varios locales. Te contestamos por correo en uno o dos días laborables.",
     "nameLabel": "Nombre",
     "namePlaceholder": "Tu nombre completo",
     "emailLabel": "Email",
@@ -2121,32 +2121,32 @@
     "directEmail": "¿Prefieres email?",
     "highlights": {
       "general": {
-        "title": "Consultas generales",
-        "description": "Preguntas sobre nuestra plataforma, funcionalidades o cómo Loyalshy puede ayudar a tu negocio."
+        "title": "Dudas generales",
+        "description": "Cómo funciona la tarjeta, qué plan te conviene o si encaja con tu negocio."
       },
       "sales": {
-        "title": "Ventas y Enterprise",
-        "description": "Planes personalizados, precios por volumen, soporte dedicado y soluciones adaptadas a tu organización."
+        "title": "Varios locales",
+        "description": "Cadenas y negocios con varios locales: límites a medida y condiciones por contrato."
       },
       "partnership": {
-        "title": "Colaboraciones",
-        "description": "Oportunidades de integración, programas de revendedor y colaboraciones estratégicas."
+        "title": "Partners",
+        "description": "Agencias, consultores y distribuidores de TPV que montan Loyalshy para sus clientes."
       },
       "support": {
-        "title": "Soporte técnico",
-        "description": "Ayuda con tu cuenta, integración de API, problemas con pases o preguntas de facturación."
+        "title": "Soporte",
+        "description": "Tu cuenta, una tarjeta que no se actualiza en el Wallet, la app de equipo o una factura."
       }
     }
   },
   "metadata": {
     "home": {
-      "title": "Loyalshy — Fideliza a tus clientes ocasionales",
-      "description": "Fideliza a tus clientes ocasionales con una tarjeta de sellos digital en Apple y Google Wallet. Sellos, cupones y avisos, sin app. Gratis hasta 50 clientes.",
+      "title": "Tarjeta de fidelización digital, sin app — Loyalshy",
+      "description": "La tarjeta de sellos digital para cafeterías, peluquerías y tiendas. Vive en Apple y Google Wallet, sin app ni papel. Gratis hasta 50 clientes.",
       "jsonLdDescription": "Plataforma de fidelización digital para pequeños negocios. Crea y gestiona tarjetas de sellos y cupones en Apple Wallet y Google Wallet."
     },
     "contact": {
       "title": "Contacto",
-      "description": "Habla con el equipo de Loyalshy. Dudas sobre la tarjeta de fidelización digital, planes para empresas o colaboraciones: escríbenos."
+      "description": "Escríbenos sobre la tarjeta de fidelización, tu cuenta o un plan para varios locales. Te contestamos por correo en uno o dos días laborables."
     },
     "privacy": {
       "title": "Política de privacidad",
@@ -2161,28 +2161,28 @@
       "description": "Cómo usa Loyalshy las cookies y tecnologías similares."
     },
     "for": {
-      "title": "Programas de fidelización por tipo de negocio",
-      "description": "Tarjetas de sellos y cupones digitales en Apple y Google Wallet para cafeterías, peluquerías y tiendas. La misma mecánica, adaptada a tu mostrador."
+      "title": "Fidelización para cafeterías, peluquerías y tiendas",
+      "description": "Una tarjeta de sellos digital o un cupón en Apple y Google Wallet, adaptados a tu mostrador: cafeterías, peluquerías y tiendas. Sin app para el cliente."
     },
     "cafes": {
-      "title": "Tarjeta de sellos digital para cafeterías y panaderías",
-      "description": "Nueve cafés y el décimo gratis, en el Apple o Google Wallet de tus clientes. Sin app, sin papel. Se escanea con la app de equipo de Loyalshy. Gratis hasta 50 clientes."
+      "title": "Tarjeta de sellos digital para cafeterías",
+      "description": "La tarjeta de sellos de tu cafetería en Apple y Google Wallet: nueve cafés y el décimo gratis. Sin app, sin papel, sin tocar el TPV. Gratis hasta 50 clientes."
     },
     "salons": {
-      "title": "Tarjeta de fidelización para peluquerías y salones de belleza",
-      "description": "Un sello por cita, un premio a la quinta y un recordatorio cuando un cliente habitual lleva tiempo sin venir. En Apple y Google Wallet, sin app."
+      "title": "Tarjeta de fidelización para peluquerías y barberías",
+      "description": "El programa de fidelización de tu peluquería en Apple y Google Wallet: un sello por cita, premio a la quinta y un recordatorio cuando hace tiempo. Sin app."
     },
     "retail": {
       "title": "Tarjetas de fidelización y cupones para tiendas",
-      "description": "Una tarjeta de sellos para los habituales y un cupón para la próxima compra, en Apple y Google Wallet. Se escanea en caja con la app de Loyalshy. Gratis hasta 50 clientes."
+      "description": "Una tarjeta de sellos y un cupón en Apple y Google Wallet para fidelizar a los clientes de tu tienda. Se escanea en caja, sin tocar el TPV."
     },
     "automations": {
-      "title": "Automatizaciones: reseñas en Google, recuperar clientes y cerca de tu local",
-      "description": "La tarjeta pide una reseña en Google, recupera a los habituales que dejaron de venir y aparece en la pantalla de bloqueo cerca de tu local. Se configura una vez desde el panel."
+      "title": "Automatizaciones: reseñas y recuperar clientes",
+      "description": "La tarjeta pide una reseña en Google, recupera a los habituales que dejaron de venir y aparece en la pantalla de bloqueo cerca de tu local."
     },
     "pricing": {
-      "title": "Precios",
-      "description": "Gratis hasta 50 clientes. Pro 29 €, Business 49 €, Scale 99 € al mes, un 20 % menos al año. Sin permanencia ni tarjeta para empezar. Todos los planes incluyen ambos wallets y la app de equipo."
+      "title": "Precios de la tarjeta de fidelización digital",
+      "description": "Gratis hasta 50 clientes. Pro 29 €, Business 49 €, Scale 99 € al mes, IVA incluido y hasta un 20 % menos al año. Sin permanencia ni tarjeta para empezar."
     },
     "staffApp": {
       "title": "La app de equipo para iPhone y Android",
@@ -2209,8 +2209,8 @@
       "description": "Los terceros que tratan datos personales por cuenta de Loyalshy, para qué y dónde."
     },
     "promote": {
-      "title": "Cómo conseguir que tus clientes se apunten a tu programa de fidelización",
-      "description": "Ocho sitios y momentos que traen altas: la caja, la mesa, la puerta, el ticket, Instagram, las reseñas de Google. Material listo para imprimir gratis desde tu panel, o te lo hacemos nosotros."
+      "title": "Cómo promocionar tu programa de fidelización",
+      "description": "Ocho sitios que traen altas: caja, mesa, puerta, ticket, Instagram y reseñas de Google. Material promocional gratis desde tu panel, o impreso por nosotros."
     }
   },
   "pages": {
@@ -2234,8 +2234,8 @@
     },
     "industries": {
       "hub": {
-        "title": "Fidelización para los negocios que ven las mismas caras.",
-        "lead": "Cafeterías, peluquerías y tiendas viven de los habituales. Loyalshy le da a cada uno una tarjeta de sellos o un cupón en Apple y Google Wallet, y a ti un panel que te enseña quién vuelve.",
+        "title": "Fidelización para cafeterías, peluquerías y tiendas.",
+        "lead": "Cafeterías, peluquerías y tiendas viven de los habituales. Loyalshy le da a cada una un programa de fidelización en Apple y Google Wallet, una tarjeta de sellos o un cupón, y a ti un panel que te enseña quién vuelve.",
         "cards": {
           "cafes": {
             "title": "Cafeterías y panaderías",
@@ -2268,11 +2268,12 @@
             "title": "Tus clientes, tus datos",
             "body": "Cada sello aparece en el panel. Ves quién vuelve y quién dejó de venir, y puedes exportar la lista cuando quieras."
           }
-        }
+        },
+        "chooseTitle": "Elige tu negocio."
       },
       "cafes": {
         "title": "La tarjeta de sellos para cafeterías.",
-        "lead": "Nueve cafés y el décimo gratis. La tarjeta vive en el Apple o Google Wallet de tus clientes, así que no se pierde, no se olvida ni se falsifica, y tú ves cada sello en el panel.",
+        "lead": "Nueve cafés y el décimo gratis. Para la cafetería y la panadería de barrio: la tarjeta vive en el Apple o Google Wallet de tus clientes, así que no se pierde, no se olvida ni se falsifica, y tú ves cada sello en el panel.",
         "heroAlt": "Una barista sonriendo detrás del mostrador",
         "counterTitle": "En el mostrador.",
         "counterLead": "La hora punta de la mañana no se frena. Esto es lo que cambia y lo que no.",
@@ -2349,7 +2350,7 @@
       },
       "salons": {
         "title": "La tarjeta de fidelización para peluquerías.",
-        "lead": "Un sello por cita, un premio a la quinta. La tarjeta vive en el Apple o Google Wallet de tus clientes y, cuando un habitual lleva tiempo sin reservar, se lo recuerda.",
+        "lead": "El programa de fidelización de tu peluquería, en el Wallet: un sello por cita, un premio a la quinta. La tarjeta vive en el Apple o Google Wallet de tus clientes y, cuando un habitual lleva tiempo sin reservar, se lo recuerda.",
         "heroAlt": "Una peluquera trabajando en un salón luminoso",
         "counterTitle": "En recepción.",
         "counterLead": "Los clientes vienen cada cuatro o seis semanas. La tarjeta tiene que sobrevivir a ese hueco, y el papel no lo hace.",
@@ -2425,8 +2426,8 @@
         }
       },
       "retail": {
-        "title": "Tarjetas y cupones para tiendas.",
-        "lead": "Una tarjeta de sellos para los clientes que vienen cada semana y un cupón para los que podrían volver. Las dos en Apple y Google Wallet, las dos escaneadas en caja con la misma app.",
+        "title": "La tarjeta de fidelización para tiendas.",
+        "lead": "Fideliza a los clientes de tu tienda con una tarjeta de sellos para los que vienen cada semana y un cupón para los que podrían volver. Las dos en Apple y Google Wallet, las dos escaneadas en caja con la misma app.",
         "heroAlt": "Una tienda de ropa pequeña con percheros y mostrador",
         "counterTitle": "En caja.",
         "counterLead": "La tarjeta se escanea mientras pagan. Nada toca tu TPV.",
@@ -2503,7 +2504,7 @@
       }
     },
     "automations": {
-      "title": "La tarjeta hace el seguimiento.",
+      "title": "Reseñas en Google y clientes que vuelven, en automático.",
       "lead": "Tres cosas que la tarjeta hace sola, configuradas una vez desde el panel: pedir una reseña en Google, recuperar a un habitual que dejó de venir y aparecer en la pantalla de bloqueo cuando un cliente pasa por delante.",
       "heroAlt": "Una mano sosteniendo un móvil",
       "rows": {
@@ -2569,11 +2570,12 @@
           "question": "¿Las automatizaciones funcionan con cupones?",
           "answer": "Con cupones ilimitados, sí: cada canje cuenta como visita. Los cupones de un solo uso nunca piden nada. Una vez canjeados, la tarjeta queda usada."
         }
-      }
+      },
+      "rowsTitle": "Tres cosas que hace sola."
     },
     "pricing": {
       "title": "Planes y precios.",
-      "lead": "Mensual o anual, sin permanencia, y puedes parar cuando quieras. Todos los planes incluyen los dos tipos de tarjeta, los dos wallets, la app de equipo y el panel.",
+      "lead": "La tarjeta de fidelización digital, con precio según cuántos clientes tienes. Mensual o anual, sin permanencia, y puedes parar cuando quieras. Todos los planes incluyen los dos tipos de tarjeta, los dos wallets, la app de equipo y el panel.",
       "compareTitle": "Plan por plan.",
       "compareLead": "Lo que incluye cada plan, línea a línea.",
       "rows": {
@@ -2715,7 +2717,8 @@
           "question": "¿Puedo probarla antes de tener clientes?",
           "answer": "Sí. La app tiene un modo demo con datos de ejemplo, para que veas cada pantalla antes del primer escaneo."
         }
-      }
+      },
+      "rowsTitle": "Lo que hace."
     },
     "partners": {
       "title": "Monta Loyalshy para tus clientes.",
@@ -3022,8 +3025,8 @@
       "dpaBody": "¿Preguntas sobre el tratamiento de datos, o necesitas un acuerdo de encargo de tratamiento? Escribe a"
     },
     "promote": {
-      "title": "Dónde se apuntan tus clientes.",
-      "lead": "La tarjeta ya está en el Wallet. Ahora tiene que verse. Ocho sitios y momentos de un negocio pequeño que traen altas, con qué poner en cada uno y qué decir. La tarjeta de mostrador y el expositor salen gratis de tu panel; el resto, te lo podemos hacer nosotros.",
+      "title": "Cómo promocionar tu programa de fidelización.",
+      "lead": "La tarjeta ya está en el Wallet. Ahora tiene que verse. Ocho sitios y momentos de un negocio pequeño que traen altas, con qué material promocional poner en cada uno y qué decir. La tarjeta de mostrador y el expositor salen gratis de tu panel; el resto, te lo podemos hacer nosotros.",
       "orderCta": "Pídenoslo hecho",
       "freeCta": "Gratis desde tu panel",
       "blocks": {
@@ -3084,7 +3087,7 @@
           "alt": "El cupón del 10 % de una hamburguesería en Apple Wallet"
         }
       },
-      "freeTitle": "Gratis desde tu panel.",
+      "freeTitle": "Material promocional gratis desde tu panel.",
       "freeLead": "La tarjeta de mostrador y el expositor de mesa salen de Distribución como PDF listos para imprimir, con tu logo, tus colores y el QR de tu programa. La segunda cara del expositor lleva tu enlace de reseñas de Google en cuanto lo configures.",
       "freeSteps": {
         "1": {

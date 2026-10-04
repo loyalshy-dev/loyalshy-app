@@ -46,7 +46,7 @@ export default async function AutomationsPage({ params }: PageProps) {
         media={<Photo id="1512428559087-560fa5ceab42" alt={t("heroAlt")} ratio="4/3" priority />}
       />
 
-      <PageSection>
+      <PageSection title={t("rowsTitle")}>
         <SplitRows
           rows={ROWS.map((r) => ({
             id: r.key,

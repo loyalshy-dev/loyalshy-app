@@ -39,7 +39,7 @@ export default async function IndustriesPage({ params }: PageProps) {
         primary={{ label: tCommon("getStartedFree"), href: "/register" }}
         secondary={{ label: tc("seePricing"), href: localePath(locale, "/pricing") }}
       />
-      <PageSection tight>
+      <PageSection title={t("chooseTitle")}>
         <LinkCards
           cards={CARDS.map((c) => ({
             href: localePath(locale, c.path),
