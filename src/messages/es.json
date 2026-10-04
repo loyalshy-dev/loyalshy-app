@@ -2598,7 +2598,7 @@
         },
         "vat": {
           "question": "¿Los precios incluyen IVA?",
-          "answer": "Los precios se muestran sin IVA. Se añade en la factura cuando corresponde."
+          "answer": "Sí. Los precios que ves incluyen el IVA, y en la factura aparece desglosado."
         },
         "cancel": {
           "question": "¿Cómo cancelo?",

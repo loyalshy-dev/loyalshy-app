@@ -2598,7 +2598,7 @@
         },
         "vat": {
           "question": "Do prices include VAT?",
-          "answer": "Prices are shown without VAT. It's added on the invoice where it applies."
+          "answer": "Yes. The prices shown include VAT, and the invoice breaks it down."
         },
         "cancel": {
           "question": "How do I cancel?",

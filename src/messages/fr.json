@@ -2598,7 +2598,7 @@
         },
         "vat": {
           "question": "Les prix incluent-ils la TVA ?",
-          "answer": "Les prix sont affichés hors TVA. Elle est ajoutée sur la facture quand elle s'applique."
+          "answer": "Oui. Les prix affichés incluent la TVA, et la facture la détaille."
         },
         "cancel": {
           "question": "Comment résilier ?",
