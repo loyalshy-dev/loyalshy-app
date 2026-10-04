@@ -125,6 +125,12 @@ Under **Automations → Near your business** (owners and Program managers, all p
 - The address is also the one shown on every program's pass and used for the Google Maps link; saving it updates all passes silently.
 - A map (Leaflet + OpenStreetMap) shows the spot and the ~100 m area; the merchant can drag the pin onto their door if the address search put it slightly off.
 
+## Marketing Site
+
+The public site lives in `src/app/[locale]` with one crawlable URL per language (`/`, `/es/...`, `/fr/...`, canonical + hreflang) and is always light. Besides the landing it has, since 2026-10-04: `/for` + `/for/cafes`, `/for/salons`, `/for/retail` (industry pages), `/automations`, `/pricing` (compare grid + plan-by-plan table; prices include VAT), `/staff-app`, `/partners`, `/private-programs`, `/promote` (where customers sign up: eight places and moments, with a quote form to have the printed material made — no price shown, it exists to validate the service), `/about`, `/status` (live health checks, cached 30 s), `/subprocessors`, `/contact` and the legal pages. Copy is in `src/messages/*.json` under `pages.*` and `metadata.*`; shared blocks in `src/components/marketing/pages/`. Photos are Unsplash placeholders through a custom `next/image` loader until real photography exists.
+
+**Free counter material:** on a program's Distribution page, "Counter material" downloads an A6 counter card and an A4 table tent as print-ready PDFs (300 dpi, drawn on canvas in the page font, the program's QR with the logo and colors). The tent's second face asks for a Google review when the business has set its review link in Automations.
+
 ## Pass Updates After Edits
 
 Passes already in customers' wallets pick up edits automatically — no re-install:
@@ -223,7 +229,7 @@ Errors are RFC 7807 problem bodies; conflicts carry a machine-readable `code` (e
 
 ## Monitoring
 
-- **`GET /api/health`** — dependency health check: pings the database (Neon) and Upstash Redis with 5s timeouts. Returns 200 when healthy, 503 when degraded. Point an external uptime monitor (UptimeRobot / Better Stack) at `https://loyalshy.com/api/health` on a 5-minute interval.
+- **`GET /api/health`** — dependency health check: pings the database (Neon) and Upstash Redis with 5s timeouts. Returns 200 when healthy, 503 when degraded. Point an external uptime monitor (UptimeRobot / Better Stack) at `https://loyalshy.com/api/health` on a 5-minute interval. The public `/status` page runs the same checks (`src/lib/health.ts`) behind a 30 s cache and links each provider's status page.
 - **Sentry** — errors are aggregated into issues; configure alert rules (new issue → email, frequency spike) in the Sentry dashboard. Rate-limiter fallback events are tagged `auth-rate-limit` / `contact-form-rate-limit`.
 
 ## Admin Panel
@@ -255,7 +261,8 @@ Org roles are now three-tier: `owner` > `admin` (Program manager) > `member` (St
   /app              — App Router pages
     /(auth)         — Login / Register / Forgot password / Invite / Claim (ownership handoff)
     /(dashboard)    — Protected dashboard (programs, contacts, settings, admin)
-    /(public)       — Landing, pricing, contact, legal, /join/[slug] self-join pages
+    /[locale]       — Marketing site (landing + industries, automations, pricing, staff app, partners, private programs, promote, about, status, subprocessors, contact, legal) in en/es/fr
+    /(public)       — /join/[slug] self-join pages
     /api            — API routes
       /api/v1       — Staff-app API (session-token auth only)
       /api/wallet   — Apple/Google Wallet callbacks + downloads
