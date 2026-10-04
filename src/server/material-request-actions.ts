@@ -4,15 +4,12 @@ import { z } from "zod"
 import { headers } from "next/headers"
 import { getLocale, getTranslations } from "next-intl/server"
 import { checkContactRateLimit, clientIpFromHeaders, escapeHtml } from "@/lib/contact-rate-limit"
+import { MATERIAL_PIECES, MATERIAL_QUANTITIES } from "@/lib/material-request"
 
 // ─── Counter-material request (/promote) ─────────────────────
 // A quote request, not an order: it lands in the team's inbox and the
 // sender gets a confirmation. No price, no payment — this exists to
 // measure demand before the print service is built.
-
-export const MATERIAL_PIECES = ["counterCard", "tableTent", "doorSticker", "windowSticker", "stamp", "social", "other"] as const
-export type MaterialPiece = (typeof MATERIAL_PIECES)[number]
-export const MATERIAL_QUANTITIES = ["1", "2-5", "6-10", "more"] as const
 
 const materialRequestSchema = z.object({
   name: z.string().min(1).max(100),
@@ -21,8 +18,8 @@ const materialRequestSchema = z.object({
   pieces: z.array(z.enum(MATERIAL_PIECES)).min(1).max(MATERIAL_PIECES.length),
   quantity: z.enum(MATERIAL_QUANTITIES),
   message: z.string().max(2000).optional().or(z.literal("")),
-  // Honeypot — must be empty
-  website: z.string().max(0).optional().or(z.literal("")),
+  // Honeypot: any value is accepted here and handled below, so a bot sees a success
+  website: z.string().max(500).optional(),
 })
 
 export type MaterialRequestInput = z.infer<typeof materialRequestSchema>
@@ -53,7 +50,8 @@ export async function submitMaterialRequest(input: MaterialRequestInput): Promis
       from: "Loyalshy <noreply@loyalshy.com>",
       to: "hello@loyalshy.com",
       replyTo: email,
-      subject: `[Material] ${escapeHtml(business)} · ${pieceLabels.join(", ")}`,
+      // A header, not HTML: strip line breaks, don't entity-escape
+      subject: `[Material] ${business.replace(/[\r\n]/g, " ")} · ${pieceLabels.join(", ")}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #111; margin-bottom: 24px;">Counter material request</h2>

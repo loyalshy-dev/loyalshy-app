@@ -1,9 +1,8 @@
-// A numbered list on hairlines. `import Link` sits below the type on purpose: see
-// the step's optional link.
-//: the step's number in the margin, its
-// title, and one sentence. Reads as a procedure, not as cards.
-
 import Link from "next/link"
+
+// A numbered list on hairlines: the step's number in the margin, its
+// title, one sentence, and an optional link under it. Reads as a
+// procedure, not as cards.
 
 export type Step = { title: string; body: string; link?: { label: string; href: string } }
 

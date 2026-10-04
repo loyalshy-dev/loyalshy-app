@@ -12,7 +12,6 @@ import { FirstCustomerChecklist } from "@/components/dashboard/programs/first-cu
 import { AnnouncementSection } from "@/components/dashboard/programs/announcement-section"
 import { JoinModeSection } from "@/components/dashboard/programs/join-mode-section"
 import { CounterMaterialSection } from "@/components/dashboard/programs/counter-material-section"
-import { parseCouponConfig, formatCouponValue } from "@/lib/pass-config"
 import { parseTemplateAnnouncement } from "@/lib/pass-config"
 import {
   getAnnouncementQuota,
@@ -124,13 +123,14 @@ export default async function ProgramDistributionPage(props: {
   const joinUrl = origin ? `${origin}${joinPath}` : joinPath
 
   // Counter material: the same accent + QR logo the QR card uses, and the
-  // reward in words for the card's title
+  // reward in words for the card's title. Coupons print the program's own
+  // name (formatCouponValue is English with a dollar sign — not for paper).
   const tDist = await getTranslations("dashboard.distribution")
   const config = program.config as Record<string, unknown> | null
-  const couponConfig = program.passType === "COUPON" ? parseCouponConfig(program.config) : null
-  const rewardLine = couponConfig
-    ? formatCouponValue(couponConfig)
-    : tDist("rewardAfterVisits", { reward: (config?.rewardDescription as string) ?? "", visits: (config?.stampsRequired as number) ?? 10 })
+  const rewardLine =
+    program.passType === "COUPON"
+      ? program.name
+      : tDist("rewardAfterVisits", { reward: (config?.rewardDescription as string) ?? "", visits: (config?.stampsRequired as number) ?? 10 })
   const materialAccent = program.passDesign?.primaryColor ?? organization.brandColor ?? "#1a1a2e"
   const materialLogo = program.passDesign?.logoGoogleUrl ?? organization.logoGoogle ?? program.passDesign?.logoUrl ?? organization.logo ?? null
 
@@ -220,8 +220,8 @@ export default async function ProgramDistributionPage(props: {
           {isPublic && (
             <section id="counter-material-section" className="scroll-mt-6">
               <CounterMaterialSection
-                organization={{ name: organization.name, slug: organization.slug, brandColor: organization.brandColor }}
-                template={{ id: program.id, name: program.name, rewardLine, accentColor: materialAccent, qrLogoUrl: materialLogo }}
+                organization={{ name: organization.name, slug: organization.slug }}
+                template={{ name: program.name, rewardLine, accentColor: materialAccent, qrLogoUrl: materialLogo }}
                 joinUrl={joinUrl}
                 reviewUrl={reviewSettings?.reviewUrl ?? null}
               />

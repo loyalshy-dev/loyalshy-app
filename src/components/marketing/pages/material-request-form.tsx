@@ -12,16 +12,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { submitMaterialRequest, type MaterialRequestInput } from "@/server/material-request-actions"
+import { MATERIAL_PIECES as PIECES, MATERIAL_QUANTITIES as QUANTITIES, type MaterialPiece as Piece, type MaterialQuantity } from "@/lib/material-request"
 
 // The quote request on /promote. Same shape as the contact form (honeypot,
 // 3/h per IP, email to the team + confirmation), plus the pieces and a
 // quantity so the answer can carry a price. Labels come from the server
 // (`pages.promote.form`): the marketing shell ships only `common` + `nav`
 // to the browser.
-
-const PIECES = ["counterCard", "tableTent", "doorSticker", "windowSticker", "stamp", "social", "other"] as const
-const QUANTITIES = ["1", "2-5", "6-10", "more"] as const
-type Piece = (typeof PIECES)[number]
 
 export type MaterialFormLabels = {
   name: string
@@ -33,7 +30,7 @@ export type MaterialFormLabels = {
   pieces: string
   pieceOptions: Record<Piece, string>
   quantity: string
-  quantityOptions: Record<(typeof QUANTITIES)[number], string>
+  quantityOptions: Record<MaterialQuantity, string>
   message: string
   messagePlaceholder: string
   submit: string
@@ -51,7 +48,7 @@ export function MaterialRequestForm({ labels: L }: { labels: MaterialFormLabels 
   const [email, setEmail] = useState("")
   const [business, setBusiness] = useState("")
   const [pieces, setPieces] = useState<Piece[]>([])
-  const [quantity, setQuantity] = useState<(typeof QUANTITIES)[number]>("1")
+  const [quantity, setQuantity] = useState<MaterialQuantity>("1")
   const [message, setMessage] = useState("")
 
   const toggle = (p: Piece, on: boolean) => setPieces((prev) => (on ? [...new Set([...prev, p])] : prev.filter((x) => x !== p)))
@@ -72,14 +69,20 @@ export function MaterialRequestForm({ labels: L }: { labels: MaterialFormLabels 
       message,
       website: (document.getElementById("material-website") as HTMLInputElement | null)?.value || "",
     }
-    const result = await submitMaterialRequest(input)
-    setLoading(false)
-    if (result.error) {
-      toast.error(result.error)
-      return
+    try {
+      const result = await submitMaterialRequest(input)
+      if (result.error) {
+        toast.error(result.error)
+        return
+      }
+      track("material_request", { pieces: pieces.join(","), quantity })
+      setDone(true)
+    } catch {
+      // The action itself threw (network, a stale action manifest after a deploy)
+      toast.error(tCommon("error"))
+    } finally {
+      setLoading(false)
     }
-    track("material_request", { pieces: pieces.join(","), quantity })
-    setDone(true)
   }
 
   if (done) {
@@ -125,7 +128,7 @@ export function MaterialRequestForm({ labels: L }: { labels: MaterialFormLabels 
         {field(
           "m-quantity",
           L.quantity,
-          <Select value={quantity} onValueChange={(v) => setQuantity(v as (typeof QUANTITIES)[number])}>
+          <Select value={quantity} onValueChange={(v) => setQuantity(v as MaterialQuantity)}>
             <SelectTrigger id="m-quantity" className="mk-input">
               <SelectValue />
             </SelectTrigger>

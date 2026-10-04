@@ -11,7 +11,7 @@ import {
   Smartphone,
 } from "lucide-react"
 import { TemplateCardPreview } from "@/components/template-card-preview"
-import { StyledQrCode, renderStyledQr } from "@/components/styled-qr-code"
+import { StyledQrCode, renderStyledQr, drawQrLogo, loadLogoImage } from "@/components/styled-qr-code"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { parseCouponConfig, formatCouponValue } from "@/lib/pass-config"
@@ -92,26 +92,6 @@ export function QrCodeDisplay({
   const [downloading, setDownloading] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  /**
-   * Fetch a logo image through same-origin proxy to avoid CORS taint.
-   * Returns the loaded Image or null on failure.
-   */
-  async function loadLogoImage(url: string): Promise<HTMLImageElement | null> {
-    try {
-      const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(url)}`
-      const img = new window.Image()
-      img.crossOrigin = "anonymous"
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve()
-        img.onerror = () => reject()
-        img.src = proxyUrl
-      })
-      return img
-    } catch {
-      return null
-    }
-  }
-
   async function downloadQrOnly() {
     setDownloading(true)
     try {
@@ -153,25 +133,7 @@ export function QrCodeDisplay({
       // Draw logo on center
       if (qrLogoUrl) {
         const logoImg = await loadLogoImage(qrLogoUrl)
-        if (logoImg) {
-          const moduleCount = qr.modules.size
-          const cellSize = qrSize / (moduleCount + 5) // padding=2.5 each side
-          const centerModules = Math.ceil(moduleCount * 0.18)
-          const logoBgRadius = centerModules * cellSize * 0.42
-          const centerXY = qrSize / 2
-          const logoSize = logoBgRadius * 2
-
-          ctx.save()
-          ctx.beginPath()
-          ctx.arc(centerXY, centerXY, logoBgRadius + 1, 0, Math.PI * 2)
-          ctx.fillStyle = posterAccentColor
-          ctx.fill()
-          ctx.beginPath()
-          ctx.arc(centerXY, centerXY, logoBgRadius, 0, Math.PI * 2)
-          ctx.clip()
-          ctx.drawImage(logoImg, centerXY - logoBgRadius, centerXY - logoBgRadius, logoSize, logoSize)
-          ctx.restore()
-        }
+        if (logoImg) drawQrLogo(ctx, qrSize, qr.modules.size, posterAccentColor, logoImg)
       }
 
       const suffix = activeTemplate
@@ -230,25 +192,7 @@ export function QrCodeDisplay({
 
     if (qrLogoUrl) {
       const logoImg = await loadLogoImage(qrLogoUrl)
-      if (logoImg) {
-        const moduleCount = qr.modules.size
-        const cellSize = size / (moduleCount + 5)
-        const centerModules = Math.ceil(moduleCount * 0.18)
-        const logoBgRadius = centerModules * cellSize * 0.42
-        const centerXY = size / 2
-        const logoSize = logoBgRadius * 2
-
-        ctx.save()
-        ctx.beginPath()
-        ctx.arc(centerXY, centerXY, logoBgRadius + 1, 0, Math.PI * 2)
-        ctx.fillStyle = posterAccentColor
-        ctx.fill()
-        ctx.beginPath()
-        ctx.arc(centerXY, centerXY, logoBgRadius, 0, Math.PI * 2)
-        ctx.clip()
-        ctx.drawImage(logoImg, centerXY - logoBgRadius, centerXY - logoBgRadius, logoSize, logoSize)
-        ctx.restore()
-      }
+      if (logoImg) drawQrLogo(ctx, size, qr.modules.size, posterAccentColor, logoImg)
     }
 
     return canvas.toDataURL("image/png", 1.0)

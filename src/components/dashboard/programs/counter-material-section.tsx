@@ -16,8 +16,9 @@ import { renderCounterCard, renderTableTent, type FaceSpec } from "./counter-mat
 // org has a review link; otherwise it repeats the program face.
 
 type Props = {
-  organization: { name: string; slug: string; brandColor: string | null }
-  template: { id: string; name: string; rewardLine: string; accentColor: string; qrLogoUrl: string | null }
+  organization: { name: string; slug: string }
+  /** `accentColor` and `qrLogoUrl` are resolved by the Distribution page (program design → org). */
+  template: { name: string; rewardLine: string; accentColor: string; qrLogoUrl: string | null }
   joinUrl: string
   reviewUrl: string | null
 }
@@ -58,7 +59,7 @@ export function CounterMaterialSection({ organization, template, joinUrl, review
     setBusy("tent")
     try {
       const { jsPDF } = await import("jspdf")
-      const { dataUrl } = await renderTableTent(programFace, reviewsFace ?? programFace, t("materialFold"))
+      const dataUrl = await renderTableTent(programFace, reviewsFace ?? programFace, t("materialFold"))
       const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" })
       pdf.addImage(dataUrl, "JPEG", 0, 0, 210, 297)
       pdf.save(`${fileBase}-table-tent.pdf`)

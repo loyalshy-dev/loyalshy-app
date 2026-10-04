@@ -13,8 +13,8 @@ const contactFormSchema = z.object({
   inquiryType: z.enum(["general", "sales", "partnership", "support"]),
   company: z.string().max(100).optional().or(z.literal("")),
   message: z.string().min(10).max(5000),
-  // Honeypot — must be empty
-  website: z.string().max(0).optional().or(z.literal("")),
+  // Honeypot: any value is accepted here and handled below, so a bot sees a success
+  website: z.string().max(500).optional(),
 })
 
 export type ContactFormInput = z.infer<typeof contactFormSchema>
@@ -65,7 +65,8 @@ export async function submitContactForm(
       from: "Loyalshy <noreply@loyalshy.com>",
       to: inquiryType === "sales" ? "sales@loyalshy.com" : "hello@loyalshy.com",
       replyTo: email,
-      subject: `[${inquiryLabels[inquiryType]}] New contact from ${escapeHtml(name)}`,
+      // A header, not HTML: strip line breaks, don't entity-escape
+      subject: `[${inquiryLabels[inquiryType]}] New contact from ${name.replace(/[\r\n]/g, " ")}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #111; margin-bottom: 24px;">New Contact Form Submission</h2>
