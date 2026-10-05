@@ -98,16 +98,27 @@ export function RootDocument({
   messages,
   children,
   forcedTheme,
+  brand,
 }: {
   locale: string
   messages: Record<string, unknown>
   children: React.ReactNode
   /** The marketing site is always light; the app follows the system / the user's choice. */
   forcedTheme?: "light" | "dark"
+  /**
+   * Puts `data-brand="loyalshy"` on <body> so the brand tokens (--mk-*, coral
+   * --primary) also reach what Radix portals to <body>: menus, tooltips, the
+   * cookie banner. The marketing pages wrap their own content in the same
+   * attribute; this covers everything outside those wrappers.
+   */
+  brand?: boolean
 }) {
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${geistMono.variable} ${inter.variable} ${cabinet.variable} antialiased`}>
+      <body
+        data-brand={brand ? "loyalshy" : undefined}
+        className={`${geistMono.variable} ${inter.variable} ${cabinet.variable} antialiased`}
+      >
         <NextIntlClientProvider locale={locale} messages={pickMessages(messages, SHARED_NAMESPACES)}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange forcedTheme={forcedTheme}>
             {children}
