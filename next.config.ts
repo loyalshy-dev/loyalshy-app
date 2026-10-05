@@ -48,7 +48,7 @@ const staticAssetHeaders = [
 // ─── Marketing locale routing (see src/i18n/marketing.ts) ────
 // English marketing pages keep their unprefixed URLs (/, /contact, …) and
 // are served by src/app/[locale] through rewrites; /en/* redirects to them.
-// "/"-style URLs send visitors to /es or /fr when their `locale` cookie
+// "/"-style URLs send visitors to /es, /ca, /fr, … when their `locale` cookie
 // says so, or — with no cookie — when their browser's primary language
 // does. Crawlers send neither, so they always get English plus hreflang.
 const prefixedLocales = locales.filter((l) => l !== defaultLocale);

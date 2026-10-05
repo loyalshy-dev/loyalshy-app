@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server"
-import type { Locale } from "@/i18n/config"
+import { locales, type Locale } from "@/i18n/config"
 import { marketingUrl, siteUrl, type MarketingPath } from "@/i18n/marketing"
 
 // ─── JSON-LD for the marketing pages ─────────────────────────
@@ -42,13 +42,13 @@ export async function siteNodes(locale: Locale): Promise<Node[]> {
         addressCountry: "ES",
       },
       contactPoint: [
-        { "@type": "ContactPoint", contactType: "customer support", email: "hello@loyalshy.com", url: `${contact}?type=support`, availableLanguage: ["es", "en", "fr"] },
-        { "@type": "ContactPoint", contactType: "sales", email: "hello@loyalshy.com", url: `${contact}?type=sales`, availableLanguage: ["es", "en", "fr"] },
+        { "@type": "ContactPoint", contactType: "customer support", email: "hello@loyalshy.com", url: `${contact}?type=support`, availableLanguage: [...locales] },
+        { "@type": "ContactPoint", contactType: "sales", email: "hello@loyalshy.com", url: `${contact}?type=sales`, availableLanguage: [...locales] },
       ],
       sameAs: ["https://www.instagram.com/loyalshy/", "https://www.tiktok.com/@loyalshy_"],
       description: t("jsonLdDescription"),
     },
-    { "@type": "WebSite", "@id": SITE_ID, name: "Loyalshy", url: siteUrl, publisher: { "@id": ORG_ID }, inLanguage: ["en", "es", "fr"] },
+    { "@type": "WebSite", "@id": SITE_ID, name: "Loyalshy", url: siteUrl, publisher: { "@id": ORG_ID }, inLanguage: [...locales] },
   ]
 }
 

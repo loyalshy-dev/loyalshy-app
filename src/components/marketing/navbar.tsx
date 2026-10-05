@@ -170,7 +170,7 @@ export function MarketingNavbar() {
   )
 }
 
-// The three languages at the foot of the phone menu, the current one in
+// The languages at the foot of the phone menu, the current one in
 // ink. Plain links to the same page in the other language; the cookie is
 // written first so the unprefixed English URL isn't bounced back by the
 // locale redirect in next.config.ts.

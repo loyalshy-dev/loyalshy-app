@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { getTranslations, setRequestLocale } from "next-intl/server"
-import type { Locale } from "@/i18n/config"
+import { locales, type Locale } from "@/i18n/config"
 import { localePath, marketingUrl, siteUrl } from "@/i18n/marketing"
 import { pageMetadata } from "@/components/marketing/pages/metadata"
 import { MarketingPage } from "@/components/marketing/pages/shell"
@@ -72,7 +72,7 @@ export default async function StaffAppPage({ params }: PageProps) {
     offers: { "@type": "Offer", price: 0, priceCurrency: "EUR" },
     isPartOf: { "@id": SOFTWARE_ID },
     publisher: { "@id": ORG_ID },
-    inLanguage: ["es", "en", "fr"],
+    inLanguage: [...locales],
     description: tm("description"),
   }
   const jsonLd = await pageJsonLd(locale, "/staff-app", "staffApp", { about: STAFF_APP_ID, extra: [mobileApp] })

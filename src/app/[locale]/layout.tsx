@@ -7,7 +7,7 @@ import { locales } from "@/i18n/config"
 import { isLocale, marketingAlternates, marketingSocial } from "@/i18n/marketing"
 
 // Root layout for the marketing site. The locale comes from the URL
-// (/, /es, /fr — see src/i18n/marketing.ts), so every language is its
+// (/, /es, /ca, /fr, … — see src/i18n/marketing.ts), so every language is its
 // own crawlable page with hreflang alternates.
 
 // Paper, always: the marketing site ignores the system / dashboard theme.
