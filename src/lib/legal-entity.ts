@@ -18,7 +18,7 @@ export const LEGAL_ENTITY = {
   country: "ES",
   email: "hello@loyalshy.com",
   /** Person(s) authorised to represent the company, e.g. the administrador único. */
-  representative: null as string | null,
+  representative: "Jordi Morell Llovet" as string | null,
   /** Registro Mercantil entry, e.g. "Registro Mercantil de Lleida, Tomo …, Folio …, Hoja L-…". */
-  register: null as string | null,
+  register: "Registro Mercantil de Lleida, Tomo 8, Hoja L-37741" as string | null,
 } as const

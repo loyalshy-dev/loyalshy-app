@@ -63,7 +63,7 @@ export default async function LegalNoticePage({ params }: PageProps) {
               <br />
               {tCommon("companyInfo.address")}
             </address>
-            {representative && <p className="mt-3">{t("representative")}: {representative}</p>}
+            {representative && <p className="mt-3">{t("representative")}: {representative} ({t("soleAdministrator")})</p>}
           </section>
 
           <section>
