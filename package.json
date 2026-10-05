@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "db:seed-admin": "tsx prisma/seed-admin.ts"
+    "db:seed-admin": "tsx prisma/seed-admin.ts",
+    "i18n:check": "tsx scripts/check-messages.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1000.0",

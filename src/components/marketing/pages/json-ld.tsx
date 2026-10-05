@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server"
-import type { Locale } from "@/i18n/config"
+import { locales, type Locale } from "@/i18n/config"
 import { marketingUrl, siteUrl, type MarketingPath } from "@/i18n/marketing"
 
 // ─── JSON-LD for the marketing pages ─────────────────────────
@@ -12,6 +12,10 @@ import { marketingUrl, siteUrl, type MarketingPath } from "@/i18n/marketing"
 export type Node = Record<string, unknown>
 type PageType = "WebPage" | "ContactPage" | "AboutPage" | "CollectionPage"
 export type Crumb = { name: string; path: MarketingPath }
+
+// Languages the team answers support and sales mail in. Deliberately not the
+// site's `locales`: a page can render in German before anyone here replies in it.
+const SUPPORT_LANGUAGES = ["es", "en", "fr"] as const
 
 export const ORG_ID = `${siteUrl}/#organization`
 export const SITE_ID = `${siteUrl}/#website`
@@ -42,13 +46,13 @@ export async function siteNodes(locale: Locale): Promise<Node[]> {
         addressCountry: "ES",
       },
       contactPoint: [
-        { "@type": "ContactPoint", contactType: "customer support", email: "hello@loyalshy.com", url: `${contact}?type=support`, availableLanguage: ["es", "en", "fr"] },
-        { "@type": "ContactPoint", contactType: "sales", email: "hello@loyalshy.com", url: `${contact}?type=sales`, availableLanguage: ["es", "en", "fr"] },
+        { "@type": "ContactPoint", contactType: "customer support", email: "hello@loyalshy.com", url: `${contact}?type=support`, availableLanguage: [...SUPPORT_LANGUAGES] },
+        { "@type": "ContactPoint", contactType: "sales", email: "hello@loyalshy.com", url: `${contact}?type=sales`, availableLanguage: [...SUPPORT_LANGUAGES] },
       ],
       sameAs: ["https://www.instagram.com/loyalshy/", "https://www.tiktok.com/@loyalshy_"],
       description: t("jsonLdDescription"),
     },
-    { "@type": "WebSite", "@id": SITE_ID, name: "Loyalshy", url: siteUrl, publisher: { "@id": ORG_ID }, inLanguage: ["en", "es", "fr"] },
+    { "@type": "WebSite", "@id": SITE_ID, name: "Loyalshy", url: siteUrl, publisher: { "@id": ORG_ID }, inLanguage: [...locales] },
   ]
 }
 

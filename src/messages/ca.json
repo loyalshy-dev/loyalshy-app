@@ -1,0 +1,3174 @@
+{
+  "common": {
+    "loyalshy": "Loyalshy",
+    "getStarted": "Començar",
+    "getStartedFree": "Començar gratis",
+    "logIn": "Iniciar sessió",
+    "learnMore": "Més informació",
+    "contact": "Contacte",
+    "contactSales": "Parlar amb vendes",
+    "save": "Desar",
+    "cancel": "Cancel·lar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Tancar",
+    "back": "Tornar",
+    "next": "Següent",
+    "loading": "Carregant...",
+    "error": "Alguna cosa ha fallat",
+    "success": "Fet",
+    "search": "Cercar...",
+    "noResults": "Sense resultats",
+    "perMonth": "€/mes",
+    "backToHome": "← Tornar a Loyalshy",
+    "companyInfo": {
+      "title": "Informació de l'empresa",
+      "name": "HEX CONCEPTS STUDIO, S.L.",
+      "vatLabel": "NIF",
+      "vat": "B27646645",
+      "address": "Av. Convent 11, 25123 Torrefarrera (Lleida), Espanya"
+    }
+  },
+  "nav": {
+    "pricing": "Preus",
+    "home": "Inici Loyalshy",
+    "openMenu": "Obrir el menú",
+    "closeMenu": "Tancar el menú",
+    "switchLanguage": "Canviar d'idioma",
+    "forBusiness": "Per al teu negoci",
+    "automations": "Automatitzacions",
+    "staffApp": "App d'equip"
+  },
+  "hero": {
+    "subtitle": "Targetes de segells i cupons que els teus clients guarden a Apple Wallet o Google Wallet. Sense app, sense compte i sense paper.",
+    "seeHowItWorks": "Veure com funciona",
+    "title": "La targeta de fidelització digital, al seu Wallet.",
+    "tryInWallet": "Prova-la al teu Wallet",
+    "note": "Gratis fins a 50 clients. Sense targeta de crèdit.",
+    "card": {
+      "business": "Café Sol",
+      "program": "Targeta de segells",
+      "reward": "Cafè gratis",
+      "customer": "Marta G."
+    },
+    "lockDate": "dilluns, 6 d'octubre",
+    "scenes": {
+      "near": {
+        "alt": "Notificació real de Wallet en un iPhone: el logo del negoci, el seu nom i el missatge que va escriure, amb la targeta en miniatura"
+      },
+      "stamp": {
+        "notification": "Segell afegit. 4 de 5."
+      },
+      "announce": {
+        "alt": "Notificació real d'un avís enviat des del panell: «Hoy 2x1»"
+      },
+      "passAlt": "Targeta de segells real d'un client a Apple Wallet: sis de set segells, pròxima recompensa un tall gratis"
+    },
+    "tagline": "Targeta de segells o cupó a Apple i Google Wallet. Sense app per al client, sense paper.",
+    "film": {
+      "scroll": "Continua baixant.",
+      "camera": "Càmera",
+      "openLink": "Obrir loyalshy.com",
+      "sendTitle": "Enviar avís",
+      "sendButton": "Enviar a 128 clients",
+      "ch1": {
+        "title": "Comparteix.",
+        "caption": "Programes públics o privats: al taulell, per QR, correu o xarxes.",
+        "link": "Idees per promocionar el teu programa"
+      },
+      "ch2": {
+        "title": "Al Wallet.",
+        "caption": "El client porta la targeta de segells o el cupó al mòbil."
+      },
+      "ch3": {
+        "title": "Notificacions intel·ligents.",
+        "caption": "Notificacions per proximitat, per ressenyes de Google i recordatoris quan fa temps de l'última visita."
+      },
+      "ch4": {
+        "title": "Anuncis.",
+        "caption": "Fes saber als clients les teves novetats."
+      },
+      "tryLine": "Afegeix la targeta de prova al teu Wallet. És exactament el que veuran els teus clients.",
+      "sendText": "Hoy 2x1",
+      "qrAlt": "QR real d'un programa de Loyalshy, a punt per al taulell",
+      "appStore": "Descarregar a l'App Store",
+      "playStore": "Disponible a Google Play",
+      "appAlt": "L'app de l'equip: cercar client, nou client, recompenses, compartir programa, avís i l'última activitat",
+      "stampAlt": "Targeta de segells d'una pizzeria a Apple Wallet, 2 de 7 segells",
+      "couponAlt": "Cupó del 10 % d'una hamburgueseria a Apple Wallet",
+      "walletTitle": "Wallet",
+      "chapters": "Capítols",
+      "ch5": {
+        "title": "App de gestió.",
+        "caption": "Propietari i empleats poden gestionar-ho des de l'app."
+      },
+      "ch6": {
+        "title": "Targeta de segells.",
+        "caption": "Un segell per visita. En arribar al nombre indicat s'obté una recompensa."
+      },
+      "ch7": {
+        "title": "Cupó.",
+        "caption": "Targeta versàtil que es pot fer servir per a un sol ús o els que vulguis."
+      },
+      "mapLabel": "Establiment"
+    }
+  },
+  "featureShowcase": {
+    "title": "Monitoratge complet.",
+    "lead": "Gestiona els programes i segueix el dia a dia dels teus clients des del panell.",
+    "mock": {
+      "overview": "Resum",
+      "newAction": "Nova interacció",
+      "contacts": "Clients",
+      "activePasses": "Targetes actives",
+      "activityMonth": "Activitat aquest mes",
+      "redeemedMonth": "Bescanvis aquest mes",
+      "stamps": "segells",
+      "coupons": "cupons",
+      "activity": "Activitat",
+      "chartTicks": [
+        "1 set",
+        "8 set",
+        "15 set",
+        "22 set",
+        "30 set"
+      ],
+      "busiestDays": "Dies amb més activitat",
+      "days": [
+        "Dl",
+        "Dt",
+        "Dc",
+        "Dj",
+        "Dv",
+        "Ds",
+        "Dg"
+      ],
+      "recent": "Activitat recent",
+      "recentStamp": "Segell afegit · Targeta de segells",
+      "recentRedeem": "Cupó bescanviat · 2×1 en cafès",
+      "recentJoin": "Nova clienta · des del QR",
+      "ago2": "fa 2 min",
+      "ago14": "fa 14 min",
+      "ago1h": "fa 1 h",
+      "topCustomers": "Millors clients",
+      "programs": "Programes",
+      "couponProgram": "Cupó 2×1",
+      "enrolled": "inscrits",
+      "active": "Actiu"
+    }
+  },
+  "pricing": {
+    "title": "Gratis fins a 50 clients",
+    "subtitle": "Després pagues segons quants clients tinguis. Sense permanència i sense targeta per començar.",
+    "monthly": "Mensual",
+    "annual": "Anual",
+    "save20": "Estalvia un 20 %",
+    "savedPerYear": "d'estalvi a l'any",
+    "mostPopular": "Recomanat",
+    "free": {
+      "name": "Free",
+      "description": "Per provar-ho amb els teus primers clients",
+      "features": {
+        "contacts": "Fins a 50 clients",
+        "programs": "1 programa",
+        "staff": "1 persona a l'equip",
+        "announcements": "2 avisos en total"
+      }
+    },
+    "starter": {
+      "name": "Pro",
+      "description": "Per a un negoci amb clientela fixa",
+      "features": {
+        "contacts": "Fins a 500 clients",
+        "programs": "Fins a 2 programes",
+        "staff": "2 persones a l'equip",
+        "announcements": "1 avís per setmana",
+        "reviews": "Peticions de ressenya a Google"
+      }
+    },
+    "growth": {
+      "name": "Business",
+      "description": "Per a negocis amb diversos programes alhora",
+      "features": {
+        "contacts": "Fins a 2.500 clients",
+        "programs": "Fins a 5 programes",
+        "staff": "5 persones a l'equip",
+        "announcements": "2 avisos per setmana",
+        "reviews": "Peticions de ressenya a Google",
+        "winback": "Missatges per recuperar clients inactius"
+      }
+    },
+    "scale": {
+      "name": "Scale",
+      "description": "Per a cadenes i negocis amb molt volum",
+      "features": {
+        "contacts": "Clients il·limitats",
+        "programs": "Programes il·limitats",
+        "staff": "25 persones a l'equip",
+        "announcements": "5 avisos per setmana",
+        "reviews": "Peticions de ressenya a Google",
+        "winback": "Missatges per recuperar clients inactius"
+      }
+    },
+    "billingPeriod": "Període de facturació",
+    "billedYearly": "Facturat a l'any",
+    "perYear": "a l'any",
+    "multiLocation": "Diversos locals o una cadena? Un pla a mida, amb tots els locals en un sol panell.",
+    "multiLocationCta": "Demana una demo",
+    "vatIncluded": "IVA inclòs"
+  },
+  "faq": {
+    "title": "Preguntes freqüents",
+    "stillHaveQuestions": "Et queda cap dubte?",
+    "emailUs": "Escriu-nos",
+    "replyTime": "i et contestem per correu.",
+    "items": {
+      "howWorks": {
+        "question": "Com funciona Loyalshy?",
+        "answer": "Loyalshy és una targeta de fidelització digital per a cafeteries, perruqueries i comerços. Dissenyes la teva targeta de segells o el teu cupó al panell i imprimeixes el QR. Els teus clients l'escanegen i la targeta es guarda al seu Apple o Google Wallet. Quan tornen, el teu equip escaneja la targeta amb l'app de Loyalshy i hi suma el segell. En completar la targeta, la recompensa apareix sola."
+      },
+      "paper": {
+        "question": "En què canvia respecte a la targeta de paper?",
+        "answer": "El segell el posa el teu equip igual que abans, escanejant en comptes d'estampar. La diferència és al client: la targeta no es perd, no s'oblida a casa i no es pot falsificar. I el recompte s'actualitza al seu mòbil a l'instant."
+      },
+      "devices": {
+        "question": "Què necessiten els meus clients?",
+        "answer": "Un iPhone amb Apple Wallet o un Android amb Google Wallet. No han de descarregar res ni crear cap compte. A l'iPhone, la targeta també apareix a l'Apple Watch."
+      },
+      "pos": {
+        "question": "Funciona amb el meu TPV?",
+        "answer": "No toca res del taulell. Loyalshy va a part del TPV: el teu equip escaneja la targeta amb el mòbil i llestos. No cal integrar ni canviar res."
+      },
+      "freePlan": {
+        "question": "Hi ha un pla gratuït?",
+        "answer": "Sí. Amb el pla Free tens 1 programa i fins a 50 clients, sense targeta de crèdit i sense data de fi. Quan se't quedi petit, canvies de pla."
+      },
+      "security": {
+        "question": "Què passa amb les dades dels meus clients?",
+        "answer": "Són teves. No les venem ni les fem servir per a publicitat, i pots exportar la teva llista de clients a CSV quan vulguis."
+      },
+      "enterprise": {
+        "question": "I si tinc diverses botigues?",
+        "answer": "Per a cadenes i negocis amb necessitats pròpies hi ha el pla Enterprise: límits a mida, suport dedicat i condicions per contracte. Escriu-nos a hello@loyalshy.com i ho veiem."
+      }
+    }
+  },
+  "tryDemo": {
+    "title": "Prova-la.",
+    "addToAppleWallet": "Afegir a Apple Wallet",
+    "addToGoogleWallet": "Afegir a Google Wallet"
+  },
+  "closingCta": {
+    "title1": "Imprimeix el QR avui.",
+    "titleHighlight": "Demà tens els primers segells.",
+    "subtitle": "Gratis fins a 50 clients, sense targeta de crèdit.",
+    "requestDemo": "Demana una demo"
+  },
+  "footer": {
+    "product": "Producte",
+    "company": "Empresa",
+    "legal": "Legal",
+    "privacyPolicy": "Política de privacitat",
+    "termsOfService": "Termes del servei",
+    "cookiePolicy": "Política de galetes",
+    "tagline": "La targeta de fidelització digital, al seu Wallet.",
+    "copyright": "© 2026 Loyalshy, un producte de HEX CONCEPTS STUDIO, S.L. Tots els drets reservats.",
+    "builtWith": "Fet a Espanya.",
+    "instagram": "Loyalshy a Instagram",
+    "tiktok": "Loyalshy a TikTok",
+    "forBusiness": "Per al teu negoci",
+    "cafes": "Cafeteries i forns",
+    "salons": "Perruqueries i barberies",
+    "retail": "Botigues i comerç",
+    "allIndustries": "Tots els negocis",
+    "automations": "Automatitzacions",
+    "staffApp": "App d'equip",
+    "privatePrograms": "Programes privats",
+    "about": "Sobre nosaltres",
+    "partners": "Partners",
+    "status": "Estat",
+    "subprocessors": "Subencarregats",
+    "promote": "Com promocionar-lo"
+  },
+  "cookieBanner": {
+    "message": "Fem servir galetes essencials per a l'autenticació i les preferències. Sense galetes de seguiment.",
+    "accept": "Entesos",
+    "dismiss": "Tancar l'avís de galetes"
+  },
+  "auth": {
+    "claim": {
+      "validating": "Comprovant el teu enllaç...",
+      "title": "Pren possessió de {organizationName}",
+      "subtitleSignup": "El teu programa de fidelització està a punt. Crea el teu compte per prendre'n possessió.",
+      "subtitleSignin": "El teu programa de fidelització està a punt. Inicia sessió per prendre'n possessió.",
+      "staleLinkTitle": "Enllaç no vàlid",
+      "staleLinkDesc": "Aquest enllaç de transferència no és vàlid. Demana al teu partner de configuració que te n'enviï un de nou.",
+      "expiredTitle": "Enllaç caducat",
+      "expiredDesc": "Aquest enllaç de transferència ha caducat. Demana al teu partner que en generi un de nou.",
+      "alreadyUsedTitle": "Ja reclamat",
+      "alreadyUsedDesc": "Aquesta organització ja té propietari. Si ets tu, inicia sessió per continuar.",
+      "rateLimitedTitle": "Massa intents",
+      "rateLimitedDesc": "Espera un moment i torna-ho a provar.",
+      "goToSignIn": "Anar a iniciar sessió",
+      "welcome": "Benvingut a {organizationName}!",
+      "createAndClaim": "Crear compte i prendre possessió",
+      "signInAndClaim": "Iniciar sessió i prendre possessió",
+      "hasAccount": "Ja tens un compte?",
+      "signInInstead": "Inicia sessió",
+      "noAccount": "No tens compte?",
+      "createOne": "Crea'n un",
+      "accountExists": "Ja existeix un compte amb aquest correu. Inicia sessió per continuar.",
+      "invalidCredentials": "Correu o contrasenya no vàlids",
+      "cannotClaimOwn": "Tu vas crear aquest enllaç de transferència: és per al propietari del negoci.",
+      "emailNotVerified": "Verifica el teu correu abans de prendre possessió.",
+      "claimFailed": "No s'ha pogut completar la transferència. Torna-ho a provar.",
+      "signedInAs": "Has iniciat sessió com a {email}.",
+      "claimNow": "Prendre possessió",
+      "useDifferentAccount": "Fer servir un altre compte"
+    },
+    "login": {
+      "title": "Benvingut de nou",
+      "subtitle": "Inicia sessió al teu compte de Loyalshy",
+      "continueWithGoogle": "Continuar amb Google",
+      "or": "o",
+      "email": "Correu electrònic",
+      "emailPlaceholder": "tu@exemple.com",
+      "password": "Contrasenya",
+      "passwordPlaceholder": "Introdueix la teva contrasenya",
+      "forgotPassword": "Has oblidat la contrasenya?",
+      "submit": "Iniciar sessió",
+      "noAccount": "No tens compte?",
+      "signUp": "Registra't",
+      "invalidCredentials": "Correu o contrasenya incorrectes",
+      "sessionEnded": "La teva sessió ha acabat. Inicia sessió de nou."
+    },
+    "legalConsent": "En continuar, acceptes els nostres <terms>Termes del servei</terms> i la nostra <privacy>Política de privacitat</privacy>.",
+    "brandTagline": "Dissenyat amb precisió per al curador digital.",
+    "register": {
+      "stepAccount": "Compte",
+      "stepVerify": "Verificar",
+      "stepOrganization": "Organització",
+      "title": "Crea un compte",
+      "subtitle": "Comença amb Loyalshy gratis",
+      "continueWithGoogle": "Continuar amb Google",
+      "or": "o",
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Maria Garcia",
+      "email": "Correu electrònic",
+      "emailPlaceholder": "tu@exemple.com",
+      "password": "Contrasenya",
+      "passwordHint": "Mínim 8 caràcters",
+      "passwordPlaceholder": "Introdueix la teva contrasenya",
+      "submit": "Crear compte",
+      "hasAccount": "Ja tens compte?",
+      "signIn": "Inicia sessió",
+      "strengthWeak": "Feble",
+      "strengthFair": "Regular",
+      "strengthGood": "Bona",
+      "strengthStrong": "Forta",
+      "orgTitle": "Posa nom a la teva organització",
+      "orgSubtitle": "Pots actualitzar-ho i afegir més detalls a la configuració.",
+      "orgName": "Nom de l'organització",
+      "orgPlaceholder": "p. ex. Trattoria Bella",
+      "orgSubmit": "Començar",
+      "accountCreated": "Compte creat!",
+      "allSet": "Tot a punt!",
+      "createFailed": "Error en crear el compte",
+      "genericError": "Alguna cosa ha fallat. Torna-ho a provar.",
+      "verifyTitle": "Revisa el teu correu",
+      "verifySubtitle": "Hem enviat un codi de 6 dígits a {email}",
+      "verifying": "Verificant...",
+      "verifySuccess": "Correu verificat!",
+      "verifyFailed": "Codi no vàlid. Torna-ho a provar.",
+      "noCode": "No has rebut el codi?",
+      "resend": "Reenviar el codi",
+      "resendCooldown": "Reenviar d'aquí a {seconds}s",
+      "resendSuccess": "Codi enviat!",
+      "resendFailed": "Error en reenviar el codi"
+    },
+    "forgotPassword": {
+      "title": "Has oblidat la contrasenya?",
+      "subtitle": "Introdueix el teu correu i t'enviarem un enllaç per restablir-la",
+      "email": "Correu electrònic",
+      "emailPlaceholder": "tu@exemple.com",
+      "submit": "Enviar enllaç",
+      "backToLogin": "Tornar a iniciar sessió",
+      "checkEmail": "Revisa el teu correu",
+      "emailSent": "Hem enviat un enllaç per restablir la contrasenya a {email}",
+      "noEmail": "No has rebut el correu? Revisa la carpeta de correu brossa o torna-ho a provar.",
+      "tryDifferent": "Provar amb un altre correu",
+      "backToInvite": "Tornar a la invitació"
+    },
+    "resetPassword": {
+      "title": "Restableix la teva contrasenya",
+      "subtitle": "Introdueix la teva nova contrasenya",
+      "newPassword": "Nova contrasenya",
+      "newPasswordPlaceholder": "Introdueix la nova contrasenya",
+      "confirmPassword": "Confirmar la contrasenya",
+      "confirmPasswordPlaceholder": "Confirma la teva nova contrasenya",
+      "submit": "Restablir la contrasenya",
+      "backToLogin": "Tornar a iniciar sessió",
+      "mismatch": "Les contrasenyes no coincideixen",
+      "tooShort": "La contrasenya ha de tenir almenys 8 caràcters",
+      "failed": "Error en restablir la contrasenya. Pot ser que l'enllaç hagi caducat.",
+      "success": "Contrasenya restablerta! Ja pots iniciar sessió.",
+      "invalidTitle": "Enllaç no vàlid",
+      "invalidDescription": "Aquest enllaç per restablir la contrasenya no és vàlid o ha caducat.",
+      "requestNewLink": "Demanar un enllaç nou",
+      "backToInvite": "Tornar a la invitació",
+      "successInvite": "Contrasenya restablerta! Inicia sessió a continuació per acceptar la invitació."
+    },
+    "invite": {
+      "joinOrg": "Unir-se a {organizationName}",
+      "invitedAs": "T'han convidat com a {role}.",
+      "createAccount": "Crea el teu compte per començar.",
+      "signInToAccept": "Inicia sessió per acceptar la invitació.",
+      "createAndJoin": "Crear compte i unir-se",
+      "signInAndJoin": "Iniciar sessió i unir-se",
+      "hasAccount": "Ja tens compte?",
+      "signInInstead": "Inicia sessió",
+      "noAccount": "No tens compte?",
+      "createOne": "Crea'n un",
+      "validating": "Validant la invitació...",
+      "invalid": "Invitació no vàlida",
+      "staleLinkTitle": "Aquest enllaç d'invitació ja no és vàlid",
+      "staleLinkDesc": "És possible que l'enllaç hagi estat substituït per una invitació més recent. Demana al propietari que torni a enviar la invitació.",
+      "expiredTitle": "Invitació caducada",
+      "expiredDesc": "Aquesta invitació ha caducat. Demana al propietari que n'enviï una de nova.",
+      "alreadyUsedTitle": "Invitació ja utilitzada",
+      "alreadyUsedDesc": "Aquesta invitació ja s'ha acceptat. Inicia sessió al teu compte per accedir a l'equip.",
+      "rateLimitedTitle": "Massa sol·licituds",
+      "rateLimitedDesc": "Espera un moment i torna-ho a provar.",
+      "expiresInDays": "Caduca d'aquí a {count, plural, one {# dia} other {# dies}}",
+      "expiresInHours": "Caduca d'aquí a {count, plural, =0 {menys d'una hora} one {# hora} other {# hores}}",
+      "acceptFailedTryAgain": "Has iniciat sessió, però no t'hem pogut afegir a l'equip. Torna-ho a provar.",
+      "goToSignIn": "Anar a iniciar sessió",
+      "welcome": "Benvingut a {organizationName}!",
+      "createFailed": "Error en crear el compte",
+      "invalidCredentials": "Credencials incorrectes",
+      "accountExists": "Ja existeix un compte amb aquest correu. Inicia sessió per acceptar la invitació.",
+      "forgotPassword": "Has oblidat la contrasenya?"
+    },
+    "error": {
+      "title": "Error d'autenticació",
+      "message": "Alguna cosa ha fallat durant l'autenticació. Torna-ho a provar.",
+      "errorId": "ID d'error: {digest}",
+      "tryAgain": "Tornar a provar",
+      "backToLogin": "Tornar a l'inici de sessió"
+    }
+  },
+  "dashboard": {
+    "partnerConsole": {
+      "title": "Consola de partner",
+      "subtitle": "La teva cartera de clients i el progrés de configuració.",
+      "statClients": "Clients",
+      "statSubscribed": "Subscripcions actives",
+      "statPendingHandoffs": "Transferències pendents",
+      "referralCardTitle": "El teu enllaç de referit",
+      "copyLink": "Copiar l'enllaç",
+      "copied": "Enllaç copiat al porta-retalls",
+      "copyFailed": "No s'ha pogut copiar l'enllaç",
+      "openError": "No s'ha pogut obrir aquesta organització.",
+      "newClient": "Nova configuració de client",
+      "requestAccess": "Sol·licitar accés",
+      "requestAccessSent": "Sol·licitud enviada. El propietari rebrà un correu per concedir-te accés.",
+      "requestAccessError": "No s'ha pogut enviar la sol·licitud d'accés. Torna-ho a provar.",
+      "requestAccessRateLimited": "Ja ho has sol·licitat fa poc. Dona temps al propietari per respondre.",
+      "requestAccessPending": "Sol·licitud enviada",
+      "clientsTitle": "Clients",
+      "colClient": "Client",
+      "colPlan": "Pla",
+      "colStatus": "Estat",
+      "colCreated": "Creat",
+      "colSetup": "Configuració",
+      "setupProgram": "Programa publicat",
+      "setupContacts": "Primers contactes units",
+      "setupOwner": "Propietari reclamat",
+      "open": "Obrir",
+      "handoffPendingBadge": "Transferència pendent",
+      "noClients": "Encara no hi ha clients. Fes servir \"Nova configuració de client\" al menú lateral per crear el primer."
+    },
+    "partner": {
+      "newClientTitle": "Nova configuració de client",
+      "newClientDesc": "Crea una organització per a un client. Podràs dissenyar la seva targeta, publicar el programa i transferir-li la propietat quan tot estigui a punt.",
+      "nameLabel": "Nom del negoci",
+      "namePlaceholder": "p. ex. Cafè Central",
+      "createButton": "Crear l'organització del client",
+      "createError": "No s'ha pogut crear l'organització. Torna-ho a provar.",
+      "cancel": "Cancel·lar",
+      "handoffTitle": "Transferir {organizationName} al seu propietari",
+      "handoffDesc": "Genera un enllaç d'un sol ús per al propietari del negoci. Quan l'obri i creï el seu compte, es convertirà en propietari i tu mantindràs l'accés com a partner.",
+      "generateLink": "Generar l'enllaç de transferència",
+      "handoffError": "No s'ha pogut generar l'enllaç. Torna-ho a provar.",
+      "ownerEmailLabel": "Correu del propietari (opcional)",
+      "ownerEmailPlaceholder": "propietari@cafe.com",
+      "ownerEmailHint": "Si introdueixes un correu, enviarem l'enllaç de transferència directament al propietari.",
+      "generateAndSend": "Generar i enviar",
+      "handoffSent": "Enllaç enviat a {email}",
+      "handoffSendFailed": "L'enllaç s'ha creat però el correu no s'ha pogut enviar. Copia'l en lloc d'això.",
+      "invalidEmail": "Aquest correu no sembla vàlid.",
+      "copyLink": "Copiar l'enllaç",
+      "copied": "Enllaç copiat al porta-retalls",
+      "copyFailed": "No s'ha pogut copiar l'enllaç",
+      "handoffExpiry": "Aquest enllaç caduca d'aquí a 7 dies. Generar-ne un de nou invalida l'anterior.",
+      "referralTitle": "El teu enllaç de referit",
+      "referralDesc": "Comparteix aquest enllaç amb clients potencials. Qualsevol negoci que es registri a través seu s'afegirà automàticament a la teva llista de clients.",
+      "referralError": "No s'ha pogut carregar el teu enllaç de referit. Torna-ho a provar."
+    },
+    "nav": {
+      "overview": "Resum",
+      "contacts": "Contactes",
+      "programs": "Programes",
+      "automations": "Automatitzacions",
+      "settings": "Configuració",
+      "connectDevice": "Connectar un dispositiu mòbil",
+      "switchOrganization": "Canviar d'organització",
+      "newClientSetup": "Nova configuració de client",
+      "handoffToOwner": "Transferir al propietari",
+      "referralLink": "Enllaç de referit",
+      "partnerConsole": "Consola de partner",
+      "signOut": "Tancar sessió",
+      "search": "Cercar accions, pàgines...",
+      "noResults": "Sense resultats.",
+      "quickActions": "Accions ràpides",
+      "registerInteraction": "Registrar interacció",
+      "createProgram": "Crear programa",
+      "navigate": "Navegar",
+      "newInteraction": "Registrar visita",
+      "action": "Acció",
+      "more": "Més",
+      "mobileNav": "Navegació mòbil"
+    },
+    "overview": {
+      "totalContacts": "Total de contactes",
+      "activePasses": "Targetes actives",
+      "activityThisMonth": "Activitat aquest mes",
+      "redeemedThisMonth": "Bescanviats aquest mes",
+      "rewardCycleProgress": "Progrés del cicle de recompenses",
+      "noContacts": "Encara no hi ha contactes",
+      "contactCount": "{count, plural, one {# contacte} other {# contactes}}",
+      "total": "total"
+    },
+    "activity": {
+      "title": "Activitat recent",
+      "stamp": "ha registrat una visita",
+      "checkIn": "ha fet check-in",
+      "passUse": "ha fet servir una targeta",
+      "rewardEarned": "ha guanyat una recompensa",
+      "rewardRedeemed": "ha bescanviat una recompensa",
+      "couponRedeemed": "ha bescanviat un cupó",
+      "empty": "Encara no hi ha activitat. Registra la teva primera interacció per veure-la aquí.",
+      "by": "per"
+    },
+    "topContacts": {
+      "title": "Millors contactes",
+      "empty": "Encara no hi ha contactes",
+      "lastInteraction": "Última interacció"
+    },
+    "programsSummary": {
+      "title": "Programes",
+      "empty": "Encara no hi ha programes actius.",
+      "createProgram": "Crear un programa",
+      "enrolled": "inscrits",
+      "rewardsEarned": "recompenses guanyades",
+      "issued": "emeses",
+      "redeemed": "bescanviats",
+      "uses": "usos",
+      "passes": "targetes"
+    },
+    "contacts": {
+      "title": "Contactes",
+      "subtitle": "Gestiona els titulars de les teves targetes.",
+      "addContact": "Afegir contacte",
+      "searchPlaceholder": "Cercar per nom, correu, telèfon...",
+      "export": "Exportar",
+      "filter": "Filtrar",
+      "hasReward": "Amb recompensa",
+      "clearFilters": "Netejar els filtres",
+      "exported": "Clients exportats",
+      "exportFailed": "Error en exportar els clients",
+      "name": "Nom",
+      "program": "Programa",
+      "progress": "Progrés",
+      "total": "Total",
+      "lastVisit": "Última visita",
+      "noContact": "Sense contacte",
+      "viewDetails": "Veure detalls",
+      "never": "Mai",
+      "ready": "A punt",
+      "active": "Actiu",
+      "noMatch": "Cap client coincideix amb els teus filtres.",
+      "page": "Pàgina",
+      "of": "de",
+      "previousPage": "Pàgina anterior",
+      "nextPage": "Pàgina següent",
+      "actions": "Accions del client",
+      "noContacts": "Encara no hi ha contactes",
+      "noContactsDesc": "Afegeix el teu primer contacte per començar a registrar visites i fidelitzar clients. Apareixeran aquí un cop afegits.",
+      "resultCount": "{count, plural, one {# contacte} other {# contactes}}"
+    },
+    "addContact": {
+      "title": "Afegir client",
+      "subtitle": "Afegeix un nou client al teu programa de fidelització.",
+      "fullName": "Nom complet",
+      "nameRequired": "El nom és obligatori",
+      "email": "Correu electrònic",
+      "invalidEmail": "Correu no vàlid",
+      "phone": "Telèfon",
+      "namePlaceholder": "Joan Garcia",
+      "emailPlaceholder": "joan@exemple.com",
+      "phonePlaceholder": "+34 612 345 678",
+      "addedSuccess": "{name} afegit correctament",
+      "failedToAdd": "Error en afegir el contacte"
+    },
+    "programs": {
+      "title": "Programes",
+      "subtitle": "Gestiona els teus programes de fidelització, recompenses i dissenys.",
+      "createProgram": "Crear programa",
+      "newProgram": "Nou programa",
+      "newProgramDescription": "Tria un tipus de programa i configura'l. Comença com a esborrany: activa'l quan estigui a punt.",
+      "all": "Tots",
+      "stampCards": "Segells",
+      "coupons": "Cupons",
+      "stampSubtitle": "{stamps} segells | {count} actius",
+      "couponSubtitle": "{discount} | {count} bescanviats",
+      "defaultSubtitle": "{count} targetes",
+      "noPrograms": "Encara no hi ha programes",
+      "createFirst": "Crea el teu primer programa de fidelització per començar a recompensar els teus clients.",
+      "createToStart": "Crea un nou programa per començar.",
+      "chooseType": "Tria un tipus de programa per començar.",
+      "programName": "Nom del programa",
+      "nameRequired": "El nom del programa és obligatori",
+      "namePlaceholder": "p. ex., Fidelització Cafè, Menú especial",
+      "backToType": "Tornar a la selecció de tipus",
+      "overview": "Resum",
+      "passes": "Targetes",
+      "attendees": "Assistents",
+      "members": "Membres",
+      "cardsTab": "Targetes",
+      "rewards": "Recompenses",
+      "redemptions": "Bescanvis",
+      "catalog": "Catàleg",
+      "distribution": "Distribució",
+      "cardDesign": "Disseny de la targeta",
+      "backToOverview": "Tornar al resum",
+      "draftBanner": "Aquest programa està en mode esborrany. Activa'l per començar a emetre targetes.",
+      "activate": "Activar",
+      "activated": "Programa activat! Els contactes ja poden rebre targetes.",
+      "backToOverviewAriaLabel": "Tornar al resum"
+    },
+    "settings": {
+      "title": "Configuració",
+      "subtitle": "Gestiona la configuració de la teva organització.",
+      "general": "General",
+      "team": "Equip",
+      "billing": "Facturació",
+      "orgProfile": "Perfil de l'organització",
+      "orgProfileDescription": "Informació bàsica de la teva organització.",
+      "orgName": "Nom de l'organització",
+      "orgNamePlaceholder": "La meva organització",
+      "orgNameRequired": "El nom de l'organització és obligatori",
+      "address": "Adreça",
+      "addressPlaceholder": "Carrer Major 123, Ciutat",
+      "inviteTeam": "Convidar membres de l'equip",
+      "inviteSent": "Invitació enviada a {email}",
+      "memberRemoved": "{name} ha estat eliminat"
+    },
+    "onboarding": {
+      "title": "Comença amb Loyalshy",
+      "completed": "completats",
+      "uploadLogo": "Puja el teu logo",
+      "uploadLogoDescription": "Personalitza les teves targetes amb el logo de la teva organització",
+      "customizeCard": "Personalitza la teva targeta",
+      "customizeCardDescription": "Configura les visites necessàries, la descripció de la recompensa i la caducitat",
+      "createFirstProgram": "Crea el teu primer programa",
+      "createFirstProgramDescription": "Tria entre segells, cupó o targeta de visita per començar a recompensar clients",
+      "printQr": "Imprimeix el teu codi QR",
+      "printQrDescription": "Descarrega i mostra el teu codi QR al taulell",
+      "firstContact": "Registra el teu primer contacte",
+      "firstContactDescription": "Afegeix un contacte o fes que escanegin el teu codi QR",
+      "inviteStaff": "Convida el teu equip",
+      "inviteStaffDescription": "Afegeix membres de l'equip per ajudar a gestionar les visites",
+      "dismiss": "Tancar la llista de tasques",
+      "heroTitle": "Crea el teu primer programa de fidelització",
+      "heroBody": "Tria una targeta de segells o un cupó, personalitza el disseny i comença a recompensar els teus clients en minuts.",
+      "heroCta": "Crear programa"
+    },
+    "status": {
+      "active": "Actiu",
+      "draft": "Esborrany",
+      "archived": "Arxivat",
+      "frozen": "Congelat",
+      "completed": "Completat",
+      "cancelled": "Cancel·lat",
+      "suspended": "Suspès",
+      "revoked": "Revocat",
+      "available": "Disponible",
+      "redeemed": "Bescanviat",
+      "expired": "Caducat"
+    },
+    "chart": {
+      "7d": "7d",
+      "30d": "30d",
+      "90d": "90d",
+      "12m": "12m",
+      "interaction": "interacció",
+      "interactions": "interaccions"
+    },
+    "contactDetail": {
+      "passes": "Targetes",
+      "visits": "Visites",
+      "rewards": "Recompenses",
+      "issuedOn": "Emesa el",
+      "lastActivity": "Última activitat",
+      "memberNumber": "Membre #",
+      "noPasses": "Sense targetes emeses",
+      "noVisits": "Sense visites registrades",
+      "noRewards": "Encara no hi ha recompenses",
+      "issuePass": "Emetre targeta",
+      "selectProgram": "Selecciona un programa",
+      "sendEmail": "Enviar correu",
+      "passIssued": "Targeta emesa a {name}",
+      "editContact": "Editar contacte",
+      "deleteContact": "Eliminar contacte",
+      "deleteConfirm": "Segur que vols eliminar aquest contacte? Aquesta acció no es pot desfer.",
+      "contactDeleted": "Contacte eliminat",
+      "contactUpdated": "Contacte actualitzat",
+      "sendPassEmail": "Enviar la targeta per correu",
+      "emailSent": "Correu enviat a {email}",
+      "sheetTitle": "Detalls del contacte",
+      "contactNotFound": "Contacte no trobat",
+      "cancel": "Cancel·lar",
+      "delete": "Eliminar",
+      "saveChanges": "Desar els canvis",
+      "fullName": "Nom complet",
+      "email": "Correu electrònic",
+      "phone": "Telèfon",
+      "nameRequired": "El nom és obligatori",
+      "failedToLoad": "Error en carregar els detalls del contacte",
+      "failedToDelete": "Error en eliminar el contacte",
+      "failedToUpdate": "Error en actualitzar el contacte",
+      "failedToRedeem": "Error en bescanviar la recompensa",
+      "rewardRedeemed": "Recompensa bescanviada!",
+      "failedToLoadPrograms": "Error en carregar els programes",
+      "alreadyHasPass": "El contacte ja té aquesta targeta",
+      "failedToIssuePass": "Error en emetre la targeta",
+      "allPrograms": "Tots",
+      "enrolled": "Inscrit el {date}",
+      "noPassInstances": "Sense targetes",
+      "selfRegistered": "Autoregistrat",
+      "registeredBy": "per {name}",
+      "checkIn": "Check-in",
+      "usePass": "Fer servir la targeta",
+      "visit": "Visita",
+      "couponRedeemed": "Cupó bescanviat",
+      "readyToRedeem": "A punt per bescanviar",
+      "suspended": "Suspès",
+      "expired": "Caducat",
+      "expires": "Caduca",
+      "checkIns": "{count, plural, one {# check-in} other {# check-ins}}",
+      "actionUsePass": "Fer servir la targeta",
+      "actionCheckIn": "Check-in",
+      "actionRedeemCoupon": "Bescanviar cupó",
+      "actionRegisterVisit": "Registrar visita",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet",
+      "stampCard": "Targeta de segells",
+      "coupon": "Cupó"
+    },
+    "contactColumns": {
+      "name": "Nom",
+      "program": "Programa",
+      "progress": "Progrés",
+      "total": "Total",
+      "lastVisit": "Última visita",
+      "noContact": "Sense contacte",
+      "viewDetails": "Veure detalls",
+      "never": "Mai",
+      "ready": "A punt",
+      "pts": "pts",
+      "balance": "saldo",
+      "scans": "escanejos",
+      "actions": "Accions del client"
+    },
+    "contactTable": {
+      "noMatch": "Cap client coincideix amb els teus filtres.",
+      "page": "Pàgina",
+      "of": "de",
+      "previousPage": "Pàgina anterior",
+      "nextPage": "Pàgina següent"
+    },
+    "passInstances": {
+      "progress": "Progrés",
+      "status": "Estat",
+      "checkIns": "Check-ins",
+      "balance": "Saldo",
+      "remaining": "Restant",
+      "scans": "Escanejos",
+      "granted": "Atorgada",
+      "verified": "Verificada",
+      "activity": "Activitat",
+      "issuePass": "Emetre targeta",
+      "noPass": "Encara no s'ha emès cap targeta",
+      "contact": "Contacte",
+      "issuedDate": "Emesa"
+    },
+    "distribution": {
+      "shareLink": "Enllaç per compartir",
+      "copyLink": "Copiar l'enllaç",
+      "copied": "Copiat",
+      "embedCopied": "Codi d'inserció copiat",
+      "qrCode": "Codi QR",
+      "downloadQr": "Descarregar el QR",
+      "printSize": "Mida d'impressió",
+      "small": "Petit",
+      "medium": "Mitjà",
+      "large": "Gran",
+      "directIssue": "Emissió directa",
+      "directIssueDescription": "Emet una targeta directament a un contacte existent.",
+      "selectContact": "Selecciona un contacte",
+      "issue": "Emetre",
+      "passIssued": "Targeta emesa a {name}",
+      "joinMode": "Mode d'accés",
+      "joinModeDescription": "Controla com els contactes poden obtenir una targeta d'aquest programa.",
+      "joinModeOpen": "Obert",
+      "joinModeOpenDescription": "Qualsevol s'hi uneix escanejant el QR o obrint l'enllaç.",
+      "joinModeInviteOnly": "Només per invitació",
+      "joinModeInviteOnlyDescription": "Només el teu equip emet targetes: per correu des d'aquí o al taulell des de l'app. El QR, l'enllaç i l'NFC deixen de funcionar.",
+      "joinModeUpdated": "Mode d'accés actualitzat",
+      "joinModeInviteOnlyNotice": "Programa per invitació: el QR, l'enllaç i l'NFC estan desactivats. Emet les targetes des d'Emissió directa o des de l'app de l'equip.",
+      "duplicateNote": "Els codis QR i els enllaços són d'autoservei: els contactes s'identifiquen per correu o telèfon. Per a més control, fes servir Emissió directa o Importació CSV.",
+      "duplicateNoteSettings": "També pots exigir el correu (en comptes de correu o telèfon) a <link>Configuració > General > Formulari públic</link>.",
+      "embedSnippet": "Inserir al web",
+      "embedDescription": "Afegeix aquest codi HTML al teu web perquè els visitants desin la teva targeta de visita.",
+      "embedButtonText": "Desar la targeta de visita",
+      "copySnippet": "Copiar el codi",
+      "nfcTitle": "Etiqueta NFC",
+      "nfcDescription": "Programa una etiqueta NFC amb aquesta URL perquè la gent s'hi pugui unir amb un toc. Funciona amb qualsevol adhesiu, targeta o funda NFC.",
+      "nfcCopyUrl": "Copiar la URL",
+      "nfcStep1": "Aconsegueix una etiqueta NFC (adhesiu, targeta o suport de taula)",
+      "nfcStep2": "Fes servir una app d'escriptura NFC per programar aquesta URL a l'etiqueta",
+      "nfcStep3": "La gent toca l'etiqueta amb el mòbil per afegir la targeta",
+      "firstCustomer": {
+        "title": "Aconsegueix el teu primer client",
+        "subtitle": "Uns passos ràpids per posar el teu programa davant de persones reals.",
+        "qrLabel": "Descarrega el cartell QR",
+        "qrDescription": "Imprimeix-lo per al taulell: PDF A4, amb el teu color de marca, a punt per escanejar.",
+        "shareLabel": "Comparteix l'enllaç d'alta",
+        "shareDescription": "Per WhatsApp, correu, o copia'l directament en una story.",
+        "scannerLabel": "Configura el mòbil del personal",
+        "scannerDescription": "Vincula l'app Loyalshy Staff perquè qualsevol de torn pugui segellar i bescanviar.",
+        "directLabel": "Emet la primera targeta manualment",
+        "directDescription": "Envia una targeta directa a un client habitual, sense escanejar."
+      },
+      "announcementTitle": "Enviar anunci",
+      "announcementDescription": "Envia un missatge curt a tothom qui té la targeta d'aquest programa a Apple o Google Wallet: apareix com a notificació a la pantalla de bloqueig.",
+      "announcementPlaceholder": "p. ex. Avui 2x1 en totes les begudes!",
+      "announcementSend": "Enviar",
+      "announcementSent": "{count, plural, =0 {Anunci desat: encara no hi ha targetes en wallets per notificar} one {Anunci enviat a # targeta} other {Anunci enviat a # targetes}}",
+      "announcementNotActive": "Activa el programa per enviar anuncis.",
+      "announcementLastSent": "Enviat {date}",
+      "announcementConfirmTitle": "Enviar aquest anunci?",
+      "announcementConfirmBody": "{count, plural, =0 {Ningú té encara aquesta targeta al seu wallet: el missatge només apareixerà a les targetes noves.} one {Es notificarà # titular. No es pot desfer.} other {Es notificaran # titulars. No es pot desfer.}}",
+      "announcementConfirmCancel": "Cancel·lar",
+      "announcementConfirmSend": "Enviar ara",
+      "announcementQuotaWeek": "Et queden {remaining} de {limit} aquesta setmana",
+      "announcementQuotaLifetime": "Et queden {remaining} de {limit} anuncis gratis",
+      "announcementQuotaUnlimited": "Anuncis il·limitats",
+      "announcementPlanWeek": "Pla {plan}: {limit, plural, one {# anunci} other {# anuncis}} cada 7 dies",
+      "announcementPlanLifetime": "Pla {plan}: {limit} anuncis en total",
+      "announcementPlanUnlimited": "Pla {plan}: sense límit setmanal",
+      "announcementSharedHint": "compartits entre tots els teus programes",
+      "announcementUsedWeek": "Ja has fet servir els anuncis d'aquesta setmana. El següent estarà disponible el {date}.",
+      "announcementUsedWeekNoDate": "Ja has fet servir els anuncis d'aquesta setmana. Aviat en tindràs més de disponibles.",
+      "announcementUsedFree": "Ja has fet servir els teus {limit} anuncis gratis. Millora el teu pla per continuar arribant als teus clients cada setmana.",
+      "announcementUpgradeCta": "Millorar a {plan} · {limit}/setmana",
+      "announcementAskOwner": "Demana al propietari del compte que millori a {plan} per enviar-ne més.",
+      "announcementProgramCap": "Aquest programa ja ha enviat 3 anuncis en les últimes 24 hores. Espera una mica perquè Google Wallet continuï entregant la notificació.",
+      "announcementSubscriptionInactive": "La teva subscripció està inactiva, així que els anuncis estan en pausa.",
+      "announcementFixBilling": "Actualitzar la facturació",
+      "announcementConfirmQuotaWeek": "{left, plural, =0 {Aquest és el teu últim anunci d'aquesta setmana.} one {Et quedarà # anunci aquesta setmana.} other {Et quedaran # anuncis aquesta setmana.}}",
+      "announcementConfirmQuotaLifetime": "{left, plural, =0 {Aquest és el teu últim anunci gratis.} one {Et quedarà # anunci gratis.} other {Et quedaran # anuncis gratis.}}",
+      "announcementNoHolders": "Ningú té encara aquesta targeta a Apple o Google Wallet. Comparteix primer el programa: els anuncis només arriben a qui té la targeta i no gastaran la teva quota fins aleshores.",
+      "issueFailed": "No s'han pogut emetre les targetes",
+      "issuedCount": "{count, plural, one {# targeta emesa} other {# targetes emeses}}",
+      "skippedHadPass": "{count, plural, one {# ja tenia targeta} other {# ja tenien targeta}}",
+      "allAlreadyHavePass": "Tots els contactes seleccionats ja tenen targeta en aquest programa",
+      "issuedToAllEligible": "{count, plural, one {# targeta emesa} other {# targetes emeses}} als contactes pendents",
+      "noEligibleFound": "No hi ha contactes pendents",
+      "noEligibleYet": "Encara no hi ha contactes pendents. Afegeix-los des de la pàgina de <link>Contactes</link>.",
+      "searchContacts": "Cercar contactes",
+      "searchContactsPlaceholder": "Cercar contactes...",
+      "noContactsFound": "No s'ha trobat cap contacte",
+      "noContactInfo": "Sense dades de contacte",
+      "noEmail": "Sense correu",
+      "removeContact": "Treure {name}",
+      "issueToAllEligible": "Emetre als pendents ({count})",
+      "bulkConfirmTitle": "Emetre targetes a tots els contactes pendents?",
+      "bulkConfirmBody": "Es crearà i s'enviarà una targeta de <strong>{template}</strong> a {count, plural, one {# contacte} other {# contactes}}. Els que tinguin correu rebran un avís.",
+      "bulkConfirmBodyCapped": "Es crearà i s'enviarà una targeta de <strong>{template}</strong> als primers 100 contactes pendents (de {total}). Els que tinguin correu rebran un avís.",
+      "bulkConfirmNextBatch": "Repeteix l'acció per emetre al següent lot.",
+      "bulkConfirmAction": "Emetre targetes",
+      "results": "Resultats",
+      "resultIssuedEmailed": "Emesa i enviada per correu",
+      "resultIssuedNoEmail": "Emesa (sense correu)",
+      "resultAlreadyHasPass": "Ja tenia targeta",
+      "resultFailed": "Error",
+      "dismissResults": "Amagar",
+      "qrTitle": "Codi QR i impressió",
+      "generating": "Generant...",
+      "downloadPng": "Descarregar PNG",
+      "downloadPdf": "Descarregar el cartell A4 (PDF)",
+      "qrNfcNote": "També pots gravar aquesta URL en etiquetes NFC. El client hi acosta el mòbil i s'hi uneix a l'instant.",
+      "rewardAfterVisits": "{reward} després de {visits} visites",
+      "posterTagline": "Escaneja per unir-te al nostre programa de fidelització",
+      "shareText": "Uneix-te a {template} de {organization}",
+      "embedJoin": "Uneix-te a {template}",
+      "shareNative": "Compartir...",
+      "embedOnSite": "Inserir al teu web",
+      "copyEmbed": "Copiar el codi d'inserció",
+      "issueToSelected": "{count, plural, =0 {Emetre targeta a contactes} one {Emetre targeta a # contacte} other {Emetre targeta a # contactes}}",
+      "materialTitle": "Material per al taulell",
+      "materialDescription": "PDF a punt per imprimir amb el teu logo, els teus colors i el QR d'aquest programa. Imprimeix-los a qualsevol copisteria.",
+      "materialCounterCard": "Targeta de taulell (A6)",
+      "materialTableTent": "Expositor de taula (A4, plegat)",
+      "materialTentReviews": "La segona cara porta el teu enllaç de ressenyes de Google.",
+      "materialTentNoReviews": "Configura el teu enllaç de ressenyes de Google a Automatitzacions i la segona cara demanarà una ressenya.",
+      "materialScanLine": "Escaneja i desa la teva targeta al teu Wallet",
+      "materialReviewsLine": "T'ha agradat? Deixa'ns una ressenya a Google",
+      "materialFold": "Plegar per aquí",
+      "materialIdeas": "Idees per promocionar el teu programa",
+      "materialFailed": "No s'ha pogut generar el PDF. Torna-ho a provar."
+    },
+    "programSettings": {
+      "title": "Configuració",
+      "subtitle": "Gestiona l'estat i el cicle de vida del teu programa.",
+      "currentStatus": "Estat actual:",
+      "activateProgram": "Activar el programa",
+      "activateDescription": "Activa aquest programa. Els contactes podran rebre targetes.",
+      "archiveProgram": "Arxivar el programa",
+      "archiveDescription": "Arxiva aquest programa. No s'emetran targetes noves.",
+      "reactivateProgram": "Reactivar el programa",
+      "reactivateDescription": "Torna aquest programa a l'estat actiu.",
+      "deleteProgram": "Eliminar el programa",
+      "deleteDescription": "Elimina permanentment aquest programa i totes les seves dades. No es pot desfer.",
+      "deleteConfirm": "N'estàs segur? Això eliminarà permanentment aquest programa, totes les targetes i totes les dades d'interacció.",
+      "typeToConfirm": "Escriu \"{name}\" per confirmar",
+      "programDeleted": "Programa eliminat",
+      "statusUpdated": "Estat del programa actualitzat"
+    },
+    "settingsForms": {
+      "logo": "Logo",
+      "uploadLogo": "Pujar el logo",
+      "removeLogo": "Eliminar el logo",
+      "brandColor": "Color de marca",
+      "saved": "Configuració desada",
+      "saveFailed": "Error en desar la configuració",
+      "inviteEmail": "Adreça de correu",
+      "inviteEmailPlaceholder": "company@exemple.com",
+      "inviteRole": "Rol",
+      "programManager": "Gestor de programes",
+      "owner": "Propietari",
+      "staff": "Personal",
+      "sendInvite": "Enviar la invitació",
+      "pendingInvitations": "Invitacions pendents",
+      "cancelInvite": "Cancel·lar",
+      "inviteCancelled": "Invitació cancel·lada",
+      "members": "Membres",
+      "viewAuditLog": "Registre d'auditoria",
+      "removeMember": "Eliminar",
+      "deleteAccountTitle": "Eliminar el compte",
+      "deleteAccountDescription": "Elimina el teu compte de manera permanent i abandona tots els equips dels quals formes part. Aquesta acció no es pot desfer.",
+      "deleteAccountButton": "Eliminar el meu compte",
+      "deleteAccountConfirmIntro": "Estàs a punt d'eliminar el teu compte de Loyalshy.",
+      "deleteAccountConsequence1": "Es tancarà la teva sessió a tots els dispositius, inclosa l'app del personal.",
+      "deleteAccountConsequence2": "Se t'eliminarà de tots els equips dels quals formes part.",
+      "deleteAccountConsequence3": "El teu nom i correu s'esborraran d'aquest compte immediatament. L'historial d'activitat es conserva al registre d'auditoria de l'equip.",
+      "deleteAccountTypeEmail": "Escriu {email} per confirmar",
+      "deleteAccountCancel": "Cancel·lar",
+      "deleteAccountConfirm": "Eliminar per sempre",
+      "deleteAccountWorking": "Eliminant...",
+      "deleteAccountSuccess": "Compte eliminat.",
+      "deleteAccountWrongEmail": "El correu no coincideix. Escriu-lo tal qual per confirmar.",
+      "deleteAccountLastOwnerTitle": "Ets l'últim propietari",
+      "deleteAccountLastOwnerBody": "No pots eliminar el teu compte mentre siguis l'únic propietari d'una organització. Ascendeix un altre membre a propietari o elimina primer l'organització. Equips afectats:",
+      "removeConfirm": "Eliminar {name} d'aquesta organització?",
+      "currentPlan": "Pla actual",
+      "changePlan": "Canviar de pla",
+      "manageBilling": "Gestionar la facturació",
+      "cancelSubscription": "Cancel·lar la subscripció",
+      "billingPortal": "Portal de facturació",
+      "usage": "Ús",
+      "contactsUsed": "{used} de {limit} contactes",
+      "programsUsed": "{used} de {limit} programes",
+      "staffUsed": "{used} de {limit} membres de l'equip",
+      "unlimited": "Il·limitat",
+      "statusTrial": "Prova",
+      "statusActive": "Actiu",
+      "statusPastDue": "Pagament endarrerit",
+      "statusCanceled": "Cancel·lat",
+      "currentPlanSection": "Pla actual",
+      "manageBillingDescription": "Gestiona la teva subscripció i facturació.",
+      "usageSection": "Ús",
+      "usageDescription": "El teu ús actual i els límits del teu pla.",
+      "plansSection": "Plans",
+      "plansDescription": "Tria el pla que millor s'adapti al teu negoci.",
+      "contactsLabel": "Contactes",
+      "contactsHint": "Els contactes compten per al teu límit fins que s'eliminin. Elimina contactes inactius per alliberar espai.",
+      "approachingLimit": "A prop del límit",
+      "contactLimitReached": "Límit assolit: elimina contactes que no facis servir o millora el teu pla",
+      "staffLimitReached": "Límit assolit: millora el teu pla per afegir-ne més",
+      "programLimitReached": "Límit assolit: millora el teu pla per afegir-ne més",
+      "teamMembersLabel": "Membres de l'equip",
+      "programsLabel": "Programes",
+      "announcementsLabel": "Avisos",
+      "announcementsHintWeek": "Últims 7 dies, compartits entre tots els programes.",
+      "announcementsHintLifetime": "Total al pla Free: millora per tenir anuncis setmanals.",
+      "announcementsLimitReached": "Límit assolit: millora per enviar-ne més",
+      "billingCheckoutSuccess": "Subscripció activada! El teu pla ja està actualitzat.",
+      "billingCheckoutCanceled": "Has cancel·lat el pagament. No s'ha canviat res.",
+      "billingDismiss": "Tancar",
+      "billingTrialBanner": "{days, plural, one {Et queda <b># dia</b>} other {Et queden <b># dies</b>}} de prova. Tria un pla per conservar totes les funcions.",
+      "billingPaymentFailedTitle": "El pagament ha fallat",
+      "billingPaymentFailedBody": "Actualitza el teu mètode de pagament perquè el servei no s'interrompi.",
+      "billingUpdatePayment": "Actualitzar el pagament",
+      "billingPlanName": "Pla {name}",
+      "billingTrialEnds": "{days, plural, one {La prova acaba d'aquí a # dia} other {La prova acaba d'aquí a # dies}}",
+      "billingSubscribeToContinue": "Subscriu-te per continuar fent servir Loyalshy",
+      "billingFreeForever": "Gratis per sempre. Canvia de pla quan vulguis.",
+      "billingRenews": "La teva subscripció es renova automàticament",
+      "billingCurrentBadge": "Actual",
+      "billingFreeForeverButton": "Gratis per sempre",
+      "billingPriceCustom": "A mida",
+      "billingPerMonth": "/mes",
+      "billingSavePerYear": "Estalvies {amount} € a l'any",
+      "billingCurrentPlanButton": "El teu pla actual",
+      "billingContactUs": "Contactar",
+      "billingUpgrade": "Millorar el pla",
+      "billingDowngrade": "Baixar de pla",
+      "billingSubscribe": "Subscriure'm",
+      "billingCheckoutFailed": "No s'ha pogut iniciar el pagament",
+      "billingPortalFailed": "No s'ha pogut obrir el portal de facturació",
+      "billingGenericError": "Alguna cosa ha fallat",
+      "billingEnterpriseFeatures": {
+        "everythingScale": "Tot el de Scale",
+        "unlimitedStaff": "Equip il·limitat",
+        "unlimitedAnnouncements": "Avisos il·limitats",
+        "whiteLabel": "Marca blanca",
+        "support": "Suport dedicat i SLA"
+      }
+    },
+    "registerVisit": {
+      "title": "Registrar interacció",
+      "scanQr": "Escanejar el codi QR",
+      "registerStamp": "Registrar visita",
+      "redeemCoupon": "Bescanviar cupó",
+      "stampAdded": "Visita registrada per a {name}",
+      "couponRedeemed": "Cupó bescanviat per a {name}"
+    },
+    "shell": {
+      "trialDaysLeft": "{count, plural, one {# dia} other {# dies}} de prova restants.",
+      "upgradeNow": "Millorar ara",
+      "pastDue": "El teu pagament està vençut. Actualitza la teva informació de facturació.",
+      "updateBilling": "Actualitzar la facturació",
+      "dismissBanner": "Tancar el bàner",
+      "handoffWelcome": "Aquí tens el teu programa de fidelització. Afegeix les teves dades de pagament per activar-lo.",
+      "handoffWelcomeCta": "Anar a facturació"
+    },
+    "rewards": {
+      "title": "Recompenses",
+      "noRewards": "Encara no hi ha recompenses",
+      "noRewardsDescription": "Les recompenses es creen automàticament quan els clients completen la seva targeta. Registra visites per començar.",
+      "searchPlaceholder": "Cercar pel nom del client...",
+      "revealPrize": "Revelar el premi",
+      "markRedeemed": "Marcar com a bescanviada",
+      "rewardRedeemed": "Recompensa marcada com a bescanviada"
+    },
+    "jobsHistory": {
+      "created": "Creat",
+      "updated": "Actualitzat",
+      "pushSent": "Push enviat",
+      "pushFailed": "Push fallit",
+      "platform": "Plataforma",
+      "trigger": "Activador",
+      "devices": "Dispositius",
+      "sent": "Enviat",
+      "failed": "Fallit"
+    },
+    "auditLog": {
+      "title": "Registre d'auditoria",
+      "subtitle": "Cada canvi de l'equip en aquesta organització, amb autor i data.",
+      "backToTeam": "Tornar a l'equip",
+      "searchPlaceholder": "Cercar per correu...",
+      "filterAll": "Totes les accions",
+      "empty": "Encara no hi ha activitat.",
+      "by": "per",
+      "target": "destinatari",
+      "unknownActor": "(usuari eliminat)",
+      "pageOf": "Pàgina {page} de {total} · {count, plural, one {# entrada} other {# entrades}}",
+      "action": {
+        "INVITATION_SENT": "Invitació enviada",
+        "INVITATION_RESENT": "Invitació reenviada",
+        "INVITATION_CANCELLED": "Invitació cancel·lada",
+        "INVITATION_ACCEPTED": "Invitació acceptada",
+        "MEMBER_REMOVED": "Membre eliminat",
+        "MEMBER_ROLE_CHANGED": "Rol canviat",
+        "HANDOFF_LINK_CREATED": "Enllaç de transferència creat",
+        "OWNERSHIP_CLAIMED": "Propietat reclamada",
+        "ACCESS_REQUESTED": "Accés sol·licitat",
+        "STAMP_UNDONE": "Segell desfet"
+      }
+    },
+    "visitsChart": {
+      "activityOverTime": "Activitat al llarg del temps",
+      "interaction": "interacció",
+      "interactions": "interaccions"
+    },
+    "programEditor": {
+      "details": "Detalls",
+      "stamps": "Segells",
+      "coupon": "Cupó",
+      "schedule": "Calendari",
+      "terms": "Termes",
+      "prizeReveal": "Premi",
+      "danger": "Perill",
+      "programDetails": "Detalls del programa",
+      "programDetailsDesc": "Informació bàsica del teu programa.",
+      "programName": "Nom del programa",
+      "programNameRequired": "El nom del programa és obligatori",
+      "stampConfiguration": "Configuració dels segells",
+      "stampConfigDesc": "Configura les visites necessàries i els detalls de la recompensa.",
+      "visitsRequired": "Visites necessàries",
+      "visitsRequiredHint": "Nombre de visites abans que un client guanyi una recompensa (3-30).",
+      "rewardExpiry": "Caducitat de la recompensa (dies)",
+      "rewardExpiryHint": "Posa 0 per a recompenses que no caduquen.",
+      "rewardDescription": "Descripció de la recompensa",
+      "rewardDescriptionRequired": "La descripció de la recompensa és obligatòria",
+      "rewardDescriptionPlaceholder": "p. ex., Cafè gratis o postres",
+      "rewardDescriptionFromPrizes": "Generat automàticament a partir dels premis. Edita els premis a sota per actualitzar-ho.",
+      "couponConfiguration": "Configuració del cupó",
+      "couponConfigDesc": "Estableix el tipus de descompte, el valor i els límits d'ús.",
+      "discountType": "Tipus de descompte",
+      "discountTypePercentage": "Percentatge de descompte",
+      "discountTypeFixed": "Import fix de descompte",
+      "discountTypeFreebie": "Article gratuït",
+      "discountPercent": "Descompte (%)",
+      "couponDescription": "Descripció",
+      "couponDescriptionRequired": "La descripció és obligatòria",
+      "couponDescriptionPlaceholder": "p. ex., Aconsegueix un 20 % de descompte en la pròxima comanda",
+      "validUntil": "Vàlid fins",
+      "couponCode": "Codi del cupó",
+      "couponCodePlaceholder": "p. ex., SAVE20",
+      "couponCodeHint": "Opcional. Es mostra a la targeta del Wallet i a la pàgina de la targeta.",
+      "redemptionLimit": "Límit de bescanvi",
+      "redemptionSingle": "Un sol ús",
+      "redemptionUnlimited": "Il·limitat",
+      "scheduleSection": "Calendari",
+      "scheduleDesc": "Controla quan el programa està actiu i accepta clients.",
+      "status": "Estat",
+      "statusDraft": "Esborrany",
+      "statusActive": "Actiu",
+      "statusArchived": "Arxivat",
+      "statusHintVisits": "Només els programes actius accepten visites noves.",
+      "statusHintCustomers": "Només els programes actius accepten clients nous.",
+      "startDate": "Data d'inici",
+      "endDate": "Data de fi (opcional)",
+      "endDateHint": "Deixa-ho buit per a un programa sense data de fi.",
+      "termsSection": "Termes i condicions",
+      "termsDesc": "Termes opcionals que es mostren a la targeta del Wallet.",
+      "termsPlaceholder": "Termes opcionals que es mostren a la targeta del Wallet...",
+      "visitsChangedTitle": "Canviant les visites necessàries de {from} a {to}",
+      "visitsChangedDesc": "Això afectarà els clients que ara mateix estan en un cicle. Tria com gestionar el progrés existent:",
+      "keepProgress": "Mantenir el progrés existent -- els clients conserven el seu recompte de visites",
+      "resetProgress": "Reiniciar tot el progrés -- tots els clients comencen des de 0 visites",
+      "unsavedChanges": "Canvis sense desar",
+      "confirmSave": "Confirmar i desar",
+      "saveChanges": "Desar els canvis",
+      "saving": "Desant...",
+      "programUpdated": "Programa actualitzat",
+      "programArchived": "Programa arxivat",
+      "programActivated": "Programa activat",
+      "programReactivated": "Programa reactivat",
+      "programDeleted": "Programa eliminat",
+      "cardDesign": "Disseny de la targeta",
+      "dangerZone": "Zona de perill",
+      "activateProgram": "Activar el programa",
+      "activateProgramDesc": "Activa aquest programa perquè els clients puguin començar a guanyar visites.",
+      "activate": "Activar",
+      "archiveProgram": "Arxivar el programa",
+      "archiveProgramDesc": "Les inscripcions actives es congelaran i els clients no guanyaran visites noves.",
+      "archive": "Arxivar",
+      "reactivateProgram": "Reactivar el programa",
+      "reactivateProgramDesc": "Torna a posar el programa com a actiu i descongela totes les inscripcions.",
+      "reactivate": "Reactivar",
+      "deleteProgram": "Eliminar el programa",
+      "deleteProgramDesc": "Elimina permanentment aquest programa, incloses totes les inscripcions, visites i recompenses. No es pot desfer.",
+      "delete": "Eliminar",
+      "archiveDialogTitle": "Arxivar el programa",
+      "archiveDialogDesc": "Les inscripcions actives es congelaran i els clients no guanyaran visites noves. Les recompenses guanyades continuaran sent vàlides. Pots reactivar el programa més endavant.",
+      "archiving": "Arxivant...",
+      "archiveConfirmBtn": "Arxivar el programa",
+      "reactivateDialogTitle": "Reactivar el programa",
+      "reactivateDialogDesc": "Això tornarà a posar el programa com a actiu i descongelarà totes les inscripcions. Els clients podran tornar a guanyar visites.",
+      "reactivating": "Reactivant...",
+      "reactivateConfirmBtn": "Reactivar el programa",
+      "deleteDialogTitle": "Eliminar el programa",
+      "deleteDialogDesc": "Aquesta acció és permanent i no es pot desfer. Totes les dades associades a aquest programa s'eliminaran.",
+      "dataToDelete": "S'eliminaran les dades següents:",
+      "passInstancesCount": "{count, plural, one {# targeta} other {# targetes}}",
+      "interactionsCount": "{count, plural, one {# interacció} other {# interaccions}}",
+      "rewardsCount": "{count, plural, one {# recompensa} other {# recompenses}}",
+      "typeToConfirm": "Escriu {name} per confirmar",
+      "deleting": "Eliminant...",
+      "deleteConfirmBtn": "Eliminar el programa",
+      "programPanelDesc": "Configura el teu programa. Els canvis es desen juntament amb el disseny de la targeta.",
+      "generalSection": "General",
+      "stampsSuffix": "segells",
+      "rewardExpirySuffix": "dies (0 = mai)",
+      "noEndDate": "Sense data de fi: el programa funciona indefinidament."
+    },
+    "createProgram": {
+      "chooseType": "Tria un tipus de programa per començar.",
+      "backToTypeSelection": "Tornar a la selecció de tipus",
+      "programName": "Nom del programa",
+      "programNameRequired": "El nom del programa és obligatori",
+      "visitsRequired": "Visites necessàries",
+      "visitsRequiredHint": "Entre 3 i 30 segells abans de la recompensa.",
+      "rewardExpiry": "Caducitat de la recompensa",
+      "rewardExpiryHint": "Dies després d'aconseguir la recompensa. 0 = no caduca mai.",
+      "stampsSuffix": "segells",
+      "daysSuffix": "dies",
+      "rewardDescription": "Descripció de la recompensa",
+      "rewardDescriptionRequired": "La descripció de la recompensa és obligatòria",
+      "rewardDescriptionPlaceholder": "p. ex., Cafè gratis o postres",
+      "creating": "Creant...",
+      "previewLabel": "Vista prèvia",
+      "previewDefaultName": "La teva targeta de segells",
+      "previewDefaultReward": "La teva recompensa",
+      "createStampCard": "Crear targeta de segells",
+      "stampCardCreated": "Programa de segells creat",
+      "stampNamePlaceholder": "p. ex., Fidelització Cafè, Menú especial",
+      "couponName": "Nom del cupó",
+      "couponNameRequired": "El nom del cupó és obligatori",
+      "couponNamePlaceholder": "p. ex., Oferta d'estiu, Descompte nou client",
+      "discountType": "Tipus de descompte",
+      "discountTypePercentage": "Percentatge",
+      "discountTypePercentageDesc": "p. ex., 20 % de descompte",
+      "discountTypeFixed": "Import fix",
+      "discountTypeFixedDesc": "p. ex., 5 € de descompte",
+      "discountTypeFreebie": "Article gratis",
+      "discountTypeFreebieDesc": "p. ex., Cafè gratis",
+      "discountPercent": "Valor del descompte",
+      "discountDollar": "Valor del descompte",
+      "discountValueHintPercent": "Entre l'1 % i el 100 %.",
+      "discountValueHintCurrency": "Fins a 10 000 €.",
+      "couponDescription": "Descripció del cupó",
+      "couponDescriptionPlaceholder": "p. ex., Aconsegueix un 20 % de descompte en la pròxima comanda",
+      "couponDescriptionFreebiePlaceholder": "p. ex., Un cafè americà gratis",
+      "validUntilOptional": "Vàlid fins (opcional)",
+      "validUntilHint": "Deixa-ho buit perquè no caduqui.",
+      "redemptionLimit": "Límit de bescanvi",
+      "redemptionSingle": "Un sol ús",
+      "redemptionSingleHint": "Es bloqueja automàticament després del primer bescanvi.",
+      "redemptionUnlimited": "Il·limitat",
+      "redemptionUnlimitedHint": "Els clients el poden bescanviar diverses vegades.",
+      "termsOptional": "Termes i condicions (opcional)",
+      "termsPlaceholder": "Termes opcionals...",
+      "previewDefaultCouponName": "El teu cupó",
+      "previewDefaultDiscount": "OFERTA",
+      "previewFreebieLabel": "GRATIS",
+      "createCoupon": "Crear cupó",
+      "couponCreated": "Programa de cupons creat"
+    },
+    "studio": {
+      "save": "Desar",
+      "saving": "Desant...",
+      "saved": "Desat",
+      "publishSuccess": "Programa publicat! Els teus clients ja s'hi poden unir.",
+      "publishSaveFirst": "Desa els canvis abans de publicar",
+      "undo": "Desfer",
+      "redo": "Refer",
+      "backToDesign": "Tornar al disseny",
+      "saveDesign": "Desar el disseny",
+      "replay": "Repetir",
+      "replayAnimation": "Repetir l'animació",
+      "moreTools": "Més eines",
+      "program": "Programa",
+      "colors": "Colors",
+      "progress": "Progrés",
+      "strip": "Franja",
+      "fields": "Camps",
+      "logo": "Logo",
+      "details": "Detalls",
+      "notifications": "Alertes",
+      "prize": "Premi",
+      "more": "Més",
+      "scratchCard": "Rasca-rasca",
+      "slotMachine": "Escurabutxaques",
+      "wheelOfFortune": "Roda de la fortuna",
+      "prizeCountHint": "{count} premis · Mostrant \"{name}\"",
+      "addPrizesHint": "Afegeix almenys 2 premis per veure l'experiència completa",
+      "saveSuccessWithUpdate": "Desat! Actualitzant {count} {passLabel} de wallet...",
+      "saveSuccess": "Desat!",
+      "saveFailed": "Error en desar",
+      "walletPass": "targeta",
+      "walletPasses": "targetes",
+      "downloadPng": "Descarregar la targeta com a PNG",
+      "downloadSuccess": "Targeta descarregada!",
+      "downloadFailed": "Error en descarregar la targeta"
+    },
+    "reviews": {
+      "title": "Ressenyes a Google",
+      "subtitle": "Demana una ressenya a Google als teus clients habituals, des de la seva targeta del Wallet.",
+      "planRequired": "Les peticions de ressenya estan incloses a partir del pla Pro. Pots deixar-ho tot configurat i activar-ho quan milloris el pla.",
+      "upgradeCta": "Millorar el pla",
+      "askOwner": "Demana al propietari del compte que millori el pla.",
+      "statAsked": "Ressenyes demanades",
+      "last30Days": "Últims 30 dies",
+      "statOpened": "Han obert l'enllaç",
+      "openRate": "{rate}% dels que l'han rebut",
+      "statReviews": "Ressenyes a Google",
+      "gainedSince": "{count, plural, =0 {Sense canvis} one {+# ressenya} other {+# ressenyes}} des del {date}",
+      "notTracked": "Tria el teu negoci per començar a mesurar",
+      "statRating": "Valoració a Google",
+      "ratingHint": "Valoració mitjana a Google",
+      "policyNote": "Google no permet premiar les ressenyes ni demanar-les només als clients contents. Loyalshy la demana a tothom per igual i ni els segells ni els descomptes depenen mai de la ressenya.",
+      "chartTitle": "Evolució de les teves ressenyes a Google",
+      "chartEmpty": "Tria el teu negoci a sota i mesurarem les teves ressenyes cada dia.",
+      "chartStarted": "Ja ho estem mesurant. El gràfic s'omple a partir de demà.",
+      "chartTooltip": "{count, plural, one {# ressenya} other {# ressenyes}}",
+      "defaultMessage": "Què tal a {business}? Una ressenya a Google ens ajuda moltíssim ⭐",
+      "defaultLinkLabel": "Deixar una ressenya a Google",
+      "errorMissingTarget": "Tria el teu negoci o enganxa el teu enllaç de ressenyes.",
+      "errorInvalidUrl": "Enganxa un enllaç de ressenyes de Google (g.page, maps.app.goo.gl o search.google.com).",
+      "errorInvalid": "Revisa els camps i torna-ho a provar.",
+      "savedOn": "Desat. Les peticions de ressenya estan activades.",
+      "savedOff": "Desat. Les peticions de ressenya estan desactivades.",
+      "settingsTitle": "Petició de ressenya",
+      "settingsDescription": "Després de la visita que triïs, el client rep una notificació al seu Wallet demanant-li una ressenya, uns 90 minuts més tard i mai de nit. A cada client se li demana una sola vegada. Compten com a visites els segells d'una targeta i els bescanvis d'un cupó il·limitat.",
+      "enableLabel": "Activar les peticions de ressenya",
+      "businessLabel": "El teu negoci a Google",
+      "changeBusiness": "Canviar",
+      "linkLabelInput": "Enllaç de ressenyes de Google",
+      "useLinkInstead": "Enganxar un enllaç de ressenyes",
+      "searchInstead": "Cercar el meu negoci",
+      "triggerLabel": "Demanar-la després de",
+      "triggerOption": "{count, plural, one {la 1a visita} other {la #a visita}}",
+      "triggerHint": "Els clients que repeteixen deixen millors ressenyes: la 2a o 3a visita sol funcionar millor. Els cupons d'un sol ús no la demanen mai.",
+      "messageLabel": "Missatge de la notificació",
+      "messageHint": "Apareix a la pantalla de bloqueig. No prometis res a canvi.",
+      "linkTextLabel": "Text de l'enllaç a la targeta",
+      "save": "Desar",
+      "searchPlaceholder": "Cerca el nom del teu negoci i la ciutat",
+      "noResults": "No hem trobat el teu negoci. Prova amb el nom i la ciutat, o enganxa el teu enllaç de ressenyes.",
+      "previewTitle": "El que veu el client",
+      "previewLockScreen": "Pantalla de bloqueig",
+      "previewPass": "Revers de la targeta",
+      "previewStep1": "En tocar la notificació s'obre la targeta: Apple i Google no permeten que obri un enllaç directament.",
+      "previewStep2": "L'enllaç de ressenya és el primer als detalls de la targeta (botó ··· a l'iPhone) i obre el formulari de Google.",
+      "previewStep3": "Els qui el toquen es compten a dalt."
+    },
+    "automations": {
+      "title": "Automatitzacions",
+      "subtitle": "Missatges que les teves targetes del Wallet envien soles.",
+      "tabReviews": "Ressenyes a Google",
+      "tabWinback": "Recuperar clients",
+      "tabProximity": "A prop del teu local"
+    },
+    "winback": {
+      "subtitle": "Quan un client habitual deixa de venir, la seva targeta del Wallet li recorda que existeixes.",
+      "planRequired": "Els missatges per recuperar clients estan inclosos a partir del pla Business. Pots deixar-ho tot configurat i activar-ho quan milloris el pla.",
+      "upgradeCta": "Millorar el pla",
+      "askOwner": "Demana al propietari del compte que millori el pla.",
+      "settingsTitle": "Missatge per recuperar clients",
+      "settingsDescription": "Quan un client habitual (2 o més visites) porta el temps que triïs sense venir, la seva targeta mostra el teu missatge a la pantalla de bloqueig, cap a les 10:00 de la teva zona horària. Un cop per absència i, com a molt, un cop cada 90 dies.",
+      "enableLabel": "Activar els missatges per recuperar clients",
+      "daysLabel": "Enviar després de",
+      "daysOption": "{days} dies sense venir",
+      "daysHint": "Ajusta-ho al que solen trigar els teus clients a tornar: en una cafeteria venen cada setmana; en una perruqueria, cada un o dos mesos.",
+      "messageLabel": "Missatge",
+      "messageHint": "Apareix a la pantalla de bloqueig i a la targeta.",
+      "defaultMessage": "Et trobem a faltar a {business}! Passa-hi quan vulguis.",
+      "firstRunLabel": "A qui s'envia primer",
+      "firstRunFromNow": "Només a partir d'ara",
+      "firstRunFromNowHint": "Als clients que arribin a {days} dies sense venir a partir d'avui.",
+      "firstRunIncludeExisting": "{count, plural, =0 {També als clients que ja estan inactius} one {També al # client que ja està inactiu} other {També als # clients que ja estan inactius}}",
+      "firstRunIncludeExistingHint": "El rebran a l'enviament de l'endemà al matí.",
+      "holdoutLabel": "Mesurar resultats (grup de comparació del {percent} %)",
+      "holdoutHint": "Alguns clients que compleixen les condicions no reben el missatge, perquè vegis quants més tornen gràcies a ell.",
+      "countLoading": "Comptant clients…",
+      "countToday": "{count, plural, =0 {Avui no compleix les condicions cap client.} one {Avui compleix les condicions # client} other {Avui compleixen les condicions # clients}}{count, plural, =0 {} other { ({reachable} amb la targeta al Wallet).}}",
+      "save": "Desar",
+      "savedOn": "Desat. Els missatges per recuperar clients estan activats.",
+      "savedOff": "Desat. Els missatges per recuperar clients estan desactivats.",
+      "errorInvalid": "Revisa els camps i torna-ho a provar.",
+      "promiseNote": "Si el teu missatge promet alguna cosa («el teu pròxim cafè és gratis»), el teu equip l'ha de complir. Loyalshy no ho controla.",
+      "previewTitle": "El que veu el client",
+      "previewLockScreen": "Pantalla de bloqueig",
+      "previewPass": "A la targeta",
+      "previewStep1": "En tocar la notificació s'obre la seva targeta.",
+      "previewStep2": "A la seva següent visita, el missatge desapareix de la targeta.",
+      "previewStep3": "Els clients que tornen es compten aquí.",
+      "resultsTitle": "Resultats",
+      "resultsDescription": "Clients que han tornat en els 14 dies següents al missatge.",
+      "resultsPeriodLabel": "Període",
+      "resultsPeriod": "{days} dies",
+      "resultsEmpty": "Encara no hi ha resultats. Apareixen 14 dies després dels primers enviaments.",
+      "resultsMeasuringOnly": "{count, plural, one {Estem mesurant # enviament.} other {Estem mesurant # enviaments.}} Els resultats apareixen 14 dies després de cada enviament.",
+      "heroExtra": "{count, plural, one {client ha tornat gràcies al missatge} other {clients han tornat gràcies al missatge}}",
+      "heroExtraHint": "Comparat amb els clients que no l'han rebut (grup de comparació).",
+      "heroRate": "han tornat en els 14 dies següents al missatge",
+      "heroNoDifference": "De moment no hi ha diferència respecte al grup de comparació.",
+      "heroNeedComparison": "Per saber quants han tornat gràcies al missatge, el grup de comparació necessita almenys {min} clients (ara {count}).",
+      "heroHoldoutOff": "Activa «Mesurar resultats» per saber quants han tornat gràcies al missatge.",
+      "barMessaged": "Han rebut el missatge",
+      "barComparison": "No l'han rebut (grup de comparació)",
+      "barCount": "{back} de {sent}",
+      "barTooltip": "{back} de {sent} clients han tornat en 14 dies",
+      "tableGroup": "Grup",
+      "tableSent": "Clients",
+      "tableBack": "Han tornat",
+      "tableRate": "Percentatge",
+      "footerMeasuring": "{count, plural, one {# enviament recent encara en mesura} other {# enviaments recents encara en mesura}}",
+      "footerUnreachable": "{count, plural, one {# client inactiu sense la targeta al Wallet} other {# clients inactius sense la targeta al Wallet}}"
+    },
+    "proximity": {
+      "subtitle": "Quan un client passa a prop del teu negoci, la seva targeta apareix a la pantalla de bloqueig de l'iPhone.",
+      "settingsTitle": "A prop del teu local",
+      "settingsDescription": "La ubicació del teu negoci. Quan un client amb la teva targeta és a prop (uns 100 m), l'iPhone pot mostrar la targeta a la seva pantalla de bloqueig amb el teu text.",
+      "enableLabel": "Mostrar la targeta a prop del teu local",
+      "iphoneOnlyTitle": "Només iPhone.",
+      "iphoneOnlyBody": "Google Wallet (Android) no avisa per proximitat. I no és una notificació: iOS decideix quan mostrar la targeta, sense so.",
+      "addressLabel": "Adreça del negoci",
+      "addressPlaceholder": "Carrer Major 123, Ciutat",
+      "addressHint": "També es mostra a la targeta i es fa servir per a l'enllaç al mapa, a tots els teus programes.",
+      "pickFromList": "Tria l'adreça de la llista per fixar la ubicació",
+      "searching": "Cercant adreces…",
+      "noResults": "No s'ha trobat cap adreça. Prova amb una cerca més concreta.",
+      "messageLabel": "Text a la pantalla de bloqueig",
+      "messageHint": "Si ho deixes buit, es mostra el nom del teu negoci.",
+      "defaultMessage": "Passa-hi! Ensenya la teva targeta al taulell.",
+      "save": "Desar",
+      "savedOn": "Desat. La teva targeta apareixerà a prop del teu local.",
+      "savedOff": "Desat. Els avisos per proximitat estan desactivats.",
+      "errorNoLocation": "Tria la teva adreça de la llista per fixar la ubicació.",
+      "errorInvalid": "Revisa els camps i torna-ho a provar.",
+      "previewTitle": "El que veu el client",
+      "previewLockScreen": "Pantalla de bloqueig de l'iPhone",
+      "previewStep1": "A prop del teu local, la targeta apareix a la pantalla de bloqueig.",
+      "previewStep2": "En tocar-la s'obre la targeta, a punt per escanejar.",
+      "previewStep3": "Desapareix quan se n'allunya.",
+      "previewNote": "Quantes vegades apareix depèn d'iOS i de la configuració del client.",
+      "mapLabel": "Mapa amb la ubicació del teu negoci. Arrossega el punt per ajustar-la.",
+      "mapHint": "Si el punt no és just a la teva porta, arrossega'l. El cercle és més o menys la zona on l'iPhone mostra la teva targeta."
+    }
+  },
+  "errors": {
+    "notFound": {
+      "code": "404",
+      "title": "Pàgina no trobada",
+      "message": "La pàgina que busques no existeix o s'ha mogut.",
+      "goHome": "Anar a l'inici"
+    },
+    "global": {
+      "title": "Alguna cosa ha fallat",
+      "message": "S'ha produït un error inesperat. Hem avisat el nostre equip.",
+      "errorId": "ID d'error: {digest}",
+      "tryAgain": "Torna-ho a provar",
+      "goHome": "Anar a l'inici"
+    }
+  },
+  "privacy": {
+    "pageTitle": "Política de privacitat",
+    "lastUpdated": "Última actualització: març de 2026",
+    "section1Title": "1. Qui som",
+    "section1P1": "Loyalshy («nosaltres», «ens», «nostre») opera una plataforma de targetes digitals de wallet a loyalshy.com. Ajudem les empreses a crear i gestionar targetes d'Apple Wallet i Google Wallet per a programes de fidelització, membresies, cupons, entrades i més.",
+    "section1P2": "Per a consultes sobre privacitat, contacti amb nosaltres a",
+    "section2Title": "2. Dades que recollim",
+    "section2AccountData": "Dades del compte:",
+    "section2AccountDataContent": "Quan vostè es registra, recollim el seu nom, l'adreça de correu electrònic i la contrasenya (xifrada). Si crea una organització, emmagatzemem el nom del negoci i els actius de marca.",
+    "section2ContactData": "Dades de contactes:",
+    "section2ContactDataContent": "Les empreses que utilitzen la nostra plataforma poden afegir contactes (els seus clients) amb noms, adreces de correu electrònic i números de telèfon per emetre targetes digitals.",
+    "section2UsageData": "Dades d'ús:",
+    "section2UsageDataContent": "Recollim pàgines vistes anonimitzades a través de Plausible Analytics, que no utilitza galetes ni rastreja dades personals.",
+    "section2PaymentData": "Dades de pagament:",
+    "section2PaymentDataContent": "El processament de pagaments el gestiona íntegrament Stripe. Emmagatzemem el seu ID de client de Stripe i l'estat de la subscripció, però mai no emmagatzemem números de targeta ni dades bancàries.",
+    "section2TechnicalData": "Dades tècniques:",
+    "section2TechnicalDataContent": "Els informes d'errors es recullen a través de Sentry amb finalitats de depuració i poden incloure adreces IP, tipus de navegador i detalls de la sol·licitud. Aquestes dades es conserven durant 30 dies.",
+    "section3Title": "3. Com utilitzem les seves dades",
+    "section3Item1": "Per proporcionar i mantenir la plataforma Loyalshy",
+    "section3Item2": "Per generar i lliurar targetes digitals de wallet (Apple Wallet, Google Wallet)",
+    "section3Item3": "Per enviar correus electrònics transaccionals (lliurament de targetes, notificacions del compte) a través de Resend",
+    "section3Item4": "Per processar pagaments i gestionar subscripcions a través de Stripe",
+    "section3Item5": "Per monitorar i corregir errors a través de Sentry",
+    "section3Item6": "Per millorar el nostre producte a partir de patrons d'ús anonimitzats",
+    "section4Title": "4. Serveis de tercers",
+    "section4Intro": "Compartim dades amb els serveis següents, cadascun dels quals opera sota les seves pròpies polítiques de privacitat:",
+    "section4Item1": "Stripe — Processament de pagaments (compatible amb PCI DSS)",
+    "section4Item2": "Resend — Lliurament de correus electrònics transaccionals",
+    "section4Item3": "Cloudflare R2 — Emmagatzematge de fitxers (logotips, imatges) mitjançant API compatible amb S3",
+    "section4Item4": "Sentry — Seguiment i monitoratge d'errors",
+    "section4Item5": "Plausible Analytics — Analítica web respectuosa amb la privacitat (sense galetes, sense dades personals)",
+    "section4Item6": "Apple Wallet / Google Wallet — Generació i lliurament de targetes digitals",
+    "section4Item7": "Neon — Allotjament de base de dades PostgreSQL",
+    "section4Item8": "Vercel — Allotjament de l'aplicació",
+    "section5Title": "5. Conservació de dades",
+    "section5P1": "Conservem les dades del seu compte mentre aquest estigui actiu. Les dades de contactes es conserven mentre existeixi el compte de l'organització. Pot sol·licitar-ne l'eliminació en qualsevol moment.",
+    "section5P2": "Els registres d'errors (Sentry) es conserven durant 30 dies. Les dades d'analítica (Plausible) són agregades i no contenen informació personal.",
+    "section6Title": "6. Els seus drets (RGPD)",
+    "section6Intro": "Si vostè es troba a l'Espai Econòmic Europeu, té dret a:",
+    "section6Item1": "Accés — Sol·licitar una còpia de les dades personals que conservem sobre vostè",
+    "section6Item2": "Rectificació — Demanar-nos que corregim dades inexactes",
+    "section6Item3": "Supressió — Demanar-nos que eliminem les seves dades personals",
+    "section6Item4": "Portabilitat — Sol·licitar les seves dades en un format llegible per màquina",
+    "section6Item5": "Limitació — Demanar-nos que limitem l'ús que fem de les seves dades",
+    "section6Item6": "Oposició — Oposar-se al nostre tractament de les seves dades",
+    "section6Outro": "Per exercir qualsevol d'aquests drets, escrigui'ns a",
+    "section6OutroSuffix": "Respondrem en un termini de 30 dies.",
+    "section7Title": "7. Seguretat de les dades",
+    "section7P1": "Implementem mesures de seguretat estàndard del sector que inclouen xifratge HTTPS, contrasenyes xifrades, gestió segura de sessions i controls d'accés basats en rols. Les claus API s'emmagatzemen com a hashes SHA-256.",
+    "section8Title": "8. Menors",
+    "section8P1": "Loyalshy no està destinat a l'ús per part de persones menors de 16 anys. No recollim conscientment dades personals de menors.",
+    "section9Title": "9. Canvis en aquesta política",
+    "section9P1": "Podem actualitzar aquesta política de privacitat periòdicament. Notificarem els usuaris registrats dels canvis materials per correu electrònic.",
+    "section10Title": "10. Contacte",
+    "section10P1": "Per a qualsevol pregunta sobre aquesta política de privacitat, contacti amb nosaltres a"
+  },
+  "terms": {
+    "pageTitle": "Termes del servei",
+    "lastUpdated": "Última actualització: març de 2026",
+    "section1Title": "1. Acceptació",
+    "section1P1": "En accedir a Loyalshy («el Servei») o utilitzar-lo, vostè accepta quedar vinculat per aquests Termes del servei. Si no hi està d'acord, no utilitzi el Servei.",
+    "section2Title": "2. Descripció del servei",
+    "section2P1": "Loyalshy és una plataforma de targetes digitals de wallet que permet a les empreses crear, gestionar i distribuir targetes d'Apple Wallet i Google Wallet. La plataforma és compatible amb targetes de segells, cupons, membresies, programes de punts, targetes prepagament, targetes regal, entrades, passis d'accés, títols de transport i identificacions.",
+    "section3Title": "3. Comptes",
+    "section3P1": "Vostè ha de proporcionar informació exacta en crear un compte. És responsable de mantenir la seguretat de les seves credencials. Ens ha de notificar immediatament qualsevol accés no autoritzat.",
+    "section3P2": "Cada organització a Loyalshy opera com un inquilí independent. Els propietaris de l'organització són responsables de gestionar els membres de l'equip i els seus nivells d'accés.",
+    "section4Title": "4. Ús acceptable",
+    "section4Intro": "Vostè es compromet a no:",
+    "section4Item1": "Utilitzar el Servei per a cap propòsit il·lícit",
+    "section4Item2": "Carregar contingut maliciós o intentar comprometre la seguretat del sistema",
+    "section4Item3": "Superar els límits d'ús del seu pla mitjançant mitjans automatitzats",
+    "section4Item4": "Revendre o redistribuir el Servei sense autorització",
+    "section4Item5": "Recollir dades personals a través de la plataforma sense el consentiment dels interessats",
+    "section4Item6": "Crear targetes que suplantin altres empreses o indueixin a error els consumidors",
+    "section5Title": "5. Preus i facturació",
+    "section5P1": "Loyalshy ofereix els plans Free, Pro, Business, Scale i Enterprise. Els plans de pagament es facturen mensualment o anualment a través de Stripe. Els preus són en EUR. Pot cancel·lar la seva subscripció en qualsevol moment, cosa que farà baixar el seu compte al pla Free al final del període de facturació en curs.",
+    "section5P2": "Ens reservem el dret de modificar els preus amb un preavís de 30 dies als clients existents.",
+    "section6Title": "6. Propietat de les dades",
+    "section6P1": "Vostè conserva la propietat de tot el contingut i les dades que carregui a Loyalshy. No reclamem cap dret de propietat intel·lectual sobre les seves dades empresarials, logotips, imatges o llistes de contactes.",
+    "section6P2": "Vostè ens atorga una llicència limitada per tractar les seves dades únicament amb la finalitat de prestar el Servei, inclosa la generació de targetes de wallet i l'enviament de comunicacions transaccionals en nom seu.",
+    "section7Title": "7. Ús de l'API",
+    "section7P1": "L'accés a l'API REST de Loyalshy està subjecte a límits de velocitat segons el seu pla. Les claus API tenen àmbit d'organització i s'han de mantenir confidencials. Ens reservem el dret de revocar l'accés a l'API per patrons d'ús abusiu.",
+    "section8Title": "8. Disponibilitat",
+    "section8P1": "Ens esforcem per mantenir una alta disponibilitat, però no garantim un servei ininterromput. No som responsables de cap temps d'inactivitat, pèrdua de dades o interrupció del servei. Farem esforços raonables per notificar els usuaris del manteniment programat.",
+    "section9Title": "9. Terminació",
+    "section9P1": "Podem suspendre o cancel·lar comptes que infringeixin aquests termes. Vostè pot eliminar el seu compte en qualsevol moment. Després de la cancel·lació, les seves dades s'eliminaran en un termini de 30 dies, llevat que la conservació sigui exigida per llei.",
+    "section10Title": "10. Limitació de responsabilitat",
+    "section10P1": "En la màxima mesura permesa per la llei, Loyalshy no serà responsable de cap dany indirecte, incidental, especial o conseqüent derivat de l'ús del Servei. La nostra responsabilitat total no superarà l'import que vostè ens hagi pagat en els 12 mesos anteriors a la reclamació.",
+    "section11Title": "11. Llei aplicable",
+    "section11P1": "Aquests termes es regiran per les lleis de la Unió Europea. Qualsevol disputa es resoldrà als tribunals de la jurisdicció on Loyalshy estigui registrada.",
+    "section12Title": "12. Canvis",
+    "section12P1": "Podem actualitzar aquests termes periòdicament. Els canvis materials es comunicaran per correu electrònic als usuaris registrats amb almenys 30 dies d'antelació a la seva entrada en vigor.",
+    "section13Title": "13. Contacte",
+    "section13P1": "Per a preguntes sobre aquests termes, contacti amb nosaltres a"
+  },
+  "cookies": {
+    "pageTitle": "Política de galetes",
+    "lastUpdated": "Última actualització: març de 2026",
+    "section1Title": "1. Què són les galetes",
+    "section1P1": "Les galetes són petits fitxers de text que s'emmagatzemen al seu dispositiu quan visita un lloc web. S'utilitzen àmpliament perquè els llocs web funcionin de manera eficient i per proporcionar informació als propietaris del lloc.",
+    "section2Title": "2. Galetes que utilitzem",
+    "section2EssentialTitle": "Galetes essencials (obligatòries)",
+    "section2EssentialIntro": "Aquestes galetes són necessàries per al funcionament de la plataforma i no es poden desactivar.",
+    "section2SessionCookie": "Galeta de sessió",
+    "section2SessionCookieContent": "Manté la seva sessió iniciada i l'estat d'autenticació. Establerta per Better Auth. Caduca quan finalitza la seva sessió o després del temps de vida de sessió configurat.",
+    "section2OrgCookie": "Galeta d'organització activa",
+    "section2OrgCookieContent": "Recorda en quina organització està treballant actualment. Necessària per a la funcionalitat multiempresa.",
+    "section2ThemeCookie": "Preferència de tema",
+    "section2ThemeCookieContent": "Emmagatzema la seva preferència de mode clar/fosc. Establerta per next-themes. Persisteix fins que es modifiqui.",
+    "section2AnalyticsTitle": "Analítica (sense galetes)",
+    "section2AnalyticsContent": "Utilitzem Plausible Analytics per a l'analítica del lloc web. Plausible és un servei d'analítica respectuós amb la privacitat que no utilitza galetes, no recull dades personals i no rastreja els usuaris entre llocs web. Plausible no requereix consentiment sota el RGPD.",
+    "section3Title": "3. Galetes de tercers",
+    "section3StripeIntro": "Stripe:",
+    "section3StripeContent": "Quan accedeixi a les pàgines de facturació o pagament, Stripe pot establir galetes per a la prevenció del frau i el processament de pagaments. Aquestes es regeixen per la",
+    "section3StripePrivacyLink": "Política de privacitat de Stripe",
+    "section3NoTracking": "No utilitzem galetes publicitàries, píxels de seguiment ni galetes de xarxes socials.",
+    "section4Title": "4. Gestió de galetes",
+    "section4P1": "Pot controlar les galetes a través de la configuració del seu navegador. La majoria dels navegadors li permeten bloquejar o eliminar galetes. Tanmateix, bloquejar les galetes essencials li impedirà usar el panell de Loyalshy.",
+    "section4P2": "Atès que només utilitzem galetes essencials (sense galetes de rastreig ni publicitat), no cal cap bàner de consentiment de galetes sota el RGPD. Les galetes essencials estan exemptes dels requisits de consentiment perquè són estrictament necessàries per al funcionament del servei.",
+    "section5Title": "5. Canvis",
+    "section5P1": "Podem actualitzar aquesta política de galetes si introduïm noves categories de galetes. Actualitzarem la data d'«Última actualització» a la part superior d'aquesta pàgina.",
+    "section6Title": "6. Contacte",
+    "section6P1": "Per a preguntes sobre el nostre ús de galetes, contacti amb nosaltres a"
+  },
+  "studio": {
+    "panels": {
+      "programSettings": "Ajustos del programa",
+      "colors": "Colors",
+      "progressStyle": "Estil de progrés",
+      "stripImage": "Imatge de franja",
+      "logo": "Logotip",
+      "prizeReveal": "Revelació del premi",
+      "notifications": "Notificacions",
+      "backOfPass": "Detalls del revers",
+      "fields": "Camps i etiquetes",
+      "properties": "Propietats",
+      "closePanel": "Tanca el panell",
+      "template": "Plantilla",
+      "textColors": "Colors de text",
+      "fieldValues": "Valors de camp",
+      "labels": "Etiquetes",
+      "textContrast": "Contrast de text",
+      "autoTextColor": "Color de text automàtic",
+      "computeFromBackground": "Calcular des del fons",
+      "primaryFieldSection": "Camp principal",
+      "showPrimaryField": "Mostrar a la franja",
+      "showPrimaryFieldHint": "Si està activat, el camp principal (p. ex. descompte, progrés) es mostra sobre la imatge de la franja a Apple Wallet. Desactiva'l per a un aspecte més net.",
+      "cardFields": "Camps de la targeta",
+      "fieldsPanelDesc": "Configura quins camps apareixen a la targeta i el seu estil de text.",
+      "cardFieldsDesc": "Tria quins camps apareixen a la targeta. Fes clic en una etiqueta per canviar-li el nom.",
+      "cardFieldsHint": "Apple: primer camp → capçalera, resta → detalls. Google: files automàtiques.",
+      "auto": "Auto",
+      "addField": "+ Afegeix un camp...",
+      "resetToDefaults": "Restableix els valors predeterminats",
+      "moveUp": "Mou {label} cap amunt",
+      "moveDown": "Mou {label} cap avall",
+      "removeField": "Elimina {label}",
+      "clickToRename": "Fes clic per canviar el nom"
+    },
+    "colors": {
+      "instruction": "Fes clic en un color o toca una àrea de la vista prèvia per editar.",
+      "background": "Fons",
+      "stripAccent": "Franja / Accent",
+      "fieldValues": "Valors de camp",
+      "labels": "Etiquetes",
+      "bgDescription": "Color de fons de la targeta",
+      "stripDescription": "Àrea de franja i accents",
+      "fieldDescription": "Text a la targeta",
+      "labelDescription": "Text de les etiquetes (només Apple)"
+    },
+    "strip": {
+      "alwaysOn": "La franja està sempre activa per a aquest tipus de targeta per garantir una visualització consistent a Apple i Google Wallet.",
+      "showStrip": "Mostrar franja",
+      "enablePrompt": "Activa \"Mostrar franja\" per configurar la imatge, els colors i els patrons.",
+      "burger": "Hamburguesa",
+      "coffeeBeans": "Grans de cafè",
+      "pizza": "Pizza",
+      "club": "Club",
+      "gym": "Gimnàs",
+      "none": "Cap",
+      "dots": "Punts",
+      "waves": "Ones",
+      "geometric": "Geomètric",
+      "chevron": "Xebró",
+      "crosshatch": "Entrecreuat",
+      "diamonds": "Diamants",
+      "confetti": "Confeti",
+      "zoom": "Zoom",
+      "resetPositionZoom": "Restableix posició i zoom",
+      "imageSection": "Imatge",
+      "presetsSection": "Predefinits",
+      "filtersSection": "Filtres",
+      "fillSection": "Farciment",
+      "colorsSection": "Colors",
+      "patternSection": "Patró",
+      "patternColorSection": "Color del patró",
+      "uploading": "Pujant...",
+      "replaceImage": "Substitueix la imatge",
+      "uploadImage": "Puja una imatge",
+      "removeImage": "Elimina",
+      "imageHint": "PNG, JPEG o WebP. Màx. 5 MB. Retallada per a Apple i Google Wallet.",
+      "noStripImage": "Sense imatge de franja",
+      "opacity": "Opacitat",
+      "blackAndWhite": "Blanc i negre",
+      "flat": "Pla",
+      "gradient": "Degradat",
+      "colorStart": "Inici",
+      "colorEnd": "Final",
+      "colorFlat": "Color",
+      "resetToCardColors": "Restableix als colors de la targeta",
+      "shapesColor": "Formes",
+      "resetToStripColor": "Restableix al color de la franja",
+      "stampGridInfo": "Quadrícula de segells activa: els segells se superposen a {surface}. Els colors dels segells es poden editar al panell de Progrés.",
+      "stampGridSurfaceImage": "la teva imatge pujada",
+      "stampGridSurfaceFlat": "un fons sòlid",
+      "stampGridSurfaceGradient": "un fons degradat",
+      "dragToReposition": "Arrossega per reposicionar"
+    },
+    "logo": {
+      "usingOrgLogo": "S'està usant el logotip de l'organització",
+      "programLogo": "Logotip del programa",
+      "preview": "Vista prèvia",
+      "brandMatch": "Coincidència de marca",
+      "advanced": "Avançat",
+      "processing": "Processant...",
+      "replaceLogo": "Substitueix el logotip",
+      "uploadLogo": "Puja un logotip",
+      "remove": "Elimina",
+      "useOrgLogoInstead": "Usa el logotip de l'organització",
+      "hasProgramLogo": "Aquest programa té el seu propi logotip.",
+      "usingOrgLogoDesc": "S'està usant el logotip de la teva organització. Puja'n un de diferent per a aquest programa.",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet",
+      "appleLogoZoom": "Zoom del logotip d'Apple",
+      "extractColorsDesc": "Extreu colors del teu logotip i aplica'ls al disseny de la teva targeta.",
+      "extracting": "Extraient...",
+      "reExtractColors": "Torna a extreure els colors",
+      "matchToBrand": "Aplica la meva marca",
+      "extractError": "No s'han pogut extreure els colors del logotip.",
+      "extractFailed": "Error en extreure els colors de la marca. Torna-ho a provar.",
+      "useDifferentImage": "Usa una imatge diferent per a {platform}",
+      "uploadOverride": "Puja una imatge",
+      "appleLogoHint": "Rectangle ample (320 × 100 px). Es recomana PNG transparent.",
+      "googleLogoHint": "Quadrat (660 px). Mantén el disseny centrat amb marge per al retall circular.",
+      "resetLogoAria": "Restableix el logotip de {platform} al generat automàticament"
+    },
+    "notifications": {
+      "movedTitle": "Ara és a Automatitzacions",
+      "movedBody": "«A prop del teu local» és ara una única ubicació per a tot el teu negoci, no per programa.",
+      "movedCta": "Obre A prop del teu local"
+    },
+    "details": {
+      "description": "Detalls del revers de la targeta. Apareixen quan el client toca la targeta per veure més informació.",
+      "businessHours": "Horari del negoci",
+      "hoursPlaceholder": "Dl–Dv: 7h–21h\nDs–Dg: 8h–22h",
+      "socialLinks": "Xarxes socials",
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "tiktok": "TikTok",
+      "twitter": "X (Twitter)",
+      "handlePlaceholder": "@elteunegoci",
+      "facebookPlaceholder": "facebook.com/elteunegoci",
+      "customMessage": "Missatge personalitzat",
+      "messagePlaceholder": "Gràcies per ser un client fidel!"
+    },
+    "prize": {
+      "rewardDescription": "Descripció de la recompensa",
+      "rewardPlaceholder": "Cafè gratis",
+      "rewardHint": "Es mostra a la targeta com la propera recompensa. S'usa com a alternativa quan no hi ha premis configurats.",
+      "rewardRevealGame": "Joc de revelació de la recompensa",
+      "showMinigame": "Mostra un minijoc divertit quan els clients guanyen una recompensa"
+    },
+    "template": {
+      "cafe": "Cafeteria",
+      "fineDining": "Alta cuina",
+      "casual": "Casual",
+      "bar": "Bar",
+      "bakery": "Fleca",
+      "general": "General"
+    },
+    "canvas": {
+      "inProgress": "En progrés",
+      "almostDone": "Gairebé a punt",
+      "completed": "Completada",
+      "available": "Disponible",
+      "redeemed": "Canjeat",
+      "active": "Actiu",
+      "noExpiry": "Sense caducitat",
+      "background": "Fons",
+      "strip": "Franja",
+      "fields": "Camps",
+      "logo": "Logotip",
+      "progress": "Progrés"
+    }
+  },
+  "serverErrors": {
+    "noOrganization": "No s'ha trobat l'organització",
+    "invalidInput": "Dades no vàlides",
+    "unknownError": "Error desconegut",
+    "nameRequired": "El nom és obligatori",
+    "invalidEmail": "Email no vàlid",
+    "contactLimitReached": "Has arribat al límit de {limit} contactes del teu pla. Elimina contactes que no facis servir o millora el pla per afegir-ne més.",
+    "contactEmailExists": "Ja existeix un contacte amb l'email \"{email}\".",
+    "contactPhoneExists": "Ja existeix un contacte amb el telèfon \"{phone}\".",
+    "contactAlreadyExists": "Ja existeix un contacte amb aquestes dades.",
+    "contactNotFound": "Contacte no trobat",
+    "contactNoEmail": "El contacte no té adreça d'email",
+    "programNotFound": "Programa no trobat o no actiu",
+    "alreadyHasPass": "Aquest contacte ja té una targeta per a aquest programa.",
+    "fileTooLarge2MB": "El fitxer ha de ser més petit de 2MB",
+    "fileTooLarge5MB": "El fitxer ha de ser més petit de 5MB",
+    "invalidFileType": "El fitxer ha de ser PNG, JPEG o WebP",
+    "invalidFileTypeSvg": "El fitxer ha de ser PNG, JPEG, WebP o SVG",
+    "templateLimitReached": "Límit de plantilles assolit ({limit}). Millora el pla per crear-ne més.",
+    "templateNotFound": "Plantilla de targeta no trobada",
+    "templateAlreadyArchived": "La plantilla ja està arxivada",
+    "templateAlreadyActive": "La plantilla ja està activa",
+    "cannotActivateArchived": "No es pot activar una plantilla arxivada",
+    "onlyArchivedReactivate": "Només les plantilles arxivades es poden reactivar",
+    "templateNameMismatch": "El nom de la plantilla no coincideix",
+    "validationFailed": "Error de validació: {issues}",
+    "rateLimitExceeded": "Massa sol·licituds. Torna-ho a provar més tard.",
+    "contactFormFailed": "No s'ha pogut enviar el teu missatge. Torna-ho a provar o envia'ns un email directament.",
+    "invalidDesignData": "Dades de disseny no vàlides",
+    "missingFields": "Falten camps obligatoris",
+    "noLogoUploaded": "No s'ha pujat cap logotip",
+    "failedFetchLogo": "Error en obtenir el logotip",
+    "failedExtractColors": "Error en extreure els colors",
+    "memberNotFound": "Membre no trobat",
+    "cannotRemoveSelf": "No et pots eliminar a tu mateix de l'organització",
+    "cannotRemoveLastOwner": "No es pot eliminar l'últim propietari. Transfereix la propietat primer.",
+    "memberAlreadyRole": "El membre ja té aquest rol",
+    "cannotChangeOwnRole": "No pots canviar el teu propi rol",
+    "cannotDemoteLastOwner": "No es pot rebaixar l'últim propietari. Promou un altre membre primer.",
+    "invitationNotFound": "Invitació no trobada",
+    "passInstanceNotFound": "Instància de targeta no trobada",
+    "contactDeleted": "El contacte s'ha eliminat",
+    "passStatus": "Aquesta targeta està {status}",
+    "templateNoLongerActive": "Aquesta plantilla de targeta ja no està activa",
+    "templateExpired": "Aquesta plantilla de targeta ha caducat",
+    "notACoupon": "Aquesta targeta no és un cupó",
+    "couponAlreadyRedeemed": "Aquest cupó ja s'ha bescanviat",
+    "couponJustRedeemed": "Aquest cupó s'acaba de bescanviar. Espera un minut abans de tornar-lo a bescanviar.",
+    "noRemainingUses": "Aquesta targeta no té usos restants",
+    "missingPassOrFile": "Falta l'ID d'instància de targeta o el fitxer",
+    "missingPassId": "Falta l'ID d'instància de targeta",
+    "csvName": "Nom",
+    "csvEmail": "Email",
+    "csvPhone": "Telèfon",
+    "csvTotalInteractions": "Total interaccions",
+    "csvActivePasses": "Targetes actives",
+    "csvLastInteraction": "Última interacció",
+    "csvJoined": "Registrat",
+    "announcementProgramNotActive": "Només es poden enviar anuncis en programes actius.",
+    "announcementQuotaReachedWeek": "Ja has fet servir tots els anuncis d'aquesta setmana. Millora el pla per enviar-ne més.",
+    "announcementQuotaReachedFree": "Ja has fet servir els teus anuncis gratuïts. Millora el pla per enviar-ne més.",
+    "announcementProgramDailyCap": "Aquest programa ja ha enviat 3 anuncis en les últimes 24 hores. Torna-ho a provar més tard.",
+    "announcementSubscriptionInactive": "La teva subscripció està inactiva. Actualitza la facturació per enviar anuncis.",
+    "announcementNoRecipients": "Encara ningú té la targeta d'aquest programa al seu wallet, així que no hi ha ningú a qui notificar. No has gastat el teu cupo.",
+    "announcementQuotaReachedWeekTopPlan": "Ja has fet servir tots els anuncis d'aquesta setmana. En tindràs més disponibles quan els anteriors facin 7 dies.",
+    "reviewMissingTarget": "Tria el teu negoci o enganxa el teu enllaç de ressenyes.",
+    "reviewInvalidUrl": "Això no sembla un enllaç de ressenyes de Google.",
+    "reviewPlanRequired": "Les peticions de ressenya estan incloses a partir del pla Pro.",
+    "winbackPlanRequired": "Els missatges per recuperar clients estan inclosos a partir del pla Business."
+  },
+  "admin": {
+    "cohorts": {
+      "title": "Retenció per cohorts",
+      "subtitle": "Cohorts mensuals de registre i quantes organitzacions continuen actives: canal de partners vs. orgànic.",
+      "segmentAll": "Totes",
+      "segmentPartner": "Atribuïdes a partners",
+      "segmentOrganic": "Orgàniques",
+      "partnerM1": "Partner · retenció mes 1 ({count} orgs)",
+      "organicM1": "Orgànic · retenció mes 1 ({count} orgs)",
+      "partnerM3": "Partner · retenció mes 3",
+      "organicM3": "Orgànic · retenció mes 3",
+      "colCohort": "Cohort",
+      "colOrgs": "Orgs",
+      "colPaid": "De pagament",
+      "colSubscribed": "Subscrites",
+      "noData": "No hi ha organitzacions en els últims 12 mesos.",
+      "methodology": "Una cohort són totes les organitzacions creades en un mes donat (UTC). Retinguda a Mn = l'organització ha registrat almenys una interacció (segell, canvi, nota…) en el mes n després del registre. M0 és el mateix mes de registre. De pagament = en un pla de pagament avui; Subscrites = subscripció activa o en prova. Les targetes comparatives es ponderen per mida de cohort entre totes les cohorts amb prou antiguitat."
+    },
+    "partners": {
+      "title": "Liquidacions de partners",
+      "subtitle": "Liquidacions mensuals de repartiment d'ingressos per a partners: ingressos nets cobrats, repartiment i compensació de la quota d'alta.",
+      "noPartners": "Encara no hi ha comptes de partner. Marca un usuari com a partner des de la pàgina d'Usuaris.",
+      "partnerLabel": "Partner",
+      "monthLabel": "Mes de la liquidació",
+      "generate": "Genera la liquidació",
+      "generateError": "No s'ha pogut generar la liquidació. Torna-ho a provar.",
+      "netCollected": "Net cobrat",
+      "grossMinusRefunds": "{gross} cobrat − {refunds} reemborsat",
+      "revShare": "Repartiment d'ingressos ({rate}%)",
+      "setupFeeShare": "Part de la quota d'alta que ens deuen",
+      "newActivated": "{count, plural, =1 {1 client nou activat} other {# clients nous activats}} × 30 €",
+      "payoutToPartner": "Pagament net al partner",
+      "payoutFromPartner": "Net degut pel partner",
+      "colOrganization": "Organització",
+      "colPlan": "Pla",
+      "colStatus": "Estat",
+      "colCreated": "Creada",
+      "colGross": "Cobrat",
+      "colRefunds": "Reemborsaments",
+      "colNet": "Net",
+      "noOrgs": "No hi ha organitzacions atribuïdes a aquest partner.",
+      "newBadge": "Nova",
+      "methodology": "Cobrat = factures de Stripe pagades amb data del mes de la liquidació. Els reemborsaments emesos durant el mes es descompten d'aquesta liquidació independentment de la data del càrrec original. Client nou activat = organització atribuïda creada durant el mes amb almenys un programa actiu. Pagament positiu: transferència al partner; negatiu: el partner ens deu."
+    },
+    "nav": {
+      "overview": "Resum",
+      "users": "Usuaris",
+      "organizations": "Organitzacions",
+      "funnel": "Embut",
+      "auditLog": "Registre d'auditoria",
+      "partners": "Partners",
+      "cohorts": "Cohorts"
+    },
+    "funnel": {
+      "title": "Embut d'activació",
+      "subtitle": "Com els registres es converteixen en programes actius i targetes emeses. Les etapes s'ancoren a User.createdAt per a la finestra de cohort; l'abandonament és retenció de cohort, no recompte d'esdeveniments.",
+      "stageSignedUp": "Registrats",
+      "stageOrgCreated": "Organització creada",
+      "stageProgramCreated": "Primer programa creat",
+      "stageProgramActive": "Primer programa activat",
+      "stagePassIssued": "Primera targeta emesa",
+      "range7d": "7 dies",
+      "range30d": "30 dies",
+      "range90d": "90 dies",
+      "rangeAll": "Tot",
+      "rangeAriaLabel": "Rang de cohort",
+      "ofCohort": "cohort",
+      "ofPrev": "{value} de l'anterior",
+      "cohortNote": "Cada etapa compta usuaris únics el registre dels quals cau dins de la finestra de cohort seleccionada. Un usuari que es registra i activa un programa el mateix dia és la mateixa persona, no dos esdeveniments."
+    },
+    "overview": {
+      "title": "Resum de la plataforma",
+      "totalUsers": "Total d'usuaris",
+      "totalOrganizations": "Organitzacions",
+      "totalContacts": "Total de contactes",
+      "estimatedMrr": "MRR estimat",
+      "newUsersMonth": "Usuaris nous aquest mes",
+      "newOrgsMonth": "Orgs. noves aquest mes",
+      "activeSubscriptions": "Subscripcions actives",
+      "subscriptionBreakdown": "Desglossament de subscripcions",
+      "planBreakdown": "Desglossament per pla"
+    },
+    "users": {
+      "title": "Usuaris",
+      "searchPlaceholder": "Cerca per nom o email...",
+      "filterAll": "Tots",
+      "filterBanned": "Bloquejats",
+      "filterSuperAdmin": "Superadmins",
+      "filterAdmins": "Admins",
+      "columnUser": "Usuari",
+      "columnRole": "Rol",
+      "columnStatus": "Estat",
+      "columnOrganization": "Organització",
+      "columnCreated": "Creació",
+      "noUsersFound": "No s'han trobat usuaris.",
+      "pageOf": "Pàgina {page} de {pageCount}",
+      "viewDetails": "Veure detalls",
+      "impersonate": "Suplantar",
+      "banUser": "Bloqueja l'usuari",
+      "unbanUser": "Desbloqueja l'usuari",
+      "ban": "Bloqueja",
+      "unban": "Desbloqueja",
+      "promoteToAdmin": "Promou a Admin",
+      "demoteToUser": "Rebaixa a Usuari",
+      "revokeSessions": "Revoca les sessions",
+      "banDialogTitle": "Bloquejar {name}?",
+      "banDialogDescription": "Això impedirà que l'usuari iniciï sessió. El pots desbloquejar més tard.",
+      "banReasonPlaceholder": "Motiu del bloqueig (opcional)",
+      "roleDialogTitle": "Canvia el rol",
+      "roleDialogDemote": "Rebaixar {name} de Superadmin a Usuari?",
+      "roleDialogPromote": "Promoure {name} a Superadmin? Tindrà accés total a la plataforma.",
+      "cancel": "Cancel·la",
+      "created": "Creació",
+      "emailVerified": "Email verificat",
+      "yes": "Sí",
+      "no": "No",
+      "organization": "Organització",
+      "banReason": "Motiu del bloqueig",
+      "activeSessions": "Sessions actives",
+      "loadingSessions": "Carregant sessions...",
+      "noActiveSessions": "No hi ha sessions actives.",
+      "unknownDevice": "Dispositiu desconegut",
+      "unknownIp": "IP desconeguda",
+      "bannedUser": "{name} ha estat bloquejat.",
+      "unbannedUser": "{name} ha estat desbloquejat.",
+      "roleUpdated": "Rol actualitzat a {role}.",
+      "sessionsRevoked": "Totes les sessions revocades.",
+      "partner": "Partner",
+      "markPartner": "Marca com a partner",
+      "unmarkPartner": "Treu l'estat de partner",
+      "partnerMarked": "{name} ara és partner. Les seves membresies ja no compten per als límits de personal.",
+      "partnerUnmarked": "Estat de partner eliminat per a {name}.",
+      "failedBan": "Error en bloquejar l'usuari.",
+      "failedUnban": "Error en desbloquejar l'usuari.",
+      "failedRoleUpdate": "Error en actualitzar el rol.",
+      "failedRevokeSessions": "Error en revocar les sessions.",
+      "failedImpersonate": "Error en suplantar l'usuari.",
+      "selfBanError": "No et pots bloquejar a tu mateix.",
+      "selfRoleError": "No pots canviar el teu propi rol.",
+      "lastAdminError": "No es pot rebaixar l'últim Superadmin."
+    },
+    "organizations": {
+      "title": "Organitzacions",
+      "searchPlaceholder": "Cerca per nom o slug...",
+      "filterAll": "Totes",
+      "columnName": "Nom",
+      "columnPlan": "Pla",
+      "columnStatus": "Estat",
+      "columnMembers": "Membres",
+      "columnContacts": "Contactes",
+      "columnCreated": "Creació",
+      "noOrganizationsFound": "No s'han trobat organitzacions.",
+      "pageOf": "Pàgina {page} de {pageCount}",
+      "viewDetails": "Veure detalls",
+      "openInStripe": "Obre a Stripe",
+      "plan": "Pla",
+      "subscriptionStatus": "Estat de la subscripció",
+      "stripeCustomerId": "ID de client de Stripe",
+      "trialEndsAt": "Fi del període de prova",
+      "created": "Creació",
+      "teamMembers": "Membres de l'equip",
+      "users": "Usuaris",
+      "templates": "Plantilles",
+      "contacts": "Contactes"
+    },
+    "auditLog": {
+      "title": "Registre d'auditoria",
+      "searchPlaceholder": "Cerca per objectiu...",
+      "filterAllActions": "Totes les accions",
+      "filterAllTypes": "Tots els tipus",
+      "columnAdmin": "Admin",
+      "columnAction": "Acció",
+      "columnTarget": "Objectiu",
+      "columnReason": "Motiu",
+      "columnDate": "Data",
+      "noLogsFound": "No s'han trobat registres.",
+      "pageOf": "Pàgina {page} de {pageCount}",
+      "targetUser": "Usuari",
+      "targetOrganization": "Organització",
+      "targetContact": "Contacte",
+      "actionUserBanned": "Usuari bloquejat",
+      "actionUserUnbanned": "Usuari desbloquejat",
+      "actionUserRoleChanged": "Rol canviat",
+      "actionUserPartnerChanged": "Estat de partner canviat",
+      "actionUserSessionsRevoked": "Sessions revocades",
+      "actionUserImpersonated": "Suplantació iniciada",
+      "actionUserImpersonationEnded": "Suplantació finalitzada",
+      "actionUserDataExported": "Dades exportades",
+      "actionUserDeleted": "Usuari eliminat",
+      "actionOrgPlanChanged": "Pla canviat",
+      "actionOrgStatusChanged": "Estat canviat",
+      "actionOrgDeleted": "Org. eliminada",
+      "actionContactsPurged": "Contactes purgats",
+      "actionBulkBan": "Bloqueig massiu",
+      "actionBulkStatusChange": "Canvi d'estat massiu",
+      "actionBulkExport": "Exportació massiva"
+    },
+    "roles": {
+      "user": "Usuari",
+      "adminSupport": "Admin de suport",
+      "adminBilling": "Admin de facturació",
+      "adminOps": "Admin d'operacions",
+      "superAdmin": "Superadmin"
+    },
+    "impersonation": {
+      "banner": "Estàs suplantant {name}",
+      "stop": "Deixa de suplantar"
+    },
+    "common": {
+      "adminPanel": "Panell d'administració",
+      "backToDashboard": "Torna al panell",
+      "signOut": "Tanca la sessió",
+      "previous": "Pàgina anterior",
+      "next": "Pàgina següent"
+    }
+  },
+  "join": {
+    "chooseProgram": "Tria un programa per unir-t'hi",
+    "freePass": "Targeta digital gratuïta",
+    "poweredBy": "Amb tecnologia de {brand}",
+    "chooseDifferent": "Tria un altre programa",
+    "getYourPass": "Aconsegueix la teva targeta digital",
+    "yourName": "El teu nom",
+    "email": "Email",
+    "namePlaceholder": "Joan Garcia",
+    "emailPlaceholder": "joan@exemple.com",
+    "webPassInstead": "Continua sense wallet",
+    "settingUp": "Preparant la teva targeta...",
+    "addingToWallet": "Afegint a la cartera...",
+    "updatingWallet": "Actualitzant la targeta...",
+    "welcomeBack": "Benvingut de nou! Carregant la teva targeta...",
+    "somethingWentWrong": "Alguna cosa ha fallat",
+    "stampSubtitle": "{reward} després de {visits} visites",
+    "inviteOnlyTitle": "Aquest programa és per invitació",
+    "inviteOnlyBody": "{name} lliura aquesta targeta directament. Demana-la al taulell o espera a rebre-la per email.",
+    "inviteOnlySeeOthers": "Veure els altres programes",
+    "inviteOnlyError": "Aquest programa és per invitació. Demana la targeta al taulell.",
+    "card": {
+      "title": "Targeta de {name}",
+      "rewardEarned": "Has guanyat una recompensa!",
+      "couponRedeemed": "Aquest cupó s'ha bescanviat",
+      "passAdded": "Targeta afegida! Comprova la teva app Wallet.",
+      "addToWallet": "Afegeix a {platform} Wallet",
+      "addingToWallet": "Afegint a la cartera...",
+      "bookmarkHint": "Desa aquesta pàgina als marcadors per accedir a la teva targeta en qualsevol moment",
+      "walletFailed": "No s'ha pogut generar la targeta",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet",
+      "saveToContacts": "Desa a Contactes"
+    }
+  },
+  "contact": {
+    "sectionLabel": "Contacte",
+    "pageTitle": "Escriu-nos.",
+    "pageSubtitle": "Dubtes sobre la targeta, el teu compte o un pla per a diversos locals. Et contestem per correu en un o dos dies laborables.",
+    "nameLabel": "Nom",
+    "namePlaceholder": "El teu nom complet",
+    "emailLabel": "Email",
+    "emailPlaceholder": "tu@empresa.com",
+    "inquiryTypeLabel": "Tipus de consulta",
+    "inquiryTypes": {
+      "general": "Consulta general",
+      "sales": "Vendes / Enterprise",
+      "partnership": "Col·laboració",
+      "support": "Suport"
+    },
+    "companyLabel": "Empresa (opcional)",
+    "companyPlaceholder": "Nom de la teva empresa",
+    "messageLabel": "Missatge",
+    "messagePlaceholder": "Explica'ns com et podem ajudar...",
+    "messageHint": "Mínim 10 caràcters",
+    "submitButton": "Envia el missatge",
+    "privacyNote": "En enviar aquest formulari, acceptes la nostra Política de privacitat. Respondrem en 1-2 dies laborables.",
+    "successTitle": "Missatge enviat!",
+    "successMessage": "Gràcies per contactar amb nosaltres. Hem enviat una confirmació al teu email i et respondrem en 1-2 dies laborables.",
+    "directEmail": "Prefereixes l'email?",
+    "highlights": {
+      "general": {
+        "title": "Dubtes generals",
+        "description": "Com funciona la targeta, quin pla et convé o si encaixa amb el teu negoci."
+      },
+      "sales": {
+        "title": "Diversos locals",
+        "description": "Cadenes i negocis amb diversos locals: límits a mida i condicions per contracte."
+      },
+      "partnership": {
+        "title": "Partners",
+        "description": "Agències, consultors i distribuïdors de TPV que munten Loyalshy per als seus clients."
+      },
+      "support": {
+        "title": "Suport",
+        "description": "El teu compte, una targeta que no s'actualitza al Wallet, l'app d'equip o una factura."
+      }
+    }
+  },
+  "metadata": {
+    "home": {
+      "title": "Targeta de fidelització digital, sense app — Loyalshy",
+      "description": "La targeta de segells digital per a cafeteries, perruqueries i botigues. Viu a Apple i Google Wallet, sense app ni paper. Gratis fins a 50 clients.",
+      "jsonLdDescription": "Plataforma de fidelització digital per a petits negocis. Crea i gestiona targetes de segells i cupons a Apple Wallet i Google Wallet."
+    },
+    "contact": {
+      "title": "Contacte",
+      "description": "Escriu-nos sobre la targeta de fidelització, el teu compte o un pla per a diversos locals. Et contestem per correu en un o dos dies laborables."
+    },
+    "privacy": {
+      "title": "Política de privacitat",
+      "description": "Com Loyalshy recull, usa i protegeix les teves dades personals."
+    },
+    "terms": {
+      "title": "Termes del servei",
+      "description": "Condicions d'ús de la plataforma Loyalshy."
+    },
+    "cookies": {
+      "title": "Política de galetes",
+      "description": "Com usa Loyalshy les galetes i tecnologies similars."
+    },
+    "for": {
+      "title": "Fidelització per a cafeteries, perruqueries i botigues",
+      "description": "Una targeta de segells digital o un cupó a Apple i Google Wallet, adaptats al teu taulell: cafeteries, perruqueries i botigues. Sense app per al client."
+    },
+    "cafes": {
+      "title": "Targeta de segells digital per a cafeteries",
+      "description": "La targeta de segells de la teva cafeteria a Apple i Google Wallet: nou cafès i el desè gratis. Sense app, sense tocar el TPV. Gratis fins a 50 clients."
+    },
+    "salons": {
+      "title": "Targeta de fidelització per a perruqueries i barberies",
+      "description": "El programa de fidelització de la teva perruqueria a Apple i Google Wallet: un segell per cita, premi a la cinquena i un recordatori quan fa temps. Sense app."
+    },
+    "retail": {
+      "title": "Targetes de fidelització i cupons per a botigues",
+      "description": "Una targeta de segells i un cupó a Apple i Google Wallet per fidelitzar els clients de la teva botiga. S'escaneja a caixa, sense tocar el TPV."
+    },
+    "automations": {
+      "title": "Automatitzacions: ressenyes i recuperar clients",
+      "description": "La targeta demana una ressenya a Google, recupera els habituals que van deixar de venir i apareix a la pantalla de bloqueig a prop del teu local."
+    },
+    "pricing": {
+      "title": "Preus de la targeta de fidelització digital",
+      "description": "Gratis fins a 50 clients. Pro 29 €, Business 49 €, Scale 99 € al mes, IVA inclòs i fins a un 20 % menys a l'any. Sense permanència ni targeta per començar."
+    },
+    "staffApp": {
+      "title": "L'app d'equip per a iPhone i Android",
+      "description": "Escaneja la targeta, afegeix el segell, bescanvia el cupó. Mode taulell, alta de clients nous i premis pendents. Inclosa en tots els plans de Loyalshy."
+    },
+    "partners": {
+      "title": "Programa de partners per a agències i consultors",
+      "description": "Munta Loyalshy per als teus clients, traspassa'ls el negoci amb un enllaç i queda't com a gestor de programes. Amb enllaços de referit i una consola de partner."
+    },
+    "privatePrograms": {
+      "title": "Programes privats, només per invitació",
+      "description": "Targetes de soci, cupons VIP i avantatges per a l'equip, amagats de la pàgina pública. Només el teu equip els emet, des del panell o des de l'app al taulell."
+    },
+    "about": {
+      "title": "Sobre Loyalshy",
+      "description": "Loyalshy el fa HEX CONCEPTS STUDIO a Lleida. Un sol producte: la targeta de fidelització a Apple i Google Wallet, per a cafeteries, perruqueries i botigues."
+    },
+    "status": {
+      "title": "Estat del sistema",
+      "description": "Estat en temps real de loyalshy.com, la seva base de dades i els proveïdors dels quals depèn Loyalshy."
+    },
+    "subprocessors": {
+      "title": "Subencarregats",
+      "description": "Els tercers que tracten dades personals per compte de Loyalshy, per a què i on."
+    },
+    "promote": {
+      "title": "Com promocionar el teu programa de fidelització",
+      "description": "Vuit llocs que porten altes: caixa, taula, porta, tiquet, Instagram i ressenyes de Google. Material promocional gratis des del panell, o imprès per nosaltres."
+    }
+  },
+  "pages": {
+    "common": {
+      "seePricing": "Veure preus",
+      "bookDemo": "Demana una demo",
+      "allPlans": "Tots els plans",
+      "fromPro": "Des de Pro",
+      "fromBusiness": "Des de Business",
+      "iphoneOnly": "Només iPhone",
+      "stampCard": "Targeta de segells",
+      "coupon": "Cupó",
+      "seeAutomations": "Veure les automatitzacions",
+      "seeStaffApp": "Veure l'app d'equip",
+      "seePrivatePrograms": "Programes privats",
+      "writeToUs": "Escriu-nos",
+      "anythingElse": "Alguna cosa més?",
+      "emailUs": "Escriu-nos",
+      "replyTime": "i et contestem per correu.",
+      "seePromote": "Com promocionar-lo al taulell"
+    },
+    "industries": {
+      "hub": {
+        "title": "Fidelització per a cafeteries, perruqueries i botigues.",
+        "lead": "Cafeteries, perruqueries i botigues viuen dels habituals. Loyalshy dona a cadascuna un programa de fidelització a Apple i Google Wallet, una targeta de segells o un cupó, i a tu un panell que t'ensenya qui torna.",
+        "cards": {
+          "cafes": {
+            "title": "Cafeteries i fleques",
+            "lead": "El desè cafè gratis, sense la targeta de paper.",
+            "alt": "Les taules i el taulell d'una cafeteria"
+          },
+          "salons": {
+            "title": "Perruqueries i barberies",
+            "lead": "Un segell per cita, un premi a la cinquena, un recordatori quan fa temps.",
+            "alt": "Una perruquera treballant en un saló lluminós"
+          },
+          "retail": {
+            "title": "Botigues i comerç",
+            "lead": "Un cupó per a la propera compra i una targeta per als habituals.",
+            "alt": "Una botiga de roba petita amb penjadors i taulell"
+          }
+        },
+        "sameTitle": "El mateix a tot arreu.",
+        "sameLead": "Sigui com sigui el taulell, la mecànica no canvia.",
+        "same": {
+          "noApp": {
+            "title": "Sense app per al client",
+            "body": "Escaneja un codi QR un cop i la targeta es desa a Apple Wallet o Google Wallet. Sense descàrregues, sense compte, sense contrasenya."
+          },
+          "counter": {
+            "title": "Al taulell no canvia res",
+            "body": "El teu equip escaneja la targeta amb l'app de Loyalshy i afegeix el segell o bescanvia el cupó. El TPV es queda com està."
+          },
+          "data": {
+            "title": "Els teus clients, les teves dades",
+            "body": "Cada segell apareix al panell. Veus qui torna i qui va deixar de venir, i pots exportar la llista quan vulguis."
+          }
+        },
+        "chooseTitle": "Tria el teu negoci."
+      },
+      "cafes": {
+        "title": "La targeta de segells per a cafeteries.",
+        "lead": "Nou cafès i el desè gratis. Per a la cafeteria i la fleca de barri: la targeta viu a l'Apple o Google Wallet dels teus clients, així que no es perd, no s'oblida ni es falsifica, i tu veus cada segell al panell.",
+        "heroAlt": "Una barista somrient darrere del taulell",
+        "counterTitle": "Al taulell.",
+        "counterLead": "L'hora punta del matí no es frena. Això és el que canvia i el que no.",
+        "steps": {
+          "1": {
+            "title": "El client escaneja el QR",
+            "body": "Un expositor de taula o un adhesiu al costat de la caixa. El primer cop, la targeta es desa al seu Wallet en uns segons. Sense app, sense més formulari que un correu."
+          },
+          "2": {
+            "title": "El teu equip escaneja la targeta",
+            "body": "El client ensenya la targeta al mòbil, el barista l'escaneja amb l'app de Loyalshy i el segell cau al moment. Si ha estat un error, hi ha deu minuts per desfer-lo."
+          },
+          "3": {
+            "title": "El premi apareix sol",
+            "body": "Amb l'últim segell la targeta ho diu, i el client canvia el cafè gratis a la seva següent visita. Després la targeta comença de nou."
+          }
+        },
+        "programsTitle": "Dos programes.",
+        "programsLead": "Una targeta de segells per al cafè de cada dia, un cupó per a les hores tranquil·les.",
+        "stamp": {
+          "title": "Nou cafès, el desè el posem nosaltres",
+          "body": "La targeta clàssica, al Wallet. Tu tries el nombre de segells, el premi i el disseny: la franja, la icona del segell i els colors són teus.",
+          "alt": "La targeta de segells d'una pizzeria a Apple Wallet"
+        },
+        "coupon": {
+          "title": "2x1 a partir de les quatre",
+          "body": "Un cupó d'un sol ús o il·limitat per a la baixada de la tarda, un dolç nou o la primera setmana d'un local nou. Es bescanvia amb el mateix escaneig.",
+          "alt": "El cupó d'una hamburgueseria a Apple Wallet"
+        },
+        "beyondTitle": "Més enllà de la targeta.",
+        "beyondLead": "El que una targeta de paper mai podrà fer.",
+        "beyond": {
+          "reviews": {
+            "title": "Demanar una ressenya a Google",
+            "body": "Després de la visita que triïs, la targeta demana un cop una ressenya a Google, una hora i mitja després, amb un enllaç que pots seguir."
+          },
+          "winback": {
+            "title": "Recuperar els que van deixar de venir",
+            "body": "Un habitual que fa un mes que no ve rep el teu missatge de «et trobem a faltar» a la pantalla de bloqueig."
+          },
+          "nearby": {
+            "title": "Aparèixer a la pantalla de bloqueig en passar",
+            "body": "Quan un client amb iPhone passa per davant de la teva cafeteria, la targeta apareix a la seva pantalla de bloqueig."
+          },
+          "announcements": {
+            "title": "Explicar a tothom les novetats",
+            "body": "Un cafè nou, l'horari de festes, un 2x1 avui. Un missatge des del panell arriba a totes les targetes."
+          }
+        },
+        "photoAlt": "El taulell d'una cafeteria",
+        "faqTitle": "Preguntes de cafeteries.",
+        "faq": {
+          "rush": {
+            "question": "Escanejar frena l'hora punta del matí?",
+            "answer": "L'escaneig triga més o menys el que trigava un segell. El barista obre l'app de Loyalshy, apunta la càmera a la targeta i llestos. Després de cada segell la càmera torna sola, a punt per al següent client."
+          },
+          "two": {
+            "question": "Un client pot rebre dos segells en una visita?",
+            "answer": "Sí, si vols. El teu equip afegeix tants segells com mereixi la comanda. Un segell posat per error es pot desfer durant deu minuts."
+          },
+          "android": {
+            "question": "I els clients sense iPhone?",
+            "answer": "Google Wallet funciona igual a Android. El client escaneja el mateix QR i la targeta es desa a Google Wallet."
+          },
+          "design": {
+            "question": "La targeta pot assemblar-se a la meva cafeteria?",
+            "answer": "Sí. A l'estudi de disseny tries el logotip, els colors, la imatge de la franja i la icona del segell. La targeta del Wallet és la targeta que vas dissenyar."
+          },
+          "hardware": {
+            "question": "Necessito cap aparell nou?",
+            "answer": "No. L'equip escaneja amb el mòbil que ja té, amb l'app de Loyalshy per a iPhone i Android. Res no es connecta al TPV."
+          }
+        }
+      },
+      "salons": {
+        "title": "La targeta de fidelització per a perruqueries.",
+        "lead": "El programa de fidelització de la teva perruqueria, al Wallet: un segell per cita, un premi a la cinquena. La targeta viu a l'Apple o Google Wallet dels teus clients i, quan un habitual fa temps que no reserva, li ho recorda.",
+        "heroAlt": "Una perruquera treballant en un saló lluminós",
+        "counterTitle": "A recepció.",
+        "counterLead": "Els clients vénen cada quatre o sis setmanes. La targeta ha de sobreviure a aquest buit, i el paper no ho fa.",
+        "steps": {
+          "1": {
+            "title": "El client escaneja el QR a recepció",
+            "body": "En una targeta al costat del mirall o al taulell. La targeta es desa al seu Wallet amb un correu. Sense app per descarregar."
+          },
+          "2": {
+            "title": "Un segell per cita",
+            "body": "Mentre paga, el teu equip escaneja la targeta amb l'app de Loyalshy. Un segell per visita, o més per un tractament, com decideixis."
+          },
+          "3": {
+            "title": "El premi a la cinquena",
+            "body": "Un pentinat gratis, un tractament, un descompte en productes. La targeta el mostra i el client el canvia a la següent cita."
+          }
+        },
+        "programsTitle": "Dos programes.",
+        "programsLead": "Una targeta de segells per als habituals, un cupó per als que vols que tornin.",
+        "stamp": {
+          "title": "Cinc cites, un tractament gratis",
+          "body": "Tries el nombre de segells, el premi i l'aspecte. Una targeta diferent per a la cadira de barber i per al color, si vols.",
+          "alt": "Una targeta de segells a Apple Wallet"
+        },
+        "coupon": {
+          "title": "20 % en el primer color",
+          "body": "Un cupó d'un sol ús per a un servei nou, per als matins tranquils entre setmana, o per a la clienta que ha portat una amiga.",
+          "alt": "Un cupó a Apple Wallet"
+        },
+        "beyondTitle": "Més enllà de la targeta.",
+        "beyondLead": "On una perruqueria en treu més profit.",
+        "beyond": {
+          "winback": {
+            "title": "El recordatori quan fa temps",
+            "body": "Un client que fa seixanta dies que no ve rep el teu missatge a la pantalla de bloqueig. L'escrius un cop; surt sol."
+          },
+          "reviews": {
+            "title": "Una ressenya a Google en el moment just",
+            "body": "Després de la visita que triïs, la targeta demana un cop una ressenya, una hora i mitja després, quan ja és a casa i content amb el tall."
+          },
+          "private": {
+            "title": "Una targeta només per a socis",
+            "body": "Un programa només per invitació per als teus clients VIP o un avantatge de soci, amagat de la pàgina pública. Només el teu equip l'emet."
+          },
+          "announcements": {
+            "title": "Obertures, tancaments i novetats",
+            "body": "Un estilista nou, l'horari de festes, un producte nou. Un missatge des del panell arriba a totes les targetes."
+          }
+        },
+        "photoAlt": "Un saló buit amb cadires al costat de les finestres",
+        "faqTitle": "Preguntes de perruqueries.",
+        "faq": {
+          "services": {
+            "question": "Serveis diferents poden donar segells diferents?",
+            "answer": "El teu equip decideix quants segells dona cada visita en escanejar. Si vols programes separats, el pla Pro en permet dos i Business cinc."
+          },
+          "booking": {
+            "question": "Es connecta amb el meu sistema de reserves?",
+            "answer": "No, i no cal. La targeta s'escaneja a recepció, al costat del que facis servir per reservar. Res a integrar."
+          },
+          "staff": {
+            "question": "Cada estilista pot tenir l'app?",
+            "answer": "Sí. Cada membre de l'equip entra al seu propi mòbil, per aparellament amb QR, per correu o amb Google. El pla fixa quants membres pots tenir."
+          },
+          "gap": {
+            "question": "I si un client no torna en mesos?",
+            "answer": "La targeta es queda al seu Wallet amb els segells que va guanyar. Des de Business, el missatge de recuperació li ho recorda passats els dies que fixis."
+          },
+          "android": {
+            "question": "Els meus clients necessiten un iPhone?",
+            "answer": "No. Google Wallet funciona igual a Android. Només el suggeriment d'«a prop del teu local» és exclusiu d'iPhone."
+          }
+        }
+      },
+      "retail": {
+        "title": "La targeta de fidelització per a botigues.",
+        "lead": "Fidelitza els clients de la teva botiga amb una targeta de segells per als que vénen cada setmana i un cupó per als que podrien tornar. Les dues a Apple i Google Wallet, les dues escanejades a caixa amb la mateixa app.",
+        "heroAlt": "Una botiga de roba petita amb penjadors i taulell",
+        "counterTitle": "A caixa.",
+        "counterLead": "La targeta s'escaneja mentre paguen. Res no toca el teu TPV.",
+        "steps": {
+          "1": {
+            "title": "Un QR al costat de la caixa",
+            "body": "Un adhesiu, un cartell de taulell o un enllaç a la bio d'Instagram. El client l'escaneja, posa un correu i la targeta és al seu Wallet."
+          },
+          "2": {
+            "title": "Un segell per compra",
+            "body": "El teu equip escaneja la targeta amb l'app de Loyalshy. Un segell per cada compra, o per cada compra a partir d'un import que fixis com a norma."
+          },
+          "3": {
+            "title": "El premi, o el cupó",
+            "body": "Amb l'últim segell la targeta mostra el premi. Un cupó es bescanvia igual: un escaneig, usat o encara vàlid, sense codis per teclejar."
+          }
+        },
+        "programsTitle": "Dos programes.",
+        "programsLead": "Segells per als habituals, un cupó per a tots els altres.",
+        "stamp": {
+          "title": "Deu compres, un regal",
+          "body": "La targeta dels habituals. Fixes el nombre de segells, el premi i el disseny, i la icona del segell pot ser el teu producte.",
+          "alt": "Una targeta de segells a Apple Wallet"
+        },
+        "coupon": {
+          "title": "10 % en la teva propera compra",
+          "body": "Un cupó d'un sol ús que se'n va amb la primera compra, o un d'il·limitat per a una temporada. Comparteix-lo per QR, enllaç o Instagram.",
+          "alt": "Un cupó del 10 % a Apple Wallet"
+        },
+        "beyondTitle": "Més enllà de la targeta.",
+        "beyondLead": "El que fa la targeta entre visita i visita.",
+        "beyond": {
+          "nearby": {
+            "title": "A la pantalla de bloqueig, al carrer",
+            "body": "Un client amb iPhone passa per davant de la teva botiga i la targeta apareix a la seva pantalla de bloqueig amb la teva frase."
+          },
+          "announcements": {
+            "title": "Col·lecció nova, rebaixes, obertura tardana",
+            "body": "Un missatge des del panell arriba a totes les targetes com a notificació. Cada pla té una quota setmanal."
+          },
+          "winback": {
+            "title": "Recuperar els que s'han refredat",
+            "body": "Un habitual que fa noranta dies que no compra rep el teu missatge. Un de cada deu no el rep, perquè vegis si ha funcionat."
+          },
+          "reviews": {
+            "title": "Demanar una ressenya a Google",
+            "body": "Després de la compra que triïs, la targeta demana un cop una ressenya a Google, amb un enllaç que pots seguir."
+          }
+        },
+        "photoAlt": "Una clienta pagant a caixa",
+        "faqTitle": "Preguntes de botigues.",
+        "faq": {
+          "amount": {
+            "question": "Un segell pot dependre de quant gasten?",
+            "answer": "La norma és teva: el teu equip afegeix un segell quan la compra ho compleix. L'app no llegeix el tiquet, així que no hi ha res a connectar."
+          },
+          "online": {
+            "question": "Puc compartir la targeta en línia?",
+            "answer": "Sí. Cada programa públic té un enllaç d'alta que pots posar a la bio d'Instagram, en un correu o al teu web, i un QR per a la botiga."
+          },
+          "coupon": {
+            "question": "Un cupó es pot fer servir més d'un cop?",
+            "answer": "Tu tries. Un cupó d'un sol ús queda anul·lat després del primer escaneig. Un d'il·limitat es pot tornar a bescanviar passat un minut, mentre duri el programa."
+          },
+          "locations": {
+            "question": "Tinc dues botigues. La targeta serveix a totes dues?",
+            "answer": "Sí. Totes dues escanegen les mateixes targetes amb la mateixa app. Cada membre de l'equip entra al seu propi mòbil."
+          },
+          "export": {
+            "question": "Puc endur-me la meva llista de clients?",
+            "answer": "Sí, quan vulguis, a CSV des del panell. La llista és teva."
+          }
+        }
+      }
+    },
+    "automations": {
+      "title": "Ressenyes a Google i clients que tornen, en automàtic.",
+      "lead": "Tres coses que la targeta fa sola, configurades un cop des del panell: demanar una ressenya a Google, recuperar un habitual que va deixar de venir i aparèixer a la pantalla de bloqueig quan un client passa per davant.",
+      "heroAlt": "Una mà sostenint un mòbil",
+      "rows": {
+        "reviews": {
+          "meta": "Ressenyes a Google · Des de Pro",
+          "title": "Demana una ressenya.",
+          "body": "Després de la visita que triïs, la tercera per defecte, la targeta demana un cop una ressenya a Google, una hora i mitja després de la visita i mai de nit. L'enllaç es registra, així que veus a quants se'ls ha demanat i quants l'han obert.",
+          "more": "Sense premi per ressenyar i sense filtrar per puntuació. El gràfic diari mostra la teva puntuació a Google i el nombre de ressenyes al llarg del temps.",
+          "alt": "Les taules d'un restaurant després del servei"
+        },
+        "winback": {
+          "meta": "Recuperar clients · Des de Business",
+          "title": "Fes que tornin.",
+          "body": "Un habitual que fa 14, 30, 60 o 90 dies que no ve rep el teu missatge a la pantalla de bloqueig, un cop per absència. Tu l'escrius; surt a les deu del matí, en la teva hora.",
+          "more": "Un de cada deu no rep missatge, perquè la targeta de resultats pugui dir-te quants han tornat gràcies a ell i no per casualitat.",
+          "alt": "Una cafeteria buida"
+        },
+        "nearby": {
+          "meta": "A prop del teu local · Tots els plans, iPhone",
+          "title": "A la pantalla de bloqueig en passar.",
+          "body": "Fixa la teva ubicació un cop. Quan un client amb iPhone és a prop, la seva targeta apareix a la pantalla de bloqueig amb la frase que vas escriure. És un suggeriment que fa iOS, no una notificació push.",
+          "more": "Arrossega el pin del mapa fins a la porta del teu negoci.",
+          "alt": "Una persona amb bosses de la compra passant per davant d'aparadors"
+        }
+      },
+      "announceTitle": "I quan tens alguna cosa a dir.",
+      "announceBody": "Els avisos són la part manual: un missatge de fins a 160 caràcters des del panell o des de l'app d'equip, lliurat com a notificació a totes les targetes d'un programa. Cada pla té una quota setmanal.",
+      "measureTitle": "Mesurat.",
+      "measureLead": "Cada automatització ensenya els seus números al panell.",
+      "measure": {
+        "asked": {
+          "title": "Demanades i obertes",
+          "body": "A quants clients els ha demanat la targeta una ressenya i quants han obert l'enllaç."
+        },
+        "rating": {
+          "title": "Puntuació al llarg del temps",
+          "body": "La teva puntuació a Google i el nombre de ressenyes, capturats cada dia des que ho vas activar."
+        },
+        "lift": {
+          "title": "Han tornat, davant del grup de comparació",
+          "body": "Clients amb missatge que han tornat en dues setmanes, al costat dels que no n'han rebut cap."
+        }
+      },
+      "faqTitle": "Preguntes sobre les automatitzacions.",
+      "faq": {
+        "frequency": {
+          "question": "Els meus clients rebran massa notificacions?",
+          "answer": "La ressenya es demana un cop per client, per sempre. El missatge de recuperació surt un cop per absència i mai més d'un cop cada noranta dies. Els avisos tenen una quota setmanal per pla. «A prop del teu local» no és una notificació: la targeta simplement treu el cap a la pantalla de bloqueig."
+        },
+        "android": {
+          "question": "Funciona a Android?",
+          "answer": "Les peticions de ressenya, els missatges de recuperació i els avisos arriben tant a Apple Wallet com a Google Wallet. «A prop del teu local» és una funció d'iPhone; Google Wallet no mostra targetes per ubicació."
+        },
+        "edit": {
+          "question": "Puc canviar els missatges?",
+          "answer": "Sí, quan vulguis, des d'Automatitzacions al panell. El següent enviament usa el text nou."
+        },
+        "plans": {
+          "question": "Quin pla necessito?",
+          "answer": "«A prop del teu local» és a tots els plans, inclòs Free. Les peticions de ressenya a Google comencen a Pro. Els missatges de recuperació comencen a Business, perquè mesurar-los necessita uns centenars d'enviaments."
+        },
+        "coupons": {
+          "question": "Les automatitzacions funcionen amb cupons?",
+          "answer": "Amb cupons il·limitats, sí: cada bescanvi compta com a visita. Els cupons d'un sol ús mai demanen res. Un cop bescanviats, la targeta queda usada."
+        }
+      },
+      "rowsTitle": "Tres coses que fa sola."
+    },
+    "pricing": {
+      "title": "Plans i preus.",
+      "lead": "La targeta de fidelització digital, amb preu segons quants clients tens. Mensual o anual, sense permanència, i pots parar quan vulguis. Tots els plans inclouen els dos tipus de targeta, els dos wallets, l'app d'equip i el panell.",
+      "compareTitle": "Pla per pla.",
+      "compareLead": "El que inclou cada pla, línia a línia.",
+      "rows": {
+        "customers": "Clients",
+        "programs": "Programes actius",
+        "team": "Membres de l'equip",
+        "announcements": "Avisos al Wallet",
+        "reviews": "Peticions de ressenya a Google",
+        "winback": "Missatges de recuperació",
+        "nearby": "A prop del teu local",
+        "private": "Programes privats",
+        "wallets": "Apple i Google Wallet",
+        "staffApp": "App d'equip per a iPhone i Android",
+        "studio": "Estudi de disseny de targetes",
+        "export": "Exportar clients a CSV"
+      },
+      "values": {
+        "unlimited": "Il·limitats",
+        "lifetime": "{count} en total",
+        "perWeek": "{count, plural, one {# a la setmana} other {# a la setmana}}",
+        "included": "Inclòs",
+        "notIncluded": "No inclòs"
+      },
+      "faqTitle": "Preguntes sobre preus.",
+      "faq": {
+        "customer": {
+          "question": "Què compta com a client?",
+          "answer": "Un contacte amb almenys una targeta. Si la mateixa persona té la teva targeta de segells i un cupó, és un client."
+        },
+        "limit": {
+          "question": "Què passa quan arribo al límit?",
+          "answer": "No es poden donar d'alta clients nous fins que passis al següent pla. Les targetes ja emeses continuen funcionant i rebent segells."
+        },
+        "change": {
+          "question": "Puc canviar de pla més endavant?",
+          "answer": "Sí, des d'Ajustos en qualsevol moment. Una pujada de pla s'aplica a l'instant."
+        },
+        "annual": {
+          "question": "Com funciona el pagament anual?",
+          "answer": "Pagues dotze mesos d'un cop al preu que apareix sota Anual, fins a un 20 % menys que pagar mes a mes."
+        },
+        "vat": {
+          "question": "Els preus inclouen IVA?",
+          "answer": "Sí. Els preus que veus inclouen l'IVA, i a la factura apareix desglossat."
+        },
+        "cancel": {
+          "question": "Com cancel·lo?",
+          "answer": "Des d'Ajustos. El pla continua actiu fins al final del període pagat i després torna a Free. Les teves targetes i clients es queden."
+        },
+        "enterprise": {
+          "question": "I si tinc diversos locals?",
+          "answer": "Les cadenes i els negocis amb necessitats pròpies tenen el pla Enterprise: límits a mida, suport dedicat i condicions per contracte. Escriu a hello@loyalshy.com i ho veiem."
+        }
+      }
+    },
+    "staffApp": {
+      "title": "L'app d'equip.",
+      "lead": "Escanejar, segellar, canviar. Loyalshy per a iPhone i Android és el que el teu equip té a la mà al taulell, i ve amb tots els plans.",
+      "appStore": "Descarrega a l'App Store",
+      "playStore": "Disponible a Google Play",
+      "screens": {
+        "scan": "La pestanya Escanejar: la càmera, a punt per a una targeta",
+        "today": "La pestanya Avui amb el nom del negoci i els accessos del dia",
+        "share": "Compartir un programa: el QR i l'enllaç d'alta",
+        "history": "L'activitat recent: segells i canvis"
+      },
+      "rows": {
+        "scan": {
+          "meta": "Escanejar",
+          "title": "Un escaneig, un segell.",
+          "body": "L'app s'obre a la càmera. Apunta-la a la targeta del client i el segell cau, o el cupó es bescanvia. Quatre segons després la càmera torna, a punt per al següent client.",
+          "more": "Un segell per error? Desfés-lo en els deu minuts següents."
+        },
+        "find": {
+          "meta": "Buscar client",
+          "title": "Sense el mòbil a mà.",
+          "body": "Un client sense el seu mòbil? Busca'l per nom o correu i afegeix el segell des de la mateixa fulla."
+        },
+        "counter": {
+          "meta": "Mode taulell",
+          "title": "El QR en pantalla.",
+          "body": "Un codi d'alta a pantalla completa per a una tauleta o un mòbil de sobres a la caixa. La pantalla no s'apaga, i se surt amb una pulsació llarga."
+        },
+        "signup": {
+          "meta": "Client nou",
+          "title": "Alta al taulell.",
+          "body": "Escriu el correu del client i la targeta s'emet i s'envia al moment. És també la via d'entrada dels programes privats."
+        },
+        "rewards": {
+          "meta": "Premis pendents",
+          "title": "Qui té un premi esperant.",
+          "body": "Els premis guanyats i encara no bescanviats, els que caduquen abans primer."
+        },
+        "announce": {
+          "meta": "Avisos",
+          "title": "Un missatge a totes les targetes.",
+          "body": "Propietaris i gestors de programes poden enviar un avís al Wallet des de l'app, amb la mateixa quota que al panell."
+        }
+      },
+      "signinTitle": "Entrar.",
+      "signinLead": "Quatre maneres d'entrar, perquè un membre nou estigui a punt en un minut.",
+      "signin": {
+        "qr": {
+          "title": "Aparellar amb un QR",
+          "body": "Des d'Ajustos, Equip, mostra un QR amb un PIN de sis xifres. El membre de l'equip l'escaneja, tecleja el PIN i ja és dins. Sense contrasenya."
+        },
+        "email": {
+          "title": "Correu i contrasenya",
+          "body": "El mateix compte que al panell."
+        },
+        "google": {
+          "title": "Google",
+          "body": "Un toc amb el compte de Google que és a l'equip."
+        },
+        "invite": {
+          "title": "L'enllaç d'invitació",
+          "body": "El correu d'invitació obre l'app directament a l'espai correcte."
+        }
+      },
+      "faqTitle": "Preguntes sobre l'app.",
+      "faq": {
+        "free": {
+          "question": "L'app costa a part?",
+          "answer": "No. Està inclosa en tots els plans, Free inclòs. El pla fixa quants membres de l'equip la poden fer servir."
+        },
+        "devices": {
+          "question": "A quins mòbils funciona?",
+          "answer": "iPhone, des de l'App Store, i Android, des de Google Play. Qualsevol mòbil amb càmera."
+        },
+        "roles": {
+          "question": "Què pot fer el personal i què no?",
+          "answer": "El personal segella, canvia, dona d'alta clients i desfà els seus propis segells. Propietaris i gestors de programes poden a més desfer el segell de qualsevol i enviar avisos. La facturació i els ajustos es queden al panell."
+        },
+        "offline": {
+          "question": "I si cau la connexió?",
+          "answer": "El segell es desa al mòbil i s'envia quan torna la connexió."
+        },
+        "demo": {
+          "question": "La puc provar abans de tenir clients?",
+          "answer": "Sí. L'app té un mode demo amb dades d'exemple, perquè vegis cada pantalla abans del primer escaneig."
+        }
+      },
+      "rowsTitle": "El que fa."
+    },
+    "partners": {
+      "title": "Munta Loyalshy per als teus clients.",
+      "lead": "Agències, consultors i distribuïdors de TPV munten programes de fidelització per als negocis a què ja serveixen. El muntes, el traspasses i et quedes com a gestor de programes.",
+      "heroAlt": "Dues persones donant-se la mà sobre un taulell",
+      "howTitle": "Com funciona.",
+      "steps": {
+        "1": {
+          "title": "Fes-te partner",
+          "body": "Escriu-nos. Marquem el teu compte com a partner i la consola de partner apareix al teu panell."
+        },
+        "2": {
+          "title": "Munta el client",
+          "body": "«Client nou» crea l'espai del client amb tu com a propietari. Dissenya la targeta, imprimeix el QR, convida el seu equip."
+        },
+        "3": {
+          "title": "Traspassa'l",
+          "body": "Genera un enllaç de reclamació d'un sol ús i envia'l al propietari. Quan el reclama, el negoci és seu: facturació, equip, ajustos."
+        },
+        "4": {
+          "title": "Queda't com a gestor de programes",
+          "body": "Conserves l'accés al disseny, la distribució i els programes, sense veure la seva facturació. La teva plaça mai compta contra el seu pla."
+        }
+      },
+      "consoleTitle": "La consola de partner.",
+      "consoleLead": "Tots els teus clients en un lloc.",
+      "console": {
+        "portfolio": {
+          "title": "Cartera",
+          "body": "Cada client que vas muntar, amb una llista de comprovació: programa publicat, primers clients dins, propietari reclamat."
+        },
+        "referral": {
+          "title": "Enllaç de referit",
+          "body": "Un enllaç amb el teu codi. Els negocis que es registren a través seu se t'atribueixen."
+        },
+        "access": {
+          "title": "Demanar accés",
+          "body": "Has perdut l'accés a un client que vas muntar? Demana-l'hi al propietari amb un clic. Rep un correu que obre el diàleg d'invitació."
+        },
+        "seat": {
+          "title": "Una plaça que no compta",
+          "body": "La teva membresia a l'espai d'un client està exempta del límit d'equip del seu pla."
+        }
+      },
+      "whoTitle": "Per a qui és.",
+      "who": {
+        "agencies": {
+          "title": "Agències de màrqueting",
+          "body": "Afegeix la fidelització als serveis que ja vens a negocis locals."
+        },
+        "consultants": {
+          "title": "Consultors d'hostaleria",
+          "body": "Munta el programa com a part d'una obertura o una renovació."
+        },
+        "pos": {
+          "title": "Distribuïdors de TPV",
+          "body": "Loyalshy funciona al costat de qualsevol TPV. Ven-lo amb la caixa."
+        },
+        "designers": {
+          "title": "Dissenyadors i impremtes",
+          "body": "Tu dissenyes la targeta i el material de taulell; el client s'emporta el programa sencer."
+        }
+      },
+      "termsTitle": "Condicions.",
+      "termsBody": "Les condicions de partner s'acorden una a una: una quota de muntatge que cobres al teu client i una part de la subscripció. Escriu-nos i ho veiem.",
+      "cta": "Escriu-nos per ser partner",
+      "faqTitle": "Preguntes de partners.",
+      "faq": {
+        "cost": {
+          "question": "El programa de partners costa res?",
+          "answer": "No. Els comptes de partner són gratuïts. Els teus clients paguen el seu propi pla quan se'ls queda petit el Free."
+        },
+        "ownership": {
+          "question": "De qui és el compte del client?",
+          "answer": "Després del traspàs, del client. Són seus la facturació, l'equip i els ajustos. Tu conserves l'accés als programes com a gestor de programes, i et poden treure quan vulguin."
+        },
+        "billing": {
+          "question": "Puc pagar jo el pla del client?",
+          "answer": "Abans del traspàs ets el propietari, així que sí. Després, la facturació és del client."
+        },
+        "referral": {
+          "question": "Què fa l'enllaç de referit?",
+          "answer": "Els negocis que es registren a través del teu enllaç se t'atribueixen, encara que mai els muntis res. L'atribució dura el que duri el compte."
+        },
+        "share": {
+          "question": "Quant és la comissió?",
+          "answer": "Depèn del volum i del que aportis. Ho acordem amb cada partner. Escriu-nos."
+        }
+      }
+    },
+    "privatePrograms": {
+      "title": "Programes només per invitació.",
+      "lead": "Algunes targetes no són per a tothom: la targeta de soci, el cupó VIP, un avantatge per al teu propi equip. Un programa només per invitació està amagat de la pàgina pública d'alta, i només el teu equip l'emet.",
+      "heroAlt": "Un barber atenent un client",
+      "whatTitle": "Què canvia.",
+      "what": {
+        "hidden": {
+          "title": "Amagat de la pàgina d'alta",
+          "body": "El programa no apareix a la teva pàgina pública, i les seves seccions de QR, enllaç i NFC desapareixen de Distribució."
+        },
+        "team": {
+          "title": "Només l'emet l'equip",
+          "body": "Les targetes s'emeten des del panell, a un contacte o a una selecció, o des de l'app d'equip al taulell amb un correu."
+        },
+        "same": {
+          "title": "Tota la resta és igual",
+          "body": "Segells, cupons, avisos, peticions de ressenya i missatges de recuperació funcionen exactament igual que en un programa públic."
+        }
+      },
+      "forTitle": "Per a què serveix.",
+      "for": {
+        "members": {
+          "title": "La targeta de soci",
+          "body": "Una targeta de segells per a qui paga una quota, emesa quan s'apunta."
+        },
+        "vip": {
+          "title": "El cupó VIP",
+          "body": "Un cupó per als teus millors clients, lliurat per l'equip en lloc d'imprès en un cartell."
+        },
+        "staff": {
+          "title": "Equip i amics",
+          "body": "Un avantatge per al teu propi equip o els teus proveïdors al qual ningú més hauria de poder apuntar-se."
+        },
+        "events": {
+          "title": "Un esdeveniment o un llançament",
+          "body": "Una targeta per als convidats d'una nit, emesa a la porta des de l'app."
+        }
+      },
+      "howTitle": "Emetre una targeta.",
+      "steps": {
+        "1": {
+          "title": "Posa el programa en només per invitació",
+          "body": "A la pàgina de Distribució del programa, tria «Només per invitació». Un programa públic es pot canviar en qualsevol moment; les targetes existents continuen funcionant."
+        },
+        "2": {
+          "title": "Emet des del panell",
+          "body": "Tria un contacte, o diversos, i emet la targeta. La reben per correu amb els botons d'Afegir al Wallet."
+        },
+        "3": {
+          "title": "O dona'ls d'alta al taulell",
+          "body": "A l'app d'equip, «Client nou» demana un correu i emet la targeta al moment."
+        }
+      },
+      "faqTitle": "Preguntes sobre programes privats.",
+      "faq": {
+        "existing": {
+          "question": "Què passa amb les targetes ja emeses quan passo un programa a només per invitació?",
+          "answer": "Res. Continuen funcionant, continuen rebent segells i continuen rebent missatges. Només s'aturen les altes noves per la pàgina pública."
+        },
+        "qr": {
+          "question": "I si algú escaneja el QR antic?",
+          "answer": "La pàgina d'alta diu que el programa és només per invitació. Mai l'apunta a un altre programa per error."
+        },
+        "plans": {
+          "question": "Quin pla necessito?",
+          "answer": "Qualsevol, Free inclòs. Un programa només per invitació compta com qualsevol altre contra el límit de programes del teu pla."
+        },
+        "both": {
+          "question": "Puc tenir un programa públic i un de privat alhora?",
+          "answer": "Sí, en un pla amb dos o més programes. El públic apareix a la teva pàgina d'alta; el privat no."
+        }
+      }
+    },
+    "about": {
+      "title": "Una empresa petita per a negocis petits.",
+      "lead": "Loyalshy el fa HEX CONCEPTS STUDIO, un estudi de Lleida. Construïm una sola cosa: la targeta de fidelització al Wallet.",
+      "heroAlt": "Un carrer de petits comerços amb terrasses",
+      "whyTitle": "Per què.",
+      "whyBody1": "Les targetes de segells de paper es perden, s'obliden a casa i ningú les compta. Les apps de fidelització es descarreguen un cop i no s'obren més. Apple Wallet i Google Wallet ja són a tots els mòbils, i una targeta allà es comporta com una targeta: apareix quan cal.",
+      "whyBody2": "Així que construïm la targeta per al Wallet, el panell que compta els segells i l'app amb què escaneja l'equip. Res més.",
+      "holdTitle": "A què ens atenim.",
+      "hold": {
+        "noApp": {
+          "title": "Sense app per al client",
+          "body": "La targeta va on ja desa les seves targetes. Res a instal·lar, res a recordar."
+        },
+        "data": {
+          "title": "La llista de clients és teva",
+          "body": "No la venem ni la fem servir per a publicitat, i la pots exportar quan vulguis."
+        },
+        "honest": {
+          "title": "Sense trucs amb el client",
+          "body": "Sense premi per ressenyar i sense filtrar per puntuació. Els missatges que surten són els que tu vas escriure."
+        },
+        "counter": {
+          "title": "Fet per a un taulell",
+          "body": "Una cafeteria amb una caixa, una perruqueria amb tres cadires, una botiga de cantonada. Les cadenes també hi caben, però dissenyem per al taulell primer."
+        }
+      },
+      "photoAlt": "Un equip treballant a la mateixa taula",
+      "companyTitle": "L'empresa.",
+      "companyBody": "HEX CONCEPTS STUDIO, S.L. és un estudi de programari a Torrefarrera, Lleida. Loyalshy és el seu producte. Funciona en servidors de Frankfurt, les dades es queden a la Unió Europea i el suport el responen les persones que el construeixen.",
+      "contactCta": "Contacta amb nosaltres"
+    },
+    "status": {
+      "title": "Estat del sistema.",
+      "lead": "Comprovacions en temps real dels serveis on corre Loyalshy, i dels proveïdors dels quals depèn.",
+      "checkedAt": "Comprovat a les {time} UTC",
+      "overall": {
+        "ok": "Tot funciona amb normalitat",
+        "degraded": "Alguns sistemes estan degradats"
+      },
+      "components": {
+        "web": {
+          "name": "Web i panell",
+          "desc": "loyalshy.com, el panell i l'API de l'app d'equip. Si aquesta pàgina carrega, funcionen."
+        },
+        "database": {
+          "name": "Base de dades",
+          "desc": "On viuen els programes, els clients i els segells."
+        },
+        "redis": {
+          "name": "Límit de peticions",
+          "desc": "Protecció de l'inici de sessió i del formulari de contacte. Si està caigut, es pot continuar entrant amb un límit reduït."
+        }
+      },
+      "states": {
+        "ok": "Operatiu",
+        "down": "Caigut",
+        "unconfigured": "Sense configurar"
+      },
+      "latency": "{ms} ms",
+      "providersTitle": "Proveïdors.",
+      "providersLead": "Loyalshy corre sobre aquests serveis. Cadascun publica la seva pròpia pàgina d'estat.",
+      "providers": {
+        "vercel": "Allotjament i web",
+        "neon": "Base de dades",
+        "upstash": "Límit de peticions",
+        "stripe": "Pagaments",
+        "trigger": "Tasques en segon pla: notificacions i correus",
+        "resend": "Enviament de correu",
+        "apple": "Actualització de targetes a Apple Wallet",
+        "google": "Google Wallet"
+      },
+      "apiNote": "Les eines de monitoratge poden consultar les mateixes comprovacions a",
+      "incidentsTitle": "Alguna cosa va malament?",
+      "incidentsBody": "Si una targeta no s'actualitza o el panell falla i aquesta pàgina ho mostra tot en verd, escriu a"
+    },
+    "subprocessors": {
+      "title": "Subencarregats.",
+      "lead": "Els tercers que tracten dades personals per compte de Loyalshy, per a què i on. Aquesta llista forma part de la nostra",
+      "updated": "Última actualització: 4 d'octubre de 2026",
+      "columns": {
+        "name": "Subencarregat",
+        "purpose": "Finalitat",
+        "data": "Dades",
+        "location": "Ubicació"
+      },
+      "rows": {
+        "vercel": {
+          "purpose": "Allotjament del web, el panell i l'API",
+          "data": "Totes les dades en trànsit; registres de peticions",
+          "location": "UE (Frankfurt); xarxa perimetral mundial"
+        },
+        "neon": {
+          "purpose": "Allotjament de la base de dades",
+          "data": "Comptes, programes, clients i interaccions",
+          "location": "UE (Frankfurt)"
+        },
+        "upstash": {
+          "purpose": "Límit de peticions",
+          "data": "Identificadors d'inici de sessió xifrats, conservats minuts",
+          "location": "UE (Frankfurt)"
+        },
+        "cloudflare": {
+          "purpose": "Emmagatzematge d'imatges i DNS",
+          "data": "Logotips i imatges de targeta pujats pels negocis",
+          "location": "UE i mundial"
+        },
+        "stripe": {
+          "purpose": "Pagaments i facturació",
+          "data": "Dades de facturació del negoci",
+          "location": "Estats Units i UE"
+        },
+        "trigger": {
+          "purpose": "Tasques en segon pla",
+          "data": "Identificadors de targetes i contactes, contingut de correus",
+          "location": "UE i Estats Units"
+        },
+        "resend": {
+          "purpose": "Correu transaccional",
+          "data": "Adreces de correu i contingut dels correus",
+          "location": "Estats Units i UE"
+        },
+        "sentry": {
+          "purpose": "Monitoratge d'errors",
+          "data": "Informes tècnics d'error, que poden incloure identificadors",
+          "location": "UE i Estats Units"
+        },
+        "apple": {
+          "purpose": "Targetes d'Apple Wallet i notificacions push",
+          "data": "Dades de la targeta, tokens push del dispositiu",
+          "location": "Mundial"
+        },
+        "google": {
+          "purpose": "Google Wallet, inici de sessió amb Google, Places",
+          "data": "Dades de la targeta; identificadors de compte de Google per a l'inici de sessió",
+          "location": "Mundial"
+        }
+      },
+      "changesTitle": "Canvis.",
+      "changesBody": "Actualitzem aquesta pàgina quan s'afegeix o se substitueix un subencarregat. Els clients d'un pla de pagament poden demanar que se'ls avisi per correu.",
+      "dpaTitle": "Acords.",
+      "dpaBody": "Preguntes sobre el tractament de dades, o necessites un acord d'encàrrec de tractament? Escriu a"
+    },
+    "promote": {
+      "title": "Com promocionar el teu programa de fidelització.",
+      "lead": "La targeta ja és al Wallet. Ara s'ha de veure. Vuit llocs i moments d'un negoci petit que porten altes, amb quin material promocional posar a cadascun i què dir. La targeta de taulell i l'expositor surten gratis del teu panell; la resta, te la podem fer nosaltres.",
+      "orderCta": "Demana'ns-ho fet",
+      "freeCta": "Gratis des del teu panell",
+      "blocks": {
+        "counter": {
+          "title": "La caixa.",
+          "body": "Una targeta de taulell amb el QR, del costat del client, al costat d'on paguen. És el millor lloc del negoci: el mòbil ja és fora i hi ha uns segons d'espera.",
+          "tip": "Dreta, en A6, a l'altura de la mà. No darrere de la caixa.",
+          "piece": "Targeta de taulell",
+          "alt": "Una targeta de taulell amb el QR del programa i la frase del Wallet"
+        },
+        "staff": {
+          "title": "El que diu l'equip.",
+          "body": "«Tens la nostra targeta? És un segon». Dit mentre paguen, porta més altes que qualsevol cartell. Que formi part de la rutina de la primera setmana i la resta ve sola.",
+          "tip": "L'app d'equip s'obre a la càmera. Tot són cinc segons.",
+          "piece": "La frase",
+          "alt": "Una bafarada amb la frase que diu l'equip al taulell"
+        },
+        "tent": {
+          "title": "La taula.",
+          "body": "Un expositor que es llegeix mentre esperen. Una cara apunta al programa; l'altra demana una ressenya a Google, per als que ho volen fer ara mateix.",
+          "tip": "La cara de la ressenya cap a la cadira, la del programa cap al passadís.",
+          "piece": "Expositor de taula",
+          "alt": "Un expositor de taula plegat: el QR del programa per un costat, el de ressenyes de Google per l'altre"
+        },
+        "door": {
+          "title": "La porta i l'aparador.",
+          "body": "Un adhesiu per al que passa, amb el motiu escrit: el premi. És també on «a prop del teu local» encén la targeta als iPhone que ja la tenen.",
+          "tip": "A l'altura dels ulls, per fora, sobre el vidre.",
+          "piece": "Adhesiu de porta",
+          "alt": "Un adhesiu rodó de porta amb el premi i el QR"
+        },
+        "ticket": {
+          "title": "El tiquet.",
+          "body": "Una línia al peu del tiquet, o un segell de cautxú a sobre: «Pregunta per la nostra targeta». Per a qui ja imprimeix tiquets, sense instal·lar res.",
+          "tip": "Si el teu TPV imprimeix codis QR, posa-hi l'enllaç d'alta.",
+          "piece": "Segell de cautxú",
+          "alt": "Un tiquet amb la frase que demana la targeta i un QR petit"
+        },
+        "social": {
+          "title": "Instagram i WhatsApp.",
+          "body": "L'enllaç d'alta a la bio, una història destacada que ensenya la targeta entrant al Wallet, i el missatge de «gràcies per venir» amb l'enllaç. «Compartir un programa» a l'app d'equip et dona l'enllaç i el QR.",
+          "tip": "La història funciona millor amb la targeta real que amb un disseny.",
+          "piece": "Plantilles per a històries i publicacions",
+          "alt": "Un marc d'història d'Instagram amb la targeta i un adhesiu d'enllaç"
+        },
+        "reviews": {
+          "title": "Ressenyes a Google.",
+          "body": "La targeta demana la ressenya sola després de la visita que triïs, des del pla Pro. Al taulell, un QR petit a la teva fitxa de Google per als que ho volen fer ara. Mai un premi a canvi.",
+          "tip": "Demana-la després de la tercera visita, no a la primera.",
+          "piece": "Targeta de ressenyes",
+          "alt": "Una targeta petita que demana una ressenya a Google amb un QR"
+        },
+        "welcome": {
+          "title": "El cupó de benvinguda.",
+          "body": "Un cupó d'un sol ús per a la primera compra dona al QR un motiu per escanejar-se avui. «Escaneja i emporta't un 10 %»: la targeta arriba al Wallet amb el descompte ja posat.",
+          "tip": "Un cupó al costat d'una targeta de segells necessita el pla Pro.",
+          "piece": "Cupó",
+          "alt": "El cupó del 10 % d'una hamburgueseria a Apple Wallet"
+        }
+      },
+      "freeTitle": "Material promocional gratis des del teu panell.",
+      "freeLead": "La targeta de taulell i l'expositor de taula surten de Distribució com a PDF a punt per imprimir, amb el teu logotip, els teus colors i el QR del teu programa. La segona cara de l'expositor porta el teu enllaç de ressenyes de Google tan bon punt el configuris.",
+      "freeSteps": {
+        "1": {
+          "title": "Publica el programa",
+          "body": "El QR apunta a la seva pàgina d'alta, i no canvia mai per molt que editis la targeta."
+        },
+        "2": {
+          "title": "Distribució, Material per al taulell",
+          "body": "Dos botons: la targeta A6 i l'expositor A4. Els PDF surten a punt per imprimir."
+        },
+        "3": {
+          "title": "Imprimeix-ho",
+          "body": "Qualsevol copisteria. Cartolina de 250 a 300 g, mat. L'expositor es plega per la línia de punts."
+        }
+      },
+      "orderTitle": "O t'ho fem nosaltres.",
+      "orderLead": "Digues-nos què necessites i et contestem amb preu i data de lliurament en dos dies laborables. Imprès en cartolina, tallat i enviat al teu negoci, amb el teu logotip i el QR del teu programa.",
+      "form": {
+        "name": "Nom",
+        "namePlaceholder": "El teu nom",
+        "email": "Correu",
+        "emailPlaceholder": "tu@elteunegoci.com",
+        "business": "Negoci",
+        "businessPlaceholder": "Nom de la cafeteria, perruqueria o botiga",
+        "pieces": "Què necessites?",
+        "pieceOptions": {
+          "counterCard": "Targeta de taulell",
+          "tableTent": "Expositor de taula",
+          "doorSticker": "Adhesiu de porta",
+          "windowSticker": "Adhesiu d'aparador",
+          "stamp": "Segell de cautxú per a tiquets",
+          "social": "Plantilles per a històries i publicacions",
+          "other": "Una altra cosa"
+        },
+        "quantity": "Quantes de cada?",
+        "quantityOptions": {
+          "1": "1",
+          "2-5": "De 2 a 5",
+          "6-10": "De 6 a 10",
+          "more": "Més de 10"
+        },
+        "message": "Alguna cosa més",
+        "messagePlaceholder": "Mides, colors, l'adreça d'enviament…",
+        "submit": "Demana pressupost",
+        "note": "Sense compromís. Et contestem per correu amb preu i data.",
+        "successTitle": "Petició rebuda",
+        "successBody": "T'escrivim en dos dies laborables amb preu i data de lliurament. Mira el teu correu: t'hem enviat la confirmació.",
+        "piecesRequired": "Tria almenys una peça."
+      },
+      "faqTitle": "Preguntes sobre promocionar.",
+      "faq": {
+        "change": {
+          "question": "I si després canvio el programa?",
+          "answer": "El QR apunta a la pàgina d'alta del programa, no al seu disseny. Canvia els segells, el premi o els colors i el QR imprès continua funcionant."
+        },
+        "ownPrinter": {
+          "question": "Ho puc imprimir a la meva pròpia impremta?",
+          "answer": "Sí. La targeta de taulell i l'expositor són PDF gratuïts des de Distribució, a resolució d'impremta. Porta'ls a qualsevol copisteria."
+        },
+        "time": {
+          "question": "Quant triga una comanda?",
+          "answer": "Contestem en dos dies laborables amb preu i data. La impressió i l'enviament depenen de la peça; adhesius i targetes solen trigar una setmana."
+        },
+        "private": {
+          "question": "Un programa només per invitació té QR?",
+          "answer": "No. Els programes només per invitació no tenen pàgina pública d'alta, així que no hi ha QR per imprimir. El material és per a programes públics."
+        }
+      },
+      "mock": {
+        "business": "Café Sol",
+        "program": "Targeta de segells",
+        "reward": "El desè cafè, gratis",
+        "scanLine": "Escaneja i desa la teva targeta al teu Wallet",
+        "reviewLine": "T'ha agradat? Deixa'ns una ressenya a Google",
+        "askLine": "Pregunta per la nostra targeta",
+        "doorLine": "El desè cafè, gratis. Escaneja.",
+        "storyLine": "Desa-la al teu Wallet",
+        "staffLine": "Tens la nostra targeta? És un segon.",
+        "receiptTotal": "Total",
+        "fold": "Plegar per aquí"
+      }
+    }
+  }
+}

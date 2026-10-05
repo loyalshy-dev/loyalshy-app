@@ -1,0 +1,3174 @@
+{
+  "common": {
+    "loyalshy": "Loyalshy",
+    "getStarted": "Inizia",
+    "getStartedFree": "Inizia gratis",
+    "logIn": "Accedi",
+    "learnMore": "Scopri di più",
+    "contact": "Contatti",
+    "contactSales": "Parla con noi",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "next": "Avanti",
+    "loading": "Caricamento...",
+    "error": "Qualcosa è andato storto",
+    "success": "Fatto",
+    "search": "Cerca...",
+    "noResults": "Nessun risultato",
+    "perMonth": "€/mese",
+    "backToHome": "← Torna a Loyalshy",
+    "companyInfo": {
+      "title": "Informazioni sull'azienda",
+      "name": "HEX CONCEPTS STUDIO, S.L.",
+      "vatLabel": "Partita IVA",
+      "vat": "B27646645",
+      "address": "Av. Convent 11, 25123 Torrefarrera (Lleida), Spagna"
+    }
+  },
+  "nav": {
+    "pricing": "Prezzi",
+    "home": "Home Loyalshy",
+    "openMenu": "Apri menu",
+    "closeMenu": "Chiudi menu",
+    "switchLanguage": "Cambia lingua",
+    "forBusiness": "Per la tua attività",
+    "automations": "Automazioni",
+    "staffApp": "App del team"
+  },
+  "hero": {
+    "subtitle": "Tessere timbri e coupon che i tuoi clienti salvano in Apple Wallet o Google Wallet. Senza app, senza account e senza carta.",
+    "seeHowItWorks": "Guarda come funziona",
+    "title": "La carta fedeltà digitale, nel loro Wallet.",
+    "tryInWallet": "Provala nel tuo Wallet",
+    "note": "Gratis fino a 50 clienti. Senza carta di credito.",
+    "card": {
+      "business": "Café Sol",
+      "program": "Tessera timbri",
+      "reward": "Caffè gratis",
+      "customer": "Marta G."
+    },
+    "lockDate": "lunedì 6 ottobre",
+    "scenes": {
+      "near": {
+        "alt": "Notifica reale di Wallet su un iPhone: il logo dell'attività, il suo nome e il messaggio che ha scritto, con la carta in miniatura"
+      },
+      "stamp": {
+        "notification": "Timbro aggiunto. 4 di 5."
+      },
+      "announce": {
+        "alt": "Notifica reale di un avviso inviato dalla dashboard: «Hoy 2x1» (oggi 2x1)"
+      },
+      "passAlt": "Tessera timbri reale di un cliente in Apple Wallet: sei timbri su sette, prossimo premio un taglio gratis"
+    },
+    "tagline": "Tessera timbri o coupon in Apple e Google Wallet. Senza app per il cliente, senza carta.",
+    "film": {
+      "scroll": "Continua a scorrere.",
+      "camera": "Fotocamera",
+      "openLink": "Apri loyalshy.com",
+      "sendTitle": "Invia avviso",
+      "sendButton": "Invia a 128 clienti",
+      "ch1": {
+        "title": "Condividi.",
+        "caption": "Programmi pubblici o privati: al banco, con QR, email o social.",
+        "link": "Idee per promuovere il tuo programma"
+      },
+      "ch2": {
+        "title": "Nel Wallet.",
+        "caption": "Il cliente porta la tessera timbri o il coupon sul suo telefono."
+      },
+      "ch3": {
+        "title": "Notifiche intelligenti.",
+        "caption": "Notifiche di prossimità, richieste di recensioni Google e promemoria quando è passato tempo dall'ultima visita."
+      },
+      "ch4": {
+        "title": "Annunci.",
+        "caption": "Fai sapere ai clienti le tue novità."
+      },
+      "tryLine": "Aggiungi la carta di prova al tuo Wallet. È esattamente ciò che vedranno i tuoi clienti.",
+      "sendText": "Hoy 2x1",
+      "qrAlt": "QR reale di un programma Loyalshy, pronto per il banco",
+      "appStore": "Scarica su App Store",
+      "playStore": "Disponibile su Google Play",
+      "appAlt": "L'app del team: cerca cliente, nuovo cliente, premi, condividi programma, avviso e ultime attività",
+      "stampAlt": "Tessera timbri di una pizzeria in Apple Wallet, 2 timbri su 7",
+      "couponAlt": "Coupon del 10 % di una hamburgheria in Apple Wallet",
+      "walletTitle": "Wallet",
+      "chapters": "Capitoli",
+      "ch5": {
+        "title": "App di gestione.",
+        "caption": "Titolare e dipendenti possono gestire tutto dall'app."
+      },
+      "ch6": {
+        "title": "Tessera timbri.",
+        "caption": "Un timbro per visita. Raggiunto il numero stabilito, si ottiene un premio."
+      },
+      "ch7": {
+        "title": "Coupon.",
+        "caption": "Una carta versatile, per un solo utilizzo o per tutti quelli che vuoi."
+      },
+      "mapLabel": "La tua attività"
+    }
+  },
+  "featureShowcase": {
+    "title": "Monitoraggio completo.",
+    "lead": "Gestisci i programmi e segui il giorno per giorno dei tuoi clienti dalla dashboard.",
+    "mock": {
+      "overview": "Panoramica",
+      "newAction": "Nuova interazione",
+      "contacts": "Clienti",
+      "activePasses": "Carte attive",
+      "activityMonth": "Attività questo mese",
+      "redeemedMonth": "Riscatti questo mese",
+      "stamps": "timbri",
+      "coupons": "coupon",
+      "activity": "Attività",
+      "chartTicks": [
+        "1 set",
+        "8 set",
+        "15 set",
+        "22 set",
+        "30 set"
+      ],
+      "busiestDays": "Giorni con più attività",
+      "days": [
+        "L",
+        "M",
+        "M",
+        "G",
+        "V",
+        "S",
+        "D"
+      ],
+      "recent": "Attività recente",
+      "recentStamp": "Timbro aggiunto · Tessera timbri",
+      "recentRedeem": "Coupon riscattato · 2×1 sui caffè",
+      "recentJoin": "Nuova cliente · dal QR",
+      "ago2": "2 min fa",
+      "ago14": "14 min fa",
+      "ago1h": "1 h fa",
+      "topCustomers": "Migliori clienti",
+      "programs": "Programmi",
+      "couponProgram": "Coupon 2×1",
+      "enrolled": "iscritti",
+      "active": "Attivo"
+    }
+  },
+  "pricing": {
+    "title": "Gratis fino a 50 clienti",
+    "subtitle": "Poi paghi in base a quanti clienti hai. Senza vincoli e senza carta per iniziare.",
+    "monthly": "Mensile",
+    "annual": "Annuale",
+    "save20": "Risparmia il 20 %",
+    "savedPerYear": "di risparmio all'anno",
+    "mostPopular": "Consigliato",
+    "free": {
+      "name": "Gratis",
+      "description": "Per provare con i tuoi primi clienti",
+      "features": {
+        "contacts": "Fino a 50 clienti",
+        "programs": "1 programma",
+        "staff": "1 persona nel team",
+        "announcements": "2 avvisi in totale"
+      }
+    },
+    "starter": {
+      "name": "Pro",
+      "description": "Per un'attività con clienti abituali",
+      "features": {
+        "contacts": "Fino a 500 clienti",
+        "programs": "Fino a 2 programmi",
+        "staff": "2 persone nel team",
+        "announcements": "1 avviso a settimana",
+        "reviews": "Richieste di recensione su Google"
+      }
+    },
+    "growth": {
+      "name": "Business",
+      "description": "Per attività con più programmi allo stesso tempo",
+      "features": {
+        "contacts": "Fino a 2.500 clienti",
+        "programs": "Fino a 5 programmi",
+        "staff": "5 persone nel team",
+        "announcements": "2 avvisi a settimana",
+        "reviews": "Richieste di recensione su Google",
+        "winback": "Messaggi per recuperare i clienti inattivi"
+      }
+    },
+    "scale": {
+      "name": "Scale",
+      "description": "Per catene e attività con molto volume",
+      "features": {
+        "contacts": "Clienti illimitati",
+        "programs": "Programmi illimitati",
+        "staff": "25 persone nel team",
+        "announcements": "5 avvisi a settimana",
+        "reviews": "Richieste di recensione su Google",
+        "winback": "Messaggi per recuperare i clienti inattivi"
+      }
+    },
+    "billingPeriod": "Periodo di fatturazione",
+    "billedYearly": "Fatturato all'anno",
+    "perYear": "all'anno",
+    "multiLocation": "Più sedi o una catena? Un piano su misura, con tutte le sedi in un'unica dashboard.",
+    "multiLocationCta": "Richiedi una demo",
+    "vatIncluded": "IVA inclusa"
+  },
+  "faq": {
+    "title": "Domande frequenti",
+    "stillHaveQuestions": "Hai ancora qualche dubbio?",
+    "emailUs": "Scrivici",
+    "replyTime": "e ti rispondiamo via email.",
+    "items": {
+      "howWorks": {
+        "question": "Come funziona Loyalshy?",
+        "answer": "Loyalshy è una carta fedeltà digitale per bar, parrucchieri e negozi. Disegni la tua tessera timbri o il tuo coupon nel pannello e stampi il QR. I tuoi clienti lo scansionano e la carta si salva nel loro Apple o Google Wallet. Quando tornano, il tuo team scansiona la carta con l'app di Loyalshy e aggiunge il timbro. Completata la carta, il premio compare da solo."
+      },
+      "paper": {
+        "question": "Cosa cambia rispetto alla carta di cartone?",
+        "answer": "Il timbro lo mette il tuo team come prima, scansionando invece di timbrare. La differenza è per il cliente: la carta non si perde, non si dimentica a casa e non si può falsificare. E il conteggio si aggiorna sul suo telefono all'istante."
+      },
+      "devices": {
+        "question": "Di cosa hanno bisogno i miei clienti?",
+        "answer": "Un iPhone con Apple Wallet o un Android con Google Wallet. Non devono scaricare nulla né creare un account. Su iPhone, la carta compare anche su Apple Watch."
+      },
+      "pos": {
+        "question": "Funziona con la mia cassa?",
+        "answer": "Non tocca nulla al banco. Loyalshy va a parte rispetto alla cassa: il tuo team scansiona la carta con il telefono e basta. Non c'è niente da integrare né da cambiare."
+      },
+      "freePlan": {
+        "question": "C'è un piano gratuito?",
+        "answer": "Sì. Con il piano Gratis hai 1 programma e fino a 50 clienti, senza carta di credito e senza scadenza. Quando ti sta stretto, cambi piano."
+      },
+      "security": {
+        "question": "Cosa succede ai dati dei miei clienti?",
+        "answer": "Sono tuoi. Non li vendiamo né li usiamo per pubblicità, e puoi esportare la tua lista di clienti in CSV quando vuoi."
+      },
+      "enterprise": {
+        "question": "E se ho più negozi?",
+        "answer": "Per catene e attività con esigenze particolari c'è il piano Enterprise: limiti su misura, supporto dedicato e condizioni da contratto. Scrivici a hello@loyalshy.com e ne parliamo."
+      }
+    }
+  },
+  "tryDemo": {
+    "title": "Provala.",
+    "addToAppleWallet": "Aggiungi ad Apple Wallet",
+    "addToGoogleWallet": "Aggiungi a Google Wallet"
+  },
+  "closingCta": {
+    "title1": "Stampa il QR oggi.",
+    "titleHighlight": "Domani hai i primi timbri.",
+    "subtitle": "Gratis fino a 50 clienti, senza carta di credito.",
+    "requestDemo": "Richiedi una demo"
+  },
+  "footer": {
+    "product": "Prodotto",
+    "company": "Azienda",
+    "legal": "Note legali",
+    "privacyPolicy": "Informativa sulla privacy",
+    "termsOfService": "Termini del servizio",
+    "cookiePolicy": "Informativa sui cookie",
+    "tagline": "La carta fedeltà digitale, nel loro Wallet.",
+    "copyright": "© 2026 Loyalshy, un prodotto di HEX CONCEPTS STUDIO, S.L. Tutti i diritti riservati.",
+    "builtWith": "Fatto in Spagna.",
+    "instagram": "Loyalshy su Instagram",
+    "tiktok": "Loyalshy su TikTok",
+    "forBusiness": "Per la tua attività",
+    "cafes": "Bar e panetterie",
+    "salons": "Parrucchieri e barbieri",
+    "retail": "Negozi e commercio",
+    "allIndustries": "Tutte le attività",
+    "automations": "Automazioni",
+    "staffApp": "App del team",
+    "privatePrograms": "Programmi privati",
+    "about": "Chi siamo",
+    "partners": "Partner",
+    "status": "Stato",
+    "subprocessors": "Sub-responsabili",
+    "promote": "Come promuoverlo"
+  },
+  "cookieBanner": {
+    "message": "Usiamo cookie essenziali per l'autenticazione e le preferenze. Nessun cookie di tracciamento.",
+    "accept": "Ho capito",
+    "dismiss": "Chiudi avviso sui cookie"
+  },
+  "auth": {
+    "claim": {
+      "validating": "Controllo del link in corso...",
+      "title": "Prendi possesso di {organizationName}",
+      "subtitleSignup": "Il tuo programma fedeltà è pronto. Crea il tuo account per prenderne possesso.",
+      "subtitleSignin": "Il tuo programma fedeltà è pronto. Accedi per prenderne possesso.",
+      "staleLinkTitle": "Link non valido",
+      "staleLinkDesc": "Questo link di trasferimento non è valido. Chiedi al partner che ti ha fatto la configurazione di inviartene uno nuovo.",
+      "expiredTitle": "Link scaduto",
+      "expiredDesc": "Questo link di trasferimento è scaduto. Chiedi al tuo partner di generarne uno nuovo.",
+      "alreadyUsedTitle": "Già reclamato",
+      "alreadyUsedDesc": "Questa organizzazione ha già un titolare. Se sei tu, accedi per continuare.",
+      "rateLimitedTitle": "Troppi tentativi",
+      "rateLimitedDesc": "Aspetta un momento e riprova.",
+      "goToSignIn": "Vai all'accesso",
+      "welcome": "Benvenuto in {organizationName}!",
+      "createAndClaim": "Crea account e prendi possesso",
+      "signInAndClaim": "Accedi e prendi possesso",
+      "hasAccount": "Hai già un account?",
+      "signInInstead": "Accedi",
+      "noAccount": "Non hai un account?",
+      "createOne": "Creane uno",
+      "accountExists": "Esiste già un account con questa email. Accedi per continuare.",
+      "invalidCredentials": "Email o password non validi",
+      "cannotClaimOwn": "Questo link di trasferimento l'hai creato tu: è per il titolare dell'attività.",
+      "emailNotVerified": "Verifica la tua email prima di prendere possesso.",
+      "claimFailed": "Non è stato possibile completare il trasferimento. Riprova.",
+      "signedInAs": "Hai effettuato l'accesso come {email}.",
+      "claimNow": "Prendi possesso",
+      "useDifferentAccount": "Usa un altro account"
+    },
+    "login": {
+      "title": "Bentornato",
+      "subtitle": "Accedi al tuo account Loyalshy",
+      "continueWithGoogle": "Continua con Google",
+      "or": "oppure",
+      "email": "Email",
+      "emailPlaceholder": "tu@esempio.com",
+      "password": "Password",
+      "passwordPlaceholder": "Inserisci la tua password",
+      "forgotPassword": "Hai dimenticato la password?",
+      "submit": "Accedi",
+      "noAccount": "Non hai un account?",
+      "signUp": "Registrati",
+      "invalidCredentials": "Email o password errati",
+      "sessionEnded": "La tua sessione è terminata. Accedi di nuovo."
+    },
+    "legalConsent": "Continuando, accetti i nostri <terms>Termini del servizio</terms> e la nostra <privacy>Informativa sulla privacy</privacy>.",
+    "brandTagline": "Progettato con precisione per il curatore digitale.",
+    "register": {
+      "stepAccount": "Account",
+      "stepVerify": "Verifica",
+      "stepOrganization": "Organizzazione",
+      "title": "Crea un account",
+      "subtitle": "Inizia con Loyalshy gratis",
+      "continueWithGoogle": "Continua con Google",
+      "or": "oppure",
+      "fullName": "Nome completo",
+      "fullNamePlaceholder": "Maria Rossi",
+      "email": "Email",
+      "emailPlaceholder": "tu@esempio.com",
+      "password": "Password",
+      "passwordHint": "Minimo 8 caratteri",
+      "passwordPlaceholder": "Inserisci la tua password",
+      "submit": "Crea account",
+      "hasAccount": "Hai già un account?",
+      "signIn": "Accedi",
+      "strengthWeak": "Debole",
+      "strengthFair": "Discreta",
+      "strengthGood": "Buona",
+      "strengthStrong": "Forte",
+      "orgTitle": "Dai un nome alla tua organizzazione",
+      "orgSubtitle": "Puoi modificarlo e aggiungere altri dettagli nelle impostazioni.",
+      "orgName": "Nome dell'organizzazione",
+      "orgPlaceholder": "es. Trattoria Bella",
+      "orgSubmit": "Inizia",
+      "accountCreated": "Account creato!",
+      "allSet": "Tutto pronto!",
+      "createFailed": "Errore nella creazione dell'account",
+      "genericError": "Qualcosa è andato storto. Riprova.",
+      "verifyTitle": "Controlla la tua email",
+      "verifySubtitle": "Abbiamo inviato un codice di 6 cifre a {email}",
+      "verifying": "Verifica in corso...",
+      "verifySuccess": "Email verificata!",
+      "verifyFailed": "Codice non valido. Riprova.",
+      "noCode": "Non hai ricevuto il codice?",
+      "resend": "Invia di nuovo il codice",
+      "resendCooldown": "Invia di nuovo tra {seconds}s",
+      "resendSuccess": "Codice inviato!",
+      "resendFailed": "Errore nell'invio del codice"
+    },
+    "forgotPassword": {
+      "title": "Hai dimenticato la password?",
+      "subtitle": "Inserisci la tua email e ti invieremo un link per reimpostarla",
+      "email": "Email",
+      "emailPlaceholder": "tu@esempio.com",
+      "submit": "Invia link",
+      "backToLogin": "Torna all'accesso",
+      "checkEmail": "Controlla la tua email",
+      "emailSent": "Abbiamo inviato un link per reimpostare la password a {email}",
+      "noEmail": "Non hai ricevuto l'email? Controlla la cartella spam o riprova.",
+      "tryDifferent": "Prova con un'altra email",
+      "backToInvite": "Torna all'invito"
+    },
+    "resetPassword": {
+      "title": "Reimposta la tua password",
+      "subtitle": "Inserisci la tua nuova password",
+      "newPassword": "Nuova password",
+      "newPasswordPlaceholder": "Inserisci la nuova password",
+      "confirmPassword": "Conferma password",
+      "confirmPasswordPlaceholder": "Conferma la tua nuova password",
+      "submit": "Reimposta password",
+      "backToLogin": "Torna all'accesso",
+      "mismatch": "Le password non coincidono",
+      "tooShort": "La password deve avere almeno 8 caratteri",
+      "failed": "Errore nel reimpostare la password. Il link potrebbe essere scaduto.",
+      "success": "Password reimpostata! Ora puoi accedere.",
+      "invalidTitle": "Link non valido",
+      "invalidDescription": "Questo link per reimpostare la password non è valido o è scaduto.",
+      "requestNewLink": "Richiedi un nuovo link",
+      "backToInvite": "Torna all'invito",
+      "successInvite": "Password reimpostata! Accedi qui sotto per accettare l'invito."
+    },
+    "invite": {
+      "joinOrg": "Unisciti a {organizationName}",
+      "invitedAs": "Sei stato invitato come {role}.",
+      "createAccount": "Crea il tuo account per iniziare.",
+      "signInToAccept": "Accedi per accettare l'invito.",
+      "createAndJoin": "Crea account e unisciti",
+      "signInAndJoin": "Accedi e unisciti",
+      "hasAccount": "Hai già un account?",
+      "signInInstead": "Accedi",
+      "noAccount": "Non hai un account?",
+      "createOne": "Creane uno",
+      "validating": "Verifica dell'invito in corso...",
+      "invalid": "Invito non valido",
+      "staleLinkTitle": "Questo link di invito non è più valido",
+      "staleLinkDesc": "È possibile che il link sia stato sostituito da un invito più recente. Chiedi al titolare di inviare di nuovo l'invito.",
+      "expiredTitle": "Invito scaduto",
+      "expiredDesc": "Questo invito è scaduto. Chiedi al titolare di inviarne uno nuovo.",
+      "alreadyUsedTitle": "Invito già usato",
+      "alreadyUsedDesc": "Questo invito è già stato accettato. Accedi al tuo account per entrare nel team.",
+      "rateLimitedTitle": "Troppe richieste",
+      "rateLimitedDesc": "Aspetta un momento e riprova.",
+      "expiresInDays": "Scade tra {count, plural, one {# giorno} other {# giorni}}",
+      "expiresInHours": "Scade tra {count, plural, =0 {meno di un'ora} one {# ora} other {# ore}}",
+      "acceptFailedTryAgain": "Hai effettuato l'accesso, ma non siamo riusciti ad aggiungerti al team. Riprova.",
+      "goToSignIn": "Vai all'accesso",
+      "welcome": "Benvenuto in {organizationName}!",
+      "createFailed": "Errore nella creazione dell'account",
+      "invalidCredentials": "Credenziali errate",
+      "accountExists": "Esiste già un account con questa email. Accedi per accettare l'invito.",
+      "forgotPassword": "Hai dimenticato la password?"
+    },
+    "error": {
+      "title": "Errore di autenticazione",
+      "message": "Qualcosa è andato storto durante l'autenticazione. Riprova.",
+      "errorId": "ID errore: {digest}",
+      "tryAgain": "Riprova",
+      "backToLogin": "Torna all'accesso"
+    }
+  },
+  "dashboard": {
+    "partnerConsole": {
+      "title": "Console partner",
+      "subtitle": "Il tuo portafoglio clienti e lo stato della configurazione.",
+      "statClients": "Clienti",
+      "statSubscribed": "Abbonamenti attivi",
+      "statPendingHandoffs": "Trasferimenti in sospeso",
+      "referralCardTitle": "Il tuo link di referral",
+      "copyLink": "Copia link",
+      "copied": "Link copiato negli appunti",
+      "copyFailed": "Non è stato possibile copiare il link",
+      "openError": "Non è stato possibile aprire questa organizzazione.",
+      "newClient": "Nuova configurazione cliente",
+      "requestAccess": "Richiedi accesso",
+      "requestAccessSent": "Richiesta inviata: il titolare riceverà un'email per concederti l'accesso.",
+      "requestAccessError": "Non è stato possibile inviare la richiesta di accesso. Riprova.",
+      "requestAccessRateLimited": "L'hai già richiesto da poco: dai al titolare il tempo di rispondere.",
+      "requestAccessPending": "Richiesta inviata",
+      "clientsTitle": "Clienti",
+      "colClient": "Cliente",
+      "colPlan": "Piano",
+      "colStatus": "Stato",
+      "colCreated": "Creato",
+      "colSetup": "Configurazione",
+      "setupProgram": "Programma pubblicato",
+      "setupContacts": "Primi contatti iscritti",
+      "setupOwner": "Titolare confermato",
+      "open": "Apri",
+      "handoffPendingBadge": "Trasferimento in sospeso",
+      "noClients": "Ancora nessun cliente. Usa \"Nuova configurazione cliente\" nel menu laterale per creare il primo."
+    },
+    "partner": {
+      "newClientTitle": "Nuova configurazione cliente",
+      "newClientDesc": "Crea un'organizzazione per un cliente. Potrai disegnare la sua carta, pubblicare il programma e trasferirgli la proprietà quando tutto è pronto.",
+      "nameLabel": "Nome dell'attività",
+      "namePlaceholder": "es. Caffè Centrale",
+      "createButton": "Crea organizzazione del cliente",
+      "createError": "Non è stato possibile creare l'organizzazione. Riprova.",
+      "cancel": "Annulla",
+      "handoffTitle": "Trasferisci {organizationName} al suo titolare",
+      "handoffDesc": "Genera un link monouso per il titolare dell'attività. Quando lo aprirà e creerà il suo account, diventerà titolare e tu manterrai l'accesso come partner.",
+      "generateLink": "Genera link di trasferimento",
+      "handoffError": "Non è stato possibile generare il link. Riprova.",
+      "ownerEmailLabel": "Email del titolare (facoltativa)",
+      "ownerEmailPlaceholder": "titolare@caffe.com",
+      "ownerEmailHint": "Se inserisci un'email, invieremo il link di trasferimento direttamente al titolare.",
+      "generateAndSend": "Genera e invia",
+      "handoffSent": "Link inviato a {email}",
+      "handoffSendFailed": "Il link è stato creato ma non è stato possibile inviare l'email: copialo e invialo tu.",
+      "invalidEmail": "Questa email non sembra valida.",
+      "copyLink": "Copia link",
+      "copied": "Link copiato negli appunti",
+      "copyFailed": "Non è stato possibile copiare il link",
+      "handoffExpiry": "Questo link scade tra 7 giorni. Generarne uno nuovo invalida il precedente.",
+      "referralTitle": "Il tuo link di referral",
+      "referralDesc": "Condividi questo link con i potenziali clienti. Qualsiasi attività che si registra tramite il link viene aggiunta automaticamente alla tua lista clienti.",
+      "referralError": "Non è stato possibile caricare il tuo link di referral. Riprova."
+    },
+    "nav": {
+      "overview": "Panoramica",
+      "contacts": "Contatti",
+      "programs": "Programmi",
+      "automations": "Automazioni",
+      "settings": "Impostazioni",
+      "connectDevice": "Collega dispositivo mobile",
+      "switchOrganization": "Cambia organizzazione",
+      "newClientSetup": "Nuova configurazione cliente",
+      "handoffToOwner": "Trasferisci al titolare",
+      "referralLink": "Link di referral",
+      "partnerConsole": "Console partner",
+      "signOut": "Esci",
+      "search": "Cerca azioni, pagine...",
+      "noResults": "Nessun risultato.",
+      "quickActions": "Azioni rapide",
+      "registerInteraction": "Registra interazione",
+      "createProgram": "Crea programma",
+      "navigate": "Vai a",
+      "newInteraction": "Registra visita",
+      "action": "Azione",
+      "more": "Altro",
+      "mobileNav": "Navigazione mobile"
+    },
+    "overview": {
+      "totalContacts": "Totale contatti",
+      "activePasses": "Carte attive",
+      "activityThisMonth": "Attività questo mese",
+      "redeemedThisMonth": "Riscattati questo mese",
+      "rewardCycleProgress": "Avanzamento del ciclo premi",
+      "noContacts": "Ancora nessun contatto",
+      "contactCount": "{count, plural, one {# contatto} other {# contatti}}",
+      "total": "totale"
+    },
+    "activity": {
+      "title": "Attività recente",
+      "stamp": "ha registrato una visita",
+      "checkIn": "ha fatto il check-in",
+      "passUse": "ha usato una carta",
+      "rewardEarned": "ha ottenuto un premio",
+      "rewardRedeemed": "ha riscattato un premio",
+      "couponRedeemed": "ha riscattato un coupon",
+      "empty": "Ancora nessuna attività. Registra la tua prima interazione per vederla qui.",
+      "by": "da"
+    },
+    "topContacts": {
+      "title": "Migliori contatti",
+      "empty": "Ancora nessun contatto",
+      "lastInteraction": "Ultima interazione"
+    },
+    "programsSummary": {
+      "title": "Programmi",
+      "empty": "Ancora nessun programma attivo.",
+      "createProgram": "Crea un programma",
+      "enrolled": "iscritti",
+      "rewardsEarned": "premi ottenuti",
+      "issued": "emessi",
+      "redeemed": "riscattati",
+      "uses": "utilizzi",
+      "passes": "carte"
+    },
+    "contacts": {
+      "title": "Contatti",
+      "subtitle": "Gestisci i titolari delle carte.",
+      "addContact": "Aggiungi contatto",
+      "searchPlaceholder": "Cerca per nome, email, telefono...",
+      "export": "Esporta",
+      "filter": "Filtra",
+      "hasReward": "Con premio",
+      "clearFilters": "Azzera filtri",
+      "exported": "Clienti esportati",
+      "exportFailed": "Errore nell'esportazione dei clienti",
+      "name": "Nome",
+      "program": "Programma",
+      "progress": "Avanzamento",
+      "total": "Totale",
+      "lastVisit": "Ultima visita",
+      "noContact": "Nessun contatto",
+      "viewDetails": "Vedi dettagli",
+      "never": "Mai",
+      "ready": "Pronto",
+      "active": "Attivo",
+      "noMatch": "Nessun cliente corrisponde ai tuoi filtri.",
+      "page": "Pagina",
+      "of": "di",
+      "previousPage": "Pagina precedente",
+      "nextPage": "Pagina successiva",
+      "actions": "Azioni sul cliente",
+      "noContacts": "Ancora nessun contatto",
+      "noContactsDesc": "Aggiungi il tuo primo contatto per iniziare a registrare visite e fidelizzare i clienti. Compariranno qui una volta aggiunti.",
+      "resultCount": "{count, plural, one {# contatto} other {# contatti}}"
+    },
+    "addContact": {
+      "title": "Aggiungi cliente",
+      "subtitle": "Aggiungi un nuovo cliente al tuo programma fedeltà.",
+      "fullName": "Nome completo",
+      "nameRequired": "Il nome è obbligatorio",
+      "email": "Email",
+      "invalidEmail": "Email non valida",
+      "phone": "Telefono",
+      "namePlaceholder": "Luca Bianchi",
+      "emailPlaceholder": "luca@esempio.com",
+      "phonePlaceholder": "+39 312 345 6789",
+      "addedSuccess": "{name} aggiunto correttamente",
+      "failedToAdd": "Errore nell'aggiunta del contatto"
+    },
+    "programs": {
+      "title": "Programmi",
+      "subtitle": "Gestisci i tuoi programmi fedeltà, i premi e i design.",
+      "createProgram": "Crea programma",
+      "newProgram": "Nuovo programma",
+      "newProgramDescription": "Scegli un tipo di programma e configuralo. Parte come bozza: attivalo quando è pronto.",
+      "all": "Tutti",
+      "stampCards": "Timbri",
+      "coupons": "Coupon",
+      "stampSubtitle": "{stamps} timbri | {count} attivi",
+      "couponSubtitle": "{discount} | {count} riscattati",
+      "defaultSubtitle": "{count} carte",
+      "noPrograms": "Ancora nessun programma",
+      "createFirst": "Crea il tuo primo programma fedeltà per iniziare a premiare i tuoi clienti.",
+      "createToStart": "Crea un nuovo programma per iniziare.",
+      "chooseType": "Scegli un tipo di programma per iniziare.",
+      "programName": "Nome del programma",
+      "nameRequired": "Il nome del programma è obbligatorio",
+      "namePlaceholder": "es. Fedeltà caffè, Menu speciale",
+      "backToType": "Torna alla scelta del tipo",
+      "overview": "Panoramica",
+      "passes": "Carte",
+      "attendees": "Partecipanti",
+      "members": "Membri",
+      "cardsTab": "Carte",
+      "rewards": "Premi",
+      "redemptions": "Riscatti",
+      "catalog": "Catalogo",
+      "distribution": "Distribuzione",
+      "cardDesign": "Design della carta",
+      "backToOverview": "Torna alla panoramica",
+      "draftBanner": "Questo programma è in bozza. Attivalo per iniziare a emettere carte.",
+      "activate": "Attiva",
+      "activated": "Programma attivato! I contatti possono già ricevere le carte.",
+      "backToOverviewAriaLabel": "Torna alla panoramica"
+    },
+    "settings": {
+      "title": "Impostazioni",
+      "subtitle": "Gestisci le impostazioni della tua organizzazione.",
+      "general": "Generale",
+      "team": "Team",
+      "billing": "Fatturazione",
+      "orgProfile": "Profilo dell'organizzazione",
+      "orgProfileDescription": "Informazioni di base sulla tua organizzazione.",
+      "orgName": "Nome dell'organizzazione",
+      "orgNamePlaceholder": "La mia organizzazione",
+      "orgNameRequired": "Il nome dell'organizzazione è obbligatorio",
+      "address": "Indirizzo",
+      "addressPlaceholder": "Via Principale 123, Città",
+      "inviteTeam": "Invita membri del team",
+      "inviteSent": "Invito inviato a {email}",
+      "memberRemoved": "{name} è stato rimosso"
+    },
+    "onboarding": {
+      "title": "Inizia con Loyalshy",
+      "completed": "completati",
+      "uploadLogo": "Carica il tuo logo",
+      "uploadLogoDescription": "Personalizza le tue carte con il logo della tua organizzazione",
+      "customizeCard": "Personalizza la tua carta",
+      "customizeCardDescription": "Imposta le visite richieste, la descrizione del premio e la scadenza",
+      "createFirstProgram": "Crea il tuo primo programma",
+      "createFirstProgramDescription": "Scegli tra timbri, coupon o biglietto da visita per iniziare a premiare i clienti",
+      "printQr": "Stampa il tuo codice QR",
+      "printQrDescription": "Scarica e mostra il tuo codice QR al banco",
+      "firstContact": "Registra il tuo primo contatto",
+      "firstContactDescription": "Aggiungi un contatto o fai scansionare il tuo codice QR",
+      "inviteStaff": "Invita il tuo team",
+      "inviteStaffDescription": "Aggiungi membri del team per aiutarti a gestire le visite",
+      "dismiss": "Chiudi la lista delle attività",
+      "heroTitle": "Crea il tuo primo programma fedeltà",
+      "heroBody": "Scegli una tessera timbri o un coupon, personalizza il design e inizia a premiare i tuoi clienti in pochi minuti.",
+      "heroCta": "Crea programma"
+    },
+    "status": {
+      "active": "Attivo",
+      "draft": "Bozza",
+      "archived": "Archiviato",
+      "frozen": "Bloccato",
+      "completed": "Completato",
+      "cancelled": "Annullato",
+      "suspended": "Sospeso",
+      "revoked": "Revocato",
+      "available": "Disponibile",
+      "redeemed": "Riscattato",
+      "expired": "Scaduto"
+    },
+    "chart": {
+      "7d": "7g",
+      "30d": "30g",
+      "90d": "90g",
+      "12m": "12m",
+      "interaction": "interazione",
+      "interactions": "interazioni"
+    },
+    "contactDetail": {
+      "passes": "Carte",
+      "visits": "Visite",
+      "rewards": "Premi",
+      "issuedOn": "Emessa il",
+      "lastActivity": "Ultima attività",
+      "memberNumber": "Membro n.",
+      "noPasses": "Nessuna carta emessa",
+      "noVisits": "Nessuna visita registrata",
+      "noRewards": "Ancora nessun premio",
+      "issuePass": "Emetti carta",
+      "selectProgram": "Seleziona un programma",
+      "sendEmail": "Invia email",
+      "passIssued": "Carta emessa a {name}",
+      "editContact": "Modifica contatto",
+      "deleteContact": "Elimina contatto",
+      "deleteConfirm": "Vuoi davvero eliminare questo contatto? Questa azione non si può annullare.",
+      "contactDeleted": "Contatto eliminato",
+      "contactUpdated": "Contatto aggiornato",
+      "sendPassEmail": "Invia email con la carta",
+      "emailSent": "Email inviata a {email}",
+      "sheetTitle": "Dettagli del contatto",
+      "contactNotFound": "Contatto non trovato",
+      "cancel": "Annulla",
+      "delete": "Elimina",
+      "saveChanges": "Salva modifiche",
+      "fullName": "Nome completo",
+      "email": "Email",
+      "phone": "Telefono",
+      "nameRequired": "Il nome è obbligatorio",
+      "failedToLoad": "Errore nel caricamento dei dettagli del contatto",
+      "failedToDelete": "Errore nell'eliminazione del contatto",
+      "failedToUpdate": "Errore nell'aggiornamento del contatto",
+      "failedToRedeem": "Errore nel riscatto del premio",
+      "rewardRedeemed": "Premio riscattato!",
+      "failedToLoadPrograms": "Errore nel caricamento dei programmi",
+      "alreadyHasPass": "Il contatto ha già questa carta",
+      "failedToIssuePass": "Errore nell'emissione della carta",
+      "allPrograms": "Tutti",
+      "enrolled": "Iscritto il {date}",
+      "noPassInstances": "Nessuna carta",
+      "selfRegistered": "Iscritto da solo",
+      "registeredBy": "da {name}",
+      "checkIn": "Check-in",
+      "usePass": "Usa carta",
+      "visit": "Visita",
+      "couponRedeemed": "Coupon riscattato",
+      "readyToRedeem": "Pronto da riscattare",
+      "suspended": "Sospeso",
+      "expired": "Scaduto",
+      "expires": "Scade",
+      "checkIns": "{count, plural, one {# check-in} other {# check-in}}",
+      "actionUsePass": "Usa carta",
+      "actionCheckIn": "Check-in",
+      "actionRedeemCoupon": "Riscatta coupon",
+      "actionRegisterVisit": "Registra visita",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet",
+      "stampCard": "Tessera timbri",
+      "coupon": "Coupon"
+    },
+    "contactColumns": {
+      "name": "Nome",
+      "program": "Programma",
+      "progress": "Avanzamento",
+      "total": "Totale",
+      "lastVisit": "Ultima visita",
+      "noContact": "Nessun contatto",
+      "viewDetails": "Vedi dettagli",
+      "never": "Mai",
+      "ready": "Pronto",
+      "pts": "pt",
+      "balance": "saldo",
+      "scans": "scansioni",
+      "actions": "Azioni sul cliente"
+    },
+    "contactTable": {
+      "noMatch": "Nessun cliente corrisponde ai tuoi filtri.",
+      "page": "Pagina",
+      "of": "di",
+      "previousPage": "Pagina precedente",
+      "nextPage": "Pagina successiva"
+    },
+    "passInstances": {
+      "progress": "Avanzamento",
+      "status": "Stato",
+      "checkIns": "Check-in",
+      "balance": "Saldo",
+      "remaining": "Rimanenti",
+      "scans": "Scansioni",
+      "granted": "Concesso",
+      "verified": "Verificato",
+      "activity": "Attività",
+      "issuePass": "Emetti carta",
+      "noPass": "Ancora nessuna carta emessa",
+      "contact": "Contatto",
+      "issuedDate": "Emessa"
+    },
+    "distribution": {
+      "shareLink": "Link condivisibile",
+      "copyLink": "Copia link",
+      "copied": "Copiato",
+      "embedCopied": "Codice di incorporamento copiato",
+      "qrCode": "Codice QR",
+      "downloadQr": "Scarica QR",
+      "printSize": "Dimensione di stampa",
+      "small": "Piccolo",
+      "medium": "Medio",
+      "large": "Grande",
+      "directIssue": "Emissione diretta",
+      "directIssueDescription": "Emetti una carta direttamente a un contatto esistente.",
+      "selectContact": "Seleziona un contatto",
+      "issue": "Emetti",
+      "passIssued": "Carta emessa a {name}",
+      "joinMode": "Modalità di accesso",
+      "joinModeDescription": "Controlla come i contatti possono ottenere una carta per questo programma.",
+      "joinModeOpen": "Aperto",
+      "joinModeOpenDescription": "Chiunque si iscrive scansionando il QR o aprendo il link.",
+      "joinModeInviteOnly": "Solo su invito",
+      "joinModeInviteOnlyDescription": "Solo il tuo team emette le carte: via email da qui o al banco dall'app. Il QR, il link e l'NFC smettono di funzionare.",
+      "joinModeUpdated": "Modalità di accesso aggiornata",
+      "joinModeInviteOnlyNotice": "Programma su invito: il QR, il link e l'NFC sono disattivati. Emetti le carte da Emissione diretta o dall'app del team.",
+      "duplicateNote": "I codici QR e i link sono in autoservizio: i contatti si identificano con email o telefono. Per un controllo maggiore, usa Emissione diretta o Importazione CSV.",
+      "duplicateNoteSettings": "Puoi anche richiedere l'email (invece di email o telefono) in <link>Impostazioni > Generale > Modulo pubblico</link>.",
+      "embedSnippet": "Incorpora nel sito",
+      "embedDescription": "Aggiungi questo codice HTML al tuo sito perché i visitatori salvino il tuo biglietto da visita.",
+      "embedButtonText": "Salva biglietto da visita",
+      "copySnippet": "Copia codice",
+      "nfcTitle": "Tag NFC",
+      "nfcDescription": "Programma un tag NFC con questo URL perché le persone possano iscriversi con un tocco. Funziona con qualsiasi adesivo, carta o cover NFC.",
+      "nfcCopyUrl": "Copia URL",
+      "nfcStep1": "Procurati un tag NFC (adesivo, carta o supporto da tavolo)",
+      "nfcStep2": "Usa un'app di scrittura NFC per programmare questo URL nel tag",
+      "nfcStep3": "Le persone toccano il tag con il telefono per aggiungere la carta",
+      "firstCustomer": {
+        "title": "Ottieni il tuo primo cliente",
+        "subtitle": "Pochi passaggi rapidi per mettere il tuo programma davanti a persone reali.",
+        "qrLabel": "Scarica il cartello QR",
+        "qrDescription": "Stampalo per il banco: PDF A4, con il colore del tuo brand, pronto da scansionare.",
+        "shareLabel": "Condividi il link di iscrizione",
+        "shareDescription": "Su WhatsApp, via email, o copialo direttamente in una storia.",
+        "scannerLabel": "Configura il telefono del personale",
+        "scannerDescription": "Collega l'app Loyalshy Staff perché chiunque sia in turno possa timbrare e riscattare.",
+        "directLabel": "Emetti la prima carta a mano",
+        "directDescription": "Invia una carta direttamente a un cliente abituale, senza scansione."
+      },
+      "announcementTitle": "Invia annuncio",
+      "announcementDescription": "Invia un messaggio breve a tutti quelli che hanno la carta di questo programma in Apple o Google Wallet: compare come notifica nella schermata di blocco.",
+      "announcementPlaceholder": "es. Oggi 2x1 su tutte le bevande!",
+      "announcementSend": "Invia",
+      "announcementSent": "{count, plural, =0 {Annuncio salvato: non ci sono ancora carte nei wallet da notificare} one {Annuncio inviato a # carta} other {Annuncio inviato a # carte}}",
+      "announcementNotActive": "Attiva il programma per inviare annunci.",
+      "announcementLastSent": "Inviato {date}",
+      "announcementConfirmTitle": "Inviare questo annuncio?",
+      "announcementConfirmBody": "{count, plural, =0 {Nessuno ha ancora questa carta nel suo wallet: il messaggio comparirà solo sulle carte nuove.} one {Verrà notificato # titolare. Non si può annullare.} other {Verranno notificati # titolari. Non si può annullare.}}",
+      "announcementConfirmCancel": "Annulla",
+      "announcementConfirmSend": "Invia ora",
+      "announcementQuotaWeek": "Te ne restano {remaining} di {limit} questa settimana",
+      "announcementQuotaLifetime": "Ti restano {remaining} di {limit} annunci gratis",
+      "announcementQuotaUnlimited": "Annunci illimitati",
+      "announcementPlanWeek": "Piano {plan}: {limit, plural, one {# annuncio} other {# annunci}} ogni 7 giorni",
+      "announcementPlanLifetime": "Piano {plan}: {limit} annunci in totale",
+      "announcementPlanUnlimited": "Piano {plan}: nessun limite settimanale",
+      "announcementSharedHint": "condivisi tra tutti i tuoi programmi",
+      "announcementUsedWeek": "Hai già usato gli annunci di questa settimana. Il prossimo sarà disponibile il {date}.",
+      "announcementUsedWeekNoDate": "Hai già usato gli annunci di questa settimana. Presto ne avrai altri disponibili.",
+      "announcementUsedFree": "Hai già usato i tuoi {limit} annunci gratis. Passa a un piano superiore per continuare a raggiungere i tuoi clienti ogni settimana.",
+      "announcementUpgradeCta": "Passa a {plan} · {limit}/settimana",
+      "announcementAskOwner": "Chiedi al titolare dell'account di passare a {plan} per inviarne di più.",
+      "announcementProgramCap": "Questo programma ha già inviato 3 annunci nelle ultime 24 ore. Aspetta un po' perché Google Wallet continui a consegnare la notifica.",
+      "announcementSubscriptionInactive": "Il tuo abbonamento non è attivo, quindi gli annunci sono in pausa.",
+      "announcementFixBilling": "Aggiorna fatturazione",
+      "announcementConfirmQuotaWeek": "{left, plural, =0 {Questo è il tuo ultimo annuncio di questa settimana.} one {Ti resterà # annuncio questa settimana.} other {Ti resteranno # annunci questa settimana.}}",
+      "announcementConfirmQuotaLifetime": "{left, plural, =0 {Questo è il tuo ultimo annuncio gratis.} one {Ti resterà # annuncio gratis.} other {Ti resteranno # annunci gratis.}}",
+      "announcementNoHolders": "Nessuno ha ancora questa carta in Apple o Google Wallet. Condividi prima il programma: gli annunci arrivano solo a chi ha la carta e non consumeranno la tua quota fino ad allora.",
+      "issueFailed": "Non è stato possibile emettere le carte",
+      "issuedCount": "{count, plural, one {# carta emessa} other {# carte emesse}}",
+      "skippedHadPass": "{count, plural, one {# aveva già la carta} other {# avevano già la carta}}",
+      "allAlreadyHavePass": "Tutti i contatti selezionati hanno già la carta di questo programma",
+      "issuedToAllEligible": "{count, plural, one {# carta emessa} other {# carte emesse}} ai contatti in attesa",
+      "noEligibleFound": "Nessun contatto in attesa",
+      "noEligibleYet": "Ancora nessun contatto in attesa. Aggiungili dalla pagina <link>Contatti</link>.",
+      "searchContacts": "Cerca contatti",
+      "searchContactsPlaceholder": "Cerca contatti...",
+      "noContactsFound": "Nessun contatto trovato",
+      "noContactInfo": "Nessun dato di contatto",
+      "noEmail": "Senza email",
+      "removeContact": "Rimuovi {name}",
+      "issueToAllEligible": "Emetti ai contatti in attesa ({count})",
+      "bulkConfirmTitle": "Emettere le carte a tutti i contatti in attesa?",
+      "bulkConfirmBody": "Verrà creata e inviata una carta <strong>{template}</strong> a {count, plural, one {# contatto} other {# contatti}}. Chi ha un'email riceverà un avviso.",
+      "bulkConfirmBodyCapped": "Verrà creata e inviata una carta <strong>{template}</strong> ai primi 100 contatti in attesa (su {total}). Chi ha un'email riceverà un avviso.",
+      "bulkConfirmNextBatch": "Ripeti l'azione per emettere al gruppo successivo.",
+      "bulkConfirmAction": "Emetti carte",
+      "results": "Risultati",
+      "resultIssuedEmailed": "Emessa e inviata via email",
+      "resultIssuedNoEmail": "Emessa (senza email)",
+      "resultAlreadyHasPass": "Aveva già la carta",
+      "resultFailed": "Errore",
+      "dismissResults": "Nascondi",
+      "qrTitle": "Codice QR e stampa",
+      "generating": "Generazione in corso...",
+      "downloadPng": "Scarica PNG",
+      "downloadPdf": "Scarica cartello A4 (PDF)",
+      "qrNfcNote": "Puoi anche scrivere questo URL su tag NFC. Il cliente avvicina il telefono e si iscrive all'istante.",
+      "rewardAfterVisits": "{reward} dopo {visits} visite",
+      "posterTagline": "Scansiona per iscriverti al nostro programma fedeltà",
+      "shareText": "Iscriviti a {template} di {organization}",
+      "embedJoin": "Iscriviti a {template}",
+      "shareNative": "Condividi...",
+      "embedOnSite": "Incorpora nel tuo sito",
+      "copyEmbed": "Copia codice di incorporamento",
+      "issueToSelected": "{count, plural, =0 {Emetti carta ai contatti} one {Emetti carta a # contatto} other {Emetti carta a # contatti}}",
+      "materialTitle": "Materiale da banco",
+      "materialDescription": "PDF pronti da stampare con il tuo logo, i tuoi colori e il QR di questo programma. Stampali in qualsiasi copisteria.",
+      "materialCounterCard": "Cartoncino da banco (A6)",
+      "materialTableTent": "Espositore da tavolo (A4, piegato)",
+      "materialTentReviews": "Il secondo lato riporta il tuo link per le recensioni Google.",
+      "materialTentNoReviews": "Imposta il tuo link per le recensioni Google in Automazioni e il secondo lato chiederà una recensione.",
+      "materialScanLine": "Scansiona e salva la tua carta nel tuo Wallet",
+      "materialReviewsLine": "Ti è piaciuto? Lasciaci una recensione su Google",
+      "materialFold": "Piega qui",
+      "materialIdeas": "Idee per promuovere il tuo programma",
+      "materialFailed": "Non è stato possibile generare il PDF. Riprova."
+    },
+    "programSettings": {
+      "title": "Impostazioni",
+      "subtitle": "Gestisci lo stato e il ciclo di vita del tuo programma.",
+      "currentStatus": "Stato attuale:",
+      "activateProgram": "Attiva programma",
+      "activateDescription": "Attiva questo programma. I contatti potranno ricevere le carte.",
+      "archiveProgram": "Archivia programma",
+      "archiveDescription": "Archivia questo programma. Non verranno emesse nuove carte.",
+      "reactivateProgram": "Riattiva programma",
+      "reactivateDescription": "Riporta questo programma allo stato attivo.",
+      "deleteProgram": "Elimina programma",
+      "deleteDescription": "Elimina definitivamente questo programma e tutti i suoi dati. Non si può annullare.",
+      "deleteConfirm": "Sei sicuro? Questo eliminerà definitivamente il programma, tutte le carte e tutti i dati delle interazioni.",
+      "typeToConfirm": "Scrivi \"{name}\" per confermare",
+      "programDeleted": "Programma eliminato",
+      "statusUpdated": "Stato del programma aggiornato"
+    },
+    "settingsForms": {
+      "logo": "Logo",
+      "uploadLogo": "Carica logo",
+      "removeLogo": "Rimuovi logo",
+      "brandColor": "Colore del brand",
+      "saved": "Impostazioni salvate",
+      "saveFailed": "Errore nel salvataggio delle impostazioni",
+      "inviteEmail": "Indirizzo email",
+      "inviteEmailPlaceholder": "collega@esempio.com",
+      "inviteRole": "Ruolo",
+      "programManager": "Responsabile programmi",
+      "owner": "Titolare",
+      "staff": "Personale",
+      "sendInvite": "Invia invito",
+      "pendingInvitations": "Inviti in sospeso",
+      "cancelInvite": "Annulla",
+      "inviteCancelled": "Invito annullato",
+      "members": "Membri",
+      "viewAuditLog": "Registro delle attività",
+      "removeMember": "Rimuovi",
+      "deleteAccountTitle": "Elimina account",
+      "deleteAccountDescription": "Elimina il tuo account in modo definitivo e lascia tutti i team di cui fai parte. Questa azione non si può annullare.",
+      "deleteAccountButton": "Elimina il mio account",
+      "deleteAccountConfirmIntro": "Stai per eliminare il tuo account Loyalshy.",
+      "deleteAccountConsequence1": "Verrai disconnesso da tutti i dispositivi, inclusa l'app del personale.",
+      "deleteAccountConsequence2": "Verrai rimosso da tutti i team di cui fai parte.",
+      "deleteAccountConsequence3": "Il tuo nome e la tua email verranno cancellati da questo account immediatamente. La cronologia delle attività resta nel registro delle attività del team.",
+      "deleteAccountTypeEmail": "Scrivi {email} per confermare",
+      "deleteAccountCancel": "Annulla",
+      "deleteAccountConfirm": "Elimina per sempre",
+      "deleteAccountWorking": "Eliminazione in corso...",
+      "deleteAccountSuccess": "Account eliminato.",
+      "deleteAccountWrongEmail": "L'email non coincide. Scrivila esattamente per confermare.",
+      "deleteAccountLastOwnerTitle": "Sei l'ultimo titolare",
+      "deleteAccountLastOwnerBody": "Non puoi eliminare il tuo account finché sei l'unico titolare di un'organizzazione. Promuovi un altro membro a titolare o elimina prima l'organizzazione. Team interessati:",
+      "removeConfirm": "Rimuovere {name} da questa organizzazione?",
+      "currentPlan": "Piano attuale",
+      "changePlan": "Cambia piano",
+      "manageBilling": "Gestisci fatturazione",
+      "cancelSubscription": "Annulla abbonamento",
+      "billingPortal": "Portale di fatturazione",
+      "usage": "Utilizzo",
+      "contactsUsed": "{used} di {limit} contatti",
+      "programsUsed": "{used} di {limit} programmi",
+      "staffUsed": "{used} di {limit} membri del team",
+      "unlimited": "Illimitato",
+      "statusTrial": "Prova",
+      "statusActive": "Attivo",
+      "statusPastDue": "Pagamento in ritardo",
+      "statusCanceled": "Annullato",
+      "currentPlanSection": "Piano attuale",
+      "manageBillingDescription": "Gestisci il tuo abbonamento e la fatturazione.",
+      "usageSection": "Utilizzo",
+      "usageDescription": "Il tuo utilizzo attuale e i limiti del tuo piano.",
+      "plansSection": "Piani",
+      "plansDescription": "Scegli il piano più adatto alla tua attività.",
+      "contactsLabel": "Contatti",
+      "contactsHint": "I contatti contano nel tuo limite finché non vengono eliminati. Elimina i contatti inattivi per liberare spazio.",
+      "approachingLimit": "Vicino al limite",
+      "contactLimitReached": "Limite raggiunto: elimina i contatti non usati o passa a un piano superiore",
+      "staffLimitReached": "Limite raggiunto: passa a un piano superiore per aggiungerne altri",
+      "programLimitReached": "Limite raggiunto: passa a un piano superiore per aggiungerne altri",
+      "teamMembersLabel": "Membri del team",
+      "programsLabel": "Programmi",
+      "announcementsLabel": "Avvisi",
+      "announcementsHintWeek": "Ultimi 7 giorni, condivisi tra tutti i programmi.",
+      "announcementsHintLifetime": "Totale nel piano Free: passa a un piano superiore per avere annunci settimanali.",
+      "announcementsLimitReached": "Limite raggiunto: passa a un piano superiore per inviarne di più",
+      "billingCheckoutSuccess": "Abbonamento attivato! Il tuo piano è già aggiornato.",
+      "billingCheckoutCanceled": "Hai annullato il pagamento. Non è cambiato nulla.",
+      "billingDismiss": "Chiudi",
+      "billingTrialBanner": "{days, plural, one {Ti resta <b># giorno</b>} other {Ti restano <b># giorni</b>}} di prova. Scegli un piano per mantenere tutte le funzioni.",
+      "billingPaymentFailedTitle": "Il pagamento non è riuscito",
+      "billingPaymentFailedBody": "Aggiorna il tuo metodo di pagamento perché il servizio non si interrompa.",
+      "billingUpdatePayment": "Aggiorna pagamento",
+      "billingPlanName": "Piano {name}",
+      "billingTrialEnds": "{days, plural, one {La prova termina tra # giorno} other {La prova termina tra # giorni}}",
+      "billingSubscribeToContinue": "Abbonati per continuare a usare Loyalshy",
+      "billingFreeForever": "Gratis per sempre. Cambia piano quando vuoi.",
+      "billingRenews": "Il tuo abbonamento si rinnova automaticamente",
+      "billingCurrentBadge": "Attuale",
+      "billingFreeForeverButton": "Gratis per sempre",
+      "billingPriceCustom": "Su misura",
+      "billingPerMonth": "/mese",
+      "billingSavePerYear": "Risparmi {amount} € all'anno",
+      "billingCurrentPlanButton": "Il tuo piano attuale",
+      "billingContactUs": "Contattaci",
+      "billingUpgrade": "Passa a un piano superiore",
+      "billingDowngrade": "Passa a un piano inferiore",
+      "billingSubscribe": "Abbonati",
+      "billingCheckoutFailed": "Non è stato possibile avviare il pagamento",
+      "billingPortalFailed": "Non è stato possibile aprire il portale di fatturazione",
+      "billingGenericError": "Qualcosa è andato storto",
+      "billingEnterpriseFeatures": {
+        "everythingScale": "Tutto quello di Scale",
+        "unlimitedStaff": "Team illimitato",
+        "unlimitedAnnouncements": "Avvisi illimitati",
+        "whiteLabel": "White label",
+        "support": "Supporto dedicato e SLA"
+      }
+    },
+    "registerVisit": {
+      "title": "Registra interazione",
+      "scanQr": "Scansiona codice QR",
+      "registerStamp": "Registra visita",
+      "redeemCoupon": "Riscatta coupon",
+      "stampAdded": "Visita registrata per {name}",
+      "couponRedeemed": "Coupon riscattato per {name}"
+    },
+    "shell": {
+      "trialDaysLeft": "{count, plural, one {# giorno} other {# giorni}} di prova rimanenti.",
+      "upgradeNow": "Passa a un piano superiore",
+      "pastDue": "Il tuo pagamento è scaduto. Aggiorna i tuoi dati di fatturazione.",
+      "updateBilling": "Aggiorna fatturazione",
+      "dismissBanner": "Chiudi banner",
+      "handoffWelcome": "Ecco il tuo programma fedeltà: aggiungi i tuoi dati di pagamento per attivarlo.",
+      "handoffWelcomeCta": "Vai alla fatturazione"
+    },
+    "rewards": {
+      "title": "Premi",
+      "noRewards": "Ancora nessun premio",
+      "noRewardsDescription": "I premi si creano automaticamente quando i clienti completano la loro carta. Registra le visite per iniziare.",
+      "searchPlaceholder": "Cerca per nome del cliente...",
+      "revealPrize": "Mostra premio",
+      "markRedeemed": "Segna come riscattato",
+      "rewardRedeemed": "Premio segnato come riscattato"
+    },
+    "jobsHistory": {
+      "created": "Creato",
+      "updated": "Aggiornato",
+      "pushSent": "Push inviato",
+      "pushFailed": "Push non riuscito",
+      "platform": "Piattaforma",
+      "trigger": "Attivatore",
+      "devices": "Dispositivi",
+      "sent": "Inviato",
+      "failed": "Non riuscito"
+    },
+    "auditLog": {
+      "title": "Registro delle attività",
+      "subtitle": "Ogni modifica del team in questa organizzazione, con autore e data.",
+      "backToTeam": "Torna al team",
+      "searchPlaceholder": "Cerca per email...",
+      "filterAll": "Tutte le azioni",
+      "empty": "Ancora nessuna attività.",
+      "by": "da",
+      "target": "destinatario",
+      "unknownActor": "(utente eliminato)",
+      "pageOf": "Pagina {page} di {total} · {count, plural, one {# voce} other {# voci}}",
+      "action": {
+        "INVITATION_SENT": "Invito inviato",
+        "INVITATION_RESENT": "Invito inviato di nuovo",
+        "INVITATION_CANCELLED": "Invito annullato",
+        "INVITATION_ACCEPTED": "Invito accettato",
+        "MEMBER_REMOVED": "Membro rimosso",
+        "MEMBER_ROLE_CHANGED": "Ruolo cambiato",
+        "HANDOFF_LINK_CREATED": "Link di trasferimento creato",
+        "OWNERSHIP_CLAIMED": "Proprietà reclamata",
+        "ACCESS_REQUESTED": "Accesso richiesto",
+        "STAMP_UNDONE": "Timbro annullato"
+      }
+    },
+    "visitsChart": {
+      "activityOverTime": "Attività nel tempo",
+      "interaction": "interazione",
+      "interactions": "interazioni"
+    },
+    "programEditor": {
+      "details": "Dettagli",
+      "stamps": "Timbri",
+      "coupon": "Coupon",
+      "schedule": "Calendario",
+      "terms": "Condizioni",
+      "prizeReveal": "Premio",
+      "danger": "Pericolo",
+      "programDetails": "Dettagli del programma",
+      "programDetailsDesc": "Informazioni di base sul tuo programma.",
+      "programName": "Nome del programma",
+      "programNameRequired": "Il nome del programma è obbligatorio",
+      "stampConfiguration": "Configurazione dei timbri",
+      "stampConfigDesc": "Imposta le visite richieste e i dettagli del premio.",
+      "visitsRequired": "Visite richieste",
+      "visitsRequiredHint": "Numero di visite prima che un cliente ottenga un premio (3-30).",
+      "rewardExpiry": "Scadenza del premio (giorni)",
+      "rewardExpiryHint": "Imposta 0 per premi che non scadono.",
+      "rewardDescription": "Descrizione del premio",
+      "rewardDescriptionRequired": "La descrizione del premio è obbligatoria",
+      "rewardDescriptionPlaceholder": "es. Caffè o dolce gratis",
+      "rewardDescriptionFromPrizes": "Generata automaticamente dai premi. Modifica i premi qui sotto per aggiornarla.",
+      "couponConfiguration": "Configurazione del coupon",
+      "couponConfigDesc": "Imposta il tipo di sconto, il valore e i limiti di utilizzo.",
+      "discountType": "Tipo di sconto",
+      "discountTypePercentage": "Sconto in percentuale",
+      "discountTypeFixed": "Sconto di importo fisso",
+      "discountTypeFreebie": "Articolo gratis",
+      "discountPercent": "Sconto (%)",
+      "couponDescription": "Descrizione",
+      "couponDescriptionRequired": "La descrizione è obbligatoria",
+      "couponDescriptionPlaceholder": "es. Ottieni il 20% di sconto sul prossimo ordine",
+      "validUntil": "Valido fino al",
+      "couponCode": "Codice coupon",
+      "couponCodePlaceholder": "es. SCONTO20",
+      "couponCodeHint": "Facoltativo. Viene mostrato sulla carta e sulla pagina della carta.",
+      "redemptionLimit": "Limite di riscatto",
+      "redemptionSingle": "Monouso",
+      "redemptionUnlimited": "Illimitato",
+      "scheduleSection": "Calendario",
+      "scheduleDesc": "Controlla quando il programma è attivo e accetta clienti.",
+      "status": "Stato",
+      "statusDraft": "Bozza",
+      "statusActive": "Attivo",
+      "statusArchived": "Archiviato",
+      "statusHintVisits": "Solo i programmi attivi accettano nuove visite.",
+      "statusHintCustomers": "Solo i programmi attivi accettano nuovi clienti.",
+      "startDate": "Data di inizio",
+      "endDate": "Data di fine (facoltativa)",
+      "endDateHint": "Lascia vuoto per un programma senza data di fine.",
+      "termsSection": "Termini e condizioni",
+      "termsDesc": "Condizioni facoltative mostrate sulla carta.",
+      "termsPlaceholder": "Condizioni facoltative mostrate sulla carta...",
+      "visitsChangedTitle": "Stai cambiando le visite richieste da {from} a {to}",
+      "visitsChangedDesc": "Questo influirà sui clienti attualmente in un ciclo. Scegli come gestire i progressi esistenti:",
+      "keepProgress": "Mantieni i progressi esistenti -- i clienti conservano il loro conteggio di visite",
+      "resetProgress": "Azzera tutti i progressi -- tutti i clienti ripartono da 0 visite",
+      "unsavedChanges": "Modifiche non salvate",
+      "confirmSave": "Conferma e salva",
+      "saveChanges": "Salva modifiche",
+      "saving": "Salvataggio in corso...",
+      "programUpdated": "Programma aggiornato",
+      "programArchived": "Programma archiviato",
+      "programActivated": "Programma attivato",
+      "programReactivated": "Programma riattivato",
+      "programDeleted": "Programma eliminato",
+      "cardDesign": "Design della carta",
+      "dangerZone": "Zona di pericolo",
+      "activateProgram": "Attiva programma",
+      "activateProgramDesc": "Attiva questo programma perché i clienti possano iniziare ad accumulare visite.",
+      "activate": "Attiva",
+      "archiveProgram": "Archivia programma",
+      "archiveProgramDesc": "Le iscrizioni attive verranno bloccate e i clienti non accumuleranno nuove visite.",
+      "archive": "Archivia",
+      "reactivateProgram": "Riattiva programma",
+      "reactivateProgramDesc": "Riporta il programma allo stato attivo e sblocca tutte le iscrizioni.",
+      "reactivate": "Riattiva",
+      "deleteProgram": "Elimina programma",
+      "deleteProgramDesc": "Elimina definitivamente questo programma, incluse tutte le iscrizioni, le visite e i premi. Non si può annullare.",
+      "delete": "Elimina",
+      "archiveDialogTitle": "Archivia programma",
+      "archiveDialogDesc": "Le iscrizioni attive verranno bloccate e i clienti non accumuleranno nuove visite. I premi già ottenuti resteranno validi. Puoi riattivare il programma più avanti.",
+      "archiving": "Archiviazione in corso...",
+      "archiveConfirmBtn": "Archivia programma",
+      "reactivateDialogTitle": "Riattiva programma",
+      "reactivateDialogDesc": "Questo riporterà il programma allo stato attivo e sbloccherà tutte le iscrizioni. I clienti potranno di nuovo accumulare visite.",
+      "reactivating": "Riattivazione in corso...",
+      "reactivateConfirmBtn": "Riattiva programma",
+      "deleteDialogTitle": "Elimina programma",
+      "deleteDialogDesc": "Questa azione è definitiva e non si può annullare. Tutti i dati associati a questo programma verranno eliminati.",
+      "dataToDelete": "Verranno eliminati i seguenti dati:",
+      "passInstancesCount": "{count, plural, one {# carta} other {# carte}}",
+      "interactionsCount": "{count, plural, one {# interazione} other {# interazioni}}",
+      "rewardsCount": "{count, plural, one {# premio} other {# premi}}",
+      "typeToConfirm": "Scrivi {name} per confermare",
+      "deleting": "Eliminazione in corso...",
+      "deleteConfirmBtn": "Elimina programma",
+      "programPanelDesc": "Configura il tuo programma. Le modifiche si salvano insieme al design della carta.",
+      "generalSection": "Generale",
+      "stampsSuffix": "timbri",
+      "rewardExpirySuffix": "giorni (0 = mai)",
+      "noEndDate": "Senza data di fine: il programma resta attivo a tempo indeterminato."
+    },
+    "createProgram": {
+      "chooseType": "Scegli un tipo di programma per iniziare.",
+      "backToTypeSelection": "Torna alla scelta del tipo",
+      "programName": "Nome del programma",
+      "programNameRequired": "Il nome del programma è obbligatorio",
+      "visitsRequired": "Visite richieste",
+      "visitsRequiredHint": "Tra 3 e 30 timbri prima del premio.",
+      "rewardExpiry": "Scadenza del premio",
+      "rewardExpiryHint": "Giorni dopo aver ottenuto il premio. 0 = non scade mai.",
+      "stampsSuffix": "timbri",
+      "daysSuffix": "giorni",
+      "rewardDescription": "Descrizione del premio",
+      "rewardDescriptionRequired": "La descrizione del premio è obbligatoria",
+      "rewardDescriptionPlaceholder": "es. Caffè o dolce gratis",
+      "creating": "Creazione in corso...",
+      "previewLabel": "Anteprima",
+      "previewDefaultName": "La tua tessera timbri",
+      "previewDefaultReward": "Il tuo premio",
+      "createStampCard": "Crea tessera timbri",
+      "stampCardCreated": "Programma a timbri creato",
+      "stampNamePlaceholder": "es. Fedeltà caffè, Menu speciale",
+      "couponName": "Nome del coupon",
+      "couponNameRequired": "Il nome del coupon è obbligatorio",
+      "couponNamePlaceholder": "es. Offerta estate, Sconto nuovo cliente",
+      "discountType": "Tipo di sconto",
+      "discountTypePercentage": "Percentuale",
+      "discountTypePercentageDesc": "es. 20% di sconto",
+      "discountTypeFixed": "Importo fisso",
+      "discountTypeFixedDesc": "es. 5 € di sconto",
+      "discountTypeFreebie": "Articolo gratis",
+      "discountTypeFreebieDesc": "es. Caffè gratis",
+      "discountPercent": "Valore dello sconto",
+      "discountDollar": "Valore dello sconto",
+      "discountValueHintPercent": "Tra 1 % e 100 %.",
+      "discountValueHintCurrency": "Fino a 10.000 €.",
+      "couponDescription": "Descrizione del coupon",
+      "couponDescriptionPlaceholder": "es. Ottieni il 20% di sconto sul prossimo ordine",
+      "couponDescriptionFreebiePlaceholder": "es. Un caffè americano gratis",
+      "validUntilOptional": "Valido fino al (facoltativo)",
+      "validUntilHint": "Lascia vuoto perché non scada.",
+      "redemptionLimit": "Limite di riscatto",
+      "redemptionSingle": "Monouso",
+      "redemptionSingleHint": "Si blocca automaticamente dopo il primo riscatto.",
+      "redemptionUnlimited": "Illimitato",
+      "redemptionUnlimitedHint": "I clienti possono riscattarlo più volte.",
+      "termsOptional": "Termini e condizioni (facoltativi)",
+      "termsPlaceholder": "Condizioni facoltative...",
+      "previewDefaultCouponName": "Il tuo coupon",
+      "previewDefaultDiscount": "OFFERTA",
+      "previewFreebieLabel": "GRATIS",
+      "createCoupon": "Crea coupon",
+      "couponCreated": "Programma coupon creato"
+    },
+    "studio": {
+      "save": "Salva",
+      "saving": "Salvataggio in corso...",
+      "saved": "Salvato",
+      "publishSuccess": "Programma pubblicato! I tuoi clienti possono già iscriversi.",
+      "publishSaveFirst": "Salva le modifiche prima di pubblicare",
+      "undo": "Annulla",
+      "redo": "Ripeti",
+      "backToDesign": "Torna al design",
+      "saveDesign": "Salva design",
+      "replay": "Ripeti",
+      "replayAnimation": "Ripeti animazione",
+      "moreTools": "Altri strumenti",
+      "program": "Programma",
+      "colors": "Colori",
+      "progress": "Avanzamento",
+      "strip": "Striscia",
+      "fields": "Campi",
+      "logo": "Logo",
+      "details": "Dettagli",
+      "notifications": "Avvisi",
+      "prize": "Premio",
+      "more": "Altro",
+      "scratchCard": "Gratta e vinci",
+      "slotMachine": "Slot machine",
+      "wheelOfFortune": "Ruota della fortuna",
+      "prizeCountHint": "{count} premi · Mostrando \"{name}\"",
+      "addPrizesHint": "Aggiungi almeno 2 premi per vedere l'esperienza completa",
+      "saveSuccessWithUpdate": "Salvato! Aggiornamento di {count} {passLabel} nei wallet...",
+      "saveSuccess": "Salvato!",
+      "saveFailed": "Errore nel salvataggio",
+      "walletPass": "carta",
+      "walletPasses": "carte",
+      "downloadPng": "Scarica la carta come PNG",
+      "downloadSuccess": "Carta scaricata!",
+      "downloadFailed": "Errore nel download della carta"
+    },
+    "reviews": {
+      "title": "Recensioni Google",
+      "subtitle": "Chiedi una recensione su Google ai tuoi clienti abituali, dalla loro carta nel Wallet.",
+      "planRequired": "Le richieste di recensione sono incluse a partire dal piano Pro. Puoi configurare tutto e attivarlo quando passi a un piano superiore.",
+      "upgradeCta": "Passa a un piano superiore",
+      "askOwner": "Chiedi al titolare dell'account di passare a un piano superiore.",
+      "statAsked": "Recensioni richieste",
+      "last30Days": "Ultimi 30 giorni",
+      "statOpened": "Hanno aperto il link",
+      "openRate": "{rate}% di chi l'ha ricevuta",
+      "statReviews": "Recensioni su Google",
+      "gainedSince": "{count, plural, =0 {Nessun cambiamento} one {+# recensione} other {+# recensioni}} dal {date}",
+      "notTracked": "Scegli la tua attività per iniziare a misurare",
+      "statRating": "Valutazione su Google",
+      "ratingHint": "Valutazione media su Google",
+      "policyNote": "Google non permette di premiare le recensioni né di chiederle solo ai clienti soddisfatti. Loyalshy la chiede a tutti allo stesso modo e né i timbri né gli sconti dipendono mai dalla recensione.",
+      "chartTitle": "Andamento delle tue recensioni su Google",
+      "chartEmpty": "Scegli la tua attività qui sotto e misureremo le tue recensioni ogni giorno.",
+      "chartStarted": "Stiamo già misurando. Il grafico si riempie a partire da domani.",
+      "chartTooltip": "{count, plural, one {# recensione} other {# recensioni}}",
+      "defaultMessage": "Com'è andata da {business}? Una recensione su Google ci aiuta tantissimo ⭐",
+      "defaultLinkLabel": "Lascia una recensione su Google",
+      "errorMissingTarget": "Scegli la tua attività o incolla il tuo link per le recensioni.",
+      "errorInvalidUrl": "Incolla un link per le recensioni Google (g.page, maps.app.goo.gl o search.google.com).",
+      "errorInvalid": "Controlla i campi e riprova.",
+      "savedOn": "Salvato. Le richieste di recensione sono attive.",
+      "savedOff": "Salvato. Le richieste di recensione sono disattivate.",
+      "settingsTitle": "Richiesta di recensione",
+      "settingsDescription": "Dopo la visita che scegli, il cliente riceve una notifica nel suo Wallet che gli chiede una recensione, circa 90 minuti dopo e mai di notte. A ogni cliente viene chiesta una sola volta. Contano come visite i timbri di una carta e i riscatti di un coupon illimitato.",
+      "enableLabel": "Attiva le richieste di recensione",
+      "businessLabel": "La tua attività su Google",
+      "changeBusiness": "Cambia",
+      "linkLabelInput": "Link per le recensioni Google",
+      "useLinkInstead": "Incolla un link per le recensioni",
+      "searchInstead": "Cerca la mia attività",
+      "triggerLabel": "Chiederla dopo",
+      "triggerOption": "{count, plural, one {la 1ª visita} other {la #ª visita}}",
+      "triggerHint": "I clienti che tornano lasciano recensioni migliori: la 2ª o la 3ª visita di solito funziona meglio. I coupon monouso non la chiedono mai.",
+      "messageLabel": "Messaggio della notifica",
+      "messageHint": "Compare nella schermata di blocco. Non promettere nulla in cambio.",
+      "linkTextLabel": "Testo del link sulla carta",
+      "save": "Salva",
+      "searchPlaceholder": "Cerca il nome della tua attività e la città",
+      "noResults": "Non abbiamo trovato la tua attività. Prova con il nome e la città, o incolla il tuo link per le recensioni.",
+      "previewTitle": "Cosa vede il cliente",
+      "previewLockScreen": "Schermata di blocco",
+      "previewPass": "Retro della carta",
+      "previewStep1": "Toccando la notifica si apre la carta: Apple e Google non permettono di aprire un link direttamente.",
+      "previewStep2": "Il link per la recensione è la prima cosa nei dettagli della carta (pulsante ··· su iPhone) e apre il modulo di Google.",
+      "previewStep3": "Chi lo tocca viene contato qui sopra."
+    },
+    "automations": {
+      "title": "Automazioni",
+      "subtitle": "Messaggi che le tue carte nel Wallet inviano da sole.",
+      "tabReviews": "Recensioni Google",
+      "tabWinback": "Recuperare clienti",
+      "tabProximity": "Vicino alla tua attività"
+    },
+    "winback": {
+      "subtitle": "Quando un cliente abituale smette di venire, la sua carta nel Wallet gli ricorda che esisti.",
+      "planRequired": "I messaggi per recuperare i clienti sono inclusi a partire dal piano Business. Puoi configurare tutto e attivarlo quando passi a un piano superiore.",
+      "upgradeCta": "Passa a un piano superiore",
+      "askOwner": "Chiedi al titolare dell'account di passare a un piano superiore.",
+      "settingsTitle": "Messaggio per recuperare i clienti",
+      "settingsDescription": "Quando un cliente abituale (2 o più visite) non viene da tutto il tempo che scegli, la sua carta mostra il tuo messaggio nella schermata di blocco, verso le 10:00 del tuo fuso orario. Una volta per assenza e, al massimo, una volta ogni 90 giorni.",
+      "enableLabel": "Attiva i messaggi per recuperare i clienti",
+      "daysLabel": "Invia dopo",
+      "daysOption": "{days} giorni senza venire",
+      "daysHint": "Regolalo su quanto ci mettono di solito i tuoi clienti a tornare: in un bar vengono ogni settimana; da un parrucchiere, ogni uno o due mesi.",
+      "messageLabel": "Messaggio",
+      "messageHint": "Compare nella schermata di blocco e sulla carta.",
+      "defaultMessage": "Ci manchi da {business}! Passa quando vuoi.",
+      "firstRunLabel": "A chi viene inviato per primo",
+      "firstRunFromNow": "Solo da adesso in poi",
+      "firstRunFromNowHint": "Ai clienti che arrivano a {days} giorni senza venire a partire da oggi.",
+      "firstRunIncludeExisting": "{count, plural, =0 {Anche ai clienti che sono già inattivi} one {Anche al cliente (#) che è già inattivo} other {Anche ai # clienti che sono già inattivi}}",
+      "firstRunIncludeExistingHint": "Lo riceveranno nell'invio della mattina successiva.",
+      "holdoutLabel": "Misura i risultati (gruppo di confronto del {percent} %)",
+      "holdoutHint": "Alcuni clienti che soddisfano le condizioni non ricevono il messaggio, così vedi quanti in più tornano grazie a esso.",
+      "countLoading": "Conteggio dei clienti in corso…",
+      "countToday": "{count, plural, =0 {Oggi nessun cliente soddisfa le condizioni.} one {Oggi # cliente soddisfa le condizioni} other {Oggi # clienti soddisfano le condizioni}}{count, plural, =0 {} other { ({reachable} con la carta nel Wallet).}}",
+      "save": "Salva",
+      "savedOn": "Salvato. I messaggi per recuperare i clienti sono attivi.",
+      "savedOff": "Salvato. I messaggi per recuperare i clienti sono disattivati.",
+      "errorInvalid": "Controlla i campi e riprova.",
+      "promiseNote": "Se il tuo messaggio promette qualcosa («il prossimo caffè è gratis»), il tuo team deve mantenerlo. Loyalshy non lo controlla.",
+      "previewTitle": "Cosa vede il cliente",
+      "previewLockScreen": "Schermata di blocco",
+      "previewPass": "Sulla carta",
+      "previewStep1": "Toccando la notifica si apre la sua carta.",
+      "previewStep2": "Alla visita successiva, il messaggio sparisce dalla carta.",
+      "previewStep3": "I clienti che tornano vengono contati qui.",
+      "resultsTitle": "Risultati",
+      "resultsDescription": "Clienti tornati nei 14 giorni successivi al messaggio.",
+      "resultsPeriodLabel": "Periodo",
+      "resultsPeriod": "{days} giorni",
+      "resultsEmpty": "Ancora nessun risultato. Compaiono 14 giorni dopo i primi invii.",
+      "resultsMeasuringOnly": "{count, plural, one {Stiamo misurando # invio.} other {Stiamo misurando # invii.}} I risultati compaiono 14 giorni dopo ogni invio.",
+      "heroExtra": "{count, plural, one {cliente è tornato grazie al messaggio} other {clienti sono tornati grazie al messaggio}}",
+      "heroExtraHint": "Rispetto ai clienti che non l'hanno ricevuto (gruppo di confronto).",
+      "heroRate": "sono tornati nei 14 giorni successivi al messaggio",
+      "heroNoDifference": "Per ora non c'è differenza rispetto al gruppo di confronto.",
+      "heroNeedComparison": "Per sapere quanti sono tornati grazie al messaggio, il gruppo di confronto ha bisogno di almeno {min} clienti (ora {count}).",
+      "heroHoldoutOff": "Attiva «Misura i risultati» per sapere quanti sono tornati grazie al messaggio.",
+      "barMessaged": "Hanno ricevuto il messaggio",
+      "barComparison": "Non l'hanno ricevuto (gruppo di confronto)",
+      "barCount": "{back} su {sent}",
+      "barTooltip": "{back} clienti su {sent} sono tornati entro 14 giorni",
+      "tableGroup": "Gruppo",
+      "tableSent": "Clienti",
+      "tableBack": "Tornati",
+      "tableRate": "Percentuale",
+      "footerMeasuring": "{count, plural, one {# invio recente ancora in misurazione} other {# invii recenti ancora in misurazione}}",
+      "footerUnreachable": "{count, plural, one {# cliente inattivo senza la carta nel Wallet} other {# clienti inattivi senza la carta nel Wallet}}"
+    },
+    "proximity": {
+      "subtitle": "Quando un cliente passa vicino alla tua attività, la sua carta compare nella schermata di blocco dell'iPhone.",
+      "settingsTitle": "Vicino alla tua attività",
+      "settingsDescription": "La posizione della tua attività. Quando un cliente con la tua carta è nelle vicinanze (circa 100 m), l'iPhone può mostrare la carta nella sua schermata di blocco con il tuo testo.",
+      "enableLabel": "Mostra la carta vicino alla tua attività",
+      "iphoneOnlyTitle": "Solo iPhone.",
+      "iphoneOnlyBody": "Google Wallet (Android) non avvisa in base alla vicinanza. E non è una notifica: iOS decide quando mostrare la carta, senza suono.",
+      "addressLabel": "Indirizzo dell'attività",
+      "addressPlaceholder": "Via Principale 123, Città",
+      "addressHint": "Viene mostrato anche sulla carta e usato per il link alla mappa, in tutti i tuoi programmi.",
+      "pickFromList": "Scegli l'indirizzo dalla lista per fissare la posizione",
+      "searching": "Ricerca degli indirizzi in corso…",
+      "noResults": "Nessun indirizzo trovato. Prova con una ricerca più precisa.",
+      "messageLabel": "Testo nella schermata di blocco",
+      "messageHint": "Se lo lasci vuoto, viene mostrato il nome della tua attività.",
+      "defaultMessage": "Passa a trovarci! Mostra la tua carta al banco.",
+      "save": "Salva",
+      "savedOn": "Salvato. La tua carta comparirà vicino alla tua attività.",
+      "savedOff": "Salvato. Gli avvisi di prossimità sono disattivati.",
+      "errorNoLocation": "Scegli il tuo indirizzo dalla lista per fissare la posizione.",
+      "errorInvalid": "Controlla i campi e riprova.",
+      "previewTitle": "Cosa vede il cliente",
+      "previewLockScreen": "Schermata di blocco dell'iPhone",
+      "previewStep1": "Vicino alla tua attività, la carta compare nella schermata di blocco.",
+      "previewStep2": "Toccandola si apre la carta, pronta da scansionare.",
+      "previewStep3": "Sparisce quando si allontana.",
+      "previewNote": "Quante volte compare dipende da iOS e dalle impostazioni del cliente.",
+      "mapLabel": "Mappa con la posizione della tua attività. Trascina il punto per regolarla.",
+      "mapHint": "Se il punto non è proprio sulla tua porta, trascinalo. Il cerchio è più o meno la zona in cui l'iPhone mostra la tua carta."
+    }
+  },
+  "errors": {
+    "notFound": {
+      "code": "404",
+      "title": "Pagina non trovata",
+      "message": "La pagina che cerchi non esiste o è stata spostata.",
+      "goHome": "Vai alla home"
+    },
+    "global": {
+      "title": "Qualcosa è andato storto",
+      "message": "Si è verificato un errore imprevisto. Il nostro team è stato avvisato.",
+      "errorId": "ID errore: {digest}",
+      "tryAgain": "Riprova",
+      "goHome": "Vai alla home"
+    }
+  },
+  "privacy": {
+    "pageTitle": "Informativa sulla privacy",
+    "lastUpdated": "Ultimo aggiornamento: marzo 2026",
+    "section1Title": "1. Chi siamo",
+    "section1P1": "Loyalshy («noi», «ci», «nostro») gestisce una piattaforma di carte digitali per wallet su loyalshy.com. Aiutiamo le aziende a creare e gestire carte per Apple Wallet e Google Wallet per programmi fedeltà, abbonamenti, coupon, biglietti e altro.",
+    "section1P2": "Per domande sulla privacy, scrivici a",
+    "section2Title": "2. Dati che raccogliamo",
+    "section2AccountData": "Dati dell'account:",
+    "section2AccountDataContent": "Quando ti registri, raccogliamo il tuo nome, il tuo indirizzo email e la tua password (cifrata). Se crei un'organizzazione, conserviamo il nome dell'attività e gli elementi del brand.",
+    "section2ContactData": "Dati dei contatti:",
+    "section2ContactDataContent": "Le aziende che usano la nostra piattaforma possono aggiungere contatti (i loro clienti) con nomi, indirizzi email e numeri di telefono per emettere carte digitali.",
+    "section2UsageData": "Dati di utilizzo:",
+    "section2UsageDataContent": "Raccogliamo visualizzazioni di pagina anonimizzate tramite Plausible Analytics, che non usa cookie e non traccia dati personali.",
+    "section2PaymentData": "Dati di pagamento:",
+    "section2PaymentDataContent": "L'elaborazione dei pagamenti è gestita interamente da Stripe. Conserviamo il tuo ID cliente di Stripe e lo stato dell'abbonamento, ma non conserviamo mai numeri di carta né dati bancari.",
+    "section2TechnicalData": "Dati tecnici:",
+    "section2TechnicalDataContent": "I report di errore vengono raccolti tramite Sentry a fini di debug e possono includere indirizzi IP, tipo di browser e dettagli della richiesta. Questi dati vengono conservati per 30 giorni.",
+    "section3Title": "3. Come usiamo i tuoi dati",
+    "section3Item1": "Per fornire e mantenere la piattaforma Loyalshy",
+    "section3Item2": "Per generare e consegnare carte digitali per wallet (Apple Wallet, Google Wallet)",
+    "section3Item3": "Per inviare email transazionali (consegna delle carte, notifiche dell'account) tramite Resend",
+    "section3Item4": "Per elaborare i pagamenti e gestire gli abbonamenti tramite Stripe",
+    "section3Item5": "Per monitorare e correggere gli errori tramite Sentry",
+    "section3Item6": "Per migliorare il nostro prodotto in base a modelli di utilizzo anonimizzati",
+    "section4Title": "4. Servizi di terze parti",
+    "section4Intro": "Condividiamo dati con i seguenti servizi, ciascuno soggetto alla propria informativa sulla privacy:",
+    "section4Item1": "Stripe: elaborazione dei pagamenti (conforme a PCI DSS)",
+    "section4Item2": "Resend: consegna di email transazionali",
+    "section4Item3": "Cloudflare R2: archiviazione di file (loghi, immagini) tramite API compatibile con S3",
+    "section4Item4": "Sentry: tracciamento e monitoraggio degli errori",
+    "section4Item5": "Plausible Analytics: statistiche web rispettose della privacy (senza cookie, senza dati personali)",
+    "section4Item6": "Apple Wallet / Google Wallet: generazione e consegna di carte digitali",
+    "section4Item7": "Neon: hosting del database PostgreSQL",
+    "section4Item8": "Vercel: hosting dell'applicazione",
+    "section5Title": "5. Conservazione dei dati",
+    "section5P1": "Conserviamo i dati del tuo account finché resta attivo. I dati dei contatti vengono conservati finché esiste l'account dell'organizzazione. Puoi richiederne la cancellazione in qualsiasi momento.",
+    "section5P2": "I log di errore (Sentry) vengono conservati per 30 giorni. I dati statistici (Plausible) sono aggregati e non contengono informazioni personali.",
+    "section6Title": "6. I tuoi diritti (GDPR)",
+    "section6Intro": "Se ti trovi nello Spazio economico europeo, hai diritto a:",
+    "section6Item1": "Accesso: richiedere una copia dei dati personali che conserviamo su di te",
+    "section6Item2": "Rettifica: chiederci di correggere dati inesatti",
+    "section6Item3": "Cancellazione: chiederci di eliminare i tuoi dati personali",
+    "section6Item4": "Portabilità: richiedere i tuoi dati in un formato leggibile da una macchina",
+    "section6Item5": "Limitazione: chiederci di limitare l'uso che facciamo dei tuoi dati",
+    "section6Item6": "Opposizione: opporti al nostro trattamento dei tuoi dati",
+    "section6Outro": "Per esercitare uno di questi diritti, scrivici a",
+    "section6OutroSuffix": "Risponderemo entro 30 giorni.",
+    "section7Title": "7. Sicurezza dei dati",
+    "section7P1": "Adottiamo misure di sicurezza standard del settore, tra cui cifratura HTTPS, password cifrate, gestione sicura delle sessioni e controlli di accesso basati sui ruoli. Le chiavi API vengono conservate come hash SHA-256.",
+    "section8Title": "8. Minori",
+    "section8P1": "Loyalshy non è destinato all'uso da parte di persone di età inferiore a 16 anni. Non raccogliamo consapevolmente dati personali di minori.",
+    "section9Title": "9. Modifiche a questa informativa",
+    "section9P1": "Potremmo aggiornare periodicamente questa informativa sulla privacy. Avviseremo gli utenti registrati delle modifiche sostanziali via email.",
+    "section10Title": "10. Contatti",
+    "section10P1": "Per qualsiasi domanda su questa informativa sulla privacy, scrivici a"
+  },
+  "terms": {
+    "pageTitle": "Termini di servizio",
+    "lastUpdated": "Ultimo aggiornamento: marzo 2026",
+    "section1Title": "1. Accettazione",
+    "section1P1": "Accedendo a Loyalshy («il Servizio») o utilizzandolo, accetti di essere vincolato da questi Termini di servizio. Se non sei d'accordo, non utilizzare il Servizio.",
+    "section2Title": "2. Descrizione del servizio",
+    "section2P1": "Loyalshy è una piattaforma di carte digitali per wallet che permette alle aziende di creare, gestire e distribuire carte per Apple Wallet e Google Wallet. La piattaforma supporta tessere timbri, coupon, abbonamenti, programmi a punti, carte prepagate, carte regalo, biglietti, pass di accesso, titoli di viaggio e documenti di identificazione.",
+    "section3Title": "3. Account",
+    "section3P1": "Devi fornire informazioni esatte quando crei un account. Sei responsabile della sicurezza delle tue credenziali. Devi avvisarci immediatamente di qualsiasi accesso non autorizzato.",
+    "section3P2": "Ogni organizzazione su Loyalshy opera come tenant indipendente. I titolari dell'organizzazione sono responsabili della gestione dei membri del team e dei loro livelli di accesso.",
+    "section4Title": "4. Uso accettabile",
+    "section4Intro": "Ti impegni a non:",
+    "section4Item1": "Utilizzare il Servizio per qualsiasi scopo illecito",
+    "section4Item2": "Caricare contenuti dannosi o tentare di compromettere la sicurezza del sistema",
+    "section4Item3": "Superare i limiti di utilizzo del tuo piano con mezzi automatizzati",
+    "section4Item4": "Rivendere o ridistribuire il Servizio senza autorizzazione",
+    "section4Item5": "Raccogliere dati personali tramite la piattaforma senza il consenso degli interessati",
+    "section4Item6": "Creare carte che impersonino altre aziende o traggano in inganno i consumatori",
+    "section5Title": "5. Prezzi e fatturazione",
+    "section5P1": "Loyalshy offre i piani Free, Pro, Business, Scale ed Enterprise. I piani a pagamento vengono fatturati mensilmente o annualmente tramite Stripe. I prezzi sono in EUR. Puoi annullare l'abbonamento in qualsiasi momento: il tuo account passerà al piano Free al termine del periodo di fatturazione in corso.",
+    "section5P2": "Ci riserviamo il diritto di modificare i prezzi con un preavviso di 30 giorni ai clienti esistenti.",
+    "section6Title": "6. Proprietà dei dati",
+    "section6P1": "Mantieni la proprietà di tutti i contenuti e i dati che carichi su Loyalshy. Non rivendichiamo alcun diritto di proprietà intellettuale sui tuoi dati aziendali, loghi, immagini o liste di contatti.",
+    "section6P2": "Ci concedi una licenza limitata per trattare i tuoi dati al solo scopo di fornire il Servizio, inclusa la generazione di carte per wallet e l'invio di comunicazioni transazionali per tuo conto.",
+    "section7Title": "7. Uso dell'API",
+    "section7P1": "L'accesso all'API REST di Loyalshy è soggetto a limiti di frequenza in base al tuo piano. Le chiavi API sono legate all'organizzazione e devono restare riservate. Ci riserviamo il diritto di revocare l'accesso all'API in caso di uso abusivo.",
+    "section8Title": "8. Disponibilità",
+    "section8P1": "Ci impegniamo a mantenere un'alta disponibilità, ma non garantiamo un servizio ininterrotto. Non siamo responsabili di eventuali tempi di inattività, perdite di dati o interruzioni del servizio. Faremo sforzi ragionevoli per avvisare gli utenti della manutenzione programmata.",
+    "section9Title": "9. Cessazione",
+    "section9P1": "Possiamo sospendere o chiudere gli account che violano questi termini. Puoi eliminare il tuo account in qualsiasi momento. Dopo la chiusura, i tuoi dati verranno eliminati entro 30 giorni, salvo che la conservazione sia richiesta dalla legge.",
+    "section10Title": "10. Limitazione di responsabilità",
+    "section10P1": "Nella misura massima consentita dalla legge, Loyalshy non sarà responsabile di alcun danno indiretto, incidentale, speciale o consequenziale derivante dall'uso del Servizio. La nostra responsabilità totale non supererà l'importo che ci hai pagato nei 12 mesi precedenti il reclamo.",
+    "section11Title": "11. Legge applicabile",
+    "section11P1": "Questi termini sono regolati dalle leggi dell'Unione europea. Qualsiasi controversia sarà risolta presso i tribunali della giurisdizione in cui Loyalshy è registrata.",
+    "section12Title": "12. Modifiche",
+    "section12P1": "Potremmo aggiornare periodicamente questi termini. Le modifiche sostanziali verranno comunicate via email agli utenti registrati con almeno 30 giorni di anticipo rispetto alla loro entrata in vigore.",
+    "section13Title": "13. Contatti",
+    "section13P1": "Per domande su questi termini, scrivici a"
+  },
+  "cookies": {
+    "pageTitle": "Informativa sui cookie",
+    "lastUpdated": "Ultimo aggiornamento: marzo 2026",
+    "section1Title": "1. Cosa sono i cookie",
+    "section1P1": "I cookie sono piccoli file di testo che vengono salvati sul tuo dispositivo quando visiti un sito web. Sono ampiamente usati per far funzionare i siti in modo efficiente e per fornire informazioni ai titolari del sito.",
+    "section2Title": "2. Cookie che utilizziamo",
+    "section2EssentialTitle": "Cookie essenziali (obbligatori)",
+    "section2EssentialIntro": "Questi cookie sono necessari al funzionamento della piattaforma e non possono essere disattivati.",
+    "section2SessionCookie": "Cookie di sessione",
+    "section2SessionCookieContent": "Mantiene la tua sessione attiva e lo stato di autenticazione. Impostato da Better Auth. Scade quando termina la sessione o dopo la durata di sessione configurata.",
+    "section2OrgCookie": "Cookie dell'organizzazione attiva",
+    "section2OrgCookieContent": "Ricorda in quale organizzazione stai lavorando al momento. Necessario per la funzionalità multi-azienda.",
+    "section2ThemeCookie": "Preferenza del tema",
+    "section2ThemeCookieContent": "Salva la tua preferenza tra modalità chiara e scura. Impostato da next-themes. Resta attivo finché non lo modifichi.",
+    "section2AnalyticsTitle": "Statistiche (senza cookie)",
+    "section2AnalyticsContent": "Usiamo Plausible Analytics per le statistiche del sito web. Plausible è un servizio di statistiche rispettoso della privacy che non usa cookie, non raccoglie dati personali e non traccia gli utenti tra un sito e l'altro. Plausible non richiede consenso ai sensi del GDPR.",
+    "section3Title": "3. Cookie di terze parti",
+    "section3StripeIntro": "Stripe:",
+    "section3StripeContent": "Quando accedi alle pagine di fatturazione o di pagamento, Stripe può impostare cookie per la prevenzione delle frodi e l'elaborazione dei pagamenti. Questi sono regolati dalla",
+    "section3StripePrivacyLink": "Informativa sulla privacy di Stripe",
+    "section3NoTracking": "Non usiamo cookie pubblicitari, pixel di tracciamento né cookie dei social network.",
+    "section4Title": "4. Gestione dei cookie",
+    "section4P1": "Puoi controllare i cookie dalle impostazioni del tuo browser. La maggior parte dei browser ti permette di bloccare o eliminare i cookie. Tuttavia, bloccare i cookie essenziali ti impedirà di usare la dashboard di Loyalshy.",
+    "section4P2": "Poiché usiamo solo cookie essenziali (nessun cookie di tracciamento o pubblicitario), ai sensi del GDPR non è richiesto un banner di consenso ai cookie. I cookie essenziali sono esenti dai requisiti di consenso perché strettamente necessari al funzionamento del servizio.",
+    "section5Title": "5. Modifiche",
+    "section5P1": "Potremmo aggiornare questa informativa sui cookie se introduciamo nuove categorie di cookie. Aggiorneremo la data «Ultimo aggiornamento» in cima a questa pagina.",
+    "section6Title": "6. Contatti",
+    "section6P1": "Per domande sul nostro uso dei cookie, scrivici a"
+  },
+  "studio": {
+    "panels": {
+      "programSettings": "Impostazioni del programma",
+      "colors": "Colori",
+      "progressStyle": "Stile di avanzamento",
+      "stripImage": "Immagine della striscia",
+      "logo": "Logo",
+      "prizeReveal": "Rivelazione del premio",
+      "notifications": "Notifiche",
+      "backOfPass": "Dettagli del retro",
+      "fields": "Campi ed etichette",
+      "properties": "Proprietà",
+      "closePanel": "Chiudi pannello",
+      "template": "Modello",
+      "textColors": "Colori del testo",
+      "fieldValues": "Valori dei campi",
+      "labels": "Etichette",
+      "textContrast": "Contrasto del testo",
+      "autoTextColor": "Colore del testo automatico",
+      "computeFromBackground": "Calcola dallo sfondo",
+      "primaryFieldSection": "Campo principale",
+      "showPrimaryField": "Mostra sulla striscia",
+      "showPrimaryFieldHint": "Se attivo, il campo principale (es. sconto, avanzamento) viene mostrato sopra l'immagine della striscia in Apple Wallet. Disattivalo per un aspetto più pulito.",
+      "cardFields": "Campi della carta",
+      "fieldsPanelDesc": "Configura quali campi compaiono sulla carta e il loro stile di testo.",
+      "cardFieldsDesc": "Scegli quali campi compaiono sulla carta. Fai clic su un'etichetta per rinominarla.",
+      "cardFieldsHint": "Apple: primo campo → intestazione, il resto → dettagli. Google: righe automatiche.",
+      "auto": "Auto",
+      "addField": "+ Aggiungi campo...",
+      "resetToDefaults": "Ripristina i valori predefiniti",
+      "moveUp": "Sposta {label} in alto",
+      "moveDown": "Sposta {label} in basso",
+      "removeField": "Elimina {label}",
+      "clickToRename": "Fai clic per rinominare"
+    },
+    "colors": {
+      "instruction": "Fai clic su un colore o tocca un'area dell'anteprima per modificare.",
+      "background": "Sfondo",
+      "stripAccent": "Striscia / Accento",
+      "fieldValues": "Valori dei campi",
+      "labels": "Etichette",
+      "bgDescription": "Colore di sfondo della carta",
+      "stripDescription": "Area della striscia e accenti",
+      "fieldDescription": "Testo sulla carta",
+      "labelDescription": "Testo delle etichette (solo Apple)"
+    },
+    "strip": {
+      "alwaysOn": "La striscia è sempre attiva per questo tipo di carta, per garantire una resa uniforme su Apple e Google Wallet.",
+      "showStrip": "Mostra striscia",
+      "enablePrompt": "Attiva \"Mostra striscia\" per configurare immagine, colori e motivi.",
+      "burger": "Hamburger",
+      "coffeeBeans": "Chicchi di caffè",
+      "pizza": "Pizza",
+      "club": "Club",
+      "gym": "Palestra",
+      "none": "Nessuno",
+      "dots": "Punti",
+      "waves": "Onde",
+      "geometric": "Geometrico",
+      "chevron": "Chevron",
+      "crosshatch": "Tratteggio incrociato",
+      "diamonds": "Rombi",
+      "confetti": "Coriandoli",
+      "zoom": "Zoom",
+      "resetPositionZoom": "Ripristina posizione e zoom",
+      "imageSection": "Immagine",
+      "presetsSection": "Preset",
+      "filtersSection": "Filtri",
+      "fillSection": "Riempimento",
+      "colorsSection": "Colori",
+      "patternSection": "Motivo",
+      "patternColorSection": "Colore del motivo",
+      "uploading": "Caricamento...",
+      "replaceImage": "Sostituisci immagine",
+      "uploadImage": "Carica immagine",
+      "removeImage": "Elimina",
+      "imageHint": "PNG, JPEG o WebP. Max 5 MB. Ritagliata per Apple e Google Wallet.",
+      "noStripImage": "Nessuna immagine della striscia",
+      "opacity": "Opacità",
+      "blackAndWhite": "Bianco e nero",
+      "flat": "Pieno",
+      "gradient": "Sfumato",
+      "colorStart": "Inizio",
+      "colorEnd": "Fine",
+      "colorFlat": "Colore",
+      "resetToCardColors": "Ripristina i colori della carta",
+      "shapesColor": "Forme",
+      "resetToStripColor": "Ripristina il colore della striscia",
+      "stampGridInfo": "Griglia dei timbri attiva: i timbri si sovrappongono a {surface}. I colori dei timbri si modificano nel pannello Avanzamento.",
+      "stampGridSurfaceImage": "l'immagine che hai caricato",
+      "stampGridSurfaceFlat": "uno sfondo pieno",
+      "stampGridSurfaceGradient": "uno sfondo sfumato",
+      "dragToReposition": "Trascina per riposizionare"
+    },
+    "logo": {
+      "usingOrgLogo": "In uso il logo dell'organizzazione",
+      "programLogo": "Logo del programma",
+      "preview": "Anteprima",
+      "brandMatch": "Abbina al brand",
+      "advanced": "Avanzate",
+      "processing": "Elaborazione...",
+      "replaceLogo": "Sostituisci logo",
+      "uploadLogo": "Carica logo",
+      "remove": "Elimina",
+      "useOrgLogoInstead": "Usa il logo dell'organizzazione",
+      "hasProgramLogo": "Questo programma ha un logo proprio.",
+      "usingOrgLogoDesc": "In uso il logo della tua organizzazione. Caricane uno diverso per questo programma.",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet",
+      "appleLogoZoom": "Zoom del logo Apple",
+      "extractColorsDesc": "Estrai i colori dal tuo logo e applicali al design della tua carta.",
+      "extracting": "Estrazione...",
+      "reExtractColors": "Estrai di nuovo i colori",
+      "matchToBrand": "Applica il mio brand",
+      "extractError": "Non è stato possibile estrarre i colori dal logo.",
+      "extractFailed": "Errore nell'estrazione dei colori del brand. Riprova.",
+      "useDifferentImage": "Usa un'immagine diversa per {platform}",
+      "uploadOverride": "Carica immagine",
+      "appleLogoHint": "Rettangolo largo (320 × 100 px). Consigliato PNG trasparente.",
+      "googleLogoHint": "Quadrato (660 px). Tieni il disegno centrato con margine per il ritaglio circolare.",
+      "resetLogoAria": "Ripristina il logo {platform} generato automaticamente"
+    },
+    "notifications": {
+      "movedTitle": "Ora è in Automazioni",
+      "movedBody": "«Vicino alla tua attività» ora è un'unica posizione per tutta la tua attività, non per programma.",
+      "movedCta": "Apri Vicino alla tua attività"
+    },
+    "details": {
+      "description": "Dettagli sul retro della carta. Compaiono quando il cliente tocca la carta per avere più informazioni.",
+      "businessHours": "Orari di apertura",
+      "hoursPlaceholder": "Lun–Ven: 7:00–21:00\nSab–Dom: 8:00–22:00",
+      "socialLinks": "Social",
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "tiktok": "TikTok",
+      "twitter": "X (Twitter)",
+      "handlePlaceholder": "@latuaattivita",
+      "facebookPlaceholder": "facebook.com/latuaattivita",
+      "customMessage": "Messaggio personalizzato",
+      "messagePlaceholder": "Grazie per essere un cliente fedele!"
+    },
+    "prize": {
+      "rewardDescription": "Descrizione del premio",
+      "rewardPlaceholder": "Caffè gratis",
+      "rewardHint": "Mostrata sulla carta come prossimo premio. Usata in alternativa quando non ci sono premi configurati.",
+      "rewardRevealGame": "Gioco di rivelazione del premio",
+      "showMinigame": "Mostra un minigioco divertente quando i clienti ottengono un premio"
+    },
+    "template": {
+      "cafe": "Caffetteria",
+      "fineDining": "Alta cucina",
+      "casual": "Casual",
+      "bar": "Bar",
+      "bakery": "Panetteria",
+      "general": "Generico"
+    },
+    "canvas": {
+      "inProgress": "In corso",
+      "almostDone": "Quasi fatto",
+      "completed": "Completata",
+      "available": "Disponibile",
+      "redeemed": "Riscattato",
+      "active": "Attiva",
+      "noExpiry": "Senza scadenza",
+      "background": "Sfondo",
+      "strip": "Striscia",
+      "fields": "Campi",
+      "logo": "Logo",
+      "progress": "Avanzamento"
+    }
+  },
+  "serverErrors": {
+    "noOrganization": "Organizzazione non trovata",
+    "invalidInput": "Dati non validi",
+    "unknownError": "Errore sconosciuto",
+    "nameRequired": "Il nome è obbligatorio",
+    "invalidEmail": "Email non valida",
+    "contactLimitReached": "Hai raggiunto il limite di {limit} contatti del tuo piano. Elimina i contatti inutilizzati o passa a un piano superiore per aggiungerne altri.",
+    "contactEmailExists": "Esiste già un contatto con l'email \"{email}\".",
+    "contactPhoneExists": "Esiste già un contatto con il telefono \"{phone}\".",
+    "contactAlreadyExists": "Esiste già un contatto con questi dati.",
+    "contactNotFound": "Contatto non trovato",
+    "contactNoEmail": "Il contatto non ha un indirizzo email",
+    "programNotFound": "Programma non trovato o non attivo",
+    "alreadyHasPass": "Questo contatto ha già una carta per questo programma.",
+    "fileTooLarge2MB": "Il file deve essere inferiore a 2 MB",
+    "fileTooLarge5MB": "Il file deve essere inferiore a 5 MB",
+    "invalidFileType": "Il file deve essere PNG, JPEG o WebP",
+    "invalidFileTypeSvg": "Il file deve essere PNG, JPEG, WebP o SVG",
+    "templateLimitReached": "Limite di modelli raggiunto ({limit}). Passa a un piano superiore per crearne altri.",
+    "templateNotFound": "Modello di carta non trovato",
+    "templateAlreadyArchived": "Il modello è già archiviato",
+    "templateAlreadyActive": "Il modello è già attivo",
+    "cannotActivateArchived": "Non puoi attivare un modello archiviato",
+    "onlyArchivedReactivate": "Solo i modelli archiviati possono essere riattivati",
+    "templateNameMismatch": "Il nome del modello non corrisponde",
+    "validationFailed": "Errore di validazione: {issues}",
+    "rateLimitExceeded": "Troppe richieste. Riprova più tardi.",
+    "contactFormFailed": "Non è stato possibile inviare il tuo messaggio. Riprova o scrivici direttamente via email.",
+    "invalidDesignData": "Dati di design non validi",
+    "missingFields": "Mancano campi obbligatori",
+    "noLogoUploaded": "Nessun logo caricato",
+    "failedFetchLogo": "Errore nel recupero del logo",
+    "failedExtractColors": "Errore nell'estrazione dei colori",
+    "memberNotFound": "Membro non trovato",
+    "cannotRemoveSelf": "Non puoi rimuovere te stesso dall'organizzazione",
+    "cannotRemoveLastOwner": "Non puoi rimuovere l'ultimo titolare. Trasferisci prima la proprietà.",
+    "memberAlreadyRole": "Il membro ha già questo ruolo",
+    "cannotChangeOwnRole": "Non puoi cambiare il tuo ruolo",
+    "cannotDemoteLastOwner": "Non puoi retrocedere l'ultimo titolare. Promuovi prima un altro membro.",
+    "invitationNotFound": "Invito non trovato",
+    "passInstanceNotFound": "Carta emessa non trovata",
+    "contactDeleted": "Il contatto è stato eliminato",
+    "passStatus": "Questa carta è {status}",
+    "templateNoLongerActive": "Questo modello di carta non è più attivo",
+    "templateExpired": "Questo modello di carta è scaduto",
+    "notACoupon": "Questa carta non è un coupon",
+    "couponAlreadyRedeemed": "Questo coupon è già stato riscattato",
+    "couponJustRedeemed": "Questo coupon è stato appena riscattato. Aspetta un minuto prima di riscattarlo di nuovo.",
+    "noRemainingUses": "Questa carta non ha più utilizzi disponibili",
+    "missingPassOrFile": "Manca l'ID della carta emessa o il file",
+    "missingPassId": "Manca l'ID della carta emessa",
+    "csvName": "Nome",
+    "csvEmail": "Email",
+    "csvPhone": "Telefono",
+    "csvTotalInteractions": "Interazioni totali",
+    "csvActivePasses": "Carte attive",
+    "csvLastInteraction": "Ultima interazione",
+    "csvJoined": "Iscritto il",
+    "announcementProgramNotActive": "Gli annunci si possono inviare solo per programmi attivi.",
+    "announcementQuotaReachedWeek": "Hai già usato tutti gli annunci di questa settimana. Passa a un piano superiore per inviarne altri.",
+    "announcementQuotaReachedFree": "Hai già usato i tuoi annunci gratuiti. Passa a un piano superiore per inviarne altri.",
+    "announcementProgramDailyCap": "Questo programma ha già inviato 3 annunci nelle ultime 24 ore. Riprova più tardi.",
+    "announcementSubscriptionInactive": "Il tuo abbonamento non è attivo. Aggiorna la fatturazione per inviare annunci.",
+    "announcementNoRecipients": "Nessuno ha ancora la carta di questo programma nel wallet, quindi non c'è nessuno da avvisare. La tua quota non è stata usata.",
+    "announcementQuotaReachedWeekTopPlan": "Hai già usato tutti gli annunci di questa settimana. Ne avrai altri disponibili quando i precedenti compiranno 7 giorni.",
+    "reviewMissingTarget": "Scegli la tua attività o incolla il tuo link per le recensioni.",
+    "reviewInvalidUrl": "Non sembra un link per le recensioni Google.",
+    "reviewPlanRequired": "Le richieste di recensione sono incluse a partire dal piano Pro.",
+    "winbackPlanRequired": "I messaggi di recupero clienti sono inclusi a partire dal piano Business."
+  },
+  "admin": {
+    "cohorts": {
+      "title": "Retention per coorte",
+      "subtitle": "Coorti mensili di registrazione e quante organizzazioni restano attive: canale partner vs organico.",
+      "segmentAll": "Tutte",
+      "segmentPartner": "Attribuite ai partner",
+      "segmentOrganic": "Organiche",
+      "partnerM1": "Partner · retention mese 1 ({count} org)",
+      "organicM1": "Organico · retention mese 1 ({count} org)",
+      "partnerM3": "Partner · retention mese 3",
+      "organicM3": "Organico · retention mese 3",
+      "colCohort": "Coorte",
+      "colOrgs": "Org",
+      "colPaid": "A pagamento",
+      "colSubscribed": "Abbonate",
+      "noData": "Nessuna organizzazione negli ultimi 12 mesi.",
+      "methodology": "Una coorte è l'insieme delle organizzazioni create in un dato mese (UTC). Trattenuta in Mn = l'organizzazione ha registrato almeno un'interazione (timbro, riscatto, nota…) nel mese n dopo la registrazione. M0 è il mese di registrazione stesso. A pagamento = oggi su un piano a pagamento; Abbonate = abbonamento attivo o in prova. Le schede di confronto sono ponderate per dimensione della coorte tra tutte le coorti abbastanza vecchie per quel mese."
+    },
+    "partners": {
+      "title": "Rendiconti partner",
+      "subtitle": "Rendiconti mensili di ripartizione dei ricavi per i partner: ricavi netti incassati, ripartizione e compensazione della quota di attivazione.",
+      "noPartners": "Non ci sono ancora account partner. Contrassegna un utente come partner dalla pagina Utenti.",
+      "partnerLabel": "Partner",
+      "monthLabel": "Mese del rendiconto",
+      "generate": "Genera rendiconto",
+      "generateError": "Non è stato possibile generare il rendiconto. Riprova.",
+      "netCollected": "Netto incassato",
+      "grossMinusRefunds": "{gross} incassato − {refunds} rimborsato",
+      "revShare": "Ripartizione dei ricavi ({rate}%)",
+      "setupFeeShare": "Quota di attivazione che ci è dovuta",
+      "newActivated": "{count, plural, =1 {1 nuovo cliente attivato} other {# nuovi clienti attivati}} × 30 €",
+      "payoutToPartner": "Pagamento netto al partner",
+      "payoutFromPartner": "Netto dovuto dal partner",
+      "colOrganization": "Organizzazione",
+      "colPlan": "Piano",
+      "colStatus": "Stato",
+      "colCreated": "Creata",
+      "colGross": "Incassato",
+      "colRefunds": "Rimborsi",
+      "colNet": "Netto",
+      "noOrgs": "Nessuna organizzazione attribuita a questo partner.",
+      "newBadge": "Nuova",
+      "methodology": "Incassato = fatture Stripe pagate con data nel mese del rendiconto. I rimborsi emessi nel mese vengono detratti da questo rendiconto a prescindere dalla data dell'addebito originale. Nuovo cliente attivato = organizzazione attribuita creata nel mese con almeno un programma attivo. Pagamento positivo: bonifico al partner; negativo: il partner ci deve."
+    },
+    "nav": {
+      "overview": "Panoramica",
+      "users": "Utenti",
+      "organizations": "Organizzazioni",
+      "funnel": "Funnel",
+      "auditLog": "Registro di audit",
+      "partners": "Partner",
+      "cohorts": "Coorti"
+    },
+    "funnel": {
+      "title": "Funnel di attivazione",
+      "subtitle": "Come le registrazioni diventano programmi attivi e carte emesse. Le fasi sono ancorate a User.createdAt per la finestra di coorte; l'abbandono è retention di coorte, non conteggio di eventi.",
+      "stageSignedUp": "Registrati",
+      "stageOrgCreated": "Organizzazione creata",
+      "stageProgramCreated": "Primo programma creato",
+      "stageProgramActive": "Primo programma attivato",
+      "stagePassIssued": "Prima carta emessa",
+      "range7d": "7 giorni",
+      "range30d": "30 giorni",
+      "range90d": "90 giorni",
+      "rangeAll": "Tutto",
+      "rangeAriaLabel": "Intervallo della coorte",
+      "ofCohort": "coorte",
+      "ofPrev": "{value} della precedente",
+      "cohortNote": "Ogni fase conta utenti unici la cui registrazione rientra nella finestra di coorte selezionata. Un utente che si registra e attiva un programma lo stesso giorno è la stessa persona, non due eventi."
+    },
+    "overview": {
+      "title": "Panoramica della piattaforma",
+      "totalUsers": "Utenti totali",
+      "totalOrganizations": "Organizzazioni",
+      "totalContacts": "Contatti totali",
+      "estimatedMrr": "MRR stimato",
+      "newUsersMonth": "Nuovi utenti questo mese",
+      "newOrgsMonth": "Nuove org. questo mese",
+      "activeSubscriptions": "Abbonamenti attivi",
+      "subscriptionBreakdown": "Dettaglio abbonamenti",
+      "planBreakdown": "Dettaglio per piano"
+    },
+    "users": {
+      "title": "Utenti",
+      "searchPlaceholder": "Cerca per nome o email...",
+      "filterAll": "Tutti",
+      "filterBanned": "Bannati",
+      "filterSuperAdmin": "Super admin",
+      "filterAdmins": "Admin",
+      "columnUser": "Utente",
+      "columnRole": "Ruolo",
+      "columnStatus": "Stato",
+      "columnOrganization": "Organizzazione",
+      "columnCreated": "Creazione",
+      "noUsersFound": "Nessun utente trovato.",
+      "pageOf": "Pagina {page} di {pageCount}",
+      "viewDetails": "Vedi dettagli",
+      "impersonate": "Impersona",
+      "banUser": "Banna utente",
+      "unbanUser": "Sbanna utente",
+      "ban": "Banna",
+      "unban": "Sbanna",
+      "promoteToAdmin": "Promuovi ad Admin",
+      "demoteToUser": "Retrocedi a Utente",
+      "revokeSessions": "Revoca sessioni",
+      "banDialogTitle": "Bannare {name}?",
+      "banDialogDescription": "L'utente non potrà più accedere. Potrai sbannarlo più tardi.",
+      "banReasonPlaceholder": "Motivo del ban (facoltativo)",
+      "roleDialogTitle": "Cambia ruolo",
+      "roleDialogDemote": "Retrocedere {name} da Super admin a Utente?",
+      "roleDialogPromote": "Promuovere {name} a Super admin? Avrà accesso completo alla piattaforma.",
+      "cancel": "Annulla",
+      "created": "Creazione",
+      "emailVerified": "Email verificata",
+      "yes": "Sì",
+      "no": "No",
+      "organization": "Organizzazione",
+      "banReason": "Motivo del ban",
+      "activeSessions": "Sessioni attive",
+      "loadingSessions": "Caricamento sessioni...",
+      "noActiveSessions": "Nessuna sessione attiva.",
+      "unknownDevice": "Dispositivo sconosciuto",
+      "unknownIp": "IP sconosciuto",
+      "bannedUser": "{name} è stato bannato.",
+      "unbannedUser": "{name} è stato sbannato.",
+      "roleUpdated": "Ruolo aggiornato a {role}.",
+      "sessionsRevoked": "Tutte le sessioni sono state revocate.",
+      "partner": "Partner",
+      "markPartner": "Contrassegna come partner",
+      "unmarkPartner": "Rimuovi stato di partner",
+      "partnerMarked": "{name} ora è partner. Le sue appartenenze non contano più nei limiti del personale.",
+      "partnerUnmarked": "Stato di partner rimosso per {name}.",
+      "failedBan": "Errore nel bannare l'utente.",
+      "failedUnban": "Errore nello sbannare l'utente.",
+      "failedRoleUpdate": "Errore nell'aggiornare il ruolo.",
+      "failedRevokeSessions": "Errore nel revocare le sessioni.",
+      "failedImpersonate": "Errore nell'impersonare l'utente.",
+      "selfBanError": "Non puoi bannare te stesso.",
+      "selfRoleError": "Non puoi cambiare il tuo ruolo.",
+      "lastAdminError": "Non puoi retrocedere l'ultimo Super admin."
+    },
+    "organizations": {
+      "title": "Organizzazioni",
+      "searchPlaceholder": "Cerca per nome o slug...",
+      "filterAll": "Tutte",
+      "columnName": "Nome",
+      "columnPlan": "Piano",
+      "columnStatus": "Stato",
+      "columnMembers": "Membri",
+      "columnContacts": "Contatti",
+      "columnCreated": "Creazione",
+      "noOrganizationsFound": "Nessuna organizzazione trovata.",
+      "pageOf": "Pagina {page} di {pageCount}",
+      "viewDetails": "Vedi dettagli",
+      "openInStripe": "Apri in Stripe",
+      "plan": "Piano",
+      "subscriptionStatus": "Stato dell'abbonamento",
+      "stripeCustomerId": "ID cliente Stripe",
+      "trialEndsAt": "Fine del periodo di prova",
+      "created": "Creazione",
+      "teamMembers": "Membri del team",
+      "users": "Utenti",
+      "templates": "Modelli",
+      "contacts": "Contatti"
+    },
+    "auditLog": {
+      "title": "Registro di audit",
+      "searchPlaceholder": "Cerca per destinatario...",
+      "filterAllActions": "Tutte le azioni",
+      "filterAllTypes": "Tutti i tipi",
+      "columnAdmin": "Admin",
+      "columnAction": "Azione",
+      "columnTarget": "Destinatario",
+      "columnReason": "Motivo",
+      "columnDate": "Data",
+      "noLogsFound": "Nessun record trovato.",
+      "pageOf": "Pagina {page} di {pageCount}",
+      "targetUser": "Utente",
+      "targetOrganization": "Organizzazione",
+      "targetContact": "Contatto",
+      "actionUserBanned": "Utente bannato",
+      "actionUserUnbanned": "Utente sbannato",
+      "actionUserRoleChanged": "Ruolo cambiato",
+      "actionUserPartnerChanged": "Stato di partner cambiato",
+      "actionUserSessionsRevoked": "Sessioni revocate",
+      "actionUserImpersonated": "Impersonazione avviata",
+      "actionUserImpersonationEnded": "Impersonazione terminata",
+      "actionUserDataExported": "Dati esportati",
+      "actionUserDeleted": "Utente eliminato",
+      "actionOrgPlanChanged": "Piano cambiato",
+      "actionOrgStatusChanged": "Stato cambiato",
+      "actionOrgDeleted": "Org. eliminata",
+      "actionContactsPurged": "Contatti eliminati",
+      "actionBulkBan": "Ban massivo",
+      "actionBulkStatusChange": "Cambio di stato massivo",
+      "actionBulkExport": "Esportazione massiva"
+    },
+    "roles": {
+      "user": "Utente",
+      "adminSupport": "Admin supporto",
+      "adminBilling": "Admin fatturazione",
+      "adminOps": "Admin operazioni",
+      "superAdmin": "Super admin"
+    },
+    "impersonation": {
+      "banner": "Stai impersonando {name}",
+      "stop": "Smetti di impersonare"
+    },
+    "common": {
+      "adminPanel": "Pannello di amministrazione",
+      "backToDashboard": "Torna alla dashboard",
+      "signOut": "Esci",
+      "previous": "Pagina precedente",
+      "next": "Pagina successiva"
+    }
+  },
+  "join": {
+    "chooseProgram": "Scegli un programma a cui iscriverti",
+    "freePass": "Carta digitale gratuita",
+    "poweredBy": "Con tecnologia {brand}",
+    "chooseDifferent": "Scegli un altro programma",
+    "getYourPass": "Ottieni la tua carta digitale",
+    "yourName": "Il tuo nome",
+    "email": "Email",
+    "namePlaceholder": "Marco Rossi",
+    "emailPlaceholder": "marco@esempio.com",
+    "webPassInstead": "Continua senza wallet",
+    "settingUp": "Preparazione della tua carta...",
+    "addingToWallet": "Aggiunta al wallet...",
+    "updatingWallet": "Aggiornamento della carta...",
+    "welcomeBack": "Bentornato! Caricamento della tua carta...",
+    "somethingWentWrong": "Qualcosa è andato storto",
+    "stampSubtitle": "{reward} dopo {visits} visite",
+    "inviteOnlyTitle": "Questo programma è su invito",
+    "inviteOnlyBody": "{name} consegna questa carta direttamente. Chiedila al banco o aspetta di riceverla via email.",
+    "inviteOnlySeeOthers": "Vedi gli altri programmi",
+    "inviteOnlyError": "Questo programma è su invito. Chiedi la carta al banco.",
+    "card": {
+      "title": "Carta di {name}",
+      "rewardEarned": "Hai ottenuto un premio!",
+      "couponRedeemed": "Questo coupon è stato riscattato",
+      "passAdded": "Carta aggiunta! Controlla la tua app Wallet.",
+      "addToWallet": "Aggiungi a {platform} Wallet",
+      "addingToWallet": "Aggiunta al wallet...",
+      "bookmarkHint": "Salva questa pagina nei preferiti per accedere alla tua carta in qualsiasi momento",
+      "walletFailed": "Non è stato possibile generare la carta",
+      "appleWallet": "Apple Wallet",
+      "googleWallet": "Google Wallet",
+      "saveToContacts": "Salva nei Contatti"
+    }
+  },
+  "contact": {
+    "sectionLabel": "Contatti",
+    "pageTitle": "Scrivici.",
+    "pageSubtitle": "Dubbi sulla carta, sul tuo account o su un piano per più sedi. Ti rispondiamo via email entro uno o due giorni lavorativi.",
+    "nameLabel": "Nome",
+    "namePlaceholder": "Il tuo nome completo",
+    "emailLabel": "Email",
+    "emailPlaceholder": "tu@azienda.com",
+    "inquiryTypeLabel": "Tipo di richiesta",
+    "inquiryTypes": {
+      "general": "Richiesta generale",
+      "sales": "Vendite / Enterprise",
+      "partnership": "Collaborazione",
+      "support": "Assistenza"
+    },
+    "companyLabel": "Azienda (facoltativo)",
+    "companyPlaceholder": "Nome della tua azienda",
+    "messageLabel": "Messaggio",
+    "messagePlaceholder": "Raccontaci come possiamo aiutarti...",
+    "messageHint": "Minimo 10 caratteri",
+    "submitButton": "Invia messaggio",
+    "privacyNote": "Inviando questo modulo accetti la nostra Informativa sulla privacy. Risponderemo entro 1-2 giorni lavorativi.",
+    "successTitle": "Messaggio inviato!",
+    "successMessage": "Grazie per averci scritto. Abbiamo inviato una conferma alla tua email e ti risponderemo entro 1-2 giorni lavorativi.",
+    "directEmail": "Preferisci l'email?",
+    "highlights": {
+      "general": {
+        "title": "Dubbi generali",
+        "description": "Come funziona la carta, quale piano ti conviene o se è adatta alla tua attività."
+      },
+      "sales": {
+        "title": "Più sedi",
+        "description": "Catene e attività con più sedi: limiti su misura e condizioni da contratto."
+      },
+      "partnership": {
+        "title": "Partner",
+        "description": "Agenzie, consulenti e rivenditori di POS che configurano Loyalshy per i loro clienti."
+      },
+      "support": {
+        "title": "Assistenza",
+        "description": "Il tuo account, una carta che non si aggiorna nel Wallet, l'app del team o una fattura."
+      }
+    }
+  },
+  "metadata": {
+    "home": {
+      "title": "Carta fedeltà digitale, senza app — Loyalshy",
+      "description": "La tessera timbri digitale per caffetterie, parrucchieri e negozi. Vive in Apple e Google Wallet, senza app né carta. Gratis fino a 50 clienti.",
+      "jsonLdDescription": "Piattaforma di fidelizzazione digitale per piccole attività. Crea e gestisci tessere timbri e coupon in Apple Wallet e Google Wallet."
+    },
+    "contact": {
+      "title": "Contatti",
+      "description": "Scrivici sulla carta fedeltà, sul tuo account o su un piano per più sedi. Ti rispondiamo via email entro uno o due giorni lavorativi."
+    },
+    "privacy": {
+      "title": "Informativa sulla privacy",
+      "description": "Come Loyalshy raccoglie, usa e protegge i tuoi dati personali."
+    },
+    "terms": {
+      "title": "Termini di servizio",
+      "description": "Condizioni di utilizzo della piattaforma Loyalshy."
+    },
+    "cookies": {
+      "title": "Informativa sui cookie",
+      "description": "Come Loyalshy usa i cookie e tecnologie simili."
+    },
+    "for": {
+      "title": "Fidelizzazione per caffetterie, parrucchieri e negozi",
+      "description": "Una tessera timbri digitale o un coupon in Apple e Google Wallet, adatti al tuo banco: caffetterie, parrucchieri e negozi. Senza app per il cliente."
+    },
+    "cafes": {
+      "title": "Tessera timbri digitale per caffetterie",
+      "description": "La tessera timbri del tuo caffè in Apple e Google Wallet: nove caffè e il decimo gratis. Senza app né carta, senza toccare la cassa. Gratis fino a 50 clienti."
+    },
+    "salons": {
+      "title": "Carta fedeltà per parrucchieri e barbieri",
+      "description": "Il programma fedeltà del tuo salone in Apple e Google Wallet: un timbro per appuntamento, premio al quinto e un promemoria se passa del tempo. Senza app."
+    },
+    "retail": {
+      "title": "Carte fedeltà e coupon per negozi",
+      "description": "Una tessera timbri e un coupon in Apple e Google Wallet per fidelizzare i clienti del tuo negozio. Si scansiona in cassa, senza toccare il gestionale."
+    },
+    "automations": {
+      "title": "Automazioni: recensioni e recupero clienti",
+      "description": "La carta chiede una recensione su Google, recupera gli abituali che hanno smesso di venire e compare nella schermata di blocco vicino al tuo locale."
+    },
+    "pricing": {
+      "title": "Prezzi della carta fedeltà digitale",
+      "description": "Gratis fino a 50 clienti. Pro 29 €, Business 49 €, Scale 99 € al mese, IVA inclusa, fino al 20 % in meno con l'annuale. Senza vincoli né carta per iniziare."
+    },
+    "staffApp": {
+      "title": "L'app del team per iPhone e Android",
+      "description": "Scansiona la carta, aggiungi il timbro, riscatta il coupon. Modalità banco, iscrizione dei nuovi clienti e premi in sospeso. Inclusa in tutti i piani Loyalshy."
+    },
+    "partners": {
+      "title": "Programma partner per agenzie e consulenti",
+      "description": "Configura Loyalshy per i tuoi clienti, passa loro l'attività con un link e resta come responsabile programmi. Con link di referral e una console partner."
+    },
+    "privatePrograms": {
+      "title": "Programmi privati, solo su invito",
+      "description": "Carte socio, coupon VIP e vantaggi per il team, nascosti dalla pagina pubblica. Li emette solo il tuo team, dalla dashboard o dall'app al banco."
+    },
+    "about": {
+      "title": "Chi è Loyalshy",
+      "description": "Loyalshy è fatto da HEX CONCEPTS STUDIO a Lleida, Spagna. Un solo prodotto: la carta fedeltà in Apple e Google Wallet, per caffetterie, parrucchieri e negozi."
+    },
+    "status": {
+      "title": "Stato del sistema",
+      "description": "Stato in tempo reale di loyalshy.com, del suo database e dei fornitori da cui dipende Loyalshy."
+    },
+    "subprocessors": {
+      "title": "Sub-responsabili",
+      "description": "Le terze parti che trattano dati personali per conto di Loyalshy, per cosa e dove."
+    },
+    "promote": {
+      "title": "Come promuovere il tuo programma fedeltà",
+      "description": "Otto punti che portano iscrizioni: cassa, tavolo, porta, scontrino, Instagram e recensioni Google. Materiale gratis dalla dashboard o stampato da noi."
+    }
+  },
+  "pages": {
+    "common": {
+      "seePricing": "Vedi i prezzi",
+      "bookDemo": "Richiedi una demo",
+      "allPlans": "Tutti i piani",
+      "fromPro": "Da Pro in su",
+      "fromBusiness": "Da Business in su",
+      "iphoneOnly": "Solo iPhone",
+      "stampCard": "Tessera timbri",
+      "coupon": "Coupon",
+      "seeAutomations": "Vedi le automazioni",
+      "seeStaffApp": "Vedi l'app del team",
+      "seePrivatePrograms": "Programmi privati",
+      "writeToUs": "Scrivici",
+      "anythingElse": "Altro?",
+      "emailUs": "Scrivici",
+      "replyTime": "e ti rispondiamo via email.",
+      "seePromote": "Come promuoverlo al banco"
+    },
+    "industries": {
+      "hub": {
+        "title": "Fidelizzazione per caffetterie, parrucchieri e negozi.",
+        "lead": "Caffetterie, parrucchieri e negozi vivono di clienti abituali. Loyalshy dà a ciascuno un programma fedeltà in Apple e Google Wallet, una tessera timbri o un coupon, e a te una dashboard che ti mostra chi torna.",
+        "cards": {
+          "cafes": {
+            "title": "Caffetterie e panetterie",
+            "lead": "Il decimo caffè gratis, senza la tessera di carta.",
+            "alt": "I tavoli e il banco di una caffetteria"
+          },
+          "salons": {
+            "title": "Parrucchieri e barbieri",
+            "lead": "Un timbro per appuntamento, un premio al quinto, un promemoria quando è passato del tempo.",
+            "alt": "Una parrucchiera al lavoro in un salone luminoso"
+          },
+          "retail": {
+            "title": "Negozi e commercio",
+            "lead": "Un coupon per il prossimo acquisto e una carta per i clienti abituali.",
+            "alt": "Un piccolo negozio di abbigliamento con appendiabiti e banco"
+          }
+        },
+        "sameTitle": "Lo stesso ovunque.",
+        "sameLead": "Qualunque sia il banco, la meccanica non cambia.",
+        "same": {
+          "noApp": {
+            "title": "Senza app per il cliente",
+            "body": "Scansiona un codice QR una volta e la carta si salva in Apple Wallet o Google Wallet. Niente download, niente account, niente password."
+          },
+          "counter": {
+            "title": "Al banco non cambia niente",
+            "body": "Il tuo team scansiona la carta con l'app di Loyalshy e aggiunge il timbro o riscatta il coupon. La cassa resta com'è."
+          },
+          "data": {
+            "title": "I tuoi clienti, i tuoi dati",
+            "body": "Ogni timbro compare nella dashboard. Vedi chi torna e chi ha smesso di venire, e puoi esportare la lista quando vuoi."
+          }
+        },
+        "chooseTitle": "Scegli la tua attività."
+      },
+      "cafes": {
+        "title": "La tessera timbri per caffetterie.",
+        "lead": "Nove caffè e il decimo gratis. Per la caffetteria e la panetteria di quartiere: la tessera vive nell'Apple o Google Wallet dei tuoi clienti, quindi non si perde, non si dimentica e non si falsifica, e tu vedi ogni timbro nella dashboard.",
+        "heroAlt": "Una barista che sorride dietro il banco",
+        "counterTitle": "Al banco.",
+        "counterLead": "L'ora di punta della mattina non rallenta. Ecco cosa cambia e cosa no.",
+        "steps": {
+          "1": {
+            "title": "Il cliente scansiona il QR",
+            "body": "Un espositore da tavolo o un adesivo accanto alla cassa. La prima volta, la carta si salva nel suo Wallet in pochi secondi. Senza app, senza altro modulo che un'email."
+          },
+          "2": {
+            "title": "Il tuo team scansiona la carta",
+            "body": "Il cliente mostra la carta sul telefono, il barista la scansiona con l'app di Loyalshy e il timbro arriva all'istante. Se è stato un errore, ci sono dieci minuti per annullarlo."
+          },
+          "3": {
+            "title": "Il premio compare da solo",
+            "body": "Con l'ultimo timbro la carta lo dice, e il cliente riscatta il caffè gratis alla visita successiva. Poi la carta ricomincia da capo."
+          }
+        },
+        "programsTitle": "Due programmi.",
+        "programsLead": "Una tessera timbri per il caffè di ogni giorno, un coupon per le ore tranquille.",
+        "stamp": {
+          "title": "Nove caffè, il decimo lo offriamo noi",
+          "body": "La tessera classica, nel Wallet. Scegli tu il numero di timbri, il premio e il design: la striscia, l'icona del timbro e i colori sono tuoi.",
+          "alt": "La tessera timbri di una pizzeria in Apple Wallet"
+        },
+        "coupon": {
+          "title": "2x1 dalle quattro in poi",
+          "body": "Un coupon monouso o illimitato per il calo del pomeriggio, un dolce nuovo o la prima settimana di un nuovo locale. Si riscatta con la stessa scansione.",
+          "alt": "Il coupon di un'hamburgheria in Apple Wallet"
+        },
+        "beyondTitle": "Oltre la tessera.",
+        "beyondLead": "Quello che una tessera di carta non potrà mai fare.",
+        "beyond": {
+          "reviews": {
+            "title": "Chiedere una recensione su Google",
+            "body": "Dopo la visita che scegli, la carta chiede una volta una recensione su Google, un'ora e mezza dopo, con un link che puoi tracciare."
+          },
+          "winback": {
+            "title": "Recuperare chi ha smesso di venire",
+            "body": "Un cliente abituale che non viene da un mese riceve il tuo messaggio «ci manchi» nella schermata di blocco."
+          },
+          "nearby": {
+            "title": "Comparire nella schermata di blocco quando passa",
+            "body": "Quando un cliente con iPhone passa davanti alla tua caffetteria, la carta compare nella sua schermata di blocco."
+          },
+          "announcements": {
+            "title": "Raccontare a tutti le novità",
+            "body": "Un caffè nuovo, gli orari delle feste, un 2x1 oggi. Un messaggio dalla dashboard arriva a tutte le carte."
+          }
+        },
+        "photoAlt": "Il banco di una caffetteria",
+        "faqTitle": "Domande dalle caffetterie.",
+        "faq": {
+          "rush": {
+            "question": "Scansionare rallenta l'ora di punta della mattina?",
+            "answer": "La scansione richiede più o meno quanto richiedeva un timbro. Il barista apre l'app di Loyalshy, punta la fotocamera sulla carta e fatto. Dopo ogni timbro la fotocamera torna da sola, pronta per il cliente successivo."
+          },
+          "two": {
+            "question": "Un cliente può ricevere due timbri in una visita?",
+            "answer": "Sì, se vuoi. Il tuo team aggiunge tanti timbri quanti ne merita l'ordine. Un timbro messo per errore si può annullare entro dieci minuti."
+          },
+          "android": {
+            "question": "E i clienti senza iPhone?",
+            "answer": "Google Wallet funziona allo stesso modo su Android. Il cliente scansiona lo stesso QR e la carta si salva in Google Wallet."
+          },
+          "design": {
+            "question": "La carta può assomigliare alla mia caffetteria?",
+            "answer": "Sì. Nello studio scegli il logo, i colori, l'immagine della striscia e l'icona del timbro. La carta nel Wallet è la carta che hai disegnato."
+          },
+          "hardware": {
+            "question": "Mi serve qualche dispositivo nuovo?",
+            "answer": "No. Il team scansiona con il telefono che ha già, con l'app di Loyalshy per iPhone e Android. Niente si collega alla cassa."
+          }
+        }
+      },
+      "salons": {
+        "title": "La carta fedeltà per parrucchieri.",
+        "lead": "Il programma fedeltà del tuo salone, nel Wallet: un timbro per appuntamento, un premio al quinto. La carta vive nell'Apple o Google Wallet dei tuoi clienti e, quando un abituale non prenota da un po', glielo ricorda.",
+        "heroAlt": "Una parrucchiera al lavoro in un salone luminoso",
+        "counterTitle": "Alla reception.",
+        "counterLead": "I clienti vengono ogni quattro o sei settimane. La carta deve sopravvivere a quel vuoto, e quella di carta non ce la fa.",
+        "steps": {
+          "1": {
+            "title": "Il cliente scansiona il QR alla reception",
+            "body": "Su un cartoncino accanto allo specchio o al banco. La carta si salva nel suo Wallet con un'email. Nessuna app da scaricare."
+          },
+          "2": {
+            "title": "Un timbro per appuntamento",
+            "body": "Mentre paga, il tuo team scansiona la carta con l'app di Loyalshy. Un timbro per visita, o di più per un trattamento, come decidi tu."
+          },
+          "3": {
+            "title": "Il premio al quinto",
+            "body": "Una piega gratis, un trattamento, uno sconto sui prodotti. La carta lo mostra e il cliente lo riscatta all'appuntamento successivo."
+          }
+        },
+        "programsTitle": "Due programmi.",
+        "programsLead": "Una tessera timbri per gli abituali, un coupon per quelli che vuoi far tornare.",
+        "stamp": {
+          "title": "Cinque appuntamenti, un trattamento gratis",
+          "body": "Scegli il numero di timbri, il premio e l'aspetto. Una carta diversa per la poltrona del barbiere e per il colore, se vuoi.",
+          "alt": "Una tessera timbri in Apple Wallet"
+        },
+        "coupon": {
+          "title": "20 % sul primo colore",
+          "body": "Un coupon monouso per un servizio nuovo, per le mattine tranquille in settimana, o per la cliente che ha portato un'amica.",
+          "alt": "Un coupon in Apple Wallet"
+        },
+        "beyondTitle": "Oltre la carta.",
+        "beyondLead": "Dove un salone ne trae il massimo.",
+        "beyond": {
+          "winback": {
+            "title": "Il promemoria quando è passato del tempo",
+            "body": "Un cliente che non viene da sessanta giorni riceve il tuo messaggio nella schermata di blocco. Lo scrivi una volta; parte da solo."
+          },
+          "reviews": {
+            "title": "Una recensione su Google al momento giusto",
+            "body": "Dopo la visita che scegli, la carta chiede una volta una recensione, un'ora e mezza dopo, quando è già a casa e contento del taglio."
+          },
+          "private": {
+            "title": "Una carta solo per i soci",
+            "body": "Un programma solo su invito per i tuoi clienti VIP o un vantaggio per i soci, nascosto dalla pagina pubblica. Lo emette solo il tuo team."
+          },
+          "announcements": {
+            "title": "Aperture, chiusure e novità",
+            "body": "Uno stilista nuovo, gli orari delle feste, un prodotto nuovo. Un messaggio dalla dashboard arriva a tutte le carte."
+          }
+        },
+        "photoAlt": "Un salone vuoto con poltrone accanto alle finestre",
+        "faqTitle": "Domande dai parrucchieri.",
+        "faq": {
+          "services": {
+            "question": "Servizi diversi possono dare timbri diversi?",
+            "answer": "Il tuo team decide quanti timbri dare a ogni visita al momento della scansione. Se vuoi programmi separati, il piano Pro ne permette due e Business cinque."
+          },
+          "booking": {
+            "question": "Si collega al mio sistema di prenotazioni?",
+            "answer": "No, e non serve. La carta si scansiona alla reception, accanto a quello che usi per prenotare. Niente da integrare."
+          },
+          "staff": {
+            "question": "Ogni stilista può avere l'app?",
+            "answer": "Sì. Ogni membro del team accede dal proprio telefono, con abbinamento via QR, via email o con Google. Il piano stabilisce quanti membri puoi avere."
+          },
+          "gap": {
+            "question": "E se un cliente non torna per mesi?",
+            "answer": "La carta resta nel suo Wallet con i timbri che ha ottenuto. Da Business in su, il messaggio di recupero glielo ricorda passati i giorni che stabilisci."
+          },
+          "android": {
+            "question": "I miei clienti hanno bisogno di un iPhone?",
+            "answer": "No. Google Wallet funziona allo stesso modo su Android. Solo il suggerimento «vicino alla tua attività» è esclusivo di iPhone."
+          }
+        }
+      },
+      "retail": {
+        "title": "La carta fedeltà per negozi.",
+        "lead": "Fidelizza i clienti del tuo negozio con una tessera timbri per chi viene ogni settimana e un coupon per chi potrebbe tornare. Entrambe in Apple e Google Wallet, entrambe scansionate in cassa con la stessa app.",
+        "heroAlt": "Un piccolo negozio di abbigliamento con appendiabiti e banco",
+        "counterTitle": "In cassa.",
+        "counterLead": "La carta si scansiona mentre pagano. Niente tocca la tua cassa.",
+        "steps": {
+          "1": {
+            "title": "Un QR accanto alla cassa",
+            "body": "Un adesivo, un cartello da banco o un link nella bio di Instagram. Il cliente lo scansiona, inserisce un'email e la carta è nel suo Wallet."
+          },
+          "2": {
+            "title": "Un timbro per acquisto",
+            "body": "Il tuo team scansiona la carta con l'app di Loyalshy. Un timbro per ogni acquisto, o per ogni acquisto oltre un importo che stabilisci come regola."
+          },
+          "3": {
+            "title": "Il premio, o il coupon",
+            "body": "Con l'ultimo timbro la carta mostra il premio. Un coupon si riscatta allo stesso modo: una scansione, usato o ancora valido, senza codici da digitare."
+          }
+        },
+        "programsTitle": "Due programmi.",
+        "programsLead": "Timbri per gli abituali, un coupon per tutti gli altri.",
+        "stamp": {
+          "title": "Dieci acquisti, un regalo",
+          "body": "La carta degli abituali. Stabilisci il numero di timbri, il premio e il design, e l'icona del timbro può essere il tuo prodotto.",
+          "alt": "Una tessera timbri in Apple Wallet"
+        },
+        "coupon": {
+          "title": "10 % sul tuo prossimo acquisto",
+          "body": "Un coupon monouso che se ne va con il primo acquisto, o uno illimitato per una stagione. Condividilo via QR, link o Instagram.",
+          "alt": "Un coupon del 10 % in Apple Wallet"
+        },
+        "beyondTitle": "Oltre la carta.",
+        "beyondLead": "Quello che la carta fa tra una visita e l'altra.",
+        "beyond": {
+          "nearby": {
+            "title": "Nella schermata di blocco, per strada",
+            "body": "Un cliente con iPhone passa davanti al tuo negozio e la carta compare nella sua schermata di blocco con la tua frase."
+          },
+          "announcements": {
+            "title": "Nuova collezione, saldi, apertura serale",
+            "body": "Un messaggio dalla dashboard arriva a tutte le carte come notifica. Ogni piano ha una quota settimanale."
+          },
+          "winback": {
+            "title": "Recuperare chi si è raffreddato",
+            "body": "Un abituale che non compra da novanta giorni riceve il tuo messaggio. Uno su dieci non lo riceve, così vedi se ha funzionato."
+          },
+          "reviews": {
+            "title": "Chiedere una recensione su Google",
+            "body": "Dopo l'acquisto che scegli, la carta chiede una volta una recensione su Google, con un link che puoi tracciare."
+          }
+        },
+        "photoAlt": "Una cliente che paga in cassa",
+        "faqTitle": "Domande dai negozi.",
+        "faq": {
+          "amount": {
+            "question": "Un timbro può dipendere da quanto spendono?",
+            "answer": "La regola è tua: il tuo team aggiunge un timbro quando l'acquisto la rispetta. L'app non legge lo scontrino, quindi non c'è niente da collegare."
+          },
+          "online": {
+            "question": "Posso condividere la carta online?",
+            "answer": "Sì. Ogni programma pubblico ha un link di iscrizione che puoi mettere nella bio di Instagram, in un'email o sul tuo sito, e un QR per il negozio."
+          },
+          "coupon": {
+            "question": "Un coupon si può usare più di una volta?",
+            "answer": "Scegli tu. Un coupon monouso viene annullato dopo la prima scansione. Uno illimitato si può riscattare di nuovo dopo un minuto, finché dura il programma."
+          },
+          "locations": {
+            "question": "Ho due negozi. La carta vale in entrambi?",
+            "answer": "Sì. Entrambi scansionano le stesse carte con la stessa app. Ogni membro del team accede dal proprio telefono."
+          },
+          "export": {
+            "question": "Posso portarmi via la mia lista clienti?",
+            "answer": "Sì, quando vuoi, in CSV dalla dashboard. La lista è tua."
+          }
+        }
+      }
+    },
+    "automations": {
+      "title": "Recensioni su Google e clienti che tornano, in automatico.",
+      "lead": "Tre cose che la carta fa da sola, configurate una volta dalla dashboard: chiedere una recensione su Google, recuperare un abituale che ha smesso di venire e comparire nella schermata di blocco quando un cliente passa davanti.",
+      "heroAlt": "Una mano che tiene un telefono",
+      "rows": {
+        "reviews": {
+          "meta": "Recensioni Google · Da Pro in su",
+          "title": "Chiedi una recensione.",
+          "body": "Dopo la visita che scegli, la terza di default, la carta chiede una volta una recensione su Google, un'ora e mezza dopo la visita e mai di notte. Il link viene tracciato, così vedi a quanti è stata chiesta e quanti l'hanno aperto.",
+          "more": "Nessun premio per la recensione e nessun filtro per punteggio. Il grafico giornaliero mostra la tua valutazione su Google e il numero di recensioni nel tempo.",
+          "alt": "I tavoli di un ristorante dopo il servizio"
+        },
+        "winback": {
+          "meta": "Recupero clienti · Da Business in su",
+          "title": "Falli tornare.",
+          "body": "Un abituale che non viene da 14, 30, 60 o 90 giorni riceve il tuo messaggio nella schermata di blocco, una volta per assenza. Lo scrivi tu; parte alle dieci di mattina, nel tuo fuso orario.",
+          "more": "Uno su dieci non riceve il messaggio, così la scheda dei risultati può dirti quanti sono tornati grazie a lui e non per caso.",
+          "alt": "Una caffetteria vuota"
+        },
+        "nearby": {
+          "meta": "Vicino alla tua attività · Tutti i piani, iPhone",
+          "title": "Nella schermata di blocco quando passa.",
+          "body": "Imposta la tua posizione una volta. Quando un cliente con iPhone è vicino, la sua carta compare nella schermata di blocco con la frase che hai scritto. È un suggerimento che fa iOS, non una notifica push.",
+          "more": "Trascina il segnaposto sulla mappa fino alla porta della tua attività.",
+          "alt": "Una persona con le buste della spesa che passa davanti alle vetrine"
+        }
+      },
+      "announceTitle": "E quando hai qualcosa da dire.",
+      "announceBody": "Gli annunci sono la parte manuale: un messaggio fino a 160 caratteri dalla dashboard o dall'app del team, consegnato come notifica a tutte le carte di un programma. Ogni piano ha una quota settimanale.",
+      "measureTitle": "Misurato.",
+      "measureLead": "Ogni automazione mostra i suoi numeri nella dashboard.",
+      "measure": {
+        "asked": {
+          "title": "Chieste e aperte",
+          "body": "A quanti clienti la carta ha chiesto una recensione e quanti hanno aperto il link."
+        },
+        "rating": {
+          "title": "Valutazione nel tempo",
+          "body": "La tua valutazione su Google e il numero di recensioni, registrati ogni giorno da quando l'hai attivato."
+        },
+        "lift": {
+          "title": "Tornati, rispetto al gruppo di confronto",
+          "body": "Clienti con messaggio tornati entro due settimane, accanto a quelli che non ne hanno ricevuto nessuno."
+        }
+      },
+      "faqTitle": "Domande sulle automazioni.",
+      "faq": {
+        "frequency": {
+          "question": "I miei clienti riceveranno troppe notifiche?",
+          "answer": "La recensione si chiede una volta per cliente, per sempre. Il messaggio di recupero parte una volta per assenza e mai più di una volta ogni novanta giorni. Gli annunci hanno una quota settimanale per piano. «Vicino alla tua attività» non è una notifica: la carta compare semplicemente nella schermata di blocco."
+        },
+        "android": {
+          "question": "Funziona su Android?",
+          "answer": "Le richieste di recensione, i messaggi di recupero e gli annunci arrivano sia su Apple Wallet sia su Google Wallet. «Vicino alla tua attività» è una funzione di iPhone; Google Wallet non mostra le carte in base alla posizione."
+        },
+        "edit": {
+          "question": "Posso cambiare i messaggi?",
+          "answer": "Sì, quando vuoi, da Automazioni nella dashboard. L'invio successivo usa il testo nuovo."
+        },
+        "plans": {
+          "question": "Quale piano mi serve?",
+          "answer": "«Vicino alla tua attività» è in tutti i piani, Free incluso. Le richieste di recensione su Google partono da Pro. I messaggi di recupero partono da Business, perché per misurarli servono qualche centinaio di invii."
+        },
+        "coupons": {
+          "question": "Le automazioni funzionano con i coupon?",
+          "answer": "Con i coupon illimitati, sì: ogni riscatto conta come visita. I coupon monouso non chiedono mai niente. Una volta riscattati, la carta è usata."
+        }
+      },
+      "rowsTitle": "Tre cose che fa da sola."
+    },
+    "pricing": {
+      "title": "Piani e prezzi.",
+      "lead": "La carta fedeltà digitale, con un prezzo in base a quanti clienti hai. Mensile o annuale, senza vincoli, e puoi fermarti quando vuoi. Tutti i piani includono i due tipi di carta, i due wallet, l'app del team e la dashboard.",
+      "compareTitle": "Piano per piano.",
+      "compareLead": "Cosa include ogni piano, riga per riga.",
+      "rows": {
+        "customers": "Clienti",
+        "programs": "Programmi attivi",
+        "team": "Membri del team",
+        "announcements": "Annunci nel Wallet",
+        "reviews": "Richieste di recensione su Google",
+        "winback": "Messaggi di recupero",
+        "nearby": "Vicino alla tua attività",
+        "private": "Programmi privati",
+        "wallets": "Apple e Google Wallet",
+        "staffApp": "App del team per iPhone e Android",
+        "studio": "Studio di design delle carte",
+        "export": "Esportazione clienti in CSV"
+      },
+      "values": {
+        "unlimited": "Illimitati",
+        "lifetime": "{count} in totale",
+        "perWeek": "{count, plural, one {# a settimana} other {# a settimana}}",
+        "included": "Incluso",
+        "notIncluded": "Non incluso"
+      },
+      "faqTitle": "Domande sui prezzi.",
+      "faq": {
+        "customer": {
+          "question": "Cosa conta come cliente?",
+          "answer": "Un contatto con almeno una carta. Se la stessa persona ha la tua tessera timbri e un coupon, è un cliente."
+        },
+        "limit": {
+          "question": "Cosa succede quando raggiungo il limite?",
+          "answer": "I nuovi clienti non possono iscriversi finché non passi al piano successivo. Le carte già emesse continuano a funzionare e a ricevere timbri."
+        },
+        "change": {
+          "question": "Posso cambiare piano più avanti?",
+          "answer": "Sì, da Impostazioni in qualsiasi momento. Un passaggio a un piano superiore si applica subito."
+        },
+        "annual": {
+          "question": "Come funziona il pagamento annuale?",
+          "answer": "Paghi dodici mesi in una volta al prezzo indicato sotto Annuale, fino al 20 % in meno rispetto a pagare mese per mese."
+        },
+        "vat": {
+          "question": "I prezzi includono l'IVA?",
+          "answer": "Sì. I prezzi che vedi includono l'IVA, e in fattura compare separata."
+        },
+        "cancel": {
+          "question": "Come annullo?",
+          "answer": "Da Impostazioni. Il piano resta attivo fino alla fine del periodo pagato e poi torna a Free. Le tue carte e i tuoi clienti restano."
+        },
+        "enterprise": {
+          "question": "E se ho più sedi?",
+          "answer": "Le catene e le attività con esigenze particolari hanno il piano Enterprise: limiti su misura, assistenza dedicata e condizioni da contratto. Scrivi a hello@loyalshy.com e ne parliamo."
+        }
+      }
+    },
+    "staffApp": {
+      "title": "L'app del team.",
+      "lead": "Scansionare, timbrare, riscattare. Loyalshy per iPhone e Android è quello che il tuo team ha in mano al banco, e viene con tutti i piani.",
+      "appStore": "Scarica su App Store",
+      "playStore": "Disponibile su Google Play",
+      "screens": {
+        "scan": "La scheda Scansiona: la fotocamera, pronta per una carta",
+        "today": "La scheda Oggi con il nome dell'attività e le scorciatoie del giorno",
+        "share": "Condividere un programma: il QR e il link di iscrizione",
+        "history": "L'attività recente: timbri e riscatti"
+      },
+      "rows": {
+        "scan": {
+          "meta": "Scansiona",
+          "title": "Una scansione, un timbro.",
+          "body": "L'app si apre sulla fotocamera. Puntala sulla carta del cliente e il timbro arriva, o il coupon viene riscattato. Quattro secondi dopo la fotocamera torna, pronta per il cliente successivo.",
+          "more": "Un timbro per errore? Annullalo entro i dieci minuti successivi."
+        },
+        "find": {
+          "meta": "Trova cliente",
+          "title": "Senza il telefono a portata di mano.",
+          "body": "Un cliente senza il suo telefono? Cercalo per nome o email e aggiungi il timbro dalla stessa scheda."
+        },
+        "counter": {
+          "meta": "Modalità banco",
+          "title": "Il QR sullo schermo.",
+          "body": "Un codice di iscrizione a schermo intero per un tablet o un telefono di riserva in cassa. Lo schermo non si spegne, e si esce con una pressione prolungata."
+        },
+        "signup": {
+          "meta": "Nuovo cliente",
+          "title": "Iscrizione al banco.",
+          "body": "Scrivi l'email del cliente e la carta viene emessa e inviata all'istante. È anche la via d'ingresso dei programmi privati."
+        },
+        "rewards": {
+          "meta": "Premi in sospeso",
+          "title": "Chi ha un premio in attesa.",
+          "body": "I premi ottenuti e non ancora riscattati, prima quelli che scadono prima."
+        },
+        "announce": {
+          "meta": "Annunci",
+          "title": "Un messaggio a tutte le carte.",
+          "body": "Titolari e responsabili programmi possono inviare un annuncio al Wallet dall'app, con la stessa quota della dashboard."
+        }
+      },
+      "signinTitle": "Accedere.",
+      "signinLead": "Quattro modi per entrare, così un nuovo membro è pronto in un minuto.",
+      "signin": {
+        "qr": {
+          "title": "Abbinare con un QR",
+          "body": "Da Impostazioni, Team, mostra un QR con un PIN di sei cifre. Il membro del team lo scansiona, digita il PIN ed è dentro. Senza password."
+        },
+        "email": {
+          "title": "Email e password",
+          "body": "Lo stesso account della dashboard."
+        },
+        "google": {
+          "title": "Google",
+          "body": "Un tocco con l'account Google che fa parte del team."
+        },
+        "invite": {
+          "title": "Il link di invito",
+          "body": "L'email di invito apre l'app direttamente nello spazio giusto."
+        }
+      },
+      "faqTitle": "Domande sull'app.",
+      "faq": {
+        "free": {
+          "question": "L'app costa a parte?",
+          "answer": "No. È inclusa in tutti i piani, Free incluso. Il piano stabilisce quanti membri del team possono usarla."
+        },
+        "devices": {
+          "question": "Su quali telefoni funziona?",
+          "answer": "iPhone, dall'App Store, e Android, da Google Play. Qualsiasi telefono con fotocamera."
+        },
+        "roles": {
+          "question": "Cosa può fare il personale e cosa no?",
+          "answer": "Il personale timbra, riscatta, iscrive clienti e annulla i propri timbri. Titolari e responsabili programmi possono inoltre annullare il timbro di chiunque e inviare annunci. Fatturazione e impostazioni restano nella dashboard."
+        },
+        "offline": {
+          "question": "E se cade la connessione?",
+          "answer": "Il timbro si salva sul telefono e viene inviato quando torna la connessione."
+        },
+        "demo": {
+          "question": "Posso provarla prima di avere clienti?",
+          "answer": "Sì. L'app ha una modalità demo con dati di esempio, così vedi ogni schermata prima della prima scansione."
+        }
+      },
+      "rowsTitle": "Cosa fa."
+    },
+    "partners": {
+      "title": "Configura Loyalshy per i tuoi clienti.",
+      "lead": "Agenzie, consulenti e rivenditori di POS configurano programmi fedeltà per le attività che già servono. Lo configuri, lo passi al cliente e resti come responsabile programmi.",
+      "heroAlt": "Due persone che si stringono la mano sopra un banco",
+      "howTitle": "Come funziona.",
+      "steps": {
+        "1": {
+          "title": "Diventa partner",
+          "body": "Scrivici. Contrassegniamo il tuo account come partner e la console partner compare nella tua dashboard."
+        },
+        "2": {
+          "title": "Configura il cliente",
+          "body": "«Nuovo cliente» crea lo spazio del cliente con te come titolare. Disegna la carta, stampa il QR, invita il suo team."
+        },
+        "3": {
+          "title": "Passaglielo",
+          "body": "Genera un link di presa in carico monouso e invialo al titolare. Quando lo riscatta, l'attività è sua: fatturazione, team, impostazioni."
+        },
+        "4": {
+          "title": "Resta come responsabile programmi",
+          "body": "Mantieni l'accesso al design, alla distribuzione e ai programmi, senza vedere la sua fatturazione. Il tuo posto non conta mai nel suo piano."
+        }
+      },
+      "consoleTitle": "La console partner.",
+      "consoleLead": "Tutti i tuoi clienti in un unico posto.",
+      "console": {
+        "portfolio": {
+          "title": "Portafoglio",
+          "body": "Ogni cliente che hai configurato, con una checklist: programma pubblicato, primi clienti dentro, titolare che ha preso in carico."
+        },
+        "referral": {
+          "title": "Link di referral",
+          "body": "Un link con il tuo codice. Le attività che si registrano tramite quel link vengono attribuite a te."
+        },
+        "access": {
+          "title": "Richiedere l'accesso",
+          "body": "Hai perso l'accesso a un cliente che hai configurato? Chiedilo al titolare con un clic. Riceve un'email che apre la finestra di invito."
+        },
+        "seat": {
+          "title": "Un posto che non conta",
+          "body": "La tua appartenenza allo spazio di un cliente è esente dal limite di team del suo piano."
+        }
+      },
+      "whoTitle": "Per chi è.",
+      "who": {
+        "agencies": {
+          "title": "Agenzie di marketing",
+          "body": "Aggiungi la fidelizzazione ai servizi che già vendi alle attività locali."
+        },
+        "consultants": {
+          "title": "Consulenti per la ristorazione",
+          "body": "Configura il programma come parte di un'apertura o di un rinnovo."
+        },
+        "pos": {
+          "title": "Rivenditori di POS",
+          "body": "Loyalshy funziona accanto a qualsiasi POS. Vendilo insieme alla cassa."
+        },
+        "designers": {
+          "title": "Designer e tipografie",
+          "body": "Tu disegni la carta e il materiale da banco; il cliente si porta via il programma intero."
+        }
+      },
+      "termsTitle": "Condizioni.",
+      "termsBody": "Le condizioni per i partner si concordano una a una: una quota di configurazione che fatturi al tuo cliente e una parte dell'abbonamento. Scrivici e ne parliamo.",
+      "cta": "Scrivici per diventare partner",
+      "faqTitle": "Domande dai partner.",
+      "faq": {
+        "cost": {
+          "question": "Il programma partner costa qualcosa?",
+          "answer": "No. Gli account partner sono gratuiti. I tuoi clienti pagano il proprio piano quando il Free diventa stretto."
+        },
+        "ownership": {
+          "question": "Di chi è l'account del cliente?",
+          "answer": "Dopo il passaggio, del cliente. Sono suoi la fatturazione, il team e le impostazioni. Tu mantieni l'accesso ai programmi come responsabile programmi, e possono rimuoverti quando vogliono."
+        },
+        "billing": {
+          "question": "Posso pagare io il piano del cliente?",
+          "answer": "Prima del passaggio sei il titolare, quindi sì. Dopo, la fatturazione è del cliente."
+        },
+        "referral": {
+          "question": "Cosa fa il link di referral?",
+          "answer": "Le attività che si registrano tramite il tuo link vengono attribuite a te, anche se non configuri mai niente per loro. L'attribuzione dura quanto l'account."
+        },
+        "share": {
+          "question": "A quanto ammonta la commissione?",
+          "answer": "Dipende dal volume e da quello che porti. Lo concordiamo con ogni partner. Scrivici."
+        }
+      }
+    },
+    "privatePrograms": {
+      "title": "Programmi solo su invito.",
+      "lead": "Alcune carte non sono per tutti: la carta socio, il coupon VIP, un vantaggio per il tuo stesso team. Un programma solo su invito è nascosto dalla pagina pubblica di iscrizione, e lo emette solo il tuo team.",
+      "heroAlt": "Un barbiere che serve un cliente",
+      "whatTitle": "Cosa cambia.",
+      "what": {
+        "hidden": {
+          "title": "Nascosto dalla pagina di iscrizione",
+          "body": "Il programma non compare nella tua pagina pubblica, e le sue sezioni QR, link e NFC spariscono da Distribuzione."
+        },
+        "team": {
+          "title": "Lo emette solo il team",
+          "body": "Le carte si emettono dalla dashboard, a un contatto o a una selezione, oppure dall'app del team al banco con un'email."
+        },
+        "same": {
+          "title": "Tutto il resto è uguale",
+          "body": "Timbri, coupon, annunci, richieste di recensione e messaggi di recupero funzionano esattamente come in un programma pubblico."
+        }
+      },
+      "forTitle": "A cosa serve.",
+      "for": {
+        "members": {
+          "title": "La carta socio",
+          "body": "Una tessera timbri per chi paga una quota, emessa al momento dell'iscrizione."
+        },
+        "vip": {
+          "title": "Il coupon VIP",
+          "body": "Un coupon per i tuoi clienti migliori, consegnato dal team invece che stampato su un cartello."
+        },
+        "staff": {
+          "title": "Team e amici",
+          "body": "Un vantaggio per il tuo stesso team o i tuoi fornitori a cui nessun altro dovrebbe potersi iscrivere."
+        },
+        "events": {
+          "title": "Un evento o un lancio",
+          "body": "Una carta per gli invitati di una serata, emessa all'ingresso dall'app."
+        }
+      },
+      "howTitle": "Emettere una carta.",
+      "steps": {
+        "1": {
+          "title": "Imposta il programma su solo su invito",
+          "body": "Nella pagina Distribuzione del programma, scegli «Solo su invito». Un programma pubblico si può cambiare in qualsiasi momento; le carte esistenti continuano a funzionare."
+        },
+        "2": {
+          "title": "Emetti dalla dashboard",
+          "body": "Scegli un contatto, o più di uno, ed emetti la carta. La ricevono via email con i pulsanti Aggiungi al Wallet."
+        },
+        "3": {
+          "title": "Oppure iscrivili al banco",
+          "body": "Nell'app del team, «Nuovo cliente» chiede un'email ed emette la carta all'istante."
+        }
+      },
+      "faqTitle": "Domande sui programmi privati.",
+      "faq": {
+        "existing": {
+          "question": "Cosa succede alle carte già emesse quando passo un programma a solo su invito?",
+          "answer": "Niente. Continuano a funzionare, a ricevere timbri e a ricevere messaggi. Si fermano solo le nuove iscrizioni dalla pagina pubblica."
+        },
+        "qr": {
+          "question": "E se qualcuno scansiona il vecchio QR?",
+          "answer": "La pagina di iscrizione dice che il programma è solo su invito. Non lo iscrive mai a un altro programma per errore."
+        },
+        "plans": {
+          "question": "Quale piano mi serve?",
+          "answer": "Qualsiasi, Free incluso. Un programma solo su invito conta come qualsiasi altro nel limite di programmi del tuo piano."
+        },
+        "both": {
+          "question": "Posso avere un programma pubblico e uno privato allo stesso tempo?",
+          "answer": "Sì, con un piano da due o più programmi. Quello pubblico compare nella tua pagina di iscrizione; quello privato no."
+        }
+      }
+    },
+    "about": {
+      "title": "Un'azienda piccola per attività piccole.",
+      "lead": "Loyalshy è fatto da HEX CONCEPTS STUDIO, uno studio di Lleida, in Spagna. Costruiamo una cosa sola: la carta fedeltà nel Wallet.",
+      "heroAlt": "Una via di piccoli negozi con dehors",
+      "whyTitle": "Perché.",
+      "whyBody1": "Le tessere timbri di carta si perdono, si dimenticano a casa e nessuno le conta. Le app fedeltà si scaricano una volta e non si aprono più. Apple Wallet e Google Wallet sono già su tutti i telefoni, e una carta lì si comporta come una carta: compare quando serve.",
+      "whyBody2": "Così abbiamo costruito la carta per il Wallet, la dashboard che conta i timbri e l'app con cui il team scansiona. Nient'altro.",
+      "holdTitle": "A cosa ci atteniamo.",
+      "hold": {
+        "noApp": {
+          "title": "Senza app per il cliente",
+          "body": "La carta va dove tiene già le sue carte. Niente da installare, niente da ricordare."
+        },
+        "data": {
+          "title": "La lista clienti è tua",
+          "body": "Non la vendiamo né la usiamo per la pubblicità, e puoi esportarla quando vuoi."
+        },
+        "honest": {
+          "title": "Senza trucchi con il cliente",
+          "body": "Nessun premio per la recensione e nessun filtro per punteggio. I messaggi che partono sono quelli che hai scritto tu."
+        },
+        "counter": {
+          "title": "Fatto per un banco",
+          "body": "Una caffetteria con una cassa, un parrucchiere con tre poltrone, un negozio all'angolo. Anche le catene ci stanno, ma progettiamo prima di tutto per il banco."
+        }
+      },
+      "photoAlt": "Un team che lavora allo stesso tavolo",
+      "companyTitle": "L'azienda.",
+      "companyBody": "HEX CONCEPTS STUDIO, S.L. è uno studio di software a Torrefarrera, Lleida. Loyalshy è il suo prodotto. Gira su server a Francoforte, i dati restano nell'Unione europea e all'assistenza rispondono le persone che lo costruiscono.",
+      "contactCta": "Contattaci"
+    },
+    "status": {
+      "title": "Stato del sistema.",
+      "lead": "Controlli in tempo reale sui servizi su cui gira Loyalshy, e sui fornitori da cui dipende.",
+      "checkedAt": "Controllato alle {time} UTC",
+      "overall": {
+        "ok": "Tutto funziona normalmente",
+        "degraded": "Alcuni sistemi sono degradati"
+      },
+      "components": {
+        "web": {
+          "name": "Web e dashboard",
+          "desc": "loyalshy.com, la dashboard e l'API dell'app del team. Se questa pagina si carica, funzionano."
+        },
+        "database": {
+          "name": "Database",
+          "desc": "Dove vivono i programmi, i clienti e i timbri."
+        },
+        "redis": {
+          "name": "Limite di richieste",
+          "desc": "Protezione dell'accesso e del modulo di contatto. Se è giù, si può comunque accedere con un limite ridotto."
+        }
+      },
+      "states": {
+        "ok": "Operativo",
+        "down": "Non disponibile",
+        "unconfigured": "Non configurato"
+      },
+      "latency": "{ms} ms",
+      "providersTitle": "Fornitori.",
+      "providersLead": "Loyalshy gira su questi servizi. Ognuno pubblica la propria pagina di stato.",
+      "providers": {
+        "vercel": "Hosting e web",
+        "neon": "Database",
+        "upstash": "Limite di richieste",
+        "stripe": "Pagamenti",
+        "trigger": "Attività in background: notifiche ed email",
+        "resend": "Invio email",
+        "apple": "Aggiornamento delle carte in Apple Wallet",
+        "google": "Google Wallet"
+      },
+      "apiNote": "Gli strumenti di monitoraggio possono interrogare gli stessi controlli su",
+      "incidentsTitle": "Qualcosa non va?",
+      "incidentsBody": "Se una carta non si aggiorna o la dashboard dà problemi e questa pagina mostra tutto in verde, scrivi a"
+    },
+    "subprocessors": {
+      "title": "Sub-responsabili.",
+      "lead": "Le terze parti che trattano dati personali per conto di Loyalshy, per cosa e dove. Questa lista fa parte della nostra",
+      "updated": "Ultimo aggiornamento: 4 ottobre 2026",
+      "columns": {
+        "name": "Sub-responsabile",
+        "purpose": "Finalità",
+        "data": "Dati",
+        "location": "Ubicazione"
+      },
+      "rows": {
+        "vercel": {
+          "purpose": "Hosting del sito, della dashboard e dell'API",
+          "data": "Tutti i dati in transito; log delle richieste",
+          "location": "UE (Francoforte); rete edge mondiale"
+        },
+        "neon": {
+          "purpose": "Hosting del database",
+          "data": "Account, programmi, clienti e interazioni",
+          "location": "UE (Francoforte)"
+        },
+        "upstash": {
+          "purpose": "Limite di richieste",
+          "data": "Identificatori di accesso cifrati, conservati per minuti",
+          "location": "UE (Francoforte)"
+        },
+        "cloudflare": {
+          "purpose": "Archiviazione di immagini e DNS",
+          "data": "Loghi e immagini delle carte caricati dalle attività",
+          "location": "UE e mondiale"
+        },
+        "stripe": {
+          "purpose": "Pagamenti e fatturazione",
+          "data": "Dati di fatturazione dell'attività",
+          "location": "Stati Uniti e UE"
+        },
+        "trigger": {
+          "purpose": "Attività in background",
+          "data": "Identificatori di carte e contatti, contenuto delle email",
+          "location": "UE e Stati Uniti"
+        },
+        "resend": {
+          "purpose": "Email transazionali",
+          "data": "Indirizzi email e contenuto delle email",
+          "location": "Stati Uniti e UE"
+        },
+        "sentry": {
+          "purpose": "Monitoraggio degli errori",
+          "data": "Report tecnici di errore, che possono includere identificatori",
+          "location": "UE e Stati Uniti"
+        },
+        "apple": {
+          "purpose": "Carte Apple Wallet e notifiche push",
+          "data": "Dati della carta, token push del dispositivo",
+          "location": "Mondiale"
+        },
+        "google": {
+          "purpose": "Google Wallet, accesso con Google, Places",
+          "data": "Dati della carta; identificatori dell'account Google per l'accesso",
+          "location": "Mondiale"
+        }
+      },
+      "changesTitle": "Modifiche.",
+      "changesBody": "Aggiorniamo questa pagina quando un sub-responsabile viene aggiunto o sostituito. I clienti con un piano a pagamento possono chiedere di essere avvisati via email.",
+      "dpaTitle": "Accordi.",
+      "dpaBody": "Domande sul trattamento dei dati, o ti serve un accordo sul trattamento dei dati? Scrivi a"
+    },
+    "promote": {
+      "title": "Come promuovere il tuo programma fedeltà.",
+      "lead": "La carta è già nel Wallet. Ora deve farsi vedere. Otto punti e momenti di una piccola attività che portano iscrizioni, con quale materiale promozionale mettere in ciascuno e cosa dire. Il cartoncino da banco e l'espositore escono gratis dalla tua dashboard; il resto possiamo fartelo noi.",
+      "orderCta": "Chiedici di farlo",
+      "freeCta": "Gratis dalla tua dashboard",
+      "blocks": {
+        "counter": {
+          "title": "La cassa.",
+          "body": "Un cartoncino da banco con il QR, dal lato del cliente, accanto a dove pagano. È il posto migliore del locale: il telefono è già fuori e ci sono alcuni secondi di attesa.",
+          "tip": "In piedi, in A6, all'altezza della mano. Non dietro la cassa.",
+          "piece": "Cartoncino da banco",
+          "alt": "Un cartoncino da banco con il QR del programma e la frase del Wallet"
+        },
+        "staff": {
+          "title": "Quello che dice il team.",
+          "body": "«Hai la nostra carta? Ci vuole un secondo». Detto mentre pagano, porta più iscrizioni di qualsiasi cartello. Fallo entrare nella routine della prima settimana e il resto viene da sé.",
+          "tip": "L'app del team si apre sulla fotocamera. In tutto sono cinque secondi.",
+          "piece": "La frase",
+          "alt": "Un fumetto con la frase che il team dice al banco"
+        },
+        "tent": {
+          "title": "Il tavolo.",
+          "body": "Un espositore che si legge mentre aspettano. Una faccia rimanda al programma; l'altra chiede una recensione su Google, per chi vuole farlo subito.",
+          "tip": "La faccia della recensione verso la sedia, quella del programma verso il corridoio.",
+          "piece": "Espositore da tavolo",
+          "alt": "Un espositore da tavolo piegato: il QR del programma da un lato, quello delle recensioni Google dall'altro"
+        },
+        "door": {
+          "title": "La porta e la vetrina.",
+          "body": "Un adesivo per chi passa, con il motivo scritto: il premio. È anche dove «vicino alla tua attività» accende la carta sugli iPhone che ce l'hanno già.",
+          "tip": "All'altezza degli occhi, all'esterno, sul vetro.",
+          "piece": "Adesivo per la porta",
+          "alt": "Un adesivo rotondo per la porta con il premio e il QR"
+        },
+        "ticket": {
+          "title": "Lo scontrino.",
+          "body": "Una riga in fondo allo scontrino, o un timbro di gomma sopra: «Chiedi la nostra carta». Per chi già stampa scontrini, senza installare niente.",
+          "tip": "Se la tua cassa stampa codici QR, metti lì il link di iscrizione.",
+          "piece": "Timbro di gomma",
+          "alt": "Uno scontrino con la frase che invita a chiedere la carta e un piccolo QR"
+        },
+        "social": {
+          "title": "Instagram e WhatsApp.",
+          "body": "Il link di iscrizione nella bio, una storia in evidenza che mostra la carta che entra nel Wallet, e il messaggio «grazie per essere venuto» con il link. «Condividi un programma» nell'app del team ti dà il link e il QR.",
+          "tip": "La storia funziona meglio con la carta vera che con un disegno.",
+          "piece": "Modelli per storie e post",
+          "alt": "Una cornice di storia Instagram con la carta e un adesivo con il link"
+        },
+        "reviews": {
+          "title": "Recensioni su Google.",
+          "body": "La carta chiede la recensione da sola dopo la visita che scegli, dal piano Pro. Al banco, un piccolo QR alla tua scheda Google per chi vuole farlo subito. Mai un premio in cambio.",
+          "tip": "Chiedila dopo la terza visita, non alla prima.",
+          "piece": "Cartoncino per le recensioni",
+          "alt": "Un cartoncino piccolo che chiede una recensione su Google con un QR"
+        },
+        "welcome": {
+          "title": "Il coupon di benvenuto.",
+          "body": "Un coupon monouso per il primo acquisto dà al QR un motivo per essere scansionato oggi. «Scansiona e prendi il 10 %»: la carta arriva nel Wallet con lo sconto già dentro.",
+          "tip": "Un coupon insieme a una tessera timbri richiede il piano Pro.",
+          "piece": "Coupon",
+          "alt": "Il coupon del 10 % di un'hamburgheria in Apple Wallet"
+        }
+      },
+      "freeTitle": "Materiale promozionale gratis dalla tua dashboard.",
+      "freeLead": "Il cartoncino da banco e l'espositore da tavolo escono da Distribuzione come PDF pronti da stampare, con il tuo logo, i tuoi colori e il QR del tuo programma. La seconda faccia dell'espositore porta il tuo link per le recensioni Google appena lo configuri.",
+      "freeSteps": {
+        "1": {
+          "title": "Pubblica il programma",
+          "body": "Il QR rimanda alla sua pagina di iscrizione, e non cambia mai per quanto tu modifichi la carta."
+        },
+        "2": {
+          "title": "Distribuzione, Materiale da banco",
+          "body": "Due pulsanti: il cartoncino A6 e l'espositore A4. I PDF escono pronti da stampare."
+        },
+        "3": {
+          "title": "Stampalo",
+          "body": "Qualsiasi copisteria. Cartoncino da 250 a 300 g, opaco. L'espositore si piega lungo la linea tratteggiata."
+        }
+      },
+      "orderTitle": "Oppure te lo facciamo noi.",
+      "orderLead": "Dicci cosa ti serve e ti rispondiamo con prezzo e data di consegna entro due giorni lavorativi. Stampato su cartoncino, tagliato e spedito alla tua attività, con il tuo logo e il QR del tuo programma.",
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Il tuo nome",
+        "email": "Email",
+        "emailPlaceholder": "tu@latuaattivita.com",
+        "business": "Attività",
+        "businessPlaceholder": "Nome della caffetteria, del salone o del negozio",
+        "pieces": "Cosa ti serve?",
+        "pieceOptions": {
+          "counterCard": "Cartoncino da banco",
+          "tableTent": "Espositore da tavolo",
+          "doorSticker": "Adesivo per la porta",
+          "windowSticker": "Adesivo per la vetrina",
+          "stamp": "Timbro di gomma per scontrini",
+          "social": "Modelli per storie e post",
+          "other": "Altro"
+        },
+        "quantity": "Quanti di ciascuno?",
+        "quantityOptions": {
+          "1": "1",
+          "2-5": "Da 2 a 5",
+          "6-10": "Da 6 a 10",
+          "more": "Più di 10"
+        },
+        "message": "Altro",
+        "messagePlaceholder": "Misure, colori, l'indirizzo di spedizione…",
+        "submit": "Chiedi un preventivo",
+        "note": "Senza impegno. Ti rispondiamo via email con prezzo e data.",
+        "successTitle": "Richiesta ricevuta",
+        "successBody": "Ti scriviamo entro due giorni lavorativi con prezzo e data di consegna. Controlla la tua email: ti abbiamo inviato la conferma.",
+        "piecesRequired": "Scegli almeno un articolo."
+      },
+      "faqTitle": "Domande sulla promozione.",
+      "faq": {
+        "change": {
+          "question": "E se poi cambio il programma?",
+          "answer": "Il QR rimanda alla pagina di iscrizione del programma, non al suo design. Cambia i timbri, il premio o i colori e il QR stampato continua a funzionare."
+        },
+        "ownPrinter": {
+          "question": "Posso stamparlo nella mia tipografia?",
+          "answer": "Sì. Il cartoncino da banco e l'espositore sono PDF gratuiti da Distribuzione, a risoluzione di stampa. Portali in qualsiasi copisteria."
+        },
+        "time": {
+          "question": "Quanto ci vuole per un ordine?",
+          "answer": "Rispondiamo entro due giorni lavorativi con prezzo e data. Stampa e spedizione dipendono dall'articolo; adesivi e cartoncini di solito richiedono una settimana."
+        },
+        "private": {
+          "question": "Un programma solo su invito ha un QR?",
+          "answer": "No. I programmi solo su invito non hanno una pagina pubblica di iscrizione, quindi non c'è nessun QR da stampare. Il materiale è per i programmi pubblici."
+        }
+      },
+      "mock": {
+        "business": "Café Sol",
+        "program": "Tessera timbri",
+        "reward": "Il decimo caffè, gratis",
+        "scanLine": "Scansiona e salva la tua carta nel Wallet",
+        "reviewLine": "Ti è piaciuto? Lasciaci una recensione su Google",
+        "askLine": "Chiedi la nostra carta",
+        "doorLine": "Il decimo caffè, gratis. Scansiona.",
+        "storyLine": "Salvala nel tuo Wallet",
+        "staffLine": "Hai la nostra carta? Ci vuole un secondo.",
+        "receiptTotal": "Totale",
+        "fold": "Piegare qui"
+      }
+    }
+  }
+}

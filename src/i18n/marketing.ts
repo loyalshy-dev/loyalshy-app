@@ -4,7 +4,7 @@ import { defaultLocale, locales, type Locale } from "./config"
 // The marketing site (landing, contact, legal) lives under
 // src/app/[locale] so every language has its own crawlable URL:
 //   /            → English (default, no prefix; rewritten to /en)
-//   /es, /fr     → Spanish, French
+//   /es, /ca, /fr, /it, /pt, /de → the other languages
 // The app (dashboard, auth, join, studio) keeps cookie-based locale.
 // Rewrites/redirects for the unprefixed English URLs are in next.config.ts.
 // ─────────────────────────────────────────────────────────────
@@ -38,7 +38,11 @@ export type MarketingPath = (typeof MARKETING_PATHS)[number]
 export const ogLocales: Record<Locale, string> = {
   en: "en_US",
   es: "es_ES",
+  ca: "ca_ES",
   fr: "fr_FR",
+  it: "it_IT",
+  pt: "pt_PT",
+  de: "de_DE",
 }
 
 export function isLocale(value: string): value is Locale {
