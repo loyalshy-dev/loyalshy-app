@@ -1,7 +1,7 @@
 "use client"
 
 import { useTransition } from "react"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { Languages } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { locales, localeNames, type Locale } from "@/i18n/config"
 import { localePath, parseMarketingPath } from "@/i18n/marketing"
-import { cn } from "@/lib/utils"
 
 interface LanguageSwitcherProps {
   className?: string
@@ -23,6 +22,7 @@ interface LanguageSwitcherProps {
 
 export function LanguageSwitcher({ className, size = "icon-sm", variant = "icon" }: LanguageSwitcherProps = {}) {
   const locale = useLocale()
+  const t = useTranslations("common")
   const [isPending, startTransition] = useTransition()
 
   function switchLocale(newLocale: Locale) {
@@ -44,7 +44,7 @@ export function LanguageSwitcher({ className, size = "icon-sm", variant = "icon"
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {variant === "code" ? (
-          <button type="button" disabled={isPending} aria-label="Switch language" className={className}>
+          <button type="button" disabled={isPending} aria-label={t("switchLanguage")} className={className}>
             {locale.toUpperCase()}
           </button>
         ) : (
@@ -52,7 +52,7 @@ export function LanguageSwitcher({ className, size = "icon-sm", variant = "icon"
             variant="ghost"
             size={size}
             disabled={isPending}
-            aria-label="Switch language"
+            aria-label={t("switchLanguage")}
             className={className}
           >
             <Languages className="size-4" />
@@ -62,17 +62,14 @@ export function LanguageSwitcher({ className, size = "icon-sm", variant = "icon"
       {/* z-[110] keeps the dropdown above the marketing mobile menu overlay (z-100).
           The `code` variant sits in the marketing bar, so its menu takes the bar's
           type and marks the current language with the bar's coral dot (.mk-lang-*). */}
-      <DropdownMenuContent align="end" className={cn("z-[110]", variant === "code" && "mk-lang-menu")}>
+      <DropdownMenuContent align="end" className={variant === "code" ? "z-[110] mk-lang-menu" : "z-[110]"}>
         {locales.map((l) => (
           <DropdownMenuItem
             key={l}
             lang={l}
             onClick={() => switchLocale(l)}
-            data-current={locale === l ? "true" : undefined}
-            className={cn(
-              variant === "code" ? "mk-lang-item" : "py-2.5 text-base",
-              locale === l && variant !== "code" ? "font-semibold" : ""
-            )}
+            aria-current={locale === l ? "true" : undefined}
+            className={variant === "code" ? "mk-lang-item" : "py-2.5 text-base aria-[current=true]:font-semibold"}
           >
             {localeNames[l]}
           </DropdownMenuItem>

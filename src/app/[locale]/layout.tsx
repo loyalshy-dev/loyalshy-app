@@ -46,7 +46,7 @@ export default async function MarketingRootLayout({ children, params }: LayoutPr
   const messages = await getMessages()
 
   return (
-    <RootDocument locale={locale} messages={messages} forcedTheme="light">
+    <RootDocument locale={locale} messages={messages} forcedTheme="light" brand>
       <LocaleCookieSync locale={locale} />
       {children}
     </RootDocument>
