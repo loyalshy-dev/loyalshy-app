@@ -6,7 +6,7 @@ A companion staff app ([loyalshy-staff](../loyalshy-staff)) lets employees scan 
 
 ## Tech Stack
 
-Next.js 16 | React 19 | Prisma 7 | PostgreSQL 18 (Neon) | Better Auth | Stripe | Trigger.dev | Tailwind CSS 4 | shadcn/ui | next-intl (en/es/fr)
+Next.js 16 | React 19 | Prisma 7 | PostgreSQL 18 (Neon) | Better Auth | Stripe | Trigger.dev | Tailwind CSS 4 | shadcn/ui | next-intl (en/es/ca/fr/it/pt/de)
 
 ## Prerequisites
 
@@ -127,7 +127,7 @@ Under **Automations → Near your business** (owners and Program managers, all p
 
 ## Marketing Site
 
-The public site lives in `src/app/[locale]` with one crawlable URL per language (`/`, `/es/...`, `/fr/...`, canonical + hreflang) and is always light. Besides the landing it has, since 2026-10-04: `/for` + `/for/cafes`, `/for/salons`, `/for/retail` (industry pages), `/automations`, `/pricing` (compare grid + plan-by-plan table; prices include VAT), `/staff-app`, `/partners`, `/private-programs`, `/promote` (where customers sign up: eight places and moments, with a quote form to have the printed material made — no price shown, it exists to validate the service), `/about`, `/status` (live health checks, cached 30 s), `/subprocessors`, `/contact` and the legal pages. Copy is in `src/messages/*.json` under `pages.*` and `metadata.*`; shared blocks in `src/components/marketing/pages/`. Photos are Unsplash placeholders through a custom `next/image` loader until real photography exists.
+The public site lives in `src/app/[locale]` with one crawlable URL per language (`/`, `/es/...`, `/ca/...`, `/fr/...`, `/it/...`, `/pt/...`, `/de/...`, canonical + hreflang; Catalan, Italian, European Portuguese and German since 2026-10-05) and is always light. Besides the landing it has, since 2026-10-04: `/for` + `/for/cafes`, `/for/salons`, `/for/retail` (industry pages), `/automations`, `/pricing` (compare grid + plan-by-plan table; prices include VAT), `/staff-app`, `/partners`, `/private-programs`, `/promote` (where customers sign up: eight places and moments, with a quote form to have the printed material made — no price shown, it exists to validate the service), `/about`, `/status` (live health checks, cached 30 s), `/subprocessors`, `/contact` and the legal pages. Copy is in `src/messages/*.json` under `pages.*` and `metadata.*`; shared blocks in `src/components/marketing/pages/`. Photos are Unsplash placeholders through a custom `next/image` loader until real photography exists.
 
 **Free counter material:** on a program's Distribution page, "Counter material" downloads an A6 counter card and an A4 table tent as print-ready PDFs (300 dpi, drawn on canvas in the page font, the program's QR with the logo and colors). The tent's second face asks for a Google review when the business has set its review link in Automations.
 
@@ -261,7 +261,7 @@ Org roles are now three-tier: `owner` > `admin` (Program manager) > `member` (St
   /app              — App Router pages
     /(auth)         — Login / Register / Forgot password / Invite / Claim (ownership handoff)
     /(dashboard)    — Protected dashboard (programs, contacts, settings, admin)
-    /[locale]       — Marketing site (landing + industries, automations, pricing, staff app, partners, private programs, promote, about, status, subprocessors, contact, legal) in en/es/fr
+    /[locale]       — Marketing site (landing + industries, automations, pricing, staff app, partners, private programs, promote, about, status, subprocessors, contact, legal) in seven languages
     /(public)       — /join/[slug] self-join pages
     /api            — API routes
       /api/v1       — Staff-app API (session-token auth only)
@@ -271,7 +271,7 @@ Org roles are now three-tier: `owner` > `admin` (Program manager) > `member` (St
       /api/internal — Trigger.dev callbacks (Bearer CRON_SECRET)
     /r/[token]      — Tracked Google review link (redirects to Google)
   /components       — Reusable UI (studio, dashboard, marketing, card-renderer)
-  /i18n, /messages  — next-intl config + en/es/fr translations
+  /i18n, /messages  — next-intl config + one messages file per locale (en, es, ca, fr, it, pt, de; `pnpm i18n:check` keeps them in parity)
   /lib              — DB client, auth, DAL, wallet generation, rate limiting
   /server           — Server actions
   /trigger          — Trigger.dev job definitions
