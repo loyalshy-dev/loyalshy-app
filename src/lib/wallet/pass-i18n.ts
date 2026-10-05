@@ -75,6 +75,14 @@ export async function createPassLocalizer(): Promise<PassLocalizer> {
     return en
   }
 
+  // Back-of-pass labels first: with the TITLE_CASE label format a front
+  // label can render to the same English as a back label ("Member #",
+  // "Last Used", "Terms & Conditions") while their translations differ
+  // (de "Kundennr." vs "Kundennummer"). One English key holds one
+  // translation, and the first recorded wins, so the full back wording does.
+  const backLabels = ((await loadMessages(defaultLocale)).walletPass as { back: Record<string, string> }).back
+  for (const key of Object.keys(backLabels)) record((locale) => translators[locale](`back.${key}`))
+
   const localized = (en: string): GoogleLocalizedString => {
     const row = dict.get(en) ?? {}
     const translatedValues = others

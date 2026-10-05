@@ -4,7 +4,7 @@ import { createTranslator } from "next-intl"
 import { locales } from "@/i18n/config"
 import { loadMessages } from "@/lib/i18n/messages"
 import { formatCouponValue } from "@/lib/pass-config"
-import { formatProgressValue, type ProgressStyle } from "./card-design"
+import { formatLabel, formatProgressValue, type ProgressStyle } from "./card-design"
 import {
   createPassLocalizer,
   googleMessage,
@@ -79,6 +79,14 @@ describe("translations", () => {
     expect(all.es?.["1 visit left"]).toBe("Te queda 1 visita")
     expect(loc.in("fr", en)).toBe("Tampon ajouté ! %@")
     expect(loc.in("it", "Merchant text")).toBe("Merchant text")
+  })
+
+  it("a title-cased front label that matches a back label takes the back wording", async () => {
+    const loc = await createPassLocalizer()
+    const front = loc.t("labels.memberNumber", undefined, (s) => formatLabel(s, "TITLE_CASE"))
+    expect(front).toBe("Member #")
+    expect(loc.in("de", front)).toBe("Kundennummer")
+    expect(loc.in("es", front)).toBe("N.º de cliente")
   })
 
   it("leaves merchant text without Google translations", async () => {
