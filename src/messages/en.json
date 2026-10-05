@@ -289,7 +289,8 @@
     "partners": "Partners",
     "status": "Status",
     "subprocessors": "Subprocessors",
-    "promote": "How to promote it"
+    "promote": "How to promote it",
+    "legalNotice": "Legal notice"
   },
   "cookieBanner": {
     "message": "We use essential cookies for authentication and preferences. No tracking cookies.",
@@ -2212,6 +2213,10 @@
     "promote": {
       "title": "How to promote your loyalty program",
       "description": "Eight spots that bring sign-ups: till, table, door, receipt, Instagram and Google reviews. Free promotional material from your dashboard, or printed by us."
+    },
+    "legalNotice": {
+      "title": "Legal notice",
+      "description": "Who runs Loyalshy: company details, contact and registration."
     }
   },
   "pages": {
@@ -3171,5 +3176,22 @@
         "fold": "Fold here"
       }
     }
+  },
+  "legalNotice": {
+    "pageTitle": "Legal notice",
+    "intro": "Information about the company that provides Loyalshy.",
+    "providerTitle": "Service provider",
+    "legalForm": "Private limited company (Sociedad Limitada) under Spanish law",
+    "representative": "Represented by",
+    "contactTitle": "Contact",
+    "email": "Email",
+    "contactForm": "Contact form",
+    "contactFormLink": "Write to us",
+    "registerTitle": "Commercial register",
+    "taxTitle": "Tax identification",
+    "vatId": "VAT ID",
+    "taxId": "Spanish tax ID (NIF)",
+    "disputeTitle": "Consumer dispute resolution",
+    "disputeP1": "Loyalshy is a service for businesses. We are neither obliged nor willing to take part in dispute resolution proceedings before a consumer arbitration board."
   }
 }

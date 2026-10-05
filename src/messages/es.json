@@ -289,7 +289,8 @@
     "partners": "Partners",
     "status": "Estado",
     "subprocessors": "Subencargados",
-    "promote": "Cómo promocionarlo"
+    "promote": "Cómo promocionarlo",
+    "legalNotice": "Aviso legal"
   },
   "cookieBanner": {
     "message": "Usamos cookies esenciales para autenticación y preferencias. Sin cookies de rastreo.",
@@ -2212,6 +2213,10 @@
     "promote": {
       "title": "Cómo promocionar tu programa de fidelización",
       "description": "Ocho sitios que traen altas: caja, mesa, puerta, ticket, Instagram y reseñas de Google. Material promocional gratis desde tu panel, o impreso por nosotros."
+    },
+    "legalNotice": {
+      "title": "Aviso legal",
+      "description": "Quién está detrás de Loyalshy: datos de la empresa, contacto y registro."
     }
   },
   "pages": {
@@ -3171,5 +3176,22 @@
         "fold": "Doblar por aquí"
       }
     }
+  },
+  "legalNotice": {
+    "pageTitle": "Aviso legal",
+    "intro": "Datos de la empresa que presta el servicio Loyalshy.",
+    "providerTitle": "Titular del servicio",
+    "legalForm": "Sociedad Limitada constituida en España",
+    "representative": "Representada por",
+    "contactTitle": "Contacto",
+    "email": "Correo electrónico",
+    "contactForm": "Formulario de contacto",
+    "contactFormLink": "Escríbenos",
+    "registerTitle": "Registro Mercantil",
+    "taxTitle": "Identificación fiscal",
+    "vatId": "NIF-IVA intracomunitario",
+    "taxId": "NIF",
+    "disputeTitle": "Resolución de conflictos con consumidores",
+    "disputeP1": "Loyalshy es un servicio para empresas. No estamos obligados ni adheridos a procedimientos de resolución de conflictos ante una junta arbitral de consumo."
   }
 }

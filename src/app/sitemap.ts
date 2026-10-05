@@ -12,6 +12,7 @@ const LASTMOD_BY_PATH: Partial<Record<MarketingPath, string>> = {
   "/privacy": "2026-10-01",
   "/terms": "2026-10-01",
   "/cookies": "2026-10-01",
+  "/legal-notice": "2026-10-05",
 }
 
 // Public but not for search: /status is operational, not content.

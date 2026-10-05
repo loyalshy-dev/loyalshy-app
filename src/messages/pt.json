@@ -289,7 +289,8 @@
     "partners": "Parceiros",
     "status": "Estado",
     "subprocessors": "Subcontratantes",
-    "promote": "Como promover"
+    "promote": "Como promover",
+    "legalNotice": "Aviso legal"
   },
   "cookieBanner": {
     "message": "Usamos cookies essenciais para autenticação e preferências. Sem cookies de rastreio.",
@@ -2212,6 +2213,10 @@
     "promote": {
       "title": "Como promover o seu programa de fidelização",
       "description": "Oito sítios que trazem adesões: caixa, mesa, porta, talão, Instagram e avaliações do Google. Material promocional grátis a partir do painel ou impresso por nós."
+    },
+    "legalNotice": {
+      "title": "Aviso legal",
+      "description": "Quem está por trás da Loyalshy: dados da empresa, contacto e registo."
     }
   },
   "pages": {
@@ -3171,5 +3176,22 @@
         "fold": "Dobrar por aqui"
       }
     }
+  },
+  "legalNotice": {
+    "pageTitle": "Aviso legal",
+    "intro": "Informações sobre a empresa que presta o serviço Loyalshy.",
+    "providerTitle": "Prestador do serviço",
+    "legalForm": "Sociedade por quotas de direito espanhol (Sociedad Limitada)",
+    "representative": "Representada por",
+    "contactTitle": "Contacto",
+    "email": "E-mail",
+    "contactForm": "Formulário de contacto",
+    "contactFormLink": "Escreva-nos",
+    "registerTitle": "Registo comercial",
+    "taxTitle": "Identificação fiscal",
+    "vatId": "NIF-IVA intracomunitário",
+    "taxId": "Número fiscal espanhol (NIF)",
+    "disputeTitle": "Resolução de litígios de consumo",
+    "disputeP1": "A Loyalshy é um serviço para empresas. Não estamos obrigados nem dispostos a participar em procedimentos de resolução de litígios perante uma entidade de resolução alternativa de litígios de consumo."
   }
 }

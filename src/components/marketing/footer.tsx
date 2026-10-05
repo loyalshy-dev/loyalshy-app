@@ -71,6 +71,7 @@ export async function MarketingFooter() {
         { label: t("termsOfService"), href: localePath(locale, "/terms") },
         { label: t("cookiePolicy"), href: localePath(locale, "/cookies") },
         { label: t("subprocessors"), href: localePath(locale, "/subprocessors") },
+        { label: t("legalNotice"), href: localePath(locale, "/legal-notice") },
       ],
     },
   ]

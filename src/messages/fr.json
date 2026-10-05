@@ -289,7 +289,8 @@
     "partners": "Partenaires",
     "status": "État du service",
     "subprocessors": "Sous-traitants",
-    "promote": "Comment le promouvoir"
+    "promote": "Comment le promouvoir",
+    "legalNotice": "Mentions légales"
   },
   "cookieBanner": {
     "message": "Nous utilisons des cookies essentiels pour l'authentification et les préférences. Aucun cookie de suivi.",
@@ -2212,6 +2213,10 @@
     "promote": {
       "title": "Comment promouvoir votre programme de fidélité",
       "description": "Huit endroits qui amènent des inscriptions : caisse, table, porte, ticket, Instagram, avis Google. Matériel promotionnel gratuit depuis votre tableau de bord."
+    },
+    "legalNotice": {
+      "title": "Mentions légales",
+      "description": "Qui édite Loyalshy : informations sur la société, contact et immatriculation."
     }
   },
   "pages": {
@@ -3171,5 +3176,22 @@
         "fold": "Plier ici"
       }
     }
+  },
+  "legalNotice": {
+    "pageTitle": "Mentions légales",
+    "intro": "Informations sur la société qui fournit Loyalshy.",
+    "providerTitle": "Éditeur du service",
+    "legalForm": "Société à responsabilité limitée de droit espagnol (Sociedad Limitada)",
+    "representative": "Représentée par",
+    "contactTitle": "Contact",
+    "email": "E-mail",
+    "contactForm": "Formulaire de contact",
+    "contactFormLink": "Nous écrire",
+    "registerTitle": "Registre du commerce",
+    "taxTitle": "Identification fiscale",
+    "vatId": "N° de TVA intracommunautaire",
+    "taxId": "Numéro fiscal espagnol (NIF)",
+    "disputeTitle": "Règlement des litiges de consommation",
+    "disputeP1": "Loyalshy est un service destiné aux entreprises. Nous ne sommes ni tenus ni disposés à participer à une procédure de médiation de la consommation."
   }
 }
