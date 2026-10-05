@@ -10,10 +10,8 @@ import {
   assertOrganizationRole,
   assertOrganizationAccess,
 } from "@/lib/dal"
-import { buildCardUrl } from "@/lib/card-access"
-import { buildPassIssuedEmailHtml, getEmailFrom, buildWalletDownloadUrl } from "@/lib/email-templates"
-import { generateApplePassForEmail } from "@/lib/wallet/generate-pass-for-email"
-import { createPassInstanceForContact, sendPassIssuedEmail, PASS_TYPE_LABELS } from "@/lib/issue-pass"
+import { createPassInstanceForContact, deliverPassIssuedEmail, sendPassIssuedEmail } from "@/lib/issue-pass"
+import { requestLocale } from "@/lib/i18n/request-locale"
 import { sanitizeText } from "@/lib/sanitize"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -90,7 +88,6 @@ export async function setProgramJoinMode(
 
 // ─── Pass Type Labels ───────────────────────────────────────
 
-// PASS_TYPE_LABELS lives in @/lib/issue-pass (shared with the staff API)
 
 // ─── Search Contacts for Direct Issue ───────────────────────
 
@@ -148,6 +145,8 @@ export async function issuePassToContacts(
   }
 
   await assertOrganizationRole(organization.id, "admin")
+  // The pass emails go out in the language the dashboard is in.
+  const locale = await requestLocale()
 
   const parsed = issuePassSchema.safeParse({ templateId, contactIds })
   if (!parsed.success) {
@@ -249,6 +248,7 @@ export async function issuePassToContacts(
         contact: { fullName: contact.fullName, email: contact.email },
         organization,
         template,
+        locale,
       })
     }
 
@@ -498,60 +498,15 @@ export async function sendPassEmail(
     return { success: false, error: t("contactNoEmail") }
   }
 
-  const cardUrl = buildCardUrl(
-    passInstance.passTemplate.organization.slug,
-    passInstance.id
+  const { error } = await deliverPassIssuedEmail(
+    {
+      passInstanceId: passInstance.id,
+      contact: { fullName: passInstance.contact.fullName, email: passInstance.contact.email },
+      organization: passInstance.passTemplate.organization,
+      template: passInstance.passTemplate,
+      locale: await requestLocale(),
+    },
+    { idempotent: false },
   )
-  const passTypeLabel = PASS_TYPE_LABELS[passInstance.passTemplate.passType] ?? "Pass"
-  const orgName = passInstance.passTemplate.organization.name
-
-  const googleWalletUrl = buildWalletDownloadUrl(passInstance.id, "google")
-
-  try {
-    const applePass = await generateApplePassForEmail(passInstance.id)
-
-    if (process.env.TRIGGER_SECRET_KEY) {
-      const { tasks } = await import("@trigger.dev/sdk")
-      await tasks.trigger("send-pass-issued-email", {
-        email: passInstance.contact.email,
-        contactName: passInstance.contact.fullName,
-        organizationName: orgName,
-        templateName: passInstance.passTemplate.name,
-        passTypeLabel,
-        cardUrl,
-        appleWalletUrl: applePass?.url,
-        googleWalletUrl,
-      })
-    } else {
-      const { Resend } = await import("resend")
-      const resend = new Resend(process.env.RESEND_API_KEY)
-      const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
-
-      const { error: resendError } = await resend.emails.send({
-        from: getEmailFrom(),
-        to: passInstance.contact.email,
-        subject: `Your ${passTypeLabel} from ${orgName}`,
-        html: buildPassIssuedEmailHtml({
-          contactName: passInstance.contact.fullName,
-          organizationName: orgName,
-          templateName: passInstance.passTemplate.name,
-          passTypeLabel,
-          cardUrl: `${baseUrl}${cardUrl}`,
-          appleWalletUrl: applePass?.url,
-          googleWalletUrl: `${baseUrl}${googleWalletUrl}`,
-        }),
-      })
-
-      if (resendError) {
-        return { success: false, error: resendError.message }
-      }
-    }
-
-    return { success: true }
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error"
-    console.error("Failed to send pass email:", message)
-    return { success: false, error: message }
-  }
+  return error ? { success: false, error } : { success: true }
 }
-

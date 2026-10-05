@@ -1,6 +1,7 @@
 import { task } from "@trigger.dev/sdk"
 import { emailsQueue } from "./queues"
-import { buildPassIssuedEmailHtml, getEmailFrom } from "@/lib/email-templates"
+import { buildPassIssuedEmail, getEmailFrom } from "@/lib/email-templates"
+import { toLocale } from "@/lib/i18n/messages"
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -9,7 +10,12 @@ type PassIssuedEmailPayload = {
   contactName: string
   organizationName: string
   templateName: string
-  passTypeLabel: string
+  /** STAMP_CARD | COUPON. Runs queued before it existed fall back to a stamp card. */
+  passType?: string
+  /** Kept for runs queued by an older web build; unused. */
+  passTypeLabel?: string
+  /** Recipient's language; English when missing. */
+  locale?: string
   cardUrl: string
   /** R2 public URL to the .pkpass file */
   appleWalletUrl?: string
@@ -37,23 +43,18 @@ export const sendPassIssuedEmailTask = task({
     const resend = new Resend(process.env.RESEND_API_KEY)
 
     const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
-    const fullCardUrl = `${baseUrl}${payload.cardUrl}`
+    const { subject, html } = await buildPassIssuedEmail(toLocale(payload.locale), {
+      contactName: payload.contactName,
+      organizationName: payload.organizationName,
+      templateName: payload.templateName,
+      passType: payload.passType ?? (payload.passTypeLabel === "Coupon" ? "COUPON" : "STAMP_CARD"),
+      cardUrl: `${baseUrl}${payload.cardUrl}`,
+      appleWalletUrl: payload.appleWalletUrl,
+      googleWalletUrl: payload.googleWalletUrl ? `${baseUrl}${payload.googleWalletUrl}` : undefined,
+    })
 
     const result = await resend.emails.send(
-      {
-        from: getEmailFrom(),
-        to: payload.email,
-        subject: `Your ${payload.passTypeLabel} from ${payload.organizationName}`,
-        html: buildPassIssuedEmailHtml({
-          contactName: payload.contactName,
-          organizationName: payload.organizationName,
-          templateName: payload.templateName,
-          passTypeLabel: payload.passTypeLabel,
-          cardUrl: fullCardUrl,
-          appleWalletUrl: payload.appleWalletUrl,
-          googleWalletUrl: payload.googleWalletUrl ? `${baseUrl}${payload.googleWalletUrl}` : undefined,
-        }),
-      },
+      { from: getEmailFrom(), to: payload.email, subject, html },
       payload.idempotencyKey ? { idempotencyKey: payload.idempotencyKey } : undefined,
     )
 

@@ -4,7 +4,8 @@ import { randomUUID } from "crypto"
 import type { Prisma } from "@prisma/client"
 import { db, getNextMemberNumber } from "@/lib/db"
 import { buildCardUrl } from "@/lib/card-access"
-import { buildPassIssuedEmailHtml, getEmailFrom, buildWalletDownloadUrl } from "@/lib/email-templates"
+import { buildPassIssuedEmail, getEmailFrom, buildWalletDownloadUrl } from "@/lib/email-templates"
+import type { Locale } from "@/i18n/config"
 import { generateApplePassForEmail } from "@/lib/wallet/generate-pass-for-email"
 import { parseCouponConfig, parseMinigameConfig, weightedRandomPrize } from "@/lib/pass-config"
 
@@ -91,27 +92,42 @@ export async function createPassInstanceForContact(params: {
   }
 }
 
+type PassEmailParams = {
+  passInstanceId: string
+  contact: { fullName: string; email: string }
+  organization: { name: string; slug: string }
+  template: { name: string; passType: string }
+  /** The customer's language (the request that issued the pass). */
+  locale: Locale
+}
+
 /**
  * Emails the customer their pass (Add to Apple / Google Wallet + card page).
  * Never throws — the pass exists either way; failures are logged.
  * Returns whether the email was handed to the sender.
  */
-export async function sendPassIssuedEmail(params: {
-  passInstanceId: string
-  contact: { fullName: string; email: string }
-  organization: { name: string; slug: string }
-  template: { name: string; passType: string }
-}): Promise<boolean> {
-  const { passInstanceId, contact, organization, template } = params
+export async function sendPassIssuedEmail(params: PassEmailParams): Promise<boolean> {
+  const { error } = await deliverPassIssuedEmail(params, { idempotent: true })
+  return !error
+}
+
+/**
+ * The send itself. `idempotent` dedupes the first email per pass (a retry
+ * can't mail twice); the dashboard's "send again" passes false.
+ */
+export async function deliverPassIssuedEmail(
+  params: PassEmailParams,
+  { idempotent }: { idempotent: boolean },
+): Promise<{ error?: string }> {
+  const { passInstanceId, contact, organization, template, locale } = params
   const cardUrl = buildCardUrl(organization.slug, passInstanceId)
   const googleWalletUrl = buildWalletDownloadUrl(passInstanceId, "google")
-  const passTypeLabel = PASS_TYPE_LABELS[template.passType] ?? "Pass"
 
   try {
     // Generate Apple pass and upload to R2 for direct wallet add from email
     const applePass = await generateApplePassForEmail(passInstanceId)
 
-    const idempotencyKey = `pass-issued:${passInstanceId}`
+    const idempotencyKey = idempotent ? `pass-issued:${passInstanceId}` : undefined
     if (process.env.TRIGGER_SECRET_KEY) {
       const { tasks } = await import("@trigger.dev/sdk")
       await tasks.trigger(
@@ -121,48 +137,45 @@ export async function sendPassIssuedEmail(params: {
           contactName: contact.fullName,
           organizationName: organization.name,
           templateName: template.name,
-          passTypeLabel,
+          passType: template.passType,
+          // Read by Trigger.dev builds deployed before `passType`/`locale`.
+          passTypeLabel: PASS_TYPE_LABELS[template.passType] ?? "Pass",
+          locale,
           cardUrl,
           appleWalletUrl: applePass?.url,
           googleWalletUrl,
           idempotencyKey,
         },
-        { idempotencyKey },
+        idempotencyKey ? { idempotencyKey } : undefined,
       )
     } else {
       const { Resend } = await import("resend")
       const resend = new Resend(process.env.RESEND_API_KEY)
       const baseUrl = process.env.BETTER_AUTH_URL ?? "https://loyalshy.com"
+      const { subject, html } = await buildPassIssuedEmail(locale, {
+        contactName: contact.fullName,
+        organizationName: organization.name,
+        templateName: template.name,
+        passType: template.passType,
+        cardUrl: `${baseUrl}${cardUrl}`,
+        appleWalletUrl: applePass?.url,
+        googleWalletUrl: `${baseUrl}${googleWalletUrl}`,
+      })
 
       const { error: resendError } = await resend.emails.send(
-        {
-          from: getEmailFrom(),
-          to: contact.email,
-          subject: `Your ${passTypeLabel} from ${organization.name}`,
-          html: buildPassIssuedEmailHtml({
-            contactName: contact.fullName,
-            organizationName: organization.name,
-            templateName: template.name,
-            passTypeLabel,
-            cardUrl: `${baseUrl}${cardUrl}`,
-            appleWalletUrl: applePass?.url,
-            googleWalletUrl: `${baseUrl}${googleWalletUrl}`,
-          }),
-        },
-        { idempotencyKey },
+        { from: getEmailFrom(), to: contact.email, subject, html },
+        idempotencyKey ? { idempotencyKey } : undefined,
       )
       if (resendError) {
-        console.error("Resend error (direct issue):", resendError.message)
-        return false
+        console.error("Resend error (pass email):", resendError.message)
+        return { error: resendError.message }
       }
     }
-    return true
+    return {}
   } catch (err) {
-    console.error(
-      "Failed to send pass issued email:",
-      err instanceof Error ? err.message : "Unknown error"
-    )
-    return false
+    const message = err instanceof Error ? err.message : "Unknown error"
+    console.error("Failed to send pass issued email:", message)
+    return { error: message }
   }
 }
 

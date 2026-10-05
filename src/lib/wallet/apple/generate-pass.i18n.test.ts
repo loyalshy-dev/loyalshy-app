@@ -88,7 +88,7 @@ describe("generateApplePass localization", () => {
     const { pass, byLang } = await build(
       input({
         cardDesign: {
-          cardType: "STAMP", showStrip: false, primaryColor: null, secondaryColor: null, textColor: null,
+          cardType: "STAMP", showStrip: false, primaryColor: "#1f1410", secondaryColor: "#ff6b47", textColor: "#ffffff",
           stripImageUrl: null, stripImageApple: null, stripImageGoogle: null, patternStyle: "NONE",
           progressStyle: "NUMBERS", labelFormat: "UPPERCASE", customProgressLabel: null,
           generatedStripApple: null, generatedStripGoogle: null, palettePreset: null, templateId: null,

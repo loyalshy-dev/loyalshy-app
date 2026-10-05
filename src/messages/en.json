@@ -3279,5 +3279,81 @@
       "contactSupport": "Contact Support",
       "revealPrize": "Reveal your prize!"
     }
+  },
+  "emails": {
+    "footer": "Loyalshy · Digital loyalty cards",
+    "passIssued": {
+      "body": "Hi {name}, {organization} has sent you {program}.",
+      "addToWallet": "Add it to your phone's wallet:",
+      "view": "Open in browser",
+      "bookmark": "Keep this email: the button above always opens your pass.",
+      "appleBadge": "Add to Apple Wallet",
+      "googleBadge": "Add to Google Wallet",
+      "subjectCoupon": "Your coupon from {organization}",
+      "subjectStampCard": "Your stamp card from {organization}",
+      "titleCoupon": "Your coupon is ready",
+      "titleStampCard": "Your stamp card is ready"
+    },
+    "welcome": {
+      "subject": "Welcome to Loyalshy, {name}",
+      "title": "Welcome to Loyalshy",
+      "intro": "Hi {name}, {organization} is set up. Three steps to your first customer:",
+      "step1Title": "Create your first program.",
+      "step1Body": "Pick a stamp card or a coupon and give it your look.",
+      "step2Title": "Share it.",
+      "step2Body": "Customers scan your QR or open {url} to join.",
+      "step3Title": "Stamp visits.",
+      "step3Body": "From the dashboard or the team app.",
+      "cta": "Get started",
+      "dashboard": "Go to dashboard",
+      "help": "Questions? Just reply to this email."
+    },
+    "invitation": {
+      "subject": "You've been invited to {organization} on Loyalshy",
+      "title": "You've been invited",
+      "accept": "Accept invitation",
+      "openApp": "Open in the team app",
+      "expires": "This invitation expires in 7 days.",
+      "bodyOwner": "{organization} has invited you to join their team as owner.",
+      "bodyAdmin": "{organization} has invited you to join their team as program manager.",
+      "bodyStaff": "{organization} has invited you to join their team as staff."
+    },
+    "handoff": {
+      "subject": "Take ownership of {organization} on Loyalshy",
+      "title": "Your loyalty program is ready",
+      "body": "{organization} has been set up for you on Loyalshy. Create your account to take ownership: your card and your program are already waiting.",
+      "cta": "Take ownership",
+      "expires": "This link expires in {days} days and works once."
+    },
+    "accessRequest": {
+      "subject": "{name} is asking for access to {organization}",
+      "title": "Access request",
+      "body": "{name} ({email}), your Loyalshy setup partner, is asking for program manager access to {organization}. They could design cards and manage programs, but not billing, your team or settings.",
+      "how": "To grant it, open your team settings. The invitation comes pre-filled: review it and send it. You can also ignore this email, or remove their access at any time.",
+      "cta": "Review invitation"
+    },
+    "resetPassword": {
+      "subject": "Reset your password",
+      "greeting": "Hi {name},",
+      "body": "Use the button below to reset your password. The link expires in 1 hour.",
+      "cta": "Reset password",
+      "ignore": "If you didn't ask for this, you can ignore this email."
+    },
+    "otp": {
+      "title": "Your verification code",
+      "expires": "The code expires in 10 minutes. If you didn't ask for it, you can ignore this email.",
+      "subjectSignIn": "Your sign-in code: {code}",
+      "subjectReset": "Your password reset code: {code}",
+      "subjectVerify": "Verify your email: {code}",
+      "instructionSignIn": "Enter this code to sign in.",
+      "instructionReset": "Enter this code to reset your password.",
+      "instructionVerify": "Enter this code to verify your email."
+    },
+    "contactReply": {
+      "subject": "We got your message",
+      "title": "Thanks for writing, {name}.",
+      "body": "We've received your message and will reply within one or two working days.",
+      "sign": "The Loyalshy team"
+    }
   }
 }

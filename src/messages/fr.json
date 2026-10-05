@@ -3279,5 +3279,81 @@
       "contactSupport": "Contacter le support",
       "revealPrize": "Découvrez votre cadeau !"
     }
+  },
+  "emails": {
+    "footer": "Loyalshy · Cartes de fidélité numériques",
+    "passIssued": {
+      "body": "Bonjour {name}, {organization} vous a envoyé {program}.",
+      "addToWallet": "Ajouter au portefeuille du téléphone :",
+      "view": "Ouvrir dans le navigateur",
+      "bookmark": "Gardez cet e-mail : le bouton ci-dessus ouvre toujours votre pass.",
+      "appleBadge": "Ajouter à Apple Wallet",
+      "googleBadge": "Ajouter à Google Wallet",
+      "subjectCoupon": "Votre coupon de {organization}",
+      "subjectStampCard": "Votre carte de fidélité de {organization}",
+      "titleCoupon": "Votre coupon est prêt",
+      "titleStampCard": "Votre carte de fidélité est prête"
+    },
+    "welcome": {
+      "subject": "Bienvenue sur Loyalshy, {name}",
+      "title": "Bienvenue sur Loyalshy",
+      "intro": "Bonjour {name}, votre compte {organization} est prêt. Trois étapes jusqu'à votre premier client :",
+      "step1Title": "Créez votre premier programme.",
+      "step1Body": "Choisissez une carte à tampons ou un coupon et donnez-lui votre style.",
+      "step2Title": "Partagez-le.",
+      "step2Body": "Vos clients scannent votre QR ou ouvrent {url} pour le rejoindre.",
+      "step3Title": "Tamponnez les visites.",
+      "step3Body": "Depuis le tableau de bord ou l'app d'équipe.",
+      "cta": "Commencer",
+      "dashboard": "Aller au tableau de bord",
+      "help": "Une question ? Répondez simplement à cet e-mail."
+    },
+    "invitation": {
+      "subject": "Invitation à rejoindre {organization} sur Loyalshy",
+      "title": "Vous avez reçu une invitation",
+      "accept": "Accepter l'invitation",
+      "openApp": "Ouvrir dans l'app d'équipe",
+      "expires": "Cette invitation expire dans 7 jours.",
+      "bodyOwner": "{organization} vous invite à rejoindre son équipe en tant que propriétaire.",
+      "bodyAdmin": "{organization} vous invite à rejoindre son équipe en tant que gestionnaire de programmes.",
+      "bodyStaff": "{organization} vous invite à rejoindre son équipe en tant que membre de l'équipe."
+    },
+    "handoff": {
+      "subject": "Prenez en main {organization} sur Loyalshy",
+      "title": "Votre programme de fidélité est prêt",
+      "body": "{organization} a été préparé pour vous sur Loyalshy. Créez votre compte pour en devenir propriétaire : votre carte et votre programme vous attendent déjà.",
+      "cta": "Prendre la main",
+      "expires": "Ce lien expire dans {days} jours et ne fonctionne qu'une fois."
+    },
+    "accessRequest": {
+      "subject": "{name} demande l'accès à {organization}",
+      "title": "Demande d'accès",
+      "body": "{name} ({email}), votre partenaire de configuration Loyalshy, demande un accès gestionnaire de programmes à {organization}. Cet accès permet de créer des cartes et de gérer les programmes, mais pas la facturation, votre équipe ni les paramètres.",
+      "how": "Pour l'accorder, ouvrez les paramètres de l'équipe. L'invitation est pré-remplie : vérifiez-la et envoyez-la. Vous pouvez aussi ignorer cet e-mail, ou retirer l'accès à tout moment.",
+      "cta": "Voir l'invitation"
+    },
+    "resetPassword": {
+      "subject": "Réinitialisez votre mot de passe",
+      "greeting": "Bonjour {name},",
+      "body": "Utilisez le bouton ci-dessous pour réinitialiser votre mot de passe. Le lien expire dans 1 heure.",
+      "cta": "Réinitialiser le mot de passe",
+      "ignore": "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail."
+    },
+    "otp": {
+      "title": "Votre code de vérification",
+      "expires": "Le code expire dans 10 minutes. Si vous ne l'avez pas demandé, ignorez cet e-mail.",
+      "subjectSignIn": "Votre code de connexion : {code}",
+      "subjectReset": "Votre code de réinitialisation : {code}",
+      "subjectVerify": "Vérifiez votre e-mail : {code}",
+      "instructionSignIn": "Saisissez ce code pour vous connecter.",
+      "instructionReset": "Saisissez ce code pour réinitialiser votre mot de passe.",
+      "instructionVerify": "Saisissez ce code pour vérifier votre e-mail."
+    },
+    "contactReply": {
+      "subject": "Nous avons bien reçu votre message",
+      "title": "Merci de nous avoir écrit, {name}.",
+      "body": "Nous avons bien reçu votre message et vous répondrons sous un ou deux jours ouvrés.",
+      "sign": "L'équipe Loyalshy"
+    }
   }
 }

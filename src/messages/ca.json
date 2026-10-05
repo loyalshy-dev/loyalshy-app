@@ -3279,5 +3279,81 @@
       "contactSupport": "Contacta amb el suport",
       "revealPrize": "Descobreix el teu premi!"
     }
+  },
+  "emails": {
+    "footer": "Loyalshy · Targetes de fidelització digitals",
+    "passIssued": {
+      "body": "Hola, {name}: {organization} t'ha enviat {program}.",
+      "addToWallet": "Afegir a la cartera del mòbil:",
+      "view": "Obrir al navegador",
+      "bookmark": "Guarda aquest correu: el botó de dalt sempre obre la teva targeta.",
+      "appleBadge": "Afegir a Apple Wallet",
+      "googleBadge": "Afegir a Google Wallet",
+      "subjectCoupon": "La teva cupó de {organization}",
+      "subjectStampCard": "La teva targeta de segells de {organization}",
+      "titleCoupon": "El teu cupó està a punt",
+      "titleStampCard": "La teva targeta de segells està a punt"
+    },
+    "welcome": {
+      "subject": "Et donem la benvinguda a Loyalshy, {name}",
+      "title": "Et donem la benvinguda a Loyalshy",
+      "intro": "Hola, {name}: el compte de {organization} ja està a punt. Tres passos fins al teu primer client:",
+      "step1Title": "Crea el teu primer programa.",
+      "step1Body": "Tria una targeta de segells o un cupó i dona-li el teu estil.",
+      "step2Title": "Comparteix-lo.",
+      "step2Body": "Els teus clients escanegen el QR o obren {url} per unir-s'hi.",
+      "step3Title": "Segella visites.",
+      "step3Body": "Des del tauler o des de l'app d'equip.",
+      "cta": "Començar",
+      "dashboard": "Anar al tauler",
+      "help": "Dubtes? Respon aquest correu."
+    },
+    "invitation": {
+      "subject": "T'han convidat a {organization} a Loyalshy",
+      "title": "T'han convidat",
+      "accept": "Acceptar la invitació",
+      "openApp": "Obrir a l'app d'equip",
+      "expires": "Aquesta invitació caduca d'aquí a 7 dies.",
+      "bodyOwner": "{organization} t'ha convidat a unir-te al seu equip com a propietari.",
+      "bodyAdmin": "{organization} t'ha convidat a unir-te al seu equip com a gestor de programes.",
+      "bodyStaff": "{organization} t'ha convidat a unir-te al seu equip com a membre de l'equip."
+    },
+    "handoff": {
+      "subject": "Pren el control de {organization} a Loyalshy",
+      "title": "El teu programa de fidelització està a punt",
+      "body": "Hem preparat {organization} a Loyalshy per a tu. Crea el teu compte per quedar-te-la: la teva targeta i el teu programa ja t'esperen.",
+      "cta": "Prendre el control",
+      "expires": "Aquest enllaç caduca d'aquí a {days} dies i només funciona una vegada."
+    },
+    "accessRequest": {
+      "subject": "{name} demana accés a {organization}",
+      "title": "Sol·licitud d'accés",
+      "body": "{name} ({email}), el teu partner de configuració a Loyalshy, demana accés com a gestor de programes a {organization}. Podria dissenyar targetes i gestionar programes, però no la facturació, el teu equip ni la configuració.",
+      "how": "Per donar-li accés, obre la configuració de l'equip. La invitació ve emplenada: revisa-la i envia-la. També pots ignorar aquest correu o retirar-li l'accés quan vulguis.",
+      "cta": "Revisar la invitació"
+    },
+    "resetPassword": {
+      "subject": "Restableix la contrasenya",
+      "greeting": "Hola, {name}:",
+      "body": "Fes servir el botó de sota per restablir la contrasenya. L'enllaç caduca d'aquí a 1 hora.",
+      "cta": "Restablir la contrasenya",
+      "ignore": "Si no ho has demanat tu, pots ignorar aquest correu."
+    },
+    "otp": {
+      "title": "El teu codi de verificació",
+      "expires": "El codi caduca d'aquí a 10 minuts. Si no l'has demanat tu, pots ignorar aquest correu.",
+      "subjectSignIn": "El teu codi per iniciar la sessió: {code}",
+      "subjectReset": "El teu codi per restablir la contrasenya: {code}",
+      "subjectVerify": "Verifica el teu correu: {code}",
+      "instructionSignIn": "Introdueix aquest codi per iniciar la sessió.",
+      "instructionReset": "Introdueix aquest codi per restablir la contrasenya.",
+      "instructionVerify": "Introdueix aquest codi per verificar el teu correu."
+    },
+    "contactReply": {
+      "subject": "Hem rebut el teu missatge",
+      "title": "Gràcies per escriure'ns, {name}.",
+      "body": "Hem rebut el teu missatge i et respondrem en un o dos dies laborables.",
+      "sign": "L'equip de Loyalshy"
+    }
   }
 }

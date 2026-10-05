@@ -7,6 +7,7 @@ import { toApiContact } from "@/lib/api-serializers"
 import { sanitizeText } from "@/lib/sanitize"
 import { getPlanLimits, isActiveSubscription, type PlanId } from "@/lib/plans"
 import { createPassInstanceForContact, findOrCreateContact, sendPassIssuedEmail } from "@/lib/issue-pass"
+import { toLocale } from "@/lib/i18n/messages"
 
 export function OPTIONS() {
   return handlePreflight()
@@ -130,14 +131,18 @@ export async function POST(req: NextRequest) {
 
     // Generating the Apple pass for the email takes a moment — do it after
     // responding (after() keeps the Lambda alive until it's done).
+    // The email goes out in the staff phone's language (iOS sends
+    // Accept-Language on every request), read now: after() runs later.
     const emailTo = contact.email
     if (emailTo) {
+      const locale = toLocale(req.headers.get("accept-language"))
       after(() =>
         sendPassIssuedEmail({
           passInstanceId: issued.id,
           contact: { fullName: contact.fullName, email: emailTo },
           organization,
           template,
+          locale,
         }).then(() => undefined),
       )
     }
