@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server"
 import { locales, type Locale } from "@/i18n/config"
 import { marketingUrl, siteUrl, type MarketingPath } from "@/i18n/marketing"
+import { LEGAL_ENTITY } from "@/lib/legal-entity"
 
 // ─── JSON-LD for the marketing pages ─────────────────────────
 // One graph per page: the shared Organization + WebSite nodes (so every
@@ -31,19 +32,19 @@ export async function siteNodes(locale: Locale): Promise<Node[]> {
       "@type": "Organization",
       "@id": ORG_ID,
       name: "Loyalshy",
-      legalName: "HEX CONCEPTS STUDIO, S.L.",
+      legalName: LEGAL_ENTITY.name,
       url: siteUrl,
       logo: `${siteUrl}/logo.png`,
-      email: "hello@loyalshy.com",
-      taxID: "B27646645",
-      vatID: "ESB27646645",
+      email: LEGAL_ENTITY.email,
+      taxID: LEGAL_ENTITY.taxId,
+      vatID: LEGAL_ENTITY.vatId,
       address: {
         "@type": "PostalAddress",
-        streetAddress: "Av. Convent 11",
-        postalCode: "25123",
-        addressLocality: "Torrefarrera",
-        addressRegion: "Lleida",
-        addressCountry: "ES",
+        streetAddress: LEGAL_ENTITY.street,
+        postalCode: LEGAL_ENTITY.postalCode,
+        addressLocality: LEGAL_ENTITY.locality,
+        addressRegion: LEGAL_ENTITY.region,
+        addressCountry: LEGAL_ENTITY.country,
       },
       contactPoint: [
         { "@type": "ContactPoint", contactType: "customer support", email: "hello@loyalshy.com", url: `${contact}?type=support`, availableLanguage: [...SUPPORT_LANGUAGES] },

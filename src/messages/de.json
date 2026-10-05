@@ -289,7 +289,8 @@
     "partners": "Partner",
     "status": "Status",
     "subprocessors": "Auftragsverarbeiter",
-    "promote": "So machst du es bekannt"
+    "promote": "So machst du es bekannt",
+    "legalNotice": "Impressum"
   },
   "cookieBanner": {
     "message": "Wir verwenden nur notwendige Cookies für Anmeldung und Einstellungen. Keine Tracking-Cookies.",
@@ -2212,6 +2213,10 @@
     "promote": {
       "title": "So bewirbst du dein Treueprogramm",
       "description": "Acht Stellen, die Anmeldungen bringen: Kasse, Tisch, Tür, Bon, Instagram und Google-Bewertungen. Gratis Material aus dem Dashboard oder von uns gedruckt."
+    },
+    "legalNotice": {
+      "title": "Impressum",
+      "description": "Wer hinter Loyalshy steht: Unternehmensangaben, Kontakt und Registereintrag."
     }
   },
   "pages": {
@@ -3171,5 +3176,23 @@
         "fold": "Hier falten"
       }
     }
+  },
+  "legalNotice": {
+    "pageTitle": "Impressum",
+    "intro": "Angaben gemäß § 5 DDG zum Anbieter von Loyalshy.",
+    "providerTitle": "Anbieter",
+    "legalForm": "Ein-Personen-Gesellschaft mit beschränkter Haftung nach spanischem Recht (Sociedad Limitada Unipersonal)",
+    "representative": "Vertreten durch",
+    "soleAdministrator": "alleiniger Geschäftsführer",
+    "contactTitle": "Kontakt",
+    "email": "E-Mail",
+    "contactForm": "Kontaktformular",
+    "contactFormLink": "Schreib uns",
+    "registerTitle": "Registereintrag",
+    "taxTitle": "Steuerliche Angaben",
+    "vatId": "Umsatzsteuer-Identifikationsnummer",
+    "taxId": "Spanische Steuernummer (NIF)",
+    "disputeTitle": "Verbraucherstreitbeilegung",
+    "disputeP1": "Loyalshy ist ein Angebot für Unternehmen. Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
   }
 }

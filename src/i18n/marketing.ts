@@ -31,6 +31,7 @@ export const MARKETING_PATHS = [
   "/privacy",
   "/terms",
   "/cookies",
+  "/legal-notice",
 ] as const
 export type MarketingPath = (typeof MARKETING_PATHS)[number]
 

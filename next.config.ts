@@ -85,7 +85,9 @@ function marketingRedirects() {
       ];
     })
   );
-  return [...toEnglish, ...toPreferred];
+  // The word German visitors type; the page itself lives at /legal-notice.
+  const impressum = [{ source: "/impressum", destination: "/de/legal-notice", permanent: true }];
+  return [...toEnglish, ...impressum, ...toPreferred];
 }
 
 const nextConfig: NextConfig = {

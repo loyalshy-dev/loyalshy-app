@@ -289,7 +289,8 @@
     "partners": "Partner",
     "status": "Stato",
     "subprocessors": "Sub-responsabili",
-    "promote": "Come promuoverlo"
+    "promote": "Come promuoverlo",
+    "legalNotice": "Note legali"
   },
   "cookieBanner": {
     "message": "Usiamo cookie essenziali per l'autenticazione e le preferenze. Nessun cookie di tracciamento.",
@@ -2212,6 +2213,10 @@
     "promote": {
       "title": "Come promuovere il tuo programma fedeltà",
       "description": "Otto punti che portano iscrizioni: cassa, tavolo, porta, scontrino, Instagram e recensioni Google. Materiale gratis dalla dashboard o stampato da noi."
+    },
+    "legalNotice": {
+      "title": "Note legali",
+      "description": "Chi gestisce Loyalshy: dati della società, contatti e registrazione."
     }
   },
   "pages": {
@@ -3171,5 +3176,23 @@
         "fold": "Piegare qui"
       }
     }
+  },
+  "legalNotice": {
+    "pageTitle": "Note legali",
+    "intro": "Informazioni sulla società che fornisce Loyalshy.",
+    "providerTitle": "Fornitore del servizio",
+    "legalForm": "Società a responsabilità limitata unipersonale di diritto spagnolo (Sociedad Limitada Unipersonal)",
+    "representative": "Rappresentata da",
+    "soleAdministrator": "amministratore unico",
+    "contactTitle": "Contatti",
+    "email": "E-mail",
+    "contactForm": "Modulo di contatto",
+    "contactFormLink": "Scrivici",
+    "registerTitle": "Registro delle imprese",
+    "taxTitle": "Identificazione fiscale",
+    "vatId": "Partita IVA intracomunitaria",
+    "taxId": "Codice fiscale spagnolo (NIF)",
+    "disputeTitle": "Risoluzione delle controversie con i consumatori",
+    "disputeP1": "Loyalshy è un servizio per le aziende. Non siamo obbligati né disposti a partecipare a procedure di risoluzione delle controversie davanti a un organismo di conciliazione per i consumatori."
   }
 }

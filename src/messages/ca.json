@@ -289,7 +289,8 @@
     "partners": "Partners",
     "status": "Estat",
     "subprocessors": "Subencarregats",
-    "promote": "Com promocionar-lo"
+    "promote": "Com promocionar-lo",
+    "legalNotice": "Avís legal"
   },
   "cookieBanner": {
     "message": "Fem servir galetes essencials per a l'autenticació i les preferències. Sense galetes de seguiment.",
@@ -2212,6 +2213,10 @@
     "promote": {
       "title": "Com promocionar el teu programa de fidelització",
       "description": "Vuit llocs que porten altes: caixa, taula, porta, tiquet, Instagram i ressenyes de Google. Material promocional gratis des del panell, o imprès per nosaltres."
+    },
+    "legalNotice": {
+      "title": "Avís legal",
+      "description": "Qui hi ha darrere de Loyalshy: dades de l'empresa, contacte i registre."
     }
   },
   "pages": {
@@ -3171,5 +3176,23 @@
         "fold": "Plegar per aquí"
       }
     }
+  },
+  "legalNotice": {
+    "pageTitle": "Avís legal",
+    "intro": "Dades de l'empresa que presta el servei Loyalshy.",
+    "providerTitle": "Titular del servei",
+    "legalForm": "Societat Limitada Unipersonal constituïda a Espanya",
+    "representative": "Representada per",
+    "soleAdministrator": "administrador únic",
+    "contactTitle": "Contacte",
+    "email": "Correu electrònic",
+    "contactForm": "Formulari de contacte",
+    "contactFormLink": "Escriu-nos",
+    "registerTitle": "Registre Mercantil",
+    "taxTitle": "Identificació fiscal",
+    "vatId": "NIF-IVA intracomunitari",
+    "taxId": "NIF",
+    "disputeTitle": "Resolució de conflictes amb consumidors",
+    "disputeP1": "Loyalshy és un servei per a empreses. No estem obligats ni adherits a procediments de resolució de conflictes davant d'una junta arbitral de consum."
   }
 }
