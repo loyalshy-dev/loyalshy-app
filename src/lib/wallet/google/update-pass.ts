@@ -7,11 +7,22 @@ import {
   GOOGLE_WALLET_ISSUER_ID,
   buildPassInstanceObjectId,
 } from "./constants"
-import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig } from "../card-design"
+import { formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig } from "../card-design"
 import type { ProgressStyle, LabelFormat } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { getWalletRewardText, parseCouponConfig, formatCouponValue } from "../../pass-config"
+import { getWalletRewardText, parseCouponConfig } from "../../pass-config"
+import {
+  createPassLocalizer,
+  googleLabel,
+  googleMessage,
+  googleTextModule,
+  localizedCouponValue,
+  localizedDate,
+  localizedDateTime,
+  localizedMonth,
+  localizedProgressValue,
+} from "../pass-i18n"
 import { createWalletPassLog } from "../apple/update-pass"
 import { loadReviewPassField, type ReviewPassField } from "../../reviews/settings"
 import { loadWinbackPassField, type WinbackPassField } from "../../winback/pass-field"
@@ -72,11 +83,9 @@ async function patchGoogleWalletObject(
   const token = await getAccessToken()
 
   const labelFmt = data.labelFormat
+  const loc = await createPassLocalizer()
 
-  const memberSinceFormatted = data.memberSince.toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-  })
+  const memberSinceFormatted = localizedMonth(loc, data.memberSince)
 
   // Parse type-specific config
   const couponConfig = data.passType === "COUPON" ? parseCouponConfig(data.templateConfig) : null
@@ -84,9 +93,9 @@ async function patchGoogleWalletObject(
   // Custom field labels from editorConfig
   const stripFiltersUpd = parseStripFilters(data.editorConfig)
   const customLabels = stripFiltersUpd.fieldLabels ?? {}
-  const lbl = (fieldId: string, defaultLabel: string) => {
+  const lbl = (fieldId: string, labelKey: string) => {
     const custom = customLabels[fieldId]
-    return formatLabel(custom ?? defaultLabel, labelFmt)
+    return custom ? formatLabel(custom, labelFmt) : loc.t(`labels.${labelKey}`, undefined, (s) => formatLabel(s, labelFmt))
   }
 
   // Coupon redemption state. Single-use redeemed flips visuals to "USED" and
@@ -96,25 +105,29 @@ async function patchGoogleWalletObject(
   const isSingleUseRedeemed = isCouponRedeemed && couponConfig?.redemptionLimit !== "unlimited"
   const isUnlimitedRedeemed = isCouponRedeemed && couponConfig?.redemptionLimit === "unlimited"
 
-  const couponPrizeText = couponConfig ? getWalletRewardText(data.templateConfig, formatCouponValue(couponConfig)) : ""
-  const couponHasPrizes = couponConfig ? couponPrizeText !== formatCouponValue(couponConfig) : false
-  const couponDiscountLabel = isSingleUseRedeemed ? "REDEEMED" : (data.revealedPrize ? "YOUR PRIZE" : (couponHasPrizes ? "PRIZES" : "DISCOUNT"))
-  const couponDiscountValue = isSingleUseRedeemed ? `${data.revealedPrize ?? couponPrizeText} (Used)` : (data.revealedPrize ?? couponPrizeText)
-  const couponValidUntilText = couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"
+  const couponValue = couponConfig ? localizedCouponValue(loc, couponConfig) : ""
+  const couponPrizeText = couponConfig ? getWalletRewardText(data.templateConfig, couponValue) : ""
+  const couponHasPrizes = couponConfig ? couponPrizeText !== couponValue : false
+  const couponDiscountLabelKey = isSingleUseRedeemed ? "redeemed" : (data.revealedPrize ? "yourPrize" : (couponHasPrizes ? "prizes" : "discount"))
+  const couponDiscountValue = isSingleUseRedeemed
+    ? loc.t("values.prizeUsed", { prize: data.revealedPrize ?? couponPrizeText })
+    : (data.revealedPrize ?? couponPrizeText)
+  const couponValidUntilText = couponConfig?.validUntil ? localizedDate(loc, new Date(couponConfig.validUntil)) : loc.t("values.noExpiry")
+  const redeemedText = loc.t("values.redeemed")
 
   // All field data — IDs match field IDs from getFieldConfig
   const allFieldData: Record<string, { id: string; header: string; body: string }> = {
-    organization: { id: "organization", header: lbl("organization", "ORG"), body: data.organizationName },
-    memberNumber: { id: "memberNumber", header: lbl("memberNumber", "MEMBER #"), body: `${data.memberNumber ?? "—"}` },
-    nextReward: { id: "nextReward", header: lbl("nextReward", data.revealedPrize ? "YOUR PRIZE" : "NEXT REWARD"), body: data.revealedPrize ?? data.rewardDescription },
-    totalVisits: { id: "totalVisits", header: lbl("totalVisits", "TOTAL VISITS"), body: `${data.totalVisits}` },
-    memberSince: { id: "memberSince", header: lbl("memberSince", "SINCE"), body: memberSinceFormatted },
-    registeredAt: { id: "registeredAt", header: lbl("registeredAt", "REGISTERED"), body: memberSinceFormatted },
-    customerName: { id: "customerName", header: lbl("customerName", "NAME"), body: data.contactName },
+    organization: { id: "organization", header: lbl("organization", "org"), body: data.organizationName },
+    memberNumber: { id: "memberNumber", header: lbl("memberNumber", "memberNumber"), body: `${data.memberNumber ?? "—"}` },
+    nextReward: { id: "nextReward", header: lbl("nextReward", data.revealedPrize ? "yourPrize" : "nextReward"), body: data.revealedPrize ?? data.rewardDescription },
+    totalVisits: { id: "totalVisits", header: lbl("totalVisits", "totalVisits"), body: `${data.totalVisits}` },
+    memberSince: { id: "memberSince", header: lbl("memberSince", "since"), body: memberSinceFormatted },
+    registeredAt: { id: "registeredAt", header: lbl("registeredAt", "registered"), body: memberSinceFormatted },
+    customerName: { id: "customerName", header: lbl("customerName", "name"), body: data.contactName },
     // COUPON
-    discount: { id: "discount", header: lbl("discount", couponDiscountLabel), body: couponDiscountValue },
-    validUntil: { id: "validUntil", header: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"), body: isSingleUseRedeemed ? "Redeemed" : couponValidUntilText },
-    couponCode: { id: "couponCode", header: lbl("couponCode", "CODE"), body: couponConfig?.couponCode ?? "" },
+    discount: { id: "discount", header: lbl("discount", couponDiscountLabelKey), body: couponDiscountValue },
+    validUntil: { id: "validUntil", header: lbl("validUntil", isSingleUseRedeemed ? "status" : "validUntil"), body: isSingleUseRedeemed ? redeemedText : couponValidUntilText },
+    couponCode: { id: "couponCode", header: lbl("couponCode", "code"), body: couponConfig?.couponCode ?? "" },
   }
 
   // Build textModulesData from user-configured unified fields
@@ -131,21 +144,17 @@ async function patchGoogleWalletObject(
     googleExcludeUpd.add("progress")
   }
   const textModulesFieldIds = allUpdFields.filter((id) => !googleExcludeUpd.has(id))
-  const textModulesData = textModulesFieldIds
+  const textModulesData: Record<string, unknown>[] = textModulesFieldIds
     .map((id) => allFieldData[id])
     .filter((f): f is { id: string; header: string; body: string } => f != null && f.body !== "")
+    .map((f) => googleTextModule(loc, f.id, f.header, f.body))
 
   // Unlimited coupons: surface the most recent redemption timestamp so the
   // user can see when they last used it. Each redeem updates the value, which
   // pairs with the messages-with-id dedupe below to fire one banner per use.
   if (isUnlimitedRedeemed && data.redeemedAt) {
-    const ts = data.redeemedAt.toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    })
-    textModulesData.push({ id: "couponLastUsed", header: lbl("couponLastUsed", "LAST USED"), body: ts })
+    const ts = localizedDateTime(loc, data.redeemedAt)
+    textModulesData.push(googleTextModule(loc, "couponLastUsed", lbl("couponLastUsed", "lastUsed"), ts))
   }
 
   // Type-specific loyalty points (native Google Wallet widget — not affected by field config)
@@ -156,17 +165,24 @@ async function patchGoogleWalletObject(
   // and only fires for STAMP_CARD (passType undefined defaults to stamp).
   const isStampPass = !data.passType || data.passType === "STAMP_CARD"
   const stampProgressValue = isStampPass
-    ? formatProgressValue(data.currentCycleVisits, data.visitsRequired, data.progressStyle, data.hasAvailableReward)
+    ? localizedProgressValue(loc, data.currentCycleVisits, data.visitsRequired, data.progressStyle, data.hasAvailableReward)
     : null
 
+  // balance.string has no localized form in the Google Wallet API, so the
+  // points values stay in English; their labels are translated.
   if (data.passType === "COUPON" && couponConfig) {
-    loyaltyPoints = { label: lbl("discount", couponDiscountLabel), balance: { string: couponDiscountValue } }
-    secondaryLoyaltyPoints = { label: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"), balance: { string: isSingleUseRedeemed ? "Redeemed" : couponValidUntilText } }
+    loyaltyPoints = { ...googleLabel(loc, lbl("discount", couponDiscountLabelKey)), balance: { string: couponDiscountValue } }
+    secondaryLoyaltyPoints = {
+      ...googleLabel(loc, lbl("validUntil", isSingleUseRedeemed ? "status" : "validUntil")),
+      balance: { string: isSingleUseRedeemed ? redeemedText : couponValidUntilText },
+    }
   } else {
     // STAMP_CARD (default)
-    const progressLabel = data.customProgressLabel ? data.customProgressLabel : data.hasAvailableReward ? "STATUS" : "PROGRESS"
-    loyaltyPoints = { label: formatLabel(progressLabel, labelFmt), balance: { string: stampProgressValue ?? "" } }
-    secondaryLoyaltyPoints = { label: lbl("totalVisits", "TOTAL VISITS"), balance: { int: data.totalVisits } }
+    const progressLabel = data.customProgressLabel
+      ? formatLabel(data.customProgressLabel, labelFmt)
+      : loc.t(`labels.${data.hasAvailableReward ? "status" : "progress"}`, undefined, (s) => formatLabel(s, labelFmt))
+    loyaltyPoints = { ...googleLabel(loc, progressLabel), balance: { string: stampProgressValue ?? "" } }
+    secondaryLoyaltyPoints = { ...googleLabel(loc, lbl("totalVisits", "totalVisits")), balance: { int: data.totalVisits } }
   }
 
   const patchBody: Record<string, unknown> = {
@@ -193,20 +209,10 @@ async function patchGoogleWalletObject(
   }
 
   if (isCouponRedeemed && data.redeemedAt) {
-    const ts = data.redeemedAt.toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    })
-    const body = isSingleUseRedeemed ? "Your coupon has been redeemed." : `Used at ${ts}.`
+    const ts = localizedDateTime(loc, data.redeemedAt)
+    const body = isSingleUseRedeemed ? loc.t("notify.couponRedeemedBody") : loc.t("notify.usedAt", { time: ts })
     patchBody.messages = [
-      {
-        id: `redeem-${data.redeemedAt.getTime()}`,
-        header: "Coupon redeemed",
-        body,
-        messageType: "TEXT_AND_NOTIFY",
-      },
+      googleMessage(loc, `redeem-${data.redeemedAt.getTime()}`, loc.t("notify.couponRedeemedTitle"), body),
     ]
   }
 
@@ -217,12 +223,7 @@ async function patchGoogleWalletObject(
   // passType), so writing patchBody.messages here can't clobber it.
   if (isStampPass && stampProgressValue && data.totalVisits > 0) {
     patchBody.messages = [
-      {
-        id: `stamp-${data.totalVisits}`,
-        header: "Stamp added!",
-        body: stampProgressValue,
-        messageType: "TEXT_AND_NOTIFY",
-      },
+      googleMessage(loc, `stamp-${data.totalVisits}`, loc.t("notify.stampAddedTitle"), stampProgressValue),
     ]
   }
 
@@ -257,9 +258,10 @@ async function patchGoogleWalletObject(
 
   // linksModuleData is replaced wholesale by a PATCH, so every link this
   // object should carry is rebuilt here (an empty list clears a revealed prize).
-  const uris: { uri: string; description: string; id: string }[] = []
+  const uris: { uri: string; description: string; id: string; localizedDescription?: unknown }[] = []
   if (data.revealLink) {
-    uris.push({ uri: data.revealLink, description: "Reveal your prize!", id: "revealLink" })
+    const description = loc.t("names.revealPrize")
+    uris.push({ uri: data.revealLink, description, localizedDescription: loc.localized(description), id: "revealLink" })
   }
   if (data.reviewPrompt) {
     uris.push({ uri: data.reviewPrompt.url, description: data.reviewPrompt.linkLabel, id: "googleReview" })

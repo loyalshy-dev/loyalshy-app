@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server"
+import { toLocale } from "@/lib/i18n/messages"
 import { sessionHandler, notFound, handlePreflight } from "@/lib/api-session"
 import { loadTemplateCardInput, toAppleCardView } from "@/lib/wallet/apple/card-view"
 
@@ -12,6 +13,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   return sessionHandler(req, async (ctx) => {
     const input = await loadTemplateCardInput(id, ctx.organizationId)
     if (!input) throw notFound("Program not found")
-    return toAppleCardView(input)
+    return toAppleCardView(input, toLocale(req.headers.get("accept-language")))
   })
 }
