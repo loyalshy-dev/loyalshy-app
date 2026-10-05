@@ -131,8 +131,9 @@ export async function POST(req: NextRequest) {
 
     // Generating the Apple pass for the email takes a moment — do it after
     // responding (after() keeps the Lambda alive until it's done).
-    // The email goes out in the staff phone's language (iOS sends
-    // Accept-Language on every request), read now: after() runs later.
+    // The email goes out in the staff app's language (Accept-Language:
+    // iOS always sends it, the app sets it explicitly since 1.3.1+; older
+    // Android builds send none → English). Read now: after() runs later.
     const emailTo = contact.email
     if (emailTo) {
       const locale = toLocale(req.headers.get("accept-language"))
