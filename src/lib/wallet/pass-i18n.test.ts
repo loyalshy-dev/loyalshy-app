@@ -84,9 +84,9 @@ describe("translations", () => {
   it("leaves merchant text without Google translations", async () => {
     const loc = await createPassLocalizer()
     const header = loc.t("labels.businessHours")
-    const module = googleTextModule(loc, "businessHours", header, "Mon–Fri 8–20")
-    expect(module.localizedHeader?.translatedValues?.find((v) => v.language === "es")?.value).toBe("HORARIO")
-    expect(module.localizedBody).toBeUndefined()
+    const textModule = googleTextModule(loc, "businessHours", header, "Mon–Fri 8–20")
+    expect(textModule.localizedHeader?.translatedValues?.find((v) => v.language === "es")?.value).toBe("HORARIO")
+    expect(textModule.localizedBody).toBeUndefined()
     const message = googleMessage(loc, "stamp-4", loc.t("notify.stampAddedTitle"), "4 / 10 Visits")
     expect(message.messageType).toBe("TEXT_AND_NOTIFY")
     expect(message.localizedHeader?.defaultValue).toEqual({ language: "en", value: "Stamp added!" })

@@ -47,16 +47,11 @@ function input(overrides: Partial<PassGenerationInput> = {}): PassGenerationInpu
 /** Runs the generator up to signing and returns what went into the pass. */
 async function build(i: PassGenerationInput) {
   const localize = vi.spyOn(PKPass.prototype, "localize")
-  let pass: PKPass | null = null
-  vi.spyOn(PKPass.prototype, "getAsBuffer").mockImplementation(function (this: PKPass) {
-    pass = this
-    return Buffer.from("")
-  })
+  const getAsBuffer = vi.spyOn(PKPass.prototype, "getAsBuffer").mockReturnValue(Buffer.from(""))
   await generateApplePass(i)
   const byLang = Object.fromEntries(localize.mock.calls.map(([lang, strings]) => [lang, strings as Record<string, string>]))
-  if (!pass) throw new Error("no pass")
-  const p = pass as PKPass
-  return { pass: p, byLang }
+  const pass = getAsBuffer.mock.contexts[0] as PKPass
+  return { pass, byLang }
 }
 
 afterEach(() => vi.restoreAllMocks())
