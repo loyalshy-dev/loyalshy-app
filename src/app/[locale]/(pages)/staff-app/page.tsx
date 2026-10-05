@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { getTranslations, setRequestLocale } from "next-intl/server"
-import { locales, type Locale } from "@/i18n/config"
+import type { Locale } from "@/i18n/config"
 import { localePath, marketingUrl, siteUrl } from "@/i18n/marketing"
 import { pageMetadata } from "@/components/marketing/pages/metadata"
 import { MarketingPage } from "@/components/marketing/pages/shell"
@@ -17,6 +17,11 @@ import { APP_STORE_URL, PLAY_STORE_URL } from "@/components/marketing/store-link
 import { ClosingCTA } from "@/components/marketing/closing-cta"
 
 type PageProps = { params: Promise<{ locale: string }> }
+
+// Languages the store builds of the staff app actually ship. Kept apart
+// from the web `locales`: a new web language goes live on deploy, the app
+// only with its next App Store / Play release — bump this with that release.
+const STAFF_APP_LANGUAGES = ["en", "es", "fr"] as const
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   // Validated by the [locale] layout.
@@ -72,7 +77,7 @@ export default async function StaffAppPage({ params }: PageProps) {
     offers: { "@type": "Offer", price: 0, priceCurrency: "EUR" },
     isPartOf: { "@id": SOFTWARE_ID },
     publisher: { "@id": ORG_ID },
-    inLanguage: [...locales],
+    inLanguage: [...STAFF_APP_LANGUAGES],
     description: tm("description"),
   }
   const jsonLd = await pageJsonLd(locale, "/staff-app", "staffApp", { about: STAFF_APP_ID, extra: [mobileApp] })

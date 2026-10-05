@@ -2166,11 +2166,11 @@
     },
     "cafes": {
       "title": "Tessera timbri digitale per caffetterie",
-      "description": "La tessera timbri della tua caffetteria in Apple e Google Wallet: nove caffè e il decimo gratis. Senza app, senza carta, senza toccare la cassa. Gratis fino a 50 clienti."
+      "description": "La tessera timbri del tuo caffè in Apple e Google Wallet: nove caffè e il decimo gratis. Senza app né carta, senza toccare la cassa. Gratis fino a 50 clienti."
     },
     "salons": {
       "title": "Carta fedeltà per parrucchieri e barbieri",
-      "description": "Il programma fedeltà del tuo salone in Apple e Google Wallet: un timbro per appuntamento, premio al quinto e un promemoria quando è passato del tempo. Senza app."
+      "description": "Il programma fedeltà del tuo salone in Apple e Google Wallet: un timbro per appuntamento, premio al quinto e un promemoria se passa del tempo. Senza app."
     },
     "retail": {
       "title": "Carte fedeltà e coupon per negozi",
@@ -2182,11 +2182,11 @@
     },
     "pricing": {
       "title": "Prezzi della carta fedeltà digitale",
-      "description": "Gratis fino a 50 clienti. Pro 29 €, Business 49 €, Scale 99 € al mese, IVA inclusa e fino al 20 % in meno con il piano annuale. Senza vincoli né carta per iniziare."
+      "description": "Gratis fino a 50 clienti. Pro 29 €, Business 49 €, Scale 99 € al mese, IVA inclusa, fino al 20 % in meno con l'annuale. Senza vincoli né carta per iniziare."
     },
     "staffApp": {
       "title": "L'app del team per iPhone e Android",
-      "description": "Scansiona la carta, aggiungi il timbro, riscatta il coupon. Modalità banco, iscrizione dei nuovi clienti e premi in sospeso. Inclusa in tutti i piani di Loyalshy."
+      "description": "Scansiona la carta, aggiungi il timbro, riscatta il coupon. Modalità banco, iscrizione dei nuovi clienti e premi in sospeso. Inclusa in tutti i piani Loyalshy."
     },
     "partners": {
       "title": "Programma partner per agenzie e consulenti",
@@ -2198,7 +2198,7 @@
     },
     "about": {
       "title": "Chi è Loyalshy",
-      "description": "Loyalshy è fatto da HEX CONCEPTS STUDIO a Lleida, in Spagna. Un solo prodotto: la carta fedeltà in Apple e Google Wallet, per caffetterie, parrucchieri e negozi."
+      "description": "Loyalshy è fatto da HEX CONCEPTS STUDIO a Lleida, Spagna. Un solo prodotto: la carta fedeltà in Apple e Google Wallet, per caffetterie, parrucchieri e negozi."
     },
     "status": {
       "title": "Stato del sistema",
@@ -2210,7 +2210,7 @@
     },
     "promote": {
       "title": "Come promuovere il tuo programma fedeltà",
-      "description": "Otto punti che portano iscrizioni: cassa, tavolo, porta, scontrino, Instagram e recensioni Google. Materiale promozionale gratis dalla tua dashboard, o stampato da noi."
+      "description": "Otto punti che portano iscrizioni: cassa, tavolo, porta, scontrino, Instagram e recensioni Google. Materiale gratis dalla dashboard o stampato da noi."
     }
   },
   "pages": {

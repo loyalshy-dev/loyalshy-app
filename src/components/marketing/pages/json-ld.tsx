@@ -13,6 +13,10 @@ export type Node = Record<string, unknown>
 type PageType = "WebPage" | "ContactPage" | "AboutPage" | "CollectionPage"
 export type Crumb = { name: string; path: MarketingPath }
 
+// Languages the team answers support and sales mail in. Deliberately not the
+// site's `locales`: a page can render in German before anyone here replies in it.
+const SUPPORT_LANGUAGES = ["es", "en", "fr"] as const
+
 export const ORG_ID = `${siteUrl}/#organization`
 export const SITE_ID = `${siteUrl}/#website`
 export const SOFTWARE_ID = `${siteUrl}/#software`
@@ -42,8 +46,8 @@ export async function siteNodes(locale: Locale): Promise<Node[]> {
         addressCountry: "ES",
       },
       contactPoint: [
-        { "@type": "ContactPoint", contactType: "customer support", email: "hello@loyalshy.com", url: `${contact}?type=support`, availableLanguage: [...locales] },
-        { "@type": "ContactPoint", contactType: "sales", email: "hello@loyalshy.com", url: `${contact}?type=sales`, availableLanguage: [...locales] },
+        { "@type": "ContactPoint", contactType: "customer support", email: "hello@loyalshy.com", url: `${contact}?type=support`, availableLanguage: [...SUPPORT_LANGUAGES] },
+        { "@type": "ContactPoint", contactType: "sales", email: "hello@loyalshy.com", url: `${contact}?type=sales`, availableLanguage: [...SUPPORT_LANGUAGES] },
       ],
       sameAs: ["https://www.instagram.com/loyalshy/", "https://www.tiktok.com/@loyalshy_"],
       description: t("jsonLdDescription"),

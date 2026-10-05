@@ -2198,7 +2198,7 @@
     },
     "about": {
       "title": "Sobre a Loyalshy",
-      "description": "A Loyalshy é feita pela HEX CONCEPTS STUDIO em Lleida. Um só produto: o cartão de fidelização no Apple Wallet e no Google Wallet, para cafés, cabeleireiros e lojas."
+      "description": "A Loyalshy é feita pela HEX CONCEPTS STUDIO em Lleida. Um só produto: o cartão de fidelização no Apple e Google Wallet, para cafés, cabeleireiros e lojas."
     },
     "status": {
       "title": "Estado do sistema",
@@ -2210,7 +2210,7 @@
     },
     "promote": {
       "title": "Como promover o seu programa de fidelização",
-      "description": "Oito sítios que trazem adesões: caixa, mesa, porta, talão, Instagram e avaliações do Google. Material promocional grátis a partir do painel, ou impresso por nós."
+      "description": "Oito sítios que trazem adesões: caixa, mesa, porta, talão, Instagram e avaliações do Google. Material promocional grátis a partir do painel ou impresso por nós."
     }
   },
   "pages": {

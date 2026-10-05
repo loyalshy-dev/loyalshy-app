@@ -1179,8 +1179,8 @@
       "termsPlaceholder": "Conditions optionnelles affichées sur le pass...",
       "visitsChangedTitle": "Modification des visites requises de {from} à {to}",
       "visitsChangedDesc": "Cela affectera les clients actuellement en cours de cycle. Choisissez comment gérer la progression existante :",
-      "keepProgress": "Conserver la progression existante — les clients conservent leur compteur de visites",
-      "resetProgress": "Réinitialiser toute la progression — tous les clients repartent de 0 visites",
+      "keepProgress": "Conserver la progression existante : les clients conservent leur compteur de visites",
+      "resetProgress": "Réinitialiser toute la progression : tous les clients repartent de 0 visites",
       "unsavedChanges": "Modifications non enregistrées",
       "confirmSave": "Confirmer et enregistrer",
       "saveChanges": "Enregistrer les modifications",
@@ -2186,19 +2186,19 @@
     },
     "staffApp": {
       "title": "L'appli équipe pour iPhone et Android",
-      "description": "Scannez la carte, ajoutez le tampon, validez le coupon. Mode comptoir, inscription des nouveaux clients et récompenses en attente. Incluse dans chaque formule Loyalshy."
+      "description": "Scannez la carte, ajoutez le tampon, validez le coupon. Mode comptoir, inscription des clients et récompenses en attente. Incluse dans chaque formule."
     },
     "partners": {
       "title": "Programme partenaires pour agences et consultants",
-      "description": "Installez Loyalshy chez vos clients, transmettez-leur le commerce avec un lien et restez gestionnaire de programmes. Liens de parrainage et console partenaire inclus."
+      "description": "Installez Loyalshy chez vos clients, transmettez-leur le commerce par lien et restez gestionnaire de programmes. Liens de parrainage et console partenaire."
     },
     "privatePrograms": {
       "title": "Programmes privés, sur invitation uniquement",
-      "description": "Cartes de membre, coupons VIP et avantages pour l'équipe, masqués de la page publique d'inscription. Seule votre équipe les émet, depuis le tableau de bord ou l'appli au comptoir."
+      "description": "Cartes de membre, coupons VIP et avantages pour l'équipe, masqués de la page publique. Seule votre équipe les émet, depuis le tableau de bord ou l'appli."
     },
     "about": {
       "title": "À propos de Loyalshy",
-      "description": "Loyalshy est développé par HEX CONCEPTS STUDIO à Lleida, en Espagne. Un seul produit : la carte de fidélité dans Apple et Google Wallet, pour cafés, salons et boutiques."
+      "description": "Loyalshy est développé par HEX CONCEPTS STUDIO à Lleida. Un seul produit : la carte de fidélité dans Apple et Google Wallet, pour cafés, salons et boutiques."
     },
     "status": {
       "title": "État du système",

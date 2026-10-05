@@ -2166,7 +2166,7 @@
     },
     "cafes": {
       "title": "Targeta de segells digital per a cafeteries",
-      "description": "La targeta de segells de la teva cafeteria a Apple i Google Wallet: nou cafès i el desè gratis. Sense app, sense paper, sense tocar el TPV. Gratis fins a 50 clients."
+      "description": "La targeta de segells de la teva cafeteria a Apple i Google Wallet: nou cafès i el desè gratis. Sense app, sense tocar el TPV. Gratis fins a 50 clients."
     },
     "salons": {
       "title": "Targeta de fidelització per a perruqueries i barberies",
@@ -2210,7 +2210,7 @@
     },
     "promote": {
       "title": "Com promocionar el teu programa de fidelització",
-      "description": "Vuit llocs que porten altes: caixa, taula, porta, tiquet, Instagram i ressenyes de Google. Material promocional gratis des del teu panell, o imprès per nosaltres."
+      "description": "Vuit llocs que porten altes: caixa, taula, porta, tiquet, Instagram i ressenyes de Google. Material promocional gratis des del panell, o imprès per nosaltres."
     }
   },
   "pages": {

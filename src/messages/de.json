@@ -2162,19 +2162,19 @@
     },
     "for": {
       "title": "Kundenbindung für Cafés, Friseursalons und Läden",
-      "description": "Eine digitale Stempelkarte oder ein Gutschein in Apple Wallet und Google Wallet, passend zu deiner Theke: Cafés, Friseursalons und Läden. Ohne App für den Kunden."
+      "description": "Digitale Stempelkarte oder Gutschein in Apple und Google Wallet, passend zu deiner Theke: Cafés, Friseursalons und Läden. Ohne App für den Kunden."
     },
     "cafes": {
       "title": "Digitale Stempelkarte für Cafés",
-      "description": "Die Stempelkarte deines Cafés in Apple Wallet und Google Wallet: neun Kaffees, der zehnte gratis. Ohne App, ohne Papier, ohne Eingriff ins Kassensystem. Kostenlos bis 50 Kunden."
+      "description": "Die Stempelkarte deines Cafés in Apple und Google Wallet: neun Kaffees, der zehnte gratis. Ohne App, ohne Eingriff in die Kasse. Kostenlos bis 50 Kunden."
     },
     "salons": {
       "title": "Treuekarte für Friseursalons und Barbershops",
-      "description": "Das Treueprogramm deines Salons in Apple Wallet und Google Wallet: ein Stempel pro Termin, eine Prämie beim fünften und eine Erinnerung, wenn es länger her ist. Ohne App."
+      "description": "Treueprogramm deines Salons in Apple und Google Wallet: ein Stempel pro Termin, eine Prämie beim fünften und eine Erinnerung nach längerer Pause. Ohne App."
     },
     "retail": {
       "title": "Treuekarten und Gutscheine für Läden",
-      "description": "Eine Stempelkarte und ein Gutschein in Apple Wallet und Google Wallet, um die Kunden deines Ladens zu binden. Wird an der Kasse gescannt, ohne Eingriff ins Kassensystem."
+      "description": "Stempelkarte und Gutschein in Apple und Google Wallet, um die Kunden deines Ladens zu binden. Wird an der Kasse gescannt, ohne Eingriff ins Kassensystem."
     },
     "automations": {
       "title": "Automatisierungen: Bewertungen und Rückgewinnung",
@@ -2182,7 +2182,7 @@
     },
     "pricing": {
       "title": "Preise der digitalen Treuekarte",
-      "description": "Kostenlos bis 50 Kunden. Pro 29 €, Business 49 €, Scale 99 € im Monat, inkl. MwSt. und bis zu 20 % günstiger im Jahr. Ohne Laufzeit und ohne Kreditkarte zum Start."
+      "description": "Kostenlos bis 50 Kunden. Pro 29 €, Business 49 €, Scale 99 € im Monat, inkl. MwSt. und bis zu 20 % günstiger im Jahr. Ohne Laufzeit, ohne Kreditkarte zum Start."
     },
     "staffApp": {
       "title": "Die Team-App für iPhone und Android",
@@ -2190,15 +2190,15 @@
     },
     "partners": {
       "title": "Partnerprogramm für Agenturen und Berater",
-      "description": "Richte Loyalshy für deine Kunden ein, übergib ihnen das Geschäft mit einem Link und bleib als Programm-Manager dabei. Mit Empfehlungslinks und einer Partner-Konsole."
+      "description": "Richte Loyalshy für deine Kunden ein, übergib ihnen das Geschäft per Link und bleib als Programm-Manager dabei. Mit Empfehlungslinks und Partner-Konsole."
     },
     "privatePrograms": {
       "title": "Private Programme, nur auf Einladung",
-      "description": "Mitgliedskarten, VIP-Gutscheine und Vorteile fürs Team, versteckt vor der öffentlichen Anmeldeseite. Nur dein Team gibt sie aus, über das Dashboard oder die App an der Theke."
+      "description": "Mitgliedskarten, VIP-Gutscheine und Vorteile fürs Team, versteckt vor der öffentlichen Anmeldeseite. Nur dein Team gibt sie aus, im Dashboard oder in der App."
     },
     "about": {
       "title": "Über Loyalshy",
-      "description": "Loyalshy wird von HEX CONCEPTS STUDIO in Lleida, Spanien gemacht. Ein einziges Produkt: die Treuekarte in Apple Wallet und Google Wallet, für Cafés, Friseursalons und Läden."
+      "description": "Loyalshy wird von HEX CONCEPTS STUDIO in Lleida, Spanien gemacht. Ein Produkt: die Treuekarte in Apple und Google Wallet, für Cafés, Friseursalons und Läden."
     },
     "status": {
       "title": "Systemstatus",
@@ -2210,7 +2210,7 @@
     },
     "promote": {
       "title": "So bewirbst du dein Treueprogramm",
-      "description": "Acht Stellen, die Anmeldungen bringen: Kasse, Tisch, Tür, Kassenbon, Instagram und Google-Bewertungen. Kostenloses Werbematerial aus deinem Dashboard, oder von uns gedruckt."
+      "description": "Acht Stellen, die Anmeldungen bringen: Kasse, Tisch, Tür, Bon, Instagram und Google-Bewertungen. Gratis Material aus dem Dashboard oder von uns gedruckt."
     }
   },
   "pages": {
