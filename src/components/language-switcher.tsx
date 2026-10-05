@@ -59,13 +59,20 @@ export function LanguageSwitcher({ className, size = "icon-sm", variant = "icon"
           </Button>
         )}
       </DropdownMenuTrigger>
-      {/* z-[110] keeps the dropdown above the marketing mobile menu overlay (z-100). */}
-      <DropdownMenuContent align="end" className="z-[110]">
+      {/* z-[110] keeps the dropdown above the marketing mobile menu overlay (z-100).
+          The `code` variant sits in the marketing bar, so its menu takes the bar's
+          type and marks the current language with the bar's coral dot (.mk-lang-*). */}
+      <DropdownMenuContent align="end" className={cn("z-[110]", variant === "code" && "mk-lang-menu")}>
         {locales.map((l) => (
           <DropdownMenuItem
             key={l}
+            lang={l}
             onClick={() => switchLocale(l)}
-            className={cn("py-2.5 text-base", locale === l ? "font-semibold" : "")}
+            data-current={locale === l ? "true" : undefined}
+            className={cn(
+              variant === "code" ? "mk-lang-item" : "py-2.5 text-base",
+              locale === l && variant !== "code" ? "font-semibold" : ""
+            )}
           >
             {localeNames[l]}
           </DropdownMenuItem>

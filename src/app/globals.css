@@ -677,6 +677,42 @@
 .mk-nav-menu-link:active { opacity: 0.6; }
 .mk-nav-lang { letter-spacing: 0.02em; }
 .mk-nav-lang:disabled { opacity: 0.6; }
+/* The language menu under the bar's code: the bar's own type and surface, a row
+   per language in its own name, the current one in ink with the coral dot. Radix
+   portals the menu to <body>, outside [data-brand], so the --mk-* tokens are out of
+   reach here: it reads the root tokens (--foreground/--background/--primary), which
+   are the same ink, paper and coral on the forced-light marketing site. */
+.mk-lang-menu {
+  min-width: 9.5rem;
+  padding: 0.3125rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklch, var(--foreground) 9%, transparent);
+  background: var(--background);
+  box-shadow: 0 12px 32px -12px oklch(0 0 0 / 0.18);
+  color: var(--foreground);
+}
+.mk-lang-item {
+  position: relative;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  padding: 0.5rem 0.75rem 0.5rem 1.375rem;
+  border-radius: 9px;
+  color: color-mix(in oklch, var(--foreground) 72%, transparent);
+}
+.mk-lang-item[data-highlighted] { background: color-mix(in oklch, var(--foreground) 6%, transparent); color: var(--foreground); }
+.mk-lang-item[data-current="true"] { color: var(--foreground); font-weight: 500; }
+.mk-lang-item[data-current="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0.625rem;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 9999px;
+  background: var(--primary);
+}
 /* The languages at the foot of the phone menu: a quiet row, the current one in ink. */
 .mk-nav-menu-langs {
   display: flex;
