@@ -68,8 +68,8 @@ function input(overrides: Partial<PassGenerationInput> = {}): PassGenerationInpu
 }
 
 describe("toAppleCardView", () => {
-  it("uses the pass's PassKit colors and front-field layout", () => {
-    const view = toAppleCardView(input())
+  it("uses the pass's PassKit colors and front-field layout", async () => {
+    const view = await toAppleCardView(input())
     expect(view.backgroundColor).toBe("rgb(31, 20, 16)")
     expect(view.foregroundColor).toBe("rgb(255, 255, 255)")
     expect(view.hasStrip).toBe(true)
@@ -81,14 +81,14 @@ describe("toAppleCardView", () => {
     expect(all.every((f) => f.label === f.label.toUpperCase())).toBe(true)
   })
 
-  it("changes stripVersion when the stamp count changes", () => {
-    const a = toAppleCardView(input({ currentCycleVisits: 3 })).stripVersion
-    const b = toAppleCardView(input({ currentCycleVisits: 4 })).stripVersion
+  it("changes stripVersion when the stamp count changes", async () => {
+    const a = (await toAppleCardView(input({ currentCycleVisits: 3 }))).stripVersion
+    const b = (await toAppleCardView(input({ currentCycleVisits: 4 }))).stripVersion
     expect(a).not.toBe(b)
   })
 
-  it("marks a used single-use coupon as voided", () => {
-    const view = toAppleCardView(
+  it("marks a used single-use coupon as voided", async () => {
+    const view = await toAppleCardView(
       input({
         programType: "COUPON",
         programConfig: { discountType: "percentage", discountValue: 20, redemptionLimit: "single" },
@@ -97,6 +97,14 @@ describe("toAppleCardView", () => {
       }),
     )
     expect(view.voided).toBe(true)
+  })
+
+  it("shows the default labels in the staff phone's language", async () => {
+    const en = await toAppleCardView(input())
+    const es = await toAppleCardView(input(), "es")
+    const label = (v: typeof en, i: number) => [...v.headerFields, ...v.secondaryFields, ...v.auxiliaryFields][i]?.label
+    expect(label(es, 0)).not.toBe(label(en, 0))
+    expect([...es.headerFields, ...es.secondaryFields].map((f) => f.label)).toContain("VISITAS TOTALES")
   })
 })
 

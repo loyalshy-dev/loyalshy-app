@@ -10,8 +10,17 @@ import {
   WEB_SERVICE_BASE_URL,
 } from "./constants"
 import type { CardDesignData, CardType } from "../card-design"
-import { formatProgressValue, formatLabel, parseStampGridConfig, parseStripFilters, getFieldConfig, splitFieldsForApple } from "../card-design"
-import { parseCouponConfig, formatCouponValue } from "../../pass-config"
+import { formatLabel, parseStampGridConfig, parseStripFilters, getFieldConfig, splitFieldsForApple } from "../card-design"
+import { parseCouponConfig } from "../../pass-config"
+import {
+  createPassLocalizer,
+  localizedCouponValue,
+  localizedDate,
+  localizedDateTime,
+  localizedMonth,
+  localizedProgressValue,
+  type PassLocalizer,
+} from "../pass-i18n"
 import type { ReviewPassField } from "../../reviews/settings"
 import type { WinbackPassField } from "../../winback/pass-field"
 import type { PassProximity } from "../../proximity/settings"
@@ -81,6 +90,7 @@ export async function generateApplePass(
   input: PassGenerationInput
 ): Promise<Buffer> {
   const certs = getAppleCertificates()
+  const loc = await createPassLocalizer()
 
   const design = input.cardDesign
   const textColor = design?.textColor ?? null
@@ -120,7 +130,7 @@ export async function generateApplePass(
   // Type-aware pass description
   const passDescription = (() => {
     const name = input.programName ?? input.organizationName
-    return input.programType === "COUPON" ? `${name} Coupon` : `${name} Loyalty Card`
+    return input.programType === "COUPON" ? loc.t("names.coupon", { name }) : loc.t("names.loyaltyCard", { name })
   })()
 
   // Parse coupon config early so we can decide voided state at constructor time.
@@ -165,13 +175,10 @@ export async function generateApplePass(
   })
 
   // ── Build fields based on shape layout ──
-  const { fieldData, appleLayout } = buildAppleFrontFields(input)
+  const { fieldData, appleLayout } = buildAppleFrontFields(input, loc)
 
   // Back-of-pass date formats (front fields compute their own copies)
-  const memberSinceFormatted = input.memberSince.toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-  })
+  const memberSinceFormatted = localizedMonth(loc, input.memberSince)
   const pad = (n: number) => String(n).padStart(2, "0")
   const d = input.memberSince
   const registeredAtFull = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
@@ -229,7 +236,7 @@ export async function generateApplePass(
   if (input.programName) {
     pushBack({
       key: "program",
-      label: "Program",
+      label: loc.t("back.program"),
       value: input.programName,
     })
   }
@@ -239,8 +246,8 @@ export async function generateApplePass(
   // every pass so the FIRST real announcement already counts as a change.
   pushBack({
     key: "announcement",
-    label: "Announcement",
-    value: input.announcement?.message ?? "No announcements yet",
+    label: loc.t("back.announcement"),
+    value: input.announcement?.message ?? loc.t("values.noAnnouncements"),
     changeMessage: "%@",
   })
 
@@ -248,64 +255,67 @@ export async function generateApplePass(
   if (input.programType === "COUPON" && couponConfig) {
     pushBack({
       key: "couponDetails",
-      label: "Coupon Details",
-      value: `${formatCouponValue(couponConfig)}${couponConfig.couponDescription ? ` — ${couponConfig.couponDescription}` : ""}`,
+      label: loc.t("back.couponDetails"),
+      value: `${localizedCouponValue(loc, couponConfig)}${couponConfig.couponDescription ? ` — ${couponConfig.couponDescription}` : ""}`,
     })
     if (couponConfig.couponCode) {
       pushBack({
         key: "redemptionCode",
-        label: "Redemption Code",
+        label: loc.t("back.redemptionCode"),
         value: couponConfig.couponCode,
       })
     }
     pushBack({
       key: "redemptionInstructions",
-      label: "How to Redeem",
-      value: "Show this pass to staff when placing your order. The coupon will be applied at checkout.",
+      label: loc.t("back.howToRedeem"),
+      value: loc.t("values.howToRedeem"),
     })
 
     // Unlimited coupons: surface the most recent redemption timestamp so
     // every successive redeem changes the field value and fires a banner via
     // changeMessage. Single-use is already covered by the discount→USED flip.
     if (isUnlimitedRedeemed && input.redeemedAt) {
-      const ts = input.redeemedAt.toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      })
+      const ts = localizedDateTime(loc, input.redeemedAt)
       pushBack({
         key: "couponLastUsed",
-        label: "Last Used",
+        label: loc.t("back.lastUsed"),
         value: ts,
-        changeMessage: "Coupon redeemed — %@",
+        changeMessage: loc.t("notify.couponRedeemed"),
       })
     }
   } else {
     // STAMP_CARD (default)
     pushBack({
       key: "programInfo",
-      label: "Loyalty Program",
-      value: `Earn a reward after every ${input.visitsRequired} visits! Your reward: ${input.rewardDescription}. Rewards expire ${input.rewardExpiryDays} days after being earned.`,
+      label: loc.t("back.loyaltyProgram"),
+      value: loc.t("values.programInfo", {
+        visits: input.visitsRequired,
+        reward: input.rewardDescription,
+        days: input.rewardExpiryDays,
+      }),
     })
     pushBack({
       key: "currentProgress",
-      label: "Current Progress",
-      value: `${input.currentCycleVisits} of ${input.visitsRequired} visits completed this cycle. ${input.totalVisits} total visits.`,
+      label: loc.t("back.currentProgress"),
+      value: loc.t("values.currentProgress", {
+        current: input.currentCycleVisits,
+        required: input.visitsRequired,
+        total: input.totalVisits,
+      }),
     })
     pushBack({
       key: "memberNumber",
-      label: "Member #",
+      label: loc.t("back.memberNumber"),
       value: `${input.memberNumber ?? "—"}`,
     })
     pushBack({
       key: "memberSince",
-      label: "Member Since",
+      label: loc.t("back.memberSince"),
       value: memberSinceFormatted,
     })
     pushBack({
       key: "registeredAt",
-      label: "Registered",
+      label: loc.t("back.registered"),
       value: registeredAtFull,
     })
   }
@@ -315,7 +325,7 @@ export async function generateApplePass(
   if (termsText) {
     pushBack({
       key: "terms",
-      label: "Terms & Conditions",
+      label: loc.t("back.terms"),
       value: termsText,
     })
   }
@@ -331,7 +341,7 @@ export async function generateApplePass(
     }
     pushBack({
       key: "contact",
-      label: "Contact",
+      label: loc.t("back.contact"),
       value: contactParts.join("\n"),
     })
   }
@@ -340,7 +350,7 @@ export async function generateApplePass(
   if (design?.businessHours) {
     pushBack({
       key: "businessHours",
-      label: "Business Hours",
+      label: loc.t("back.businessHours"),
       value: design.businessHours,
     })
   }
@@ -348,7 +358,7 @@ export async function generateApplePass(
   if (design?.mapAddress) {
     pushBack({
       key: "mapAddress",
-      label: "Address",
+      label: loc.t("back.address"),
       value: design.mapAddress,
     })
   }
@@ -356,7 +366,7 @@ export async function generateApplePass(
   if (design?.customMessage) {
     pushBack({
       key: "customMessage",
-      label: "Message",
+      label: loc.t("back.message"),
       value: design.customMessage,
     })
   }
@@ -370,7 +380,7 @@ export async function generateApplePass(
     if (socialParts.length > 0) {
       pushBack({
         key: "socials",
-        label: "Social Media",
+        label: loc.t("back.socialMedia"),
         value: socialParts.join("\n"),
       })
     }
@@ -384,15 +394,15 @@ export async function generateApplePass(
     const cardPageUrl = `${baseUrl}/join/${input.organizationSlug}/card/${input.passInstanceId}?sig=${sig}`
     pushBack({
       key: "revealLink",
-      label: "Prize Ready!",
-      value: `You have a prize waiting to be revealed! Tap here to play:\n${cardPageUrl}`,
+      label: loc.t("back.prizeReady"),
+      value: loc.t("values.prizeWaiting", { url: cardPageUrl }),
     })
   }
 
   pushBack({
     key: "poweredBy",
-    label: "Powered By",
-    value: "Loyalshy — Digital Loyalty Cards\nhttps://loyalshy.com",
+    label: loc.t("back.poweredBy"),
+    value: loc.t("values.poweredBy"),
   })
 
   // "Near your business": iOS may show the pass on the lock screen near the
@@ -405,7 +415,34 @@ export async function generateApplePass(
     })
   }
 
+  applyAppleLocalizations(pass, loc)
+
   return pass.getAsBuffer()
+}
+
+/**
+ * One `<lang>.lproj/pass.strings` per language, keyed by the English text in
+ * pass.json. en.lproj is written too (identity entries) so an English
+ * iPhone matches English instead of falling through to another language.
+ */
+function applyAppleLocalizations(pass: PKPass, loc: PassLocalizer) {
+  const all = loc.translations()
+  const english: Record<string, string> = {}
+  for (const [locale, strings] of Object.entries(all)) {
+    pass.localize(locale, escapeStrings(strings))
+    for (const en of Object.keys(strings)) english[en] = en
+  }
+  if (Object.keys(english).length > 0) pass.localize("en", escapeStrings(english))
+}
+
+/**
+ * passkit-generator writes `"key" = "value";` lines verbatim, and keys carry
+ * merchant text (a reward in quotes, a URL), so quotes, backslashes and line
+ * breaks are escaped here; iOS unescapes them when it reads pass.strings.
+ */
+export function escapeStrings(strings: Record<string, string>): Record<string, string> {
+  const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "\\n")
+  return Object.fromEntries(Object.entries(strings).map(([k, v]) => [esc(k), esc(v)]))
 }
 
 // ─── Shared building blocks ─────────────────────────────────
@@ -537,7 +574,7 @@ export async function resolveAppleStrip(
  * Front-of-pass fields (header / primary / secondary / auxiliary) exactly as
  * they are written into pass.json.
  */
-export function buildAppleFrontFields(input: PassGenerationInput): {
+export function buildAppleFrontFields(input: PassGenerationInput, loc: PassLocalizer): {
   fieldData: Record<string, AppleFrontField>
   appleLayout: { header: string[]; primary: string[]; secondary: string[]; auxiliary: string[] }
 } {
@@ -551,47 +588,48 @@ export function buildAppleFrontFields(input: PassGenerationInput): {
 
   const progressStyle = design?.progressStyle ?? "NUMBERS"
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
-  const progressValue = formatProgressValue(
+  const progressValue = localizedProgressValue(
+    loc,
     input.currentCycleVisits,
     input.visitsRequired,
     progressStyle,
     input.hasAvailableReward
   )
 
-  const progressLabel = design?.customProgressLabel
-    ? design.customProgressLabel
-    : input.hasAvailableReward ? "STATUS" : "PROGRESS"
-
-  const memberSinceFormatted = input.memberSince.toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-  })
+  const memberSinceFormatted = localizedMonth(loc, input.memberSince)
 
   // Registration timestamps — short for header, full for back
   const pad = (n: number) => String(n).padStart(2, "0")
   const d = input.memberSince
   const registeredAtShort = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 
-  // Custom field labels from editorConfig
+  // Custom field labels from editorConfig (merchant text, never translated);
+  // otherwise the default label `walletPass.labels.<key>` in every language.
   const customLabels = stripFilters.fieldLabels ?? {}
-  const lbl = (fieldId: string, defaultLabel: string) => {
+  const lbl = (fieldId: string, labelKey: string) => {
     const custom = customLabels[fieldId]
-    return formatLabel(custom ?? defaultLabel, labelFmt)
+    return custom ? formatLabel(custom, labelFmt) : loc.t(`labels.${labelKey}`, undefined, (s) => formatLabel(s, labelFmt))
   }
+  // Progress: field label override, then the design's custom progress label.
+  const progressLabel = customLabels.progress
+    ? formatLabel(customLabels.progress, labelFmt)
+    : design?.customProgressLabel
+      ? formatLabel(design.customProgressLabel, labelFmt)
+      : lbl("progress", input.hasAvailableReward ? "status" : "progress")
 
   // Field data map — all labels go through formatLabel with custom label overrides.
   // changeMessage triggers an iOS lock-screen notification when the field's value
   // changes between fetches (Starbucks-style "tap to view"). %@ is the new value.
   const fieldData: Record<string, { key: string; label: string; value: string; changeMessage?: string }> = {
-    organization: { key: "organization", label: lbl("organization", "ORG"), value: input.organizationName },
-    memberNumber: { key: "memberNumber", label: lbl("memberNumber", "MEMBER #"), value: `${input.memberNumber ?? "—"}` },
+    organization: { key: "organization", label: lbl("organization", "org"), value: input.organizationName },
+    memberNumber: { key: "memberNumber", label: lbl("memberNumber", "memberNumber"), value: `${input.memberNumber ?? "—"}` },
     progress: {
       key: "progress",
-      label: lbl("progress", progressLabel),
+      label: progressLabel,
       value: progressValue,
-      ...(isStampType ? { changeMessage: "Stamp added! %@" } : {}),
+      ...(isStampType ? { changeMessage: loc.t("notify.stampAdded") } : {}),
     },
-    nextReward: { key: "nextReward", label: lbl("nextReward", "NEXT REWARD"), value: input.rewardDescription },
+    nextReward: { key: "nextReward", label: lbl("nextReward", "nextReward"), value: input.rewardDescription },
     // totalVisits is the *primary* changeMessage carrier for stamp cards —
     // it's in the default secondary layout (so it actually ends up in the
     // pass) and increments monotonically per stamp. The progress field above
@@ -599,28 +637,28 @@ export function buildAppleFrontFields(input: PassGenerationInput): {
     // include it.
     totalVisits: {
       key: "totalVisits",
-      label: lbl("totalVisits", "TOTAL VISITS"),
+      label: lbl("totalVisits", "totalVisits"),
       value: `${input.totalVisits}`,
-      ...(isStampType ? { changeMessage: "Visit recorded — %@ total" } : {}),
+      ...(isStampType ? { changeMessage: loc.t("notify.visitRecorded") } : {}),
     },
-    memberSince: { key: "memberSince", label: lbl("memberSince", "SINCE"), value: memberSinceFormatted },
-    registeredAt: { key: "registeredAt", label: lbl("registeredAt", "REGISTERED"), value: registeredAtShort },
-    customerName: { key: "customerName", label: lbl("customerName", "NAME"), value: input.customerName },
+    memberSince: { key: "memberSince", label: lbl("memberSince", "since"), value: memberSinceFormatted },
+    registeredAt: { key: "registeredAt", label: lbl("registeredAt", "registered"), value: registeredAtShort },
+    customerName: { key: "customerName", label: lbl("customerName", "name"), value: input.customerName },
     // COUPON fields. When a single-use coupon has been redeemed, the discount
     // value flips to "USED" — that value change is what triggers the lock-screen
     // notification via changeMessage on the next pass fetch.
     discount: couponConfig?.discountType === "freebie"
       ? {
           key: "discount",
-          label: lbl("discount", "OFFER"),
-          value: isSingleUseRedeemed ? "USED" : (couponConfig.couponDescription || "Free item"),
-          ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
+          label: lbl("discount", "offer"),
+          value: isSingleUseRedeemed ? loc.t("values.used") : (couponConfig.couponDescription || loc.t("values.freeItem")),
+          ...(input.programType === "COUPON" ? { changeMessage: loc.t("notify.coupon") } : {}),
         }
       : {
           key: "discount",
-          label: lbl("discount", "DISCOUNT"),
-          value: isSingleUseRedeemed ? "USED" : (couponConfig ? formatCouponValue(couponConfig) : input.rewardDescription),
-          ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
+          label: lbl("discount", "discount"),
+          value: isSingleUseRedeemed ? loc.t("values.used") : (couponConfig ? localizedCouponValue(loc, couponConfig) : input.rewardDescription),
+          ...(input.programType === "COUPON" ? { changeMessage: loc.t("notify.coupon") } : {}),
         },
     // validUntil is the *primary* changeMessage carrier for coupon single-use
     // redemption — it's in the default secondary layout (so it ends up in the
@@ -629,17 +667,17 @@ export function buildAppleFrontFields(input: PassGenerationInput): {
     // custom layouts that include it.
     validUntil: {
       key: "validUntil",
-      label: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"),
+      label: lbl("validUntil", isSingleUseRedeemed ? "status" : "validUntil"),
       value: isSingleUseRedeemed
-        ? "Redeemed"
-        : (couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"),
-      ...(input.programType === "COUPON" ? { changeMessage: "Coupon %@" } : {}),
+        ? loc.t("values.redeemed")
+        : (couponConfig?.validUntil ? localizedDate(loc, new Date(couponConfig.validUntil)) : loc.t("values.noExpiry")),
+      ...(input.programType === "COUPON" ? { changeMessage: loc.t("notify.coupon") } : {}),
     },
-    couponCode: { key: "couponCode", label: lbl("couponCode", "CODE"), value: couponConfig?.couponCode ?? "" },
+    couponCode: { key: "couponCode", label: lbl("couponCode", "code"), value: couponConfig?.couponCode ?? "" },
     // Generic fields
-    title: { key: "title", label: lbl("title", "TITLE"), value: input.programName ?? "" },
-    description: { key: "description", label: lbl("description", "DESCRIPTION"), value: input.rewardDescription },
-    address: { key: "address", label: lbl("address", "ADDRESS"), value: design?.mapAddress ?? "" },
+    title: { key: "title", label: lbl("title", "title"), value: input.programName ?? "" },
+    description: { key: "description", label: lbl("description", "description"), value: input.rewardDescription },
+    address: { key: "address", label: lbl("address", "address"), value: design?.mapAddress ?? "" },
   }
 
   // User-configurable field layout for all pass types

@@ -1,5 +1,6 @@
 "use server"
 
+import { requestLocale } from "@/lib/i18n/request-locale"
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
@@ -142,6 +143,7 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
     // dedupes both the trigger and the Resend send so a Trigger.dev retry can't
     // mail the new owner twice.
     const welcomeIdempotencyKey = `welcome:${result.id}`
+    const welcomeLocale = await requestLocale()
     import("@trigger.dev/sdk")
       .then(({ tasks }) =>
         tasks.trigger(
@@ -152,6 +154,7 @@ export async function createOrganization(input: z.input<typeof createOrganizatio
             organizationName: name,
             organizationSlug: slug,
             getStartedPath,
+            locale: welcomeLocale,
             idempotencyKey: welcomeIdempotencyKey,
           },
           { idempotencyKey: welcomeIdempotencyKey },

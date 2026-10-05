@@ -1934,12 +1934,14 @@ export async function resendInvitation(organizationId: string, invitationId: str
   const inviteUrl = `${siteUrl}/invite/${plaintextToken}`
   const mobileDeepLink = `loyalshystaff://invite/${plaintextToken}?url=${encodeURIComponent(siteUrl)}`
 
+  const { requestLocale } = await import("@/lib/i18n/request-locale")
   await sendInvitationEmail({
     email: invitation.email,
     organizationName: invitation.organization.name,
-    role: invitation.role === "OWNER" ? "owner" : "staff",
+    role: invitation.role === "OWNER" ? "owner" : invitation.role === "ADMIN" ? "admin" : "staff",
     inviteUrl,
     mobileDeepLink,
+    locale: await requestLocale(),
   })
 
   await logOrgAction({

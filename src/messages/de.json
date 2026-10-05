@@ -3194,5 +3194,166 @@
     "taxId": "Spanische Steuernummer (NIF)",
     "disputeTitle": "Verbraucherstreitbeilegung",
     "disputeP1": "Loyalshy ist ein Angebot für Unternehmen. Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
+  },
+  "walletPass": {
+    "labels": {
+      "org": "GESCHÄFT",
+      "memberNumber": "KUNDENNR.",
+      "status": "STATUS",
+      "progress": "FORTSCHRITT",
+      "nextReward": "NÄCHSTE PRÄMIE",
+      "yourPrize": "DEINE PRÄMIE",
+      "totalVisits": "BESUCHE GESAMT",
+      "since": "SEIT",
+      "registered": "REGISTRIERT",
+      "name": "NAME",
+      "offer": "ANGEBOT",
+      "discount": "RABATT",
+      "redeemed": "EINGELÖST",
+      "prizes": "PRÄMIEN",
+      "validUntil": "GÜLTIG BIS",
+      "code": "CODE",
+      "title": "TITEL",
+      "description": "BESCHREIBUNG",
+      "address": "ADRESSE",
+      "lastUsed": "ZULETZT GENUTZT",
+      "businessHours": "ÖFFNUNGSZEITEN",
+      "message": "NACHRICHT",
+      "terms": "BEDINGUNGEN"
+    },
+    "back": {
+      "program": "Programm",
+      "announcement": "Mitteilung",
+      "couponDetails": "Gutscheindetails",
+      "redemptionCode": "Gutscheincode",
+      "howToRedeem": "So löst du ihn ein",
+      "lastUsed": "Zuletzt genutzt",
+      "loyaltyProgram": "Treueprogramm",
+      "currentProgress": "Dein Fortschritt",
+      "memberNumber": "Kundennummer",
+      "memberSince": "Dabei seit",
+      "registered": "Registriert",
+      "terms": "Bedingungen",
+      "contact": "Kontakt",
+      "businessHours": "Öffnungszeiten",
+      "address": "Adresse",
+      "message": "Nachricht",
+      "socialMedia": "Social Media",
+      "prizeReady": "Prämie bereit!",
+      "poweredBy": "Bereitgestellt von"
+    },
+    "values": {
+      "noAnnouncements": "Noch keine Mitteilungen",
+      "howToRedeem": "Zeig diese Karte beim Bestellen dem Personal. Der Gutschein wird beim Bezahlen abgezogen.",
+      "programInfo": "Alle {visits} Besuche bekommst du eine Prämie! Deine Prämie: {reward}. Prämien verfallen {days} Tage, nachdem du sie bekommen hast.",
+      "currentProgress": "{current} von {required} Besuchen in dieser Runde. {total} Besuche insgesamt.",
+      "used": "EINGELÖST",
+      "freeItem": "Gratisartikel",
+      "redeemed": "Eingelöst",
+      "noExpiry": "Ohne Ablaufdatum",
+      "prizeWaiting": "Eine Prämie wartet auf dich! Tippe hier, um sie aufzudecken:\n{url}",
+      "poweredBy": "Loyalshy, digitale Treuekarten\nhttps://loyalshy.com",
+      "rewardAvailable": "Prämie verfügbar!",
+      "visitsLeft": "{count, plural, one {Noch # Besuch} other {Noch # Besuche}}",
+      "visitsOf": "{current} / {total} Besuche",
+      "prizeUsed": "{prize} (eingelöst)",
+      "percentOff": "{value} % Rabatt",
+      "amountOff": "${value} Rabatt"
+    },
+    "notify": {
+      "stampAdded": "Stempel hinzugefügt! %@",
+      "visitRecorded": "Besuch erfasst: %@ insgesamt",
+      "coupon": "Gutschein %@",
+      "couponRedeemed": "Gutschein eingelöst: %@",
+      "stampAddedTitle": "Stempel hinzugefügt!",
+      "couponRedeemedTitle": "Gutschein eingelöst",
+      "couponRedeemedBody": "Dein Gutschein wurde eingelöst.",
+      "usedAt": "Genutzt am {time}."
+    },
+    "names": {
+      "coupon": "Gutschein {name}",
+      "loyaltyCard": "Treuekarte {name}",
+      "googleProgram": "Treue {name}",
+      "googleDefault": "Treuekarte",
+      "logo": "Logo von {name}",
+      "contactSupport": "Support kontaktieren",
+      "revealPrize": "Deck deine Prämie auf!"
+    }
+  },
+  "emails": {
+    "footer": "Loyalshy · Digitale Treuekarten",
+    "passIssued": {
+      "body": "Hallo {name}, {organization} hat dir {program} geschickt.",
+      "addToWallet": "Zur Wallet auf deinem Handy hinzufügen:",
+      "view": "Im Browser öffnen",
+      "bookmark": "Heb diese E-Mail auf: Der Button oben öffnet immer deine Karte.",
+      "appleBadge": "Zu Apple Wallet hinzufügen",
+      "googleBadge": "Zu Google Wallet hinzufügen",
+      "subjectCoupon": "Dein Gutschein von {organization}",
+      "subjectStampCard": "Deine Stempelkarte von {organization}",
+      "titleCoupon": "Dein Gutschein ist bereit",
+      "titleStampCard": "Deine Stempelkarte ist bereit"
+    },
+    "welcome": {
+      "subject": "Willkommen bei Loyalshy, {name}",
+      "title": "Willkommen bei Loyalshy",
+      "intro": "Hallo {name}, {organization} ist eingerichtet. Drei Schritte bis zum ersten Kunden:",
+      "step1Title": "Erstelle dein erstes Programm.",
+      "step1Body": "Wähle eine Stempelkarte oder einen Gutschein und gib ihm deinen Look.",
+      "step2Title": "Teile es.",
+      "step2Body": "Kunden scannen deinen QR-Code oder öffnen {url}, um mitzumachen.",
+      "step3Title": "Stemple Besuche.",
+      "step3Body": "Im Dashboard oder in der Team-App.",
+      "cta": "Loslegen",
+      "dashboard": "Zum Dashboard",
+      "help": "Fragen? Antworte einfach auf diese E-Mail."
+    },
+    "invitation": {
+      "subject": "Du wurdest zu {organization} auf Loyalshy eingeladen",
+      "title": "Du wurdest eingeladen",
+      "accept": "Einladung annehmen",
+      "openApp": "In der Team-App öffnen",
+      "expires": "Diese Einladung läuft in 7 Tagen ab.",
+      "bodyOwner": "{organization} hat dich eingeladen, dem Team als Inhaber beizutreten.",
+      "bodyAdmin": "{organization} hat dich eingeladen, dem Team als Programm-Manager beizutreten.",
+      "bodyStaff": "{organization} hat dich eingeladen, dem Team als Teammitglied beizutreten."
+    },
+    "handoff": {
+      "subject": "Übernimm {organization} auf Loyalshy",
+      "title": "Dein Treueprogramm ist bereit",
+      "body": "{organization} wurde für dich auf Loyalshy eingerichtet. Erstelle dein Konto, um es zu übernehmen: Deine Karte und dein Programm warten schon auf dich.",
+      "cta": "Übernehmen",
+      "expires": "Dieser Link läuft in {days} Tagen ab und funktioniert nur einmal."
+    },
+    "accessRequest": {
+      "subject": "{name} bittet um Zugang zu {organization}",
+      "title": "Zugangsanfrage",
+      "body": "{name} ({email}), dein Einrichtungspartner bei Loyalshy, bittet um Zugang als Programm-Manager für {organization}. Mit diesem Zugang lassen sich Karten gestalten und Programme verwalten, aber nicht Abrechnung, Team oder Einstellungen.",
+      "how": "Um den Zugang zu geben, öffne die Team-Einstellungen. Die Einladung ist schon ausgefüllt: prüfen und senden. Du kannst diese E-Mail auch ignorieren oder den Zugang jederzeit wieder entziehen.",
+      "cta": "Einladung prüfen"
+    },
+    "resetPassword": {
+      "subject": "Setze dein Passwort zurück",
+      "greeting": "Hallo {name},",
+      "body": "Mit dem Button unten setzt du dein Passwort zurück. Der Link läuft in 1 Stunde ab.",
+      "cta": "Passwort zurücksetzen",
+      "ignore": "Wenn du das nicht angefordert hast, kannst du diese E-Mail ignorieren."
+    },
+    "otp": {
+      "title": "Dein Bestätigungscode",
+      "expires": "Der Code läuft in 10 Minuten ab. Wenn du ihn nicht angefordert hast, kannst du diese E-Mail ignorieren.",
+      "subjectSignIn": "Dein Anmeldecode: {code}",
+      "subjectReset": "Dein Code zum Zurücksetzen des Passworts: {code}",
+      "subjectVerify": "Bestätige deine E-Mail: {code}",
+      "instructionSignIn": "Gib diesen Code ein, um dich anzumelden.",
+      "instructionReset": "Gib diesen Code ein, um dein Passwort zurückzusetzen.",
+      "instructionVerify": "Gib diesen Code ein, um deine E-Mail zu bestätigen."
+    },
+    "contactReply": {
+      "subject": "Wir haben deine Nachricht erhalten",
+      "title": "Danke für deine Nachricht, {name}.",
+      "body": "Wir haben deine Nachricht erhalten und antworten innerhalb von ein bis zwei Werktagen.",
+      "sign": "Das Loyalshy-Team"
+    }
   }
 }

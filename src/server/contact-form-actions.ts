@@ -1,5 +1,7 @@
 "use server"
 
+import { buildContactReplyEmail } from "@/lib/email-templates"
+import { requestLocale } from "@/lib/i18n/request-locale"
 import { z } from "zod"
 import { headers } from "next/headers"
 import { getTranslations } from "next-intl/server"
@@ -83,25 +85,13 @@ export async function submitContactForm(
       `,
     })
 
-    // Send confirmation to sender
+    // Send confirmation to sender, in the language of the page they wrote from
+    const reply = await buildContactReplyEmail(await requestLocale(), { name })
     await resend.emails.send({
       from: "Loyalshy <noreply@loyalshy.com>",
       to: email,
-      subject: "We received your message — Loyalshy",
-      html: `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #111; margin-bottom: 16px;">Thanks for reaching out, ${escapeHtml(name)}!</h2>
-          <p style="color: #444; line-height: 1.6;">
-            We've received your message and will get back to you within 1-2 business days.
-          </p>
-          <p style="color: #444; line-height: 1.6;">
-            In the meantime, feel free to explore our <a href="https://loyalshy.com" style="color: #6366f1;">platform</a> or check out our <a href="https://loyalshy.com/api/v1/docs" style="color: #6366f1;">API documentation</a>.
-          </p>
-          <p style="color: #666; margin-top: 24px; font-size: 14px;">
-            — The Loyalshy Team
-          </p>
-        </div>
-      `,
+      subject: reply.subject,
+      html: reply.html,
     })
 
     return { success: true }

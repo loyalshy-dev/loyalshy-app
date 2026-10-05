@@ -3,10 +3,22 @@ import "server-only"
 import { buildClassId, buildObjectId, buildProgramClassId, buildEnrollmentObjectId } from "./constants"
 import { buildSaveUrl } from "./jwt-utils"
 import type { CardDesignData } from "../card-design"
-import { formatProgressValue, formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig, resolveCardDesign } from "../card-design"
+import { formatLabel, parseStripFilters, parseStampGridConfig, getFieldConfig, resolveCardDesign } from "../card-design"
 import { generateStampGridImage, GOOGLE_HERO_WIDTH, GOOGLE_HERO_HEIGHT } from "../strip-image"
 import { uploadFile } from "../../storage"
-import { parseCouponConfig, formatCouponValue, getWalletRewardText, parseTemplateAnnouncement } from "../../pass-config"
+import { parseCouponConfig, getWalletRewardText, parseTemplateAnnouncement } from "../../pass-config"
+import {
+  createPassLocalizer,
+  googleLabel,
+  googleMessage,
+  googleTextModule,
+  localizedCouponValue,
+  localizedDate,
+  localizedDateTime,
+  localizedMonth,
+  localizedProgressValue,
+  type PassLocalizer,
+} from "../pass-i18n"
 import { db } from "../../db"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -100,7 +112,7 @@ type LoyaltyClassInput = Pick<
   | "announcement"
 >
 
-function buildLoyaltyClass(input: LoyaltyClassInput) {
+function buildLoyaltyClass(input: LoyaltyClassInput, loc: PassLocalizer) {
   // Use per-template class ID when templateId is available, otherwise fall back to organization
   const classId = input.templateId
     ? buildProgramClassId(input.templateId)
@@ -152,8 +164,8 @@ function buildLoyaltyClass(input: LoyaltyClassInput) {
   // Type-aware program display name
   const programDisplayName = (() => {
     const name = input.templateName
-    if (!name) return "Loyalty Card"
-    return input.passType === "COUPON" ? name : `${name} Loyalty`
+    if (!name) return loc.t("names.googleDefault")
+    return input.passType === "COUPON" ? name : loc.t("names.googleProgram", { name })
   })()
 
   // Prefer Google-specific logo, fall back to general
@@ -162,6 +174,7 @@ function buildLoyaltyClass(input: LoyaltyClassInput) {
   const loyaltyClass: Record<string, unknown> = {
     id: classId,
     programName: programDisplayName,
+    ...(loc.localizedIf(programDisplayName) ? { localizedProgramName: loc.localizedIf(programDisplayName) } : {}),
     issuerName: input.organizationName,
     reviewStatus: "UNDER_REVIEW",
     hexBackgroundColor: hexBg,
@@ -171,18 +184,15 @@ function buildLoyaltyClass(input: LoyaltyClassInput) {
 
   // Program logo (required for Loyalty classes)
   const logoUrl = googleLogo ?? "https://developers.google.com/static/wallet/site-assets/images/pass-builder/pass_google_logo.jpg"
+  const logoDescription = loc.localized(loc.t("names.logo", { name: input.organizationName }))
   loyaltyClass.programLogo = {
     sourceUri: { uri: logoUrl },
-    contentDescription: {
-      defaultValue: { language: "en", value: `${input.organizationName} logo` },
-    },
+    contentDescription: logoDescription,
   }
   if (googleLogo) {
     loyaltyClass.wideProgramLogo = {
       sourceUri: { uri: googleLogo },
-      contentDescription: {
-        defaultValue: { language: "en", value: `${input.organizationName} logo` },
-      },
+      contentDescription: logoDescription,
     }
   }
 
@@ -260,9 +270,11 @@ function buildLoyaltyClass(input: LoyaltyClassInput) {
 
   // Contact fallback — always include at least one link
   if (linksUris.length === 0) {
+    const description = loc.t("names.contactSupport")
     linksUris.push({
       uri: `mailto:support@loyalshy.com`,
-      description: "Contact Support",
+      description,
+      localizedDescription: loc.localized(description),
       id: "contact",
     })
   }
@@ -271,26 +283,15 @@ function buildLoyaltyClass(input: LoyaltyClassInput) {
 
   // Text modules replace deprecated infoModuleData
   const classTextModules: Record<string, unknown>[] = []
+  const classLabel = (key: string) => loc.t(`labels.${key}`, undefined, (s) => formatLabel(s, labelFmt))
   if (design?.businessHours) {
-    classTextModules.push({
-      id: "businessHours",
-      header: formatLabel("BUSINESS HOURS", labelFmt),
-      body: design.businessHours,
-    })
+    classTextModules.push(googleTextModule(loc, "businessHours", classLabel("businessHours"), design.businessHours))
   }
   if (design?.customMessage) {
-    classTextModules.push({
-      id: "customMessage",
-      header: formatLabel("MESSAGE", labelFmt),
-      body: design.customMessage,
-    })
+    classTextModules.push(googleTextModule(loc, "customMessage", classLabel("message"), design.customMessage))
   }
   if (input.termsAndConditions) {
-    classTextModules.push({
-      id: "terms",
-      header: formatLabel("TERMS & CONDITIONS", labelFmt),
-      body: input.termsAndConditions,
-    })
+    classTextModules.push(googleTextModule(loc, "terms", classLabel("terms"), input.termsAndConditions))
   }
   if (classTextModules.length > 0) {
     loyaltyClass.textModulesData = classTextModules
@@ -319,7 +320,7 @@ function buildLoyaltyClass(input: LoyaltyClassInput) {
 
 // ─── Build Loyalty Object (one per pass instance or contact) ────────────
 
-async function buildLoyaltyObject(input: GooglePassGenerationInput) {
+async function buildLoyaltyObject(input: GooglePassGenerationInput, loc: PassLocalizer) {
   // Use pass-instance-scoped object ID when passInstanceId is available, otherwise fall back to contact
   const objectId = input.passInstanceId
     ? buildEnrollmentObjectId(input.passInstanceId)
@@ -332,21 +333,15 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
 
   const progressStyle = design?.progressStyle ?? "NUMBERS"
   const labelFmt = design?.labelFormat ?? "UPPERCASE"
-  const progressValue = formatProgressValue(
+  const progressValue = localizedProgressValue(
+    loc,
     input.currentCycleVisits,
     input.visitsRequired,
     progressStyle,
     input.hasAvailableReward
   )
 
-  const progressLabel = design?.customProgressLabel
-    ? design.customProgressLabel
-    : input.hasAvailableReward ? "STATUS" : "PROGRESS"
-
-  const memberSinceFormatted = input.memberSince.toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-  })
+  const memberSinceFormatted = localizedMonth(loc, input.memberSince)
 
   // Parse type-specific config
   const couponConfig = input.passType === "COUPON" ? parseCouponConfig(input.templateConfig) : null
@@ -362,36 +357,47 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   // Custom field labels from editorConfig
   const objStripFilters = parseStripFilters(design?.editorConfig)
   const customLabels = objStripFilters.fieldLabels ?? {}
-  const lbl = (fieldId: string, defaultLabel: string) => {
+  const lbl = (fieldId: string, labelKey: string) => {
     const custom = customLabels[fieldId]
-    return formatLabel(custom ?? defaultLabel, labelFmt)
+    return custom ? formatLabel(custom, labelFmt) : loc.t(`labels.${labelKey}`, undefined, (s) => formatLabel(s, labelFmt))
   }
+  const progressLabel = design?.customProgressLabel
+    ? formatLabel(design.customProgressLabel, labelFmt)
+    : loc.t(`labels.${input.hasAvailableReward ? "status" : "progress"}`, undefined, (s) => formatLabel(s, labelFmt))
+
+  // Coupon texts (prize names are merchant text; the coupon value is ours).
+  const couponValue = couponConfig ? localizedCouponValue(loc, couponConfig) : ""
+  const prizeText = couponConfig ? getWalletRewardText(input.templateConfig, couponValue) : ""
+  const hasPrizes = couponConfig ? prizeText !== couponValue : false
+  const usedPrizeText = loc.t("values.prizeUsed", { prize: prizeText }, (s) => s.trim())
+  const validUntilText = couponConfig?.validUntil ? localizedDate(loc, new Date(couponConfig.validUntil)) : loc.t("values.noExpiry")
+  const redeemedText = loc.t("values.redeemed")
+  const discountLabel = lbl("discount", isSingleUseRedeemed ? "redeemed" : (hasPrizes ? "prizes" : "discount"))
+  const validUntilLabel = lbl("validUntil", isSingleUseRedeemed ? "status" : "validUntil")
 
   // All field data as textModulesData entries — IDs match field IDs from getFieldConfig
   const allFieldData: Record<string, { id: string; header: string; body: string }> = {
-    organization: { id: "organization", header: lbl("organization", "ORG"), body: input.organizationName },
-    memberNumber: { id: "memberNumber", header: lbl("memberNumber", "MEMBER #"), body: `${input.memberNumber ?? "—"}` },
-    nextReward: { id: "nextReward", header: lbl("nextReward", "NEXT REWARD"), body: getWalletRewardText(input.templateConfig, input.rewardDescription) },
-    totalVisits: { id: "totalVisits", header: lbl("totalVisits", "TOTAL VISITS"), body: `${input.totalVisits}` },
-    memberSince: { id: "memberSince", header: lbl("memberSince", "SINCE"), body: memberSinceFormatted },
-    registeredAt: { id: "registeredAt", header: lbl("registeredAt", "REGISTERED"), body: memberSinceFormatted },
-    customerName: { id: "customerName", header: lbl("customerName", "NAME"), body: input.contactName },
+    organization: { id: "organization", header: lbl("organization", "org"), body: input.organizationName },
+    memberNumber: { id: "memberNumber", header: lbl("memberNumber", "memberNumber"), body: `${input.memberNumber ?? "—"}` },
+    nextReward: { id: "nextReward", header: lbl("nextReward", "nextReward"), body: getWalletRewardText(input.templateConfig, input.rewardDescription) },
+    totalVisits: { id: "totalVisits", header: lbl("totalVisits", "totalVisits"), body: `${input.totalVisits}` },
+    memberSince: { id: "memberSince", header: lbl("memberSince", "since"), body: memberSinceFormatted },
+    registeredAt: { id: "registeredAt", header: lbl("registeredAt", "registered"), body: memberSinceFormatted },
+    customerName: { id: "customerName", header: lbl("customerName", "name"), body: input.contactName },
     // COUPON. Single-use redeemed flips visuals to USED + "Redeemed" status —
     // same shape patchGoogleWalletObject produces on the update path.
     discount: {
       id: "discount",
-      header: lbl("discount", isSingleUseRedeemed ? "REDEEMED" : (couponConfig ? (getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) !== formatCouponValue(couponConfig) ? "PRIZES" : "DISCOUNT") : "DISCOUNT")),
-      body: isSingleUseRedeemed
-        ? `${couponConfig ? getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) : ""} (Used)`.trim()
-        : (couponConfig ? getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig)) : ""),
+      header: discountLabel,
+      body: isSingleUseRedeemed ? usedPrizeText : prizeText,
     },
     validUntil: {
       id: "validUntil",
-      header: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"),
-      body: isSingleUseRedeemed ? "Redeemed" : (couponConfig?.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry"),
+      header: validUntilLabel,
+      body: isSingleUseRedeemed ? redeemedText : validUntilText,
     },
-    couponCode: { id: "couponCode", header: lbl("couponCode", "CODE"), body: couponConfig?.couponCode ?? "" },
-    address: { id: "address", header: lbl("address", "ADDRESS"), body: design?.mapAddress ?? "" },
+    couponCode: { id: "couponCode", header: lbl("couponCode", "code"), body: couponConfig?.couponCode ?? "" },
+    address: { id: "address", header: lbl("address", "address"), body: design?.mapAddress ?? "" },
   }
 
   // Build textModulesData from user-configured unified fields
@@ -408,33 +414,34 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     googleExcludeObj.add("progress")
   }
   const textModulesFieldIds = allObjFields.filter((id) => !googleExcludeObj.has(id))
-  const textModulesData = textModulesFieldIds
+  const textModulesData: Record<string, unknown>[] = textModulesFieldIds
     .map((id) => allFieldData[id])
     .filter((f): f is { id: string; header: string; body: string } => f != null && f.body !== "")
+    .map((f) => googleTextModule(loc, f.id, f.header, f.body))
 
   // Type-specific loyalty points (native Google Wallet points widget — not affected by field config)
   let loyaltyPoints: Record<string, unknown>
   let secondaryLoyaltyPoints: Record<string, unknown>
 
+  // balance.string has no localized form in the Google Wallet API, so the
+  // points values stay in English; their labels are translated.
   if (input.passType === "COUPON" && couponConfig) {
-    const prizeText = getWalletRewardText(input.templateConfig, formatCouponValue(couponConfig))
-    const hasPrizes = prizeText !== formatCouponValue(couponConfig)
     loyaltyPoints = {
-      label: lbl("discount", isSingleUseRedeemed ? "REDEEMED" : (hasPrizes ? "PRIZES" : "DISCOUNT")),
-      balance: { string: isSingleUseRedeemed ? `${prizeText} (Used)`.trim() : prizeText },
+      ...googleLabel(loc, discountLabel),
+      balance: { string: isSingleUseRedeemed ? usedPrizeText : prizeText },
     }
     secondaryLoyaltyPoints = {
-      label: lbl("validUntil", isSingleUseRedeemed ? "STATUS" : "VALID UNTIL"),
-      balance: { string: isSingleUseRedeemed ? "Redeemed" : (couponConfig.validUntil ? new Date(couponConfig.validUntil).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No expiry") },
+      ...googleLabel(loc, validUntilLabel),
+      balance: { string: isSingleUseRedeemed ? redeemedText : validUntilText },
     }
   } else {
     // STAMP_CARD (default)
     loyaltyPoints = {
-      label: formatLabel(progressLabel, labelFmt),
+      ...googleLabel(loc, progressLabel),
       balance: { string: progressValue },
     }
     secondaryLoyaltyPoints = {
-      label: lbl("totalVisits", "TOTAL VISITS"),
+      ...googleLabel(loc, lbl("totalVisits", "totalVisits")),
       balance: { int: input.totalVisits },
     }
   }
@@ -443,13 +450,8 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   // re-save reflects the latest use. Same shape patchGoogleWalletObject
   // produces, so a re-saved pass after redemption matches the in-place update.
   if (isUnlimitedRedeemed && input.redeemedAt) {
-    const ts = input.redeemedAt.toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    })
-    textModulesData.push({ id: "couponLastUsed", header: lbl("couponLastUsed", "LAST USED"), body: ts })
+    const ts = localizedDateTime(loc, input.redeemedAt)
+    textModulesData.push(googleTextModule(loc, "couponLastUsed", lbl("couponLastUsed", "lastUsed"), ts))
   }
 
   const loyaltyObject: Record<string, unknown> = {
@@ -475,20 +477,10 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
   // redeemedAt timestamp. Same pattern as patchGoogleWalletObject, so a pass
   // that gets re-saved before its first PATCH still surfaces the banner.
   if (isCouponRedeemed && input.redeemedAt) {
-    const ts = input.redeemedAt.toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    })
-    const body = isSingleUseRedeemed ? "Your coupon has been redeemed." : `Used at ${ts}.`
+    const ts = localizedDateTime(loc, input.redeemedAt)
+    const body = isSingleUseRedeemed ? loc.t("notify.couponRedeemedBody") : loc.t("notify.usedAt", { time: ts })
     loyaltyObject.messages = [
-      {
-        id: `redeem-${input.redeemedAt.getTime()}`,
-        header: "Coupon redeemed",
-        body,
-        messageType: "TEXT_AND_NOTIFY",
-      },
+      googleMessage(loc, `redeem-${input.redeemedAt.getTime()}`, loc.t("notify.couponRedeemedTitle"), body),
     ]
   }
 
@@ -500,7 +492,8 @@ async function buildLoyaltyObject(input: GooglePassGenerationInput) {
     loyaltyObject.linksModuleData = {
       uris: [{
         uri: `${baseUrl}/join/${input.organizationSlug}/card/${input.passInstanceId}?sig=${sig}`,
-        description: "Reveal your prize!",
+        description: loc.t("names.revealPrize"),
+        localizedDescription: loc.localized(loc.t("names.revealPrize")),
         id: "revealLink",
       }],
     }
@@ -597,8 +590,9 @@ async function generateAndUploadStampGrid(
 export async function generateGoogleWalletSaveUrl(
   input: GooglePassGenerationInput
 ): Promise<string> {
-  const loyaltyClass = buildLoyaltyClass(input)
-  const loyaltyObject = await buildLoyaltyObject(input)
+  const loc = await createPassLocalizer()
+  const loyaltyClass = buildLoyaltyClass(input, loc)
+  const loyaltyObject = await buildLoyaltyObject(input, loc)
 
   // Also PATCH the class via REST API to ensure updates (like logo changes)
   // are applied to existing classes that Google may have cached
@@ -644,6 +638,7 @@ export async function syncGoogleLoyaltyClass(templateId: string): Promise<void> 
   const organization = template.organization
   const passDesign = resolveCardDesign(template.passDesign, organization)
 
+  const loc = await createPassLocalizer()
   await patchLoyaltyClass(buildLoyaltyClass({
     organizationId: organization.id,
     organizationName: organization.name,
@@ -658,7 +653,7 @@ export async function syncGoogleLoyaltyClass(templateId: string): Promise<void> 
     passDesign,
     passType: template.passType,
     announcement: parseTemplateAnnouncement(template.announcement),
-  }))
+  }, loc))
 }
 
 /**

@@ -1,5 +1,6 @@
 "use server"
 
+import { requestLocale } from "@/lib/i18n/request-locale"
 import { db } from "@/lib/db"
 import { assertAuthenticated } from "@/lib/dal"
 import { publicFormLimiter } from "@/lib/rate-limit"
@@ -100,14 +101,6 @@ export async function getMyPartnerClients(): Promise<
 // org's owner(s) a prefilled link to the Team invite dialog. The owner
 // stays fully in control: one click to review, one click to send.
 
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-}
-
 export async function requestClientAccess(
   organizationId: string
 ): Promise<
@@ -163,40 +156,25 @@ export async function requestClientAccess(
 
   const siteUrl = process.env.BETTER_AUTH_URL || "http://localhost:3000"
   const inviteLink = `${siteUrl}/dashboard/settings?tab=team&invite=${encodeURIComponent(session.user.email)}&inviteRole=admin`
-  const repName = escapeHtml(session.user.name)
-  const repEmail = escapeHtml(session.user.email)
-  const orgName = escapeHtml(org.name)
-
   try {
     const { Resend } = await import("resend")
     const resend = new Resend(process.env.RESEND_API_KEY)
+    const { buildAccessRequestEmail } = await import("@/lib/email-templates")
+    // The owners' language isn't stored; the partner's is the best guess
+    // (same market, usually the same agency language).
+    const email = await buildAccessRequestEmail(await requestLocale(), {
+      partnerName: session.user.name,
+      partnerEmail: session.user.email,
+      organizationName: org.name,
+      inviteLink,
+    })
     await Promise.all(
       owners.slice(0, 3).map((owner) =>
         resend.emails.send({
           from: "Loyalshy <noreply@loyalshy.com>",
           to: owner.user.email,
-          subject: `${session.user.name} is requesting access to ${org.name}`,
-          html: `
-            <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">
-              <h2 style="color:#171717;font-size:24px;margin-bottom:8px;">Access request</h2>
-              <p style="color:#525252;font-size:15px;line-height:1.6;">
-                <strong>${repName}</strong> (${repEmail}), your Loyalshy setup
-                partner, is asking for <strong>Program manager</strong> access to
-                <strong>${orgName}</strong> — they'd be able to design cards and
-                manage programs, but not billing, your team, or settings.
-              </p>
-              <p style="color:#525252;font-size:15px;line-height:1.6;">
-                To grant it, open your team settings — the invitation will be
-                pre-filled, you just review and send. You can also ignore this
-                email, or remove their access again at any time.
-              </p>
-              <a href="${inviteLink}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;margin:16px 0;">
-                Review invitation
-              </a>
-              <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
-              <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital loyalty programs</p>
-            </div>
-          `,
+          subject: email.subject,
+          html: email.html,
         })
       )
     )

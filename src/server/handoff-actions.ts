@@ -1,5 +1,6 @@
 "use server"
 
+import { requestLocale } from "@/lib/i18n/request-locale"
 import { z } from "zod"
 import crypto from "crypto"
 import { addDays } from "date-fns"
@@ -112,14 +113,6 @@ export async function createClientOrg(input: z.input<typeof createClientOrgSchem
 
 // ─── Create Handoff Link ────────────────────────────────────
 
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-}
-
 const recipientEmailSchema = z.string().email().max(254)
 
 /**
@@ -180,27 +173,17 @@ export async function createHandoffLink(
     try {
       const { Resend } = await import("resend")
       const resend = new Resend(process.env.RESEND_API_KEY)
-      const orgName = escapeHtml(organization.name)
+      const { buildHandoffEmail } = await import("@/lib/email-templates")
+      const { subject, html } = await buildHandoffEmail(await requestLocale(), {
+        organizationName: organization.name,
+        url,
+        expiryDays: HANDOFF_EXPIRY_DAYS,
+      })
       await resend.emails.send({
         from: "Loyalshy <noreply@loyalshy.com>",
         to: recipientEmail,
-        subject: `Take ownership of ${organization.name} on Loyalshy`,
-        html: `
-          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">
-            <h2 style="color:#171717;font-size:24px;margin-bottom:8px;">Your loyalty program is ready!</h2>
-            <p style="color:#525252;font-size:15px;line-height:1.6;">
-              <strong>${orgName}</strong> has been set up for you on Loyalshy.
-              Create your account to take ownership — your card design and
-              program are already waiting for you.
-            </p>
-            <a href="${url}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;margin:16px 0;">
-              Take ownership
-            </a>
-            <p style="color:#a3a3a3;font-size:13px;margin-top:24px;">This link expires in ${HANDOFF_EXPIRY_DAYS} days and can be used once.</p>
-            <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0;" />
-            <p style="color:#a3a3a3;font-size:12px;">Loyalshy — Digital loyalty programs</p>
-          </div>
-        `,
+        subject,
+        html,
       })
       emailSent = true
     } catch (err) {

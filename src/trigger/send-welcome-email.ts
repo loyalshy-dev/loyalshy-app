@@ -1,5 +1,6 @@
 import { task } from "@trigger.dev/sdk"
-import { renderEmailFooter } from "@/lib/email-templates"
+import { buildWelcomeEmail } from "@/lib/email-templates"
+import { toLocale } from "@/lib/i18n/messages"
 import { emailsQueue } from "./queues"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -15,6 +16,8 @@ type WelcomeEmailPayload = {
    * create-program deep link if absent.
    */
   getStartedPath?: string
+  /** Owner's language at signup; English when missing. */
+  locale?: string
   /** Forwarded to Resend so a Trigger.dev retry doesn't resend the welcome. */
   idempotencyKey?: string
 }
@@ -39,42 +42,16 @@ export const sendWelcomeEmailTask = task({
     const getStartedUrl = `${baseUrl}${payload.getStartedPath ?? "/dashboard/programs?action=create"}`
     const joinUrl = `${baseUrl}/join/${payload.organizationSlug}`
 
+    const { subject, html } = await buildWelcomeEmail(toLocale(payload.locale), {
+      ownerName: payload.ownerName,
+      organizationName: payload.organizationName,
+      getStartedUrl,
+      dashboardUrl,
+      joinUrl,
+    })
+
     const result = await resend.emails.send(
-      {
-      from: "Loyalshy <noreply@loyalshy.com>",
-      to: payload.email,
-      subject: `Welcome to Loyalshy, ${payload.ownerName}!`,
-      html: `
-        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:520px;margin:0 auto;padding:40px 20px;">
-          <h1 style="color:#171717;font-size:28px;margin-bottom:8px;">Welcome to Loyalshy!</h1>
-          <p style="color:#525252;font-size:15px;line-height:1.6;">
-            Hi ${payload.ownerName}, your organization <strong>${payload.organizationName}</strong> is all set up. Here's how to get started:
-          </p>
-
-          <div style="background:#fafafa;border-radius:8px;padding:20px;margin:24px 0;">
-            <h3 style="color:#171717;font-size:16px;margin:0 0 12px 0;">Getting Started</h3>
-            <ol style="color:#525252;font-size:14px;line-height:1.8;padding-left:20px;margin:0;">
-              <li><strong>Create your first program</strong> — <a href="${getStartedUrl}" style="color:#2563eb;">Pick a stamp card or coupon</a> and customize it</li>
-              <li><strong>Share with customers</strong> — They scan to join at <a href="${joinUrl}" style="color:#2563eb;">${joinUrl}</a></li>
-              <li><strong>Register visits</strong> — Use the dashboard to stamp customer visits</li>
-            </ol>
-          </div>
-
-          <a href="${getStartedUrl}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;">
-            Get started
-          </a>
-          <a href="${dashboardUrl}" style="display:inline-block;padding:12px 24px;color:#525252;text-decoration:none;font-size:14px;margin-left:8px;">
-            Go to dashboard
-          </a>
-
-          <p style="color:#a3a3a3;font-size:13px;margin-top:32px;">
-            Need help? Reply to this email or visit our docs.
-          </p>
-
-          ${renderEmailFooter("Loyalshy — Digital Loyalty Cards")}
-        </div>
-      `,
-      },
+      { from: "Loyalshy <noreply@loyalshy.com>", to: payload.email, subject, html },
       payload.idempotencyKey ? { idempotencyKey: payload.idempotencyKey } : undefined,
     )
 

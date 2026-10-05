@@ -4,6 +4,8 @@ import { db } from "@/lib/db"
 import { resolveCardDesign, parseStripFilters } from "../card-design"
 import { parseCouponConfig, parseTemplateAnnouncement } from "@/lib/pass-config"
 import { getPassColors, hexToPasskitRgb } from "./colors"
+import type { Locale } from "@/i18n/config"
+import { createPassLocalizer } from "../pass-i18n"
 import {
   buildAppleFrontFields,
   resolveAppleStrip,
@@ -193,7 +195,12 @@ export async function loadTemplateCardInput(
   }
 }
 
-export function toAppleCardView(input: PassGenerationInput): AppleCardView {
+/**
+ * `locale` is the staff phone's language (Accept-Language): the pass itself
+ * carries every language and Wallet shows the holder's, so the preview
+ * shows the one the person at the counter reads.
+ */
+export async function toAppleCardView(input: PassGenerationInput, locale: Locale = "en"): Promise<AppleCardView> {
   const design = input.cardDesign
   const stripFilters = parseStripFilters(design?.editorConfig ?? null)
   const colors = getPassColors(
@@ -208,11 +215,12 @@ export function toAppleCardView(input: PassGenerationInput): AppleCardView {
     design?.secondaryColor ??
     input.secondaryColor ??
     "#ffffff"
-  const { fieldData, appleLayout } = buildAppleFrontFields(input)
+  const loc = await createPassLocalizer()
+  const { fieldData, appleLayout } = buildAppleFrontFields(input, loc)
   const pick = (ids: string[]) =>
     ids.flatMap((id) => {
       const f = fieldData[id]
-      return f ? [{ label: f.label, value: f.value }] : []
+      return f ? [{ label: loc.in(locale, f.label), value: loc.in(locale, f.value) }] : []
     })
 
   const couponConfig = input.programType === "COUPON" ? parseCouponConfig(input.programConfig) : null

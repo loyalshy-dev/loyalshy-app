@@ -1,5 +1,6 @@
 import { task } from "@trigger.dev/sdk"
-import { renderEmailFooter } from "@/lib/email-templates"
+import { buildInvitationEmail } from "@/lib/email-templates"
+import { toLocale } from "@/lib/i18n/messages"
 import { emailsQueue } from "./queues"
 
 // ─── Types ──────────────────────────────────────────────────
@@ -10,6 +11,8 @@ type InvitationEmailPayload = {
   role: "owner" | "admin" | "staff"
   inviteUrl: string
   mobileDeepLink?: string
+  /** Inviter's language; English when missing. */
+  locale?: string
   /** Forwarded to Resend so a Trigger.dev retry doesn't resend the invitation. */
   idempotencyKey?: string
 }
@@ -29,33 +32,15 @@ export const sendInvitationEmailTask = task({
     const { Resend } = await import("resend")
     const resend = new Resend(process.env.RESEND_API_KEY)
 
-    const roleLabel =
-      payload.role === "owner"
-        ? "an owner"
-        : payload.role === "admin"
-          ? "a program manager"
-          : "a staff member"
+    const { subject, html } = await buildInvitationEmail(toLocale(payload.locale), {
+      organizationName: payload.organizationName,
+      role: payload.role,
+      inviteUrl: payload.inviteUrl,
+      mobileDeepLink: payload.mobileDeepLink,
+    })
 
     const result = await resend.emails.send(
-      {
-      from: "Loyalshy <noreply@loyalshy.com>",
-      to: payload.email,
-      subject: `You've been invited to ${payload.organizationName} on Loyalshy`,
-      html: `
-        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">
-          <h2 style="color:#171717;font-size:24px;margin-bottom:8px;">You've been invited!</h2>
-          <p style="color:#525252;font-size:15px;line-height:1.6;">
-            <strong>${payload.organizationName}</strong> has invited you to join their team as ${roleLabel}.
-          </p>
-          <a href="${payload.inviteUrl}" style="display:inline-block;padding:12px 24px;background:#171717;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:500;margin:16px 0;">
-            Accept Invitation
-          </a>
-          ${payload.mobileDeepLink ? `<a href="${payload.mobileDeepLink}" style="display:inline-block;padding:10px 20px;background:#fff;color:#171717;text-decoration:none;border-radius:6px;font-size:13px;font-weight:500;border:1px solid #e5e5e5;">Open in Staff App</a>` : ""}
-          <p style="color:#a3a3a3;font-size:13px;margin-top:24px;">This invitation expires in 7 days.</p>
-          ${renderEmailFooter("Loyalshy — Digital Loyalty Cards")}
-        </div>
-      `,
-      },
+      { from: "Loyalshy <noreply@loyalshy.com>", to: payload.email, subject, html },
       payload.idempotencyKey ? { idempotencyKey: payload.idempotencyKey } : undefined,
     )
 
